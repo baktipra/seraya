@@ -1,3 +1,6 @@
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -21,7 +24,10 @@ vi.mock('@/design-system', async () => {
   };
 });
 
-import { InvitationEditor } from '@/components/projects/invitation-editor';
+import {
+  getInvitationEditorSaveStatus,
+  InvitationEditor,
+} from '@/components/projects/invitation-editor';
 
 const project = {
   account_id: '11111111-1111-1111-1111-111111111111',
@@ -46,25 +52,191 @@ const draft = {
   updated_at: '2026-06-20T00:00:00.000Z',
 };
 
-describe('SRY-016 invitation editor owner UI', () => {
-  it('renders the scoped editor sections, save action, and private preview entry without gallery controls', () => {
+const editableFieldNames = [
+  'hero.eyebrow',
+  'hero.title',
+  'hero.subtitle',
+  'couple.personOne.displayName',
+  'couple.personOne.fullName',
+  'couple.personOne.parentLine',
+  'couple.personTwo.displayName',
+  'couple.personTwo.fullName',
+  'couple.personTwo.parentLine',
+  'story.enabled',
+  'story.heading',
+  'story.body',
+  'events.enabled',
+  'events.primaryDate',
+  'events.ceremony.enabled',
+  'events.ceremony.title',
+  'events.ceremony.date',
+  'events.ceremony.startTime',
+  'events.ceremony.endTime',
+  'events.reception.enabled',
+  'events.reception.title',
+  'events.reception.date',
+  'events.reception.startTime',
+  'events.reception.endTime',
+  'location.enabled',
+  'location.venueName',
+  'location.address',
+  'location.mapsUrl',
+  'rsvp.enabled',
+  'rsvp.heading',
+  'rsvp.lead',
+  'closing.enabled',
+  'closing.message',
+  'closing.signature',
+] as const;
+
+const polishedSections = [
+  'Pembuka',
+  'Mempelai',
+  'Cerita kalian',
+  'Detail acara',
+  'Lokasi',
+  'Konfirmasi kehadiran',
+  'Penutup',
+] as const;
+
+describe('SRY-018 invitation editor polish owner UI', () => {
+  it('renders the seven guided editing chapters in the required order with owner-friendly copy', () => {
     const html = renderToStaticMarkup(<InvitationEditor draft={draft} projectId={project.id} />);
 
-    expect(html).toContain('Edit undangan');
-    expect(html).toContain('Pembuka');
-    expect(html).toContain('Mempelai');
-    expect(html).toContain('Cerita');
-    expect(html).toContain('Acara');
-    expect(html).toContain('Lokasi');
-    expect(html).toContain('RSVP');
-    expect(html).toContain('Penutup');
+    let previousIndex = -1;
+
+    for (const section of polishedSections) {
+      const sectionIndex = html.indexOf(`>${section}</h2>`);
+      expect(sectionIndex).toBeGreaterThan(previousIndex);
+      previousIndex = sectionIndex;
+    }
+
+    expect(html).toContain(
+      'Lengkapi detail undangan kalian, lalu simpan untuk melihat hasilnya di preview.',
+    );
+    expect(html).toContain('Perubahan ini tersimpan sebagai draft pribadi.');
+    expect(html).toContain(
+      '1</span><span class="text-seraya-text-primary text-sm font-semibold">Lengkapi detail</span>',
+    );
     expect(html).toContain('Simpan perubahan');
-    expect(html).toContain('Pratinjau undangan');
-    expect(html).toContain(`href="/dashboard/${project.id}/preview"`);
-    expect(html).toContain('name="hero.title"');
-    expect(html).toContain('name="rsvp.enabled"');
+    expect(html).toContain('Lihat hasil undangan');
+    expect(html).toContain('Kembali ke project');
+    expect(html).toContain('Sapaan kecil');
+    expect(html).toContain('Nama yang tampil di undangan');
+    expect(html).toContain('Tampilkan konfirmasi kehadiran');
+    expect(html).toContain('Nama penutup');
+    expect(html).not.toContain('Isi undangan Roselle');
+    expect(html).not.toContain('draft object');
+    expect(html).not.toContain('schema field');
+    expect(html).not.toContain('JSON payload');
+  });
+
+  it('preserves every locked editable form name and keeps optional-section inputs rendered', () => {
+    const html = renderToStaticMarkup(<InvitationEditor draft={draft} projectId={project.id} />);
+
+    for (const name of editableFieldNames) {
+      expect(html).toContain(`name="${name}"`);
+    }
+
+    expect(html).toContain(`type="hidden" name="projectId" value="${project.id}"`);
+    expect(html).toContain(
+      'Tampilkan bagian ini pada undangan setelah diterbitkan. Isi tetap tersimpan meskipun bagian ini belum ditampilkan.',
+    );
+    expect(html).toContain('name="story.body"');
+    expect(html).toContain('name="location.mapsUrl"');
+    expect(html).toContain('name="closing.message"');
     expect(html).not.toContain('name="gallery.imageIds"');
     expect(html).not.toContain('Upload foto');
     expect(html).not.toContain('draft-private-id');
+  });
+
+  it('shows an initial truthful save status and explains that preview uses saved draft changes only', () => {
+    const html = renderToStaticMarkup(<InvitationEditor draft={draft} projectId={project.id} />);
+
+    expect(html).toContain('data-testid="invitation-editor-save-status"');
+    expect(html).toContain('Belum ada perubahan');
+    expect(html).not.toContain('>Tersimpan</p>');
+    expect(html).toContain('Preview menampilkan perubahan yang sudah disimpan.');
+    expect(html).toContain(`href="/dashboard/${project.id}/preview"`);
+  });
+
+  it('uses local save status only after explicit state transitions and never treats unsaved edits as saved', () => {
+    expect(
+      getInvitationEditorSaveStatus({
+        actionStatus: 'idle',
+        hasSaved: false,
+        isDirty: false,
+        isPending: false,
+      }),
+    ).toMatchObject({ label: 'Belum ada perubahan' });
+
+    expect(
+      getInvitationEditorSaveStatus({
+        actionStatus: 'idle',
+        hasSaved: false,
+        isDirty: true,
+        isPending: false,
+      }),
+    ).toMatchObject({ label: 'Belum disimpan' });
+
+    expect(
+      getInvitationEditorSaveStatus({
+        actionStatus: 'idle',
+        hasSaved: false,
+        isDirty: true,
+        isPending: true,
+      }),
+    ).toMatchObject({ label: 'Menyimpan perubahan…' });
+
+    expect(
+      getInvitationEditorSaveStatus({
+        actionStatus: 'error',
+        hasSaved: false,
+        isDirty: true,
+        isPending: false,
+      }),
+    ).toMatchObject({ label: 'Belum disimpan' });
+
+    expect(
+      getInvitationEditorSaveStatus({
+        actionStatus: 'success',
+        hasSaved: false,
+        isDirty: false,
+        isPending: false,
+      }),
+    ).toMatchObject({ label: 'Belum ada perubahan' });
+
+    expect(
+      getInvitationEditorSaveStatus({
+        actionStatus: 'success',
+        hasSaved: true,
+        isDirty: false,
+        isPending: false,
+      }),
+    ).toMatchObject({
+      description: 'Perubahan siap dipreview.',
+      label: 'Tersimpan',
+    });
+  });
+
+  it('keeps the server action, accessible field-error boundary, and editor-local mobile action treatment', async () => {
+    const source = await readFile(
+      path.resolve(process.cwd(), 'src/components/projects/invitation-editor.tsx'),
+      'utf8',
+    );
+
+    expect(source).toContain(
+      "import { saveInvitationEditorAction } from '@/modules/invitations/invitation-editor.actions';",
+    );
+    expect(source).toMatch(/<form\s+action=\{formAction\}/);
+    expect(source).toContain('onChange={() => setIsDirty(true)}');
+    expect(source).toContain('role="alert"');
+    expect(source).toContain('aria-describedby');
+    expect(source).toContain('sticky bottom-0');
+    expect(source).toContain('safe-area-inset-bottom');
+    expect(source).not.toContain('localStorage');
+    expect(source).not.toContain('sessionStorage');
+    expect(source).not.toContain('revalidateTag');
+    expect(source).not.toContain('published_invitation_snapshots');
   });
 });
