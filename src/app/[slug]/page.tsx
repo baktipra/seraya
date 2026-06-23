@@ -1,0 +1,75 @@
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+
+import {
+  createInvitationViewModel,
+  DEFAULT_PREVIEW_TEMPLATE_ID,
+  getInvitationTemplate,
+} from '@/modules/invitation-templates';
+import { getPublicGalleryImagesForCurrentSnapshot } from '@/modules/media/public-media.service';
+import { getPublicInvitationBySlug } from '@/modules/publications/public-invitation.service';
+
+export const revalidate = 3600;
+export const dynamic = 'force-static';
+
+const PublicInvitationTemplate = getInvitationTemplate(DEFAULT_PREVIEW_TEMPLATE_ID);
+const privateInvitationRobots: Metadata['robots'] = {
+  follow: false,
+  index: false,
+  noarchive: true,
+};
+
+type PublicInvitationPageProps = {
+  params: Promise<{ slug: string }>;
+};
+
+export async function generateMetadata({ params }: PublicInvitationPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const invitation = await getPublicInvitationBySlug(slug);
+
+  if (!invitation || !invitation.is_current) {
+    return { robots: privateInvitationRobots };
+  }
+
+  const title =
+    invitation.snapshot.draft.hero.title ??
+    `${
+      invitation.snapshot.draft.couple.personOne.displayName
+    } & ${invitation.snapshot.draft.couple.personTwo.displayName}`;
+
+  return {
+    robots: privateInvitationRobots,
+    title,
+  };
+}
+
+/**
+ * Anonymous, snapshot-only Roselle runtime. Do not add session or dashboard
+ * dependencies here: RLS and the public repository expose only current,
+ * published, non-deleted snapshots by slug.
+ */
+export default async function PublicInvitationPage({ params }: PublicInvitationPageProps) {
+  const { slug } = await params;
+  const publishedInvitation = await getPublicInvitationBySlug(slug);
+
+  if (!publishedInvitation || !publishedInvitation.is_current) {
+    notFound();
+  }
+
+  const galleryImages = await getPublicGalleryImagesForCurrentSnapshot(
+    publishedInvitation.snapshot.draft.gallery.imageIds,
+  );
+  const invitation = createInvitationViewModel({
+    draft: { content: publishedInvitation.snapshot.draft },
+    galleryImages,
+    project: {
+      event_date_primary: publishedInvitation.snapshot.project.eventDatePrimary,
+    },
+  });
+
+  return (
+    <main className="bg-seraya-ivory min-h-screen px-0 py-0 sm:px-6 sm:py-8">
+      <PublicInvitationTemplate invitation={invitation} />
+    </main>
+  );
+}

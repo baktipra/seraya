@@ -1,0 +1,225 @@
+@import 'tailwindcss';
+
+:root {
+  color-scheme: light;
+
+  /* Raw Seraya palette: use semantic aliases in components whenever possible. */
+  --seraya-ink: #2b2523;
+  --seraya-ivory: #fcf8f3;
+  --seraya-paper: #ffffff;
+  --seraya-rosewood: #8e4b52;
+  --seraya-rosewood-soft: #f3e4e5;
+  --seraya-terracotta: #b96b56;
+  --seraya-sage: #849386;
+  --seraya-sand: #f1e7dc;
+  --seraya-muted: #776c65;
+  --seraya-border: #e8ddd2;
+  --seraya-success: #2f6d58;
+  --seraya-warning: #9a6426;
+  --seraya-error: #a24242;
+  --seraya-info: #3d657c;
+
+  /* Semantic color roles. */
+  --seraya-bg-canvas: var(--seraya-ivory);
+  --seraya-bg-surface: var(--seraya-paper);
+  --seraya-bg-soft: #f7f0e9;
+  --seraya-bg-brand-soft: var(--seraya-rosewood-soft);
+
+  --seraya-text-primary: var(--seraya-ink);
+  --seraya-text-secondary: #5f5550;
+  --seraya-text-muted: var(--seraya-muted);
+  --seraya-text-inverse: #fffdfb;
+
+  --seraya-action-primary: var(--seraya-rosewood);
+  --seraya-action-primary-hover: #733c43;
+  --seraya-action-secondary: var(--seraya-terracotta);
+
+  --seraya-border-default: var(--seraya-border);
+  --seraya-border-strong: #cdbfb2;
+  --seraya-focus-ring: #a55e67;
+
+  --seraya-status-success: var(--seraya-success);
+  --seraya-status-success-soft: #e8f3ed;
+  --seraya-status-warning: var(--seraya-warning);
+  --seraya-status-warning-soft: #fbf0df;
+  --seraya-status-error: var(--seraya-error);
+  --seraya-status-error-soft: #f9e8e8;
+  --seraya-status-info: var(--seraya-info);
+  --seraya-status-info-soft: #e9f2f6;
+
+  --font-ui: 'Aptos', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --font-editorial: 'Iowan Old Style', 'Baskerville', 'Times New Roman', serif;
+
+  --seraya-radius-sm: 0.5rem;
+  --seraya-radius-md: 0.75rem;
+  --seraya-radius-lg: 1rem;
+  --seraya-radius-xl: 1.5rem;
+  --seraya-radius-pill: 999px;
+
+  --seraya-shadow-soft: 0 12px 30px rgb(43 37 35 / 0.06);
+  --seraya-shadow-float: 0 20px 56px rgb(43 37 35 / 0.12);
+  --seraya-shadow-modal: 0 24px 72px rgb(43 37 35 / 0.18);
+}
+
+@theme inline {
+  --color-seraya-ink: var(--seraya-ink);
+  --color-seraya-ivory: var(--seraya-ivory);
+  --color-seraya-paper: var(--seraya-paper);
+  --color-seraya-rosewood: var(--seraya-rosewood);
+  --color-seraya-rosewood-soft: var(--seraya-rosewood-soft);
+  --color-seraya-terracotta: var(--seraya-terracotta);
+  --color-seraya-sage: var(--seraya-sage);
+  --color-seraya-sand: var(--seraya-sand);
+  --color-seraya-muted: var(--seraya-muted);
+  --color-seraya-border: var(--seraya-border);
+  --color-seraya-success: var(--seraya-success);
+  --color-seraya-warning: var(--seraya-warning);
+  --color-seraya-error: var(--seraya-error);
+  --color-seraya-info: var(--seraya-info);
+
+  --color-seraya-canvas: var(--seraya-bg-canvas);
+  --color-seraya-surface: var(--seraya-bg-surface);
+  --color-seraya-soft: var(--seraya-bg-soft);
+  --color-seraya-brand-soft: var(--seraya-bg-brand-soft);
+  --color-seraya-text-primary: var(--seraya-text-primary);
+  --color-seraya-text-secondary: var(--seraya-text-secondary);
+  --color-seraya-text-muted: var(--seraya-text-muted);
+  --color-seraya-text-inverse: var(--seraya-text-inverse);
+  --color-seraya-action-primary: var(--seraya-action-primary);
+  --color-seraya-action-primary-hover: var(--seraya-action-primary-hover);
+  --color-seraya-action-secondary: var(--seraya-action-secondary);
+  --color-seraya-border-default: var(--seraya-border-default);
+  --color-seraya-border-strong: var(--seraya-border-strong);
+  --color-seraya-focus-ring: var(--seraya-focus-ring);
+  --color-seraya-status-success: var(--seraya-status-success);
+  --color-seraya-status-success-soft: var(--seraya-status-success-soft);
+  --color-seraya-status-warning: var(--seraya-status-warning);
+  --color-seraya-status-warning-soft: var(--seraya-status-warning-soft);
+  --color-seraya-status-error: var(--seraya-status-error);
+  --color-seraya-status-error-soft: var(--seraya-status-error-soft);
+  --color-seraya-status-info: var(--seraya-status-info);
+  --color-seraya-status-info-soft: var(--seraya-status-info-soft);
+
+  --font-sans: var(--font-ui);
+  --font-serif: var(--font-editorial);
+}
+
+* {
+  border-color: var(--seraya-border-default);
+}
+
+html {
+  min-width: 320px;
+  scroll-behavior: smooth;
+  background: var(--seraya-bg-canvas);
+}
+
+body {
+  min-height: 100vh;
+  background: var(--seraya-bg-canvas);
+  color: var(--seraya-text-primary);
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button:not(:disabled),
+[role='button']:not([aria-disabled='true']) {
+  cursor: pointer;
+}
+
+::selection {
+  background: var(--seraya-bg-brand-soft);
+  color: var(--seraya-text-primary);
+}
+
+:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--seraya-focus-ring) 46%, transparent);
+  outline-offset: 3px;
+}
+
+.seraya-display-xl,
+.seraya-display-lg,
+.seraya-display-md {
+  font-family: var(--font-editorial);
+  color: var(--seraya-text-primary);
+  letter-spacing: -0.04em;
+  line-height: 0.98;
+}
+
+.seraya-display-xl {
+  font-size: clamp(3rem, 7vw, 5.5rem);
+}
+
+.seraya-display-lg {
+  font-size: clamp(2.5rem, 5vw, 4.25rem);
+}
+
+.seraya-display-md {
+  font-size: clamp(2rem, 3vw, 3rem);
+}
+
+.seraya-heading-xl,
+.seraya-heading-lg,
+.seraya-heading-md,
+.seraya-heading-sm {
+  color: var(--seraya-text-primary);
+  font-weight: 650;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+}
+
+.seraya-heading-xl {
+  font-size: 2.25rem;
+}
+
+.seraya-heading-lg {
+  font-size: 1.75rem;
+}
+
+.seraya-heading-md {
+  font-size: 1.375rem;
+}
+
+.seraya-heading-sm {
+  font-size: 1.125rem;
+}
+
+.seraya-body-lg {
+  font-size: 1.125rem;
+  line-height: 1.65;
+}
+
+.seraya-body-md {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.seraya-body-sm {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.seraya-caption {
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

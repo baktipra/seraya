@@ -1,0 +1,3 @@
+-- Intentionally empty for SRY-003.
+-- Auth users and ownership records are created by tests or local development flows,
+-- never by committed seed credentials.
