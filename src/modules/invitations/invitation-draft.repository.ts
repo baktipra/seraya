@@ -47,3 +47,34 @@ export async function getActiveInvitationDraftForVerifiedProject(
     throw new InvitationDraftRepositoryError();
   }
 }
+
+/**
+ * Updates only the active draft already loaded through a verified owned
+ * project. The explicit draft id and soft-delete predicate keep this narrow;
+ * no snapshot table, publication function, or public cache path is involved.
+ */
+export async function updateActiveInvitationDraftForVerifiedProject(input: {
+  content: InvitationDraft['content'];
+  draft: InvitationDraft;
+  project: OwnedProject;
+}): Promise<InvitationDraft> {
+  const supabase = await createServerSupabaseClient();
+  const { data, error } = await supabase
+    .from('invitation_drafts')
+    .update({ content: input.content })
+    .eq('id', input.draft.id)
+    .eq('project_id', input.project.id)
+    .is('deleted_at', null)
+    .select(activeDraftSelect)
+    .maybeSingle<InvitationDraftDatabaseRecord>();
+
+  if (error || !data) {
+    throw new InvitationDraftRepositoryError();
+  }
+
+  try {
+    return mapInvitationDraft(data);
+  } catch {
+    throw new InvitationDraftRepositoryError();
+  }
+}

@@ -141,10 +141,10 @@ export function ProjectOverviewBootstrap({
           </div>
           <div className="border-seraya-border-default bg-seraya-canvas rounded-[var(--seraya-radius-md)] border p-4">
             <dt className="text-seraya-text-muted text-xs font-semibold tracking-[0.08em] uppercase">
-              Link undangan
+              Tautan undangan
             </dt>
             <dd className="text-seraya-text-primary mt-2 text-base font-semibold break-all">
-              seraya.id/{project.slug}
+              /{project.slug}
             </dd>
           </div>
           <div className="border-seraya-border-default bg-seraya-canvas rounded-[var(--seraya-radius-md)] border p-4">
@@ -204,9 +204,14 @@ export function ProjectOverviewBootstrap({
               </Link>
             </>
           ) : null}
-          <Button disabled size="lg" title="Editor undangan akan hadir pada tahap berikutnya.">
-            Lengkapi undangan
-          </Button>
+          {draft ? (
+            <Link
+              className="bg-seraya-action-primary text-seraya-text-inverse hover:bg-seraya-action-primary-hover focus-visible:outline-seraya-focus-ring inline-flex min-h-12 items-center justify-center rounded-[var(--seraya-radius-md)] px-5 text-base font-semibold shadow-[0_8px_18px_rgb(142_75_82_/_0.16)] transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
+              href={`/dashboard/${project.id}/invitation`}
+            >
+              Edit undangan
+            </Link>
+          ) : null}
         </div>
 
         {project.status !== 'published' ? (

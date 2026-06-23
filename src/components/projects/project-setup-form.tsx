@@ -177,28 +177,23 @@ export function ProjectSetupForm() {
             >
               Link undangan
             </label>
-            <div className="border-seraya-border-default bg-seraya-surface focus-within:border-seraya-action-primary focus-within:ring-seraya-focus-ring/30 flex min-h-11 items-center overflow-hidden rounded-[var(--seraya-radius-md)] border transition-colors focus-within:ring-3">
-              <span className="text-seraya-text-secondary shrink-0 border-r px-3.5 text-sm font-medium">
-                seraya.id/
-              </span>
-              <Input
-                aria-describedby={errors.slug ? 'project-slug-error' : 'project-slug-hint'}
-                className="min-h-10 rounded-none border-0 px-3 shadow-none focus-visible:ring-0"
-                hasError={Boolean(errors.slug)}
-                id="project-slug"
-                maxLength={60}
-                name="slug"
-                onChange={(event) => {
-                  setSlugEdited(true);
-                  setSlug(normalizeSlug(event.target.value));
-                }}
-                placeholder="raka-nadia"
-                required
-                value={slug}
-              />
-            </div>
+            <Input
+              aria-describedby={errors.slug ? 'project-slug-error' : 'project-slug-hint'}
+              hasError={Boolean(errors.slug)}
+              id="project-slug"
+              maxLength={60}
+              name="slug"
+              onChange={(event) => {
+                setSlugEdited(true);
+                setSlug(normalizeSlug(event.target.value));
+              }}
+              placeholder="raka-nadia"
+              required
+              value={slug}
+            />
             <p className="text-seraya-text-muted text-sm leading-6" id="project-slug-hint">
-              Gunakan huruf kecil, angka, dan tanda hubung. Link ini bisa kamu ubah sekarang.
+              Gunakan huruf kecil, angka, dan tanda hubung. Bagian ini menjadi akhir tautan
+              undangan.
             </p>
             <ErrorMessage id="project-slug-error" message={errors.slug} />
           </div>

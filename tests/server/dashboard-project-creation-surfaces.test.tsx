@@ -21,6 +21,7 @@ vi.mock('@/components/projects/payment-activation-controls', () => ({
 import { DashboardEmptyState } from '@/components/dashboard/dashboard-empty-state';
 import { DashboardProjectLauncher } from '@/components/dashboard/dashboard-project-launcher';
 import { ProjectOverviewBootstrap } from '@/components/projects/project-overview-bootstrap';
+import { ProjectSetupForm } from '@/components/projects/project-setup-form';
 import { createDefaultInvitationDraftContent } from '@/modules/invitations/invitation-draft.defaults';
 
 const paymentOverview = {
@@ -101,7 +102,9 @@ describe('SRY-005 project creation dashboard surfaces', () => {
     expect(html).toContain('Undangan kalian sudah dibuat.');
     expect(html).toContain('Detail dasar undangan sudah siap.');
     expect(html).toContain('Kesiapan isi undangan');
-    expect(html).toContain('seraya.id/raka-nadia');
+    expect(html).toContain('Tautan undangan');
+    expect(html).toContain('/raka-nadia');
+    expect(html).not.toContain('seraya.id');
     expect(html).toContain('Jakarta');
     expect(html).toContain('Pratinjau undangan');
     expect(html).toContain(`action="/dashboard/${project.id}/preview"`);
@@ -110,12 +113,21 @@ describe('SRY-005 project creation dashboard surfaces', () => {
     expect(html).toContain('12 tamu tersimpan');
     expect(html).toContain('Kelola tamu');
     expect(html).toContain(`href="/dashboard/${project.id}/guests"`);
-    expect(html).toContain('Lengkapi undangan');
+    expect(html).toContain('Edit undangan');
+    expect(html).toContain(`href="/dashboard/${project.id}/invitation"`);
     expect(html).toContain('data-test-payment-controls');
     expect(html).toContain('data-payment-publish-allowed="false"');
     expect(html).toContain('disabled');
     expect(html).not.toContain('schema_version');
     expect(html).not.toContain('draft-id');
+  });
+
+  it('uses neutral invitation-path copy in the project form instead of a hardcoded origin', () => {
+    const html = renderToStaticMarkup(<ProjectSetupForm />);
+
+    expect(html).toContain('Link undangan');
+    expect(html).toContain('Bagian ini menjadi akhir tautan undangan.');
+    expect(html).not.toContain('seraya.id');
   });
 
   it('shows a safe recovery message when an active project has no readable draft', () => {

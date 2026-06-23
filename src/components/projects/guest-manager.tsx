@@ -19,6 +19,7 @@ import {
   createOrReplacePersonalGuestLinkAction,
   revokePersonalGuestLinkAction,
 } from '@/modules/guest-links/guest-link.actions';
+import { PersonalGuestLinkResultActions } from '@/components/projects/personal-guest-link-result-actions';
 import { initialGuestLinkActionState } from '@/modules/guest-links/guest-link.action-state';
 import type { GuestLinkActionState } from '@/modules/guest-links/guest-link.action-state';
 import {
@@ -202,7 +203,10 @@ export function GuestManager({ initialGuests, projectId }: GuestManagerProps) {
   const [removeGuest, setRemoveGuest] = useState<GuestListItem | null>(null);
   const [linkGuest, setLinkGuest] = useState<GuestListItem | null>(null);
   const [revokeLinkGuest, setRevokeLinkGuest] = useState<GuestListItem | null>(null);
-  const [revealedPersonalUrl, setRevealedPersonalUrl] = useState<string | null>(null);
+  const [revealedPersonalLink, setRevealedPersonalLink] = useState<{
+    guestDisplayName: string;
+    personalUrl: string;
+  } | null>(null);
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
   const lastRevealedUrl = useRef<string | null>(null);
   const [createState, createAction, createPending] = useActionState(
@@ -245,21 +249,33 @@ export function GuestManager({ initialGuests, projectId }: GuestManagerProps) {
       return;
     }
 
-    lastRevealedUrl.current = linkState.personalUrl;
-    setLinkGuest(null);
-    setRevealedPersonalUrl(linkState.personalUrl);
-    setCopyFeedback(null);
-    toast({ title: 'Tautan pribadi siap untuk disalin.', variant: 'success' });
-    router.refresh();
-  }, [linkState.personalUrl, linkState.status, router, toast]);
+    const guestDisplayName = linkGuest?.display_name;
+    const personalUrl = linkState.personalUrl;
+
+    if (!guestDisplayName) {
+      return;
+    }
+
+    lastRevealedUrl.current = personalUrl;
+
+    queueMicrotask(() => {
+      setLinkGuest(null);
+      setRevealedPersonalLink({ guestDisplayName, personalUrl });
+      setCopyFeedback(null);
+      toast({ title: 'Tautan pribadi siap untuk disalin.', variant: 'success' });
+      router.refresh();
+    });
+  }, [linkGuest, linkState.personalUrl, linkState.status, router, toast]);
 
   async function copyPersonalUrl() {
-    if (!revealedPersonalUrl) {
+    const personalUrl = revealedPersonalLink?.personalUrl;
+
+    if (!personalUrl) {
       return;
     }
 
     try {
-      await navigator.clipboard.writeText(revealedPersonalUrl);
+      await navigator.clipboard.writeText(personalUrl);
       setCopyFeedback('Tautan disalin.');
     } catch {
       setCopyFeedback('Salin tautan ini secara manual.');
@@ -528,35 +544,24 @@ export function GuestManager({ initialGuests, projectId }: GuestManagerProps) {
         description="Simpan tautan ini sekarang. Setelah dialog ditutup, tautan tidak dapat dibuka kembali dari daftar tamu."
         onOpenChange={(open) => {
           if (!open) {
-            setRevealedPersonalUrl(null);
+            setRevealedPersonalLink(null);
             setCopyFeedback(null);
           }
         }}
-        open={Boolean(revealedPersonalUrl)}
+        open={Boolean(revealedPersonalLink)}
         title="Tautan pribadi siap"
       >
-        {revealedPersonalUrl ? (
-          <div className="space-y-5">
-            <Input aria-label="Tautan pribadi" readOnly value={revealedPersonalUrl} />
-            <p aria-live="polite" className="text-seraya-text-muted text-sm leading-6">
-              {copyFeedback ?? 'Bagikan hanya kepada tamu yang dituju.'}
-            </p>
-            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-              <Button
-                onClick={() => {
-                  setRevealedPersonalUrl(null);
-                  setCopyFeedback(null);
-                }}
-                type="button"
-                variant="secondary"
-              >
-                Selesai
-              </Button>
-              <Button onClick={copyPersonalUrl} type="button">
-                Salin tautan
-              </Button>
-            </div>
-          </div>
+        {revealedPersonalLink ? (
+          <PersonalGuestLinkResultActions
+            copyFeedback={copyFeedback}
+            guestDisplayName={revealedPersonalLink.guestDisplayName}
+            onClose={() => {
+              setRevealedPersonalLink(null);
+              setCopyFeedback(null);
+            }}
+            onCopy={copyPersonalUrl}
+            personalUrl={revealedPersonalLink.personalUrl}
+          />
         ) : null}
       </Dialog>
 
