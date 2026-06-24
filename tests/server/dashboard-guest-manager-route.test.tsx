@@ -3,30 +3,36 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 
-const { getGuestManagerMock, notFoundMock } = vi.hoisted(() => ({
+const { getGuestManagerMock, getOwnedProjectContextMock, notFoundMock } = vi.hoisted(() => ({
   getGuestManagerMock: vi.fn(),
+  getOwnedProjectContextMock: vi.fn(),
   notFoundMock: vi.fn(),
 }));
 
 vi.mock('next/navigation', () => ({ notFound: notFoundMock }));
 vi.mock('@/components/projects/guest-manager', () => ({
   GuestManager: ({ initialGuests, projectId }: { initialGuests: unknown[]; projectId: string }) => (
-    <div data-project-id={projectId} data-guest-count={initialGuests.length}>
+    <div data-guest-count={initialGuests.length} data-project-id={projectId}>
       Daftar tamu
     </div>
   ),
 }));
+vi.mock('@/modules/auth/dashboard-request-context', () => ({
+  getOwnedProjectContextForRequest: getOwnedProjectContextMock,
+}));
 vi.mock('@/modules/guests/guest.service', () => ({
-  getGuestManagerForCurrentUser: getGuestManagerMock,
+  getGuestManagerForVerifiedProject: getGuestManagerMock,
 }));
 
 import GuestsPage from '@/app/(dashboard)/dashboard/[projectId]/guests/page';
 
 const projectId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+const project = { id: projectId };
 
 describe('SRY-012 private guest manager route', () => {
   beforeEach(() => {
     getGuestManagerMock.mockReset();
+    getOwnedProjectContextMock.mockReset().mockResolvedValue(project);
     notFoundMock.mockReset();
     notFoundMock.mockImplementation(() => {
       throw new Error('NEXT_NOT_FOUND');
@@ -45,19 +51,20 @@ describe('SRY-012 private guest manager route', () => {
           rsvp_status: 'pending',
         },
       ],
-      project: { id: projectId },
+      project,
     });
 
     const page = await GuestsPage({ params: Promise.resolve({ projectId }) });
     const html = renderToStaticMarkup(page);
 
-    expect(getGuestManagerMock).toHaveBeenCalledWith(projectId);
+    expect(getOwnedProjectContextMock).toHaveBeenCalledWith(projectId);
+    expect(getGuestManagerMock).toHaveBeenCalledWith(project);
     expect(html).toContain('data-guest-count="1"');
     expect(html).toContain(`data-project-id="${projectId}"`);
   });
 
   it('does not render a guessed cross-account guest list', async () => {
-    getGuestManagerMock.mockRejectedValue(new ProjectAccessDeniedError());
+    getOwnedProjectContextMock.mockRejectedValue(new ProjectAccessDeniedError());
 
     await expect(
       GuestsPage({

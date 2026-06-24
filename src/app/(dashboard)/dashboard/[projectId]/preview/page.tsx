@@ -2,13 +2,14 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { Badge } from '@/design-system';
+import { getOwnedProjectContextForRequest } from '@/modules/auth/dashboard-request-context';
 import {
   createInvitationViewModel,
   DEFAULT_PREVIEW_TEMPLATE_ID,
   getInvitationTemplate,
 } from '@/modules/invitation-templates';
 import {
-  getOwnedProjectInvitationOverview,
+  getOwnedProjectInvitationOverviewForVerifiedProject,
   type OwnedProjectInvitationOverview,
 } from '@/modules/invitations/invitation-draft.service';
 import { getPrivateGalleryImagesForVerifiedProject } from '@/modules/media/media.service';
@@ -28,7 +29,8 @@ export default async function InvitationPreviewPage({ params }: InvitationPrevie
   let overview: OwnedProjectInvitationOverview;
 
   try {
-    overview = await getOwnedProjectInvitationOverview(projectId);
+    const project = await getOwnedProjectContextForRequest(projectId);
+    overview = await getOwnedProjectInvitationOverviewForVerifiedProject(project);
   } catch (error) {
     if (error instanceof ProjectAccessDeniedError) {
       notFound();

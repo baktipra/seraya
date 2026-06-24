@@ -1,8 +1,9 @@
 import { notFound } from 'next/navigation';
 
 import { GalleryManager } from '@/components/projects/gallery-manager';
+import { getOwnedProjectContextForRequest } from '@/modules/auth/dashboard-request-context';
 import {
-  getOwnedProjectInvitationOverview,
+  getOwnedProjectInvitationOverviewForVerifiedProject,
   type OwnedProjectInvitationOverview,
 } from '@/modules/invitations/invitation-draft.service';
 import { getPrivateGalleryImagesForVerifiedProject } from '@/modules/media/media.service';
@@ -20,7 +21,8 @@ export default async function GalleryPage({ params }: GalleryPageProps) {
   let overview: OwnedProjectInvitationOverview;
 
   try {
-    overview = await getOwnedProjectInvitationOverview(projectId);
+    const project = await getOwnedProjectContextForRequest(projectId);
+    overview = await getOwnedProjectInvitationOverviewForVerifiedProject(project);
   } catch (error) {
     if (error instanceof ProjectAccessDeniedError) {
       notFound();

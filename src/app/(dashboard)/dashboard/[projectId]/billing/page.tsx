@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { PaymentActivationControls } from '@/components/projects/payment-activation-controls';
+import { getOwnedProjectContextForRequest } from '@/modules/auth/dashboard-request-context';
 import {
   Badge,
   Button,
@@ -13,7 +14,7 @@ import {
 } from '@/design-system';
 import { getPaymentStatusLabel } from '@/modules/payments/payment.mapper';
 import {
-  getPaymentHistoryForCurrentUser,
+  getPaymentHistoryForVerifiedProject,
   getPaymentOverviewForVerifiedProject,
 } from '@/modules/payments/payment.service';
 import { formatPaymentAmountIdr } from '@/modules/payments/payment.types';
@@ -27,7 +28,8 @@ type BillingPageProps = {
 
 async function loadBillingData(projectId: string) {
   try {
-    const { payments, project } = await getPaymentHistoryForCurrentUser(projectId);
+    const project = await getOwnedProjectContextForRequest(projectId);
+    const { payments } = await getPaymentHistoryForVerifiedProject(project);
     const overview = await getPaymentOverviewForVerifiedProject(project);
 
     return { overview, payments, project };

@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
 
 import { GuestManager } from '@/components/projects/guest-manager';
-import { getGuestManagerForCurrentUser } from '@/modules/guests/guest.service';
+import { getOwnedProjectContextForRequest } from '@/modules/auth/dashboard-request-context';
+import { getGuestManagerForVerifiedProject } from '@/modules/guests/guest.service';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 
 type GuestsPageProps = {
@@ -12,7 +13,8 @@ export const dynamic = 'force-dynamic';
 
 async function loadGuestManager(projectId: string) {
   try {
-    return await getGuestManagerForCurrentUser(projectId);
+    const project = await getOwnedProjectContextForRequest(projectId);
+    return await getGuestManagerForVerifiedProject(project);
   } catch (error) {
     if (error instanceof ProjectAccessDeniedError) {
       notFound();

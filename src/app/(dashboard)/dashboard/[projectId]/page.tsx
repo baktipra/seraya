@@ -1,8 +1,9 @@
 import { notFound } from 'next/navigation';
 
 import { ProjectOverviewBootstrap } from '@/components/projects/project-overview-bootstrap';
+import { getOwnedProjectContextForRequest } from '@/modules/auth/dashboard-request-context';
 import {
-  getOwnedProjectInvitationOverview,
+  getOwnedProjectInvitationOverviewForVerifiedProject,
   type OwnedProjectInvitationOverview,
 } from '@/modules/invitations/invitation-draft.service';
 import { getPaymentOverviewForVerifiedProject } from '@/modules/payments/payment.service';
@@ -19,7 +20,8 @@ export default async function ProjectDashboardPage({ params }: ProjectDashboardP
   let overview: OwnedProjectInvitationOverview;
 
   try {
-    overview = await getOwnedProjectInvitationOverview(projectId);
+    const project = await getOwnedProjectContextForRequest(projectId);
+    overview = await getOwnedProjectInvitationOverviewForVerifiedProject(project);
   } catch (error) {
     if (error instanceof ProjectAccessDeniedError) {
       notFound();

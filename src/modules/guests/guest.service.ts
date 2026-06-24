@@ -6,7 +6,7 @@ import type {
   GuestLinkStateRecord,
   GuestPersonalLinkState,
 } from '@/modules/guest-links/guest-link.types';
-import { getOwnedProjectById } from '@/modules/projects/project.repository';
+import { getOwnedProjectById, type OwnedProject } from '@/modules/projects/project.repository';
 
 import { mapGuestListItem } from './guest.mapper';
 import { assertGuestBelongsToProject } from './guest.policy';
@@ -31,7 +31,7 @@ export class GuestUnavailableError extends Error {
 
 export type OwnedGuestManager = {
   guests: GuestListItem[];
-  project: Awaited<ReturnType<typeof getOwnedProjectById>>;
+  project: OwnedProject;
 };
 
 function mapGuestLinkStates(records: GuestLinkStateRecord[]) {
@@ -50,10 +50,10 @@ function mapGuestLinkStates(records: GuestLinkStateRecord[]) {
   return states;
 }
 
-/** Loads active guests plus factual operational state after current owner/project verification. */
-export async function getGuestManagerForCurrentUser(projectId: string): Promise<OwnedGuestManager> {
-  const user = await requireCurrentUser();
-  const project = await getOwnedProjectById(projectId, user.id);
+/** Loads active guests plus factual operational state after verified server project scope. */
+export async function getGuestManagerForVerifiedProject(
+  project: OwnedProject,
+): Promise<OwnedGuestManager> {
   const guests = await listActiveGuestsForVerifiedProject(project);
   const linkStates = mapGuestLinkStates(
     await listGuestLinkStatesForVerifiedGuestIds(guests.map((guest) => guest.id)),
@@ -63,6 +63,14 @@ export async function getGuestManagerForCurrentUser(projectId: string): Promise<
     guests: guests.map((guest) => mapGuestListItem(guest, linkStates.get(guest.id))),
     project,
   };
+}
+
+/** Standalone owner-scoped guest manager loader for non-RSC callers. */
+export async function getGuestManagerForCurrentUser(projectId: string): Promise<OwnedGuestManager> {
+  const user = await requireCurrentUser();
+  const project = await getOwnedProjectById(projectId, user.id);
+
+  return getGuestManagerForVerifiedProject(project);
 }
 
 export async function createGuestForCurrentUser(input: {

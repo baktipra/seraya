@@ -2,13 +2,13 @@ import { redirect } from 'next/navigation';
 
 import { DashboardShell } from '@/components/dashboard/dashboard-shell';
 import { AuthenticationRequiredError } from '@/modules/auth/current-user';
-import { getDashboardSessionContext } from '@/modules/auth/dashboard-session';
+import { getDashboardSessionContextForRequest } from '@/modules/auth/dashboard-session';
 
 export const dynamic = 'force-dynamic';
 
 async function getDashboardContextOrRedirect() {
   try {
-    return await getDashboardSessionContext();
+    return await getDashboardSessionContextForRequest();
   } catch (error) {
     if (error instanceof AuthenticationRequiredError) {
       redirect('/login?next=/dashboard');

@@ -89,15 +89,25 @@ export async function getPaymentOverviewForVerifiedProject(
   }
 }
 
+/** Private payment history after verified server project scope. */
+export async function getPaymentHistoryForVerifiedProject(project: OwnedProject): Promise<{
+  payments: PaymentTransaction[];
+  project: OwnedProject;
+}> {
+  const payments = await listPaymentsForVerifiedProject(project);
+
+  return { payments, project };
+}
+
+/** Standalone owner-scoped history loader for non-RSC callers. */
 export async function getPaymentHistoryForCurrentUser(projectId: string): Promise<{
   payments: PaymentTransaction[];
   project: OwnedProject;
 }> {
   const user = await requireCurrentUser();
   const project = await getOwnedProjectById(projectId, user.id);
-  const payments = await listPaymentsForVerifiedProject(project);
 
-  return { payments, project };
+  return getPaymentHistoryForVerifiedProject(project);
 }
 
 /**

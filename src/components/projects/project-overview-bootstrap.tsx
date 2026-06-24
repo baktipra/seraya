@@ -202,6 +202,15 @@ export function ProjectOverviewBootstrap({
               >
                 Kelola tamu
               </Link>
+              <Link
+                className="border-seraya-border-default bg-seraya-surface text-seraya-text-primary hover:border-seraya-border-strong hover:bg-seraya-canvas focus-visible:outline-seraya-focus-ring inline-flex min-h-12 flex-col items-start justify-center rounded-[var(--seraya-radius-md)] border px-5 py-2 text-left transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
+                href={`/dashboard/${project.id}/rsvp`}
+              >
+                <span className="text-base font-semibold">Ringkasan RSVP</span>
+                <span className="text-seraya-text-secondary text-sm font-normal">
+                  Lihat respons tamu yang sudah masuk.
+                </span>
+              </Link>
             </>
           ) : null}
           {draft ? (

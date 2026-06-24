@@ -4,20 +4,23 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createDefaultInvitationDraftContent } from '@/modules/invitations/invitation-draft.defaults';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 
-const { getOverviewMock, getPrivateGalleryMock, notFoundMock } = vi.hoisted(() => ({
-  getOverviewMock: vi.fn(),
-  getPrivateGalleryMock: vi.fn(),
-  notFoundMock: vi.fn(),
-}));
+const { getOverviewMock, getOwnedProjectContextMock, getPrivateGalleryMock, notFoundMock } =
+  vi.hoisted(() => ({
+    getOverviewMock: vi.fn(),
+    getOwnedProjectContextMock: vi.fn(),
+    getPrivateGalleryMock: vi.fn(),
+    notFoundMock: vi.fn(),
+  }));
 
 vi.mock('next/navigation', () => ({
   notFound: notFoundMock,
 }));
-
-vi.mock('@/modules/invitations/invitation-draft.service', () => ({
-  getOwnedProjectInvitationOverview: getOverviewMock,
+vi.mock('@/modules/auth/dashboard-request-context', () => ({
+  getOwnedProjectContextForRequest: getOwnedProjectContextMock,
 }));
-
+vi.mock('@/modules/invitations/invitation-draft.service', () => ({
+  getOwnedProjectInvitationOverviewForVerifiedProject: getOverviewMock,
+}));
 vi.mock('@/modules/media/media.service', () => ({
   getPrivateGalleryImagesForVerifiedProject: getPrivateGalleryMock,
 }));
@@ -54,6 +57,7 @@ const ownedOverview = {
 describe('SRY-007 private invitation preview route', () => {
   beforeEach(() => {
     getOverviewMock.mockReset();
+    getOwnedProjectContextMock.mockReset().mockResolvedValue(project);
     getPrivateGalleryMock.mockReset();
     getPrivateGalleryMock.mockResolvedValue([]);
     notFoundMock.mockReset();
@@ -70,7 +74,8 @@ describe('SRY-007 private invitation preview route', () => {
     });
     const html = renderToStaticMarkup(page);
 
-    expect(getOverviewMock).toHaveBeenCalledWith(project.id);
+    expect(getOwnedProjectContextMock).toHaveBeenCalledWith(project.id);
+    expect(getOverviewMock).toHaveBeenCalledWith(project);
     expect(getPrivateGalleryMock).toHaveBeenCalledWith({
       draftImageIds: [],
       project,
@@ -107,7 +112,7 @@ describe('SRY-007 private invitation preview route', () => {
   });
 
   it('does not render a guessed cross-account project preview', async () => {
-    getOverviewMock.mockRejectedValue(new ProjectAccessDeniedError());
+    getOwnedProjectContextMock.mockRejectedValue(new ProjectAccessDeniedError());
 
     await expect(
       InvitationPreviewPage({

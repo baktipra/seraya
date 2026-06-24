@@ -1,20 +1,19 @@
 import { notFound } from 'next/navigation';
 
-import { requireCurrentUser } from '@/modules/auth/current-user';
+import { getOwnedProjectContextForRequest } from '@/modules/auth/dashboard-request-context';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
-import { getOwnedProjectById } from '@/modules/projects/project.repository';
 
 type ProjectLayoutProps = {
   children: React.ReactNode;
   params: Promise<{ projectId: string }>;
 };
 
-/** Defense-in-depth project ownership check behind proxy-level authentication. */
+/** Defense-in-depth owner scope shared request-locally with nested project pages. */
 export default async function ProjectDashboardLayout({ children, params }: ProjectLayoutProps) {
-  const [{ projectId }, user] = await Promise.all([params, requireCurrentUser()]);
+  const { projectId } = await params;
 
   try {
-    await getOwnedProjectById(projectId, user.id);
+    await getOwnedProjectContextForRequest(projectId);
   } catch (error) {
     if (error instanceof ProjectAccessDeniedError) {
       notFound();

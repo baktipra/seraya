@@ -16,4 +16,13 @@ export {
   softRemoveGuestForCurrentUser,
   updateGuestForCurrentUser,
 } from './guest.service';
+export {
+  createRsvpAnalyticsViewModel,
+  getRsvpAnalyticsForCurrentUser,
+} from './rsvp-analytics.service';
+export {
+  type PendingRsvpGuest,
+  type RsvpAnalyticsGuestRecord,
+  type RsvpAnalyticsViewModel,
+} from './rsvp-analytics.types';
 export { type CreateGuestInput, type Guest, type GuestListItem } from './guest.types';

@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { requireCurrentUser } from '@/modules/auth/current-user';
-import { getOwnedProjectById } from '@/modules/projects/project.repository';
+import { getOwnedProjectById, type OwnedProject } from '@/modules/projects/project.repository';
 
 import {
   getActiveInvitationDraftForVerifiedProject,
@@ -34,15 +34,13 @@ export class InvitationEditorValidationError extends Error {
 
 export type OwnedInvitationEditor = {
   draft: InvitationDraft;
-  project: Awaited<ReturnType<typeof getOwnedProjectById>>;
+  project: OwnedProject;
 };
 
-/** Owner-scoped editor loader. It does not load snapshots or public route data. */
-export async function getInvitationEditorForCurrentUser(
-  projectId: string,
+/** Route-internal loader after server-owned project verification. */
+export async function getInvitationEditorForVerifiedProject(
+  project: OwnedProject,
 ): Promise<OwnedInvitationEditor> {
-  const user = await requireCurrentUser();
-  const project = await getOwnedProjectById(projectId, user.id);
   const draft = await getActiveInvitationDraftForVerifiedProject(project);
 
   if (!draft) {
@@ -50,6 +48,16 @@ export async function getInvitationEditorForCurrentUser(
   }
 
   return { draft, project };
+}
+
+/** Owner-scoped editor loader. It does not load snapshots or public route data. */
+export async function getInvitationEditorForCurrentUser(
+  projectId: string,
+): Promise<OwnedInvitationEditor> {
+  const user = await requireCurrentUser();
+  const project = await getOwnedProjectById(projectId, user.id);
+
+  return getInvitationEditorForVerifiedProject(project);
 }
 
 function applyEditorInputToActiveDraft(

@@ -7,8 +7,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createDefaultInvitationDraftContent } from '@/modules/invitations/invitation-draft.defaults';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 
-const { getEditorMock, notFoundMock } = vi.hoisted(() => ({
+const { getEditorMock, getOwnedProjectContextMock, notFoundMock } = vi.hoisted(() => ({
   getEditorMock: vi.fn(),
+  getOwnedProjectContextMock: vi.fn(),
   notFoundMock: vi.fn(),
 }));
 
@@ -18,9 +19,12 @@ vi.mock('@/components/projects/invitation-editor', () => ({
     <div data-editor-project-id={projectId}>Edit undangan</div>
   ),
 }));
+vi.mock('@/modules/auth/dashboard-request-context', () => ({
+  getOwnedProjectContextForRequest: getOwnedProjectContextMock,
+}));
 vi.mock('@/modules/invitations/invitation-editor.service', () => ({
   InvitationEditorDraftUnavailableError: class InvitationEditorDraftUnavailableError extends Error {},
-  getInvitationEditorForCurrentUser: getEditorMock,
+  getInvitationEditorForVerifiedProject: getEditorMock,
 }));
 
 import InvitationEditorPage, {
@@ -56,6 +60,7 @@ const draft = {
 describe('SRY-016 private invitation editor route', () => {
   beforeEach(() => {
     getEditorMock.mockReset();
+    getOwnedProjectContextMock.mockReset().mockResolvedValue(project);
     notFoundMock.mockReset();
     notFoundMock.mockImplementation(() => {
       throw new Error('NEXT_NOT_FOUND');
@@ -71,7 +76,8 @@ describe('SRY-016 private invitation editor route', () => {
     expect(dynamic).toBe('force-dynamic');
     expect(revalidate).toBe(0);
     expect(fetchCache).toBe('force-no-store');
-    expect(getEditorMock).toHaveBeenCalledWith(project.id);
+    expect(getOwnedProjectContextMock).toHaveBeenCalledWith(project.id);
+    expect(getEditorMock).toHaveBeenCalledWith(project);
     expect(html).toContain('Edit undangan');
     expect(html).toContain(`data-editor-project-id="${project.id}"`);
     expect(html).not.toContain('draft-private-id');
@@ -79,7 +85,7 @@ describe('SRY-016 private invitation editor route', () => {
   });
 
   it('uses the same unavailable route for cross-owner and unavailable draft cases', async () => {
-    getEditorMock.mockRejectedValueOnce(new ProjectAccessDeniedError());
+    getOwnedProjectContextMock.mockRejectedValueOnce(new ProjectAccessDeniedError());
 
     await expect(
       InvitationEditorPage({
@@ -94,13 +100,15 @@ describe('SRY-016 private invitation editor route', () => {
     ).rejects.toThrow('NEXT_NOT_FOUND');
   });
 
-  it('does not introduce a public snapshot, cookie, or Host-derived route dependency', async () => {
+  it('uses the request-local verified project context without public snapshot, cookie, or Host dependencies', async () => {
     const source = await readFile(
       path.resolve(process.cwd(), 'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx'),
       'utf8',
     );
 
-    expect(source).toContain('getInvitationEditorForCurrentUser');
+    expect(source).toContain('getOwnedProjectContextForRequest');
+    expect(source).toContain('getInvitationEditorForVerifiedProject');
+    expect(source).not.toContain('getInvitationEditorForCurrentUser');
     expect(source).not.toContain('createServerSupabaseClient');
     expect(source).not.toContain('cookies(');
     expect(source).not.toContain('publications');
