@@ -65,6 +65,7 @@ function NavigationLink({
             ),
       )}
       href={item.href as Route}
+      prefetch={false}
     >
       <Icon className={mode === 'desktop' ? 'size-[1.1rem]' : 'size-5'} />
       <span>{item.label}</span>
