@@ -17,6 +17,24 @@ export type OwnedProjectInvitationOverview = {
 };
 
 /**
+ * Narrow private draft read model for owner-only routes that render the
+ * active draft but do not need publication or guest data. The caller must
+ * already hold a server-verified project context.
+ */
+export type OwnedProjectPrivateInvitationDraft = {
+  draft: InvitationDraft | null;
+  project: OwnedProject;
+};
+
+export async function getOwnedProjectPrivateInvitationDraftForVerifiedProject(
+  project: OwnedProject,
+): Promise<OwnedProjectPrivateInvitationDraft> {
+  const draft = await getActiveInvitationDraftForVerifiedProject(project);
+
+  return { draft, project };
+}
+
+/**
  * Private read model after a route or caller has already established a
  * server-owned project scope. It does not accept a browser-supplied account.
  */

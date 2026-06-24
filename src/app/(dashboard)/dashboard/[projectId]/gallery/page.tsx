@@ -3,8 +3,8 @@ import { notFound } from 'next/navigation';
 import { GalleryManager } from '@/components/projects/gallery-manager';
 import { getOwnedProjectContextForRequest } from '@/modules/auth/dashboard-request-context';
 import {
-  getOwnedProjectInvitationOverviewForVerifiedProject,
-  type OwnedProjectInvitationOverview,
+  getOwnedProjectPrivateInvitationDraftForVerifiedProject,
+  type OwnedProjectPrivateInvitationDraft,
 } from '@/modules/invitations/invitation-draft.service';
 import { getPrivateGalleryImagesForVerifiedProject } from '@/modules/media/media.service';
 import type { InvitationGalleryImage } from '@/modules/media/media.types';
@@ -18,11 +18,11 @@ export const dynamic = 'force-dynamic';
 
 export default async function GalleryPage({ params }: GalleryPageProps) {
   const { projectId } = await params;
-  let overview: OwnedProjectInvitationOverview;
+  let privateDraft: OwnedProjectPrivateInvitationDraft;
 
   try {
     const project = await getOwnedProjectContextForRequest(projectId);
-    overview = await getOwnedProjectInvitationOverviewForVerifiedProject(project);
+    privateDraft = await getOwnedProjectPrivateInvitationDraftForVerifiedProject(project);
   } catch (error) {
     if (error instanceof ProjectAccessDeniedError) {
       notFound();
@@ -31,7 +31,7 @@ export default async function GalleryPage({ params }: GalleryPageProps) {
     throw error;
   }
 
-  if (!overview.draft) {
+  if (!privateDraft.draft) {
     notFound();
   }
 
@@ -39,8 +39,8 @@ export default async function GalleryPage({ params }: GalleryPageProps) {
 
   try {
     images = await getPrivateGalleryImagesForVerifiedProject({
-      draftImageIds: overview.draft.content.gallery.imageIds,
-      project: overview.project,
+      draftImageIds: privateDraft.draft.content.gallery.imageIds,
+      project: privateDraft.project,
     });
   } catch (error) {
     // A stale or failed object must not break gallery management or leak any
@@ -54,8 +54,8 @@ export default async function GalleryPage({ params }: GalleryPageProps) {
   return (
     <GalleryManager
       initialImages={images}
-      isPublished={overview.project.status === 'published'}
-      projectId={overview.project.id}
+      isPublished={privateDraft.project.status === 'published'}
+      projectId={privateDraft.project.id}
     />
   );
 }

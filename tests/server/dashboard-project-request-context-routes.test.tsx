@@ -8,6 +8,7 @@ const {
   getHistoryMock,
   getOverviewMock,
   getOwnedProjectContextMock,
+  getPrivateDraftMock,
   getPaymentOverviewMock,
   notFoundMock,
 } = vi.hoisted(() => ({
@@ -15,6 +16,7 @@ const {
   getHistoryMock: vi.fn(),
   getOverviewMock: vi.fn(),
   getOwnedProjectContextMock: vi.fn(),
+  getPrivateDraftMock: vi.fn(),
   getPaymentOverviewMock: vi.fn(),
   notFoundMock: vi.fn(),
 }));
@@ -38,6 +40,7 @@ vi.mock('@/components/projects/payment-activation-controls', () => ({
 }));
 vi.mock('@/modules/invitations/invitation-draft.service', () => ({
   getOwnedProjectInvitationOverviewForVerifiedProject: getOverviewMock,
+  getOwnedProjectPrivateInvitationDraftForVerifiedProject: getPrivateDraftMock,
 }));
 vi.mock('@/modules/media/media.service', () => ({
   getPrivateGalleryImagesForVerifiedProject: getGalleryMock,
@@ -82,6 +85,7 @@ describe('SRY-021A project routes request-local verified context', () => {
       project,
       publication: null,
     });
+    getPrivateDraftMock.mockReset().mockResolvedValue({ draft, project });
     getOwnedProjectContextMock.mockReset().mockResolvedValue(project);
     getPaymentOverviewMock.mockReset().mockResolvedValue({
       configuration: null,
@@ -111,8 +115,9 @@ describe('SRY-021A project routes request-local verified context', () => {
     const html = renderToStaticMarkup(page);
 
     expect(getOwnedProjectContextMock).toHaveBeenCalledTimes(1);
-    expect(getOverviewMock).toHaveBeenCalledWith(project);
+    expect(getPrivateDraftMock).toHaveBeenCalledWith(project);
     expect(getGalleryMock).toHaveBeenCalledWith({ draftImageIds: [], project });
+    expect(getOverviewMock).not.toHaveBeenCalled();
     expect(html).toContain(`data-gallery-project-id="${project.id}"`);
   });
 

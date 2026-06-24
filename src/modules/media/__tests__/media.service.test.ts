@@ -10,6 +10,7 @@ const {
   getActiveDraftMock,
   getAssetMock,
   getOwnedProjectMock,
+  getReadyMediaAssetsMock,
   markFailedMock,
   requireCurrentUserMock,
   reserveAssetMock,
@@ -20,6 +21,7 @@ const {
   getActiveDraftMock: vi.fn(),
   getAssetMock: vi.fn(),
   getOwnedProjectMock: vi.fn(),
+  getReadyMediaAssetsMock: vi.fn(),
   markFailedMock: vi.fn(),
   requireCurrentUserMock: vi.fn(),
   reserveAssetMock: vi.fn(),
@@ -43,7 +45,7 @@ vi.mock('../media.repository', () => ({
   finalizeGalleryMediaAssetWithAdmin: finalizeWithAdminMock,
   getMediaAssetForVerifiedProjectWithAdmin: getAssetMock,
   getOwnedReadyMediaAssetById: vi.fn(),
-  getReadyMediaAssetsForVerifiedProject: vi.fn(),
+  getReadyMediaAssetsForVerifiedProject: getReadyMediaAssetsMock,
   markMediaAssetFailedForVerifiedProject: markFailedMock,
   reserveProcessingGalleryMediaAsset: reserveAssetMock,
   updateInvitationDraftGalleryForVerifiedProject: vi.fn(),
@@ -51,6 +53,7 @@ vi.mock('../media.repository', () => ({
 
 import {
   finalizeGalleryUploadForCurrentUser,
+  getPrivateGalleryImagesForVerifiedProject,
   reserveGalleryUploadForCurrentUser,
 } from '../media.service';
 import { GalleryMediaValidationError } from '../media.validation';
@@ -108,6 +111,7 @@ describe('SRY-009 gallery media server service', () => {
     requireCurrentUserMock.mockResolvedValue({ id: userA });
     getOwnedProjectMock.mockResolvedValue(project);
     getActiveDraftMock.mockResolvedValue(createDraft());
+    getReadyMediaAssetsMock.mockResolvedValue([]);
     reserveAssetMock.mockResolvedValue(createProcessingAsset());
     createSignedUploadUrlMock.mockResolvedValue('https://upload.example.test/temporary-token');
     getAssetMock.mockResolvedValue(createProcessingAsset());
@@ -186,5 +190,27 @@ describe('SRY-009 gallery media server service', () => {
 
     expect(finalizeWithAdminMock).not.toHaveBeenCalled();
     expect(markFailedMock).toHaveBeenCalledWith(project, assetId);
+  });
+
+  it('resolves preview/gallery assets with one bounded repository query and preserves draft order', async () => {
+    const firstImageId = '11111111-1111-4111-8111-111111111111';
+    const secondImageId = '22222222-2222-4222-8222-222222222222';
+    getReadyMediaAssetsMock.mockResolvedValue([
+      { ...createProcessingAsset(), id: firstImageId, status: 'ready' },
+      { ...createProcessingAsset(), id: secondImageId, status: 'ready' },
+    ]);
+
+    await expect(
+      getPrivateGalleryImagesForVerifiedProject({
+        draftImageIds: [secondImageId, firstImageId],
+        project,
+      }),
+    ).resolves.toEqual([
+      { alt: 'Foto pasangan 1', id: secondImageId, src: `/dashboard/media/${secondImageId}` },
+      { alt: 'Foto pasangan 2', id: firstImageId, src: `/dashboard/media/${firstImageId}` },
+    ]);
+
+    expect(getReadyMediaAssetsMock).toHaveBeenCalledTimes(1);
+    expect(getReadyMediaAssetsMock).toHaveBeenCalledWith(project, [secondImageId, firstImageId]);
   });
 });

@@ -4,13 +4,19 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createDefaultInvitationDraftContent } from '@/modules/invitations/invitation-draft.defaults';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 
-const { getOverviewMock, getOwnedProjectContextMock, getPrivateGalleryMock, notFoundMock } =
-  vi.hoisted(() => ({
-    getOverviewMock: vi.fn(),
-    getOwnedProjectContextMock: vi.fn(),
-    getPrivateGalleryMock: vi.fn(),
-    notFoundMock: vi.fn(),
-  }));
+const {
+  getOverviewMock,
+  getOwnedProjectContextMock,
+  getPrivateDraftMock,
+  getPrivateGalleryMock,
+  notFoundMock,
+} = vi.hoisted(() => ({
+  getOverviewMock: vi.fn(),
+  getOwnedProjectContextMock: vi.fn(),
+  getPrivateDraftMock: vi.fn(),
+  getPrivateGalleryMock: vi.fn(),
+  notFoundMock: vi.fn(),
+}));
 
 vi.mock('next/navigation', () => ({
   notFound: notFoundMock,
@@ -20,6 +26,7 @@ vi.mock('@/modules/auth/dashboard-request-context', () => ({
 }));
 vi.mock('@/modules/invitations/invitation-draft.service', () => ({
   getOwnedProjectInvitationOverviewForVerifiedProject: getOverviewMock,
+  getOwnedProjectPrivateInvitationDraftForVerifiedProject: getPrivateDraftMock,
 }));
 vi.mock('@/modules/media/media.service', () => ({
   getPrivateGalleryImagesForVerifiedProject: getPrivateGalleryMock,
@@ -40,7 +47,7 @@ const project = {
   status: 'draft',
 };
 
-const ownedOverview = {
+const ownedPrivateDraft = {
   draft: {
     content: createDefaultInvitationDraftContent(project),
     created_at: '2026-06-20T00:00:00.000Z',
@@ -50,36 +57,35 @@ const ownedOverview = {
     schema_version: 1,
     updated_at: '2026-06-20T00:00:00.000Z',
   },
-  publication: null,
   project,
 };
 
-describe('SRY-007 private invitation preview route', () => {
+describe('SRY-021B private invitation preview route', () => {
   beforeEach(() => {
     getOverviewMock.mockReset();
     getOwnedProjectContextMock.mockReset().mockResolvedValue(project);
-    getPrivateGalleryMock.mockReset();
-    getPrivateGalleryMock.mockResolvedValue([]);
+    getPrivateDraftMock.mockReset().mockResolvedValue(ownedPrivateDraft);
+    getPrivateGalleryMock.mockReset().mockResolvedValue([]);
     notFoundMock.mockReset();
     notFoundMock.mockImplementation(() => {
       throw new Error('NEXT_NOT_FOUND');
     });
   });
 
-  it('renders the owner preview with a dashboard toolbar and no private record metadata', async () => {
-    getOverviewMock.mockResolvedValue(ownedOverview);
-
+  it('renders the owner preview from the narrow draft-plus-gallery read path only', async () => {
     const page = await InvitationPreviewPage({
       params: Promise.resolve({ projectId: project.id }),
     });
     const html = renderToStaticMarkup(page);
 
     expect(getOwnedProjectContextMock).toHaveBeenCalledWith(project.id);
-    expect(getOverviewMock).toHaveBeenCalledWith(project);
+    expect(getPrivateDraftMock).toHaveBeenCalledWith(project);
     expect(getPrivateGalleryMock).toHaveBeenCalledWith({
       draftImageIds: [],
       project,
     });
+    expect(getPrivateGalleryMock).toHaveBeenCalledTimes(1);
+    expect(getOverviewMock).not.toHaveBeenCalled();
     expect(html).toContain('← Kembali ke project');
     expect(html).toContain('Pratinjau undangan');
     expect(html).toContain('Belum dipublikasikan');
@@ -92,9 +98,9 @@ describe('SRY-007 private invitation preview route', () => {
     const imageId = '11111111-1111-4111-8111-111111111111';
     const draft = createDefaultInvitationDraftContent(project);
     draft.gallery = { enabled: true, imageIds: [imageId] };
-    getOverviewMock.mockResolvedValue({
-      ...ownedOverview,
-      draft: { ...ownedOverview.draft, content: draft },
+    getPrivateDraftMock.mockResolvedValue({
+      ...ownedPrivateDraft,
+      draft: { ...ownedPrivateDraft.draft, content: draft },
     });
     getPrivateGalleryMock.mockResolvedValue([
       { alt: 'Foto pasangan 1', id: imageId, src: `/dashboard/media/${imageId}` },
@@ -111,7 +117,7 @@ describe('SRY-007 private invitation preview route', () => {
     expect(html).not.toContain('projects/');
   });
 
-  it('does not render a guessed cross-account project preview', async () => {
+  it('does not render a guessed cross-account or soft-deleted project preview', async () => {
     getOwnedProjectContextMock.mockRejectedValue(new ProjectAccessDeniedError());
 
     await expect(
@@ -119,13 +125,18 @@ describe('SRY-007 private invitation preview route', () => {
         params: Promise.resolve({ projectId: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb' }),
       }),
     ).rejects.toThrow('NEXT_NOT_FOUND');
+
+    expect(getPrivateDraftMock).not.toHaveBeenCalled();
+    expect(getPrivateGalleryMock).not.toHaveBeenCalled();
   });
 
   it('does not render an active project when its draft is absent or soft-deleted', async () => {
-    getOverviewMock.mockResolvedValue({ ...ownedOverview, draft: null });
+    getPrivateDraftMock.mockResolvedValue({ ...ownedPrivateDraft, draft: null });
 
     await expect(
       InvitationPreviewPage({ params: Promise.resolve({ projectId: project.id }) }),
     ).rejects.toThrow('NEXT_NOT_FOUND');
+
+    expect(getPrivateGalleryMock).not.toHaveBeenCalled();
   });
 });

@@ -9,8 +9,8 @@ import {
   getInvitationTemplate,
 } from '@/modules/invitation-templates';
 import {
-  getOwnedProjectInvitationOverviewForVerifiedProject,
-  type OwnedProjectInvitationOverview,
+  getOwnedProjectPrivateInvitationDraftForVerifiedProject,
+  type OwnedProjectPrivateInvitationDraft,
 } from '@/modules/invitations/invitation-draft.service';
 import { getPrivateGalleryImagesForVerifiedProject } from '@/modules/media/media.service';
 import type { InvitationGalleryImage } from '@/modules/media/media.types';
@@ -26,11 +26,11 @@ const PreviewInvitationTemplate = getInvitationTemplate(DEFAULT_PREVIEW_TEMPLATE
 
 export default async function InvitationPreviewPage({ params }: InvitationPreviewPageProps) {
   const { projectId } = await params;
-  let overview: OwnedProjectInvitationOverview;
+  let privateDraft: OwnedProjectPrivateInvitationDraft;
 
   try {
     const project = await getOwnedProjectContextForRequest(projectId);
-    overview = await getOwnedProjectInvitationOverviewForVerifiedProject(project);
+    privateDraft = await getOwnedProjectPrivateInvitationDraftForVerifiedProject(project);
   } catch (error) {
     if (error instanceof ProjectAccessDeniedError) {
       notFound();
@@ -41,7 +41,7 @@ export default async function InvitationPreviewPage({ params }: InvitationPrevie
 
   // An active project without an active draft is a safe recovery condition in
   // overview, but it must not expose a preview shell with partial metadata.
-  if (!overview.draft) {
+  if (!privateDraft.draft) {
     notFound();
   }
 
@@ -49,8 +49,8 @@ export default async function InvitationPreviewPage({ params }: InvitationPrevie
 
   try {
     galleryImages = await getPrivateGalleryImagesForVerifiedProject({
-      draftImageIds: overview.draft.content.gallery.imageIds,
-      project: overview.project,
+      draftImageIds: privateDraft.draft.content.gallery.imageIds,
+      project: privateDraft.project,
     });
   } catch (error) {
     // Gallery media is intentionally optional in the renderer. A missing,
@@ -63,9 +63,9 @@ export default async function InvitationPreviewPage({ params }: InvitationPrevie
   }
 
   const invitation = createInvitationViewModel({
-    draft: overview.draft,
+    draft: privateDraft.draft,
     galleryImages,
-    project: overview.project,
+    project: privateDraft.project,
   });
   return (
     <section aria-label="Pratinjau undangan" className="space-y-5 sm:space-y-7">
@@ -78,8 +78,8 @@ export default async function InvitationPreviewPage({ params }: InvitationPrevie
         </Link>
         <div className="flex flex-wrap items-center gap-2.5 sm:justify-end">
           <p className="text-seraya-text-primary text-sm font-semibold">Pratinjau undangan</p>
-          <Badge variant={overview.project.status === 'published' ? 'success' : 'warning'}>
-            {overview.project.status === 'published'
+          <Badge variant={privateDraft.project.status === 'published' ? 'success' : 'warning'}>
+            {privateDraft.project.status === 'published'
               ? 'Sudah dipublikasikan'
               : 'Belum dipublikasikan'}
           </Badge>
