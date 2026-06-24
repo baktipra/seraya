@@ -75,9 +75,7 @@ describe('SRY-021A dashboard session request context', () => {
     beginFreshRequest();
     createServerSupabaseClientMock.mockReset();
     getCurrentDashboardUserForRequestMock.mockReset().mockResolvedValue({
-      email: 'raka@example.test',
       id: 'owner-a',
-      user_metadata: {},
     });
     listOwnedActiveProjectsMock.mockReset().mockResolvedValue([]);
   });
@@ -108,9 +106,7 @@ describe('SRY-021A dashboard session request context', () => {
     beginFreshRequest();
     createServerSupabaseClientMock.mockReset();
     getCurrentDashboardUserForRequestMock.mockReset().mockResolvedValue({
-      email: 'nadia@example.test',
       id: 'owner-b',
-      user_metadata: {},
     });
     listOwnedActiveProjectsMock.mockReset().mockResolvedValue([]);
     const secondClient = createProfileClient();

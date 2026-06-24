@@ -3,14 +3,15 @@ import 'server-only';
 import { cache } from 'react';
 
 import { createServerSupabaseClient } from '@/server/supabase/server';
-import type { SerayaAuthUser } from '@/server/supabase/types';
-
 import {
   listOwnedActiveProjects,
   type ProjectLauncherItem,
 } from '@/modules/projects/project.repository';
 
-import { getCurrentDashboardUserForRequest } from './dashboard-request-context';
+import {
+  getCurrentDashboardUserForRequest,
+  type DashboardVerifiedClaimsIdentity,
+} from './dashboard-request-context';
 
 export type DashboardProfile = {
   display_name: string | null;
@@ -22,7 +23,7 @@ export type DashboardSessionContext = {
   profile: DashboardProfile | null;
   profileUnavailable: boolean;
   projects: ProjectLauncherItem[];
-  user: SerayaAuthUser;
+  user: DashboardVerifiedClaimsIdentity;
 };
 
 /**

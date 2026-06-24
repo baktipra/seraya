@@ -26,7 +26,7 @@ export default async function DashboardLayout({
   return (
     <DashboardShell
       displayName={context.profile?.display_name}
-      email={context.profile?.email ?? context.user.email}
+      email={context.profile?.email ?? null}
       hasActiveProject={context.hasActiveProject}
     >
       {children}
