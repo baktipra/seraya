@@ -12,6 +12,7 @@ export type GuestDatabaseRecord = {
   project_id: string;
   rsvp_status: Guest['rsvp_status'];
   updated_at: string;
+  whatsapp_phone_e164?: string | null;
 };
 
 export function mapGuest(record: GuestDatabaseRecord): Guest {
@@ -25,6 +26,7 @@ export function mapGuest(record: GuestDatabaseRecord): Guest {
     project_id: record.project_id,
     rsvp_status: record.rsvp_status,
     updated_at: record.updated_at,
+    whatsapp_phone_e164: record.whatsapp_phone_e164 ?? null,
   };
 }
 
@@ -39,5 +41,6 @@ export function mapGuestListItem(
     link_state: linkState,
     party_size: guest.party_size,
     rsvp_status: guest.rsvp_status,
+    whatsapp_phone_e164: guest.whatsapp_phone_e164,
   };
 }

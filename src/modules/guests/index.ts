@@ -11,6 +11,10 @@ export {
   parseUpdateGuestFormData,
 } from './guest.schema';
 export {
+  isCanonicalGuestWhatsAppPhoneE164,
+  normalizeGuestWhatsAppPhoneE164,
+} from './whatsapp-phone';
+export {
   createGuestForCurrentUser,
   getGuestManagerForCurrentUser,
   softRemoveGuestForCurrentUser,

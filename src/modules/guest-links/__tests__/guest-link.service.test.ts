@@ -57,6 +57,7 @@ const guest = {
   project_id: project.id,
   rsvp_status: 'pending' as const,
   updated_at: '2026-06-21T00:00:00.000Z',
+  whatsapp_phone_e164: '+6281234567890',
 };
 
 describe('SRY-013 owner personal-link service ownership guard', () => {
@@ -107,5 +108,6 @@ describe('SRY-013 owner personal-link service ownership guard', () => {
     expect(result.personalUrl).toMatch(
       /^http:\/\/localhost:3000\/raka-nadia\/g\/[A-Za-z0-9_-]{43}$/,
     );
+    expect(result.recipientWhatsAppPhoneE164).toBe('+6281234567890');
   });
 });

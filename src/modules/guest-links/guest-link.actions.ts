@@ -35,6 +35,9 @@ export async function createOrReplacePersonalGuestLinkAction(
     return {
       message: 'Tautan pribadi siap untuk disalin.',
       personalUrl: result.personalUrl,
+      ...(result.recipientWhatsAppPhoneE164
+        ? { recipientWhatsAppPhoneE164: result.recipientWhatsAppPhoneE164 }
+        : {}),
       status: 'success',
     };
   } catch (error) {

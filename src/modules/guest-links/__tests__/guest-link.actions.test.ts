@@ -53,13 +53,17 @@ describe('SRY-013 personal guest-link server actions', () => {
   it('returns the fresh personal URL only in the immediate successful action result', async () => {
     const token = randomBytes(32).toString('base64url');
     const personalUrl = new URL(`/raka-nadia/g/${token}`, 'https://seraya.example').toString();
-    createOrReplaceMock.mockResolvedValue({ personalUrl });
+    createOrReplaceMock.mockResolvedValue({
+      personalUrl,
+      recipientWhatsAppPhoneE164: '+6281234567890',
+    });
 
     await expect(
       createOrReplacePersonalGuestLinkAction(initialGuestLinkActionState, linkFormData()),
     ).resolves.toEqual({
       message: 'Tautan pribadi siap untuk disalin.',
       personalUrl,
+      recipientWhatsAppPhoneE164: '+6281234567890',
       status: 'success',
     });
 

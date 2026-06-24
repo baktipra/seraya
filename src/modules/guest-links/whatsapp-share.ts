@@ -1,4 +1,5 @@
-const WHATSAPP_COMPOSE_URL = 'https://wa.me/';
+const WHATSAPP_COMPOSE_ORIGIN = 'https://wa.me';
+const canonicalE164Pattern = /^\+[1-9][0-9]{7,14}$/;
 
 function normalizeGuestDisplayName(value: string) {
   return value.trim().replace(/\s+/gu, ' ');
@@ -27,14 +28,36 @@ function assertHttpsPersonalGuestUrl(value: string) {
   }
 }
 
+function assertCanonicalRecipientWhatsAppPhone(value: string) {
+  if (!canonicalE164Pattern.test(value)) {
+    throw new Error('Recipient WhatsApp phone must be a canonical E.164 value.');
+  }
+}
+
+function buildWhatsAppComposeUrl(input: {
+  message: string;
+  recipientWhatsAppPhoneE164?: string | null;
+}) {
+  const encodedMessage = encodeURIComponent(input.message);
+  const recipientWhatsAppPhoneE164 = input.recipientWhatsAppPhoneE164 ?? null;
+
+  if (!recipientWhatsAppPhoneE164) {
+    return `${WHATSAPP_COMPOSE_ORIGIN}/?text=${encodedMessage}`;
+  }
+
+  assertCanonicalRecipientWhatsAppPhone(recipientWhatsAppPhoneE164);
+  return `${WHATSAPP_COMPOSE_ORIGIN}/${recipientWhatsAppPhoneE164.slice(1)}?text=${encodedMessage}`;
+}
+
 /**
- * Builds a manual WhatsApp compose handoff only. This helper deliberately
- * receives the fresh one-time URL from the existing server-controlled link
- * creation result; it does not read environment values or request metadata.
+ * Builds a manual WhatsApp compose handoff only. The fresh capability URL and
+ * optional recipient phone arrive from the already-authorized one-time result;
+ * this helper never reads request metadata, environment values, or storage.
  */
 export function buildWhatsAppGuestInviteShareUrl(input: {
   guestDisplayName: string;
   personalGuestUrl: string;
+  recipientWhatsAppPhoneE164?: string | null;
 }) {
   const guestDisplayName = normalizeGuestDisplayName(input.guestDisplayName);
 
@@ -52,5 +75,8 @@ export function buildWhatsAppGuestInviteShareUrl(input: {
     input.personalGuestUrl,
   ].join('\n');
 
-  return `${WHATSAPP_COMPOSE_URL}?text=${encodeURIComponent(message)}`;
+  return buildWhatsAppComposeUrl({
+    message,
+    recipientWhatsAppPhoneE164: input.recipientWhatsAppPhoneE164,
+  });
 }

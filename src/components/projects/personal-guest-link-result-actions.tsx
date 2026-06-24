@@ -9,6 +9,7 @@ type PersonalGuestLinkResultActionsProps = {
   onClose: () => void;
   onCopy: () => void;
   personalUrl: string;
+  recipientWhatsAppPhoneE164?: string | null;
 };
 
 /**
@@ -22,6 +23,7 @@ export function PersonalGuestLinkResultActions({
   onClose,
   onCopy,
   personalUrl,
+  recipientWhatsAppPhoneE164 = null,
 }: PersonalGuestLinkResultActionsProps) {
   let whatsappShareUrl: string | null = null;
 
@@ -29,6 +31,7 @@ export function PersonalGuestLinkResultActions({
     whatsappShareUrl = buildWhatsAppGuestInviteShareUrl({
       guestDisplayName,
       personalGuestUrl: personalUrl,
+      recipientWhatsAppPhoneE164,
     });
   } catch {
     // The existing controlled server action only returns a configured HTTPS
@@ -45,7 +48,9 @@ export function PersonalGuestLinkResultActions({
       </p>
       {whatsappShareUrl ? (
         <p className="text-seraya-text-secondary text-sm leading-6">
-          WhatsApp akan dibuka agar Anda dapat memilih penerima dan mengirim pesan sendiri.
+          {recipientWhatsAppPhoneE164
+            ? 'WhatsApp akan dibuka dengan nomor tamu ini agar Anda dapat mengirim pesan sendiri.'
+            : 'WhatsApp akan dibuka agar Anda dapat memilih penerima dan mengirim pesan sendiri.'}
         </p>
       ) : null}
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">

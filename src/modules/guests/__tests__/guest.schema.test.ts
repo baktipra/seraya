@@ -45,8 +45,33 @@ describe('SRY-012 guest validation contract', () => {
         groupLabel: 'Teman',
         partySize: 3,
         projectId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+        whatsappPhoneE164: null,
       });
       expect(parsed.data).not.toHaveProperty('accountId');
+    }
+  });
+
+  it('normalizes supported WhatsApp input and maps invalid values to the private field error', () => {
+    const formData = new FormData();
+    formData.set('projectId', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
+    formData.set('displayName', 'Rani');
+    formData.set('groupLabel', 'Teman');
+    formData.set('partySize', '1');
+    formData.set('whatsappPhoneE164', '0812 3456 7890');
+
+    expect(parseCreateGuestFormData(formData)).toMatchObject({
+      data: expect.objectContaining({ whatsappPhoneE164: '+6281234567890' }),
+      success: true,
+    });
+
+    formData.set('whatsappPhoneE164', '0812 ext 99');
+    const invalid = parseCreateGuestFormData(formData);
+    expect(invalid.success).toBe(false);
+    if (!invalid.success) {
+      expect(invalid.error.issues[0]?.path).toEqual(['whatsappPhoneE164']);
+      expect(invalid.error.issues[0]?.message).toBe(
+        'Nomor WhatsApp perlu menggunakan format yang valid.',
+      );
     }
   });
 });

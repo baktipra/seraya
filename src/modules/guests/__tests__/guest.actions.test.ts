@@ -33,6 +33,7 @@ function guestFormData() {
   formData.set('displayName', 'Keluarga Budi');
   formData.set('groupLabel', 'Keluarga');
   formData.set('partySize', '2');
+  formData.set('whatsappPhoneE164', '0812 3456 7890');
   return formData;
 }
 
@@ -66,7 +67,12 @@ describe('SRY-012 guest server actions', () => {
     });
 
     expect(createGuestForCurrentUserMock).toHaveBeenCalledWith({
-      guest: { displayName: 'Keluarga Budi', groupLabel: 'Keluarga', partySize: 2 },
+      guest: {
+        displayName: 'Keluarga Budi',
+        groupLabel: 'Keluarga',
+        partySize: 2,
+        whatsappPhoneE164: '+6281234567890',
+      },
       projectId,
     });
     expect(revalidatePathMock).toHaveBeenCalledWith(`/dashboard/${projectId}`);
@@ -96,7 +102,12 @@ describe('SRY-012 guest server actions', () => {
     });
 
     expect(updateGuestForCurrentUserMock).toHaveBeenCalledWith({
-      guest: { displayName: 'Keluarga Budi', groupLabel: null, partySize: 1 },
+      guest: {
+        displayName: 'Keluarga Budi',
+        groupLabel: null,
+        partySize: 1,
+        whatsappPhoneE164: '+6281234567890',
+      },
       guestId,
       projectId,
     });

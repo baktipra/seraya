@@ -224,7 +224,7 @@ async function createPersonalGuestLink(db: PGlite, guestId: string, token: strin
   `);
 }
 
-describe('SRY-003 through SRY-013 Supabase migrations, ownership, drafts, publication, media, payments, guests, personal links, and RSVP', () => {
+describe('SRY-003 through SRY-022 Supabase migrations, ownership, drafts, publication, media, payments, guests, personal links, RSVP, and private contact data', () => {
   // Full Vitest runs compile the whole app beside this PGlite migration harness.
   // Allow the first cold database/migration setup enough room without weakening
   // any assertion or production behaviour.
@@ -1812,6 +1812,45 @@ describe('SRY-003 through SRY-013 Supabase migrations, ownership, drafts, public
     ]);
   });
 
+  it('stores only canonical private guest WhatsApp contacts and keeps them within existing owner RLS', async () => {
+    const guestA = 'd1212121-1212-4121-8121-121212121212';
+    const guestB = 'd1313131-1313-4131-8131-131313131313';
+
+    await resetToDatabaseOwner(database);
+    await database.exec(`
+      insert into public.guests (id, project_id, display_name, whatsapp_phone_e164)
+      values
+        ('${guestA}', '${projectA}', 'Tamu Kontak A', '+6281234567890'),
+        ('${guestB}', '${projectB}', 'Tamu Kontak B', '+14155550123');
+    `);
+
+    await expect(
+      database.query(`
+        insert into public.guests (project_id, display_name, whatsapp_phone_e164)
+        values ('${projectA}', 'Nomor Tidak Valid', '081234567890');
+      `),
+    ).rejects.toThrow(/guests_whatsapp_phone_e164_e164/i);
+
+    await impersonateAuthenticatedUser(database, userA);
+    const ownContact = await database.query<{ id: string; whatsapp_phone_e164: string | null }>(`
+      select id, whatsapp_phone_e164
+      from public.guests
+      order by id;
+    `);
+    expect(ownContact.rows).toEqual([{ id: guestA, whatsapp_phone_e164: '+6281234567890' }]);
+
+    await impersonateAuthenticatedUser(database, userB);
+    const foreignContact = await database.query<{
+      id: string;
+      whatsapp_phone_e164: string | null;
+    }>(`
+      select id, whatsapp_phone_e164
+      from public.guests
+      order by id;
+    `);
+    expect(foreignContact.rows).toEqual([{ id: guestB, whatsapp_phone_e164: '+14155550123' }]);
+  });
+
   it('keeps guest metadata owner-only and denies browser insert/update/delete paths', async () => {
     const guestA = 'd1111111-1111-4111-8111-111111111111';
     const guestB = 'd2222222-2222-4222-8222-222222222222';
@@ -1888,15 +1927,22 @@ describe('SRY-003 through SRY-013 Supabase migrations, ownership, drafts, public
     await database.query(`select * from public.publish_invitation_snapshot('${projectA}')`);
 
     await resetToDatabaseOwner(database);
-    const snapshotShape = await database.query<{ draft_has_guests: boolean; has_guests: boolean }>(`
+    const snapshotShape = await database.query<{
+      draft_has_guests: boolean;
+      has_guests: boolean;
+      has_whatsapp_phone: boolean;
+    }>(`
       select
         (snapshot ? 'guests') as has_guests,
-        ((snapshot -> 'draft') ? 'guests') as draft_has_guests
+        ((snapshot -> 'draft') ? 'guests') as draft_has_guests,
+        (snapshot ? 'whatsapp_phone_e164') as has_whatsapp_phone
       from public.published_invitation_snapshots
       where project_id = '${projectA}' and is_current;
     `);
 
-    expect(snapshotShape.rows).toEqual([{ draft_has_guests: false, has_guests: false }]);
+    expect(snapshotShape.rows).toEqual([
+      { draft_has_guests: false, has_guests: false, has_whatsapp_phone: false },
+    ]);
   });
 
   it('creates private guest_links with hashed-only capability storage and one active link maximum', async () => {

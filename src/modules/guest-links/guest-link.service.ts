@@ -40,6 +40,7 @@ export async function createOrReplacePersonalGuestLinkForCurrentUser(input: {
 
   return {
     personalUrl: buildPersonalGuestInvitationUrl({ slug: project.slug, token }),
+    recipientWhatsAppPhoneE164: guest.whatsapp_phone_e164,
   };
 }
 

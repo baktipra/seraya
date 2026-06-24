@@ -37,6 +37,7 @@ const sampleGuest: Guest = {
   project_id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
   rsvp_status: 'attending',
   updated_at: '2026-06-21T00:00:00.000Z',
+  whatsapp_phone_e164: '+6281234567890',
 };
 
 describe('SRY-014 private guest CSV parser and export serializer', () => {
@@ -136,6 +137,8 @@ describe('SRY-014 private guest CSV parser and export serializer', () => {
     expect(csv).toContain("'@mention,,3");
     expect(csv).not.toContain('rsvp_status');
     expect(csv).not.toContain('project_id');
+    expect(csv).not.toContain('whatsapp_phone_e164');
+    expect(csv).not.toContain(sampleGuest.whatsapp_phone_e164);
     expect(csv).not.toContain(sampleGuest.id);
   });
 });

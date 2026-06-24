@@ -62,6 +62,42 @@ describe('SRY-017 manual WhatsApp personal-link handoff', () => {
     ).toThrow('Personal guest invitation URL must be a valid HTTPS URL.');
   });
 
+  it('targets the saved canonical guest number when the one-time result includes it', () => {
+    const personalGuestUrl = 'https://sandbox.seraya.example/raka-nadia/g/opaque-token';
+    const shareUrl = buildWhatsAppGuestInviteShareUrl({
+      guestDisplayName: 'Keluarga Rani',
+      personalGuestUrl,
+      recipientWhatsAppPhoneE164: '+6281234567890',
+    });
+    const parsed = new URL(shareUrl);
+
+    expect(`${parsed.origin}${parsed.pathname}`).toBe('https://wa.me/6281234567890');
+    expect(parsed.searchParams.get('text')).toContain(personalGuestUrl);
+  });
+
+  it('preserves the existing numberless WhatsApp compose handoff when no contact is saved', () => {
+    const shareUrl = buildWhatsAppGuestInviteShareUrl({
+      guestDisplayName: 'Keluarga Rani',
+      personalGuestUrl: 'https://sandbox.seraya.example/raka-nadia/g/opaque-token',
+      recipientWhatsAppPhoneE164: null,
+    });
+
+    expect(shareUrl).toMatch(/^https:\/\/wa\.me\/\?text=/);
+  });
+
+  it.each(['081234567890', '+6281234', '+0'])(
+    'rejects a recipient number that is not canonical E.164: %s',
+    (recipientWhatsAppPhoneE164) => {
+      expect(() =>
+        buildWhatsAppGuestInviteShareUrl({
+          guestDisplayName: 'Rani',
+          personalGuestUrl: 'https://sandbox.seraya.example/raka-nadia/g/opaque-token',
+          recipientWhatsAppPhoneE164,
+        }),
+      ).toThrow('Recipient WhatsApp phone must be a canonical E.164 value.');
+    },
+  );
+
   it('does not read a host header or environment origin while generating a share handoff', async () => {
     const source = await readFile(
       path.join(root, 'src/modules/guest-links/whatsapp-share.ts'),

@@ -44,6 +44,7 @@ export async function createGuestAction(
         displayName: parsed.data.displayName,
         groupLabel: parsed.data.groupLabel,
         partySize: parsed.data.partySize,
+        whatsappPhoneE164: parsed.data.whatsappPhoneE164 ?? null,
       },
       projectId: parsed.data.projectId,
     });
@@ -89,6 +90,7 @@ export async function updateGuestAction(
         displayName: parsed.data.displayName,
         groupLabel: parsed.data.groupLabel,
         partySize: parsed.data.partySize,
+        whatsappPhoneE164: parsed.data.whatsappPhoneE164 ?? null,
       },
       guestId: parsed.data.guestId,
       projectId: parsed.data.projectId,

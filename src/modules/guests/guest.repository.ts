@@ -8,7 +8,7 @@ import { mapGuest, type GuestDatabaseRecord } from './guest.mapper';
 import type { CreateGuestInput, Guest, UpdateGuestInput } from './guest.types';
 
 const guestSelect =
-  'id, project_id, display_name, group_label, party_size, rsvp_status, created_at, updated_at, deleted_at';
+  'id, project_id, display_name, group_label, party_size, rsvp_status, whatsapp_phone_e164, created_at, updated_at, deleted_at';
 
 export class GuestRepositoryError extends Error {
   constructor() {
@@ -47,6 +47,7 @@ export async function createGuestForVerifiedProject(input: {
       group_label: input.guest.groupLabel,
       party_size: input.guest.partySize,
       project_id: input.project.id,
+      whatsapp_phone_e164: input.guest.whatsappPhoneE164 ?? null,
     })
     .select(guestSelect)
     .single();
@@ -74,6 +75,7 @@ export async function createGuestsForVerifiedProject(input: {
       group_label: guest.groupLabel,
       party_size: guest.partySize,
       project_id: input.project.id,
+      whatsapp_phone_e164: guest.whatsappPhoneE164 ?? null,
     })),
   );
 
@@ -115,6 +117,7 @@ export async function updateGuestForVerifiedProject(input: {
       display_name: input.guest.displayName,
       group_label: input.guest.groupLabel,
       party_size: input.guest.partySize,
+      whatsapp_phone_e164: input.guest.whatsappPhoneE164 ?? null,
     })
     .eq('id', input.guestId)
     .eq('project_id', input.project.id)

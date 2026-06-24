@@ -30,6 +30,22 @@ describe('SRY-017 personal guest-link WhatsApp share UI', () => {
     expect(html).toContain('Selesai');
   });
 
+  it('uses a recipient-specific handoff only when the one-time result receives a canonical private contact', () => {
+    const html = renderToStaticMarkup(
+      <PersonalGuestLinkResultActions
+        copyFeedback={null}
+        guestDisplayName="Keluarga Rani"
+        onClose={() => undefined}
+        onCopy={() => undefined}
+        personalUrl={personalGuestUrl}
+        recipientWhatsAppPhoneE164="+6281234567890"
+      />,
+    );
+
+    expect(html).toContain('https://wa.me/6281234567890?text=');
+    expect(html).toContain('nomor tamu ini');
+  });
+
   it('keeps the share action out of normal guest rows and makes it contingent on the one-time revealed link state', async () => {
     const source = await readFile(
       path.join(root, 'src/components/projects/guest-manager.tsx'),
@@ -45,6 +61,23 @@ describe('SRY-017 personal guest-link WhatsApp share UI', () => {
     expect(source).not.toContain('localStorage');
     expect(source).not.toContain('sessionStorage');
     expect(source).not.toContain('document.cookie');
+  });
+
+  it('keeps the private contact field in owner Guest Manager input and forwards it only to the one-time result', async () => {
+    const source = await readFile(
+      path.join(root, 'src/components/projects/guest-manager.tsx'),
+      'utf8',
+    );
+
+    expect(source).toContain('Nomor WhatsApp');
+    expect(source).toContain('name="whatsappPhoneE164"');
+    expect(source).toContain('type="tel"');
+    expect(source).toContain('inputMode="tel"');
+    expect(source).toContain(
+      'recipientWhatsAppPhoneE164={revealedPersonalLink.recipientWhatsAppPhoneE164}',
+    );
+    expect(source).not.toContain('window.localStorage');
+    expect(source).not.toContain('window.sessionStorage');
   });
 
   it('keeps capability data out of normal guest-list DTOs, including revoked list states', async () => {

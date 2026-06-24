@@ -1,5 +1,10 @@
 import { z } from 'zod';
 
+import {
+  GuestWhatsAppPhoneValidationError,
+  normalizeGuestWhatsAppPhoneE164,
+} from './whatsapp-phone';
+
 const rawHtmlPattern = /<\/?[a-z][^>]*>|<!--[\s\S]*?-->|<!doctype\s+html[^>]*>/i;
 
 function containsNoRawHtml(value: string) {
@@ -34,11 +39,28 @@ const partySizeSchema = z.preprocess(
     .refine((value) => value <= 20, 'Jumlah undangan maksimal 20 orang.'),
 );
 
+const whatsappPhoneE164Schema = z.string().transform((value, context) => {
+  try {
+    return normalizeGuestWhatsAppPhoneE164(value);
+  } catch (error) {
+    if (error instanceof GuestWhatsAppPhoneValidationError) {
+      context.addIssue({
+        code: 'custom',
+        message: error.message,
+      });
+      return z.NEVER;
+    }
+
+    throw error;
+  }
+});
+
 export const guestInputSchema = z
   .object({
     displayName: displayNameSchema,
     groupLabel: groupLabelSchema,
     partySize: partySizeSchema,
+    whatsappPhoneE164: whatsappPhoneE164Schema.optional(),
   })
   .strict();
 
@@ -62,7 +84,9 @@ export const removeGuestActionFormSchema = z
   .strict();
 
 export type GuestInputField = keyof z.input<typeof guestInputSchema>;
-export type GuestFieldErrors = Partial<Record<'displayName' | 'groupLabel' | 'partySize', string>>;
+export type GuestFieldErrors = Partial<
+  Record<'displayName' | 'groupLabel' | 'partySize' | 'whatsappPhoneE164', string>
+>;
 
 function getFormText(formData: FormData, name: string) {
   const value = formData.get(name);
@@ -75,6 +99,7 @@ export function parseCreateGuestFormData(formData: FormData) {
     groupLabel: getFormText(formData, 'groupLabel'),
     partySize: getFormText(formData, 'partySize'),
     projectId: getFormText(formData, 'projectId'),
+    whatsappPhoneE164: getFormText(formData, 'whatsappPhoneE164'),
   });
 }
 
@@ -85,6 +110,7 @@ export function parseUpdateGuestFormData(formData: FormData) {
     guestId: getFormText(formData, 'guestId'),
     partySize: getFormText(formData, 'partySize'),
     projectId: getFormText(formData, 'projectId'),
+    whatsappPhoneE164: getFormText(formData, 'whatsappPhoneE164'),
   });
 }
 
@@ -103,7 +129,7 @@ export function getGuestFieldErrors(error: z.ZodError): GuestFieldErrors {
 
     if (
       typeof field === 'string' &&
-      ['displayName', 'groupLabel', 'partySize'].includes(field) &&
+      ['displayName', 'groupLabel', 'partySize', 'whatsappPhoneE164'].includes(field) &&
       !fieldErrors[field as keyof GuestFieldErrors]
     ) {
       fieldErrors[field as keyof GuestFieldErrors] = issue.message;

@@ -122,6 +122,34 @@ function GuestFields({
       <div className="space-y-2">
         <label
           className="text-seraya-text-primary text-sm font-semibold"
+          htmlFor="guest-whatsapp-phone-e164"
+        >
+          Nomor WhatsApp <span className="text-seraya-text-muted font-normal">(opsional)</span>
+        </label>
+        <Input
+          aria-describedby={
+            errors?.whatsappPhoneE164
+              ? 'guest-whatsapp-phone-e164-error'
+              : 'guest-whatsapp-phone-e164-help'
+          }
+          autoComplete="tel"
+          defaultValue={guest?.whatsapp_phone_e164 ?? ''}
+          hasError={Boolean(errors?.whatsappPhoneE164)}
+          id="guest-whatsapp-phone-e164"
+          inputMode="tel"
+          name="whatsappPhoneE164"
+          placeholder="Contoh: 0812 3456 7890"
+          type="tel"
+        />
+        <p className="text-seraya-text-muted text-sm leading-6" id="guest-whatsapp-phone-e164-help">
+          Contoh: 0812 3456 7890
+        </p>
+        <FieldError id="guest-whatsapp-phone-e164-error" message={errors?.whatsappPhoneE164} />
+      </div>
+
+      <div className="space-y-2">
+        <label
+          className="text-seraya-text-primary text-sm font-semibold"
           htmlFor="guest-party-size"
         >
           Jumlah undangan
@@ -206,6 +234,7 @@ export function GuestManager({ initialGuests, projectId }: GuestManagerProps) {
   const [revealedPersonalLink, setRevealedPersonalLink] = useState<{
     guestDisplayName: string;
     personalUrl: string;
+    recipientWhatsAppPhoneE164: string | null;
   } | null>(null);
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
   const lastRevealedUrl = useRef<string | null>(null);
@@ -260,12 +289,23 @@ export function GuestManager({ initialGuests, projectId }: GuestManagerProps) {
 
     queueMicrotask(() => {
       setLinkGuest(null);
-      setRevealedPersonalLink({ guestDisplayName, personalUrl });
+      setRevealedPersonalLink({
+        guestDisplayName,
+        personalUrl,
+        recipientWhatsAppPhoneE164: linkState.recipientWhatsAppPhoneE164 ?? null,
+      });
       setCopyFeedback(null);
       toast({ title: 'Tautan pribadi siap untuk disalin.', variant: 'success' });
       router.refresh();
     });
-  }, [linkGuest, linkState.personalUrl, linkState.status, router, toast]);
+  }, [
+    linkGuest,
+    linkState.personalUrl,
+    linkState.recipientWhatsAppPhoneE164,
+    linkState.status,
+    router,
+    toast,
+  ]);
 
   async function copyPersonalUrl() {
     const personalUrl = revealedPersonalLink?.personalUrl;
@@ -340,6 +380,11 @@ export function GuestManager({ initialGuests, projectId }: GuestManagerProps) {
                     {guest.group_label ? `${guest.group_label} · ` : ''}
                     {guest.party_size} orang
                   </p>
+                  {guest.whatsapp_phone_e164 ? (
+                    <p className="text-seraya-text-muted text-sm leading-6">
+                      WhatsApp: {guest.whatsapp_phone_e164}
+                    </p>
+                  ) : null}
                   <GuestStateSummary guest={guest} />
                 </div>
                 <div className="flex shrink-0 flex-wrap gap-2">
@@ -561,6 +606,7 @@ export function GuestManager({ initialGuests, projectId }: GuestManagerProps) {
             }}
             onCopy={copyPersonalUrl}
             personalUrl={revealedPersonalLink.personalUrl}
+            recipientWhatsAppPhoneE164={revealedPersonalLink.recipientWhatsAppPhoneE164}
           />
         ) : null}
       </Dialog>
