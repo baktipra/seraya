@@ -5,7 +5,7 @@ import { unstable_cache } from 'next/cache';
 import { RESERVED_SLUGS, SLUG_MAX_LENGTH, SLUG_MIN_LENGTH } from '@/lib/slug';
 import { createPublicSupabaseClient } from '@/server/supabase/public';
 
-import { parsePublishedInvitationSnapshotRecord } from './published-invitation.schema';
+import { normalizePublishedInvitationSnapshotRecord } from './published-invitation.schema';
 import {
   getPublishedInvitationCacheTag,
   type PublishedInvitationSnapshot,
@@ -31,9 +31,12 @@ export function isSafePublicInvitationSlug(slug: string) {
   );
 }
 
-async function getCurrentPublishedInvitationBySlugUncached(
-  slug: string,
-): Promise<PublishedInvitationSnapshot | null> {
+/**
+ * Returns the raw public record deliberately. Compatibility parsing happens
+ * after the persistent cache boundary so old cache values cannot skip defaults
+ * added by newer invitation content contracts.
+ */
+async function getCurrentPublishedInvitationBySlugUncached(slug: string): Promise<unknown | null> {
   const supabase = createPublicSupabaseClient();
   const { data, error } = await supabase
     .from('published_invitation_snapshots')
@@ -46,22 +49,17 @@ async function getCurrentPublishedInvitationBySlugUncached(
     throw new PublicInvitationRepositoryError();
   }
 
-  if (!data) {
-    return null;
-  }
-
-  try {
-    return parsePublishedInvitationSnapshotRecord(data) as PublishedInvitationSnapshot;
-  } catch {
-    // Corrupt/unsupported snapshot data must never crash or partially render in
-    // the public runtime. The service maps it to the public not-found path.
-    return null;
-  }
+  return data;
 }
 
 /**
  * No cookies, session, or dashboard context participates in this lookup. The
  * result cache is keyed and invalidated only by the public published slug.
+ *
+ * Important: normalize only after `getCached()` returns. A valid cache value
+ * generated before a later draft-schema field existed is still structurally a
+ * public snapshot record, but it needs current compatibility defaults before
+ * any route or template can read it.
  */
 export async function getCachedCurrentPublishedInvitationBySlug(
   slug: string,
@@ -79,5 +77,6 @@ export async function getCachedCurrentPublishedInvitationBySlug(
     },
   );
 
-  return getCached();
+  const cachedRecord = await getCached();
+  return normalizePublishedInvitationSnapshotRecord(cachedRecord);
 }

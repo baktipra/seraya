@@ -98,6 +98,30 @@ describe('SRY-008 public invitation route', () => {
     expect(html).toContain('data-template="laras"');
   });
 
+  it.each(['roselle', 'aruna', 'laras'] as const)(
+    'renders a legacy %s public snapshot without Amplop Digital',
+    async (templateKey) => {
+      const legacyDraft = { ...snapshot.snapshot.draft };
+      delete (legacyDraft as Partial<typeof legacyDraft>).digitalGift;
+      getPublicInvitationMock.mockResolvedValue({
+        ...snapshot,
+        snapshot: {
+          ...snapshot.snapshot,
+          draft: { ...legacyDraft, templateKey },
+        },
+        template_id: templateKey,
+      });
+
+      const page = await PublicInvitationPage({ params: Promise.resolve({ slug: 'raka-nadia' }) });
+      const html = renderToStaticMarkup(page);
+
+      expect(html).toContain(`data-template=\"${templateKey}\"`);
+      expect(html).toContain('Raka &amp; Nadia');
+      expect(html).not.toContain('Amplop Digital');
+      expect(html).not.toContain('Salin nomor');
+    },
+  );
+
   it('renders Amplop Digital only from the immutable published snapshot draft', async () => {
     const publishedDraft = {
       ...snapshot.snapshot.draft,

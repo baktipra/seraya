@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { createDefaultInvitationDraftContent } from '@/modules/invitations/invitation-draft.defaults';
 
 import {
+  normalizePublishedInvitationSnapshot,
+  normalizePublishedInvitationSnapshotRecord,
   parsePublishedInvitationSnapshot,
   parsePublishedInvitationSnapshotRecord,
 } from '../published-invitation.schema';
@@ -45,6 +47,53 @@ describe('published invitation snapshot contract', () => {
     delete (payload.draft as Partial<typeof payload.draft>).digitalGift;
 
     expect(parsePublishedInvitationSnapshot(payload).draft.digitalGift).toEqual({
+      accounts: [],
+      enabled: false,
+      heading: null,
+      lead: null,
+    });
+  });
+
+  it('normalizes only an absent legacy digitalGift field and rejects malformed present data', () => {
+    const legacyPayload = createPayload();
+    delete (legacyPayload.draft as Partial<typeof legacyPayload.draft>).digitalGift;
+
+    expect(normalizePublishedInvitationSnapshot(legacyPayload)?.draft.digitalGift).toEqual({
+      accounts: [],
+      enabled: false,
+      heading: null,
+      lead: null,
+    });
+
+    expect(
+      normalizePublishedInvitationSnapshot({
+        ...createPayload(),
+        draft: {
+          ...createPayload().draft,
+          digitalGift: { accounts: [], enabled: true, heading: null, lead: null },
+        },
+      }),
+    ).toBeNull();
+  });
+
+  it('normalizes legacy full snapshot records without digitalGift', () => {
+    const payload = createPayload();
+    delete (payload.draft as Partial<typeof payload.draft>).digitalGift;
+
+    expect(
+      normalizePublishedInvitationSnapshotRecord({
+        created_at: '2026-06-20T00:00:00.000Z',
+        draft_schema_version: 1,
+        id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        is_current: true,
+        project_id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+        published_at: '2026-06-20T00:00:00.000Z',
+        revision: 1,
+        slug: 'raka-nadia',
+        snapshot: payload,
+        template_id: 'roselle',
+      })?.snapshot.draft.digitalGift,
+    ).toEqual({
       accounts: [],
       enabled: false,
       heading: null,

@@ -111,6 +111,31 @@ describe('SRY-013 personal guest invitation route', () => {
     expect(html).toContain('data-template="aruna"');
   });
 
+  it('renders a legacy personal snapshot without Amplop Digital', async () => {
+    const guestToken = randomBytes(32).toString('base64url');
+    const legacyDraft = { ...snapshot.draft };
+    delete (legacyDraft as Partial<typeof legacyDraft>).digitalGift;
+    getPersonalGuestInvitationMock.mockResolvedValue({
+      guestDisplayName: 'Keluarga Budi',
+      rsvpStatus: 'pending',
+      snapshot: {
+        ...snapshot,
+        draft: legacyDraft,
+      },
+      templateId: 'roselle',
+    });
+
+    const page = await PersonalGuestInvitationPage({
+      params: Promise.resolve({ guestToken, slug: 'raka-nadia' }),
+    });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain('Untuk Keluarga Budi');
+    expect(html).toContain('Raka &amp; Nadia');
+    expect(html).not.toContain('Amplop Digital');
+    expect(html).not.toContain('Salin nomor');
+  });
+
   it('renders Amplop Digital from the same published personal snapshot only', async () => {
     const guestToken = randomBytes(32).toString('base64url');
     getPersonalGuestInvitationMock.mockResolvedValue({

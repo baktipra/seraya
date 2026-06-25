@@ -9,6 +9,7 @@ import {
 } from '@/modules/invitation-templates';
 import { getPublicGalleryImagesForCurrentSnapshot } from '@/modules/media/public-media.service';
 import { getPersonalGuestInvitationByToken } from '@/modules/guest-links';
+import { normalizePublishedInvitationSnapshot } from '@/modules/publications/published-invitation.schema';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -46,18 +47,22 @@ export default async function PersonalGuestInvitationPage({
     token: guestToken,
   });
 
-  if (!personalInvitation) {
+  const snapshot = personalInvitation
+    ? normalizePublishedInvitationSnapshot(personalInvitation.snapshot)
+    : null;
+
+  if (!personalInvitation || !snapshot) {
     notFound();
   }
 
   const galleryImages = await getPublicGalleryImagesForCurrentSnapshot(
-    personalInvitation.snapshot.draft.gallery.imageIds,
+    snapshot.draft.gallery.imageIds,
   );
   const invitation = createInvitationViewModel({
-    draft: { content: personalInvitation.snapshot.draft },
+    draft: { content: snapshot.draft },
     galleryImages,
     project: {
-      event_date_primary: personalInvitation.snapshot.project.eventDatePrimary,
+      event_date_primary: snapshot.project.eventDatePrimary,
     },
   });
 
@@ -66,9 +71,9 @@ export default async function PersonalGuestInvitationPage({
       <PersonalGuestGreeting displayName={personalInvitation.guestDisplayName} />
       <InvitationTemplateRenderer
         invitation={invitation}
-        templateKey={personalInvitation.snapshot.draft.templateKey}
+        templateKey={snapshot.draft.templateKey}
       />
-      {personalInvitation.snapshot.draft.rsvp.enabled ? (
+      {snapshot.draft.rsvp.enabled ? (
         <PersonalGuestRsvp
           guestToken={guestToken}
           rsvpStatus={personalInvitation.rsvpStatus}

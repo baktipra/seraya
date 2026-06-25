@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
 import { createDefaultInvitationDraftContent } from '@/modules/invitations/invitation-draft.defaults';
+import { normalizePublishedInvitationSnapshot } from '@/modules/publications/published-invitation.schema';
 
 import { InvitationTemplateRenderer } from '../invitation-template-renderer';
 import { getInvitationTemplate, invitationTemplateRegistry } from '../invitation-template.registry';
@@ -145,6 +146,43 @@ describe('SRY-025 invitation template registry', () => {
       );
 
       expect(html).toContain(`id="${digitalGiftHeadingId}"`);
+    },
+  );
+
+  it.each(['roselle', 'aruna', 'laras'] as const)(
+    'hides Amplop Digital after the legacy snapshot compatibility boundary with %s',
+    (templateKey) => {
+      const content = createDefaultInvitationDraftContent(project);
+      const legacyDraft = { ...content };
+      delete (legacyDraft as Partial<typeof legacyDraft>).digitalGift;
+      const snapshot = normalizePublishedInvitationSnapshot({
+        draft: legacyDraft,
+        project: {
+          eventCity: 'Jakarta',
+          eventDatePrimary: project.event_date_primary,
+          slug: 'raka-nadia',
+          timezone: project.default_timezone,
+        },
+      });
+
+      expect(snapshot?.draft.digitalGift).toEqual({
+        accounts: [],
+        enabled: false,
+        heading: null,
+        lead: null,
+      });
+
+      const invitation = createInvitationViewModel({
+        draft: { content: snapshot!.draft },
+        project: { event_date_primary: project.event_date_primary },
+      });
+      const html = renderToStaticMarkup(
+        <InvitationTemplateRenderer invitation={invitation} templateKey={templateKey} />,
+      );
+
+      expect(html).toContain(`data-template=\"${templateKey}\"`);
+      expect(html).not.toContain('Amplop Digital');
+      expect(html).not.toContain('Salin nomor');
     },
   );
 

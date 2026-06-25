@@ -62,6 +62,28 @@ describe('SRY-013 anonymous personal invitation service', () => {
     expect(resolveRecordMock).toHaveBeenCalledWith({ slug: 'raka-nadia', token });
   });
 
+  it('normalizes a legacy personal snapshot without digitalGift before route rendering', async () => {
+    const token = randomBytes(32).toString('base64url');
+    const legacyDraft = { ...snapshot.draft };
+    delete (legacyDraft as Partial<typeof legacyDraft>).digitalGift;
+    resolveRecordMock.mockResolvedValue({
+      guest_display_name: 'Keluarga Budi',
+      rsvp_status: 'pending',
+      snapshot: { ...snapshot, draft: legacyDraft },
+      template_id: 'roselle',
+    });
+
+    await expect(
+      getPersonalGuestInvitationByToken({ slug: 'raka-nadia', token }),
+    ).resolves.toMatchObject({
+      snapshot: {
+        draft: {
+          digitalGift: { accounts: [], enabled: false, heading: null, lead: null },
+        },
+      },
+    });
+  });
+
   it('accepts a selected published template id without adding any guest data to the snapshot DTO', async () => {
     const token = randomBytes(32).toString('base64url');
     resolveRecordMock.mockResolvedValue({

@@ -6,6 +6,7 @@ import {
   InvitationTemplateRenderer,
 } from '@/modules/invitation-templates';
 import { getPublicGalleryImagesForCurrentSnapshot } from '@/modules/media/public-media.service';
+import { normalizePublishedInvitationSnapshot } from '@/modules/publications/published-invitation.schema';
 import { getPublicInvitationBySlug } from '@/modules/publications/public-invitation.service';
 
 export const revalidate = 3600;
@@ -25,15 +26,15 @@ export async function generateMetadata({ params }: PublicInvitationPageProps): P
   const { slug } = await params;
   const invitation = await getPublicInvitationBySlug(slug);
 
-  if (!invitation || !invitation.is_current) {
+  const snapshot = invitation ? normalizePublishedInvitationSnapshot(invitation.snapshot) : null;
+
+  if (!invitation || !invitation.is_current || !snapshot) {
     return { robots: privateInvitationRobots };
   }
 
   const title =
-    invitation.snapshot.draft.hero.title ??
-    `${
-      invitation.snapshot.draft.couple.personOne.displayName
-    } & ${invitation.snapshot.draft.couple.personTwo.displayName}`;
+    snapshot.draft.hero.title ??
+    `${snapshot.draft.couple.personOne.displayName} & ${snapshot.draft.couple.personTwo.displayName}`;
 
   return {
     robots: privateInvitationRobots,
@@ -50,18 +51,22 @@ export default async function PublicInvitationPage({ params }: PublicInvitationP
   const { slug } = await params;
   const publishedInvitation = await getPublicInvitationBySlug(slug);
 
-  if (!publishedInvitation || !publishedInvitation.is_current) {
+  const snapshot = publishedInvitation
+    ? normalizePublishedInvitationSnapshot(publishedInvitation.snapshot)
+    : null;
+
+  if (!publishedInvitation || !publishedInvitation.is_current || !snapshot) {
     notFound();
   }
 
   const galleryImages = await getPublicGalleryImagesForCurrentSnapshot(
-    publishedInvitation.snapshot.draft.gallery.imageIds,
+    snapshot.draft.gallery.imageIds,
   );
   const invitation = createInvitationViewModel({
-    draft: { content: publishedInvitation.snapshot.draft },
+    draft: { content: snapshot.draft },
     galleryImages,
     project: {
-      event_date_primary: publishedInvitation.snapshot.project.eventDatePrimary,
+      event_date_primary: snapshot.project.eventDatePrimary,
     },
   });
 
@@ -69,7 +74,7 @@ export default async function PublicInvitationPage({ params }: PublicInvitationP
     <main className="bg-seraya-ivory min-h-screen px-0 py-0 sm:px-6 sm:py-8">
       <InvitationTemplateRenderer
         invitation={invitation}
-        templateKey={publishedInvitation.snapshot.draft.templateKey}
+        templateKey={snapshot.draft.templateKey}
       />
     </main>
   );

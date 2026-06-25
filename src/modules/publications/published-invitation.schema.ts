@@ -64,6 +64,27 @@ export const publishedInvitationSnapshotRecordSchema = z
   })
   .strict();
 
+/**
+ * Compatibility boundary for snapshot JSON that can come from a legacy database
+ * record or a previously persisted public-cache entry. The draft schema applies
+ * safe defaults only for absent legacy fields; malformed present data stays
+ * invalid and is handled through the existing unavailable/not-found path.
+ */
+export function normalizePublishedInvitationSnapshot(input: unknown) {
+  const parsed = publishedInvitationSnapshotSchema.safeParse(input);
+  return parsed.success ? parsed.data : null;
+}
+
+/**
+ * Compatibility boundary for the full public snapshot record. Keep this parser
+ * outside persistent-cache callbacks so a cache entry created by an older
+ * runtime cannot bypass newly introduced legacy defaults.
+ */
+export function normalizePublishedInvitationSnapshotRecord(input: unknown) {
+  const parsed = publishedInvitationSnapshotRecordSchema.safeParse(input);
+  return parsed.success ? parsed.data : null;
+}
+
 export function parsePublishedInvitationSnapshot(input: unknown) {
   return publishedInvitationSnapshotSchema.parse(input);
 }
