@@ -21,6 +21,25 @@ function createCompleteInvitation() {
     message: 'Terima kasih atas doa terbaik Anda.',
     signature: 'Raka & Nadia',
   };
+  content.digitalGift = {
+    accounts: [
+      {
+        accountHolder: 'Raka Pratama',
+        accountNumber: '123456789012',
+        id: '11111111-1111-4111-8111-111111111111',
+        providerName: 'Bank Seraya',
+      },
+      {
+        accountHolder: 'Nadia Putri',
+        accountNumber: '987654321098',
+        id: '22222222-2222-4222-8222-222222222222',
+        providerName: 'E-wallet Seraya',
+      },
+    ],
+    enabled: true,
+    heading: 'Amplop Digital',
+    lead: 'Terima kasih atas doa terbaik Anda.',
+  };
   content.events = {
     ceremony: {
       date: '2027-08-17',
@@ -100,7 +119,32 @@ describe('SRY-025 invitation template registry', () => {
       expect(html).toContain('src="/media/two"');
       expect(html.indexOf('src="/media/one"')).toBeLessThan(html.indexOf('src="/media/two"'));
       expect(html).toContain('Konfirmasi Kehadiran');
+      expect(html).toContain('Amplop Digital');
+      expect(html).toContain('Bank Seraya');
+      expect(html).toContain('Raka Pratama');
+      expect(html).toContain('123456789012');
+      expect(html).toContain('E-wallet Seraya');
+      expect(html.indexOf('123456789012')).toBeLessThan(html.indexOf('987654321098'));
+      expect(html).toContain('Salin nomor');
       expect(html).toContain('Terima kasih atas doa terbaik Anda.');
+    },
+  );
+
+  it.each([
+    ['roselle', 'roselle-digital-gift-title'],
+    ['aruna', 'aruna-digital-gift-title'],
+    ['laras', 'laras-digital-gift-title'],
+  ] as const)(
+    'uses dedicated Amplop Digital markup for %s',
+    (templateKey, digitalGiftHeadingId) => {
+      const html = renderToStaticMarkup(
+        <InvitationTemplateRenderer
+          invitation={createCompleteInvitation()}
+          templateKey={templateKey}
+        />,
+      );
+
+      expect(html).toContain(`id="${digitalGiftHeadingId}"`);
     },
   );
 
@@ -119,6 +163,8 @@ describe('SRY-025 invitation template registry', () => {
       expect(html).not.toContain('src="/media/');
       expect(html).not.toContain('Buka peta lokasi (tab baru)');
       expect(html).not.toContain('Terima kasih atas doa terbaik Anda.');
+      expect(html).not.toContain('Amplop Digital');
+      expect(html).not.toContain('Salin nomor');
     },
   );
 });

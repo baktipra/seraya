@@ -98,6 +98,40 @@ describe('SRY-008 public invitation route', () => {
     expect(html).toContain('data-template="laras"');
   });
 
+  it('renders Amplop Digital only from the immutable published snapshot draft', async () => {
+    const publishedDraft = {
+      ...snapshot.snapshot.draft,
+      digitalGift: {
+        accounts: [
+          {
+            accountHolder: 'Raka Pratama',
+            accountNumber: '123456789012',
+            id: '11111111-1111-4111-8111-111111111111',
+            providerName: 'Bank Seraya',
+          },
+        ],
+        enabled: true,
+        heading: 'Amplop Digital',
+        lead: 'Terima kasih atas doa terbaik Anda.',
+      },
+    };
+
+    getPublicInvitationMock.mockResolvedValue({
+      ...snapshot,
+      snapshot: { ...snapshot.snapshot, draft: publishedDraft },
+    });
+
+    const page = await PublicInvitationPage({ params: Promise.resolve({ slug: 'raka-nadia' }) });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain('Amplop Digital');
+    expect(html).toContain('Bank Seraya');
+    expect(html).toContain('Raka Pratama');
+    expect(html).toContain('123456789012');
+    expect(html).toContain('Salin nomor');
+    expect(html).not.toContain('draft-only-bank-change');
+  });
+
   it('maps snapshot gallery IDs only to the public Seraya media proxy', async () => {
     const imageId = '11111111-1111-4111-8111-111111111111';
     const draft = createDefaultInvitationDraftContent({

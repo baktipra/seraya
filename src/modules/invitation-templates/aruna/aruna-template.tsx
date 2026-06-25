@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element -- Aruna receives only Seraya media proxy URLs. */
+import { DigitalGiftCopyButton } from '../digital-gift-copy-button';
 import type { InvitationTemplateProps } from '../invitation-template.types';
 
 import styles from './aruna.module.css';
@@ -153,6 +154,35 @@ export function ArunaTemplate({ invitation }: InvitationTemplateProps) {
             <p className={styles.sectionKicker}>RSVP</p>
             <h2 id="aruna-rsvp-title">{invitation.rsvp.heading}</h2>
             <p className={styles.prose}>{invitation.rsvp.lead}</p>
+          </section>
+        ) : null}
+
+        {invitation.digitalGift ? (
+          <section aria-labelledby="aruna-digital-gift-title" className={styles.digitalGiftSection}>
+            <div className={styles.digitalGiftHeading}>
+              <p>Amplop Digital</p>
+              <h2 id="aruna-digital-gift-title">{invitation.digitalGift.heading}</h2>
+              {invitation.digitalGift.lead ? (
+                <p className={styles.prose}>{invitation.digitalGift.lead}</p>
+              ) : null}
+            </div>
+            <div className={styles.digitalGiftGrid}>
+              {invitation.digitalGift.accounts.map((account, index) => (
+                <article className={styles.digitalGiftCard} key={account.id}>
+                  <span className={styles.digitalGiftIndex} aria-hidden="true">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <p className={styles.digitalGiftProvider}>{account.providerName}</p>
+                  <h3>{account.accountHolder}</h3>
+                  <p className={styles.digitalGiftNumber}>{account.accountNumber}</p>
+                  <DigitalGiftCopyButton
+                    accountNumber={account.accountNumber}
+                    className={styles.digitalGiftCopyButton}
+                    feedbackClassName={styles.digitalGiftFeedback}
+                  />
+                </article>
+              ))}
+            </div>
           </section>
         ) : null}
 

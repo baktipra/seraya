@@ -63,6 +63,7 @@ function snapshot(): PublishedInvitationSnapshot {
     snapshot: {
       draft: {
         closing: { enabled: false, message: null, signature: null },
+        digitalGift: { accounts: [], enabled: false, heading: null, lead: null },
         couple: {
           personOne: { displayName: 'Raka', fullName: null, parentLine: null },
           personTwo: { displayName: 'Nadia', fullName: null, parentLine: null },

@@ -40,6 +40,18 @@ describe('published invitation snapshot contract', () => {
     expect(parsePublishedInvitationSnapshot(payload).draft.templateKey).toBe('roselle');
   });
 
+  it('resolves legacy published snapshot drafts without digitalGift to the disabled state', () => {
+    const payload = createPayload();
+    delete (payload.draft as Partial<typeof payload.draft>).digitalGift;
+
+    expect(parsePublishedInvitationSnapshot(payload).draft.digitalGift).toEqual({
+      accounts: [],
+      enabled: false,
+      heading: null,
+      lead: null,
+    });
+  });
+
   it('accepts each supported immutable snapshot template id', () => {
     for (const templateId of ['roselle', 'aruna', 'laras'] as const) {
       expect(

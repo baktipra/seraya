@@ -2,7 +2,14 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useActionState, useEffect, useRef, useState, type ReactNode } from 'react';
+import {
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+  type InputHTMLAttributes,
+  type ReactNode,
+} from 'react';
 
 import {
   Button,
@@ -29,13 +36,18 @@ export type InvitationEditorProps = {
 };
 
 type EditorFieldProps = {
+  autoComplete?: string;
   error?: string;
   help?: string;
+  inputMode?: InputHTMLAttributes<HTMLInputElement>['inputMode'];
   label: string;
   name: string;
   required?: boolean;
+  type?: InputHTMLAttributes<HTMLInputElement>['type'];
   value: string | null;
 };
+
+type DigitalGiftAccountEditorValue = InvitationDraft['content']['digitalGift']['accounts'][number];
 
 type InvitationEditorSaveStatusInput = {
   hasSaved: boolean;
@@ -69,7 +81,17 @@ function FieldError({ message, name }: { message?: string; name: string }) {
   );
 }
 
-function EditorTextField({ error, help, label, name, required = false, value }: EditorFieldProps) {
+function EditorTextField({
+  autoComplete,
+  error,
+  help,
+  inputMode,
+  label,
+  name,
+  required = false,
+  type,
+  value,
+}: EditorFieldProps) {
   const id = fieldId(name);
   const describedBy = [help ? `${id}-help` : null, error ? `${id}-error` : null]
     .filter(Boolean)
@@ -86,8 +108,11 @@ function EditorTextField({ error, help, label, name, required = false, value }: 
         defaultValue={value ?? ''}
         hasError={Boolean(error)}
         id={id}
+        autoComplete={autoComplete}
+        inputMode={inputMode}
         name={name}
         required={required}
+        type={type}
       />
       {help ? (
         <p className="text-seraya-text-muted text-sm leading-6" id={`${id}-help`}>
@@ -261,6 +286,19 @@ function EditorSection({
       {children}
     </section>
   );
+}
+
+function createDigitalGiftAccountId() {
+  const browserId = globalThis.crypto?.randomUUID?.();
+
+  if (browserId) {
+    return browserId;
+  }
+
+  // This fallback only creates a local React/form key before the owner saves.
+  // The server still validates UUID shape and authorizes the entire draft save.
+  const entropy = Math.random().toString(16).slice(2).padEnd(12, '0').slice(0, 12);
+  return `00000000-0000-4000-8000-${entropy}`;
 }
 
 function EditorEventCard({ children, title }: { children: ReactNode; title: string }) {
@@ -470,6 +508,9 @@ export function InvitationEditor({ draft, projectId }: InvitationEditorProps) {
   const [hasSaved, setHasSaved] = useState(false);
   const [selectedTemplateKey, setSelectedTemplateKey] = useState<InvitationTemplateKey>(
     content.templateKey,
+  );
+  const [digitalGiftAccounts, setDigitalGiftAccounts] = useState<DigitalGiftAccountEditorValue[]>(
+    content.digitalGift.accounts,
   );
   const lastHandledSuccessState = useRef<InvitationEditorActionState | null>(null);
   const saveStatus = getInvitationEditorSaveStatus({
@@ -855,8 +896,140 @@ export function InvitationEditor({ draft, projectId }: InvitationEditorProps) {
           </EditorSection>
 
           <EditorSection
-            description="Pesan terakhir yang tampil di akhir undangan."
+            description="Bagikan informasi rekening atau e-wallet untuk hadiah pernikahan. Informasi ini akan tampil pada undangan setelah dipublikasikan."
             number="07"
+            title="Amplop Digital"
+          >
+            <div className="space-y-5">
+              <EditorToggle
+                checked={content.digitalGift.enabled}
+                error={getError(state.fieldErrors, 'digitalGift.enabled')}
+                help="Tampilkan informasi transfer ini pada undangan setelah diterbitkan."
+                label="Tampilkan Amplop Digital"
+                name="digitalGift.enabled"
+              />
+              <EditorTextField
+                error={getError(state.fieldErrors, 'digitalGift.heading')}
+                label="Judul Amplop Digital (opsional)"
+                name="digitalGift.heading"
+                value={content.digitalGift.heading}
+              />
+              <EditorTextAreaField
+                error={getError(state.fieldErrors, 'digitalGift.lead')}
+                label="Pesan pengantar (opsional)"
+                name="digitalGift.lead"
+                value={content.digitalGift.lead}
+              />
+
+              <div className="border-seraya-border-default bg-seraya-surface rounded-[var(--seraya-radius-md)] border p-4 sm:p-5">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <h3 className="text-seraya-text-primary text-base font-semibold">
+                      Rekening atau e-wallet
+                    </h3>
+                    <p className="text-seraya-text-muted mt-1 max-w-xl text-sm leading-6">
+                      Nomor hanya akan ditampilkan setelah undangan dipublikasikan.
+                    </p>
+                  </div>
+                  <Button
+                    disabled={digitalGiftAccounts.length >= 3}
+                    onClick={() => {
+                      setDigitalGiftAccounts((current) => [
+                        ...current,
+                        {
+                          accountHolder: '',
+                          accountNumber: '',
+                          id: createDigitalGiftAccountId(),
+                          providerName: '',
+                        },
+                      ]);
+                      setIsDirty(true);
+                    }}
+                    size="sm"
+                    type="button"
+                    variant="secondary"
+                  >
+                    Tambah rekening
+                  </Button>
+                </div>
+
+                {digitalGiftAccounts.length === 0 ? (
+                  <p className="text-seraya-text-muted bg-seraya-canvas mt-5 rounded-[var(--seraya-radius-sm)] px-3.5 py-3 text-sm leading-6">
+                    Tambahkan setidaknya satu rekening atau e-wallet sebelum menampilkan Amplop
+                    Digital.
+                  </p>
+                ) : (
+                  <div className="mt-5 space-y-4">
+                    {digitalGiftAccounts.map((account, index) => {
+                      const accountPrefix = `digitalGift.accounts.${index}`;
+
+                      return (
+                        <fieldset
+                          className="border-seraya-border-default rounded-[var(--seraya-radius-md)] border p-4 sm:p-5"
+                          key={account.id}
+                        >
+                          <legend className="text-seraya-text-primary px-1 text-base font-semibold">
+                            Rekening {index + 1}
+                          </legend>
+                          <div className="mt-2 flex justify-end">
+                            <Button
+                              onClick={() => {
+                                setDigitalGiftAccounts((current) =>
+                                  current.filter((item) => item.id !== account.id),
+                                );
+                                setIsDirty(true);
+                              }}
+                              size="sm"
+                              type="button"
+                              variant="text"
+                            >
+                              Hapus rekening
+                            </Button>
+                          </div>
+                          <input name={`${accountPrefix}.id`} type="hidden" value={account.id} />
+                          <div className="mt-4 grid gap-4">
+                            <EditorTextField
+                              error={getError(state.fieldErrors, `${accountPrefix}.providerName`)}
+                              label="Penyedia / Bank / E-wallet"
+                              name={`${accountPrefix}.providerName`}
+                              required
+                              value={account.providerName}
+                            />
+                            <EditorTextField
+                              autoComplete="name"
+                              error={getError(state.fieldErrors, `${accountPrefix}.accountHolder`)}
+                              label="Nama pemilik rekening"
+                              name={`${accountPrefix}.accountHolder`}
+                              required
+                              value={account.accountHolder}
+                            />
+                            <EditorTextField
+                              autoComplete="off"
+                              error={getError(state.fieldErrors, `${accountPrefix}.accountNumber`)}
+                              help="Nomor hanya akan ditampilkan setelah undangan dipublikasikan."
+                              inputMode="numeric"
+                              label="Nomor rekening / nomor e-wallet"
+                              name={`${accountPrefix}.accountNumber`}
+                              required
+                              value={account.accountNumber}
+                            />
+                          </div>
+                        </fieldset>
+                      );
+                    })}
+                  </div>
+                )}
+                <FieldError
+                  message={getError(state.fieldErrors, 'digitalGift.accounts')}
+                  name="digitalGift.accounts"
+                />
+              </div>
+            </div>
+          </EditorSection>
+
+          <EditorSection
+            description="Pesan terakhir yang tampil di akhir undangan."
+            number="08"
             title="Penutup"
           >
             <div className="space-y-5">

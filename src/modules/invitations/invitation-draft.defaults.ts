@@ -27,6 +27,12 @@ export function createDefaultInvitationDraftContent(
       message: null,
       signature: null,
     },
+    digitalGift: {
+      accounts: [],
+      enabled: false,
+      heading: null,
+      lead: null,
+    },
     couple: {
       personOne: {
         displayName: project.person_one_name,

@@ -111,6 +111,46 @@ describe('SRY-013 personal guest invitation route', () => {
     expect(html).toContain('data-template="aruna"');
   });
 
+  it('renders Amplop Digital from the same published personal snapshot only', async () => {
+    const guestToken = randomBytes(32).toString('base64url');
+    getPersonalGuestInvitationMock.mockResolvedValue({
+      guestDisplayName: 'Keluarga Budi',
+      rsvpStatus: 'pending',
+      snapshot: {
+        ...snapshot,
+        draft: {
+          ...snapshot.draft,
+          digitalGift: {
+            accounts: [
+              {
+                accountHolder: 'Raka Pratama',
+                accountNumber: '123456789012',
+                id: '11111111-1111-4111-8111-111111111111',
+                providerName: 'Bank Seraya',
+              },
+            ],
+            enabled: true,
+            heading: 'Amplop Digital',
+            lead: null,
+          },
+        },
+      },
+      templateId: 'roselle',
+    });
+
+    const page = await PersonalGuestInvitationPage({
+      params: Promise.resolve({ guestToken, slug: 'raka-nadia' }),
+    });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain('Amplop Digital');
+    expect(html).toContain('Bank Seraya');
+    expect(html).toContain('Raka Pratama');
+    expect(html).toContain('123456789012');
+    expect(html).toContain('Salin nomor');
+    expect(html).not.toContain('token_hash');
+  });
+
   it('does not render RSVP controls when the current immutable snapshot disables RSVP', async () => {
     const guestToken = randomBytes(32).toString('base64url');
     getPersonalGuestInvitationMock.mockResolvedValue({

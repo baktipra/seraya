@@ -71,6 +71,17 @@ function applyEditorInputToActiveDraft(
       message: input.closing.message,
       signature: input.closing.signature,
     },
+    digitalGift: {
+      accounts: input.digitalGift.accounts.map((account) => ({
+        accountHolder: account.accountHolder,
+        accountNumber: account.accountNumber,
+        id: account.id,
+        providerName: account.providerName,
+      })),
+      enabled: input.digitalGift.enabled,
+      heading: input.digitalGift.heading,
+      lead: input.digitalGift.lead,
+    },
     couple: {
       personOne: {
         displayName: input.couple.personOne.displayName,

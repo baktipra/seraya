@@ -51,6 +51,52 @@ describe('createInvitationViewModel', () => {
     });
   });
 
+  it('maps enabled Amplop Digital accounts in order and hides the section when disabled', () => {
+    const draft = createDraft();
+    draft.content.digitalGift = {
+      accounts: [
+        {
+          accountHolder: 'Raka Pratama',
+          accountNumber: '123456789012',
+          id: '11111111-1111-4111-8111-111111111111',
+          providerName: 'Bank Seraya',
+        },
+        {
+          accountHolder: 'Nadia Pratama',
+          accountNumber: '987654321098',
+          id: '22222222-2222-4222-8222-222222222222',
+          providerName: 'E-wallet Seraya',
+        },
+      ],
+      enabled: true,
+      heading: null,
+      lead: 'Terima kasih atas doa terbaik Anda.',
+    };
+
+    const visible = createInvitationViewModel({ draft, project });
+    expect(visible.digitalGift).toEqual({
+      accounts: [
+        {
+          accountHolder: 'Raka Pratama',
+          accountNumber: '123456789012',
+          id: '11111111-1111-4111-8111-111111111111',
+          providerName: 'Bank Seraya',
+        },
+        {
+          accountHolder: 'Nadia Pratama',
+          accountNumber: '987654321098',
+          id: '22222222-2222-4222-8222-222222222222',
+          providerName: 'E-wallet Seraya',
+        },
+      ],
+      heading: 'Amplop Digital',
+      lead: 'Terima kasih atas doa terbaik Anda.',
+    });
+
+    draft.content.digitalGift.enabled = false;
+    expect(createInvitationViewModel({ draft, project }).digitalGift).toBeNull();
+  });
+
   it('maps only render-safe resolved gallery items and never creates a gallery from unresolved IDs alone', () => {
     const draft = createDraft();
     const imageId = '11111111-1111-4111-8111-111111111111';

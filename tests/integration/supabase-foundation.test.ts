@@ -799,42 +799,62 @@ describe('SRY-003 through SRY-022 Supabase migrations, ownership, drafts, public
     await impersonateAuthenticatedUser(database, userA);
     await database.exec(`
       update public.invitation_drafts
-      set content = jsonb_set(content, '{templateKey}', '"aruna"'::jsonb)
+      set content = jsonb_set(
+        jsonb_set(content, '{templateKey}', '"aruna"'::jsonb),
+        '{digitalGift}',
+        '{"enabled":true,"heading":"Amplop pertama","lead":null,"accounts":[{"id":"11111111-1111-4111-8111-111111111111","providerName":"Bank Seraya","accountHolder":"Raka Pratama","accountNumber":"123456789012"}]}'::jsonb
+      )
       where project_id = '${projectA}' and deleted_at is null;
     `);
 
     const firstPublication = await database.query<{
+      snapshot_account_number: string | null;
       snapshot_template_key: string | null;
       template_id: string;
     }>(`
       select
         template_id,
-        snapshot #>> '{draft,templateKey}' as snapshot_template_key
+        snapshot #>> '{draft,templateKey}' as snapshot_template_key,
+        snapshot #>> '{draft,digitalGift,accounts,0,accountNumber}' as snapshot_account_number
       from public.publish_invitation_snapshot('${projectA}');
     `);
     expect(firstPublication.rows).toEqual([
-      { snapshot_template_key: 'aruna', template_id: 'aruna' },
+      {
+        snapshot_account_number: '123456789012',
+        snapshot_template_key: 'aruna',
+        template_id: 'aruna',
+      },
     ]);
 
     await database.exec(`
       update public.invitation_drafts
-      set content = jsonb_set(content, '{templateKey}', '"laras"'::jsonb)
+      set content = jsonb_set(
+        jsonb_set(content, '{templateKey}', '"laras"'::jsonb),
+        '{digitalGift,accounts,0,accountNumber}',
+        '"987654321098"'::jsonb
+      )
       where project_id = '${projectA}' and deleted_at is null;
     `);
 
     await resetToDatabaseOwner(database);
     const beforeRepublish = await database.query<{
+      snapshot_account_number: string | null;
       snapshot_template_key: string | null;
       template_id: string;
     }>(`
       select
         template_id,
-        snapshot #>> '{draft,templateKey}' as snapshot_template_key
+        snapshot #>> '{draft,templateKey}' as snapshot_template_key,
+        snapshot #>> '{draft,digitalGift,accounts,0,accountNumber}' as snapshot_account_number
       from public.published_invitation_snapshots
       where project_id = '${projectA}' and is_current;
     `);
     expect(beforeRepublish.rows).toEqual([
-      { snapshot_template_key: 'aruna', template_id: 'aruna' },
+      {
+        snapshot_account_number: '123456789012',
+        snapshot_template_key: 'aruna',
+        template_id: 'aruna',
+      },
     ]);
 
     await impersonateAuthenticatedUser(database, userA);
@@ -844,6 +864,7 @@ describe('SRY-003 through SRY-022 Supabase migrations, ownership, drafts, public
     const revisions = await database.query<{
       is_current: boolean;
       revision: number;
+      snapshot_account_number: string | null;
       snapshot_template_key: string | null;
       template_id: string;
     }>(`
@@ -851,14 +872,27 @@ describe('SRY-003 through SRY-022 Supabase migrations, ownership, drafts, public
         revision,
         is_current,
         template_id,
-        snapshot #>> '{draft,templateKey}' as snapshot_template_key
+        snapshot #>> '{draft,templateKey}' as snapshot_template_key,
+        snapshot #>> '{draft,digitalGift,accounts,0,accountNumber}' as snapshot_account_number
       from public.published_invitation_snapshots
       where project_id = '${projectA}'
       order by revision;
     `);
     expect(revisions.rows).toEqual([
-      { is_current: false, revision: 1, snapshot_template_key: 'aruna', template_id: 'aruna' },
-      { is_current: true, revision: 2, snapshot_template_key: 'laras', template_id: 'laras' },
+      {
+        is_current: false,
+        revision: 1,
+        snapshot_account_number: '123456789012',
+        snapshot_template_key: 'aruna',
+        template_id: 'aruna',
+      },
+      {
+        is_current: true,
+        revision: 2,
+        snapshot_account_number: '987654321098',
+        snapshot_template_key: 'laras',
+        template_id: 'laras',
+      },
     ]);
 
     await expect(

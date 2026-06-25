@@ -111,6 +111,38 @@ describe('SRY-021B private invitation preview route', () => {
     expect(getOverviewMock).not.toHaveBeenCalled();
   });
 
+  it('renders saved private-draft Amplop Digital without publication, payment, or guest reads', async () => {
+    const draft = createDefaultInvitationDraftContent(project);
+    draft.digitalGift = {
+      accounts: [
+        {
+          accountHolder: 'Raka Pratama',
+          accountNumber: '123456789012',
+          id: '11111111-1111-4111-8111-111111111111',
+          providerName: 'Bank Seraya',
+        },
+      ],
+      enabled: true,
+      heading: 'Amplop Digital',
+      lead: 'Terima kasih atas doa terbaik Anda.',
+    };
+    getPrivateDraftMock.mockResolvedValue({
+      ...ownedPrivateDraft,
+      draft: { ...ownedPrivateDraft.draft, content: draft },
+    });
+
+    const page = await InvitationPreviewPage({
+      params: Promise.resolve({ projectId: project.id }),
+    });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain('Amplop Digital');
+    expect(html).toContain('Bank Seraya');
+    expect(html).toContain('123456789012');
+    expect(html).toContain('Salin nomor');
+    expect(getOverviewMock).not.toHaveBeenCalled();
+  });
+
   it('renders only owner-resolved gallery proxy images in the private preview', async () => {
     const imageId = '11111111-1111-4111-8111-111111111111';
     const draft = createDefaultInvitationDraftContent(project);

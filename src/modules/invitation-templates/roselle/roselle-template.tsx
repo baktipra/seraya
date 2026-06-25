@@ -3,6 +3,7 @@ import type { InvitationTemplateProps } from '../invitation-template.types';
 import {
   RoselleClosing,
   RoselleCouple,
+  RoselleDigitalGift,
   RoselleEvents,
   RoselleGallery,
   RoselleHero,
@@ -28,6 +29,7 @@ export function RoselleTemplate({ invitation }: InvitationTemplateProps) {
         <RoselleLocation location={invitation.location} />
         <RoselleGallery gallery={invitation.gallery} />
         <RoselleRsvp rsvp={invitation.rsvp} />
+        <RoselleDigitalGift digitalGift={invitation.digitalGift} />
         <RoselleClosing closing={invitation.closing} />
       </div>
     </article>

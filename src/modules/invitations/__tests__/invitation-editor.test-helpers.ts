@@ -50,6 +50,15 @@ export function createValidInvitationEditorFormData() {
   checked('rsvp.enabled', content.rsvp.enabled);
   text('rsvp.heading', content.rsvp.heading);
   text('rsvp.lead', content.rsvp.lead);
+  checked('digitalGift.enabled', content.digitalGift.enabled);
+  text('digitalGift.heading', content.digitalGift.heading);
+  text('digitalGift.lead', content.digitalGift.lead);
+  content.digitalGift.accounts.forEach((account, index) => {
+    text(`digitalGift.accounts.${index}.id`, account.id);
+    text(`digitalGift.accounts.${index}.providerName`, account.providerName);
+    text(`digitalGift.accounts.${index}.accountHolder`, account.accountHolder);
+    text(`digitalGift.accounts.${index}.accountNumber`, account.accountNumber);
+  });
   checked('closing.enabled', content.closing.enabled);
   text('closing.message', content.closing.message);
   text('closing.signature', content.closing.signature);

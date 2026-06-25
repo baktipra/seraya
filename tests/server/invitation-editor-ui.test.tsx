@@ -85,6 +85,9 @@ const editableFieldNames = [
   'rsvp.enabled',
   'rsvp.heading',
   'rsvp.lead',
+  'digitalGift.enabled',
+  'digitalGift.heading',
+  'digitalGift.lead',
   'closing.enabled',
   'closing.message',
   'closing.signature',
@@ -97,11 +100,12 @@ const polishedSections = [
   'Detail acara',
   'Lokasi',
   'Konfirmasi kehadiran',
+  'Amplop Digital',
   'Penutup',
 ] as const;
 
-describe('SRY-018 invitation editor polish owner UI', () => {
-  it('renders the seven guided editing chapters in the required order with owner-friendly copy', () => {
+describe('SRY-026 invitation editor Amplop Digital owner UI', () => {
+  it('renders the eight guided editing chapters in the required order with owner-friendly copy', () => {
     const html = renderToStaticMarkup(<InvitationEditor draft={draft} projectId={project.id} />);
 
     let previousIndex = -1;
@@ -130,6 +134,11 @@ describe('SRY-018 invitation editor polish owner UI', () => {
     expect(html).toContain('Sapaan kecil');
     expect(html).toContain('Nama yang tampil di undangan');
     expect(html).toContain('Tampilkan konfirmasi kehadiran');
+    expect(html).toContain(
+      'Bagikan informasi rekening atau e-wallet untuk hadiah pernikahan. Informasi ini akan tampil pada undangan setelah dipublikasikan.',
+    );
+    expect(html).toContain('Tampilkan Amplop Digital');
+    expect(html).toContain('Nomor hanya akan ditampilkan setelah undangan dipublikasikan.');
     expect(html).toContain('Nama penutup');
     expect(html).not.toContain('Isi undangan Roselle');
     expect(html).not.toContain('draft object');
@@ -159,6 +168,43 @@ describe('SRY-018 invitation editor polish owner UI', () => {
     expect(html).not.toContain('name="gallery.imageIds"');
     expect(html).not.toContain('Upload foto');
     expect(html).not.toContain('draft-private-id');
+  });
+
+  it('renders owner-only Amplop Digital account fields when the current private draft has accounts', () => {
+    const giftDraft = {
+      ...draft,
+      content: {
+        ...draft.content,
+        digitalGift: {
+          accounts: [
+            {
+              accountHolder: 'Raka Pratama',
+              accountNumber: '123456789012',
+              id: '11111111-1111-4111-8111-111111111111',
+              providerName: 'Bank Seraya',
+            },
+          ],
+          enabled: true,
+          heading: 'Amplop untuk kami',
+          lead: 'Terima kasih atas doa terbaik Anda.',
+        },
+      },
+    };
+
+    const html = renderToStaticMarkup(
+      <InvitationEditor draft={giftDraft} projectId={project.id} />,
+    );
+
+    expect(html).toContain('Penyedia / Bank / E-wallet');
+    expect(html).toContain('Nama pemilik rekening');
+    expect(html).toContain('Nomor rekening / nomor e-wallet');
+    expect(html).toContain('name="digitalGift.accounts.0.id"');
+    expect(html).toContain('name="digitalGift.accounts.0.providerName"');
+    expect(html).toContain('name="digitalGift.accounts.0.accountHolder"');
+    expect(html).toContain('name="digitalGift.accounts.0.accountNumber"');
+    expect(html).toContain('Tambah rekening');
+    expect(html).toContain('Hapus rekening');
+    expect(html).toContain('value="123456789012"');
   });
 
   it('shows an initial truthful save status and explains that preview uses saved draft changes only', () => {

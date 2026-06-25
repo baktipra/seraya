@@ -24,6 +24,44 @@ describe('SRY-016 invitation editor form boundary', () => {
     }
   });
 
+  it('reconstructs up to three explicit Amplop Digital account slots without allowing injected fields', () => {
+    const formData = createValidInvitationEditorFormData();
+    formData.set('digitalGift.enabled', 'true');
+    formData.set('digitalGift.accounts.0.id', '11111111-1111-4111-8111-111111111111');
+    formData.set('digitalGift.accounts.0.providerName', 'Bank Seraya');
+    formData.set('digitalGift.accounts.0.accountHolder', 'Raka Pratama');
+    formData.set('digitalGift.accounts.0.accountNumber', '1234 5678-9012');
+
+    const parsed = parseInvitationEditorFormData(formData);
+
+    expect(parsed.success).toBe(true);
+
+    if (parsed.success) {
+      expect(parsed.data.content.digitalGift).toEqual({
+        accounts: [
+          {
+            accountHolder: 'Raka Pratama',
+            accountNumber: '1234 5678-9012',
+            id: '11111111-1111-4111-8111-111111111111',
+            providerName: 'Bank Seraya',
+          },
+        ],
+        enabled: true,
+        heading: '',
+        lead: '',
+      });
+    }
+  });
+
+  it('rejects an Amplop Digital account slot outside the three server-recognized indexes', () => {
+    const formData = createValidInvitationEditorFormData();
+    formData.set('digitalGift.accounts.3.id', '11111111-1111-4111-8111-111111111111');
+
+    const parsed = parseInvitationEditorFormData(formData);
+
+    expect(parsed.success).toBe(false);
+  });
+
   it('rejects an injected unknown form field before it can enter the draft document', () => {
     const formData = createValidInvitationEditorFormData();
     formData.set('gallery.imageIds', 'attacker-controlled');

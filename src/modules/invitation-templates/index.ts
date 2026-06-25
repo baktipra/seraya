@@ -1,4 +1,5 @@
 export { ArunaTemplate } from './aruna/aruna-template';
+export { DigitalGiftCopyButton } from './digital-gift-copy-button';
 export { formatInvitationDate, formatInvitationTime } from './invitation-date-formatters';
 export {
   DEFAULT_INVITATION_TEMPLATE_KEY,

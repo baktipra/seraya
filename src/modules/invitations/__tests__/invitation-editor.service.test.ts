@@ -52,6 +52,19 @@ function createEditorInput(): InvitationEditorFormInput {
   return {
     content: {
       closing: { enabled: false, message: '', signature: '' },
+      digitalGift: {
+        accounts: [
+          {
+            accountHolder: ' Raka Pratama ',
+            accountNumber: '1234 5678-9012',
+            id: '11111111-1111-4111-8111-111111111111',
+            providerName: ' Bank Seraya ',
+          },
+        ],
+        enabled: true,
+        heading: ' Amplop Digital ',
+        lead: ' Terima kasih atas doa terbaik Anda. ',
+      },
       couple: {
         personOne: { displayName: ' Raka ', fullName: ' ', parentLine: ' ' },
         personTwo: { displayName: ' Nadia ', fullName: '', parentLine: '' },
@@ -129,6 +142,19 @@ describe('SRY-016 invitation editor service', () => {
     expect(update.content.story.body).toBeNull();
     expect(update.content.location.mapsUrl).toBe('https://maps.example.test/raka-nadia');
     expect(update.content.templateKey).toBe('aruna');
+    expect(update.content.digitalGift).toEqual({
+      accounts: [
+        {
+          accountHolder: 'Raka Pratama',
+          accountNumber: '123456789012',
+          id: '11111111-1111-4111-8111-111111111111',
+          providerName: 'Bank Seraya',
+        },
+      ],
+      enabled: true,
+      heading: 'Amplop Digital',
+      lead: 'Terima kasih atas doa terbaik Anda.',
+    });
     expect(update.content.meta).toEqual(draft.content.meta);
     expect(update.content.gallery).toEqual(draft.content.gallery);
     expect(result.content.gallery.imageIds).toEqual(draft.content.gallery.imageIds);
@@ -142,6 +168,7 @@ describe('SRY-016 invitation editor service', () => {
     invalid.content.events.ceremony.startTime = '25:99';
     invalid.content.location.mapsUrl = 'http://maps.example.test/not-https';
     invalid.content.story.body = '<strong>tidak boleh</strong>';
+    invalid.content.digitalGift.accounts[0]!.accountNumber = '12/34';
 
     await expect(saveInvitationEditorDraftForCurrentUser(invalid)).rejects.toBeInstanceOf(
       InvitationEditorValidationError,
@@ -156,6 +183,7 @@ describe('SRY-016 invitation editor service', () => {
       expect(validationError.fieldErrors['events.ceremony.startTime']).toBeDefined();
       expect(validationError.fieldErrors['location.mapsUrl']).toBeDefined();
       expect(validationError.fieldErrors['story.body']).toBeDefined();
+      expect(validationError.fieldErrors['digitalGift.accounts.0.accountNumber']).toBeDefined();
     }
 
     expect(updateActiveDraftMock).not.toHaveBeenCalled();

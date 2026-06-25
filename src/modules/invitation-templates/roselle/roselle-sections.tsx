@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element -- Roselle receives only local Seraya media proxy URLs; image optimization/CDN work is out of scope. */
+import { DigitalGiftCopyButton } from '../digital-gift-copy-button';
 import type { InvitationViewModel } from '../invitation-view-model';
 
 import { RoselleDivider, RosellePetalDecoration } from './roselle-decoration';
@@ -166,6 +167,36 @@ export function RoselleRsvp({ rsvp }: Pick<InvitationViewModel, 'rsvp'>) {
         {rsvp.heading}
       </h2>
       <p className={styles.prose}>{rsvp.lead}</p>
+    </section>
+  );
+}
+
+export function RoselleDigitalGift({ digitalGift }: Pick<InvitationViewModel, 'digitalGift'>) {
+  if (!digitalGift) {
+    return null;
+  }
+
+  return (
+    <section aria-labelledby="roselle-digital-gift-title" className={styles.digitalGiftSection}>
+      <p className={styles.sectionEyebrow}>Amplop Digital</p>
+      <h2 className={styles.sectionTitle} id="roselle-digital-gift-title">
+        {digitalGift.heading}
+      </h2>
+      {digitalGift.lead ? <p className={styles.prose}>{digitalGift.lead}</p> : null}
+      <div className={styles.digitalGiftGrid}>
+        {digitalGift.accounts.map((account) => (
+          <article className={styles.digitalGiftCard} key={account.id}>
+            <p className={styles.digitalGiftProvider}>{account.providerName}</p>
+            <p className={styles.digitalGiftHolder}>{account.accountHolder}</p>
+            <p className={styles.digitalGiftNumber}>{account.accountNumber}</p>
+            <DigitalGiftCopyButton
+              accountNumber={account.accountNumber}
+              className={styles.digitalGiftCopyButton}
+              feedbackClassName={styles.digitalGiftFeedback}
+            />
+          </article>
+        ))}
+      </div>
     </section>
   );
 }

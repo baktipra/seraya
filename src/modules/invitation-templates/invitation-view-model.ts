@@ -26,6 +26,17 @@ export type InvitationGalleryViewModel = {
   images: InvitationGalleryImage[];
 };
 
+export type InvitationDigitalGiftViewModel = {
+  accounts: Array<{
+    accountHolder: string;
+    accountNumber: string;
+    id: string;
+    providerName: string;
+  }>;
+  heading: string;
+  lead: string | null;
+};
+
 export type InvitationViewModel = {
   closing: {
     message: string | null;
@@ -35,6 +46,7 @@ export type InvitationViewModel = {
     personOne: InvitationPersonViewModel;
     personTwo: InvitationPersonViewModel;
   };
+  digitalGift: InvitationDigitalGiftViewModel | null;
   events: {
     ceremony: InvitationEventPartViewModel | null;
     primaryDateLabel: string | null;
@@ -143,6 +155,19 @@ export function createInvitationViewModel({
         parentLine: content.couple.personTwo.parentLine,
       },
     },
+    digitalGift:
+      content.digitalGift.enabled && content.digitalGift.accounts.length > 0
+        ? {
+            accounts: content.digitalGift.accounts.map((account) => ({
+              accountHolder: account.accountHolder,
+              accountNumber: account.accountNumber,
+              id: account.id,
+              providerName: account.providerName,
+            })),
+            heading: content.digitalGift.heading ?? 'Amplop Digital',
+            lead: content.digitalGift.lead,
+          }
+        : null,
     events:
       content.events.enabled && hasEventContent
         ? {

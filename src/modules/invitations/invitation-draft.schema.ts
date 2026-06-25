@@ -5,6 +5,8 @@ import {
   INVITATION_TEMPLATE_KEYS,
 } from '@/modules/invitation-templates/invitation-template.keys';
 
+import { normalizeDigitalGiftAccountNumber } from './digital-gift-account-number';
+
 export const INVITATION_DRAFT_SCHEMA_VERSION = 1 as const;
 
 const htmlTagPattern = /<\/?[a-z][^>]*>|<!--[\s\S]*?-->|<!doctype\s+html[^>]*>/i;
@@ -112,6 +114,54 @@ const invitationTemplateKeySchema = z
   .enum(INVITATION_TEMPLATE_KEYS)
   .default(DEFAULT_INVITATION_TEMPLATE_KEY);
 
+const digitalGiftAccountNumberSchema = z
+  .string()
+  .trim()
+  .min(1, 'Nomor rekening atau e-wallet perlu diisi.')
+  .refine(
+    (value) => /^[0-9 -]+$/.test(value),
+    'Nomor rekening atau e-wallet hanya boleh berisi angka, spasi, atau tanda hubung.',
+  )
+  .transform(normalizeDigitalGiftAccountNumber)
+  .refine(
+    (value) => value.length >= 6 && value.length <= 30,
+    'Nomor rekening atau e-wallet harus terdiri dari 6 sampai 30 angka.',
+  );
+
+const digitalGiftAccountSchema = z
+  .object({
+    accountHolder: requiredText(160, 'Nama pemilik rekening'),
+    accountNumber: digitalGiftAccountNumberSchema,
+    id: z.string().trim().uuid('ID rekening tidak valid.'),
+    providerName: requiredText(100, 'Penyedia, bank, atau e-wallet'),
+  })
+  .strict();
+
+const disabledDigitalGift = () => ({
+  accounts: [],
+  enabled: false,
+  heading: null,
+  lead: null,
+});
+
+const digitalGiftSchema = z
+  .object({
+    accounts: z.array(digitalGiftAccountSchema).max(3, 'Maksimal tiga rekening atau e-wallet.'),
+    enabled: z.boolean(),
+    heading: nullableText(120, 'Judul Amplop Digital'),
+    lead: nullableText(600, 'Pengantar Amplop Digital'),
+  })
+  .strict()
+  .superRefine((value, context) => {
+    if (value.enabled && value.accounts.length === 0) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Tambahkan setidaknya satu rekening atau e-wallet untuk Amplop Digital.',
+        path: ['accounts'],
+      });
+    }
+  });
+
 export const invitationDraftContentSchema = z
   .object({
     closing: z
@@ -121,6 +171,10 @@ export const invitationDraftContentSchema = z
         signature: nullableText(160, 'Tanda tangan'),
       })
       .strict(),
+    // Legacy drafts and snapshots predate Amplop Digital. Missing values
+    // intentionally resolve to the safe disabled state without mutating the
+    // stored JSON document until the owner explicitly saves a draft again.
+    digitalGift: digitalGiftSchema.default(disabledDigitalGift),
     couple: z
       .object({
         personOne: invitationPersonSchema,
