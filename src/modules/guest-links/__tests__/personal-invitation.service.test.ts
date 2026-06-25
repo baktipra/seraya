@@ -62,6 +62,23 @@ describe('SRY-013 anonymous personal invitation service', () => {
     expect(resolveRecordMock).toHaveBeenCalledWith({ slug: 'raka-nadia', token });
   });
 
+  it('accepts a selected published template id without adding any guest data to the snapshot DTO', async () => {
+    const token = randomBytes(32).toString('base64url');
+    resolveRecordMock.mockResolvedValue({
+      guest_display_name: 'Keluarga Budi',
+      rsvp_status: 'pending',
+      snapshot: { ...snapshot, draft: { ...snapshot.draft, templateKey: 'laras' } },
+      template_id: 'laras',
+    });
+
+    await expect(
+      getPersonalGuestInvitationByToken({ slug: 'raka-nadia', token }),
+    ).resolves.toMatchObject({
+      snapshot: { draft: { templateKey: 'laras' } },
+      templateId: 'laras',
+    });
+  });
+
   it('uses the same unavailable result for invalid capability and malformed resolver output', async () => {
     await expect(
       getPersonalGuestInvitationByToken({ slug: 'raka-nadia', token: 'invalid' }),

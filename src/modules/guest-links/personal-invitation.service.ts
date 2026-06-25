@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { INVITATION_TEMPLATE_KEYS } from '@/modules/invitation-templates/invitation-template.keys';
 import { isSafePublicInvitationSlug } from '@/modules/publications/public-invitation.repository';
 import { publishedInvitationSnapshotSchema } from '@/modules/publications/published-invitation.schema';
 import { z } from 'zod';
@@ -17,7 +18,7 @@ const personalGuestInvitationRecordSchema = z
     guest_display_name: z.string().trim().min(1).max(120),
     rsvp_status: z.enum(['pending', 'attending', 'declined']),
     snapshot: publishedInvitationSnapshotSchema,
-    template_id: z.literal('roselle'),
+    template_id: z.enum(INVITATION_TEMPLATE_KEYS),
   })
   .strict();
 

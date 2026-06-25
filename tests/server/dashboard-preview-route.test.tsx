@@ -94,6 +94,23 @@ describe('SRY-021B private invitation preview route', () => {
     expect(html).not.toContain(project.account_id);
   });
 
+  it('renders the selected private draft template without reading publication data', async () => {
+    const draft = createDefaultInvitationDraftContent(project);
+    draft.templateKey = 'aruna';
+    getPrivateDraftMock.mockResolvedValue({
+      ...ownedPrivateDraft,
+      draft: { ...ownedPrivateDraft.draft, content: draft },
+    });
+
+    const page = await InvitationPreviewPage({
+      params: Promise.resolve({ projectId: project.id }),
+    });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain('data-template="aruna"');
+    expect(getOverviewMock).not.toHaveBeenCalled();
+  });
+
   it('renders only owner-resolved gallery proxy images in the private preview', async () => {
     const imageId = '11111111-1111-4111-8111-111111111111';
     const draft = createDefaultInvitationDraftContent(project);

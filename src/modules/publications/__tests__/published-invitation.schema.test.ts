@@ -33,6 +33,35 @@ describe('published invitation snapshot contract', () => {
     });
   });
 
+  it('resolves legacy published snapshot drafts without templateKey to Roselle', () => {
+    const payload = createPayload();
+    delete (payload.draft as Partial<typeof payload.draft>).templateKey;
+
+    expect(parsePublishedInvitationSnapshot(payload).draft.templateKey).toBe('roselle');
+  });
+
+  it('accepts each supported immutable snapshot template id', () => {
+    for (const templateId of ['roselle', 'aruna', 'laras'] as const) {
+      expect(
+        parsePublishedInvitationSnapshotRecord({
+          created_at: '2026-06-20T00:00:00.000Z',
+          draft_schema_version: 1,
+          id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+          is_current: true,
+          project_id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+          published_at: '2026-06-20T00:00:00.000Z',
+          revision: 1,
+          slug: 'raka-nadia',
+          snapshot: {
+            ...createPayload(),
+            draft: { ...createPayload().draft, templateKey: templateId },
+          },
+          template_id: templateId,
+        }).template_id,
+      ).toBe(templateId);
+    }
+  });
+
   it('rejects internal metadata, unsupported schema versions, and invalid public project data', () => {
     expect(() =>
       parsePublishedInvitationSnapshot({
@@ -52,9 +81,9 @@ describe('published invitation snapshot contract', () => {
       parsePublishedInvitationSnapshotRecord({
         created_at: '2026-06-20T00:00:00.000Z',
         draft_schema_version: 2,
-        id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+        id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         is_current: true,
-        project_id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+        project_id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
         published_at: '2026-06-20T00:00:00.000Z',
         revision: 1,
         slug: 'raka-nadia',

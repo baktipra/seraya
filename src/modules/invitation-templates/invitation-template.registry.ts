@@ -1,3 +1,5 @@
+import { ArunaTemplate } from './aruna/aruna-template';
+import { LarasTemplate } from './laras/laras-template';
 import { RoselleTemplate } from './roselle/roselle-template';
 import {
   DEFAULT_PREVIEW_TEMPLATE_ID,
@@ -7,6 +9,8 @@ import {
 } from './invitation-template.types';
 
 export const invitationTemplateRegistry = {
+  aruna: ArunaTemplate,
+  laras: LarasTemplate,
   roselle: RoselleTemplate,
 } satisfies InvitationTemplateRegistry;
 

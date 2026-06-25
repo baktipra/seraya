@@ -12,10 +12,14 @@ import {
 } from './roselle-sections';
 import styles from './roselle.module.css';
 
-/** Private-preview Roselle renderer. It accepts only an already mapped typed view model. */
+/** Roselle presentation renderer. It accepts only an already mapped typed view model. */
 export function RoselleTemplate({ invitation }: InvitationTemplateProps) {
   return (
-    <article aria-labelledby="roselle-invitation-title" className={styles.invitation}>
+    <article
+      aria-labelledby="roselle-invitation-title"
+      className={styles.invitation}
+      data-template="roselle"
+    >
       <RoselleHero hero={invitation.hero} />
       <div className={styles.content}>
         <RoselleCouple couple={invitation.couple} />

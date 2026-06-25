@@ -79,6 +79,7 @@ function snapshot(): PublishedInvitationSnapshot {
         meta: { locale: 'id-ID', timezone: 'Asia/Jakarta' },
         rsvp: { enabled: true, heading: null, lead: null },
         story: { body: null, enabled: false, heading: null },
+        templateKey: 'roselle',
       },
       project: {
         eventCity: 'Jakarta',

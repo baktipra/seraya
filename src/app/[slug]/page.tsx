@@ -3,8 +3,7 @@ import { notFound } from 'next/navigation';
 
 import {
   createInvitationViewModel,
-  DEFAULT_PREVIEW_TEMPLATE_ID,
-  getInvitationTemplate,
+  InvitationTemplateRenderer,
 } from '@/modules/invitation-templates';
 import { getPublicGalleryImagesForCurrentSnapshot } from '@/modules/media/public-media.service';
 import { getPublicInvitationBySlug } from '@/modules/publications/public-invitation.service';
@@ -12,7 +11,6 @@ import { getPublicInvitationBySlug } from '@/modules/publications/public-invitat
 export const revalidate = 3600;
 export const dynamic = 'force-static';
 
-const PublicInvitationTemplate = getInvitationTemplate(DEFAULT_PREVIEW_TEMPLATE_ID);
 const privateInvitationRobots: Metadata['robots'] = {
   follow: false,
   index: false,
@@ -44,7 +42,7 @@ export async function generateMetadata({ params }: PublicInvitationPageProps): P
 }
 
 /**
- * Anonymous, snapshot-only Roselle runtime. Do not add session or dashboard
+ * Anonymous, snapshot-only selected-template runtime. Do not add session or dashboard
  * dependencies here: RLS and the public repository expose only current,
  * published, non-deleted snapshots by slug.
  */
@@ -69,7 +67,10 @@ export default async function PublicInvitationPage({ params }: PublicInvitationP
 
   return (
     <main className="bg-seraya-ivory min-h-screen px-0 py-0 sm:px-6 sm:py-8">
-      <PublicInvitationTemplate invitation={invitation} />
+      <InvitationTemplateRenderer
+        invitation={invitation}
+        templateKey={publishedInvitation.snapshot.draft.templateKey}
+      />
     </main>
   );
 }

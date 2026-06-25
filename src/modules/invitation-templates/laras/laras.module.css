@@ -1,0 +1,374 @@
+.invitation {
+  --laras-ink: #181521;
+  --laras-plum: #282033;
+  --laras-plum-light: #3d3048;
+  --laras-ivory: #fff8ed;
+  --laras-gold: #c8a16e;
+  --laras-rose: #bd7c8a;
+  --laras-muted: #d8cdd2;
+  --laras-line: rgb(255 248 237 / 0.2);
+
+  width: 100%;
+  max-width: 48rem;
+  margin: 0 auto;
+  overflow: hidden;
+  border: 1px solid rgb(200 161 110 / 0.46);
+  border-radius: 1.25rem;
+  background:
+    radial-gradient(circle at 80% 10%, rgb(189 124 138 / 0.17), transparent 27rem),
+    linear-gradient(155deg, var(--laras-plum), var(--laras-ink));
+  box-shadow: 0 24px 70px rgb(24 21 33 / 0.34);
+  color: var(--laras-ivory);
+  font-family: var(--font-ui), sans-serif;
+}
+
+.hero {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 34rem;
+  padding: clamp(3.5rem, 10vw, 6.5rem) clamp(1.4rem, 7vw, 4.5rem);
+  overflow: hidden;
+  text-align: center;
+}
+
+.cornerTop,
+.cornerBottom {
+  position: absolute;
+  width: 6rem;
+  height: 6rem;
+  border-color: var(--laras-gold);
+  opacity: 0.66;
+}
+
+.cornerTop {
+  top: 1.35rem;
+  left: 1.35rem;
+  border-top: 1px solid;
+  border-left: 1px solid;
+}
+
+.cornerBottom {
+  right: 1.35rem;
+  bottom: 1.35rem;
+  border-right: 1px solid;
+  border-bottom: 1px solid;
+}
+
+.eyebrow,
+.sectionLabel,
+.eventLabel {
+  margin: 0;
+  color: var(--laras-gold);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+.monogram {
+  display: grid;
+  place-items: center;
+  width: 4.3rem;
+  height: 4.3rem;
+  margin: 1.5rem 0;
+  border: 1px solid var(--laras-gold);
+  border-radius: 50%;
+  color: var(--laras-gold);
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 2.25rem;
+}
+
+.hero h1,
+.coupleSection h2,
+.storySection h2,
+.eventsSection h2,
+.locationSection h2,
+.gallerySection h2,
+.rsvpSection h2,
+.closingSection h2,
+.person h3,
+.eventCard h3 {
+  font-family: var(--font-editorial), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.045em;
+}
+
+.hero h1 {
+  max-width: 10ch;
+  margin: 0;
+  font-size: clamp(3.5rem, 10vw, 6.7rem);
+  line-height: 0.88;
+}
+
+.heroSubtitle {
+  max-width: 33rem;
+  margin: 1.35rem auto 0;
+  color: var(--laras-muted);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.heroDate,
+.primaryDate {
+  margin: 1.4rem 0 0;
+  color: var(--laras-gold);
+  font-size: 0.84rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.content {
+  display: grid;
+  padding: 0 clamp(1.4rem, 6vw, 4.5rem) clamp(2.5rem, 7vw, 4.5rem);
+}
+
+.coupleSection,
+.storySection,
+.eventsSection,
+.locationSection,
+.gallerySection,
+.rsvpSection,
+.closingSection {
+  padding: clamp(3rem, 8vw, 5.15rem) 0;
+}
+
+.storySection,
+.eventsSection,
+.locationSection,
+.gallerySection,
+.rsvpSection,
+.closingSection {
+  border-top: 1px solid var(--laras-line);
+}
+
+.coupleSection h2,
+.storySection h2,
+.eventsSection h2,
+.locationSection h2,
+.gallerySection h2,
+.rsvpSection h2,
+.closingSection h2 {
+  max-width: 16ch;
+  margin: 0.7rem 0 0;
+  color: var(--laras-ivory);
+  font-size: clamp(2rem, 5.8vw, 3.25rem);
+  line-height: 0.98;
+}
+
+.coupleGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: clamp(0.75rem, 3vw, 1.6rem);
+  align-items: center;
+  margin-top: 2.5rem;
+}
+
+.person {
+  min-width: 0;
+  text-align: center;
+}
+
+.person h3 {
+  margin: 0;
+  color: var(--laras-ivory);
+  font-size: clamp(2rem, 5.5vw, 3rem);
+  line-height: 0.98;
+}
+
+.personFullName,
+.personParent,
+.prose,
+.eventCard,
+.locationVenue {
+  color: var(--laras-muted);
+  font-size: 0.98rem;
+  line-height: 1.75;
+}
+
+.personFullName {
+  margin: 0.6rem 0 0;
+  font-weight: 700;
+}
+
+.personParent {
+  margin: 0.3rem 0 0;
+}
+
+.ampersand {
+  color: var(--laras-rose);
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 2.2rem;
+}
+
+.prose {
+  max-width: 36rem;
+  margin: 1.25rem 0 0;
+  white-space: pre-line;
+}
+
+.eventsHeading {
+  max-width: 35rem;
+}
+
+.eventsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.eventCard {
+  position: relative;
+  min-width: 0;
+  padding: 1.2rem;
+  border: 1px solid rgb(200 161 110 / 0.45);
+  background: rgb(255 248 237 / 0.05);
+}
+
+.eventLabel {
+  display: block;
+  margin-bottom: 1.5rem;
+}
+
+.eventCard h3 {
+  margin: 0;
+  color: var(--laras-ivory);
+  font-size: 1.65rem;
+  line-height: 1;
+}
+
+.eventCard p {
+  margin: 0.45rem 0 0;
+}
+
+.locationVenue {
+  margin: 1.25rem 0 0;
+  color: var(--laras-ivory);
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 1.6rem;
+  line-height: 1.15;
+}
+
+.mapsLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  margin-top: 1.25rem;
+  padding: 0 1rem;
+  border: 1px solid var(--laras-gold);
+  color: var(--laras-ivory);
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.mapsLink:hover {
+  background: var(--laras-gold);
+  color: var(--laras-ink);
+}
+
+.mapsLink:focus-visible {
+  outline: 3px solid rgb(200 161 110 / 0.55);
+  outline-offset: 4px;
+}
+
+.galleryGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin-top: 2rem;
+}
+
+.galleryFigure {
+  aspect-ratio: 1 / 1.16;
+  margin: 0;
+  padding: 0.32rem;
+  border: 1px solid rgb(200 161 110 / 0.5);
+  background: rgb(255 248 237 / 0.04);
+}
+
+.galleryFigure:nth-child(2n) {
+  transform: translateY(1.15rem);
+}
+
+.galleryImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.rsvpSection {
+  padding: clamp(2.5rem, 7vw, 4.25rem) clamp(1.2rem, 4vw, 2.5rem);
+  border: 1px solid rgb(200 161 110 / 0.46);
+  background: linear-gradient(135deg, rgb(61 48 72 / 0.9), rgb(24 21 33 / 0.4));
+}
+
+.rsvpSection h2 {
+  max-width: 18ch;
+}
+
+.closingSection {
+  text-align: center;
+}
+
+.closingMark {
+  display: block;
+  margin-bottom: 1.2rem;
+  color: var(--laras-gold);
+  font-size: 1.25rem;
+}
+
+.closingSection h2,
+.closingSection .prose {
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.signature {
+  margin: 1.3rem 0 0;
+  color: var(--laras-gold);
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 1.45rem;
+}
+
+@media (max-width: 36rem) {
+  .invitation {
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+  }
+
+  .hero {
+    min-height: 30rem;
+  }
+
+  .cornerTop,
+  .cornerBottom {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+
+  .coupleGrid,
+  .eventsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .ampersand {
+    justify-self: center;
+  }
+
+  .galleryFigure:nth-child(2n) {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mapsLink {
+    transition: none;
+  }
+}

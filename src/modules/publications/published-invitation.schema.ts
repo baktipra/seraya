@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { INVITATION_TEMPLATE_KEYS } from '@/modules/invitation-templates/invitation-template.keys';
 import {
   INVITATION_DRAFT_SCHEMA_VERSION,
   invitationDraftContentSchema,
@@ -59,7 +60,7 @@ export const publishedInvitationSnapshotRecordSchema = z
     revision: z.number().int().min(1),
     slug: publishedSlugSchema,
     snapshot: publishedInvitationSnapshotSchema,
-    template_id: z.literal('roselle'),
+    template_id: z.enum(INVITATION_TEMPLATE_KEYS),
   })
   .strict();
 

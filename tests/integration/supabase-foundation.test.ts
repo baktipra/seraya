@@ -786,6 +786,91 @@ describe('SRY-003 through SRY-022 Supabase migrations, ownership, drafts, public
     expect(persisted.rows).toEqual([{ current_count: '1', status: 'published' }]);
   });
 
+  it('preserves the selected template immutably in snapshots and defaults new drafts to Roselle', async () => {
+    await resetToDatabaseOwner(database);
+    const defaultDraft = await database.query<{ template_key: string | null }>(`
+      select content ->> 'templateKey' as template_key
+      from public.invitation_drafts
+      where project_id = '${projectA}' and deleted_at is null;
+    `);
+    expect(defaultDraft.rows).toEqual([{ template_key: 'roselle' }]);
+
+    await createVerifiedPaidActivationPayment(database, projectA, userA);
+    await impersonateAuthenticatedUser(database, userA);
+    await database.exec(`
+      update public.invitation_drafts
+      set content = jsonb_set(content, '{templateKey}', '"aruna"'::jsonb)
+      where project_id = '${projectA}' and deleted_at is null;
+    `);
+
+    const firstPublication = await database.query<{
+      snapshot_template_key: string | null;
+      template_id: string;
+    }>(`
+      select
+        template_id,
+        snapshot #>> '{draft,templateKey}' as snapshot_template_key
+      from public.publish_invitation_snapshot('${projectA}');
+    `);
+    expect(firstPublication.rows).toEqual([
+      { snapshot_template_key: 'aruna', template_id: 'aruna' },
+    ]);
+
+    await database.exec(`
+      update public.invitation_drafts
+      set content = jsonb_set(content, '{templateKey}', '"laras"'::jsonb)
+      where project_id = '${projectA}' and deleted_at is null;
+    `);
+
+    await resetToDatabaseOwner(database);
+    const beforeRepublish = await database.query<{
+      snapshot_template_key: string | null;
+      template_id: string;
+    }>(`
+      select
+        template_id,
+        snapshot #>> '{draft,templateKey}' as snapshot_template_key
+      from public.published_invitation_snapshots
+      where project_id = '${projectA}' and is_current;
+    `);
+    expect(beforeRepublish.rows).toEqual([
+      { snapshot_template_key: 'aruna', template_id: 'aruna' },
+    ]);
+
+    await impersonateAuthenticatedUser(database, userA);
+    await database.query(`select * from public.publish_invitation_snapshot('${projectA}')`);
+
+    await resetToDatabaseOwner(database);
+    const revisions = await database.query<{
+      is_current: boolean;
+      revision: number;
+      snapshot_template_key: string | null;
+      template_id: string;
+    }>(`
+      select
+        revision,
+        is_current,
+        template_id,
+        snapshot #>> '{draft,templateKey}' as snapshot_template_key
+      from public.published_invitation_snapshots
+      where project_id = '${projectA}'
+      order by revision;
+    `);
+    expect(revisions.rows).toEqual([
+      { is_current: false, revision: 1, snapshot_template_key: 'aruna', template_id: 'aruna' },
+      { is_current: true, revision: 2, snapshot_template_key: 'laras', template_id: 'laras' },
+    ]);
+
+    await expect(
+      database.query(`
+        insert into public.published_invitation_snapshots (
+          project_id, slug, revision, template_id, draft_schema_version, snapshot, is_current
+        )
+        values ('${projectB}', 'owner-b-wedding', 1, 'unsupported', 1, '{}'::jsonb, false);
+      `),
+    ).rejects.toThrow(/published_invitation_snapshots_template_valid|check constraint/i);
+  });
+
   it('rolls publication back when the snapshot insert fails', async () => {
     await resetToDatabaseOwner(database);
     await database.exec(`

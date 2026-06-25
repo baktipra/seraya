@@ -1,5 +1,10 @@
 import { z } from 'zod';
 
+import {
+  DEFAULT_INVITATION_TEMPLATE_KEY,
+  INVITATION_TEMPLATE_KEYS,
+} from '@/modules/invitation-templates/invitation-template.keys';
+
 export const INVITATION_DRAFT_SCHEMA_VERSION = 1 as const;
 
 const htmlTagPattern = /<\/?[a-z][^>]*>|<!--[\s\S]*?-->|<!doctype\s+html[^>]*>/i;
@@ -103,6 +108,10 @@ const invitationPersonSchema = z
   })
   .strict();
 
+const invitationTemplateKeySchema = z
+  .enum(INVITATION_TEMPLATE_KEYS)
+  .default(DEFAULT_INVITATION_TEMPLATE_KEY);
+
 export const invitationDraftContentSchema = z
   .object({
     closing: z
@@ -167,6 +176,9 @@ export const invitationDraftContentSchema = z
         heading: nullableText(120, 'Judul cerita'),
       })
       .strict(),
+    // Legacy documents predate this key. Zod defaults absent values to Roselle
+    // while still rejecting unknown values on every new save and snapshot parse.
+    templateKey: invitationTemplateKeySchema,
   })
   .strict();
 

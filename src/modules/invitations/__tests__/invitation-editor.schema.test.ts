@@ -39,6 +39,19 @@ describe('SRY-016 invitation editor form boundary', () => {
     }
   });
 
+  it('rejects an unsupported template key before it can reach the active draft', () => {
+    const formData = createValidInvitationEditorFormData();
+    formData.set('templateKey', 'unknown-template');
+
+    const parsed = parseInvitationEditorFormData(formData);
+
+    expect(parsed.success).toBe(false);
+
+    if (!parsed.success) {
+      expect(getInvitationEditorFieldErrors(parsed.error).templateKey).toBeDefined();
+    }
+  });
+
   it('rejects duplicate form values instead of accepting an ambiguous client submission', () => {
     const formData = createValidInvitationEditorFormData();
     formData.append('hero.title', 'Nama lain');

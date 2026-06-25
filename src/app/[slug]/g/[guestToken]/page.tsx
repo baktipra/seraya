@@ -5,8 +5,7 @@ import { PersonalGuestGreeting } from '@/components/personal-invitation/personal
 import { PersonalGuestRsvp } from '@/components/personal-invitation/personal-guest-rsvp';
 import {
   createInvitationViewModel,
-  DEFAULT_PREVIEW_TEMPLATE_ID,
-  getInvitationTemplate,
+  InvitationTemplateRenderer,
 } from '@/modules/invitation-templates';
 import { getPublicGalleryImagesForCurrentSnapshot } from '@/modules/media/public-media.service';
 import { getPersonalGuestInvitationByToken } from '@/modules/guest-links';
@@ -15,7 +14,6 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 export const fetchCache = 'force-no-store';
 
-const PersonalInvitationTemplate = getInvitationTemplate(DEFAULT_PREVIEW_TEMPLATE_ID);
 const personalInvitationRobots: Metadata['robots'] = {
   follow: false,
   index: false,
@@ -66,7 +64,10 @@ export default async function PersonalGuestInvitationPage({
   return (
     <main className="bg-seraya-ivory min-h-screen px-0 py-0 sm:px-6 sm:py-8">
       <PersonalGuestGreeting displayName={personalInvitation.guestDisplayName} />
-      <PersonalInvitationTemplate invitation={invitation} />
+      <InvitationTemplateRenderer
+        invitation={invitation}
+        templateKey={personalInvitation.snapshot.draft.templateKey}
+      />
       {personalInvitation.snapshot.draft.rsvp.enabled ? (
         <PersonalGuestRsvp
           guestToken={guestToken}

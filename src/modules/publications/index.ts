@@ -16,7 +16,6 @@ export {
 export { getPublicInvitationBySlug } from './public-invitation.service';
 export {
   getPublishedInvitationCacheTag,
-  ROSELLE_PUBLISHED_TEMPLATE_ID,
   type PublishedInvitationSnapshot,
   type PublishedInvitationSnapshotPayload,
 } from './publication.types';

@@ -1,0 +1,390 @@
+.invitation {
+  --aruna-paper: #fffdf8;
+  --aruna-ivory: #fff6ea;
+  --aruna-ink: #392a26;
+  --aruna-clay: #b95f48;
+  --aruna-clay-deep: #8f4235;
+  --aruna-sand: #ead8c2;
+  --aruna-wash: #f9ede1;
+  --aruna-muted: #75625a;
+
+  width: 100%;
+  max-width: 48rem;
+  margin: 0 auto;
+  overflow: hidden;
+  border: 1px solid var(--aruna-sand);
+  border-radius: 1.25rem;
+  background: var(--aruna-paper);
+  box-shadow: 0 22px 64px rgb(89 49 38 / 0.1);
+  color: var(--aruna-ink);
+  font-family: var(--font-ui), sans-serif;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1.5rem;
+  align-items: end;
+  min-height: 31rem;
+  padding: clamp(2rem, 8vw, 5rem) clamp(1.4rem, 7vw, 4.5rem);
+  background:
+    linear-gradient(145deg, rgb(255 246 234 / 0.94), rgb(255 253 248 / 0.88)),
+    repeating-linear-gradient(90deg, transparent 0 3.5rem, rgb(185 95 72 / 0.04) 3.5rem 3.56rem);
+}
+
+.heroRule,
+.closingRule {
+  grid-column: 1 / -1;
+  width: 100%;
+  height: 1px;
+  background: var(--aruna-clay);
+  opacity: 0.65;
+}
+
+.heroContent {
+  max-width: 29rem;
+}
+
+.kicker,
+.sectionKicker,
+.sectionHeading p,
+.personLabel,
+.heroDateLabel {
+  margin: 0;
+  color: var(--aruna-clay-deep);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.hero h1,
+.sectionHeading h2,
+.storySection h2,
+.locationSection h2,
+.rsvpSection h2,
+.closingSection h2,
+.personName,
+.eventCard h3 {
+  font-family: var(--font-editorial), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.045em;
+}
+
+.hero h1 {
+  max-width: 10ch;
+  margin: 1rem 0 0;
+  font-size: clamp(3.5rem, 10vw, 6.5rem);
+  line-height: 0.88;
+}
+
+.heroSubtitle {
+  max-width: 30rem;
+  margin: 1.4rem 0 0;
+  color: var(--aruna-muted);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.heroDateWrap {
+  display: grid;
+  gap: 0.45rem;
+  min-width: 8.5rem;
+  padding: 1rem 0 0 1rem;
+  border-left: 1px solid var(--aruna-clay);
+}
+
+.heroDate {
+  max-width: 8ch;
+  color: var(--aruna-ink);
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 1.35rem;
+  line-height: 1.05;
+}
+
+.content {
+  display: grid;
+  gap: 0;
+  padding: 0 clamp(1.4rem, 6vw, 4.5rem) clamp(2.5rem, 7vw, 4.5rem);
+}
+
+.coupleSection,
+.storySection,
+.eventsSection,
+.locationSection,
+.gallerySection,
+.rsvpSection,
+.closingSection {
+  padding: clamp(3rem, 8vw, 5.25rem) 0;
+}
+
+.storySection,
+.eventsSection,
+.locationSection,
+.gallerySection,
+.rsvpSection,
+.closingSection {
+  border-top: 1px solid var(--aruna-sand);
+}
+
+.sectionHeading {
+  max-width: 34rem;
+}
+
+.sectionHeading h2,
+.storySection h2,
+.locationSection h2,
+.rsvpSection h2,
+.closingSection h2 {
+  max-width: 16ch;
+  margin: 0.65rem 0 0;
+  font-size: clamp(2rem, 5.8vw, 3.2rem);
+  line-height: 0.98;
+}
+
+.coupleGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: clamp(0.75rem, 3vw, 1.75rem);
+  align-items: center;
+  margin-top: 2.4rem;
+}
+
+.person {
+  min-width: 0;
+}
+
+.person:nth-child(3) {
+  text-align: right;
+}
+
+.personName {
+  margin: 0.45rem 0 0;
+  font-size: clamp(2rem, 5.5vw, 3rem);
+  line-height: 0.98;
+}
+
+.personFullName,
+.personParent,
+.prose,
+.eventCard,
+.locationVenue {
+  color: var(--aruna-muted);
+  font-size: 0.98rem;
+  line-height: 1.75;
+}
+
+.personFullName {
+  margin: 0.65rem 0 0;
+  font-weight: 700;
+}
+
+.personParent {
+  margin: 0.35rem 0 0;
+}
+
+.ampersand {
+  color: var(--aruna-clay);
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 2.1rem;
+}
+
+.prose {
+  max-width: 36rem;
+  margin: 1.25rem 0 0;
+  white-space: pre-line;
+}
+
+.primaryDate {
+  display: inline-flex;
+  margin-top: 1.25rem;
+  border-bottom: 1px solid var(--aruna-clay);
+  padding-bottom: 0.3rem;
+  color: var(--aruna-clay-deep);
+  font-size: 0.84rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.eventsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.eventCard {
+  position: relative;
+  min-width: 0;
+  padding: 1.3rem 1.15rem 1.15rem;
+  border: 1px solid var(--aruna-sand);
+  background: var(--aruna-wash);
+}
+
+.eventRule {
+  display: block;
+  width: 2.5rem;
+  height: 2px;
+  margin-bottom: 1.2rem;
+  background: var(--aruna-clay);
+}
+
+.eventCard h3 {
+  margin: 0;
+  color: var(--aruna-ink);
+  font-size: 1.65rem;
+  line-height: 1;
+}
+
+.eventCard p {
+  margin: 0.45rem 0 0;
+}
+
+.locationVenue {
+  margin: 1.25rem 0 0;
+  color: var(--aruna-ink);
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 1.55rem;
+  line-height: 1.15;
+}
+
+.mapsLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  margin-top: 1.25rem;
+  border-bottom: 1px solid var(--aruna-clay);
+  color: var(--aruna-clay-deep);
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.mapsLink:focus-visible {
+  outline: 3px solid rgb(185 95 72 / 0.45);
+  outline-offset: 4px;
+}
+
+.galleryGrid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+.galleryFigure {
+  position: relative;
+  grid-column: span 6;
+  aspect-ratio: 4 / 5;
+  margin: 0;
+  overflow: hidden;
+  background: var(--aruna-sand);
+}
+
+.galleryFigure:nth-child(3n) {
+  grid-column: 3 / span 8;
+  aspect-ratio: 16 / 10;
+}
+
+.galleryImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.galleryFigure figcaption {
+  position: absolute;
+  right: 0.6rem;
+  bottom: 0.5rem;
+  color: rgb(255 253 248 / 0.85);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.rsvpSection {
+  padding-right: clamp(1rem, 4vw, 2.5rem);
+  padding-left: clamp(1rem, 4vw, 2.5rem);
+  background: var(--aruna-ink);
+  color: var(--aruna-paper);
+}
+
+.rsvpSection .sectionKicker,
+.rsvpSection h2,
+.rsvpSection .prose {
+  color: inherit;
+}
+
+.rsvpSection .sectionKicker {
+  color: #f3b49d;
+}
+
+.closingSection {
+  text-align: center;
+}
+
+.closingRule {
+  max-width: 5rem;
+  margin: 0 auto 1.65rem;
+}
+
+.closingSection h2,
+.closingSection .prose {
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.signature {
+  margin: 1.3rem 0 0;
+  color: var(--aruna-clay-deep);
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 1.45rem;
+}
+
+@media (max-width: 36rem) {
+  .invitation {
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+  }
+
+  .hero {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .heroDateWrap {
+    min-width: 0;
+    padding: 1rem 0 0;
+    border-top: 1px solid var(--aruna-clay);
+    border-left: 0;
+  }
+
+  .coupleGrid,
+  .eventsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .ampersand {
+    justify-self: center;
+  }
+
+  .person:nth-child(3) {
+    text-align: left;
+  }
+
+  .galleryFigure,
+  .galleryFigure:nth-child(3n) {
+    grid-column: span 12;
+    aspect-ratio: 4 / 5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mapsLink {
+    transition: none;
+  }
+}

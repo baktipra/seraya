@@ -5,8 +5,7 @@ import { Badge } from '@/design-system';
 import { getOwnedProjectContextForRequest } from '@/modules/auth/dashboard-request-context';
 import {
   createInvitationViewModel,
-  DEFAULT_PREVIEW_TEMPLATE_ID,
-  getInvitationTemplate,
+  InvitationTemplateRenderer,
 } from '@/modules/invitation-templates';
 import {
   getOwnedProjectPrivateInvitationDraftForVerifiedProject,
@@ -21,8 +20,6 @@ type InvitationPreviewPageProps = {
 };
 
 export const dynamic = 'force-dynamic';
-
-const PreviewInvitationTemplate = getInvitationTemplate(DEFAULT_PREVIEW_TEMPLATE_ID);
 
 export default async function InvitationPreviewPage({ params }: InvitationPreviewPageProps) {
   const { projectId } = await params;
@@ -86,7 +83,10 @@ export default async function InvitationPreviewPage({ params }: InvitationPrevie
         </div>
       </header>
 
-      <PreviewInvitationTemplate invitation={invitation} />
+      <InvitationTemplateRenderer
+        invitation={invitation}
+        templateKey={privateDraft.draft.content.templateKey}
+      />
     </section>
   );
 }

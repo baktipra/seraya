@@ -91,6 +91,26 @@ describe('SRY-013 personal guest invitation route', () => {
     expect(html).not.toContain('payment');
   });
 
+  it('renders the same template stored in the published personal snapshot', async () => {
+    const guestToken = randomBytes(32).toString('base64url');
+    getPersonalGuestInvitationMock.mockResolvedValue({
+      guestDisplayName: 'Keluarga Budi',
+      rsvpStatus: 'pending',
+      snapshot: {
+        ...snapshot,
+        draft: { ...snapshot.draft, templateKey: 'aruna' },
+      },
+      templateId: 'aruna',
+    });
+
+    const page = await PersonalGuestInvitationPage({
+      params: Promise.resolve({ guestToken, slug: 'raka-nadia' }),
+    });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain('data-template="aruna"');
+  });
+
   it('does not render RSVP controls when the current immutable snapshot disables RSVP', async () => {
     const guestToken = randomBytes(32).toString('base64url');
     getPersonalGuestInvitationMock.mockResolvedValue({

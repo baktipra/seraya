@@ -1,6 +1,5 @@
+import type { InvitationTemplateKey } from '@/modules/invitation-templates/invitation-template.keys';
 import type { InvitationDraftContent } from '@/modules/invitations/invitation-draft.schema';
-
-export const ROSELLE_PUBLISHED_TEMPLATE_ID = 'roselle' as const;
 
 export type PublishedInvitationProjectSnapshot = {
   eventCity: string;
@@ -24,7 +23,7 @@ export type PublishedInvitationSnapshot = {
   revision: number;
   slug: string;
   snapshot: PublishedInvitationSnapshotPayload;
-  template_id: typeof ROSELLE_PUBLISHED_TEMPLATE_ID;
+  template_id: InvitationTemplateKey;
 };
 
 export function getPublishedInvitationCacheTag(slug: string) {

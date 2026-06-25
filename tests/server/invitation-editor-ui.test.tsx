@@ -53,6 +53,7 @@ const draft = {
 };
 
 const editableFieldNames = [
+  'templateKey',
   'hero.eyebrow',
   'hero.title',
   'hero.subtitle',
@@ -119,6 +120,11 @@ describe('SRY-018 invitation editor polish owner UI', () => {
       '1</span><span class="text-seraya-text-primary text-sm font-semibold">Lengkapi detail</span>',
     );
     expect(html).toContain('Simpan perubahan');
+    expect(html).toContain('Pilih desain undangan');
+    expect(html).toContain('Pilih tampilan yang paling sesuai untuk hari spesial kalian.');
+    expect(html).toContain('Roselle');
+    expect(html).toContain('Aruna');
+    expect(html).toContain('Laras');
     expect(html).toContain('Lihat hasil undangan');
     expect(html).toContain('Kembali ke project');
     expect(html).toContain('Sapaan kecil');
@@ -142,6 +148,11 @@ describe('SRY-018 invitation editor polish owner UI', () => {
     expect(html).toContain(
       'Tampilkan bagian ini pada undangan setelah diterbitkan. Isi tetap tersimpan meskipun bagian ini belum ditampilkan.',
     );
+    expect(html).toContain('name="templateKey"');
+    expect(html).toContain('value="roselle"');
+    expect(html).toContain('value="aruna"');
+    expect(html).toContain('value="laras"');
+    expect(html).toContain('>Terpilih</span>');
     expect(html).toContain('name="story.body"');
     expect(html).toContain('name="location.mapsUrl"');
     expect(html).toContain('name="closing.message"');

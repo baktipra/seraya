@@ -18,6 +18,7 @@ export function createValidInvitationEditorFormData() {
   };
 
   formData.set('projectId', invitationEditorTestProjectId);
+  text('templateKey', content.templateKey);
   text('hero.eyebrow', content.hero.eyebrow);
   text('hero.title', content.hero.title);
   text('hero.subtitle', content.hero.subtitle);

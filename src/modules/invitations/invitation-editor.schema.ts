@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { INVITATION_TEMPLATE_KEYS } from '@/modules/invitation-templates/invitation-template.keys';
+
 const databaseUuidShape = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const projectIdSchema = z.string().regex(databaseUuidShape, 'Project tidak valid.');
@@ -10,6 +12,7 @@ const checkboxInputSchema = z
 
 const editorFormFieldNames = [
   'projectId',
+  'templateKey',
   'hero.eyebrow',
   'hero.title',
   'hero.subtitle',
@@ -121,6 +124,7 @@ const invitationEditorFormSchema = z
             lead: formTextSchema,
           })
           .strict(),
+        templateKey: z.enum(INVITATION_TEMPLATE_KEYS),
         story: z
           .object({
             body: formTextSchema,
@@ -232,6 +236,7 @@ export function parseInvitationEditorFormData(formData: FormData) {
         heading: getFormValue(formData, 'rsvp.heading'),
         lead: getFormValue(formData, 'rsvp.lead'),
       },
+      templateKey: getFormValue(formData, 'templateKey'),
       story: {
         body: getFormValue(formData, 'story.body'),
         enabled: getCheckboxValue(formData, 'story.enabled'),

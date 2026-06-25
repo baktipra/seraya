@@ -84,6 +84,20 @@ describe('SRY-008 public invitation route', () => {
     expect(html).not.toContain('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
   });
 
+  it('renders the template stored in the immutable published snapshot only', async () => {
+    const publishedDraft = { ...snapshot.snapshot.draft, templateKey: 'laras' as const };
+    getPublicInvitationMock.mockResolvedValue({
+      ...snapshot,
+      snapshot: { ...snapshot.snapshot, draft: publishedDraft },
+      template_id: 'laras' as const,
+    });
+
+    const page = await PublicInvitationPage({ params: Promise.resolve({ slug: 'raka-nadia' }) });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain('data-template="laras"');
+  });
+
   it('maps snapshot gallery IDs only to the public Seraya media proxy', async () => {
     const imageId = '11111111-1111-4111-8111-111111111111';
     const draft = createDefaultInvitationDraftContent({

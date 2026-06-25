@@ -20,6 +20,7 @@ import {
 } from '@/modules/invitations/invitation-editor.action-state';
 import { saveInvitationEditorAction } from '@/modules/invitations/invitation-editor.actions';
 import type { InvitationEditorFieldErrors } from '@/modules/invitations/invitation-editor.schema';
+import type { InvitationTemplateKey } from '@/modules/invitation-templates/invitation-template.keys';
 import type { InvitationDraft } from '@/modules/invitations/invitation-draft.types';
 
 export type InvitationEditorProps = {
@@ -275,6 +276,151 @@ function getError(errors: InvitationEditorFieldErrors | undefined, name: string)
   return errors?.[name as keyof InvitationEditorFieldErrors];
 }
 
+const invitationTemplateOptions: ReadonlyArray<{
+  description: string;
+  key: InvitationTemplateKey;
+  name: string;
+}> = [
+  {
+    description: 'Hangat, romantis, dan lembut dengan detail kelopak yang tenang.',
+    key: 'roselle',
+    name: 'Roselle',
+  },
+  {
+    description: 'Terang dan editorial dengan aksen terracotta serta ruang yang lega.',
+    key: 'aruna',
+    name: 'Aruna',
+  },
+  {
+    description: 'Elegan dan formal dengan suasana malam bernuansa plum yang dalam.',
+    key: 'laras',
+    name: 'Laras',
+  },
+];
+
+function InvitationTemplateMiniPreview({ templateKey }: { templateKey: InvitationTemplateKey }) {
+  if (templateKey === 'aruna') {
+    return (
+      <div
+        aria-hidden="true"
+        className="relative h-32 overflow-hidden rounded-[var(--seraya-radius-sm)] border border-[#d8b89f] bg-[#fff6ea] p-3"
+      >
+        <span className="absolute inset-x-3 top-3 h-px bg-[#b95f48]" />
+        <span className="absolute right-3 bottom-3 h-12 w-10 border-l border-[#b95f48]" />
+        <span className="mt-5 block h-2 w-12 bg-[#b95f48]" />
+        <span className="mt-3 block h-5 w-4/5 bg-[#4b332d]" />
+        <span className="mt-2 block h-2 w-3/5 bg-[#c9a995]" />
+        <span className="absolute bottom-4 left-3 h-6 w-2/5 bg-[#f1ddcc]" />
+      </div>
+    );
+  }
+
+  if (templateKey === 'laras') {
+    return (
+      <div
+        aria-hidden="true"
+        className="relative h-32 overflow-hidden rounded-[var(--seraya-radius-sm)] border border-[#c8a16e] bg-[#211a2b] p-3"
+      >
+        <span className="absolute top-3 left-3 size-7 rounded-full border border-[#c8a16e]" />
+        <span className="absolute top-6 left-6 h-px w-12 bg-[#c8a16e]" />
+        <span className="mt-9 block h-5 w-4/5 bg-[#fff8ed]" />
+        <span className="mt-2 block h-2 w-1/2 bg-[#c8a16e]" />
+        <span className="absolute right-3 bottom-3 h-12 w-2/5 border border-[#c8a16e]/70 bg-[#3d3048]" />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      aria-hidden="true"
+      className="relative h-32 overflow-hidden rounded-[var(--seraya-radius-sm)] border border-[#e6d6ca] bg-[#fffaf4] p-3"
+    >
+      <span className="absolute -top-4 -left-3 size-16 rounded-full border border-[#7a8b79]/50" />
+      <span className="absolute -right-4 bottom-0 size-16 rounded-full border border-[#bd7d83]/45" />
+      <span className="relative mt-5 block h-2 w-10 bg-[#97636d]" />
+      <span className="relative mt-3 block h-5 w-4/5 bg-[#402b35]" />
+      <span className="relative mt-2 block h-2 w-3/5 bg-[#b8a3a5]" />
+      <span className="absolute right-3 bottom-3 h-7 w-2/5 rounded-[0.7rem] border border-[#e6d6ca] bg-[#fffefb]" />
+    </div>
+  );
+}
+
+function InvitationTemplatePicker({
+  error,
+  onSelect,
+  selectedTemplateKey,
+}: {
+  error?: string;
+  onSelect: (templateKey: InvitationTemplateKey) => void;
+  selectedTemplateKey: InvitationTemplateKey;
+}) {
+  const describedBy = error ? `${fieldId('templateKey')}-error` : undefined;
+
+  return (
+    <fieldset
+      aria-describedby={describedBy}
+      className="border-seraya-border-default bg-seraya-canvas rounded-[var(--seraya-radius-lg)] border p-4 shadow-[var(--seraya-shadow-soft)] sm:p-6"
+    >
+      <legend className="sr-only">Pilih desain undangan</legend>
+      <div className="max-w-2xl">
+        <h2 className="text-seraya-text-primary text-xl font-semibold tracking-[-0.025em]">
+          Pilih desain undangan
+        </h2>
+        <p className="text-seraya-text-muted mt-1.5 text-sm leading-6">
+          Pilih tampilan yang paling sesuai untuk hari spesial kalian.
+        </p>
+      </div>
+
+      <div className="mt-5 grid gap-4 lg:grid-cols-3">
+        {invitationTemplateOptions.map((template) => {
+          const selected = selectedTemplateKey === template.key;
+          const inputId = fieldId(`templateKey-${template.key}`);
+
+          return (
+            <label
+              className={[
+                'group bg-seraya-surface focus-within:outline-seraya-focus-ring flex min-w-0 cursor-pointer flex-col gap-3 rounded-[var(--seraya-radius-md)] border p-3.5 transition-colors focus-within:outline-3 focus-within:outline-offset-3',
+                selected
+                  ? 'border-seraya-action-primary ring-seraya-action-primary/15 ring-2'
+                  : 'border-seraya-border-default hover:border-seraya-border-strong',
+              ].join(' ')}
+              htmlFor={inputId}
+              key={template.key}
+            >
+              <input
+                checked={selected}
+                className="sr-only"
+                id={inputId}
+                name="templateKey"
+                onChange={() => onSelect(template.key)}
+                type="radio"
+                value={template.key}
+              />
+              <InvitationTemplateMiniPreview templateKey={template.key} />
+              <span className="flex items-start justify-between gap-3">
+                <span className="min-w-0">
+                  <span className="text-seraya-text-primary block text-base font-semibold">
+                    {template.name}
+                  </span>
+                  <span className="text-seraya-text-muted mt-1 block text-sm leading-6">
+                    {template.description}
+                  </span>
+                </span>
+                {selected ? (
+                  <span className="bg-seraya-brand-soft text-seraya-action-primary shrink-0 rounded-[var(--seraya-radius-pill)] px-2 py-1 text-xs font-semibold">
+                    Terpilih
+                  </span>
+                ) : null}
+              </span>
+            </label>
+          );
+        })}
+      </div>
+      <FieldError message={error} name="templateKey" />
+    </fieldset>
+  );
+}
+
 /**
  * Local-only presentation state for the explicit draft save flow. It never
  * changes server behavior and never treats browser edits as persisted data.
@@ -319,10 +465,13 @@ export function InvitationEditor({ draft, projectId }: InvitationEditorProps) {
     saveInvitationEditorAction,
     initialInvitationEditorActionState,
   );
+  const content = draft.content;
   const [isDirty, setIsDirty] = useState(false);
   const [hasSaved, setHasSaved] = useState(false);
+  const [selectedTemplateKey, setSelectedTemplateKey] = useState<InvitationTemplateKey>(
+    content.templateKey,
+  );
   const lastHandledSuccessState = useRef<InvitationEditorActionState | null>(null);
-  const content = draft.content;
   const saveStatus = getInvitationEditorSaveStatus({
     actionStatus: state.status,
     hasSaved,
@@ -423,6 +572,15 @@ export function InvitationEditor({ draft, projectId }: InvitationEditorProps) {
               {state.message}
             </div>
           ) : null}
+
+          <InvitationTemplatePicker
+            error={getError(state.fieldErrors, 'templateKey')}
+            onSelect={(templateKey) => {
+              setSelectedTemplateKey(templateKey);
+              setIsDirty(true);
+            }}
+            selectedTemplateKey={selectedTemplateKey}
+          />
 
           <EditorSection
             description="Sapaan dan judul pertama yang menyambut tamu."

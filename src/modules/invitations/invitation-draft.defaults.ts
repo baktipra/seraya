@@ -1,4 +1,5 @@
 import { getProjectCoupleLabel } from '@/modules/projects/project.mapper';
+import { DEFAULT_INVITATION_TEMPLATE_KEY } from '@/modules/invitation-templates/invitation-template.keys';
 
 import {
   invitationDraftContentSchema,
@@ -85,5 +86,6 @@ export function createDefaultInvitationDraftContent(
       enabled: false,
       heading: null,
     },
+    templateKey: DEFAULT_INVITATION_TEMPLATE_KEY,
   });
 }

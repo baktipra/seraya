@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createDefaultInvitationDraftContent } from '../invitation-draft.defaults';
-import { parseInvitationEditorFormData } from '../invitation-editor.schema';
+import {
+  parseInvitationEditorFormData,
+  type InvitationEditorFormInput,
+} from '../invitation-editor.schema';
 import {
   InvitationEditorDraftUnavailableError,
   InvitationEditorValidationError,
@@ -45,7 +48,7 @@ const project = {
   status: 'draft',
 };
 
-function createEditorInput() {
+function createEditorInput(): InvitationEditorFormInput {
   return {
     content: {
       closing: { enabled: false, message: '', signature: '' },
@@ -67,6 +70,7 @@ function createEditorInput() {
         venueName: ' Gedung Bahagia ',
       },
       rsvp: { enabled: true, heading: ' Konfirmasi Kehadiran ', lead: ' ' },
+      templateKey: 'aruna',
       story: { body: ' ', enabled: false, heading: '' },
     },
     projectId,
@@ -124,6 +128,7 @@ describe('SRY-016 invitation editor service', () => {
     expect(update.content.hero.subtitle).toBeNull();
     expect(update.content.story.body).toBeNull();
     expect(update.content.location.mapsUrl).toBe('https://maps.example.test/raka-nadia');
+    expect(update.content.templateKey).toBe('aruna');
     expect(update.content.meta).toEqual(draft.content.meta);
     expect(update.content.gallery).toEqual(draft.content.gallery);
     expect(result.content.gallery.imageIds).toEqual(draft.content.gallery.imageIds);

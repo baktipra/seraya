@@ -161,6 +161,25 @@ describe('SRY-006 invitation draft V1 content contract', () => {
     expect(parsed.location.mapsUrl).toBeNull();
   });
 
+  it('defaults a legacy draft without templateKey to Roselle and accepts all supported keys', () => {
+    const legacy = { ...defaultContent };
+    delete (legacy as Partial<typeof defaultContent>).templateKey;
+
+    expect(invitationDraftContentSchema.parse(legacy).templateKey).toBe('roselle');
+    expect(
+      invitationDraftContentSchema.parse({ ...defaultContent, templateKey: 'aruna' }).templateKey,
+    ).toBe('aruna');
+    expect(
+      invitationDraftContentSchema.parse({ ...defaultContent, templateKey: 'laras' }).templateKey,
+    ).toBe('laras');
+  });
+
+  it('rejects unsupported template keys on new draft content', () => {
+    expect(() =>
+      invitationDraftContentSchema.parse({ ...defaultContent, templateKey: 'unknown-template' }),
+    ).toThrow(/Invalid option/i);
+  });
+
   it('rejects schema versions other than V1', () => {
     expect(() =>
       invitationDraftDocumentSchema.parse({

@@ -127,6 +127,7 @@ function applyEditorInputToActiveDraft(
       enabled: input.story.enabled,
       heading: input.story.heading,
     },
+    templateKey: input.templateKey,
   };
 }
 
