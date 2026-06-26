@@ -3,12 +3,14 @@ import { notFound } from 'next/navigation';
 
 import { PersonalGuestGreeting } from '@/components/personal-invitation/personal-guest-greeting';
 import { PersonalGuestRsvp } from '@/components/personal-invitation/personal-guest-rsvp';
+import { PersonalGuestbook } from '@/components/personal-invitation/personal-guestbook';
 import {
   createInvitationViewModel,
   InvitationTemplateRenderer,
 } from '@/modules/invitation-templates';
 import { getPublicGalleryImagesForCurrentSnapshot } from '@/modules/media/public-media.service';
 import { getPersonalGuestInvitationByToken } from '@/modules/guest-links';
+import { getPersonalGuestbookEntryByToken } from '@/modules/guestbook';
 import { normalizePublishedInvitationSnapshot } from '@/modules/publications/published-invitation.schema';
 
 export const dynamic = 'force-dynamic';
@@ -23,6 +25,7 @@ const personalInvitationRobots: Metadata['robots'] = {
 
 type PersonalGuestInvitationPageProps = {
   params: Promise<{ guestToken: string; slug: string }>;
+  searchParams?: Promise<{ guestbook?: string | string[] | undefined }>;
 };
 
 /** Metadata is deliberately token-free and does not perform a capability lookup. */
@@ -40,6 +43,7 @@ export function generateMetadata(): Metadata {
  */
 export default async function PersonalGuestInvitationPage({
   params,
+  searchParams,
 }: PersonalGuestInvitationPageProps) {
   const { guestToken, slug } = await params;
   const personalInvitation = await getPersonalGuestInvitationByToken({
@@ -54,6 +58,18 @@ export default async function PersonalGuestInvitationPage({
   if (!personalInvitation || !snapshot) {
     notFound();
   }
+
+  const personalGuestbookEntry = await getPersonalGuestbookEntryByToken({
+    slug,
+    token: guestToken,
+  });
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const guestbookFeedback =
+    resolvedSearchParams?.guestbook === 'success'
+      ? 'success'
+      : resolvedSearchParams?.guestbook === 'error'
+        ? 'error'
+        : undefined;
 
   const galleryImages = await getPublicGalleryImagesForCurrentSnapshot(
     snapshot.draft.gallery.imageIds,
@@ -80,6 +96,12 @@ export default async function PersonalGuestInvitationPage({
           slug={slug}
         />
       ) : null}
+      <PersonalGuestbook
+        entry={personalGuestbookEntry}
+        feedback={guestbookFeedback}
+        guestToken={guestToken}
+        slug={slug}
+      />
     </main>
   );
 }

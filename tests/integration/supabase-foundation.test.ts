@@ -224,7 +224,7 @@ async function createPersonalGuestLink(db: PGlite, guestId: string, token: strin
   `);
 }
 
-describe('SRY-003 through SRY-022 Supabase migrations, ownership, drafts, publication, media, payments, guests, personal links, RSVP, and private contact data', () => {
+describe('SRY-003 through SRY-027 Supabase migrations, ownership, drafts, publication, media, payments, guests, personal links, RSVP, private contact data, and guestbook', () => {
   // Full Vitest runs compile the whole app beside this PGlite migration harness.
   // Allow the first cold database/migration setup enough room without weakening
   // any assertion or production behaviour.
@@ -2323,6 +2323,188 @@ describe('SRY-003 through SRY-022 Supabase migrations, ownership, drafts, public
       select * from public.resolve_personal_guest_invitation('owner-a-wedding', '${replacementToken}');
     `);
     expect(deletedProjectLink.rows).toEqual([]);
+  });
+
+  it('creates a private guestbook with one active entry per guest, capability-scoped upsert, owner-only inbox reads, and soft removal', async () => {
+    const guestA = 'deeeeeee-eeee-4eee-8eee-eeeeeeeeeeee';
+    const guestB = 'dfffffff-ffff-4fff-8fff-ffffffffffff';
+    const guestC = 'd1212121-1212-4121-8121-121212121212';
+    const tokenA = createRuntimePersonalGuestToken();
+    const tokenB = createRuntimePersonalGuestToken();
+    const tokenC = createRuntimePersonalGuestToken();
+
+    await resetToDatabaseOwner(database);
+    await database.exec(`
+      insert into public.guests (id, project_id, display_name)
+      values
+        ('${guestA}', '${projectA}', 'Tamu Buku A'),
+        ('${guestB}', '${projectB}', 'Tamu Buku B'),
+        ('${guestC}', '${projectA}', 'Tamu Buku C');
+    `);
+    await createVerifiedPaidActivationPayment(database, projectA, userA);
+    await impersonateAuthenticatedUser(database, userA);
+    await database.query(`select * from public.publish_invitation_snapshot('${projectA}')`);
+    await createPersonalGuestLink(database, guestA, tokenA);
+    await createPersonalGuestLink(database, guestB, tokenB);
+    await createPersonalGuestLink(database, guestC, tokenC);
+
+    const columns = await database.query<{ column_name: string }>(`
+      select column_name
+      from information_schema.columns
+      where table_schema = 'public' and table_name = 'guestbook_entries'
+      order by ordinal_position;
+    `);
+    expect(columns.rows.map((row) => row.column_name)).toEqual([
+      'id',
+      'guest_id',
+      'message',
+      'created_at',
+      'updated_at',
+      'deleted_at',
+    ]);
+
+    await impersonateAnonymousUser(database);
+    await expect(database.query('select * from public.guestbook_entries')).rejects.toThrow(
+      /permission denied/i,
+    );
+    await expect(
+      database.query(`
+        insert into public.guestbook_entries (guest_id, message)
+        values ('${guestA}', 'Browser write');
+      `),
+    ).rejects.toThrow(/permission denied/i);
+
+    const created = await database.query<{ state: string | null }>(`
+      select public.submit_personal_guestbook_entry(
+        'owner-a-wedding', '${tokenA}', '  Semoga bahagia\nselalu 💐  '
+      ) as state;
+    `);
+    expect(created.rows).toEqual([{ state: 'created' }]);
+
+    const resolved = await database.query<{ message: string | null; updated_at: string | null }>(`
+      select * from public.resolve_personal_guestbook_entry('owner-a-wedding', '${tokenA}');
+    `);
+    expect(resolved.rows).toHaveLength(1);
+    expect(resolved.rows[0]?.message).toBe('Semoga bahagia\nselalu 💐');
+    expect(resolved.rows[0]?.updated_at).toBeTruthy();
+    expect(Object.keys(resolved.rows[0] ?? {}).sort()).toEqual(['message', 'updated_at']);
+
+    const crossGuestAttempt = await database.query<{ state: string | null }>(`
+      select public.submit_personal_guestbook_entry(
+        'owner-a-wedding', '${tokenB}', 'Tidak boleh mengubah pesan tamu lain'
+      ) as state;
+    `);
+    expect(crossGuestAttempt.rows).toEqual([{ state: null }]);
+
+    const immediateRepeat = await database.query<{ state: string | null }>(`
+      select public.submit_personal_guestbook_entry(
+        'owner-a-wedding', '${tokenA}', 'Pesan kedua terlalu cepat'
+      ) as state;
+    `);
+    expect(immediateRepeat.rows).toEqual([{ state: null }]);
+
+    await resetToDatabaseOwner(database);
+    await database.exec(`
+      alter table public.guestbook_entries disable trigger guestbook_entries_set_updated_at;
+      update public.guestbook_entries
+      set updated_at = now() - interval '10 seconds'
+      where guest_id = '${guestA}' and deleted_at is null;
+      alter table public.guestbook_entries enable trigger guestbook_entries_set_updated_at;
+    `);
+
+    await impersonateAnonymousUser(database);
+    const updated = await database.query<{ state: string | null }>(`
+      select public.submit_personal_guestbook_entry(
+        'owner-a-wedding', '${tokenA}', 'Semoga selalu bahagia'
+      ) as state;
+    `);
+    expect(updated.rows).toEqual([{ state: 'updated' }]);
+
+    await resetToDatabaseOwner(database);
+    const activeCount = await database.query<{ count: string }>(`
+      select count(*)::text as count
+      from public.guestbook_entries
+      where guest_id = '${guestA}' and deleted_at is null;
+    `);
+    expect(activeCount.rows).toEqual([{ count: '1' }]);
+    await expect(
+      database.query(`
+        insert into public.guestbook_entries (guest_id, message)
+        values ('${guestA}', 'Duplikat tidak boleh aktif');
+      `),
+    ).rejects.toThrow(/guestbook_entries_one_active_per_guest_idx|duplicate key/i);
+
+    await impersonateAuthenticatedUser(database, userA);
+    const ownerInbox = await database.query<{ message: string }>(`
+      select message from public.guestbook_entries order by updated_at desc;
+    `);
+    expect(ownerInbox.rows).toEqual([{ message: 'Semoga selalu bahagia' }]);
+
+    await impersonateAuthenticatedUser(database, userB);
+    const foreignInbox = await database.query(`select message from public.guestbook_entries;`);
+    expect(foreignInbox.rows).toEqual([]);
+
+    await resetToDatabaseOwner(database);
+    await database.exec(`
+      update public.guestbook_entries
+      set deleted_at = now()
+      where guest_id = '${guestA}' and deleted_at is null;
+    `);
+
+    await impersonateAuthenticatedUser(database, userA);
+    const afterRemoval = await database.query(`select message from public.guestbook_entries;`);
+    expect(afterRemoval.rows).toEqual([]);
+
+    await impersonateAnonymousUser(database);
+    const replacement = await database.query<{ state: string | null }>(`
+      select public.submit_personal_guestbook_entry(
+        'owner-a-wedding', '${tokenA}', 'Ucapan baru setelah dihapus'
+      ) as state;
+    `);
+    expect(replacement.rows).toEqual([{ state: 'created' }]);
+
+    await resetToDatabaseOwner(database);
+    await database.exec(`
+      update public.guest_links
+      set status = 'revoked'::public.guest_link_status,
+          revoked_at = now()
+      where guest_id = '${guestA}' and status = 'active'::public.guest_link_status;
+    `);
+
+    await impersonateAnonymousUser(database);
+    const revoked = await database.query<{ state: string | null }>(`
+      select public.submit_personal_guestbook_entry(
+        'owner-a-wedding', '${tokenA}', 'Tidak boleh masuk'
+      ) as state;
+    `);
+    expect(revoked.rows).toEqual([{ state: null }]);
+
+    await resetToDatabaseOwner(database);
+    await database.exec(`update public.guests set deleted_at = now() where id = '${guestB}';`);
+
+    await impersonateAnonymousUser(database);
+    const softDeleted = await database.query<{ state: string | null }>(`
+      select public.submit_personal_guestbook_entry(
+        'owner-b-wedding', '${tokenB}', 'Tidak boleh masuk'
+      ) as state;
+    `);
+    expect(softDeleted.rows).toEqual([{ state: null }]);
+
+    await resetToDatabaseOwner(database);
+    await database.exec(`
+      update public.guest_links
+      set status = 'expired'::public.guest_link_status,
+          revoked_at = now()
+      where guest_id = '${guestC}' and status = 'active'::public.guest_link_status;
+    `);
+
+    await impersonateAnonymousUser(database);
+    const expired = await database.query<{ state: string | null }>(`
+      select public.submit_personal_guestbook_entry(
+        'owner-a-wedding', '${tokenC}', 'Tidak boleh masuk'
+      ) as state;
+    `);
+    expect(expired.rows).toEqual([{ state: null }]);
   });
 
   it('rejects anonymous RSVP when the current published snapshot has RSVP disabled', async () => {

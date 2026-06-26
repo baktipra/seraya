@@ -8,13 +8,17 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createDefaultInvitationDraftContent } from '@/modules/invitations/invitation-draft.defaults';
 
-const { getPersonalGuestInvitationMock, getPublicGalleryImagesMock, notFoundMock } = vi.hoisted(
-  () => ({
-    getPersonalGuestInvitationMock: vi.fn(),
-    getPublicGalleryImagesMock: vi.fn(),
-    notFoundMock: vi.fn(),
-  }),
-);
+const {
+  getPersonalGuestInvitationMock,
+  getPersonalGuestbookEntryMock,
+  getPublicGalleryImagesMock,
+  notFoundMock,
+} = vi.hoisted(() => ({
+  getPersonalGuestInvitationMock: vi.fn(),
+  getPersonalGuestbookEntryMock: vi.fn(),
+  getPublicGalleryImagesMock: vi.fn(),
+  notFoundMock: vi.fn(),
+}));
 
 vi.mock('next/navigation', () => ({ notFound: notFoundMock }));
 vi.mock('@/modules/guest-links', () => ({
@@ -22,6 +26,9 @@ vi.mock('@/modules/guest-links', () => ({
 }));
 vi.mock('@/modules/media/public-media.service', () => ({
   getPublicGalleryImagesForCurrentSnapshot: getPublicGalleryImagesMock,
+}));
+vi.mock('@/modules/guestbook', () => ({
+  getPersonalGuestbookEntryByToken: getPersonalGuestbookEntryMock,
 }));
 
 import PersonalGuestInvitationPage, {
@@ -49,6 +56,8 @@ const snapshot = {
 describe('SRY-013 personal guest invitation route', () => {
   beforeEach(() => {
     getPersonalGuestInvitationMock.mockReset();
+    getPersonalGuestbookEntryMock.mockReset();
+    getPersonalGuestbookEntryMock.mockResolvedValue(null);
     getPublicGalleryImagesMock.mockReset();
     getPublicGalleryImagesMock.mockResolvedValue([]);
     notFoundMock.mockReset();
@@ -86,6 +95,12 @@ describe('SRY-013 personal guest invitation route', () => {
     expect(html).toContain('Hadir');
     expect(html).toContain('Tidak hadir');
     expect(html).toContain('Raka &amp; Nadia');
+    expect(html).toContain('Ucapan &amp; Doa');
+    expect(html).toContain('Kirim ucapan');
+    expect(getPersonalGuestbookEntryMock).toHaveBeenCalledWith({
+      slug: 'raka-nadia',
+      token: guestToken,
+    });
     expect(html).not.toContain('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
     expect(html).not.toContain('token_hash');
     expect(html).not.toContain('payment');
@@ -200,6 +215,32 @@ describe('SRY-013 personal guest invitation route', () => {
     expect(html).not.toContain('Status saat ini:');
   });
 
+  it('renders only the current guest’s own saved guestbook message and success feedback', async () => {
+    const guestToken = randomBytes(32).toString('base64url');
+    getPersonalGuestInvitationMock.mockResolvedValue({
+      guestDisplayName: 'Keluarga Budi',
+      rsvpStatus: 'pending',
+      snapshot,
+      templateId: 'roselle',
+    });
+    getPersonalGuestbookEntryMock.mockResolvedValue({
+      message: 'Semoga bahagia selalu',
+      updatedAt: '2027-08-17T09:00:00.000Z',
+    });
+
+    const page = await PersonalGuestInvitationPage({
+      params: Promise.resolve({ guestToken, slug: 'raka-nadia' }),
+      searchParams: Promise.resolve({ guestbook: 'success' }),
+    });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain('Semoga bahagia selalu');
+    expect(html).toContain('Perbarui ucapan');
+    expect(html).toContain('Ucapan dan doa kalian sudah disimpan.');
+    expect(html).not.toContain('guestbook_entries');
+    expect(html).not.toContain('guest_id');
+  });
+
   it('uses one unavailable/not-found path for invalid, revoked, and mismatched capabilities', async () => {
     const guestToken = randomBytes(32).toString('base64url');
     getPersonalGuestInvitationMock.mockResolvedValue(null);
@@ -217,11 +258,13 @@ describe('SRY-013 personal guest invitation route', () => {
     );
 
     expect(routeSource).toContain('getPersonalGuestInvitationByToken');
+    expect(routeSource).toContain('getPersonalGuestbookEntryByToken');
     expect(routeSource).toContain("export const dynamic = 'force-dynamic';");
     expect(routeSource).toContain("export const fetchCache = 'force-no-store';");
     expect(routeSource).not.toContain('cookies(');
     expect(routeSource).not.toContain('createServerSupabaseClient');
     expect(routeSource).not.toContain('invitation-draft.service');
+    expect(routeSource).not.toContain('createServerSupabaseClient');
   });
 
   it('uses token-free noindex metadata', () => {

@@ -116,6 +116,9 @@ describe('SRY-005 project creation dashboard surfaces', () => {
     expect(html).toContain('Ringkasan RSVP');
     expect(html).toContain('Lihat respons tamu yang sudah masuk.');
     expect(html).toContain(`href="/dashboard/${project.id}/rsvp"`);
+    expect(html).toContain('Ucapan &amp; Doa');
+    expect(html).toContain('Lihat pesan yang dikirim tamu.');
+    expect(html).toContain(`href="/dashboard/${project.id}/guestbook"`);
     expect(html).toContain('Edit undangan');
     expect(html).toContain(`href="/dashboard/${project.id}/invitation"`);
     expect(html).toContain('data-test-payment-controls');
