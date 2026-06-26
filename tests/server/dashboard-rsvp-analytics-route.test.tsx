@@ -34,7 +34,20 @@ import RsvpAnalyticsPage, {
 const projectId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 const project = { id: projectId };
 
-describe('SRY-020 private RSVP analytics route', () => {
+const analytics = {
+  activeGuestCount: 1,
+  attendingCountUnknownGuestCount: 0,
+  attendingGuestCount: 1,
+  confirmedAttendeeCount: 1,
+  declinedGuestCount: 0,
+  invitedPeopleCount: 1,
+  pendingGuestCount: 0,
+  pendingGuests: [],
+  respondedCount: 1,
+  respondedPercentage: 100,
+};
+
+describe('SRY-028 private RSVP analytics route', () => {
   beforeEach(() => {
     getOwnedProjectContextMock.mockReset().mockResolvedValue(project);
     getRsvpAnalyticsMock.mockReset();
@@ -45,18 +58,7 @@ describe('SRY-020 private RSVP analytics route', () => {
   });
 
   it('is private dynamic no-store and renders only verified owner analytics', async () => {
-    getRsvpAnalyticsMock.mockResolvedValue({
-      analytics: {
-        activeGuestCount: 1,
-        attendingCount: 1,
-        declinedCount: 0,
-        pendingCount: 0,
-        pendingGuests: [],
-        respondedCount: 1,
-        respondedPercentage: 100,
-      },
-      project,
-    });
+    getRsvpAnalyticsMock.mockResolvedValue({ analytics, project });
 
     const page = await RsvpAnalyticsPage({ params: Promise.resolve({ projectId }) });
     const html = renderToStaticMarkup(page);
@@ -80,7 +82,7 @@ describe('SRY-020 private RSVP analytics route', () => {
     ).rejects.toThrow('NEXT_NOT_FOUND');
   });
 
-  it('uses the request-local verified project context without public snapshot, cookie, Host-derived, or mutation dependencies', async () => {
+  it('uses request-local verified project context without public snapshot, cookie, Host-derived, or mutation dependencies', async () => {
     const source = await readFile(
       path.resolve(process.cwd(), 'src/app/(dashboard)/dashboard/[projectId]/rsvp/page.tsx'),
       'utf8',

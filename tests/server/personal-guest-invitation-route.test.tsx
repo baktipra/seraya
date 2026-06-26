@@ -76,6 +76,8 @@ describe('SRY-013 personal guest invitation route', () => {
     const guestToken = randomBytes(32).toString('base64url');
     getPersonalGuestInvitationMock.mockResolvedValue({
       guestDisplayName: 'Keluarga Budi',
+      partySize: 4,
+      rsvpAttendeeCount: null,
       rsvpStatus: 'pending',
       snapshot,
       templateId: 'roselle',
@@ -94,6 +96,8 @@ describe('SRY-013 personal guest invitation route', () => {
     expect(html).toContain('Status saat ini:');
     expect(html).toContain('Hadir');
     expect(html).toContain('Tidak hadir');
+    expect(html).toContain('Undangan ini berlaku untuk maksimal 4 orang.');
+    expect(html).toContain('Jumlah orang yang hadir');
     expect(html).toContain('Raka &amp; Nadia');
     expect(html).toContain('Ucapan &amp; Doa');
     expect(html).toContain('Kirim ucapan');
@@ -110,6 +114,8 @@ describe('SRY-013 personal guest invitation route', () => {
     const guestToken = randomBytes(32).toString('base64url');
     getPersonalGuestInvitationMock.mockResolvedValue({
       guestDisplayName: 'Keluarga Budi',
+      partySize: 4,
+      rsvpAttendeeCount: null,
       rsvpStatus: 'pending',
       snapshot: {
         ...snapshot,
@@ -132,6 +138,8 @@ describe('SRY-013 personal guest invitation route', () => {
     delete (legacyDraft as Partial<typeof legacyDraft>).digitalGift;
     getPersonalGuestInvitationMock.mockResolvedValue({
       guestDisplayName: 'Keluarga Budi',
+      partySize: 4,
+      rsvpAttendeeCount: null,
       rsvpStatus: 'pending',
       snapshot: {
         ...snapshot,
@@ -155,6 +163,8 @@ describe('SRY-013 personal guest invitation route', () => {
     const guestToken = randomBytes(32).toString('base64url');
     getPersonalGuestInvitationMock.mockResolvedValue({
       guestDisplayName: 'Keluarga Budi',
+      partySize: 4,
+      rsvpAttendeeCount: null,
       rsvpStatus: 'pending',
       snapshot: {
         ...snapshot,
@@ -195,6 +205,8 @@ describe('SRY-013 personal guest invitation route', () => {
     const guestToken = randomBytes(32).toString('base64url');
     getPersonalGuestInvitationMock.mockResolvedValue({
       guestDisplayName: 'Keluarga Budi',
+      partySize: 4,
+      rsvpAttendeeCount: 2,
       rsvpStatus: 'attending',
       snapshot: {
         ...snapshot,
@@ -215,10 +227,33 @@ describe('SRY-013 personal guest invitation route', () => {
     expect(html).not.toContain('Status saat ini:');
   });
 
+  it('renders accessible RSVP success feedback after a valid personal submission', async () => {
+    const guestToken = randomBytes(32).toString('base64url');
+    getPersonalGuestInvitationMock.mockResolvedValue({
+      guestDisplayName: 'Keluarga Budi',
+      partySize: 4,
+      rsvpAttendeeCount: 2,
+      rsvpStatus: 'attending',
+      snapshot,
+      templateId: 'roselle',
+    });
+
+    const page = await PersonalGuestInvitationPage({
+      params: Promise.resolve({ guestToken, slug: 'raka-nadia' }),
+      searchParams: Promise.resolve({ rsvp: 'success' }),
+    });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain('Konfirmasi kehadiran kalian sudah disimpan.');
+    expect(html).toContain('role="status"');
+  });
+
   it('renders only the current guest’s own saved guestbook message and success feedback', async () => {
     const guestToken = randomBytes(32).toString('base64url');
     getPersonalGuestInvitationMock.mockResolvedValue({
       guestDisplayName: 'Keluarga Budi',
+      partySize: 4,
+      rsvpAttendeeCount: null,
       rsvpStatus: 'pending',
       snapshot,
       templateId: 'roselle',

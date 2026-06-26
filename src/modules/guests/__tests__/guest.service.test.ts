@@ -36,7 +36,11 @@ vi.mock('../guest.repository', () => ({
   updateGuestForVerifiedProject: updateGuestMock,
 }));
 
-import { softRemoveGuestForCurrentUser, updateGuestForCurrentUser } from '../guest.service';
+import {
+  GuestAttendanceCountConflictError,
+  softRemoveGuestForCurrentUser,
+  updateGuestForCurrentUser,
+} from '../guest.service';
 
 const project = {
   account_id: '11111111-1111-1111-1111-111111111111',
@@ -53,7 +57,21 @@ const project = {
 
 const guestId = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
 
-describe('SRY-012 guest service ownership guard', () => {
+const existingGuest = {
+  created_at: '2027-01-01T00:00:00.000Z',
+  deleted_at: null,
+  display_name: 'Tamu',
+  group_label: null,
+  id: guestId,
+  party_size: 4,
+  project_id: project.id,
+  rsvp_attendee_count: 3,
+  rsvp_status: 'attending' as const,
+  updated_at: '2027-01-01T00:00:00.000Z',
+  whatsapp_phone_e164: null,
+};
+
+describe('SRY-028 guest service attendance guard', () => {
   beforeEach(() => {
     createGuestMock.mockReset();
     getGuestMock.mockReset();
@@ -83,5 +101,32 @@ describe('SRY-012 guest service ownership guard', () => {
 
     expect(updateGuestMock).not.toHaveBeenCalled();
     expect(softRemoveGuestMock).not.toHaveBeenCalled();
+  });
+
+  it('rejects reducing party size below an already confirmed attendee count without inventing a new count', async () => {
+    getGuestMock.mockResolvedValue(existingGuest);
+
+    await expect(
+      updateGuestForCurrentUser({
+        guest: { displayName: 'Tamu', groupLabel: null, partySize: 2 },
+        guestId,
+        projectId: project.id,
+      }),
+    ).rejects.toBeInstanceOf(GuestAttendanceCountConflictError);
+
+    expect(updateGuestMock).not.toHaveBeenCalled();
+  });
+
+  it('allows unrelated edits for legacy attending guest with unknown count', async () => {
+    getGuestMock.mockResolvedValue({ ...existingGuest, rsvp_attendee_count: null });
+    updateGuestMock.mockResolvedValue({ ...existingGuest, rsvp_attendee_count: null });
+
+    await expect(
+      updateGuestForCurrentUser({
+        guest: { displayName: 'Nama Baru', groupLabel: 'Keluarga', partySize: 1 },
+        guestId,
+        projectId: project.id,
+      }),
+    ).resolves.toMatchObject({ rsvp_attendee_count: null, rsvp_status: 'attending' });
   });
 });

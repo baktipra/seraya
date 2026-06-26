@@ -10,30 +10,37 @@ const projectId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 
 const analytics = {
   activeGuestCount: 8,
-  attendingCount: 3,
-  declinedCount: 2,
-  pendingCount: 3,
+  attendingCountUnknownGuestCount: 1,
+  attendingGuestCount: 3,
+  confirmedAttendeeCount: 6,
+  declinedGuestCount: 2,
+  invitedPeopleCount: 14,
+  pendingGuestCount: 3,
   pendingGuests: [{ displayName: 'Alya' }, { displayName: 'Bima' }, { displayName: 'Citra' }],
   respondedCount: 5,
   respondedPercentage: 63,
 };
 
-describe('SRY-020 RSVP analytics owner UI', () => {
-  it('renders factual current-state metrics, status breakdown, and a capped pending sample', () => {
+describe('SRY-028 RSVP attendance owner UI', () => {
+  it('renders separate guest-group and explicit attendance metrics with uncertainty clarity', () => {
     const html = renderToStaticMarkup(
       <RsvpAnalyticsDashboard analytics={analytics} projectId={projectId} />,
     );
 
     expect(html).toContain('Ringkasan RSVP');
-    expect(html).toContain('Lihat gambaran respons tamu untuk undangan kalian.');
-    expect(html).toContain('Semua angka menghitung data tamu, bukan total orang dalam rombongan.');
+    expect(html).toContain('Lihat respons tamu dan jumlah orang yang terkonfirmasi hadir.');
+    expect(html).toContain(
+      'Rombongan adalah data tamu. Jumlah orang hadir hanya dihitung dari konfirmasi yang dikirim tamu.',
+    );
     expect(html).toContain('Tamu terdaftar');
-    expect(html).toContain('Hadir');
-    expect(html).toContain('Tidak hadir');
+    expect(html).toContain('Orang diundang');
+    expect(html).toContain('Rombongan hadir');
+    expect(html).toContain('Orang terkonfirmasi hadir');
     expect(html).toContain('Belum merespons');
     expect(html).toContain('Sudah merespons');
     expect(html).toContain('5 dari 8 tamu');
     expect(html).toContain('63%');
+    expect(html).toContain('1 rombongan hadir belum mencantumkan jumlah orang.');
     expect(html).toContain('Menunggu respons');
     expect(html).toContain('Alya');
     expect(html).toContain('Bima');
@@ -43,7 +50,6 @@ describe('SRY-020 RSVP analytics owner UI', () => {
     expect(html).not.toContain('Buat tautan');
     expect(html).not.toContain('Kirim WhatsApp');
     expect(html).not.toContain('Ubah RSVP');
-    expect(html).not.toContain('party_size');
     expect(html).not.toContain('token_hash');
   });
 
@@ -52,9 +58,12 @@ describe('SRY-020 RSVP analytics owner UI', () => {
       <RsvpAnalyticsDashboard
         analytics={{
           activeGuestCount: 0,
-          attendingCount: 0,
-          declinedCount: 0,
-          pendingCount: 0,
+          attendingCountUnknownGuestCount: 0,
+          attendingGuestCount: 0,
+          confirmedAttendeeCount: 0,
+          declinedGuestCount: 0,
+          invitedPeopleCount: 0,
+          pendingGuestCount: 0,
           pendingGuests: [],
           respondedCount: 0,
           respondedPercentage: 0,
@@ -66,9 +75,12 @@ describe('SRY-020 RSVP analytics owner UI', () => {
       <RsvpAnalyticsDashboard
         analytics={{
           activeGuestCount: 2,
-          attendingCount: 2,
-          declinedCount: 0,
-          pendingCount: 0,
+          attendingCountUnknownGuestCount: 0,
+          attendingGuestCount: 2,
+          confirmedAttendeeCount: 2,
+          declinedGuestCount: 0,
+          invitedPeopleCount: 2,
+          pendingGuestCount: 0,
           pendingGuests: [],
           respondedCount: 2,
           respondedPercentage: 100,
@@ -92,7 +104,6 @@ describe('SRY-020 RSVP analytics owner UI', () => {
     expect(source).not.toContain('guest.actions');
     expect(source).not.toContain('guest-link');
     expect(source).not.toContain('token_hash');
-    expect(source).not.toContain('party_size');
     expect(source).not.toContain('<form');
   });
 });

@@ -29,6 +29,14 @@ export class GuestUnavailableError extends Error {
   }
 }
 
+/** Owner edits may not reduce an invited party below a submitted attendance count. */
+export class GuestAttendanceCountConflictError extends Error {
+  constructor() {
+    super('The invited party size cannot be lower than the confirmed attendee count.');
+    this.name = 'GuestAttendanceCountConflictError';
+  }
+}
+
 export type OwnedGuestManager = {
   guests: GuestListItem[];
   project: OwnedProject;
@@ -111,8 +119,18 @@ export async function updateGuestForCurrentUser(input: {
 }): Promise<GuestListItem> {
   const user = await requireCurrentUser();
   const project = await getOwnedProjectById(input.projectId, user.id);
-  const existing = await getActiveGuestForVerifiedProjectWithAdmin(project, input.guestId);
-  assertGuestBelongsToProject(existing, project.id);
+  const existing = assertGuestBelongsToProject(
+    await getActiveGuestForVerifiedProjectWithAdmin(project, input.guestId),
+    project.id,
+  );
+
+  if (
+    existing.rsvp_attendee_count !== null &&
+    input.guest.partySize < existing.rsvp_attendee_count
+  ) {
+    throw new GuestAttendanceCountConflictError();
+  }
+
   const guest = await updateGuestForVerifiedProject({
     guest: input.guest,
     guestId: input.guestId,

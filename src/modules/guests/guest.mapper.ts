@@ -10,6 +10,7 @@ export type GuestDatabaseRecord = {
   id: string;
   party_size: number;
   project_id: string;
+  rsvp_attendee_count?: number | null;
   rsvp_status: Guest['rsvp_status'];
   updated_at: string;
   whatsapp_phone_e164?: string | null;
@@ -24,6 +25,7 @@ export function mapGuest(record: GuestDatabaseRecord): Guest {
     id: record.id,
     party_size: record.party_size,
     project_id: record.project_id,
+    rsvp_attendee_count: record.rsvp_attendee_count ?? null,
     rsvp_status: record.rsvp_status,
     updated_at: record.updated_at,
     whatsapp_phone_e164: record.whatsapp_phone_e164 ?? null,
@@ -40,6 +42,7 @@ export function mapGuestListItem(
     id: guest.id,
     link_state: linkState,
     party_size: guest.party_size,
+    rsvp_attendee_count: guest.rsvp_attendee_count,
     rsvp_status: guest.rsvp_status,
     whatsapp_phone_e164: guest.whatsapp_phone_e164,
   };

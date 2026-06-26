@@ -208,7 +208,7 @@ export function ProjectOverviewBootstrap({
               >
                 <span className="text-base font-semibold">Ringkasan RSVP</span>
                 <span className="text-seraya-text-secondary text-sm font-normal">
-                  Lihat respons tamu yang sudah masuk.
+                  Lihat respons tamu dan jumlah orang yang terkonfirmasi hadir.
                 </span>
               </Link>
               <Link

@@ -14,29 +14,40 @@ export type OwnedRsvpAnalytics = {
 };
 
 /**
- * Calculates current guest-record status only. No response timeline, party-size
- * weighting, link metadata, or updated_at interpretation belongs here.
+ * Calculates active guest-group response state and explicit submitted attendee
+ * counts. party_size remains an invitation cap, never an inferred attendance.
  */
 export function createRsvpAnalyticsViewModel(
   guests: RsvpAnalyticsGuestRecord[],
 ): RsvpAnalyticsViewModel {
-  let attendingCount = 0;
-  let declinedCount = 0;
-  let pendingCount = 0;
+  let attendingGuestCount = 0;
+  let attendingCountUnknownGuestCount = 0;
+  let confirmedAttendeeCount = 0;
+  let declinedGuestCount = 0;
+  let invitedPeopleCount = 0;
+  let pendingGuestCount = 0;
   const pendingGuests: RsvpAnalyticsViewModel['pendingGuests'] = [];
 
   for (const guest of guests) {
+    invitedPeopleCount += guest.party_size;
+
     if (guest.rsvp_status === 'attending') {
-      attendingCount += 1;
+      attendingGuestCount += 1;
+
+      if (guest.rsvp_attendee_count === null) {
+        attendingCountUnknownGuestCount += 1;
+      } else {
+        confirmedAttendeeCount += guest.rsvp_attendee_count;
+      }
       continue;
     }
 
     if (guest.rsvp_status === 'declined') {
-      declinedCount += 1;
+      declinedGuestCount += 1;
       continue;
     }
 
-    pendingCount += 1;
+    pendingGuestCount += 1;
 
     if (pendingGuests.length < PENDING_GUEST_SAMPLE_LIMIT) {
       pendingGuests.push({ displayName: guest.display_name });
@@ -44,15 +55,18 @@ export function createRsvpAnalyticsViewModel(
   }
 
   const activeGuestCount = guests.length;
-  const respondedCount = attendingCount + declinedCount;
+  const respondedCount = attendingGuestCount + declinedGuestCount;
   const respondedPercentage =
     activeGuestCount === 0 ? 0 : Math.round((respondedCount / activeGuestCount) * 100);
 
   return {
     activeGuestCount,
-    attendingCount,
-    declinedCount,
-    pendingCount,
+    attendingCountUnknownGuestCount,
+    attendingGuestCount,
+    confirmedAttendeeCount,
+    declinedGuestCount,
+    invitedPeopleCount,
+    pendingGuestCount,
     pendingGuests,
     respondedCount,
     respondedPercentage,

@@ -12,6 +12,7 @@ export type Guest = {
   id: string;
   party_size: number;
   project_id: string;
+  rsvp_attendee_count: number | null;
   rsvp_status: GuestRsvpStatus;
   updated_at: string;
   whatsapp_phone_e164: string | null;
@@ -20,7 +21,7 @@ export type Guest = {
 /** Render-safe owner row: factual RSVP/link state only; no hash or raw personal URL. */
 export type GuestListItem = Pick<
   Guest,
-  'display_name' | 'group_label' | 'id' | 'party_size' | 'rsvp_status'
+  'display_name' | 'group_label' | 'id' | 'party_size' | 'rsvp_attendee_count' | 'rsvp_status'
 > & {
   link_state: GuestPersonalLinkState;
   whatsapp_phone_e164: string | null;

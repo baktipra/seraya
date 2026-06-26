@@ -6,11 +6,11 @@ import { createServerSupabaseClient } from '@/server/supabase/server';
 import { GuestRepositoryError } from './guest.repository';
 import type { RsvpAnalyticsGuestRecord } from './rsvp-analytics.types';
 
-const rsvpAnalyticsSelect = 'display_name, rsvp_status';
+const rsvpAnalyticsSelect = 'display_name, party_size, rsvp_status, rsvp_attendee_count';
 
 /**
- * Narrow owner-scoped source for RSVP current-state insight. The existing
- * project verification happens before this query; RLS still remains active.
+ * Narrow owner-scoped source for RSVP current-state insight. Existing project
+ * verification happens before this query; RLS still remains active.
  */
 export async function listRsvpAnalyticsGuestsForVerifiedProject(
   project: OwnedProject,
@@ -29,6 +29,8 @@ export async function listRsvpAnalyticsGuestsForVerifiedProject(
 
   return (data ?? []).map((guest) => ({
     display_name: guest.display_name,
+    party_size: guest.party_size,
+    rsvp_attendee_count: guest.rsvp_attendee_count ?? null,
     rsvp_status: guest.rsvp_status,
   }));
 }

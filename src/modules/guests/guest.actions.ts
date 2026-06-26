@@ -12,6 +12,7 @@ import {
 import { GuestAccessDeniedError } from './guest.policy';
 import {
   createGuestForCurrentUser,
+  GuestAttendanceCountConflictError,
   isGuestRepositoryFailure,
   softRemoveGuestForCurrentUser,
   updateGuestForCurrentUser,
@@ -21,6 +22,7 @@ import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 function revalidateGuestSurfaces(projectId: string) {
   revalidatePath(`/dashboard/${projectId}`);
   revalidatePath(`/dashboard/${projectId}/guests`);
+  revalidatePath(`/dashboard/${projectId}/rsvp`);
 }
 
 /** Server Action module intentionally exports async functions only. */
@@ -98,6 +100,17 @@ export async function updateGuestAction(
   } catch (error) {
     if (error instanceof ProjectAccessDeniedError || error instanceof GuestAccessDeniedError) {
       return { message: 'Tamu tidak dapat diperbarui untuk undangan ini.', status: 'error' };
+    }
+
+    if (error instanceof GuestAttendanceCountConflictError) {
+      return {
+        fieldErrors: {
+          partySize:
+            'Jumlah undangan tidak boleh lebih kecil dari jumlah orang yang sudah dikonfirmasi hadir.',
+        },
+        message: 'Periksa jumlah undangan untuk tamu ini.',
+        status: 'error',
+      };
     }
 
     console.error('Seraya guest update failed.', {

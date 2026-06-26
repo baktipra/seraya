@@ -197,15 +197,27 @@ function useGuestActionFeedback(state: SuccessActionState, options: { onSuccess:
   }, [options, router, state.message, state.status, toast]);
 }
 
+function getOwnerRsvpSummary(guest: GuestListItem) {
+  if (guest.rsvp_status !== 'attending') {
+    return rsvpStatusLabels[guest.rsvp_status];
+  }
+
+  if (guest.rsvp_attendee_count === null) {
+    return 'Hadir — jumlah belum dikonfirmasi';
+  }
+
+  return `Hadir — ${guest.rsvp_attendee_count} dari ${guest.party_size} orang`;
+}
+
 function GuestStateSummary({ guest }: { guest: GuestListItem }) {
   return (
-    <dl className="text-seraya-text-muted grid grid-cols-2 gap-x-4 gap-y-1 text-xs leading-5 sm:text-sm">
+    <dl className="text-seraya-text-muted grid grid-cols-1 gap-x-4 gap-y-1 text-xs leading-5 sm:grid-cols-2 sm:text-sm">
       <div>
         <dt className="sr-only">Status RSVP</dt>
         <dd>
           RSVP:{' '}
           <span className="text-seraya-text-primary font-semibold">
-            {rsvpStatusLabels[guest.rsvp_status]}
+            {getOwnerRsvpSummary(guest)}
           </span>
         </dd>
       </div>

@@ -25,7 +25,10 @@ const personalInvitationRobots: Metadata['robots'] = {
 
 type PersonalGuestInvitationPageProps = {
   params: Promise<{ guestToken: string; slug: string }>;
-  searchParams?: Promise<{ guestbook?: string | string[] | undefined }>;
+  searchParams?: Promise<{
+    guestbook?: string | string[] | undefined;
+    rsvp?: string | string[] | undefined;
+  }>;
 };
 
 /** Metadata is deliberately token-free and does not perform a capability lookup. */
@@ -70,6 +73,7 @@ export default async function PersonalGuestInvitationPage({
       : resolvedSearchParams?.guestbook === 'error'
         ? 'error'
         : undefined;
+  const rsvpFeedback = resolvedSearchParams?.rsvp === 'success' ? 'success' : undefined;
 
   const galleryImages = await getPublicGalleryImagesForCurrentSnapshot(
     snapshot.draft.gallery.imageIds,
@@ -92,6 +96,9 @@ export default async function PersonalGuestInvitationPage({
       {snapshot.draft.rsvp.enabled ? (
         <PersonalGuestRsvp
           guestToken={guestToken}
+          feedback={rsvpFeedback}
+          partySize={personalInvitation.partySize}
+          rsvpAttendeeCount={personalInvitation.rsvpAttendeeCount}
           rsvpStatus={personalInvitation.rsvpStatus}
           slug={slug}
         />

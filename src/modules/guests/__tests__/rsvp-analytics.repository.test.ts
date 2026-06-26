@@ -1,14 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { createServerSupabaseClientMock, eqMock, fromMock, isMock, orderMock, selectMock } =
-  vi.hoisted(() => ({
+const { createServerSupabaseClientMock, eqMock, isMock, orderMock, selectMock } = vi.hoisted(
+  () => ({
     createServerSupabaseClientMock: vi.fn(),
     eqMock: vi.fn(),
-    fromMock: vi.fn(),
     isMock: vi.fn(),
     orderMock: vi.fn(),
     selectMock: vi.fn(),
-  }));
+  }),
+);
 
 vi.mock('@/server/supabase/server', () => ({
   createServerSupabaseClient: createServerSupabaseClientMock,
@@ -26,54 +26,45 @@ const project = {
   person_one_name: 'Raka',
   person_two_name: 'Nadia',
   slug: 'raka-nadia',
-  status: 'draft',
+  status: 'published',
 };
 
-describe('SRY-020 RSVP analytics repository boundary', () => {
+describe('SRY-028 RSVP analytics repository', () => {
   beforeEach(() => {
     createServerSupabaseClientMock.mockReset();
     eqMock.mockReset();
-    fromMock.mockReset();
     isMock.mockReset();
     orderMock.mockReset();
     selectMock.mockReset();
 
+    createServerSupabaseClientMock.mockResolvedValue({
+      from: () => ({ select: selectMock }),
+    });
+    selectMock.mockReturnValue({ eq: eqMock });
+    eqMock.mockReturnValue({ is: isMock });
+    isMock.mockReturnValue({ order: orderMock });
+  });
+
+  it('uses one narrow active-guest query with the fields needed for truthful current counts', async () => {
     orderMock.mockResolvedValue({
       data: [
-        { display_name: 'Alya', rsvp_status: 'pending' },
-        { display_name: 'Bima', rsvp_status: 'attending' },
+        { display_name: 'Alya', party_size: 3, rsvp_attendee_count: 2, rsvp_status: 'attending' },
+        { display_name: 'Bima', party_size: 1, rsvp_attendee_count: null, rsvp_status: 'pending' },
       ],
       error: null,
     });
-    isMock.mockReturnValue({ order: orderMock });
-    eqMock.mockReturnValue({ is: isMock });
-    selectMock.mockReturnValue({ eq: eqMock });
-    fromMock.mockReturnValue({ select: selectMock });
-    createServerSupabaseClientMock.mockResolvedValue({ from: fromMock });
-  });
 
-  it('uses one narrow active-guest query in the established owner/RLS boundary', async () => {
     const records = await listRsvpAnalyticsGuestsForVerifiedProject(project);
 
-    expect(fromMock).toHaveBeenCalledWith('guests');
-    expect(selectMock).toHaveBeenCalledWith('display_name, rsvp_status');
+    expect(selectMock).toHaveBeenCalledWith(
+      'display_name, party_size, rsvp_status, rsvp_attendee_count',
+    );
     expect(eqMock).toHaveBeenCalledWith('project_id', project.id);
     expect(isMock).toHaveBeenCalledWith('deleted_at', null);
     expect(orderMock).toHaveBeenCalledWith('created_at', { ascending: true });
     expect(records).toEqual([
-      { display_name: 'Alya', rsvp_status: 'pending' },
-      { display_name: 'Bima', rsvp_status: 'attending' },
+      { display_name: 'Alya', party_size: 3, rsvp_attendee_count: 2, rsvp_status: 'attending' },
+      { display_name: 'Bima', party_size: 1, rsvp_attendee_count: null, rsvp_status: 'pending' },
     ]);
-  });
-
-  it('does not select party size, guest IDs, links, tokens, payment data, or updated_at', async () => {
-    await listRsvpAnalyticsGuestsForVerifiedProject(project);
-
-    const selectedColumns = selectMock.mock.calls[0]?.[0] ?? '';
-    expect(selectedColumns).not.toContain('party_size');
-    expect(selectedColumns).not.toContain('id');
-    expect(selectedColumns).not.toContain('token');
-    expect(selectedColumns).not.toContain('payment');
-    expect(selectedColumns).not.toContain('updated_at');
   });
 });

@@ -39,15 +39,15 @@ function RsvpBreakdownItem({ count, label, toneClassName, total }: RsvpBreakdown
       <div className="flex items-baseline justify-between gap-4">
         <p className="text-seraya-text-primary text-sm font-semibold">{label}</p>
         <p className="text-seraya-text-secondary text-sm tabular-nums">
-          {count} tamu <span className="text-seraya-text-muted">({percentage}%)</span>
+          {count} rombongan <span className="text-seraya-text-muted">({percentage}%)</span>
         </p>
       </div>
       <div
-        aria-label={`${label}: ${count} dari ${total} tamu`}
+        aria-label={`${label}: ${count} dari ${total} rombongan`}
         aria-valuemax={ariaMaximum}
         aria-valuemin={0}
         aria-valuenow={count}
-        aria-valuetext={`${count} dari ${total} tamu`}
+        aria-valuetext={`${count} dari ${total} rombongan`}
         className="bg-seraya-soft h-2 overflow-hidden rounded-full"
         role="progressbar"
       >
@@ -69,7 +69,7 @@ function PendingGuestContent({ analytics }: Pick<RsvpAnalyticsDashboardProps, 'a
     );
   }
 
-  if (analytics.pendingCount === 0) {
+  if (analytics.pendingGuestCount === 0) {
     return (
       <p className="text-seraya-text-secondary text-sm leading-6">
         Semua tamu sudah memberi respons.
@@ -91,7 +91,7 @@ function PendingGuestContent({ analytics }: Pick<RsvpAnalyticsDashboardProps, 'a
   );
 }
 
-/** Read-only owner summary composed solely from current active guest RSVP state. */
+/** Read-only owner summary of current guest-group RSVP plus explicit attendance counts. */
 export function RsvpAnalyticsDashboard({ analytics, projectId }: RsvpAnalyticsDashboardProps) {
   return (
     <section
@@ -109,21 +109,23 @@ export function RsvpAnalyticsDashboard({ analytics, projectId }: RsvpAnalyticsDa
           Ringkasan RSVP
         </h1>
         <p className="text-seraya-text-secondary mt-3 max-w-2xl text-base leading-7">
-          Lihat gambaran respons tamu untuk undangan kalian.
+          Lihat respons tamu dan jumlah orang yang terkonfirmasi hadir.
         </p>
         <p className="text-seraya-text-muted mt-4 text-sm leading-6">
-          Semua angka menghitung data tamu, bukan total orang dalam rombongan.
+          Rombongan adalah data tamu. Jumlah orang hadir hanya dihitung dari konfirmasi yang dikirim
+          tamu.
         </p>
       </header>
 
       <section
         aria-label="Angka RSVP saat ini"
-        className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+        className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5"
       >
         <MetricCard label="Tamu terdaftar" value={analytics.activeGuestCount} />
-        <MetricCard label="Hadir" value={analytics.attendingCount} />
-        <MetricCard label="Tidak hadir" value={analytics.declinedCount} />
-        <MetricCard label="Belum merespons" value={analytics.pendingCount} />
+        <MetricCard label="Orang diundang" value={analytics.invitedPeopleCount} />
+        <MetricCard label="Rombongan hadir" value={analytics.attendingGuestCount} />
+        <MetricCard label="Orang terkonfirmasi hadir" value={analytics.confirmedAttendeeCount} />
+        <MetricCard label="Belum merespons" value={analytics.pendingGuestCount} />
       </section>
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(18rem,0.75fr)]">
@@ -163,21 +165,28 @@ export function RsvpAnalyticsDashboard({ analytics, projectId }: RsvpAnalyticsDa
               </div>
             </div>
 
+            {analytics.attendingCountUnknownGuestCount > 0 ? (
+              <p className="border-seraya-border-default bg-seraya-canvas text-seraya-text-secondary rounded-[var(--seraya-radius-md)] border px-4 py-3 text-sm leading-6">
+                {analytics.attendingCountUnknownGuestCount} rombongan hadir belum mencantumkan
+                jumlah orang.
+              </p>
+            ) : null}
+
             <div aria-label="Rincian status RSVP" className="space-y-5">
               <RsvpBreakdownItem
-                count={analytics.attendingCount}
+                count={analytics.attendingGuestCount}
                 label="Hadir"
                 toneClassName="bg-seraya-status-success"
                 total={analytics.activeGuestCount}
               />
               <RsvpBreakdownItem
-                count={analytics.declinedCount}
+                count={analytics.declinedGuestCount}
                 label="Tidak hadir"
                 toneClassName="bg-seraya-status-error"
                 total={analytics.activeGuestCount}
               />
               <RsvpBreakdownItem
-                count={analytics.pendingCount}
+                count={analytics.pendingGuestCount}
                 label="Belum merespons"
                 toneClassName="bg-seraya-text-muted"
                 total={analytics.activeGuestCount}

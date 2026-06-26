@@ -78,6 +78,7 @@ export async function resolvePersonalGuestInvitationRecord(input: { slug: string
 
 /** Anonymous-safe RSVP mutation. No project or guest identifiers are accepted. */
 export async function submitPersonalGuestRsvpRecord(input: {
+  attendeeCount: number | null;
   slug: string;
   status: 'attending' | 'declined';
   token: string;
@@ -85,6 +86,7 @@ export async function submitPersonalGuestRsvpRecord(input: {
   const supabase = createPublicSupabaseClient();
   const { data, error } = await supabase.rpc('submit_personal_guest_rsvp', {
     raw_token: input.token,
+    requested_attendee_count: input.attendeeCount,
     requested_slug: input.slug,
     requested_status: input.status,
   });

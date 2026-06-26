@@ -26,8 +26,14 @@ describe('SRY-012 / SRY-013 guest privacy source contract', () => {
     expect(publicService).not.toContain('guests');
     expect(publicService).not.toContain('guest_links');
     expect(publicRoute).not.toContain('whatsapp_phone_e164');
+    expect(publicRoute).not.toContain('rsvp_attendee_count');
+    expect(publicRoute).not.toContain('party_size');
     expect(snapshotSchema).not.toContain('whatsapp_phone_e164');
+    expect(snapshotSchema).not.toContain('rsvp_attendee_count');
+    expect(snapshotSchema).not.toContain('party_size');
     expect(publicService).not.toContain('whatsapp_phone_e164');
+    expect(publicService).not.toContain('rsvp_attendee_count');
+    expect(publicService).not.toContain('party_size');
     expect(personalRoute).not.toContain('whatsapp_phone_e164');
     expect(personalService).not.toContain('whatsapp_phone_e164');
   });

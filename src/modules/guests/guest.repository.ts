@@ -8,7 +8,7 @@ import { mapGuest, type GuestDatabaseRecord } from './guest.mapper';
 import type { CreateGuestInput, Guest, UpdateGuestInput } from './guest.types';
 
 const guestSelect =
-  'id, project_id, display_name, group_label, party_size, rsvp_status, whatsapp_phone_e164, created_at, updated_at, deleted_at';
+  'id, project_id, display_name, group_label, party_size, rsvp_status, rsvp_attendee_count, whatsapp_phone_e164, created_at, updated_at, deleted_at';
 
 export class GuestRepositoryError extends Error {
   constructor() {

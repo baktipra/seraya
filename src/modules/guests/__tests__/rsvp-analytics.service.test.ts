@@ -33,88 +33,91 @@ const project = {
   person_one_name: 'Raka',
   person_two_name: 'Nadia',
   slug: 'raka-nadia',
-  status: 'draft',
+  status: 'published',
 };
 
-describe('SRY-020 RSVP analytics current-state service', () => {
+describe('SRY-028 RSVP attendance analytics', () => {
   beforeEach(() => {
-    getOwnedProjectMock.mockReset();
+    getOwnedProjectMock.mockReset().mockResolvedValue(project);
     listRsvpAnalyticsGuestsMock.mockReset();
-    requireCurrentUserMock.mockReset();
-
-    requireCurrentUserMock.mockResolvedValue({ id: project.account_id });
-    getOwnedProjectMock.mockResolvedValue(project);
+    requireCurrentUserMock.mockReset().mockResolvedValue({ id: project.account_id });
   });
 
-  it('calculates active guest-record status counts and a deterministic pending sample', () => {
+  it('keeps guest-group metrics separate from invited and confirmed people totals', () => {
     const analytics = createRsvpAnalyticsViewModel([
-      { display_name: 'Alya', rsvp_status: 'pending' },
-      { display_name: 'Bima', rsvp_status: 'attending' },
-      { display_name: 'Citra', rsvp_status: 'declined' },
-      { display_name: 'Dara', rsvp_status: 'pending' },
+      { display_name: 'Alya', party_size: 4, rsvp_attendee_count: null, rsvp_status: 'pending' },
+      { display_name: 'Bima', party_size: 3, rsvp_attendee_count: 2, rsvp_status: 'attending' },
+      { display_name: 'Citra', party_size: 2, rsvp_attendee_count: null, rsvp_status: 'attending' },
+      { display_name: 'Dara', party_size: 1, rsvp_attendee_count: null, rsvp_status: 'declined' },
     ]);
 
     expect(analytics).toEqual({
       activeGuestCount: 4,
-      attendingCount: 1,
-      declinedCount: 1,
-      pendingCount: 2,
-      pendingGuests: [{ displayName: 'Alya' }, { displayName: 'Dara' }],
-      respondedCount: 2,
-      respondedPercentage: 50,
+      attendingCountUnknownGuestCount: 1,
+      attendingGuestCount: 2,
+      confirmedAttendeeCount: 2,
+      declinedGuestCount: 1,
+      invitedPeopleCount: 10,
+      pendingGuestCount: 1,
+      pendingGuests: [{ displayName: 'Alya' }],
+      respondedCount: 3,
+      respondedPercentage: 75,
     });
   });
 
-  it('uses guest records rather than party-size-like extra data and caps pending guests at five', () => {
-    const guests = [
-      { display_name: 'Satu', party_size: 20, rsvp_status: 'pending' },
-      { display_name: 'Dua', party_size: 20, rsvp_status: 'pending' },
-      { display_name: 'Tiga', party_size: 20, rsvp_status: 'pending' },
-      { display_name: 'Empat', party_size: 20, rsvp_status: 'pending' },
-      { display_name: 'Lima', party_size: 20, rsvp_status: 'pending' },
-      { display_name: 'Enam', party_size: 20, rsvp_status: 'pending' },
-    ] as unknown as Parameters<typeof createRsvpAnalyticsViewModel>[0];
+  it('caps pending sample by active pending guest order and never weights attendance by party size', () => {
+    const guests = Array.from({ length: 6 }, (_, index) => ({
+      display_name: `Tamu ${index + 1}`,
+      party_size: 20,
+      rsvp_attendee_count: null,
+      rsvp_status: 'pending' as const,
+    }));
 
     const analytics = createRsvpAnalyticsViewModel(guests);
 
-    expect(analytics.activeGuestCount).toBe(6);
-    expect(analytics.pendingCount).toBe(6);
-    expect(analytics.respondedCount).toBe(0);
-    expect(analytics.respondedPercentage).toBe(0);
     expect(analytics.pendingGuests).toEqual([
-      { displayName: 'Satu' },
-      { displayName: 'Dua' },
-      { displayName: 'Tiga' },
-      { displayName: 'Empat' },
-      { displayName: 'Lima' },
+      { displayName: 'Tamu 1' },
+      { displayName: 'Tamu 2' },
+      { displayName: 'Tamu 3' },
+      { displayName: 'Tamu 4' },
+      { displayName: 'Tamu 5' },
     ]);
+    expect(analytics.pendingGuestCount).toBe(6);
+    expect(analytics.invitedPeopleCount).toBe(120);
+    expect(analytics.confirmedAttendeeCount).toBe(0);
   });
 
-  it('handles an empty active guest directory with a truthful zero percent', () => {
+  it('returns a safe zero state with no people or percentage for no active guests', () => {
     expect(createRsvpAnalyticsViewModel([])).toEqual({
       activeGuestCount: 0,
-      attendingCount: 0,
-      declinedCount: 0,
-      pendingCount: 0,
+      attendingCountUnknownGuestCount: 0,
+      attendingGuestCount: 0,
+      confirmedAttendeeCount: 0,
+      declinedGuestCount: 0,
+      invitedPeopleCount: 0,
+      pendingGuestCount: 0,
       pendingGuests: [],
       respondedCount: 0,
       respondedPercentage: 0,
     });
   });
 
-  it('verifies owner project scope before loading the narrow guest data', async () => {
+  it('verifies owner scope before the narrow RSVP record read', async () => {
     listRsvpAnalyticsGuestsMock.mockResolvedValue([
-      { display_name: 'Alya', rsvp_status: 'attending' },
+      { display_name: 'Alya', party_size: 2, rsvp_attendee_count: 1, rsvp_status: 'attending' },
     ]);
 
     const result = await getRsvpAnalyticsForCurrentUser(project.id);
 
     expect(getOwnedProjectMock).toHaveBeenCalledWith(project.id, project.account_id);
     expect(listRsvpAnalyticsGuestsMock).toHaveBeenCalledWith(project);
-    expect(result.analytics).toMatchObject({ attendingCount: 1, activeGuestCount: 1 });
+    expect(result.analytics).toMatchObject({
+      attendingGuestCount: 1,
+      confirmedAttendeeCount: 1,
+    });
   });
 
-  it('does not query guest analytics for an unavailable or foreign-owned project', async () => {
+  it('does not read guest records when owner-project verification fails', async () => {
     getOwnedProjectMock.mockRejectedValue(new ProjectAccessDeniedError());
 
     await expect(
@@ -124,16 +127,19 @@ describe('SRY-020 RSVP analytics current-state service', () => {
     expect(listRsvpAnalyticsGuestsMock).not.toHaveBeenCalled();
   });
 
-  it('returns a DTO without guest IDs, links, tokens, payment fields, or response-history fields', () => {
+  it('does not expose IDs, link state, guest contacts, or raw party rows in the DTO', () => {
     const analytics = createRsvpAnalyticsViewModel([
-      { display_name: 'Alya', rsvp_status: 'pending' },
+      { display_name: 'Alya', party_size: 2, rsvp_attendee_count: null, rsvp_status: 'pending' },
     ]);
 
     expect(Object.keys(analytics).sort()).toEqual([
       'activeGuestCount',
-      'attendingCount',
-      'declinedCount',
-      'pendingCount',
+      'attendingCountUnknownGuestCount',
+      'attendingGuestCount',
+      'confirmedAttendeeCount',
+      'declinedGuestCount',
+      'invitedPeopleCount',
+      'pendingGuestCount',
       'pendingGuests',
       'respondedCount',
       'respondedPercentage',

@@ -224,7 +224,7 @@ async function createPersonalGuestLink(db: PGlite, guestId: string, token: strin
   `);
 }
 
-describe('SRY-003 through SRY-027 Supabase migrations, ownership, drafts, publication, media, payments, guests, personal links, RSVP, private contact data, and guestbook', () => {
+describe('SRY-003 through SRY-028 Supabase migrations, ownership, drafts, publication, media, payments, guests, personal links, RSVP, private contact data, and guestbook', () => {
   // Full Vitest runs compile the whole app beside this PGlite migration harness.
   // Allow the first cold database/migration setup enough room without weakening
   // any assertion or production behaviour.
@@ -2157,17 +2157,17 @@ describe('SRY-003 through SRY-027 Supabase migrations, ownership, drafts, public
     );
   });
 
-  it('resolves only active linked guests against the matching current published snapshot and updates only that RSVP', async () => {
+  it('resolves only the linked active guest RSVP state and validates explicit attendance count against server party size', async () => {
     const guestA = 'd7777777-7777-4777-8777-777777777777';
     const guestB = 'd8888888-8888-4888-8888-888888888888';
     const tokenA = createRuntimePersonalGuestToken();
 
     await resetToDatabaseOwner(database);
     await database.exec(`
-      insert into public.guests (id, project_id, display_name)
+      insert into public.guests (id, project_id, display_name, party_size)
       values
-        ('${guestA}', '${projectA}', 'Tamu RSVP A'),
-        ('${guestB}', '${projectA}', 'Tamu RSVP B');
+        ('${guestA}', '${projectA}', 'Tamu RSVP A', 4),
+        ('${guestB}', '${projectA}', 'Tamu RSVP B', 2);
     `);
     await createVerifiedPaidActivationPayment(database, projectA, userA);
     await impersonateAuthenticatedUser(database, userA);
@@ -2177,6 +2177,8 @@ describe('SRY-003 through SRY-027 Supabase migrations, ownership, drafts, public
     await impersonateAnonymousUser(database);
     const resolved = await database.query<{
       guest_display_name: string;
+      party_size: number;
+      rsvp_attendee_count: string | null;
       rsvp_status: string;
       snapshot: { draft: { rsvp: { enabled: boolean } } };
       template_id: string;
@@ -2186,49 +2188,135 @@ describe('SRY-003 through SRY-027 Supabase migrations, ownership, drafts, public
     expect(resolved.rows).toHaveLength(1);
     expect(resolved.rows[0]).toMatchObject({
       guest_display_name: 'Tamu RSVP A',
+      party_size: 4,
+      rsvp_attendee_count: null,
       rsvp_status: 'pending',
       snapshot: { draft: { rsvp: { enabled: true } } },
       template_id: 'roselle',
     });
     expect(Object.keys(resolved.rows[0] ?? {}).sort()).toEqual([
       'guest_display_name',
+      'party_size',
+      'rsvp_attendee_count',
       'rsvp_status',
       'snapshot',
       'template_id',
     ]);
 
+    const rejectedZero = await database.query<{ status: string | null }>(`
+      select public.submit_personal_guest_rsvp(
+        'owner-a-wedding', '${tokenA}', 'attending'::public.rsvp_status, 0::smallint
+      )::text as status;
+    `);
+    expect(rejectedZero.rows).toEqual([{ status: null }]);
+
+    const rejectedOverLimit = await database.query<{ status: string | null }>(`
+      select public.submit_personal_guest_rsvp(
+        'owner-a-wedding', '${tokenA}', 'attending'::public.rsvp_status, 5::smallint
+      )::text as status;
+    `);
+    expect(rejectedOverLimit.rows).toEqual([{ status: null }]);
+
     const attending = await database.query<{ status: string | null }>(`
       select public.submit_personal_guest_rsvp(
-        'owner-a-wedding', '${tokenA}', 'attending'::public.rsvp_status
+        'owner-a-wedding', '${tokenA}', 'attending'::public.rsvp_status, 2::smallint
       )::text as status;
     `);
     expect(attending.rows).toEqual([{ status: 'attending' }]);
 
     const declined = await database.query<{ status: string | null }>(`
       select public.submit_personal_guest_rsvp(
-        'owner-a-wedding', '${tokenA}', 'declined'::public.rsvp_status
+        'owner-a-wedding', '${tokenA}', 'declined'::public.rsvp_status, 4::smallint
       )::text as status;
     `);
     expect(declined.rows).toEqual([{ status: 'declined' }]);
 
     const rejectedPending = await database.query<{ status: string | null }>(`
       select public.submit_personal_guest_rsvp(
-        'owner-a-wedding', '${tokenA}', 'pending'::public.rsvp_status
+        'owner-a-wedding', '${tokenA}', 'pending'::public.rsvp_status, null::smallint
       )::text as status;
     `);
     expect(rejectedPending.rows).toEqual([{ status: null }]);
 
     await resetToDatabaseOwner(database);
-    const guestStatuses = await database.query<{ id: string; rsvp_status: string }>(`
-      select id, rsvp_status::text as rsvp_status
+    const guestStatuses = await database.query<{
+      id: string;
+      rsvp_attendee_count: string | null;
+      rsvp_status: string;
+    }>(`
+      select id, rsvp_status::text as rsvp_status, rsvp_attendee_count::text as rsvp_attendee_count
       from public.guests
       where id in ('${guestA}', '${guestB}')
       order by id;
     `);
     expect(guestStatuses.rows).toEqual([
-      { id: guestA, rsvp_status: 'declined' },
-      { id: guestB, rsvp_status: 'pending' },
+      { id: guestA, rsvp_attendee_count: null, rsvp_status: 'declined' },
+      { id: guestB, rsvp_attendee_count: null, rsvp_status: 'pending' },
     ]);
+  });
+
+  it('keeps legacy attending RSVP rows with unknown count deploy-safe while enforcing M0017 count constraints', async () => {
+    const legacyGuest = 'd7878787-7878-4787-8787-787878787878';
+    const confirmedGuest = 'd7979797-7979-4797-8797-797979797979';
+
+    await resetToDatabaseOwner(database);
+    await database.exec(`
+      insert into public.guests (id, project_id, display_name, party_size, rsvp_status)
+      values ('${legacyGuest}', '${projectA}', 'Tamu Legacy Hadir', 4, 'attending'::public.rsvp_status);
+
+      insert into public.guests (
+        id, project_id, display_name, party_size, rsvp_status, rsvp_attendee_count
+      )
+      values (
+        '${confirmedGuest}', '${projectA}', 'Tamu Konfirmasi', 4,
+        'attending'::public.rsvp_status, 3
+      );
+    `);
+
+    const legacy = await database.query<{
+      rsvp_attendee_count: string | null;
+      rsvp_status: string;
+    }>(`
+      select rsvp_status::text as rsvp_status, rsvp_attendee_count::text as rsvp_attendee_count
+      from public.guests where id = '${legacyGuest}';
+    `);
+    expect(legacy.rows).toEqual([{ rsvp_attendee_count: null, rsvp_status: 'attending' }]);
+
+    await expect(
+      database.query(`
+        insert into public.guests (
+          project_id, display_name, party_size, rsvp_status, rsvp_attendee_count
+        ) values (
+          '${projectA}', 'Pending Tidak Valid', 2, 'pending'::public.rsvp_status, 1
+        );
+      `),
+    ).rejects.toThrow(/guests_rsvp_attendee_count_contract/i);
+
+    await expect(
+      database.query(`
+        insert into public.guests (
+          project_id, display_name, party_size, rsvp_status, rsvp_attendee_count
+        ) values (
+          '${projectA}', 'Declined Tidak Valid', 2, 'declined'::public.rsvp_status, 1
+        );
+      `),
+    ).rejects.toThrow(/guests_rsvp_attendee_count_contract/i);
+
+    await expect(
+      database.query(`
+        update public.guests
+        set rsvp_status = 'pending'::public.rsvp_status, rsvp_attendee_count = 1
+        where id = '${confirmedGuest}';
+      `),
+    ).rejects.toThrow(/guests_rsvp_attendee_count_contract/i);
+
+    await expect(
+      database.query(`
+        update public.guests
+        set party_size = 2
+        where id = '${confirmedGuest}';
+      `),
+    ).rejects.toThrow(/guests_rsvp_attendee_count_contract/i);
   });
 
   it('invalidates replaced, revoked, expired, soft-removed, unpublished, deleted, and cross-project links uniformly', async () => {
@@ -2296,6 +2384,26 @@ describe('SRY-003 through SRY-027 Supabase migrations, ownership, drafts, public
     expect(foreignCrossProjectLink.rows).toEqual([]);
     expect(unpublishedForeignLink.rows).toEqual([]);
 
+    const revokedRsvp = await database.query<{ status: string | null }>(`
+      select public.submit_personal_guest_rsvp(
+        'owner-a-wedding', '${oldToken}', 'declined'::public.rsvp_status, null::smallint
+      )::text as status;
+    `);
+    const expiredRsvp = await database.query<{ status: string | null }>(`
+      select public.submit_personal_guest_rsvp(
+        'owner-a-wedding', '${expiredToken}', 'declined'::public.rsvp_status, null::smallint
+      )::text as status;
+    `);
+    const crossProjectRsvp = await database.query<{ status: string | null }>(`
+      select public.submit_personal_guest_rsvp(
+        'owner-a-wedding', '${foreignToken}', 'declined'::public.rsvp_status, null::smallint
+      )::text as status;
+    `);
+
+    expect(revokedRsvp.rows).toEqual([{ status: null }]);
+    expect(expiredRsvp.rows).toEqual([{ status: null }]);
+    expect(crossProjectRsvp.rows).toEqual([{ status: null }]);
+
     await resetToDatabaseOwner(database);
     await database.exec(`
       update public.guests set deleted_at = now() where id = '${softRemovedGuest}';
@@ -2312,7 +2420,13 @@ describe('SRY-003 through SRY-027 Supabase migrations, ownership, drafts, public
     const softRemovedLink = await database.query(`
       select * from public.resolve_personal_guest_invitation('owner-a-wedding', '${softRemovedToken}');
     `);
+    const softRemovedRsvp = await database.query<{ status: string | null }>(`
+      select public.submit_personal_guest_rsvp(
+        'owner-a-wedding', '${softRemovedToken}', 'declined'::public.rsvp_status, null::smallint
+      )::text as status;
+    `);
     expect(softRemovedLink.rows).toEqual([]);
+    expect(softRemovedRsvp.rows).toEqual([{ status: null }]);
 
     await resetToDatabaseOwner(database);
     await database.exec(
@@ -2533,7 +2647,7 @@ describe('SRY-003 through SRY-027 Supabase migrations, ownership, drafts, public
     await impersonateAnonymousUser(database);
     const rejected = await database.query<{ status: string | null }>(`
       select public.submit_personal_guest_rsvp(
-        'owner-a-wedding', '${token}', 'declined'::public.rsvp_status
+        'owner-a-wedding', '${token}', 'declined'::public.rsvp_status, null::smallint
       )::text as status;
     `);
     expect(rejected.rows).toEqual([{ status: null }]);

@@ -17,6 +17,7 @@ vi.mock('../guest-link.repository', () => ({
 
 import {
   getPersonalGuestInvitationByToken,
+  parsePersonalGuestRsvpSubmission,
   submitPersonalGuestRsvp,
 } from '../personal-invitation.service';
 
@@ -35,17 +36,19 @@ const snapshot = {
   },
 };
 
-describe('SRY-013 anonymous personal invitation service', () => {
+describe('SRY-028 anonymous personal RSVP service', () => {
   beforeEach(() => {
     resolveRecordMock.mockReset();
     submitRecordMock.mockReset();
   });
 
-  it('maps only snapshot, linked display name, and current RSVP state from a narrow resolver', async () => {
+  it('maps only snapshot, linked display name, and that guest’s RSVP/party fields from a narrow resolver', async () => {
     const token = randomBytes(32).toString('base64url');
     resolveRecordMock.mockResolvedValue({
       guest_display_name: 'Keluarga Budi',
-      rsvp_status: 'pending',
+      party_size: 4,
+      rsvp_attendee_count: 2,
+      rsvp_status: 'attending',
       snapshot,
       template_id: 'roselle',
     });
@@ -53,7 +56,9 @@ describe('SRY-013 anonymous personal invitation service', () => {
     await expect(getPersonalGuestInvitationByToken({ slug: 'raka-nadia', token })).resolves.toEqual(
       {
         guestDisplayName: 'Keluarga Budi',
-        rsvpStatus: 'pending',
+        partySize: 4,
+        rsvpAttendeeCount: 2,
+        rsvpStatus: 'attending',
         snapshot,
         templateId: 'roselle',
       },
@@ -62,12 +67,14 @@ describe('SRY-013 anonymous personal invitation service', () => {
     expect(resolveRecordMock).toHaveBeenCalledWith({ slug: 'raka-nadia', token });
   });
 
-  it('normalizes a legacy personal snapshot without digitalGift before route rendering', async () => {
+  it('normalizes legacy personal snapshot data without digitalGift before route rendering', async () => {
     const token = randomBytes(32).toString('base64url');
     const legacyDraft = { ...snapshot.draft };
     delete (legacyDraft as Partial<typeof legacyDraft>).digitalGift;
     resolveRecordMock.mockResolvedValue({
       guest_display_name: 'Keluarga Budi',
+      party_size: 1,
+      rsvp_attendee_count: null,
       rsvp_status: 'pending',
       snapshot: { ...snapshot, draft: legacyDraft },
       template_id: 'roselle',
@@ -84,21 +91,20 @@ describe('SRY-013 anonymous personal invitation service', () => {
     });
   });
 
-  it('accepts a selected published template id without adding any guest data to the snapshot DTO', async () => {
+  it('rejects a resolver payload that tries to retain an attendance count outside the resolved party limit', async () => {
     const token = randomBytes(32).toString('base64url');
     resolveRecordMock.mockResolvedValue({
       guest_display_name: 'Keluarga Budi',
-      rsvp_status: 'pending',
-      snapshot: { ...snapshot, draft: { ...snapshot.draft, templateKey: 'laras' } },
-      template_id: 'laras',
+      party_size: 2,
+      rsvp_attendee_count: 3,
+      rsvp_status: 'attending',
+      snapshot,
+      template_id: 'roselle',
     });
 
     await expect(
       getPersonalGuestInvitationByToken({ slug: 'raka-nadia', token }),
-    ).resolves.toMatchObject({
-      snapshot: { draft: { templateKey: 'laras' } },
-      templateId: 'laras',
-    });
+    ).resolves.toBeNull();
   });
 
   it('uses the same unavailable result for invalid capability and malformed resolver output', async () => {
@@ -114,22 +120,59 @@ describe('SRY-013 anonymous personal invitation service', () => {
     ).resolves.toBeNull();
   });
 
-  it('accepts attending/declined only and forwards no client identity into RSVP mutation', async () => {
+  it('requires a whole positive count for attending, clears count for declined, and forwards no client identity', async () => {
     const token = randomBytes(32).toString('base64url');
     submitRecordMock.mockResolvedValue('attending');
 
     await expect(
-      submitPersonalGuestRsvp({ slug: 'raka-nadia', status: 'attending', token }),
+      submitPersonalGuestRsvp({ attendeeCount: 2, slug: 'raka-nadia', status: 'attending', token }),
     ).resolves.toBe('attending');
     await expect(
-      submitPersonalGuestRsvp({ slug: 'raka-nadia', status: 'pending', token }),
+      submitPersonalGuestRsvp({
+        attendeeCount: null,
+        slug: 'raka-nadia',
+        status: 'attending',
+        token,
+      }),
     ).resolves.toBeNull();
+    await expect(
+      submitPersonalGuestRsvp({
+        attendeeCount: 999,
+        slug: 'raka-nadia',
+        status: 'declined',
+        token,
+      }),
+    ).resolves.toBe('attending');
 
-    expect(submitRecordMock).toHaveBeenCalledWith({
+    expect(submitRecordMock).toHaveBeenNthCalledWith(1, {
+      attendeeCount: 2,
       slug: 'raka-nadia',
       status: 'attending',
       token,
     });
-    expect(submitRecordMock).toHaveBeenCalledTimes(1);
+    expect(submitRecordMock).toHaveBeenNthCalledWith(2, {
+      attendeeCount: null,
+      slug: 'raka-nadia',
+      status: 'declined',
+      token,
+    });
+  });
+
+  it('parses only status and attendee count from the anonymous form payload', () => {
+    const formData = new FormData();
+    formData.set('status', 'attending');
+    formData.set('attendeeCount', '2');
+    formData.set('guestId', 'attacker-controlled');
+    formData.set('partySize', '999');
+
+    expect(parsePersonalGuestRsvpSubmission(formData)).toEqual({
+      data: { attendeeCount: 2, status: 'attending' },
+      success: true,
+    });
+
+    for (const invalidCount of ['0', '-1', '1.5', '', '2.0']) {
+      formData.set('attendeeCount', invalidCount);
+      expect(parsePersonalGuestRsvpSubmission(formData)).toEqual({ success: false });
+    }
   });
 });

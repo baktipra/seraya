@@ -4,8 +4,11 @@ import type { PublishedInvitationSnapshotPayload } from '@/modules/publications/
 
 export type GuestPersonalLinkState = 'not_created' | 'active' | 'revoked';
 
+/** Narrow personal capability payload. It contains only the resolved guest's live RSVP fields. */
 export type PersonalGuestInvitation = {
   guestDisplayName: string;
+  partySize: number;
+  rsvpAttendeeCount: number | null;
   rsvpStatus: GuestRsvpStatus;
   snapshot: PublishedInvitationSnapshotPayload;
   templateId: InvitationTemplateKey;

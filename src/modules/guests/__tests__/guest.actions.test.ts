@@ -14,6 +14,7 @@ const {
 
 vi.mock('next/cache', () => ({ revalidatePath: revalidatePathMock }));
 vi.mock('../guest.service', () => ({
+  GuestAttendanceCountConflictError: class GuestAttendanceCountConflictError extends Error {},
   createGuestForCurrentUser: createGuestForCurrentUserMock,
   isGuestRepositoryFailure: () => false,
   softRemoveGuestForCurrentUser: removeGuestForCurrentUserMock,
@@ -77,6 +78,7 @@ describe('SRY-012 guest server actions', () => {
     });
     expect(revalidatePathMock).toHaveBeenCalledWith(`/dashboard/${projectId}`);
     expect(revalidatePathMock).toHaveBeenCalledWith(`/dashboard/${projectId}/guests`);
+    expect(revalidatePathMock).toHaveBeenCalledWith(`/dashboard/${projectId}/rsvp`);
   });
 
   it('updates and soft-removes only the supplied verified project/guest scope', async () => {
