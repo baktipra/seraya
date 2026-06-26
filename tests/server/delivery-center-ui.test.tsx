@@ -93,9 +93,9 @@ describe('SRY-029 owner Delivery Center UI', () => {
       </ToastProvider>,
     );
 
-    expect(html).toContain('Undangan belum dipublikasikan');
+    expect(html).toContain('Bagikan tersedia setelah undangan diterbitkan');
     expect(html).toContain(
-      'Publikasikan undangan terlebih dahulu sebelum membagikan tautan pribadi.',
+      'Terbitkan versi undangan yang sudah kalian setujui sebelum menyiapkan undangan pribadi.',
     );
     expect(html).toContain(`href="/dashboard/${projectId}"`);
   });

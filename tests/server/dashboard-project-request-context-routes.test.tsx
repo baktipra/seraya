@@ -6,18 +6,18 @@ import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 const {
   getGalleryMock,
   getHistoryMock,
-  getOverviewMock,
   getOwnedProjectContextMock,
   getPrivateDraftMock,
   getPaymentOverviewMock,
+  getReadinessMock,
   notFoundMock,
 } = vi.hoisted(() => ({
   getGalleryMock: vi.fn(),
   getHistoryMock: vi.fn(),
-  getOverviewMock: vi.fn(),
   getOwnedProjectContextMock: vi.fn(),
   getPrivateDraftMock: vi.fn(),
   getPaymentOverviewMock: vi.fn(),
+  getReadinessMock: vi.fn(),
   notFoundMock: vi.fn(),
 }));
 
@@ -26,8 +26,8 @@ vi.mock('@/modules/auth/dashboard-request-context', () => ({
   getOwnedProjectContextForRequest: getOwnedProjectContextMock,
 }));
 vi.mock('@/components/projects/project-overview-bootstrap', () => ({
-  ProjectOverviewBootstrap: ({ project }: { project: { id: string } }) => (
-    <div data-project-overview-id={project.id}>Overview</div>
+  ProjectOverviewBootstrap: ({ projectId }: { projectId: string }) => (
+    <div data-project-overview-id={projectId}>Overview</div>
   ),
 }));
 vi.mock('@/components/projects/gallery-manager', () => ({
@@ -39,7 +39,6 @@ vi.mock('@/components/projects/payment-activation-controls', () => ({
   PaymentActivationControls: () => <div>Aktivasi</div>,
 }));
 vi.mock('@/modules/invitations/invitation-draft.service', () => ({
-  getOwnedProjectInvitationOverviewForVerifiedProject: getOverviewMock,
   getOwnedProjectPrivateInvitationDraftForVerifiedProject: getPrivateDraftMock,
 }));
 vi.mock('@/modules/media/media.service', () => ({
@@ -48,6 +47,9 @@ vi.mock('@/modules/media/media.service', () => ({
 vi.mock('@/modules/payments/payment.service', () => ({
   getPaymentHistoryForVerifiedProject: getHistoryMock,
   getPaymentOverviewForVerifiedProject: getPaymentOverviewMock,
+}));
+vi.mock('@/modules/readiness', () => ({
+  getWeddingReadinessForRequest: getReadinessMock,
 }));
 
 import BillingPage from '@/app/(dashboard)/dashboard/[projectId]/billing/page';
@@ -71,20 +73,40 @@ const draft = {
   content: { gallery: { imageIds: [] } },
 };
 
+const readiness = {
+  identity: { coupleLabel: 'Raka & Nadia', templateKey: 'roselle' },
+  invitation: {
+    hasPublishedSnapshot: false,
+    hasUnpublishedChanges: false,
+    hasVerifiedActivation: false,
+    state: 'draft_ready_unactivated',
+  },
+  guests: {
+    activeGuestCount: 0,
+    activePersonalLinkGuestCount: 0,
+    guestsWithoutActivePersonalLinkCount: 0,
+    whatsappAvailableCount: 0,
+    whatsappUnavailableCount: 0,
+  },
+  primaryAction: { href: `/dashboard/${project.id}/preview`, key: 'preview_invitation' },
+  responses: {
+    activeGuestbookCount: 0,
+    attendingCount: 0,
+    confirmedAttendeeCount: 0,
+    declinedCount: 0,
+    hasActivePersonalLinks: false,
+    nonPendingRsvpCount: 0,
+  },
+};
+
 function projectParams(projectId = project.id) {
   return { params: Promise.resolve({ projectId }) };
 }
 
-describe('SRY-021A project routes request-local verified context', () => {
+describe('SRY-031 project routes request-local verified context', () => {
   beforeEach(() => {
     getGalleryMock.mockReset().mockResolvedValue([]);
     getHistoryMock.mockReset().mockResolvedValue({ payments: [], project });
-    getOverviewMock.mockReset().mockResolvedValue({
-      draft,
-      guestCount: 0,
-      project,
-      publication: null,
-    });
     getPrivateDraftMock.mockReset().mockResolvedValue({ draft, project });
     getOwnedProjectContextMock.mockReset().mockResolvedValue(project);
     getPaymentOverviewMock.mockReset().mockResolvedValue({
@@ -93,20 +115,19 @@ describe('SRY-021A project routes request-local verified context', () => {
       payment: null,
       publishEligibility: { allowed: false, reason: 'payment_required' },
     });
+    getReadinessMock.mockReset().mockResolvedValue(readiness);
     notFoundMock.mockReset();
     notFoundMock.mockImplementation(() => {
       throw new Error('NEXT_NOT_FOUND');
     });
   });
 
-  it('uses one server-verified project context for project overview data and payment overview', async () => {
+  it('uses one owner-scoped readiness projection for the project overview', async () => {
     const page = await ProjectDashboardPage(projectParams());
     const html = renderToStaticMarkup(page);
 
-    expect(getOwnedProjectContextMock).toHaveBeenCalledTimes(1);
-    expect(getOwnedProjectContextMock).toHaveBeenCalledWith(project.id);
-    expect(getOverviewMock).toHaveBeenCalledWith(project);
-    expect(getPaymentOverviewMock).toHaveBeenCalledWith(project);
+    expect(getReadinessMock).toHaveBeenCalledTimes(1);
+    expect(getReadinessMock).toHaveBeenCalledWith(project.id);
     expect(html).toContain(`data-project-overview-id="${project.id}"`);
   });
 
@@ -117,7 +138,6 @@ describe('SRY-021A project routes request-local verified context', () => {
     expect(getOwnedProjectContextMock).toHaveBeenCalledTimes(1);
     expect(getPrivateDraftMock).toHaveBeenCalledWith(project);
     expect(getGalleryMock).toHaveBeenCalledWith({ draftImageIds: [], project });
-    expect(getOverviewMock).not.toHaveBeenCalled();
     expect(html).toContain(`data-gallery-project-id="${project.id}"`);
   });
 
@@ -131,14 +151,11 @@ describe('SRY-021A project routes request-local verified context', () => {
     expect(html).toContain('Tagihan undangan');
   });
 
-  it('keeps foreign project handling generic before overview, media, or payment reads', async () => {
-    getOwnedProjectContextMock.mockRejectedValue(new ProjectAccessDeniedError());
+  it('keeps foreign project handling generic before overview composition', async () => {
+    getReadinessMock.mockRejectedValue(new ProjectAccessDeniedError());
 
     await expect(ProjectDashboardPage(projectParams('project-foreign'))).rejects.toThrow(
       'NEXT_NOT_FOUND',
     );
-
-    expect(getOverviewMock).not.toHaveBeenCalled();
-    expect(getPaymentOverviewMock).not.toHaveBeenCalled();
   });
 });

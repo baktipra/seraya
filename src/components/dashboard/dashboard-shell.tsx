@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { siteConfig } from '@/config/site';
 
 import { AccountMenu } from './account-menu';
-import { DashboardDesktopNavigation, DashboardMobileNavigation } from './dashboard-navigation';
+import { DashboardDesktopNavigation } from './dashboard-navigation';
 
 export interface DashboardShellProps {
   children: ReactNode;
@@ -45,15 +45,13 @@ export function DashboardShell({
       </header>
 
       <div className="mx-auto flex max-w-[96rem]">
-        <aside className="border-seraya-border-default bg-seraya-surface sticky top-16 hidden h-[calc(100vh-4rem)] w-64 shrink-0 border-r px-4 py-6 md:flex md:flex-col">
+        <aside className="border-seraya-border-default bg-seraya-surface sticky top-16 hidden h-[calc(100vh-4rem)] w-52 shrink-0 border-r px-4 py-6 md:flex md:flex-col">
           <DashboardDesktopNavigation />
         </aside>
         <main className="min-w-0 flex-1 px-4 py-7 pb-24 sm:px-6 sm:py-10 sm:pb-24 lg:px-10 lg:py-12">
           <div className="mx-auto w-full max-w-5xl">{children}</div>
         </main>
       </div>
-
-      <DashboardMobileNavigation />
     </div>
   );
 }

@@ -1,27 +1,17 @@
 import { notFound } from 'next/navigation';
 
 import { ProjectOverviewBootstrap } from '@/components/projects/project-overview-bootstrap';
-import { getOwnedProjectContextForRequest } from '@/modules/auth/dashboard-request-context';
-import {
-  getOwnedProjectInvitationOverviewForVerifiedProject,
-  type OwnedProjectInvitationOverview,
-} from '@/modules/invitations/invitation-draft.service';
-import { getPaymentOverviewForVerifiedProject } from '@/modules/payments/payment.service';
+import { getWeddingReadinessForRequest } from '@/modules/readiness';
+import type { WeddingReadinessV1 } from '@/modules/readiness';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 
 type ProjectDashboardPageProps = {
   params: Promise<{ projectId: string }>;
 };
 
-export const dynamic = 'force-dynamic';
-
-export default async function ProjectDashboardPage({ params }: ProjectDashboardPageProps) {
-  const { projectId } = await params;
-  let overview: OwnedProjectInvitationOverview;
-
+async function getProjectReadinessOrNotFound(projectId: string): Promise<WeddingReadinessV1> {
   try {
-    const project = await getOwnedProjectContextForRequest(projectId);
-    overview = await getOwnedProjectInvitationOverviewForVerifiedProject(project);
+    return await getWeddingReadinessForRequest(projectId);
   } catch (error) {
     if (error instanceof ProjectAccessDeniedError) {
       notFound();
@@ -29,16 +19,15 @@ export default async function ProjectDashboardPage({ params }: ProjectDashboardP
 
     throw error;
   }
+}
 
-  const paymentOverview = await getPaymentOverviewForVerifiedProject(overview.project);
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
-  return (
-    <ProjectOverviewBootstrap
-      draft={overview.draft}
-      guestCount={overview.guestCount}
-      paymentOverview={paymentOverview}
-      publication={overview.publication}
-      project={overview.project}
-    />
-  );
+export default async function ProjectDashboardPage({ params }: ProjectDashboardPageProps) {
+  const { projectId } = await params;
+  const readiness = await getProjectReadinessOrNotFound(projectId);
+
+  return <ProjectOverviewBootstrap projectId={projectId} readiness={readiness} />;
 }

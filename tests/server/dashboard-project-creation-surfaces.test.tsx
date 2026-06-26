@@ -1,55 +1,41 @@
 import { renderToStaticMarkup } from 'react-dom/server';
-import { describe, expect, it, vi } from 'vitest';
-
-vi.mock('@/components/projects/publish-invitation-controls', () => ({
-  PublishInvitationControls: ({
-    publishEligibility,
-  }: {
-    publishEligibility: { allowed: boolean };
-  }) => (
-    <div
-      data-payment-publish-allowed={String(publishEligibility.allowed)}
-      data-test-publish-controls="true"
-    />
-  ),
-}));
-
-vi.mock('@/components/projects/payment-activation-controls', () => ({
-  PaymentActivationControls: () => <div data-test-payment-controls="true" />,
-}));
+import { describe, expect, it } from 'vitest';
 
 import { DashboardEmptyState } from '@/components/dashboard/dashboard-empty-state';
 import { DashboardProjectLauncher } from '@/components/dashboard/dashboard-project-launcher';
 import { ProjectOverviewBootstrap } from '@/components/projects/project-overview-bootstrap';
 import { ProjectSetupForm } from '@/components/projects/project-setup-form';
-import { createDefaultInvitationDraftContent } from '@/modules/invitations/invitation-draft.defaults';
+import type { WeddingReadinessV1 } from '@/modules/readiness';
 
-const paymentOverview = {
-  configuration: {
-    amountIdr: 99000,
-    currency: 'IDR' as const,
-    pricingVersion: 'v1' as const,
-    productCode: 'invitation_activation' as const,
+const projectId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+
+const draftReadyReadiness: WeddingReadinessV1 = {
+  identity: { coupleLabel: 'Raka & Nadia', templateKey: 'roselle' },
+  invitation: {
+    hasPublishedSnapshot: false,
+    hasUnpublishedChanges: false,
+    hasVerifiedActivation: false,
+    state: 'draft_ready_unactivated',
   },
-  isConfigured: true,
-  payment: null,
-  publishEligibility: { allowed: false, reason: 'payment_required' } as const,
+  guests: {
+    activeGuestCount: 0,
+    activePersonalLinkGuestCount: 0,
+    guestsWithoutActivePersonalLinkCount: 0,
+    whatsappAvailableCount: 0,
+    whatsappUnavailableCount: 0,
+  },
+  primaryAction: { href: `/dashboard/${projectId}/preview`, key: 'preview_invitation' },
+  responses: {
+    activeGuestbookCount: 0,
+    attendingCount: 0,
+    confirmedAttendeeCount: 0,
+    declinedCount: 0,
+    hasActivePersonalLinks: false,
+    nonPendingRsvpCount: 0,
+  },
 };
 
-const project = {
-  account_id: '11111111-1111-1111-1111-111111111111',
-  default_timezone: 'Asia/Jakarta',
-  deleted_at: null,
-  event_city: 'Jakarta',
-  event_date_primary: '2027-08-17',
-  id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
-  person_one_name: 'Raka',
-  person_two_name: 'Nadia',
-  slug: 'raka-nadia',
-  status: 'draft',
-};
-
-describe('SRY-005 project creation dashboard surfaces', () => {
+describe('SRY-031 project readiness surfaces', () => {
   it('activates the dashboard empty-state CTA for the new project route', () => {
     const html = renderToStaticMarkup(<DashboardEmptyState />);
 
@@ -66,7 +52,7 @@ describe('SRY-005 project creation dashboard surfaces', () => {
             coupleLabel: 'Raka & Nadia',
             event_city: 'Jakarta',
             event_date_primary: '2027-08-17',
-            id: project.id,
+            id: projectId,
             person_one_name: 'Raka',
             person_two_name: 'Nadia',
             status: 'draft',
@@ -77,58 +63,28 @@ describe('SRY-005 project creation dashboard surfaces', () => {
 
     expect(html).toContain('Raka &amp; Nadia');
     expect(html).toContain('17 Agustus 2027');
-    expect(html).toContain(`action="/dashboard/${project.id}"`);
+    expect(html).toContain(`action="/dashboard/${projectId}"`);
   });
 
-  it('renders stored draft readiness without exposing raw JSON and keeps completion coming soon', () => {
+  it('renders one calm primary action with readiness chapters instead of a feature-card dashboard', () => {
     const html = renderToStaticMarkup(
-      <ProjectOverviewBootstrap
-        guestCount={12}
-        draft={{
-          content: createDefaultInvitationDraftContent(project),
-          created_at: '2026-06-20T00:00:00.000Z',
-          deleted_at: null,
-          id: 'draft-id',
-          project_id: project.id,
-          schema_version: 1,
-          updated_at: '2026-06-20T00:00:00.000Z',
-        }}
-        paymentOverview={paymentOverview}
-        publication={null}
-        project={project}
-      />,
+      <ProjectOverviewBootstrap projectId={projectId} readiness={draftReadyReadiness} />,
     );
 
-    expect(html).toContain('Undangan kalian sudah dibuat.');
-    expect(html).toContain('Detail dasar undangan sudah siap.');
-    expect(html).toContain('Kesiapan isi undangan');
-    expect(html).toContain('Tautan undangan');
-    expect(html).toContain('/raka-nadia');
-    expect(html).not.toContain('seraya.id');
-    expect(html).toContain('Jakarta');
-    expect(html).toContain('Pratinjau undangan');
-    expect(html).toContain(`action="/dashboard/${project.id}/preview"`);
-    expect(html).toContain('Kelola galeri');
-    expect(html).toContain(`href="/dashboard/${project.id}/gallery"`);
-    expect(html).toContain('12 tamu tersimpan');
-    expect(html).toContain('Kelola tamu');
-    expect(html).toContain(`href="/dashboard/${project.id}/guests"`);
-    expect(html).toContain('Ringkasan RSVP');
-    expect(html).toContain('Lihat respons tamu dan jumlah orang yang terkonfirmasi hadir.');
-    expect(html).toContain(`href="/dashboard/${project.id}/rsvp"`);
-    expect(html).toContain('Ucapan &amp; Doa');
-    expect(html).toContain('Lihat pesan yang dikirim tamu.');
-    expect(html).toContain(`href="/dashboard/${project.id}/guestbook"`);
-    expect(html).toContain('Pusat Pengiriman');
-    expect(html).toContain('Siapkan tautan pribadi dan bagikan undangan ke tamu.');
-    expect(html).toContain(`href="/dashboard/${project.id}/delivery"`);
-    expect(html).toContain('Edit undangan');
-    expect(html).toContain(`href="/dashboard/${project.id}/invitation"`);
-    expect(html).toContain('data-test-payment-controls');
-    expect(html).toContain('data-payment-publish-allowed="false"');
-    expect(html).toContain('disabled');
-    expect(html).not.toContain('schema_version');
-    expect(html).not.toContain('draft-id');
+    expect(html).toContain('Ringkasan persiapan undangan');
+    expect(html).toContain('Siap ditinjau');
+    expect(html).toContain('Roselle — romantis hangat');
+    expect(html).toContain('Undangan siap ditinjau');
+    expect(html).toContain('Lihat preview');
+    expect(html).toContain(`href="/dashboard/${projectId}/preview"`);
+    expect(html).toContain('Perjalanan kalian');
+    expect(html).toContain('Undangan');
+    expect(html).toContain('Tamu');
+    expect(html).toContain('Respons');
+    expect(html).toContain('Respons tamu akan tersedia setelah undangan pribadi mulai disiapkan.');
+    expect(html).not.toContain('completion');
+    expect(html).not.toContain('token_hash');
+    expect(html).not.toContain('payment_transactions');
   });
 
   it('uses neutral invitation-path copy in the project form instead of a hardcoded origin', () => {
@@ -139,18 +95,28 @@ describe('SRY-005 project creation dashboard surfaces', () => {
     expect(html).not.toContain('seraya.id');
   });
 
-  it('shows a safe recovery message when an active project has no readable draft', () => {
+  it('keeps a missing saved draft in the truthful incomplete state', () => {
     const html = renderToStaticMarkup(
       <ProjectOverviewBootstrap
-        guestCount={0}
-        draft={null}
-        paymentOverview={paymentOverview}
-        publication={null}
-        project={project}
+        projectId={projectId}
+        readiness={{
+          ...draftReadyReadiness,
+          invitation: {
+            hasPublishedSnapshot: false,
+            hasUnpublishedChanges: false,
+            hasVerifiedActivation: false,
+            state: 'draft_incomplete',
+          },
+          primaryAction: {
+            href: `/dashboard/${projectId}/invitation`,
+            key: 'complete_invitation',
+          },
+        }}
       />,
     );
 
-    expect(html).toContain('draft undangan belum tersedia');
-    expect(html).toContain('Nama pasangan');
+    expect(html).toContain('Undangan kalian sedang disusun');
+    expect(html).toContain('Lengkapi undangan');
+    expect(html).toContain(`href="/dashboard/${projectId}/invitation"`);
   });
 });

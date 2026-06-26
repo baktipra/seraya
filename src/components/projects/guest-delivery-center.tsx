@@ -394,10 +394,11 @@ export function GuestDeliveryCenter({
                 className="text-seraya-text-primary text-base font-semibold"
                 id="delivery-publication-notice"
               >
-                Undangan belum dipublikasikan
+                Bagikan tersedia setelah undangan diterbitkan
               </h2>
               <p className="text-seraya-text-secondary mt-1 text-sm leading-6">
-                Publikasikan undangan terlebih dahulu sebelum membagikan tautan pribadi.
+                Terbitkan versi undangan yang sudah kalian setujui sebelum menyiapkan undangan
+                pribadi.
               </p>
             </div>
             <Link
@@ -499,15 +500,17 @@ export function GuestDeliveryCenter({
 
           {rows.length === 0 ? (
             <div className="border-seraya-border-default rounded-[var(--seraya-radius-md)] border border-dashed px-5 py-10 text-center">
-              <p className="text-seraya-text-primary font-semibold">Belum ada tamu aktif.</p>
+              <p className="text-seraya-text-primary font-semibold">
+                Belum ada tamu untuk disiapkan
+              </p>
               <p className="text-seraya-text-muted mt-2 text-sm leading-6">
-                Tambahkan tamu di Kelola tamu untuk mulai menyiapkan tautan pribadi.
+                Tambahkan tamu sebelum membuat undangan pribadi.
               </p>
               <Link
                 className="text-seraya-action-primary focus-visible:outline-seraya-focus-ring mt-4 inline-flex min-h-11 items-center rounded-[var(--seraya-radius-sm)] text-sm font-semibold underline-offset-4 hover:underline focus-visible:outline-3 focus-visible:outline-offset-3"
                 href={`/dashboard/${projectId}/guests`}
               >
-                Kelola tamu
+                Tambah tamu
               </Link>
             </div>
           ) : filteredRows.length === 0 ? (

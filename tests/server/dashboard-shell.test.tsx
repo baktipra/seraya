@@ -1,5 +1,3 @@
-import { readFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -13,7 +11,6 @@ vi.mock('next/link', () => ({
     href: string;
     prefetch?: boolean;
     className?: string;
-    'aria-current'?: 'page';
   }) => (
     <a {...anchorProps} data-prefetch={String(prefetch)}>
       {children}
@@ -23,34 +20,42 @@ vi.mock('next/link', () => ({
 
 import { LoginForm } from '@/components/auth/login-form';
 import { DashboardEmptyState } from '@/components/dashboard/dashboard-empty-state';
-import {
-  DashboardDesktopNavigation,
-  DashboardMobileNavigation,
-} from '@/components/dashboard/dashboard-navigation';
+import { DashboardDesktopNavigation } from '@/components/dashboard/dashboard-navigation';
+import { ProjectNavigation } from '@/components/dashboard/project-navigation';
+import type { WeddingReadinessV1 } from '@/modules/readiness';
 
-const dashboardNavigationSource = resolve(
-  process.cwd(),
-  'src/components/dashboard/dashboard-navigation.tsx',
-);
+const projectId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 
-const dashboardNavigationHrefs = [
-  '/dashboard',
-  '/dashboard/coming-soon?feature=invitation',
-  '/dashboard/coming-soon?feature=guests',
-  '/dashboard/coming-soon?feature=share',
-  '/dashboard/coming-soon?feature=billing',
-  '/dashboard/coming-soon?feature=settings',
-  '/dashboard/coming-soon?feature=help',
-];
-
-function expectPrefetchDisabledForEveryLink(html: string, expectedLinkCount: number) {
-  const prefetchMatches = html.match(/data-prefetch="false"/g) ?? [];
-
-  expect(prefetchMatches).toHaveLength(expectedLinkCount);
-  expect(html).not.toContain('data-prefetch="true"');
+function createReadiness(overrides: Partial<WeddingReadinessV1> = {}): WeddingReadinessV1 {
+  return {
+    identity: { coupleLabel: 'Raka & Nadia', templateKey: 'roselle' },
+    invitation: {
+      hasPublishedSnapshot: false,
+      hasUnpublishedChanges: false,
+      hasVerifiedActivation: false,
+      state: 'draft_ready_unactivated',
+    },
+    guests: {
+      activeGuestCount: 0,
+      activePersonalLinkGuestCount: 0,
+      guestsWithoutActivePersonalLinkCount: 0,
+      whatsappAvailableCount: 0,
+      whatsappUnavailableCount: 0,
+    },
+    primaryAction: { href: `/dashboard/${projectId}/preview`, key: 'preview_invitation' },
+    responses: {
+      activeGuestbookCount: 0,
+      attendingCount: 0,
+      confirmedAttendeeCount: 0,
+      declinedCount: 0,
+      hasActivePersonalLinks: false,
+      nonPendingRsvpCount: 0,
+    },
+    ...overrides,
+  };
 }
 
-describe('SRY-004 auth and dashboard shell surfaces', () => {
+describe('SRY-031 dashboard and conditional project navigation surfaces', () => {
   it('renders an accessible login form shell', () => {
     const html = renderToStaticMarkup(<LoginForm nextPath="/dashboard" />);
 
@@ -65,53 +70,73 @@ describe('SRY-004 auth and dashboard shell surfaces', () => {
 
     expect(html).toContain('Belum ada undangan');
     expect(html).toContain('Buat undangan baru');
-    expect(html).toContain('disabled');
   });
 
-  it('renders desktop shell navigation with existing destinations and disabled prefetch', () => {
+  it('keeps the global dashboard nav as a project launcher rather than feature navigation', () => {
     const html = renderToStaticMarkup(<DashboardDesktopNavigation />);
 
-    expect(html).toContain('Navigasi dashboard');
-    expect(html).toContain('Overview');
-    expect(html).toContain('Undangan');
-    expect(html).toContain('Tamu');
-    expect(html).toContain('Bagikan');
-    expect(html).toContain('Tagihan');
-    expect(html).toContain('Pengaturan');
-    expect(html).toContain('Bantuan');
-    expect(html.match(/aria-current="page"/g)).toHaveLength(1);
-
-    for (const href of dashboardNavigationHrefs) {
-      expect(html).toContain(`href="${href.replaceAll('&', '&amp;')}"`);
-    }
-
-    expectPrefetchDisabledForEveryLink(html, dashboardNavigationHrefs.length);
+    expect(html).toContain('Navigasi undangan');
+    expect(html).toContain('Semua undangan');
+    expect(html).toContain('Buat undangan');
+    expect(html).toContain('href="/dashboard"');
+    expect(html).toContain('href="/dashboard/new"');
+    expect(html).not.toContain('coming-soon');
+    expect(html).not.toContain('Tagihan');
   });
 
-  it('renders mobile bottom navigation with existing destinations and disabled prefetch', () => {
-    const html = renderToStaticMarkup(<DashboardMobileNavigation />);
-    const mobileHrefs = dashboardNavigationHrefs.slice(0, 4);
+  it('shows only Ringkasan, Undangan, and Tamu before publish', () => {
+    const html = renderToStaticMarkup(
+      <ProjectNavigation projectId={projectId} readiness={createReadiness()} />,
+    );
 
-    expect(html).toContain('Navigasi utama dashboard');
-    expect(html).toContain('Overview');
+    expect(html).toContain('Ringkasan');
     expect(html).toContain('Undangan');
     expect(html).toContain('Tamu');
-    expect(html).toContain('Bagikan');
-    expect(html).toContain('bottom-0');
-    expect(html.match(/aria-current="page"/g)).toHaveLength(1);
-
-    for (const href of mobileHrefs) {
-      expect(html).toContain(`href="${href.replaceAll('&', '&amp;')}"`);
-    }
-
-    expectPrefetchDisabledForEveryLink(html, mobileHrefs.length);
+    expect(html).not.toContain('Bagikan');
+    expect(html).not.toContain('Respons Tamu');
+    expect(html).not.toContain('coming-soon');
   });
 
-  it('keeps the shared navigation free of client-side Supabase and custom navigation runtime code', async () => {
-    const source = await readFile(dashboardNavigationSource, 'utf8');
+  it('adds Bagikan after publish and Respons Tamu after the first active personal link', () => {
+    const publishedHtml = renderToStaticMarkup(
+      <ProjectNavigation
+        projectId={projectId}
+        readiness={createReadiness({
+          invitation: {
+            hasPublishedSnapshot: true,
+            hasUnpublishedChanges: false,
+            hasVerifiedActivation: true,
+            state: 'published',
+          },
+        })}
+      />,
+    );
+    const responsesHtml = renderToStaticMarkup(
+      <ProjectNavigation
+        projectId={projectId}
+        readiness={createReadiness({
+          invitation: {
+            hasPublishedSnapshot: true,
+            hasUnpublishedChanges: false,
+            hasVerifiedActivation: true,
+            state: 'published',
+          },
+          responses: {
+            activeGuestbookCount: 0,
+            attendingCount: 0,
+            confirmedAttendeeCount: 0,
+            declinedCount: 0,
+            hasActivePersonalLinks: true,
+            nonPendingRsvpCount: 0,
+          },
+        })}
+      />,
+    );
 
-    expect(source).toContain('prefetch={false}');
-    expect(source).not.toMatch(/@\/server\/supabase|@supabase\/supabase-js|createBrowserClient/);
-    expect(source).not.toMatch(/router\.prefetch|useRouter\(/);
+    expect(publishedHtml).toContain('Bagikan');
+    expect(publishedHtml).not.toContain('Respons Tamu');
+    expect(responsesHtml).toContain('Bagikan');
+    expect(responsesHtml).toContain('Respons Tamu');
+    expect(responsesHtml).toContain(`href="/dashboard/${projectId}/rsvp"`);
   });
 });

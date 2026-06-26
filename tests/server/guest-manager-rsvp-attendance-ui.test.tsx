@@ -15,5 +15,9 @@ describe('SRY-028 Guest Manager RSVP attendance display', () => {
     expect(source).not.toContain('name="rsvpStatus"');
     expect(source).not.toContain('name="rsvpAttendeeCount"');
     expect(source).not.toContain('token_hash');
+    expect(source).toContain('Belum ada tamu yang disiapkan.');
+    expect(source).toContain(
+      'Tambahkan daftar tamu saat kalian siap mengirim undangan secara personal.',
+    );
   });
 });

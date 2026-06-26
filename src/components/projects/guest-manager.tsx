@@ -442,9 +442,9 @@ export function GuestManager({ initialGuests, projectId }: GuestManagerProps) {
           </ul>
         ) : (
           <div className="border-seraya-border-default rounded-[var(--seraya-radius-md)] border border-dashed px-5 py-10 text-center">
-            <p className="text-seraya-text-primary font-semibold">Belum ada tamu tersimpan.</p>
+            <p className="text-seraya-text-primary font-semibold">Belum ada tamu yang disiapkan.</p>
             <p className="text-seraya-text-muted mt-2 text-sm leading-6">
-              Tambahkan nama tamu pertama untuk mulai menyiapkan undangan kalian.
+              Tambahkan daftar tamu saat kalian siap mengirim undangan secara personal.
             </p>
           </div>
         )}

@@ -105,6 +105,15 @@ export function RsvpAnalyticsDashboard({ analytics, projectId }: RsvpAnalyticsDa
         >
           ← Kembali ke project
         </Link>
+        <nav aria-label="Respons Tamu" className="mt-4 flex flex-wrap gap-3 text-sm font-semibold">
+          <span className="text-seraya-text-primary">RSVP</span>
+          <Link
+            className="text-seraya-action-primary focus-visible:outline-seraya-focus-ring rounded-[var(--seraya-radius-sm)] underline-offset-4 hover:underline focus-visible:outline-3 focus-visible:outline-offset-3"
+            href={`/dashboard/${projectId}/guestbook`}
+          >
+            Ucapan &amp; Doa
+          </Link>
+        </nav>
         <h1 className="seraya-display-md mt-5" id="rsvp-analytics-title">
           Ringkasan RSVP
         </h1>

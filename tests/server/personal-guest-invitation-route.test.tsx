@@ -404,6 +404,7 @@ describe('SRY-013 personal guest invitation route', () => {
     expect(routeSource).toContain("export const fetchCache = 'force-no-store';");
     expect(routeSource).not.toContain('cookies(');
     expect(routeSource).not.toContain('createServerSupabaseClient');
+    expect(routeSource).not.toContain('modules/readiness');
     expect(routeSource).not.toContain('invitation-draft.service');
     expect(routeSource).not.toContain('createServerSupabaseClient');
   });

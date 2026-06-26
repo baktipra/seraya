@@ -6,11 +6,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 
-const { getOwnedProjectContextMock, getRsvpAnalyticsMock, notFoundMock } = vi.hoisted(() => ({
-  getOwnedProjectContextMock: vi.fn(),
-  getRsvpAnalyticsMock: vi.fn(),
-  notFoundMock: vi.fn(),
-}));
+const { getOwnedProjectContextMock, getReadinessMock, getRsvpAnalyticsMock, notFoundMock } =
+  vi.hoisted(() => ({
+    getOwnedProjectContextMock: vi.fn(),
+    getReadinessMock: vi.fn(),
+    getRsvpAnalyticsMock: vi.fn(),
+    notFoundMock: vi.fn(),
+  }));
 
 vi.mock('next/navigation', () => ({ notFound: notFoundMock }));
 vi.mock('@/components/projects/rsvp-analytics-dashboard', () => ({
@@ -23,6 +25,9 @@ vi.mock('@/modules/auth/dashboard-request-context', () => ({
 }));
 vi.mock('@/modules/guests/rsvp-analytics.service', () => ({
   getRsvpAnalyticsForVerifiedProject: getRsvpAnalyticsMock,
+}));
+vi.mock('@/modules/readiness', () => ({
+  getWeddingReadinessForRequest: getReadinessMock,
 }));
 
 import RsvpAnalyticsPage, {
@@ -47,9 +52,23 @@ const analytics = {
   respondedPercentage: 100,
 };
 
-describe('SRY-028 private RSVP analytics route', () => {
+function createReadiness({
+  hasActivePersonalLinks = true,
+  hasPublishedSnapshot = true,
+}: {
+  hasActivePersonalLinks?: boolean;
+  hasPublishedSnapshot?: boolean;
+} = {}) {
+  return {
+    invitation: { hasPublishedSnapshot },
+    responses: { hasActivePersonalLinks },
+  };
+}
+
+describe('SRY-031 private RSVP analytics route', () => {
   beforeEach(() => {
     getOwnedProjectContextMock.mockReset().mockResolvedValue(project);
+    getReadinessMock.mockReset().mockResolvedValue(createReadiness());
     getRsvpAnalyticsMock.mockReset();
     notFoundMock.mockReset();
     notFoundMock.mockImplementation(() => {
@@ -57,7 +76,7 @@ describe('SRY-028 private RSVP analytics route', () => {
     });
   });
 
-  it('is private dynamic no-store and renders only verified owner analytics', async () => {
+  it('is private dynamic no-store and renders only verified owner analytics after active personal links exist', async () => {
     getRsvpAnalyticsMock.mockResolvedValue({ analytics, project });
 
     const page = await RsvpAnalyticsPage({ params: Promise.resolve({ projectId }) });
@@ -66,14 +85,30 @@ describe('SRY-028 private RSVP analytics route', () => {
     expect(dynamic).toBe('force-dynamic');
     expect(revalidate).toBe(0);
     expect(fetchCache).toBe('force-no-store');
+    expect(getReadinessMock).toHaveBeenCalledWith(projectId);
     expect(getOwnedProjectContextMock).toHaveBeenCalledWith(projectId);
     expect(getRsvpAnalyticsMock).toHaveBeenCalledWith(project);
     expect(html).toContain('Ringkasan RSVP');
     expect(html).toContain(`data-rsvp-analytics-project-id="${projectId}"`);
   });
 
+  it('shows a truthful unavailable state before personal invitations exist without loading analytics', async () => {
+    getReadinessMock.mockResolvedValue(
+      createReadiness({ hasActivePersonalLinks: false, hasPublishedSnapshot: true }),
+    );
+
+    const page = await RsvpAnalyticsPage({ params: Promise.resolve({ projectId }) });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain('Respons tamu belum tersedia');
+    expect(html).toContain('Status RSVP akan muncul setelah undangan pribadi mulai disiapkan.');
+    expect(html).toContain(`href="/dashboard/${projectId}/delivery"`);
+    expect(getOwnedProjectContextMock).not.toHaveBeenCalled();
+    expect(getRsvpAnalyticsMock).not.toHaveBeenCalled();
+  });
+
   it('uses the same unavailable route state for foreign or deleted project access', async () => {
-    getOwnedProjectContextMock.mockRejectedValue(new ProjectAccessDeniedError());
+    getReadinessMock.mockRejectedValue(new ProjectAccessDeniedError());
 
     await expect(
       RsvpAnalyticsPage({
@@ -88,6 +123,7 @@ describe('SRY-028 private RSVP analytics route', () => {
       'utf8',
     );
 
+    expect(source).toContain('getWeddingReadinessForRequest');
     expect(source).toContain('getOwnedProjectContextForRequest');
     expect(source).toContain('getRsvpAnalyticsForVerifiedProject');
     expect(source).not.toContain('getRsvpAnalyticsForCurrentUser');

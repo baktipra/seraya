@@ -103,6 +103,15 @@ export function GuestbookDashboard({ entries, projectId, timezone }: GuestbookDa
         >
           ← Kembali ke project
         </Link>
+        <nav aria-label="Respons Tamu" className="mt-4 flex flex-wrap gap-3 text-sm font-semibold">
+          <Link
+            className="text-seraya-action-primary focus-visible:outline-seraya-focus-ring rounded-[var(--seraya-radius-sm)] underline-offset-4 hover:underline focus-visible:outline-3 focus-visible:outline-offset-3"
+            href={`/dashboard/${projectId}/rsvp`}
+          >
+            RSVP
+          </Link>
+          <span className="text-seraya-text-primary">Ucapan &amp; Doa</span>
+        </nav>
         <h1 className="seraya-display-md mt-5" id="guestbook-dashboard-title">
           Ucapan &amp; Doa
         </h1>

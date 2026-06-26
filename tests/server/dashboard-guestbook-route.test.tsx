@@ -3,11 +3,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 
-const { getGuestbookInboxMock, getOwnedProjectContextMock, notFoundMock } = vi.hoisted(() => ({
-  getGuestbookInboxMock: vi.fn(),
-  getOwnedProjectContextMock: vi.fn(),
-  notFoundMock: vi.fn(),
-}));
+const { getGuestbookInboxMock, getOwnedProjectContextMock, getReadinessMock, notFoundMock } =
+  vi.hoisted(() => ({
+    getGuestbookInboxMock: vi.fn(),
+    getOwnedProjectContextMock: vi.fn(),
+    getReadinessMock: vi.fn(),
+    notFoundMock: vi.fn(),
+  }));
 
 vi.mock('next/navigation', () => ({ notFound: notFoundMock }));
 vi.mock('@/modules/auth/dashboard-request-context', () => ({
@@ -17,6 +19,9 @@ vi.mock('@/modules/guestbook', () => ({
   getGuestbookInboxForVerifiedProject: getGuestbookInboxMock,
   initialGuestbookActionState: { status: 'idle' },
   removeGuestbookEntryAction: vi.fn(),
+}));
+vi.mock('@/modules/readiness', () => ({
+  getWeddingReadinessForRequest: getReadinessMock,
 }));
 
 import GuestbookDashboardPage, {
@@ -38,18 +43,31 @@ const project = {
   status: 'published',
 };
 
-describe('SRY-027 owner guestbook dashboard route', () => {
+function createReadiness({
+  hasActivePersonalLinks = true,
+  hasPublishedSnapshot = true,
+}: {
+  hasActivePersonalLinks?: boolean;
+  hasPublishedSnapshot?: boolean;
+} = {}) {
+  return {
+    invitation: { hasPublishedSnapshot },
+    responses: { hasActivePersonalLinks },
+  };
+}
+
+describe('SRY-031 owner guestbook dashboard route', () => {
   beforeEach(() => {
     getGuestbookInboxMock.mockReset();
-    getOwnedProjectContextMock.mockReset();
+    getOwnedProjectContextMock.mockReset().mockResolvedValue(project);
+    getReadinessMock.mockReset().mockResolvedValue(createReadiness());
     notFoundMock.mockReset();
     notFoundMock.mockImplementation(() => {
       throw new Error('NEXT_NOT_FOUND');
     });
-    getOwnedProjectContextMock.mockResolvedValue(project);
   });
 
-  it('remains private, dynamic, and no-store while rendering only owner inbox data', async () => {
+  it('remains private, dynamic, and no-store while rendering only owner inbox data after active personal links exist', async () => {
     getGuestbookInboxMock.mockResolvedValue({
       entries: [
         {
@@ -70,6 +88,7 @@ describe('SRY-027 owner guestbook dashboard route', () => {
     expect(dynamic).toBe('force-dynamic');
     expect(revalidate).toBe(0);
     expect(fetchCache).toBe('force-no-store');
+    expect(getReadinessMock).toHaveBeenCalledWith(project.id);
     expect(getOwnedProjectContextMock).toHaveBeenCalledWith(project.id);
     expect(getGuestbookInboxMock).toHaveBeenCalledWith(project);
     expect(html).toContain('Ucapan &amp; Doa');
@@ -79,8 +98,27 @@ describe('SRY-027 owner guestbook dashboard route', () => {
     expect(html).toContain('Hapus ucapan');
   });
 
-  it('uses generic not-found behavior for foreign or soft-deleted project context', async () => {
-    getOwnedProjectContextMock.mockRejectedValue(new ProjectAccessDeniedError());
+  it('shows a truthful unavailable state before personal invitations exist without loading guestbook entries', async () => {
+    getReadinessMock.mockResolvedValue(
+      createReadiness({ hasActivePersonalLinks: false, hasPublishedSnapshot: true }),
+    );
+
+    const page = await GuestbookDashboardPage({
+      params: Promise.resolve({ projectId: project.id }),
+    });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain('Ucapan &amp; Doa belum tersedia');
+    expect(html).toContain(
+      'Ucapan dari tamu akan muncul setelah undangan pribadi mulai disiapkan.',
+    );
+    expect(html).toContain(`href="/dashboard/${project.id}/delivery"`);
+    expect(getOwnedProjectContextMock).not.toHaveBeenCalled();
+    expect(getGuestbookInboxMock).not.toHaveBeenCalled();
+  });
+
+  it('uses generic not-found behavior for foreign or soft-deleted project readiness', async () => {
+    getReadinessMock.mockRejectedValue(new ProjectAccessDeniedError());
 
     await expect(
       GuestbookDashboardPage({ params: Promise.resolve({ projectId: project.id }) }),

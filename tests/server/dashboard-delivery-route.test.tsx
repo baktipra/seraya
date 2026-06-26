@@ -6,11 +6,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 
-const { getDeliveryCenterMock, getOwnedProjectContextMock, notFoundMock } = vi.hoisted(() => ({
-  getDeliveryCenterMock: vi.fn(),
-  getOwnedProjectContextMock: vi.fn(),
-  notFoundMock: vi.fn(),
-}));
+const { getDeliveryCenterMock, getOwnedProjectContextMock, getReadinessMock, notFoundMock } =
+  vi.hoisted(() => ({
+    getDeliveryCenterMock: vi.fn(),
+    getOwnedProjectContextMock: vi.fn(),
+    getReadinessMock: vi.fn(),
+    notFoundMock: vi.fn(),
+  }));
 
 vi.mock('next/navigation', () => ({ notFound: notFoundMock }));
 vi.mock('@/components/projects/guest-delivery-center', () => ({
@@ -37,6 +39,9 @@ vi.mock('@/modules/delivery/delivery.actions', () => ({
 vi.mock('@/modules/delivery/delivery.service', () => ({
   getGuestDeliveryCenterForVerifiedProject: getDeliveryCenterMock,
 }));
+vi.mock('@/modules/readiness', () => ({
+  getWeddingReadinessForRequest: getReadinessMock,
+}));
 
 import DeliveryCenterPage, {
   dynamic,
@@ -47,10 +52,18 @@ import DeliveryCenterPage, {
 const projectId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 const project = { id: projectId };
 
-describe('SRY-029 private Delivery Center route', () => {
+function createReadiness(published = true) {
+  return {
+    invitation: { hasPublishedSnapshot: published },
+    responses: { hasActivePersonalLinks: false },
+  };
+}
+
+describe('SRY-031 private Delivery Center route', () => {
   beforeEach(() => {
     getDeliveryCenterMock.mockReset();
     getOwnedProjectContextMock.mockReset().mockResolvedValue(project);
+    getReadinessMock.mockReset().mockResolvedValue(createReadiness());
     notFoundMock.mockReset();
     notFoundMock.mockImplementation(() => {
       throw new Error('NEXT_NOT_FOUND');
@@ -85,6 +98,7 @@ describe('SRY-029 private Delivery Center route', () => {
     expect(dynamic).toBe('force-dynamic');
     expect(revalidate).toBe(0);
     expect(fetchCache).toBe('force-no-store');
+    expect(getReadinessMock).toHaveBeenCalledWith(projectId);
     expect(getOwnedProjectContextMock).toHaveBeenCalledWith(projectId);
     expect(getDeliveryCenterMock).toHaveBeenCalledWith(project);
     expect(html).toContain('data-delivery-published="true"');
@@ -92,8 +106,22 @@ describe('SRY-029 private Delivery Center route', () => {
     expect(html).toContain('1 rows');
   });
 
-  it('uses generic unavailable behavior for foreign or soft-deleted project context', async () => {
-    getOwnedProjectContextMock.mockRejectedValue(new ProjectAccessDeniedError());
+  it('keeps direct unpublished owner access blocked before any delivery or link-preparation read', async () => {
+    getReadinessMock.mockResolvedValue(createReadiness(false));
+
+    const page = await DeliveryCenterPage({ params: Promise.resolve({ projectId }) });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain('Bagikan tersedia setelah undangan diterbitkan');
+    expect(html).toContain(
+      'Terbitkan versi undangan yang sudah kalian setujui sebelum menyiapkan undangan pribadi.',
+    );
+    expect(getOwnedProjectContextMock).not.toHaveBeenCalled();
+    expect(getDeliveryCenterMock).not.toHaveBeenCalled();
+  });
+
+  it('uses generic unavailable behavior for foreign or soft-deleted project readiness', async () => {
+    getReadinessMock.mockRejectedValue(new ProjectAccessDeniedError());
 
     await expect(DeliveryCenterPage({ params: Promise.resolve({ projectId }) })).rejects.toThrow(
       'NEXT_NOT_FOUND',
@@ -101,12 +129,13 @@ describe('SRY-029 private Delivery Center route', () => {
     expect(getDeliveryCenterMock).not.toHaveBeenCalled();
   });
 
-  it('uses request-local verified project context and avoids public/private unrelated loaders', async () => {
+  it('uses owner-scoped request readiness plus the existing delivery service without public or mutation dependencies', async () => {
     const source = await readFile(
       path.resolve(process.cwd(), 'src/app/(dashboard)/dashboard/[projectId]/delivery/page.tsx'),
       'utf8',
     );
 
+    expect(source).toContain('getWeddingReadinessForRequest');
     expect(source).toContain('getOwnedProjectContextForRequest');
     expect(source).toContain('getGuestDeliveryCenterForVerifiedProject');
     expect(source).not.toContain('createServerSupabaseClient');

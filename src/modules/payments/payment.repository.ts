@@ -81,6 +81,31 @@ function mapPaymentAttemptReservation(record: unknown): PaymentAttemptReservatio
   return { ...payment, created_now: value.created_now };
 }
 
+/**
+ * Readiness-only entitlement check. This intentionally selects no transaction
+ * detail and mirrors the verified activation facts used by the dashboard policy.
+ * M0011 remains the final publish authority.
+ */
+export async function hasVerifiedActivationPaymentForVerifiedProject(
+  project: OwnedProject,
+): Promise<boolean> {
+  const supabase = await createServerSupabaseClient();
+  const { count, error } = await supabase
+    .from('payment_transactions')
+    .select('id', { count: 'exact', head: true })
+    .eq('project_id', project.id)
+    .eq('provider', MIDTRANS_SNAP_PROVIDER)
+    .eq('product_code', PAYMENT_PRODUCT_CODE)
+    .eq('status', 'paid')
+    .not('paid_at', 'is', null);
+
+  if (error) {
+    throw new PaymentRepositoryError();
+  }
+
+  return (count ?? 0) > 0;
+}
+
 export async function getLatestPaymentForVerifiedProject(
   project: OwnedProject,
 ): Promise<PaymentTransaction | null> {
