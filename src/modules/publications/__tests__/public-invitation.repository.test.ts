@@ -75,6 +75,42 @@ describe('public invitation cache compatibility boundary', () => {
     });
   });
 
+  it('normalizes a legacy cache payload without eventSchedule after the cache retrieval boundary', async () => {
+    const legacyRecord = createPublicRecord();
+    legacyRecord.snapshot.draft.events = {
+      ceremony: {
+        date: '2027-08-17',
+        enabled: true,
+        endTime: '10:00',
+        startTime: '08:00',
+        title: 'Akad Nikah',
+      },
+      enabled: true,
+      primaryDate: '2027-08-17',
+      reception: { date: null, enabled: false, endTime: null, startTime: null, title: null },
+    };
+    legacyRecord.snapshot.draft.location = {
+      address: 'Jalan Mawar 1',
+      enabled: true,
+      mapsUrl: 'https://maps.example.test/akad',
+      venueName: 'Masjid Seraya',
+    };
+    delete (legacyRecord.snapshot.draft as Partial<typeof legacyRecord.snapshot.draft>)
+      .eventSchedule;
+
+    unstableCacheMock.mockImplementation(() => async () => legacyRecord);
+
+    const result = await getCachedCurrentPublishedInvitationBySlug('raka-nadia');
+
+    expect(result?.snapshot.draft.eventSchedule.events).toEqual([
+      expect.objectContaining({
+        mapsUrl: 'https://maps.example.test/akad',
+        title: 'Akad Nikah',
+        venueName: 'Masjid Seraya',
+      }),
+    ]);
+  });
+
   it('preserves modern enabled Amplop Digital account order from a cache hit', async () => {
     const modernRecord = createPublicRecord();
     modernRecord.snapshot.draft.digitalGift = {

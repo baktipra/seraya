@@ -1,4 +1,8 @@
-import type { InvitationDraftContent } from '@/modules/invitations/invitation-draft.schema';
+import {
+  isLegacyEventScheduleDerived,
+  type EventScheduleItemV1,
+  type InvitationDraftContent,
+} from '@/modules/invitations/invitation-draft.schema';
 
 import type { InvitationGalleryImage } from '@/modules/media/media.types';
 
@@ -10,10 +14,13 @@ export type InvitationPersonViewModel = {
   parentLine: string | null;
 };
 
-export type InvitationEventPartViewModel = {
+export type InvitationScheduleItemViewModel = {
+  address: string | null;
   dateLabel: string | null;
+  mapsHref: string | null;
   timeLabel: string | null;
   title: string | null;
+  venueName: string | null;
 };
 
 export type InvitationLocationViewModel = {
@@ -48,9 +55,8 @@ export type InvitationViewModel = {
   };
   digitalGift: InvitationDigitalGiftViewModel | null;
   events: {
-    ceremony: InvitationEventPartViewModel | null;
+    items: InvitationScheduleItemViewModel[];
     primaryDateLabel: string | null;
-    reception: InvitationEventPartViewModel | null;
   } | null;
   gallery: InvitationGalleryViewModel | null;
   hero: {
@@ -59,6 +65,9 @@ export type InvitationViewModel = {
     subtitle: string | null;
     title: string;
   };
+  // Modern multi-event schedules render venue details inside each event item.
+  // This remains only for a legacy normalized document, preserving its old
+  // separate location presentation until that owner explicitly saves again.
   location: InvitationLocationViewModel | null;
   rsvp: {
     heading: string;
@@ -91,18 +100,6 @@ function formatTimeRange(startTime: string | null, endTime: string | null) {
   return formattedStartTime ?? formattedEndTime;
 }
 
-function createEventPartViewModel(part: InvitationDraftContent['events']['ceremony']) {
-  if (!part.enabled || (!part.title && !part.date && !part.startTime && !part.endTime)) {
-    return null;
-  }
-
-  return {
-    dateLabel: formatInvitationDate(part.date),
-    timeLabel: formatTimeRange(part.startTime, part.endTime),
-    title: part.title,
-  } satisfies InvitationEventPartViewModel;
-}
-
 function getSafeHttpsHref(value: string | null) {
   if (!value) {
     return null;
@@ -115,6 +112,49 @@ function getSafeHttpsHref(value: string | null) {
   }
 }
 
+function createScheduleItemViewModel(event: EventScheduleItemV1): InvitationScheduleItemViewModel {
+  return {
+    address: event.venueAddress,
+    dateLabel: formatInvitationDate(event.date),
+    mapsHref: getSafeHttpsHref(event.mapsUrl),
+    timeLabel: formatTimeRange(event.startTime, event.endTime),
+    title: event.title,
+    venueName: event.venueName,
+  };
+}
+
+function createLegacyEventPartViewModel(
+  part: InvitationDraftContent['events']['ceremony'],
+): InvitationScheduleItemViewModel | null {
+  if (!part.enabled || (!part.title && !part.date && !part.startTime && !part.endTime)) {
+    return null;
+  }
+
+  return {
+    address: null,
+    dateLabel: formatInvitationDate(part.date),
+    mapsHref: null,
+    timeLabel: formatTimeRange(part.startTime, part.endTime),
+    title: part.title,
+    venueName: null,
+  };
+}
+
+function createLegacyLocationViewModel(content: InvitationDraftContent) {
+  const mapsHref = getSafeHttpsHref(content.location.mapsUrl);
+  const hasLocationContent = Boolean(
+    content.location.venueName || content.location.address || mapsHref,
+  );
+
+  return content.location.enabled && hasLocationContent
+    ? {
+        address: content.location.address,
+        mapsHref,
+        venueName: content.location.venueName,
+      }
+    : null;
+}
+
 /**
  * The sole data mapping boundary between validated invitation content and visual
  * templates. It accepts no database client and exposes plain React text only.
@@ -125,15 +165,29 @@ export function createInvitationViewModel({
   project,
 }: InvitationViewModelInput) {
   const { content } = draft;
-  const primaryDate = content.events.primaryDate ?? project.event_date_primary;
+  const isLegacySchedule = isLegacyEventScheduleDerived(content);
+  const legacyPrimaryDate = content.events.primaryDate ?? project.event_date_primary;
+  const modernPrimaryDate = content.eventSchedule.events[0]?.date ?? null;
+  const primaryDate = isLegacySchedule ? legacyPrimaryDate : modernPrimaryDate;
   const primaryDateLabel = formatInvitationDate(primaryDate);
-  const ceremony = createEventPartViewModel(content.events.ceremony);
-  const reception = createEventPartViewModel(content.events.reception);
-  const hasEventContent = Boolean(primaryDateLabel || ceremony || reception);
-  const mapsHref = getSafeHttpsHref(content.location.mapsUrl);
-  const hasLocationContent = Boolean(
-    content.location.venueName || content.location.address || mapsHref,
+  const legacyCeremony = createLegacyEventPartViewModel(content.events.ceremony);
+  const legacyReception = createLegacyEventPartViewModel(content.events.reception);
+  const legacyItems = [legacyCeremony, legacyReception].filter(
+    (event): event is InvitationScheduleItemViewModel => event !== null,
   );
+  const modernItems = content.eventSchedule.events.map(createScheduleItemViewModel);
+  const hasLegacyEventContent = Boolean(primaryDateLabel || legacyItems.length > 0);
+  const events = isLegacySchedule
+    ? content.events.enabled && hasLegacyEventContent
+      ? {
+          items: legacyItems,
+          primaryDateLabel,
+        }
+      : null
+    : {
+        items: modernItems,
+        primaryDateLabel,
+      };
 
   return {
     closing:
@@ -168,14 +222,7 @@ export function createInvitationViewModel({
             lead: content.digitalGift.lead,
           }
         : null,
-    events:
-      content.events.enabled && hasEventContent
-        ? {
-            ceremony,
-            primaryDateLabel,
-            reception,
-          }
-        : null,
+    events,
     gallery:
       content.gallery.enabled && galleryImages.length > 0
         ? {
@@ -190,14 +237,7 @@ export function createInvitationViewModel({
         content.hero.title ??
         `${content.couple.personOne.displayName} & ${content.couple.personTwo.displayName}`,
     },
-    location:
-      content.location.enabled && hasLocationContent
-        ? {
-            address: content.location.address,
-            mapsHref,
-            venueName: content.location.venueName,
-          }
-        : null,
+    location: isLegacySchedule ? createLegacyLocationViewModel(content) : null,
     rsvp: content.rsvp.enabled
       ? {
           heading: content.rsvp.heading ?? 'Konfirmasi Kehadiran',

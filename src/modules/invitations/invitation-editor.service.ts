@@ -12,7 +12,10 @@ import {
   type InvitationEditorFieldErrors,
   type InvitationEditorFormInput,
 } from './invitation-editor.schema';
-import { invitationDraftContentSchema } from './invitation-draft.schema';
+import {
+  derivePrimaryEventCompatibility,
+  invitationDraftContentSchema,
+} from './invitation-draft.schema';
 import type { InvitationDraft } from './invitation-draft.types';
 
 export class InvitationEditorDraftUnavailableError extends Error {
@@ -64,6 +67,20 @@ function applyEditorInputToActiveDraft(
   currentContent: InvitationDraft['content'],
   input: InvitationEditorFormInput['content'],
 ) {
+  const eventSchedule = {
+    events: input.eventSchedule.events.map((event) => ({
+      date: event.date,
+      endTime: event.endTime,
+      id: event.id,
+      mapsUrl: event.mapsUrl,
+      startTime: event.startTime,
+      title: event.title,
+      venueAddress: event.venueAddress,
+      venueName: event.venueName,
+    })),
+  };
+  const primaryCompatibility = derivePrimaryEventCompatibility(eventSchedule);
+
   return {
     ...currentContent,
     closing: {
@@ -94,37 +111,19 @@ function applyEditorInputToActiveDraft(
         parentLine: input.couple.personTwo.parentLine,
       },
     },
-    events: {
-      ceremony: {
-        date: input.events.ceremony.date,
-        enabled: input.events.ceremony.enabled,
-        endTime: input.events.ceremony.endTime,
-        startTime: input.events.ceremony.startTime,
-        title: input.events.ceremony.title,
-      },
-      enabled: input.events.enabled,
-      primaryDate: input.events.primaryDate,
-      reception: {
-        date: input.events.reception.date,
-        enabled: input.events.reception.enabled,
-        endTime: input.events.reception.endTime,
-        startTime: input.events.reception.startTime,
-        title: input.events.reception.title,
-      },
-    },
+    // The client submits only this canonical schedule. Existing `events` and
+    // `location` fields are derived here from the first event, preventing any
+    // browser-originated conflict between the primary summary and schedule.
+    eventSchedule,
+    events: primaryCompatibility.events,
+    location: primaryCompatibility.location,
     hero: {
       eyebrow: input.hero.eyebrow,
       subtitle: input.hero.subtitle,
       title: input.hero.title,
     },
-    location: {
-      address: input.location.address,
-      enabled: input.location.enabled,
-      mapsUrl: input.location.mapsUrl,
-      venueName: input.location.venueName,
-    },
     // meta and gallery intentionally stay sourced from the verified active
-    // draft. SRY-016 has no controls for them, so client input cannot mutate
+    // draft. The editor has no controls for them, so client input cannot mutate
     // timezone, gallery membership, or schema-level metadata.
     meta: currentContent.meta,
     gallery: currentContent.gallery,

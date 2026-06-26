@@ -94,6 +94,47 @@ describe('SRY-021B private invitation preview route', () => {
     expect(html).not.toContain(project.account_id);
   });
 
+  it('renders the saved private draft schedule in its owner-defined order without loading public or guest data', async () => {
+    const draft = createDefaultInvitationDraftContent(project);
+    const first = draft.eventSchedule.events[0]!;
+    draft.eventSchedule.events = [
+      {
+        ...first,
+        mapsUrl: 'https://maps.example.test/akad',
+        title: 'Akad Nikah',
+        venueAddress: 'Jalan Mawar 1',
+        venueName: 'Masjid Seraya',
+      },
+      {
+        ...first,
+        date: '2027-08-18',
+        endTime: null,
+        id: '11111111-1111-4111-8111-111111111111',
+        mapsUrl: null,
+        startTime: '19:00',
+        title: 'Resepsi',
+        venueAddress: null,
+        venueName: null,
+      },
+    ];
+    getPrivateDraftMock.mockResolvedValue({
+      ...ownedPrivateDraft,
+      draft: { ...ownedPrivateDraft.draft, content: draft },
+    });
+
+    const page = await InvitationPreviewPage({
+      params: Promise.resolve({ projectId: project.id }),
+    });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain('Akad Nikah');
+    expect(html).toContain('Resepsi');
+    expect(html.indexOf('Akad Nikah')).toBeLessThan(html.indexOf('Resepsi'));
+    expect(html).toContain('Masjid Seraya');
+    expect(html).toContain('href="https://maps.example.test/akad"');
+    expect(getOverviewMock).not.toHaveBeenCalled();
+  });
+
   it('renders the selected private draft template without reading publication data', async () => {
     const draft = createDefaultInvitationDraftContent(project);
     draft.templateKey = 'aruna';

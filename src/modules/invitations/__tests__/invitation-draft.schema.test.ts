@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest';
 
 import { createDefaultInvitationDraftContent } from '../invitation-draft.defaults';
 import {
+  derivePrimaryEventCompatibility,
   invitationDraftContentSchema,
   invitationDraftDocumentSchema,
+  isLegacyEventScheduleDerived,
 } from '../invitation-draft.schema';
 
 describe('SRY-006 invitation draft V1 content contract', () => {
@@ -27,11 +29,24 @@ describe('SRY-006 invitation draft V1 content contract', () => {
           personTwo: { displayName: 'Nadia', fullName: null, parentLine: null },
         },
         events: {
-          ceremony: { enabled: false },
+          ceremony: { enabled: true },
           primaryDate: '2027-08-17',
           reception: { enabled: false },
         },
         digitalGift: { accounts: [], enabled: false, heading: null, lead: null },
+        eventSchedule: {
+          events: [
+            {
+              date: '2027-08-17',
+              endTime: null,
+              mapsUrl: null,
+              startTime: '08:00',
+              title: 'Akad Nikah',
+              venueAddress: null,
+              venueName: null,
+            },
+          ],
+        },
         gallery: { enabled: false, imageIds: [] },
         hero: { eyebrow: 'The Wedding Of', subtitle: null, title: 'Raka & Nadia' },
         location: { address: null, enabled: false, mapsUrl: null, venueName: null },
@@ -40,6 +55,109 @@ describe('SRY-006 invitation draft V1 content contract', () => {
         story: { body: null, enabled: false, heading: null },
       },
       schemaVersion: 1,
+    });
+  });
+
+  it('creates one valid default schedule event and mirrors it to the legacy primary fields', () => {
+    const [event] = defaultContent.eventSchedule.events;
+
+    expect(event).toMatchObject({
+      date: '2027-08-17',
+      endTime: null,
+      startTime: '08:00',
+      title: 'Akad Nikah',
+      venueAddress: null,
+      venueName: null,
+    });
+    expect(event?.id).toMatch(/^[0-9a-f-]{36}$/i);
+    expect(defaultContent.events).toMatchObject({
+      enabled: true,
+      primaryDate: event?.date,
+      ceremony: { date: event?.date, startTime: event?.startTime, title: event?.title },
+    });
+  });
+
+  it('normalizes a legacy draft without eventSchedule into exactly one derived event', () => {
+    const legacy = structuredClone(defaultContent) as Record<string, unknown>;
+    delete legacy.eventSchedule;
+
+    const parsed = invitationDraftContentSchema.parse(legacy);
+
+    expect(parsed.eventSchedule.events).toEqual([
+      expect.objectContaining({
+        date: '2027-08-17',
+        mapsUrl: null,
+        startTime: '08:00',
+        title: 'Akad Nikah',
+      }),
+    ]);
+    expect(isLegacyEventScheduleDerived(parsed)).toBe(true);
+  });
+
+  it('rejects invalid schedule IDs, blank titles, more than four events, invalid maps URLs, and backwards end times', () => {
+    const event = defaultContent.eventSchedule.events[0]!;
+    const parseSchedule = (events: unknown[]) =>
+      invitationDraftContentSchema.safeParse({ ...defaultContent, eventSchedule: { events } });
+
+    expect(parseSchedule([{ ...event, id: 'bad-id' }]).success).toBe(false);
+    expect(parseSchedule([{ ...event, title: '   ' }]).success).toBe(false);
+    expect(
+      parseSchedule(
+        Array.from({ length: 5 }, (_, index) => ({
+          ...event,
+          id: `00000000-0000-4000-8000-00000000000${index + 1}`,
+        })),
+      ).success,
+    ).toBe(false);
+    expect(parseSchedule([{ ...event, mapsUrl: 'javascript:alert(1)' }]).success).toBe(false);
+    expect(parseSchedule([{ ...event, endTime: '07:59', startTime: '08:00' }]).success).toBe(false);
+  });
+
+  it('preserves owner-defined schedule order and derives legacy primary mirrors only from the first event', () => {
+    const first = {
+      ...defaultContent.eventSchedule.events[0]!,
+      mapsUrl: 'https://maps.example.test/akad',
+      title: 'Akad Nikah',
+      venueAddress: 'Jalan Mawar 1',
+      venueName: 'Masjid Seraya',
+    };
+    const second = {
+      ...first,
+      date: '2027-08-18',
+      id: '11111111-1111-4111-8111-111111111111',
+      mapsUrl: 'https://maps.example.test/resepsi',
+      title: 'Resepsi',
+      venueAddress: 'Jalan Melati 2',
+      venueName: 'Balai Seraya',
+    };
+    const parsed = invitationDraftContentSchema.parse({
+      ...defaultContent,
+      eventSchedule: { events: [first, second] },
+    });
+
+    expect(parsed.eventSchedule.events.map((event) => event.title)).toEqual([
+      'Akad Nikah',
+      'Resepsi',
+    ]);
+    expect(derivePrimaryEventCompatibility(parsed.eventSchedule)).toEqual({
+      events: {
+        ceremony: {
+          date: '2027-08-17',
+          enabled: true,
+          endTime: null,
+          startTime: '08:00',
+          title: 'Akad Nikah',
+        },
+        enabled: true,
+        primaryDate: '2027-08-17',
+        reception: { date: null, enabled: false, endTime: null, startTime: null, title: null },
+      },
+      location: {
+        address: 'Jalan Mawar 1',
+        enabled: true,
+        mapsUrl: 'https://maps.example.test/akad',
+        venueName: 'Masjid Seraya',
+      },
     });
   });
 
@@ -109,7 +227,9 @@ describe('SRY-006 invitation draft V1 content contract', () => {
       'invalid date format',
       () => ({
         ...defaultContent,
-        events: { ...defaultContent.events, primaryDate: '17-08-2027' },
+        eventSchedule: {
+          events: [{ ...defaultContent.eventSchedule.events[0], date: '17-08-2027' }],
+        },
       }),
       /YYYY-MM-DD/i,
     ],
@@ -117,9 +237,8 @@ describe('SRY-006 invitation draft V1 content contract', () => {
       'invalid time format',
       () => ({
         ...defaultContent,
-        events: {
-          ...defaultContent.events,
-          ceremony: { ...defaultContent.events.ceremony, startTime: '7 PM' },
+        eventSchedule: {
+          events: [{ ...defaultContent.eventSchedule.events[0], startTime: '7 PM' }],
         },
       }),
       /HH:mm/i,

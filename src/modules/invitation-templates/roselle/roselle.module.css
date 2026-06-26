@@ -470,3 +470,28 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+.eventSequence {
+  margin: 0 0 0.65rem;
+  color: var(--roselle-rosewood);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.eventVenue {
+  margin-top: 1rem !important;
+  color: var(--roselle-ink);
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 1.18rem;
+  line-height: 1.2;
+}
+
+.eventAddress {
+  white-space: pre-line;
+}
+
+.eventPart .mapsLink {
+  margin-top: 1rem;
+}

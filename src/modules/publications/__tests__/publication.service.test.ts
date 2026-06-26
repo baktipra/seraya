@@ -68,6 +68,20 @@ function snapshot(): PublishedInvitationSnapshot {
           personOne: { displayName: 'Raka', fullName: null, parentLine: null },
           personTwo: { displayName: 'Nadia', fullName: null, parentLine: null },
         },
+        eventSchedule: {
+          events: [
+            {
+              date: '2027-08-17',
+              endTime: null,
+              id: '44444444-4444-4444-8444-444444444444',
+              mapsUrl: null,
+              startTime: '08:00',
+              title: 'Akad Nikah',
+              venueAddress: null,
+              venueName: null,
+            },
+          ],
+        },
         events: {
           ceremony: { date: null, enabled: false, endTime: null, startTime: null, title: null },
           enabled: false,

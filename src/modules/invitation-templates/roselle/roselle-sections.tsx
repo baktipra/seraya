@@ -67,20 +67,31 @@ export function RoselleStory({ story }: Pick<InvitationViewModel, 'story'>) {
   );
 }
 
-function RoselleEventPart({
+function RoselleScheduleEvent({
   event,
+  sequence,
 }: {
-  event: NonNullable<InvitationViewModel['events']>['ceremony'];
+  event: NonNullable<InvitationViewModel['events']>['items'][number];
+  sequence: number;
 }) {
-  if (!event) {
-    return null;
-  }
-
   return (
-    <article className={styles.eventPart}>
+    <article className={styles.eventPart} data-schedule-event="roselle">
+      <p className={styles.eventSequence}>Acara {String(sequence).padStart(2, '0')}</p>
       {event.title ? <h3 className={styles.eventTitle}>{event.title}</h3> : null}
       {event.dateLabel ? <p>{event.dateLabel}</p> : null}
       {event.timeLabel ? <p>{event.timeLabel}</p> : null}
+      {event.venueName ? <p className={styles.eventVenue}>{event.venueName}</p> : null}
+      {event.address ? <p className={styles.eventAddress}>{event.address}</p> : null}
+      {event.mapsHref ? (
+        <a
+          className={styles.mapsLink}
+          href={event.mapsHref}
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          Buka peta acara (tab baru)
+        </a>
+      ) : null}
     </article>
   );
 }
@@ -99,10 +110,15 @@ export function RoselleEvents({ events }: Pick<InvitationViewModel, 'events'>) {
       {events.primaryDateLabel ? (
         <p className={styles.eventPrimaryDate}>{events.primaryDateLabel}</p>
       ) : null}
-      {events.ceremony || events.reception ? (
+      {events.items.length > 0 ? (
         <div className={styles.eventGrid}>
-          <RoselleEventPart event={events.ceremony} />
-          <RoselleEventPart event={events.reception} />
+          {events.items.map((event, index) => (
+            <RoselleScheduleEvent
+              event={event}
+              key={`${event.title ?? 'acara'}-${index}`}
+              sequence={index + 1}
+            />
+          ))}
         </div>
       ) : null}
     </section>
@@ -124,7 +140,12 @@ export function RoselleLocation({ location }: Pick<InvitationViewModel, 'locatio
         {location.venueName ? <p className={styles.locationVenue}>{location.venueName}</p> : null}
         {location.address ? <p className={styles.locationAddress}>{location.address}</p> : null}
         {location.mapsHref ? (
-          <a className={styles.mapsLink} href={location.mapsHref} rel="noreferrer" target="_blank">
+          <a
+            className={styles.mapsLink}
+            href={location.mapsHref}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
             Buka peta lokasi (tab baru)
           </a>
         ) : null}

@@ -42,12 +42,14 @@ type EditorFieldProps = {
   inputMode?: InputHTMLAttributes<HTMLInputElement>['inputMode'];
   label: string;
   name: string;
+  placeholder?: string;
   required?: boolean;
   type?: InputHTMLAttributes<HTMLInputElement>['type'];
   value: string | null;
 };
 
 type DigitalGiftAccountEditorValue = InvitationDraft['content']['digitalGift']['accounts'][number];
+type EventScheduleEditorValue = InvitationDraft['content']['eventSchedule']['events'][number];
 
 type InvitationEditorSaveStatusInput = {
   hasSaved: boolean;
@@ -88,6 +90,7 @@ function EditorTextField({
   inputMode,
   label,
   name,
+  placeholder,
   required = false,
   type,
   value,
@@ -111,6 +114,7 @@ function EditorTextField({
         autoComplete={autoComplete}
         inputMode={inputMode}
         name={name}
+        placeholder={placeholder}
         required={required}
         type={type}
       />
@@ -288,7 +292,7 @@ function EditorSection({
   );
 }
 
-function createDigitalGiftAccountId() {
+function createLocalUuid() {
   const browserId = globalThis.crypto?.randomUUID?.();
 
   if (browserId) {
@@ -301,11 +305,152 @@ function createDigitalGiftAccountId() {
   return `00000000-0000-4000-8000-${entropy}`;
 }
 
-function EditorEventCard({ children, title }: { children: ReactNode; title: string }) {
+function createDigitalGiftAccountId() {
+  return createLocalUuid();
+}
+
+function createEventScheduleItem(): EventScheduleEditorValue {
+  return {
+    date: '',
+    endTime: null,
+    id: createLocalUuid(),
+    mapsUrl: null,
+    startTime: '',
+    title: '',
+    venueAddress: null,
+    venueName: null,
+  };
+}
+
+function EditorScheduleEventCard({
+  event,
+  index,
+  onMoveDown,
+  onMoveUp,
+  onRemove,
+  removable,
+  total,
+  errors,
+}: {
+  event: EventScheduleEditorValue;
+  index: number;
+  onMoveDown: () => void;
+  onMoveUp: () => void;
+  onRemove: () => void;
+  removable: boolean;
+  total: number;
+  errors: InvitationEditorFieldErrors | undefined;
+}) {
+  const eventPrefix = `eventSchedule.events.${index}`;
+  const isPrimary = index === 0;
+
   return (
     <fieldset className="border-seraya-border-default bg-seraya-surface rounded-[var(--seraya-radius-md)] border p-4 sm:p-5">
-      <legend className="text-seraya-text-primary px-1 text-base font-semibold">{title}</legend>
-      <div className="mt-4 space-y-4">{children}</div>
+      <legend className="sr-only">Acara {index + 1}</legend>
+      <div className="border-seraya-border-default flex flex-col gap-4 border-b pb-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h3 className="text-seraya-text-primary text-base font-semibold">Acara {index + 1}</h3>
+            {isPrimary ? (
+              <span className="bg-seraya-brand-soft text-seraya-action-primary rounded-[var(--seraya-radius-pill)] px-2.5 py-1 text-xs font-semibold">
+                Acara utama
+              </span>
+            ) : null}
+          </div>
+          {isPrimary ? (
+            <p className="text-seraya-text-muted mt-1.5 text-sm leading-6">
+              Acara pertama menjadi acara utama yang digunakan pada ringkasan undangan.
+            </p>
+          ) : null}
+        </div>
+        <div className="flex flex-wrap gap-2 sm:justify-end">
+          <Button
+            aria-label={`Pindahkan acara ${index + 1} ke atas`}
+            disabled={index === 0}
+            onClick={onMoveUp}
+            size="sm"
+            type="button"
+            variant="secondary"
+          >
+            Naik
+          </Button>
+          <Button
+            aria-label={`Pindahkan acara ${index + 1} ke bawah`}
+            disabled={index === total - 1}
+            onClick={onMoveDown}
+            size="sm"
+            type="button"
+            variant="secondary"
+          >
+            Turun
+          </Button>
+          <Button
+            aria-label={`Hapus acara ${index + 1}`}
+            disabled={!removable}
+            onClick={onRemove}
+            size="sm"
+            type="button"
+            variant="text"
+          >
+            Hapus
+          </Button>
+        </div>
+      </div>
+
+      <input name={`${eventPrefix}.id`} type="hidden" value={event.id} />
+      <div className="mt-5 grid gap-4 sm:grid-cols-2">
+        <div className="sm:col-span-2">
+          <EditorTextField
+            error={getError(errors, `${eventPrefix}.title`)}
+            label="Nama acara"
+            name={`${eventPrefix}.title`}
+            placeholder="Contoh: Akad Nikah, Resepsi, atau Ngunduh Mantu"
+            required
+            value={event.title}
+          />
+        </div>
+        <EditorDateField
+          error={getError(errors, `${eventPrefix}.date`)}
+          label="Tanggal"
+          name={`${eventPrefix}.date`}
+          value={event.date}
+        />
+        <EditorTimeField
+          error={getError(errors, `${eventPrefix}.startTime`)}
+          label="Waktu mulai"
+          name={`${eventPrefix}.startTime`}
+          value={event.startTime}
+        />
+        <EditorTimeField
+          error={getError(errors, `${eventPrefix}.endTime`)}
+          label="Waktu selesai (opsional)"
+          name={`${eventPrefix}.endTime`}
+          value={event.endTime}
+        />
+        <EditorTextField
+          error={getError(errors, `${eventPrefix}.venueName`)}
+          label="Nama tempat (opsional)"
+          name={`${eventPrefix}.venueName`}
+          value={event.venueName}
+        />
+        <div className="sm:col-span-2">
+          <EditorTextAreaField
+            error={getError(errors, `${eventPrefix}.venueAddress`)}
+            label="Alamat tempat (opsional)"
+            name={`${eventPrefix}.venueAddress`}
+            value={event.venueAddress}
+          />
+        </div>
+        <div className="sm:col-span-2">
+          <EditorTextField
+            error={getError(errors, `${eventPrefix}.mapsUrl`)}
+            help="Gunakan tautan HTTPS yang valid."
+            label="Tautan peta (opsional)"
+            name={`${eventPrefix}.mapsUrl`}
+            value={event.mapsUrl}
+          />
+        </div>
+      </div>
     </fieldset>
   );
 }
@@ -511,6 +656,9 @@ export function InvitationEditor({ draft, projectId }: InvitationEditorProps) {
   );
   const [digitalGiftAccounts, setDigitalGiftAccounts] = useState<DigitalGiftAccountEditorValue[]>(
     content.digitalGift.accounts,
+  );
+  const [eventScheduleEvents, setEventScheduleEvents] = useState<EventScheduleEditorValue[]>(
+    content.eventSchedule.events,
   );
   const lastHandledSuccessState = useRef<InvitationEditorActionState | null>(null);
   const saveStatus = getInvitationEditorSaveStatus({
@@ -738,138 +886,90 @@ export function InvitationEditor({ draft, projectId }: InvitationEditorProps) {
           </EditorSection>
 
           <EditorSection
-            description="Tanggal, waktu, dan rangkaian acara kalian."
+            description="Tambahkan akad, resepsi, atau acara lain dalam satu undangan."
             number="04"
-            title="Detail acara"
+            title="Rangkaian Acara"
           >
             <div className="space-y-5">
-              <EditorToggle
-                checked={content.events.enabled}
-                error={getError(state.fieldErrors, 'events.enabled')}
-                help="Tampilkan bagian ini pada undangan setelah diterbitkan. Isi tetap tersimpan meskipun bagian ini belum ditampilkan."
-                label="Tampilkan detail acara"
-                name="events.enabled"
-              />
-              <EditorDateField
-                error={getError(state.fieldErrors, 'events.primaryDate')}
-                label="Tanggal utama"
-                name="events.primaryDate"
-                value={content.events.primaryDate}
-              />
-              <div className="grid gap-5 lg:grid-cols-2">
-                <EditorEventCard title="Akad atau upacara">
-                  <EditorToggle
-                    checked={content.events.ceremony.enabled}
-                    error={getError(state.fieldErrors, 'events.ceremony.enabled')}
-                    help="Tampilkan acara ini pada undangan setelah diterbitkan. Isi tetap tersimpan meskipun acara ini belum ditampilkan."
-                    label="Tampilkan akad atau upacara"
-                    name="events.ceremony.enabled"
-                  />
-                  <EditorTextField
-                    error={getError(state.fieldErrors, 'events.ceremony.title')}
-                    label="Nama acara"
-                    name="events.ceremony.title"
-                    value={content.events.ceremony.title}
-                  />
-                  <EditorDateField
-                    error={getError(state.fieldErrors, 'events.ceremony.date')}
-                    label="Tanggal"
-                    name="events.ceremony.date"
-                    value={content.events.ceremony.date}
-                  />
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <EditorTimeField
-                      error={getError(state.fieldErrors, 'events.ceremony.startTime')}
-                      label="Mulai"
-                      name="events.ceremony.startTime"
-                      value={content.events.ceremony.startTime}
-                    />
-                    <EditorTimeField
-                      error={getError(state.fieldErrors, 'events.ceremony.endTime')}
-                      label="Selesai"
-                      name="events.ceremony.endTime"
-                      value={content.events.ceremony.endTime}
-                    />
-                  </div>
-                </EditorEventCard>
-
-                <EditorEventCard title="Resepsi">
-                  <EditorToggle
-                    checked={content.events.reception.enabled}
-                    error={getError(state.fieldErrors, 'events.reception.enabled')}
-                    help="Tampilkan acara ini pada undangan setelah diterbitkan. Isi tetap tersimpan meskipun acara ini belum ditampilkan."
-                    label="Tampilkan resepsi"
-                    name="events.reception.enabled"
-                  />
-                  <EditorTextField
-                    error={getError(state.fieldErrors, 'events.reception.title')}
-                    label="Nama acara"
-                    name="events.reception.title"
-                    value={content.events.reception.title}
-                  />
-                  <EditorDateField
-                    error={getError(state.fieldErrors, 'events.reception.date')}
-                    label="Tanggal"
-                    name="events.reception.date"
-                    value={content.events.reception.date}
-                  />
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <EditorTimeField
-                      error={getError(state.fieldErrors, 'events.reception.startTime')}
-                      label="Mulai"
-                      name="events.reception.startTime"
-                      value={content.events.reception.startTime}
-                    />
-                    <EditorTimeField
-                      error={getError(state.fieldErrors, 'events.reception.endTime')}
-                      label="Selesai"
-                      name="events.reception.endTime"
-                      value={content.events.reception.endTime}
-                    />
-                  </div>
-                </EditorEventCard>
+              <div className="border-seraya-border-default bg-seraya-brand-soft/45 flex flex-col gap-4 rounded-[var(--seraya-radius-md)] border px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                <div>
+                  <p className="text-seraya-text-primary text-sm font-semibold">
+                    Susun acara kalian
+                  </p>
+                  <p className="text-seraya-text-muted mt-1 text-sm leading-6">
+                    Acara pertama menjadi acara utama yang digunakan pada ringkasan undangan.
+                  </p>
+                </div>
+                <Button
+                  disabled={eventScheduleEvents.length >= 4}
+                  onClick={() => {
+                    setEventScheduleEvents((current) => [...current, createEventScheduleItem()]);
+                    setIsDirty(true);
+                  }}
+                  size="sm"
+                  type="button"
+                  variant="secondary"
+                >
+                  Tambah acara
+                </Button>
               </div>
-            </div>
-          </EditorSection>
 
-          <EditorSection
-            description="Tempat berlangsungnya acara dan tautan peta."
-            number="05"
-            title="Lokasi"
-          >
-            <div className="space-y-5">
-              <EditorToggle
-                checked={content.location.enabled}
-                error={getError(state.fieldErrors, 'location.enabled')}
-                help="Tampilkan bagian ini pada undangan setelah diterbitkan. Isi tetap tersimpan meskipun bagian ini belum ditampilkan."
-                label="Tampilkan lokasi"
-                name="location.enabled"
-              />
-              <EditorTextField
-                error={getError(state.fieldErrors, 'location.venueName')}
-                label="Nama tempat"
-                name="location.venueName"
-                value={content.location.venueName}
-              />
-              <EditorTextAreaField
-                error={getError(state.fieldErrors, 'location.address')}
-                label="Alamat"
-                name="location.address"
-                value={content.location.address}
-              />
-              <EditorTextField
-                error={getError(state.fieldErrors, 'location.mapsUrl')}
-                help="Gunakan tautan HTTPS yang valid."
-                label="Tautan peta"
-                name="location.mapsUrl"
-                value={content.location.mapsUrl}
+              <div className="space-y-4">
+                {eventScheduleEvents.map((event, index) => (
+                  <EditorScheduleEventCard
+                    errors={state.fieldErrors}
+                    event={event}
+                    index={index}
+                    key={event.id}
+                    onMoveDown={() => {
+                      setEventScheduleEvents((current) => {
+                        if (index === current.length - 1) {
+                          return current;
+                        }
+
+                        const next = [...current];
+                        [next[index], next[index + 1]] = [next[index + 1]!, next[index]!];
+                        return next;
+                      });
+                      setIsDirty(true);
+                    }}
+                    onMoveUp={() => {
+                      setEventScheduleEvents((current) => {
+                        if (index === 0) {
+                          return current;
+                        }
+
+                        const next = [...current];
+                        [next[index - 1], next[index]] = [next[index]!, next[index - 1]!];
+                        return next;
+                      });
+                      setIsDirty(true);
+                    }}
+                    onRemove={() => {
+                      setEventScheduleEvents((current) => {
+                        if (current.length === 1) {
+                          return current;
+                        }
+
+                        return current.filter((item) => item.id !== event.id);
+                      });
+                      setIsDirty(true);
+                    }}
+                    removable={eventScheduleEvents.length > 1}
+                    total={eventScheduleEvents.length}
+                  />
+                ))}
+              </div>
+              <FieldError
+                message={getError(state.fieldErrors, 'eventSchedule.events')}
+                name="eventSchedule.events"
               />
             </div>
           </EditorSection>
 
           <EditorSection
             description="Atur teks RSVP yang akan dilihat tamu."
-            number="06"
+            number="05"
             title="Konfirmasi kehadiran"
           >
             <div className="space-y-5">
@@ -897,7 +997,7 @@ export function InvitationEditor({ draft, projectId }: InvitationEditorProps) {
 
           <EditorSection
             description="Bagikan informasi rekening atau e-wallet untuk hadiah pernikahan. Informasi ini akan tampil pada undangan setelah dipublikasikan."
-            number="07"
+            number="06"
             title="Amplop Digital"
           >
             <div className="space-y-5">
@@ -1029,7 +1129,7 @@ export function InvitationEditor({ draft, projectId }: InvitationEditorProps) {
 
           <EditorSection
             description="Pesan terakhir yang tampil di akhir undangan."
-            number="08"
+            number="07"
             title="Penutup"
           >
             <div className="space-y-5">

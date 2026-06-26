@@ -41,33 +41,35 @@ function createCompleteInvitation() {
     heading: 'Amplop Digital',
     lead: 'Terima kasih atas doa terbaik Anda.',
   };
-  content.events = {
-    ceremony: {
-      date: '2027-08-17',
-      enabled: true,
-      endTime: '10:00',
-      startTime: '08:00',
-      title: 'Akad Nikah',
-    },
-    enabled: true,
-    primaryDate: '2027-08-17',
-    reception: {
-      date: '2027-08-17',
-      enabled: true,
-      endTime: '14:00',
-      startTime: '11:00',
-      title: 'Resepsi',
-    },
+  const primaryScheduleEvent = content.eventSchedule.events[0]!;
+  content.eventSchedule = {
+    events: [
+      {
+        ...primaryScheduleEvent,
+        date: '2027-08-17',
+        endTime: '10:00',
+        mapsUrl: 'https://maps.example.test/raka-nadia',
+        startTime: '08:00',
+        title: 'Akad Nikah',
+        venueAddress: 'Jalan Mawar No. 1, Jakarta',
+        venueName: 'Gedung Bahagia',
+      },
+      {
+        ...primaryScheduleEvent,
+        date: '2027-08-17',
+        endTime: '14:00',
+        id: '11111111-1111-4111-8111-111111111111',
+        mapsUrl: null,
+        startTime: '11:00',
+        title: 'Resepsi',
+        venueAddress: null,
+        venueName: null,
+      },
+    ],
   };
   content.gallery = {
     enabled: true,
     imageIds: ['11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222'],
-  };
-  content.location = {
-    address: 'Jalan Mawar No. 1, Jakarta',
-    enabled: true,
-    mapsUrl: 'https://maps.example.test/raka-nadia',
-    venueName: 'Gedung Bahagia',
   };
   content.rsvp = {
     enabled: true,
@@ -115,7 +117,7 @@ describe('SRY-025 invitation template registry', () => {
       expect(html).toContain('Akad Nikah');
       expect(html).toContain('Resepsi');
       expect(html).toContain('Gedung Bahagia');
-      expect(html).toContain('Buka peta lokasi (tab baru)');
+      expect(html).toContain('Buka peta acara (tab baru)');
       expect(html).toContain('src="/media/one"');
       expect(html).toContain('src="/media/two"');
       expect(html.indexOf('src="/media/one"')).toBeLessThan(html.indexOf('src="/media/two"'));
@@ -128,6 +130,25 @@ describe('SRY-025 invitation template registry', () => {
       expect(html.indexOf('123456789012')).toBeLessThan(html.indexOf('987654321098'));
       expect(html).toContain('Salin nomor');
       expect(html).toContain('Terima kasih atas doa terbaik Anda.');
+    },
+  );
+
+  it.each(['roselle', 'aruna', 'laras'] as const)(
+    'renders multi-event schedule data with distinct %s schedule markup and no duplicate location block',
+    (templateKey) => {
+      const html = renderToStaticMarkup(
+        <InvitationTemplateRenderer
+          invitation={createCompleteInvitation()}
+          templateKey={templateKey}
+        />,
+      );
+
+      expect(html.match(new RegExp(`data-schedule-event=\"${templateKey}\"`, 'g'))).toHaveLength(2);
+      expect(html).toContain('Akad Nikah');
+      expect(html).toContain('Resepsi');
+      expect(html).toContain('Buka peta acara (tab baru)');
+      expect(html).not.toContain('Buka peta lokasi (tab baru)');
+      expect(html).not.toContain('<iframe');
     },
   );
 

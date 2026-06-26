@@ -461,3 +461,19 @@
     transition: none;
   }
 }
+
+.eventVenue {
+  margin: 1rem 0 0 !important;
+  color: var(--laras-ivory);
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 1.22rem;
+  line-height: 1.2;
+}
+
+.eventAddress {
+  white-space: pre-line;
+}
+
+.eventCard .mapsLink {
+  margin-top: 1rem;
+}

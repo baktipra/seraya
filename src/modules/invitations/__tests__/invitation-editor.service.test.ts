@@ -69,19 +69,31 @@ function createEditorInput(): InvitationEditorFormInput {
         personOne: { displayName: ' Raka ', fullName: ' ', parentLine: ' ' },
         personTwo: { displayName: ' Nadia ', fullName: '', parentLine: '' },
       },
-      events: {
-        ceremony: { date: '', enabled: false, endTime: '', startTime: '', title: '' },
-        enabled: true,
-        primaryDate: '2027-08-17',
-        reception: { date: '', enabled: false, endTime: '', startTime: '', title: '' },
+      eventSchedule: {
+        events: [
+          {
+            date: '2027-08-17',
+            endTime: ' 11:00 ',
+            id: '22222222-2222-4222-8222-222222222222',
+            mapsUrl: ' https://maps.example.test/raka-nadia ',
+            startTime: ' 08:00 ',
+            title: ' Akad Nikah ',
+            venueAddress: ' Jalan Mawar ',
+            venueName: ' Gedung Bahagia ',
+          },
+          {
+            date: '2027-08-17',
+            endTime: '',
+            id: '33333333-3333-4333-8333-333333333333',
+            mapsUrl: '',
+            startTime: ' 18:30 ',
+            title: ' Resepsi ',
+            venueAddress: '',
+            venueName: '',
+          },
+        ],
       },
       hero: { eyebrow: ' The Wedding Of ', subtitle: ' ', title: ' Raka & Nadia ' },
-      location: {
-        address: ' Jalan Mawar ',
-        enabled: true,
-        mapsUrl: ' https://maps.example.test/raka-nadia ',
-        venueName: ' Gedung Bahagia ',
-      },
       rsvp: { enabled: true, heading: ' Konfirmasi Kehadiran ', lead: ' ' },
       templateKey: 'aruna',
       story: { body: ' ', enabled: false, heading: '' },
@@ -140,6 +152,20 @@ describe('SRY-016 invitation editor service', () => {
     expect(update.content.couple.personOne.fullName).toBeNull();
     expect(update.content.hero.subtitle).toBeNull();
     expect(update.content.story.body).toBeNull();
+    expect(update.content.eventSchedule.events).toMatchObject([
+      {
+        date: '2027-08-17',
+        endTime: '11:00',
+        mapsUrl: 'https://maps.example.test/raka-nadia',
+        startTime: '08:00',
+        title: 'Akad Nikah',
+        venueAddress: 'Jalan Mawar',
+        venueName: 'Gedung Bahagia',
+      },
+      { title: 'Resepsi' },
+    ]);
+    expect(update.content.events.primaryDate).toBe('2027-08-17');
+    expect(update.content.events.ceremony.title).toBe('Akad Nikah');
     expect(update.content.location.mapsUrl).toBe('https://maps.example.test/raka-nadia');
     expect(update.content.templateKey).toBe('aruna');
     expect(update.content.digitalGift).toEqual({
@@ -164,9 +190,9 @@ describe('SRY-016 invitation editor service', () => {
     const draft = createDraft();
     getActiveDraftMock.mockResolvedValue(draft);
     const invalid = createEditorInput();
-    invalid.content.events.primaryDate = '2027-02-30';
-    invalid.content.events.ceremony.startTime = '25:99';
-    invalid.content.location.mapsUrl = 'http://maps.example.test/not-https';
+    invalid.content.eventSchedule.events[0]!.date = '2027-02-30';
+    invalid.content.eventSchedule.events[0]!.startTime = '25:99';
+    invalid.content.eventSchedule.events[0]!.mapsUrl = 'http://maps.example.test/not-https';
     invalid.content.story.body = '<strong>tidak boleh</strong>';
     invalid.content.digitalGift.accounts[0]!.accountNumber = '12/34';
 
@@ -179,9 +205,9 @@ describe('SRY-016 invitation editor service', () => {
     } catch (error) {
       expect(error).toBeInstanceOf(InvitationEditorValidationError);
       const validationError = error as InvitationEditorValidationError;
-      expect(validationError.fieldErrors['events.primaryDate']).toBeDefined();
-      expect(validationError.fieldErrors['events.ceremony.startTime']).toBeDefined();
-      expect(validationError.fieldErrors['location.mapsUrl']).toBeDefined();
+      expect(validationError.fieldErrors['eventSchedule.events.0.date']).toBeDefined();
+      expect(validationError.fieldErrors['eventSchedule.events.0.startTime']).toBeDefined();
+      expect(validationError.fieldErrors['eventSchedule.events.0.mapsUrl']).toBeDefined();
       expect(validationError.fieldErrors['story.body']).toBeDefined();
       expect(validationError.fieldErrors['digitalGift.accounts.0.accountNumber']).toBeDefined();
     }

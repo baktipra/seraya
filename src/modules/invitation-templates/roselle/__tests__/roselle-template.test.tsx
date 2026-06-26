@@ -69,19 +69,18 @@ describe('RoselleTemplate', () => {
       enabled: true,
       heading: 'Awal yang baik',
     };
-    draft.content.events.ceremony = {
-      date: '2027-08-17',
-      enabled: true,
-      endTime: '10:30',
-      startTime: '09:00',
-      title: 'Akad nikah',
-    };
-    draft.content.location = {
-      address: 'Jl. Bahagia No. 1, Jakarta',
-      enabled: true,
-      mapsUrl: 'https://www.google.com/maps?q=Jakarta',
-      venueName: 'Rumah Bahagia',
-    };
+    draft.content.eventSchedule.events = [
+      {
+        ...draft.content.eventSchedule.events[0]!,
+        date: '2027-08-17',
+        endTime: '10:30',
+        mapsUrl: 'https://www.google.com/maps?q=Jakarta',
+        startTime: '09:00',
+        title: 'Akad nikah',
+        venueAddress: 'Jl. Bahagia No. 1, Jakarta',
+        venueName: 'Rumah Bahagia',
+      },
+    ];
     draft.content.closing = {
       enabled: true,
       message: 'Terima kasih atas doa baiknya.',
@@ -98,8 +97,8 @@ describe('RoselleTemplate', () => {
     expect(html).toContain('Jl. Bahagia No. 1, Jakarta');
     expect(html).toContain('href="https://www.google.com/maps?q=Jakarta"');
     expect(html).toContain('target="_blank"');
-    expect(html).toContain('rel="noreferrer"');
-    expect(html).toContain('Buka peta lokasi (tab baru)');
+    expect(html).toContain('rel="noopener noreferrer"');
+    expect(html).toContain('Buka peta acara (tab baru)');
     expect(html).toContain('Terima kasih atas doa baiknya.');
   });
 

@@ -6,6 +6,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createDefaultInvitationDraftContent } from '@/modules/invitations/invitation-draft.defaults';
+import { normalizePublishedInvitationSnapshot } from '@/modules/publications/published-invitation.schema';
 
 const { getPublicGalleryImagesMock, getPublicInvitationMock, notFoundMock } = vi.hoisted(() => ({
   getPublicGalleryImagesMock: vi.fn(),
@@ -103,12 +104,13 @@ describe('SRY-008 public invitation route', () => {
     async (templateKey) => {
       const legacyDraft = { ...snapshot.snapshot.draft };
       delete (legacyDraft as Partial<typeof legacyDraft>).digitalGift;
+      const normalizedLegacySnapshot = normalizePublishedInvitationSnapshot({
+        ...snapshot.snapshot,
+        draft: { ...legacyDraft, templateKey },
+      });
       getPublicInvitationMock.mockResolvedValue({
         ...snapshot,
-        snapshot: {
-          ...snapshot.snapshot,
-          draft: { ...legacyDraft, templateKey },
-        },
+        snapshot: normalizedLegacySnapshot,
         template_id: templateKey,
       });
 
@@ -121,6 +123,51 @@ describe('SRY-008 public invitation route', () => {
       expect(html).not.toContain('Salin nomor');
     },
   );
+
+  it('renders only the schedule stored in the immutable published snapshot, then changes only after a replacement snapshot', async () => {
+    const publishedScheduleDraft = structuredClone(snapshot.snapshot.draft);
+    const first = publishedScheduleDraft.eventSchedule.events[0]!;
+    publishedScheduleDraft.eventSchedule.events = [
+      {
+        ...first,
+        title: 'Akad Nikah',
+        venueName: 'Masjid Seraya',
+      },
+    ];
+    const laterDraft = structuredClone(publishedScheduleDraft);
+    laterDraft.eventSchedule.events = [
+      {
+        ...laterDraft.eventSchedule.events[0]!,
+        title: 'Resepsi Baru',
+        venueName: 'Balai Seraya',
+      },
+    ];
+
+    getPublicInvitationMock.mockResolvedValue({
+      ...snapshot,
+      snapshot: { ...snapshot.snapshot, draft: publishedScheduleDraft },
+    });
+    const firstRender = renderToStaticMarkup(
+      await PublicInvitationPage({ params: Promise.resolve({ slug: 'raka-nadia' }) }),
+    );
+
+    expect(firstRender).toContain('Akad Nikah');
+    expect(firstRender).toContain('Masjid Seraya');
+    expect(firstRender).not.toContain('Resepsi Baru');
+
+    getPublicInvitationMock.mockResolvedValue({
+      ...snapshot,
+      revision: 2,
+      snapshot: { ...snapshot.snapshot, draft: laterDraft },
+    });
+    const republishedRender = renderToStaticMarkup(
+      await PublicInvitationPage({ params: Promise.resolve({ slug: 'raka-nadia' }) }),
+    );
+
+    expect(republishedRender).toContain('Resepsi Baru');
+    expect(republishedRender).toContain('Balai Seraya');
+    expect(republishedRender).not.toContain('Masjid Seraya');
+  });
 
   it('renders Amplop Digital only from the immutable published snapshot draft', async () => {
     const publishedDraft = {

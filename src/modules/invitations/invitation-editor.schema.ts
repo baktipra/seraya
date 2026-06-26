@@ -4,11 +4,22 @@ import { INVITATION_TEMPLATE_KEYS } from '@/modules/invitation-templates/invitat
 
 const databaseUuidShape = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const digitalGiftAccountMaximum = 3 as const;
+const eventScheduleMaximum = 4 as const;
 const digitalGiftAccountInputKeys = [
   'id',
   'providerName',
   'accountHolder',
   'accountNumber',
+] as const;
+const eventScheduleEventInputKeys = [
+  'id',
+  'title',
+  'date',
+  'startTime',
+  'endTime',
+  'venueName',
+  'venueAddress',
+  'mapsUrl',
 ] as const;
 
 const projectIdSchema = z.string().regex(databaseUuidShape, 'Project tidak valid.');
@@ -32,22 +43,6 @@ const baseEditorFormFieldNames = [
   'story.enabled',
   'story.heading',
   'story.body',
-  'events.enabled',
-  'events.primaryDate',
-  'events.ceremony.enabled',
-  'events.ceremony.title',
-  'events.ceremony.date',
-  'events.ceremony.startTime',
-  'events.ceremony.endTime',
-  'events.reception.enabled',
-  'events.reception.title',
-  'events.reception.date',
-  'events.reception.startTime',
-  'events.reception.endTime',
-  'location.enabled',
-  'location.venueName',
-  'location.address',
-  'location.mapsUrl',
   'rsvp.enabled',
   'rsvp.heading',
   'rsvp.lead',
@@ -63,11 +58,21 @@ type DigitalGiftAccountIndex = 0 | 1 | 2;
 type DigitalGiftAccountInputKey = (typeof digitalGiftAccountInputKeys)[number];
 type DigitalGiftAccountFieldName =
   `digitalGift.accounts.${DigitalGiftAccountIndex}.${DigitalGiftAccountInputKey}`;
-type EditorFormFieldName = (typeof baseEditorFormFieldNames)[number] | DigitalGiftAccountFieldName;
-type EditorFieldErrorName = EditorFormFieldName | 'digitalGift.accounts';
+type EventScheduleEventIndex = 0 | 1 | 2 | 3;
+type EventScheduleEventInputKey = (typeof eventScheduleEventInputKeys)[number];
+type EventScheduleEventFieldName =
+  `eventSchedule.events.${EventScheduleEventIndex}.${EventScheduleEventInputKey}`;
+type EditorFormFieldName =
+  | (typeof baseEditorFormFieldNames)[number]
+  | DigitalGiftAccountFieldName
+  | EventScheduleEventFieldName;
+type EditorFieldErrorName = EditorFormFieldName | 'digitalGift.accounts' | 'eventSchedule.events';
 
 const digitalGiftAccountFieldPattern = new RegExp(
   `^digitalGift\\.accounts\\.([0-${digitalGiftAccountMaximum - 1}])\\.(${digitalGiftAccountInputKeys.join('|')})$`,
+);
+const eventScheduleEventFieldPattern = new RegExp(
+  `^eventSchedule\\.events\\.([0-${eventScheduleMaximum - 1}])\\.(${eventScheduleEventInputKeys.join('|')})$`,
 );
 
 const invitationEditorFormSchema = z
@@ -118,28 +123,25 @@ const invitationEditorFormSchema = z
             lead: formTextSchema,
           })
           .strict(),
-        events: z
+        eventSchedule: z
           .object({
-            ceremony: z
-              .object({
-                date: formTextSchema,
-                enabled: checkboxInputSchema,
-                endTime: formTextSchema,
-                startTime: formTextSchema,
-                title: formTextSchema,
-              })
-              .strict(),
-            enabled: checkboxInputSchema,
-            primaryDate: formTextSchema,
-            reception: z
-              .object({
-                date: formTextSchema,
-                enabled: checkboxInputSchema,
-                endTime: formTextSchema,
-                startTime: formTextSchema,
-                title: formTextSchema,
-              })
-              .strict(),
+            events: z
+              .array(
+                z
+                  .object({
+                    date: formTextSchema,
+                    endTime: formTextSchema,
+                    id: z.string().regex(databaseUuidShape, 'ID acara tidak valid.'),
+                    mapsUrl: formTextSchema,
+                    startTime: formTextSchema,
+                    title: formTextSchema,
+                    venueAddress: formTextSchema,
+                    venueName: formTextSchema,
+                  })
+                  .strict(),
+              )
+              .min(1)
+              .max(eventScheduleMaximum),
           })
           .strict(),
         hero: z
@@ -147,14 +149,6 @@ const invitationEditorFormSchema = z
             eyebrow: formTextSchema,
             subtitle: formTextSchema,
             title: formTextSchema,
-          })
-          .strict(),
-        location: z
-          .object({
-            address: formTextSchema,
-            enabled: checkboxInputSchema,
-            mapsUrl: formTextSchema,
-            venueName: formTextSchema,
           })
           .strict(),
         rsvp: z
@@ -206,15 +200,24 @@ function getDigitalGiftAccountFieldMatch(name: string) {
   return digitalGiftAccountFieldPattern.exec(name);
 }
 
+function getEventScheduleEventFieldMatch(name: string) {
+  return eventScheduleEventFieldPattern.exec(name);
+}
+
 function isKnownEditorFormFieldName(name: string): name is EditorFormFieldName {
   return (
     (baseEditorFormFieldNames as readonly string[]).includes(name) ||
-    getDigitalGiftAccountFieldMatch(name) !== null
+    getDigitalGiftAccountFieldMatch(name) !== null ||
+    getEventScheduleEventFieldMatch(name) !== null
   );
 }
 
 function isEditorFieldErrorName(name: string): name is EditorFieldErrorName {
-  return name === 'digitalGift.accounts' || isKnownEditorFormFieldName(name);
+  return (
+    name === 'digitalGift.accounts' ||
+    name === 'eventSchedule.events' ||
+    isKnownEditorFormFieldName(name)
+  );
 }
 
 function getDigitalGiftAccountIndexes(formData: FormData) {
@@ -231,6 +234,24 @@ function getDigitalGiftAccountIndexes(formData: FormData) {
   return [...indexes].sort((left, right) => left - right);
 }
 
+function getEventScheduleEventIndexes(formData: FormData) {
+  const indexes = new Set<number>();
+
+  for (const key of formData.keys()) {
+    const match = getEventScheduleEventFieldMatch(key);
+
+    if (match) {
+      indexes.add(Number(match[1]));
+    }
+  }
+
+  return [...indexes].sort((left, right) => left - right);
+}
+
+function hasContiguousIndexes(indexes: number[]) {
+  return indexes.every((index, position) => index === position);
+}
+
 function getDigitalGiftAccountsFromFormData(formData: FormData) {
   return getDigitalGiftAccountIndexes(formData).map((index) => ({
     accountHolder: getFormValue(formData, `digitalGift.accounts.${index}.accountHolder`),
@@ -240,12 +261,25 @@ function getDigitalGiftAccountsFromFormData(formData: FormData) {
   }));
 }
 
+function getEventScheduleEventsFromFormData(formData: FormData) {
+  return getEventScheduleEventIndexes(formData).map((index) => ({
+    date: getFormValue(formData, `eventSchedule.events.${index}.date`),
+    endTime: getFormValue(formData, `eventSchedule.events.${index}.endTime`),
+    id: getFormValue(formData, `eventSchedule.events.${index}.id`),
+    mapsUrl: getFormValue(formData, `eventSchedule.events.${index}.mapsUrl`),
+    startTime: getFormValue(formData, `eventSchedule.events.${index}.startTime`),
+    title: getFormValue(formData, `eventSchedule.events.${index}.title`),
+    venueAddress: getFormValue(formData, `eventSchedule.events.${index}.venueAddress`),
+    venueName: getFormValue(formData, `eventSchedule.events.${index}.venueName`),
+  }));
+}
+
 /**
  * Browser field names are deliberately enumerated. The submitted document is
  * reconstructed server-side from these known editable fields only; gallery,
- * metadata, schema version, snapshots, and any injected field cannot cross
- * this boundary. Amplop Digital accounts are limited to the three exact
- * server-recognized slot indexes used by the owner editor.
+ * metadata, legacy event/location mirrors, schema version, snapshots, and any
+ * injected field cannot cross this boundary. Amplop Digital accounts use three
+ * exact slots and schedule events use four exact slots.
  */
 export function parseInvitationEditorFormData(formData: FormData) {
   const submittedFields = [...new Set(Array.from(formData.keys()))];
@@ -253,10 +287,19 @@ export function parseInvitationEditorFormData(formData: FormData) {
   const duplicateFields = submittedFields.filter(
     (name) => isKnownEditorFormFieldName(name) && formData.getAll(name).length > 1,
   );
+  const eventIndexes = getEventScheduleEventIndexes(formData);
 
-  if (unexpectedFields.length > 0 || duplicateFields.length > 0) {
+  if (
+    unexpectedFields.length > 0 ||
+    duplicateFields.length > 0 ||
+    !hasContiguousIndexes(eventIndexes)
+  ) {
     return {
-      error: createUnexpectedFieldError([...unexpectedFields, ...duplicateFields]),
+      error: createUnexpectedFieldError([
+        ...unexpectedFields,
+        ...duplicateFields,
+        ...(hasContiguousIndexes(eventIndexes) ? [] : ['eventSchedule.events']),
+      ]),
       success: false as const,
     };
   }
@@ -286,34 +329,13 @@ export function parseInvitationEditorFormData(formData: FormData) {
         heading: getFormValue(formData, 'digitalGift.heading'),
         lead: getFormValue(formData, 'digitalGift.lead'),
       },
-      events: {
-        ceremony: {
-          date: getFormValue(formData, 'events.ceremony.date'),
-          enabled: getCheckboxValue(formData, 'events.ceremony.enabled'),
-          endTime: getFormValue(formData, 'events.ceremony.endTime'),
-          startTime: getFormValue(formData, 'events.ceremony.startTime'),
-          title: getFormValue(formData, 'events.ceremony.title'),
-        },
-        enabled: getCheckboxValue(formData, 'events.enabled'),
-        primaryDate: getFormValue(formData, 'events.primaryDate'),
-        reception: {
-          date: getFormValue(formData, 'events.reception.date'),
-          enabled: getCheckboxValue(formData, 'events.reception.enabled'),
-          endTime: getFormValue(formData, 'events.reception.endTime'),
-          startTime: getFormValue(formData, 'events.reception.startTime'),
-          title: getFormValue(formData, 'events.reception.title'),
-        },
+      eventSchedule: {
+        events: getEventScheduleEventsFromFormData(formData),
       },
       hero: {
         eyebrow: getFormValue(formData, 'hero.eyebrow'),
         subtitle: getFormValue(formData, 'hero.subtitle'),
         title: getFormValue(formData, 'hero.title'),
-      },
-      location: {
-        address: getFormValue(formData, 'location.address'),
-        enabled: getCheckboxValue(formData, 'location.enabled'),
-        mapsUrl: getFormValue(formData, 'location.mapsUrl'),
-        venueName: getFormValue(formData, 'location.venueName'),
       },
       rsvp: {
         enabled: getCheckboxValue(formData, 'rsvp.enabled'),
@@ -337,10 +359,23 @@ function normalizeIssuePath(path: PropertyKey[]) {
 }
 
 /** Converts strict Zod paths into the exact client form names used by the editor. */
+function flattenValidationIssues(issues: z.ZodIssue[]): z.ZodIssue[] {
+  return issues.flatMap((issue) => {
+    if (issue.code === 'invalid_union') {
+      // The first union branch is the strict modern draft contract. Prefer its
+      // concrete paths so owners receive field-level schedule feedback rather
+      // than an opaque union error when a new schedule is invalid.
+      return issue.errors[0] ? flattenValidationIssues(issue.errors[0] as z.ZodIssue[]) : [issue];
+    }
+
+    return [issue];
+  });
+}
+
 export function getInvitationEditorFieldErrors(error: z.ZodError): InvitationEditorFieldErrors {
   const fieldErrors: InvitationEditorFieldErrors = {};
 
-  for (const issue of error.issues) {
+  for (const issue of flattenValidationIssues(error.issues)) {
     const field = normalizeIssuePath(issue.path).join('.');
     const key = field === 'projectId' || isEditorFieldErrorName(field) ? field : 'form';
 

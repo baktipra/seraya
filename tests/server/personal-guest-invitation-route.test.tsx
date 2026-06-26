@@ -7,6 +7,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createDefaultInvitationDraftContent } from '@/modules/invitations/invitation-draft.defaults';
+import { normalizePublishedInvitationSnapshot } from '@/modules/publications/published-invitation.schema';
 
 const {
   getPersonalGuestInvitationMock,
@@ -136,15 +137,16 @@ describe('SRY-013 personal guest invitation route', () => {
     const guestToken = randomBytes(32).toString('base64url');
     const legacyDraft = { ...snapshot.draft };
     delete (legacyDraft as Partial<typeof legacyDraft>).digitalGift;
+    const normalizedLegacySnapshot = normalizePublishedInvitationSnapshot({
+      ...snapshot,
+      draft: legacyDraft,
+    });
     getPersonalGuestInvitationMock.mockResolvedValue({
       guestDisplayName: 'Keluarga Budi',
       partySize: 4,
       rsvpAttendeeCount: null,
       rsvpStatus: 'pending',
-      snapshot: {
-        ...snapshot,
-        draft: legacyDraft,
-      },
+      snapshot: normalizedLegacySnapshot,
       templateId: 'roselle',
     });
 
@@ -157,6 +159,110 @@ describe('SRY-013 personal guest invitation route', () => {
     expect(html).toContain('Raka &amp; Nadia');
     expect(html).not.toContain('Amplop Digital');
     expect(html).not.toContain('Salin nomor');
+  });
+
+  it('renders the same immutable published schedule for the personalized capability, with no guest fields in schedule output', async () => {
+    const guestToken = randomBytes(32).toString('base64url');
+    const personalDraft = structuredClone(snapshot.draft);
+    const first = personalDraft.eventSchedule.events[0]!;
+    personalDraft.eventSchedule.events = [
+      {
+        ...first,
+        mapsUrl: 'https://maps.example.test/akad',
+        title: 'Akad Nikah',
+        venueAddress: 'Jalan Mawar 1',
+        venueName: 'Masjid Seraya',
+      },
+      {
+        ...first,
+        date: '2027-08-18',
+        endTime: null,
+        id: '11111111-1111-4111-8111-111111111111',
+        mapsUrl: null,
+        startTime: '19:00',
+        title: 'Resepsi',
+        venueAddress: null,
+        venueName: null,
+      },
+    ];
+    getPersonalGuestInvitationMock.mockResolvedValue({
+      guestDisplayName: 'Keluarga Budi',
+      partySize: 4,
+      rsvpAttendeeCount: null,
+      rsvpStatus: 'pending',
+      snapshot: { ...snapshot, draft: personalDraft },
+      templateId: 'roselle',
+    });
+
+    const html = renderToStaticMarkup(
+      await PersonalGuestInvitationPage({
+        params: Promise.resolve({ guestToken, slug: 'raka-nadia' }),
+      }),
+    );
+
+    expect(html).toContain('Akad Nikah');
+    expect(html).toContain('Resepsi');
+    expect(html.indexOf('Akad Nikah')).toBeLessThan(html.indexOf('Resepsi'));
+    expect(html).toContain('Masjid Seraya');
+    expect(html).toContain('href="https://maps.example.test/akad"');
+    expect(html).not.toContain('party_size');
+    expect(html).not.toContain('rsvp_attendee_count');
+  });
+
+  it('keeps the personalized schedule immutable until the service returns a replacement published snapshot', async () => {
+    const guestToken = randomBytes(32).toString('base64url');
+    const publishedDraft = structuredClone(snapshot.draft);
+    publishedDraft.eventSchedule.events = [
+      {
+        ...publishedDraft.eventSchedule.events[0]!,
+        title: 'Akad Nikah',
+        venueName: 'Masjid Seraya',
+      },
+    ];
+    const republishedDraft = structuredClone(publishedDraft);
+    republishedDraft.eventSchedule.events = [
+      {
+        ...republishedDraft.eventSchedule.events[0]!,
+        title: 'Resepsi Baru',
+        venueName: 'Balai Seraya',
+      },
+    ];
+
+    getPersonalGuestInvitationMock.mockResolvedValue({
+      guestDisplayName: 'Keluarga Budi',
+      partySize: 4,
+      rsvpAttendeeCount: null,
+      rsvpStatus: 'pending',
+      snapshot: { ...snapshot, draft: publishedDraft },
+      templateId: 'roselle',
+    });
+    const firstRender = renderToStaticMarkup(
+      await PersonalGuestInvitationPage({
+        params: Promise.resolve({ guestToken, slug: 'raka-nadia' }),
+      }),
+    );
+
+    expect(firstRender).toContain('Akad Nikah');
+    expect(firstRender).toContain('Masjid Seraya');
+    expect(firstRender).not.toContain('Resepsi Baru');
+
+    getPersonalGuestInvitationMock.mockResolvedValue({
+      guestDisplayName: 'Keluarga Budi',
+      partySize: 4,
+      rsvpAttendeeCount: null,
+      rsvpStatus: 'pending',
+      snapshot: { ...snapshot, draft: republishedDraft },
+      templateId: 'roselle',
+    });
+    const republishedRender = renderToStaticMarkup(
+      await PersonalGuestInvitationPage({
+        params: Promise.resolve({ guestToken, slug: 'raka-nadia' }),
+      }),
+    );
+
+    expect(republishedRender).toContain('Resepsi Baru');
+    expect(republishedRender).toContain('Balai Seraya');
+    expect(republishedRender).not.toContain('Masjid Seraya');
   });
 
   it('renders Amplop Digital from the same published personal snapshot only', async () => {

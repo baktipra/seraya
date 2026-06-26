@@ -11,7 +11,6 @@ import {
 import { getPublicGalleryImagesForCurrentSnapshot } from '@/modules/media/public-media.service';
 import { getPersonalGuestInvitationByToken } from '@/modules/guest-links';
 import { getPersonalGuestbookEntryByToken } from '@/modules/guestbook';
-import { normalizePublishedInvitationSnapshot } from '@/modules/publications/published-invitation.schema';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -54,9 +53,7 @@ export default async function PersonalGuestInvitationPage({
     token: guestToken,
   });
 
-  const snapshot = personalInvitation
-    ? normalizePublishedInvitationSnapshot(personalInvitation.snapshot)
-    : null;
+  const snapshot = personalInvitation?.snapshot ?? null;
 
   if (!personalInvitation || !snapshot) {
     notFound();

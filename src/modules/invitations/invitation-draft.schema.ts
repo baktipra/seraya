@@ -12,6 +12,8 @@ export const INVITATION_DRAFT_SCHEMA_VERSION = 1 as const;
 const htmlTagPattern = /<\/?[a-z][^>]*>|<!--[\s\S]*?-->|<!doctype\s+html[^>]*>/i;
 const dateOnlyPattern = /^\d{4}-\d{2}-\d{2}$/;
 const timePattern = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
+const legacyEventScheduleMarker = Symbol('legacy-event-schedule-derived');
+const legacyEventScheduleItemId = '00000000-0000-4000-8000-000000000001';
 
 function isIsoDateOnly(value: string) {
   if (!dateOnlyPattern.test(value)) {
@@ -102,6 +104,43 @@ const invitationEventPartSchema = z
   })
   .strict();
 
+const eventScheduleItemSchema = z
+  .object({
+    date: z
+      .string()
+      .trim()
+      .refine(isIsoDateOnly, 'Tanggal acara harus memakai format YYYY-MM-DD yang valid.'),
+    endTime: nullableTime('Waktu selesai'),
+    id: z.string().trim().uuid('ID acara tidak valid.'),
+    mapsUrl: nullableHttpsUrl,
+    startTime: z.string().trim().regex(timePattern, 'Waktu mulai harus memakai format HH:mm.'),
+    title: requiredText(80, 'Nama acara'),
+    venueAddress: nullableText(280, 'Alamat tempat'),
+    venueName: nullableText(160, 'Nama tempat'),
+  })
+  .strict()
+  .superRefine((event, context) => {
+    if (event.endTime && event.endTime < event.startTime) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Waktu selesai tidak boleh lebih awal dari waktu mulai.',
+        path: ['endTime'],
+      });
+    }
+  });
+
+export const eventScheduleSchema = z
+  .object({
+    events: z
+      .array(eventScheduleItemSchema)
+      .min(1, 'Tambahkan setidaknya satu acara.')
+      .max(4, 'Maksimal empat acara.'),
+  })
+  .strict();
+
+export type EventScheduleItemV1 = z.infer<typeof eventScheduleItemSchema>;
+export type EventScheduleV1 = z.infer<typeof eventScheduleSchema>;
+
 const invitationPersonSchema = z
   .object({
     displayName: requiredText(80, 'Nama panggilan'),
@@ -162,7 +201,7 @@ const digitalGiftSchema = z
     }
   });
 
-export const invitationDraftContentSchema = z
+const invitationDraftContentBaseSchema = z
   .object({
     closing: z
       .object({
@@ -236,6 +275,80 @@ export const invitationDraftContentSchema = z
   })
   .strict();
 
+function selectLegacyPrimaryEvent(
+  events: z.infer<typeof invitationDraftContentBaseSchema>['events'],
+) {
+  if (events.ceremony.enabled || events.ceremony.title || events.ceremony.date) {
+    return events.ceremony;
+  }
+
+  if (events.reception.enabled || events.reception.title || events.reception.date) {
+    return events.reception;
+  }
+
+  return events.ceremony;
+}
+
+function deriveLegacyEventSchedule(
+  content: z.infer<typeof invitationDraftContentBaseSchema>,
+): EventScheduleV1 {
+  const primary = selectLegacyPrimaryEvent(content.events);
+
+  return {
+    events: [
+      {
+        date: primary.date ?? content.events.primaryDate ?? '1970-01-01',
+        endTime: primary.endTime,
+        id: legacyEventScheduleItemId,
+        mapsUrl: content.location.mapsUrl,
+        startTime: primary.startTime ?? '00:00',
+        title: primary.title ?? 'Acara Pernikahan',
+        venueAddress: content.location.address,
+        venueName: content.location.venueName,
+      },
+    ],
+  };
+}
+
+const modernInvitationDraftContentSchema = invitationDraftContentBaseSchema
+  .extend({
+    eventSchedule: eventScheduleSchema,
+  })
+  .strict();
+
+const legacyInvitationDraftContentSchema = invitationDraftContentBaseSchema.transform((content) => {
+  const normalizedContent = {
+    ...content,
+    eventSchedule: deriveLegacyEventSchedule(content),
+  };
+
+  Object.defineProperty(normalizedContent, legacyEventScheduleMarker, {
+    configurable: false,
+    enumerable: false,
+    value: true,
+    writable: false,
+  });
+
+  return normalizedContent;
+});
+
+/**
+ * New documents must provide the strict multi-event contract. A missing
+ * `eventSchedule` is accepted only at this compatibility boundary for drafts
+ * and snapshots created before SRY-030, then receives one derived event in
+ * memory. The legacy marker is non-enumerable and is never persisted.
+ */
+export const invitationDraftContentSchema = z.union([
+  modernInvitationDraftContentSchema,
+  legacyInvitationDraftContentSchema,
+]);
+
+export type InvitationDraftContent = z.output<typeof modernInvitationDraftContentSchema>;
+export type InvitationDraftDocument = {
+  content: InvitationDraftContent;
+  schemaVersion: typeof INVITATION_DRAFT_SCHEMA_VERSION;
+};
+
 export const invitationDraftDocumentSchema = z
   .object({
     content: invitationDraftContentSchema,
@@ -243,9 +356,54 @@ export const invitationDraftDocumentSchema = z
   })
   .strict();
 
-export type InvitationDraftContent = z.infer<typeof invitationDraftContentSchema>;
-export type InvitationDraftDocument = z.infer<typeof invitationDraftDocumentSchema>;
+export function isLegacyEventScheduleDerived(content: InvitationDraftContent) {
+  return Boolean(
+    (content as InvitationDraftContent & { [legacyEventScheduleMarker]?: boolean })[
+      legacyEventScheduleMarker
+    ],
+  );
+}
+
+/**
+ * Existing `events` and `location` JSON stay as compatibility mirrors only.
+ * Save flows call this from server-owned schedule input so a browser cannot
+ * persist conflicting first-event and legacy values.
+ */
+export function derivePrimaryEventCompatibility(eventSchedule: EventScheduleV1) {
+  const primary = eventSchedule.events[0];
+
+  if (!primary) {
+    throw new Error('A primary invitation event is required.');
+  }
+
+  return {
+    events: {
+      ceremony: {
+        date: primary.date,
+        enabled: true,
+        endTime: primary.endTime,
+        startTime: primary.startTime,
+        title: primary.title,
+      },
+      enabled: true,
+      primaryDate: primary.date,
+      reception: {
+        date: null,
+        enabled: false,
+        endTime: null,
+        startTime: null,
+        title: null,
+      },
+    },
+    location: {
+      address: primary.venueAddress,
+      enabled: Boolean(primary.venueName || primary.venueAddress || primary.mapsUrl),
+      mapsUrl: primary.mapsUrl,
+      venueName: primary.venueName,
+    },
+  };
+}
 
 export function parseInvitationDraftDocument(input: unknown): InvitationDraftDocument {
-  return invitationDraftDocumentSchema.parse(input);
+  return invitationDraftDocumentSchema.parse(input) as InvitationDraftDocument;
 }

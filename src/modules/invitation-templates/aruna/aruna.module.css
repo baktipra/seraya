@@ -474,3 +474,28 @@
     transition: none;
   }
 }
+
+.eventSequence {
+  display: block;
+  margin: 0 0 0.8rem;
+  color: var(--aruna-clay-deep);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+}
+
+.eventVenue {
+  margin-top: 1rem !important;
+  color: var(--aruna-ink);
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+
+.eventAddress {
+  white-space: pre-line;
+}
+
+.eventCard .mapsLink {
+  margin-top: 1rem;
+}

@@ -1,5 +1,7 @@
-import { getProjectCoupleLabel } from '@/modules/projects/project.mapper';
+import { randomUUID } from 'node:crypto';
+
 import { DEFAULT_INVITATION_TEMPLATE_KEY } from '@/modules/invitation-templates/invitation-template.keys';
+import { getProjectCoupleLabel } from '@/modules/projects/project.mapper';
 
 import {
   invitationDraftContentSchema,
@@ -8,7 +10,7 @@ import {
 
 export type InvitationDraftProjectSource = {
   default_timezone: string;
-  event_date_primary: string | null;
+  event_date_primary: string;
   person_one_name: string;
   person_two_name: string;
 };
@@ -45,13 +47,27 @@ export function createDefaultInvitationDraftContent(
         parentLine: null,
       },
     },
+    eventSchedule: {
+      events: [
+        {
+          date: project.event_date_primary,
+          endTime: null,
+          id: randomUUID(),
+          mapsUrl: null,
+          startTime: '08:00',
+          title: 'Akad Nikah',
+          venueAddress: null,
+          venueName: null,
+        },
+      ],
+    },
     events: {
       ceremony: {
-        date: null,
-        enabled: false,
+        date: project.event_date_primary,
+        enabled: true,
         endTime: null,
-        startTime: null,
-        title: null,
+        startTime: '08:00',
+        title: 'Akad Nikah',
       },
       enabled: true,
       primaryDate: project.event_date_primary,
@@ -93,5 +109,5 @@ export function createDefaultInvitationDraftContent(
       heading: null,
     },
     templateKey: DEFAULT_INVITATION_TEMPLATE_KEY,
-  });
+  }) as InvitationDraftContent;
 }

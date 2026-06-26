@@ -66,22 +66,14 @@ const editableFieldNames = [
   'story.enabled',
   'story.heading',
   'story.body',
-  'events.enabled',
-  'events.primaryDate',
-  'events.ceremony.enabled',
-  'events.ceremony.title',
-  'events.ceremony.date',
-  'events.ceremony.startTime',
-  'events.ceremony.endTime',
-  'events.reception.enabled',
-  'events.reception.title',
-  'events.reception.date',
-  'events.reception.startTime',
-  'events.reception.endTime',
-  'location.enabled',
-  'location.venueName',
-  'location.address',
-  'location.mapsUrl',
+  'eventSchedule.events.0.id',
+  'eventSchedule.events.0.title',
+  'eventSchedule.events.0.date',
+  'eventSchedule.events.0.startTime',
+  'eventSchedule.events.0.endTime',
+  'eventSchedule.events.0.venueName',
+  'eventSchedule.events.0.venueAddress',
+  'eventSchedule.events.0.mapsUrl',
   'rsvp.enabled',
   'rsvp.heading',
   'rsvp.lead',
@@ -97,15 +89,14 @@ const polishedSections = [
   'Pembuka',
   'Mempelai',
   'Cerita kalian',
-  'Detail acara',
-  'Lokasi',
+  'Rangkaian Acara',
   'Konfirmasi kehadiran',
   'Amplop Digital',
   'Penutup',
 ] as const;
 
-describe('SRY-026 invitation editor Amplop Digital owner UI', () => {
-  it('renders the eight guided editing chapters in the required order with owner-friendly copy', () => {
+describe('SRY-030 invitation editor multi-event owner UI', () => {
+  it('renders the seven guided editing chapters in the required order with owner-friendly copy', () => {
     const html = renderToStaticMarkup(<InvitationEditor draft={draft} projectId={project.id} />);
 
     let previousIndex = -1;
@@ -163,11 +154,32 @@ describe('SRY-026 invitation editor Amplop Digital owner UI', () => {
     expect(html).toContain('value="laras"');
     expect(html).toContain('>Terpilih</span>');
     expect(html).toContain('name="story.body"');
-    expect(html).toContain('name="location.mapsUrl"');
+    expect(html).toContain('Rangkaian Acara');
+    expect(html).toContain('Tambahkan akad, resepsi, atau acara lain dalam satu undangan.');
+    expect(html).toContain('Acara utama');
+    expect(html).toContain(
+      'Acara pertama menjadi acara utama yang digunakan pada ringkasan undangan.',
+    );
+    expect(html).toContain('Tambah acara');
+    expect(html).toContain('placeholder="Contoh: Akad Nikah, Resepsi, atau Ngunduh Mantu"');
+    expect(html).toContain('aria-label="Pindahkan acara 1 ke bawah"');
+    expect(html).toContain('aria-label="Hapus acara 1"');
+    expect(html).toContain('name="eventSchedule.events.0.mapsUrl"');
     expect(html).toContain('name="closing.message"');
     expect(html).not.toContain('name="gallery.imageIds"');
     expect(html).not.toContain('Upload foto');
     expect(html).not.toContain('draft-private-id');
+  });
+
+  it('keeps at least one schedule event in the editor by disabling the final remove control', () => {
+    const html = renderToStaticMarkup(<InvitationEditor draft={draft} projectId={project.id} />);
+
+    expect(html).toContain('aria-label="Hapus acara 1"');
+    expect(html).toMatch(
+      /aria-label="Hapus acara 1"[^>]*disabled|disabled[^>]*aria-label="Hapus acara 1"/,
+    );
+    expect(html).not.toContain('name="events.primaryDate"');
+    expect(html).not.toContain('name="location.mapsUrl"');
   });
 
   it('renders owner-only Amplop Digital account fields when the current private draft has accounts', () => {

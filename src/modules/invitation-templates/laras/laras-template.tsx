@@ -18,23 +18,31 @@ function Person({
   );
 }
 
-function EventCard({
+function EventScheduleBlock({
   event,
-  label,
+  sequence,
 }: {
-  event: NonNullable<InvitationTemplateProps['invitation']['events']>['ceremony'];
-  label: string;
+  event: NonNullable<InvitationTemplateProps['invitation']['events']>['items'][number];
+  sequence: number;
 }) {
-  if (!event) {
-    return null;
-  }
-
   return (
-    <article className={styles.eventCard}>
-      <span className={styles.eventLabel}>{label}</span>
+    <article className={styles.eventCard} data-schedule-event="laras">
+      <span className={styles.eventLabel}>{String(sequence).padStart(2, '0')}</span>
       {event.title ? <h3>{event.title}</h3> : null}
       {event.dateLabel ? <p>{event.dateLabel}</p> : null}
       {event.timeLabel ? <p>{event.timeLabel}</p> : null}
+      {event.venueName ? <p className={styles.eventVenue}>{event.venueName}</p> : null}
+      {event.address ? <p className={styles.eventAddress}>{event.address}</p> : null}
+      {event.mapsHref ? (
+        <a
+          className={styles.mapsLink}
+          href={event.mapsHref}
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          Buka peta acara (tab baru)
+        </a>
+      ) : null}
     </article>
   );
 }
@@ -93,10 +101,15 @@ export function LarasTemplate({ invitation }: InvitationTemplateProps) {
                 <p className={styles.primaryDate}>{invitation.events.primaryDateLabel}</p>
               ) : null}
             </div>
-            {invitation.events.ceremony || invitation.events.reception ? (
+            {invitation.events.items.length > 0 ? (
               <div className={styles.eventsGrid}>
-                <EventCard event={invitation.events.ceremony} label="I" />
-                <EventCard event={invitation.events.reception} label="II" />
+                {invitation.events.items.map((event, index) => (
+                  <EventScheduleBlock
+                    event={event}
+                    key={`${event.title ?? 'acara'}-${index}`}
+                    sequence={index + 1}
+                  />
+                ))}
               </div>
             ) : null}
           </section>
@@ -116,7 +129,7 @@ export function LarasTemplate({ invitation }: InvitationTemplateProps) {
               <a
                 className={styles.mapsLink}
                 href={invitation.location.mapsHref}
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 target="_blank"
               >
                 Buka peta lokasi (tab baru)

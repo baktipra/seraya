@@ -42,6 +42,41 @@ describe('published invitation snapshot contract', () => {
     expect(parsePublishedInvitationSnapshot(payload).draft.templateKey).toBe('roselle');
   });
 
+  it('normalizes a legacy published snapshot without eventSchedule to one derived event', () => {
+    const payload = createPayload();
+    payload.draft.events = {
+      ceremony: {
+        date: '2027-08-17',
+        enabled: true,
+        endTime: '10:00',
+        startTime: '08:00',
+        title: 'Akad Nikah',
+      },
+      enabled: true,
+      primaryDate: '2027-08-17',
+      reception: { date: null, enabled: false, endTime: null, startTime: null, title: null },
+    };
+    payload.draft.location = {
+      address: 'Jalan Mawar 1',
+      enabled: true,
+      mapsUrl: 'https://maps.example.test/akad',
+      venueName: 'Masjid Seraya',
+    };
+    delete (payload.draft as Partial<typeof payload.draft>).eventSchedule;
+
+    expect(parsePublishedInvitationSnapshot(payload).draft.eventSchedule.events).toEqual([
+      expect.objectContaining({
+        date: '2027-08-17',
+        endTime: '10:00',
+        mapsUrl: 'https://maps.example.test/akad',
+        startTime: '08:00',
+        title: 'Akad Nikah',
+        venueAddress: 'Jalan Mawar 1',
+        venueName: 'Masjid Seraya',
+      }),
+    ]);
+  });
+
   it('resolves legacy published snapshot drafts without digitalGift to the disabled state', () => {
     const payload = createPayload();
     delete (payload.draft as Partial<typeof payload.draft>).digitalGift;

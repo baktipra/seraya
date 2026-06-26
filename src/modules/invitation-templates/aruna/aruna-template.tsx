@@ -19,21 +19,32 @@ function Person({
   );
 }
 
-function EventPart({
+function EventScheduleBlock({
   event,
+  sequence,
 }: {
-  event: NonNullable<InvitationTemplateProps['invitation']['events']>['ceremony'];
+  event: NonNullable<InvitationTemplateProps['invitation']['events']>['items'][number];
+  sequence: number;
 }) {
-  if (!event) {
-    return null;
-  }
-
   return (
-    <article className={styles.eventCard}>
+    <article className={styles.eventCard} data-schedule-event="aruna">
       <span className={styles.eventRule} aria-hidden="true" />
+      <span className={styles.eventSequence}>{String(sequence).padStart(2, '0')}</span>
       {event.title ? <h3>{event.title}</h3> : null}
       {event.dateLabel ? <p>{event.dateLabel}</p> : null}
       {event.timeLabel ? <p>{event.timeLabel}</p> : null}
+      {event.venueName ? <p className={styles.eventVenue}>{event.venueName}</p> : null}
+      {event.address ? <p className={styles.eventAddress}>{event.address}</p> : null}
+      {event.mapsHref ? (
+        <a
+          className={styles.mapsLink}
+          href={event.mapsHref}
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          Buka peta acara (tab baru)
+        </a>
+      ) : null}
     </article>
   );
 }
@@ -95,10 +106,15 @@ export function ArunaTemplate({ invitation }: InvitationTemplateProps) {
                 <span className={styles.primaryDate}>{invitation.events.primaryDateLabel}</span>
               ) : null}
             </div>
-            {invitation.events.ceremony || invitation.events.reception ? (
+            {invitation.events.items.length > 0 ? (
               <div className={styles.eventsGrid}>
-                <EventPart event={invitation.events.ceremony} />
-                <EventPart event={invitation.events.reception} />
+                {invitation.events.items.map((event, index) => (
+                  <EventScheduleBlock
+                    event={event}
+                    key={`${event.title ?? 'acara'}-${index}`}
+                    sequence={index + 1}
+                  />
+                ))}
               </div>
             ) : null}
           </section>
@@ -118,7 +134,7 @@ export function ArunaTemplate({ invitation }: InvitationTemplateProps) {
               <a
                 className={styles.mapsLink}
                 href={invitation.location.mapsHref}
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 target="_blank"
               >
                 Buka peta lokasi (tab baru)

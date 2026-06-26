@@ -6,7 +6,6 @@ import {
   InvitationTemplateRenderer,
 } from '@/modules/invitation-templates';
 import { getPublicGalleryImagesForCurrentSnapshot } from '@/modules/media/public-media.service';
-import { normalizePublishedInvitationSnapshot } from '@/modules/publications/published-invitation.schema';
 import { getPublicInvitationBySlug } from '@/modules/publications/public-invitation.service';
 
 export const revalidate = 3600;
@@ -26,7 +25,7 @@ export async function generateMetadata({ params }: PublicInvitationPageProps): P
   const { slug } = await params;
   const invitation = await getPublicInvitationBySlug(slug);
 
-  const snapshot = invitation ? normalizePublishedInvitationSnapshot(invitation.snapshot) : null;
+  const snapshot = invitation?.snapshot ?? null;
 
   if (!invitation || !invitation.is_current || !snapshot) {
     return { robots: privateInvitationRobots };
@@ -51,9 +50,7 @@ export default async function PublicInvitationPage({ params }: PublicInvitationP
   const { slug } = await params;
   const publishedInvitation = await getPublicInvitationBySlug(slug);
 
-  const snapshot = publishedInvitation
-    ? normalizePublishedInvitationSnapshot(publishedInvitation.snapshot)
-    : null;
+  const snapshot = publishedInvitation?.snapshot ?? null;
 
   if (!publishedInvitation || !publishedInvitation.is_current || !snapshot) {
     notFound();

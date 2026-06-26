@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { createDefaultInvitationDraftContent } from '@/modules/invitations/invitation-draft.defaults';
+import { invitationDraftContentSchema } from '@/modules/invitations/invitation-draft.schema';
 import type { InvitationDraft } from '@/modules/invitations/invitation-draft.types';
 
 import { createInvitationViewModel } from '../invitation-view-model';
@@ -115,19 +116,100 @@ describe('createInvitationViewModel', () => {
     });
   });
 
-  it('renders partial but valid content without creating empty sections or unsafe maps links', () => {
+  it('preserves a normalized legacy draft’s old event/location presentation until a modern schedule is saved', () => {
     const draft = createDraft();
-    draft.content.events.primaryDate = null;
-    draft.content.events.enabled = true;
-    draft.content.location.enabled = true;
-    draft.content.location.mapsUrl = 'http://example.test/not-secure';
+    const legacyContent = structuredClone(draft.content) as Record<string, unknown>;
+    delete legacyContent.eventSchedule;
+    legacyContent.events = {
+      ceremony: {
+        date: '2027-08-17',
+        enabled: true,
+        endTime: '10:00',
+        startTime: '08:00',
+        title: 'Akad Nikah',
+      },
+      enabled: true,
+      primaryDate: '2027-08-17',
+      reception: {
+        date: null,
+        enabled: false,
+        endTime: null,
+        startTime: null,
+        title: null,
+      },
+    };
+    legacyContent.location = {
+      address: 'Jalan Mawar 1',
+      enabled: true,
+      mapsUrl: 'https://maps.example.test/akad',
+      venueName: 'Masjid Seraya',
+    };
 
-    const invitation = createInvitationViewModel({
-      draft,
-      project: { ...project, event_date_primary: null },
+    // This is the same draft-schema boundary used by repositories before a renderer receives content.
+    draft.content = invitationDraftContentSchema.parse(legacyContent);
+
+    const invitation = createInvitationViewModel({ draft, project });
+
+    expect(invitation.events).toEqual({
+      items: [
+        expect.objectContaining({
+          dateLabel: '17 Agustus 2027',
+          timeLabel: '08.00–10.00',
+          title: 'Akad Nikah',
+        }),
+      ],
+      primaryDateLabel: '17 Agustus 2027',
     });
+    expect(invitation.location).toEqual({
+      address: 'Jalan Mawar 1',
+      mapsHref: 'https://maps.example.test/akad',
+      venueName: 'Masjid Seraya',
+    });
+  });
 
-    expect(invitation.events).toBeNull();
+  it('maps the owner-defined schedule in saved order, hides empty venue fields, and drops unsafe map links', () => {
+    const draft = createDraft();
+    const first = draft.content.eventSchedule.events[0]!;
+    draft.content.eventSchedule.events = [
+      {
+        ...first,
+        mapsUrl: 'https://maps.example.test/akad',
+        title: 'Akad Nikah',
+        venueAddress: 'Jalan Mawar 1',
+        venueName: 'Masjid Seraya',
+      },
+      {
+        ...first,
+        date: '2027-08-18',
+        endTime: null,
+        id: '11111111-1111-4111-8111-111111111111',
+        mapsUrl: null,
+        startTime: '19:00',
+        title: 'Resepsi',
+        venueAddress: null,
+        venueName: null,
+      },
+    ];
+
+    const invitation = createInvitationViewModel({ draft, project });
+
+    expect(invitation.events).toEqual({
+      items: [
+        expect.objectContaining({
+          address: 'Jalan Mawar 1',
+          mapsHref: 'https://maps.example.test/akad',
+          title: 'Akad Nikah',
+          venueName: 'Masjid Seraya',
+        }),
+        expect.objectContaining({
+          address: null,
+          mapsHref: null,
+          title: 'Resepsi',
+          venueName: null,
+        }),
+      ],
+      primaryDateLabel: '17 Agustus 2027',
+    });
     expect(invitation.location).toBeNull();
   });
 });
