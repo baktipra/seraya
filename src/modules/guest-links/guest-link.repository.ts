@@ -3,7 +3,7 @@ import 'server-only';
 import { createAdminSupabaseClient } from '@/server/supabase/admin';
 import { createPublicSupabaseClient } from '@/server/supabase/public';
 
-import type { GuestLinkStateRecord } from './guest-link.types';
+import type { GuestLinkStateRecord, LatestGuestLinkStateRecord } from './guest-link.types';
 
 const ownerStateSelect = 'guest_id, status';
 
@@ -31,6 +31,45 @@ export async function listGuestLinkStatesForVerifiedGuestIds(guestIds: string[])
   }
 
   return (data ?? []) as GuestLinkStateRecord[];
+}
+
+/**
+ * Owner delivery projection. The relationship embed limits guest_links to the
+ * latest status-only row per already-verified active guest. It never selects
+ * raw capability material, hashes, or a guest-link history list.
+ */
+export async function listLatestGuestLinkStatesForVerifiedGuestIds(guestIds: string[]) {
+  if (guestIds.length === 0) {
+    return [] as LatestGuestLinkStateRecord[];
+  }
+
+  const supabase = createAdminSupabaseClient();
+  const { data, error } = await supabase
+    .from('guests')
+    .select('id, guest_links(status, created_at)')
+    .in('id', guestIds)
+    .is('deleted_at', null)
+    .order('created_at', { ascending: false, foreignTable: 'guest_links' })
+    .limit(1, { foreignTable: 'guest_links' });
+
+  if (error) {
+    throw new GuestLinkRepositoryError();
+  }
+
+  return (data ?? []).flatMap((guest) => {
+    const guestLinks = Array.isArray(guest.guest_links) ? guest.guest_links : [];
+    const latestLink = guestLinks[0];
+
+    return latestLink
+      ? [
+          {
+            created_at: latestLink.created_at,
+            guest_id: guest.id,
+            status: latestLink.status,
+          },
+        ]
+      : [];
+  }) as LatestGuestLinkStateRecord[];
 }
 
 /** Atomic, service-role-only mutation after Server Action ownership verification. */

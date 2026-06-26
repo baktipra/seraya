@@ -71,6 +71,29 @@ export async function getCurrentPublishedInvitationForVerifiedProject(
   }
 }
 
+/**
+ * Delivery Center needs only the existence of a current immutable snapshot.
+ * Keep this separate from the owner publication reader so no snapshot JSON is
+ * selected for readiness or share-command gates.
+ */
+export async function hasCurrentPublishedInvitationForVerifiedProject(
+  project: OwnedProject,
+): Promise<boolean> {
+  const supabase = await createServerSupabaseClient();
+  const { data, error } = await supabase
+    .from('published_invitation_snapshots')
+    .select('id')
+    .eq('project_id', project.id)
+    .eq('is_current', true)
+    .maybeSingle();
+
+  if (error) {
+    throw new PublicationRepositoryError();
+  }
+
+  return Boolean(data);
+}
+
 /** Database-owned publication transaction. No client-facing value picks snapshot fields. */
 export async function publishInvitationSnapshot(
   projectId: string,
