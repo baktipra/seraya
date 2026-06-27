@@ -33,6 +33,7 @@ function createReadiness(overrides: Partial<WeddingReadinessV1> = {}): WeddingRe
       hasPublishedSnapshot: false,
       hasUnpublishedChanges: false,
       hasVerifiedActivation: false,
+      publishedSlug: null,
       state: 'draft_ready_unactivated',
     },
     guests: {
@@ -106,6 +107,7 @@ describe('SRY-031 dashboard and conditional project navigation surfaces', () => 
             hasPublishedSnapshot: true,
             hasUnpublishedChanges: false,
             hasVerifiedActivation: true,
+            publishedSlug: 'raka-nadia',
             state: 'published',
           },
         })}
@@ -119,6 +121,7 @@ describe('SRY-031 dashboard and conditional project navigation surfaces', () => 
             hasPublishedSnapshot: true,
             hasUnpublishedChanges: false,
             hasVerifiedActivation: true,
+            publishedSlug: 'raka-nadia',
             state: 'published',
           },
           responses: {

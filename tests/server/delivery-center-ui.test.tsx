@@ -56,7 +56,9 @@ describe('SRY-029 owner Delivery Center UI', () => {
     );
 
     expect(html).toContain('Pusat Pengiriman');
-    expect(html).toContain('Siapkan dan bagikan tautan undangan pribadi untuk setiap tamu.');
+    expect(html).toContain(
+      'Undangan Pribadi menyertakan sapaan, RSVP, dan ucapan tamu. Buat atau perbarui link untuk tamu sebelum membagikannya.',
+    );
     expect(html).toContain('Tamu aktif');
     expect(html).toContain('Nomor WhatsApp tersedia');
     expect(html).toContain('Tautan aktif');
@@ -98,6 +100,29 @@ describe('SRY-029 owner Delivery Center UI', () => {
       'Terbitkan versi undangan yang sudah kalian setujui sebelum menyiapkan undangan pribadi.',
     );
     expect(html).toContain(`href="/dashboard/${projectId}"`);
+  });
+
+  it('explains that RSVP requires guests and Undangan Pribadi when no active guests exist', () => {
+    const html = renderToStaticMarkup(
+      <ToastProvider>
+        <GuestDeliveryCenter
+          isPublished
+          projectId={projectId}
+          rows={[]}
+          summary={{
+            activeGuestCount: 0,
+            activePersonalLinkCount: 0,
+            whatsappAvailableCount: 0,
+            whatsappMissingCount: 0,
+          }}
+        />
+      </ToastProvider>,
+    );
+
+    expect(html).toContain('Untuk menerima RSVP, tambahkan tamu lalu buat Undangan Pribadi.');
+    expect(html).toContain(`href="/dashboard/${projectId}/guests"`);
+    expect(html).toContain('Kelola Tamu');
+    expect(html).not.toContain('Link Publik cukup untuk RSVP');
   });
 
   it('keeps raw links and full phone numbers confined to the immediate result, with no browser persistence or custom send runtime', async () => {

@@ -115,6 +115,7 @@ describe('SRY-031 wedding readiness composition', () => {
       hasPublishedSnapshot: false,
       hasUnpublishedChanges: false,
       hasVerifiedActivation: false,
+      publishedSlug: null,
       state: 'draft_ready_unactivated',
     });
     expect(readiness.primaryAction).toEqual({
@@ -143,6 +144,7 @@ describe('SRY-031 wedding readiness composition', () => {
     const readiness = await getWeddingReadinessForVerifiedProject(project);
 
     expect(readiness.invitation.state).toBe('published');
+    expect(readiness.invitation.publishedSlug).toBe(project.slug);
     expect(readiness.primaryAction.key).toBe('prepare_personal_invitations');
     expect(readiness.guests.guestsWithoutActivePersonalLinkCount).toBe(2);
   });

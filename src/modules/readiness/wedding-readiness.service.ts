@@ -190,6 +190,7 @@ export async function getWeddingReadinessForVerifiedProject(
       hasPublishedSnapshot: Boolean(publication),
       hasUnpublishedChanges,
       hasVerifiedActivation,
+      publishedSlug: publication?.slug ?? null,
       state,
     },
     guests: {

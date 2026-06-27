@@ -32,6 +32,8 @@ export type WeddingReadinessV1 = {
     hasPublishedSnapshot: boolean;
     hasUnpublishedChanges: boolean;
     hasVerifiedActivation: boolean;
+    /** Owner-safe current public path material; never includes invitation content or guest data. */
+    publishedSlug: string | null;
     state: InvitationReadinessState;
   };
   guests: {

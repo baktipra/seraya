@@ -378,7 +378,8 @@ export function GuestDeliveryCenter({
           Pusat Pengiriman
         </h1>
         <p className="text-seraya-text-secondary mt-3 max-w-2xl text-base leading-7">
-          Siapkan dan bagikan tautan undangan pribadi untuk setiap tamu.
+          Undangan Pribadi menyertakan sapaan, RSVP, dan ucapan tamu. Buat atau perbarui link untuk
+          tamu sebelum membagikannya.
         </p>
         <p className="text-seraya-text-muted mt-4 text-sm leading-6">
           Status di sini menunjukkan kesiapan tautan dan WhatsApp, bukan status pesan terkirim atau
@@ -504,13 +505,13 @@ export function GuestDeliveryCenter({
                 Belum ada tamu untuk disiapkan
               </p>
               <p className="text-seraya-text-muted mt-2 text-sm leading-6">
-                Tambahkan tamu sebelum membuat undangan pribadi.
+                Untuk menerima RSVP, tambahkan tamu lalu buat Undangan Pribadi.
               </p>
               <Link
                 className="text-seraya-action-primary focus-visible:outline-seraya-focus-ring mt-4 inline-flex min-h-11 items-center rounded-[var(--seraya-radius-sm)] text-sm font-semibold underline-offset-4 hover:underline focus-visible:outline-3 focus-visible:outline-offset-3"
                 href={`/dashboard/${projectId}/guests`}
               >
-                Tambah tamu
+                Kelola Tamu
               </Link>
             </div>
           ) : filteredRows.length === 0 ? (

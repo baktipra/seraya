@@ -15,6 +15,7 @@ const draftReadyReadiness: WeddingReadinessV1 = {
     hasPublishedSnapshot: false,
     hasUnpublishedChanges: false,
     hasVerifiedActivation: false,
+    publishedSlug: null,
     state: 'draft_ready_unactivated',
   },
   guests: {
@@ -87,6 +88,106 @@ describe('SRY-031 project readiness surfaces', () => {
     expect(html).not.toContain('payment_transactions');
   });
 
+  it('explains Link Publik versus Undangan Pribadi after publish and directs owners with no guests to Kelola Tamu', () => {
+    const html = renderToStaticMarkup(
+      <ProjectOverviewBootstrap
+        projectId={projectId}
+        readiness={{
+          ...draftReadyReadiness,
+          invitation: {
+            hasPublishedSnapshot: true,
+            hasUnpublishedChanges: false,
+            hasVerifiedActivation: true,
+            publishedSlug: 'raka-nadia',
+            state: 'published',
+          },
+          primaryAction: { href: `/dashboard/${projectId}/guests`, key: 'add_guests' },
+        }}
+      />,
+    );
+
+    expect(html).toContain('Cara membagikan undangan');
+    expect(html).toContain('Link Publik');
+    expect(html).toContain(
+      'Bagikan untuk melihat detail undangan. Tidak memuat RSVP atau ucapan tamu.',
+    );
+    expect(html).toContain('href="/raka-nadia"');
+    expect(html).toContain('Buka Link Publik');
+    expect(html).toContain('Undangan Pribadi');
+    expect(html).toContain(
+      'Buat untuk setiap tamu agar mereka menerima sapaan personal, mengisi RSVP, dan meninggalkan ucapan.',
+    );
+    expect(html).toContain('Untuk menerima RSVP, tambahkan tamu lalu buat Undangan Pribadi.');
+    expect(html).toContain(`href="/dashboard/${projectId}/guests"`);
+    expect(html).not.toContain('/g/');
+  });
+
+  it('directs owners with guests but no active personal link to the existing Delivery Center flow', () => {
+    const html = renderToStaticMarkup(
+      <ProjectOverviewBootstrap
+        projectId={projectId}
+        readiness={{
+          ...draftReadyReadiness,
+          invitation: {
+            hasPublishedSnapshot: true,
+            hasUnpublishedChanges: false,
+            hasVerifiedActivation: true,
+            publishedSlug: 'raka-nadia',
+            state: 'published',
+          },
+          guests: {
+            activeGuestCount: 2,
+            activePersonalLinkGuestCount: 0,
+            guestsWithoutActivePersonalLinkCount: 2,
+            whatsappAvailableCount: 1,
+            whatsappUnavailableCount: 1,
+          },
+          primaryAction: {
+            href: `/dashboard/${projectId}/delivery`,
+            key: 'prepare_personal_invitations',
+          },
+        }}
+      />,
+    );
+
+    expect(html).toContain(
+      'Untuk menerima RSVP, buat Undangan Pribadi untuk setiap tamu sebelum membagikannya.',
+    );
+    expect(html).toContain('Buka Delivery Center');
+    expect(html).toContain(`href="/dashboard/${projectId}/delivery"`);
+  });
+
+  it('keeps active personal invitations described as the RSVP and guestbook path', () => {
+    const html = renderToStaticMarkup(
+      <ProjectOverviewBootstrap
+        projectId={projectId}
+        readiness={{
+          ...draftReadyReadiness,
+          invitation: {
+            hasPublishedSnapshot: true,
+            hasUnpublishedChanges: false,
+            hasVerifiedActivation: true,
+            publishedSlug: 'raka-nadia',
+            state: 'published',
+          },
+          guests: {
+            activeGuestCount: 1,
+            activePersonalLinkGuestCount: 1,
+            guestsWithoutActivePersonalLinkCount: 0,
+            whatsappAvailableCount: 1,
+            whatsappUnavailableCount: 0,
+          },
+          primaryAction: { href: `/dashboard/${projectId}/delivery`, key: 'open_delivery_center' },
+        }}
+      />,
+    );
+
+    expect(html).toContain(
+      'Undangan Pribadi aktif adalah tempat tamu menerima sapaan, mengisi RSVP, dan meninggalkan ucapan.',
+    );
+    expect(html).toContain('Buka Delivery Center');
+  });
+
   it('uses neutral invitation-path copy in the project form instead of a hardcoded origin', () => {
     const html = renderToStaticMarkup(<ProjectSetupForm />);
 
@@ -105,6 +206,7 @@ describe('SRY-031 project readiness surfaces', () => {
             hasPublishedSnapshot: false,
             hasUnpublishedChanges: false,
             hasVerifiedActivation: false,
+            publishedSlug: null,
             state: 'draft_incomplete',
           },
           primaryAction: {

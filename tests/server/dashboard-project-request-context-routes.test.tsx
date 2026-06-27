@@ -79,6 +79,7 @@ const readiness = {
     hasPublishedSnapshot: false,
     hasUnpublishedChanges: false,
     hasVerifiedActivation: false,
+    publishedSlug: null,
     state: 'draft_ready_unactivated',
   },
   guests: {

@@ -72,6 +72,7 @@ function createReadiness(overrides: Partial<WeddingReadinessV1> = {}): WeddingRe
       hasPublishedSnapshot: false,
       hasUnpublishedChanges: false,
       hasVerifiedActivation: true,
+      publishedSlug: null,
       state: 'ready_to_publish',
     },
     guests: {
@@ -120,6 +121,7 @@ describe('SRY-031 readiness publish path repair', () => {
         hasPublishedSnapshot: true,
         hasUnpublishedChanges: true,
         hasVerifiedActivation: true,
+        publishedSlug: 'raka-nadia',
         state: 'published_with_unpublished_changes',
       },
       primaryAction: { key: 'review_changes' },

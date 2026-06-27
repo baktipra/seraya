@@ -217,6 +217,121 @@ function getResponseChapter(readiness: WeddingReadinessV1, projectId: string): C
   };
 }
 
+type PersonalInvitationJourneyCopy = {
+  action: { href: Route; label: string };
+  description: string;
+};
+
+function getPersonalInvitationJourneyCopy(
+  readiness: WeddingReadinessV1,
+  projectId: string,
+): PersonalInvitationJourneyCopy {
+  const base = `/dashboard/${projectId}`;
+  const hasGuests = readiness.guests.activeGuestCount > 0;
+  const activePersonalLinks = readiness.guests.activePersonalLinkGuestCount;
+
+  if (!hasGuests) {
+    return {
+      action: { href: `${base}/guests` as Route, label: 'Kelola Tamu' },
+      description: 'Untuk menerima RSVP, tambahkan tamu lalu buat Undangan Pribadi.',
+    };
+  }
+
+  if (activePersonalLinks === 0) {
+    return {
+      action: { href: `${base}/delivery` as Route, label: 'Buka Delivery Center' },
+      description:
+        'Untuk menerima RSVP, buat Undangan Pribadi untuk setiap tamu sebelum membagikannya.',
+    };
+  }
+
+  if (activePersonalLinks < readiness.guests.activeGuestCount) {
+    return {
+      action: { href: `${base}/delivery` as Route, label: 'Buka Delivery Center' },
+      description:
+        'Sebagian tamu belum memiliki Undangan Pribadi. Siapkan link mereka sebelum membagikannya.',
+    };
+  }
+
+  return {
+    action: { href: `${base}/delivery` as Route, label: 'Buka Delivery Center' },
+    description:
+      'Undangan Pribadi aktif adalah tempat tamu menerima sapaan, mengisi RSVP, dan meninggalkan ucapan.',
+  };
+}
+
+function InvitationJourneyClarity({
+  projectId,
+  readiness,
+}: {
+  projectId: string;
+  readiness: WeddingReadinessV1;
+}) {
+  const publicSlug = readiness.invitation.publishedSlug;
+
+  if (!readiness.invitation.hasPublishedSnapshot || !publicSlug) {
+    return null;
+  }
+
+  const personal = getPersonalInvitationJourneyCopy(readiness, projectId);
+
+  return (
+    <Card aria-labelledby="invitation-journey-clarity-title">
+      <CardHeader>
+        <CardTitle
+          className="font-sans text-lg font-semibold tracking-[-0.02em]"
+          id="invitation-journey-clarity-title"
+        >
+          Cara membagikan undangan
+        </CardTitle>
+        <CardDescription>
+          Pilih link sesuai kebutuhan tamu. RSVP dan ucapan hanya tersedia melalui Undangan Pribadi.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="grid gap-5 pt-5 sm:grid-cols-2 sm:pt-6">
+        <section className="border-seraya-border-default min-w-0 border-b pb-5 sm:border-r sm:border-b-0 sm:pr-5 sm:pb-0">
+          <p className="text-seraya-action-primary text-xs font-semibold tracking-[0.14em] uppercase">
+            Link Publik
+          </p>
+          <h3 className="text-seraya-text-primary mt-2 text-base font-semibold">
+            Untuk melihat detail undangan
+          </h3>
+          <p className="text-seraya-text-secondary mt-2 text-sm leading-6">
+            Bagikan untuk melihat detail undangan. Tidak memuat RSVP atau ucapan tamu.
+          </p>
+          <Link
+            className="text-seraya-action-primary focus-visible:outline-seraya-focus-ring mt-4 inline-flex min-h-11 items-center rounded-[var(--seraya-radius-sm)] text-sm font-semibold underline-offset-4 hover:underline focus-visible:outline-3 focus-visible:outline-offset-3"
+            href={`/${publicSlug}` as Route}
+            rel="noreferrer"
+            target="_blank"
+          >
+            Buka Link Publik
+          </Link>
+        </section>
+        <section className="min-w-0">
+          <p className="text-seraya-action-primary text-xs font-semibold tracking-[0.14em] uppercase">
+            Undangan Pribadi
+          </p>
+          <h3 className="text-seraya-text-primary mt-2 text-base font-semibold">
+            Untuk RSVP dan ucapan tamu
+          </h3>
+          <p className="text-seraya-text-secondary mt-2 text-sm leading-6">
+            Buat untuk setiap tamu agar mereka menerima sapaan personal, mengisi RSVP, dan
+            meninggalkan ucapan.
+          </p>
+          <p className="text-seraya-text-muted mt-3 text-sm leading-6">{personal.description}</p>
+          <Link
+            className="text-seraya-action-primary focus-visible:outline-seraya-focus-ring mt-4 inline-flex min-h-11 items-center rounded-[var(--seraya-radius-sm)] text-sm font-semibold underline-offset-4 hover:underline focus-visible:outline-3 focus-visible:outline-offset-3"
+            href={personal.action.href}
+          >
+            {personal.action.label}
+          </Link>
+        </section>
+      </CardContent>
+    </Card>
+  );
+}
+
 function getReadinessPublishEligibility(readiness: WeddingReadinessV1): ProjectPublishEligibility {
   return readiness.invitation.hasVerifiedActivation
     ? { allowed: true, reason: 'verified_payment' }
@@ -325,6 +440,8 @@ export function ProjectOverviewBootstrap({ projectId, readiness }: ProjectOvervi
           </div>
         </div>
       </Card>
+
+      <InvitationJourneyClarity projectId={projectId} readiness={readiness} />
 
       <Card aria-labelledby="readiness-chapters-title">
         <CardHeader>
