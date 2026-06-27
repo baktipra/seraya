@@ -7,7 +7,9 @@ import type { Guest } from '@/modules/guests/guest.types';
 import { getOwnedProjectById, type OwnedProject } from '@/modules/projects/project.repository';
 
 import {
+  GuestLinkActiveLinkExistsError,
   GuestLinkRepositoryError,
+  createPersonalGuestLinkIfNoneActiveForVerifiedGuest,
   listLatestGuestLinkStatesForVerifiedGuestIds,
   replacePersonalGuestLinkForVerifiedGuest,
   revokePersonalGuestLinkForVerifiedGuest,
@@ -23,13 +25,37 @@ export class GuestLinkUnavailableError extends Error {
   }
 }
 
+/** Minimum server-only guest shape required by the existing link authority. */
+export type PersonalGuestLinkPreparationTarget = Pick<
+  Guest,
+  'deleted_at' | 'id' | 'project_id' | 'whatsapp_phone_e164'
+>;
+
+/**
+ * One private capability mutation. Raw capability material never leaves this
+ * helper, which is used by batch preparation after delivery already verified
+ * owner, project, active guests, and current link-state eligibility.
+ */
+export async function preparePersonalGuestLinkForVerifiedGuestWithoutReveal(input: {
+  guest: PersonalGuestLinkPreparationTarget;
+  project: OwnedProject;
+}): Promise<void> {
+  const guest = assertGuestBelongsToProject(input.guest, input.project.id);
+  const token = generatePersonalGuestToken();
+
+  await createPersonalGuestLinkIfNoneActiveForVerifiedGuest({
+    guestId: guest.id,
+    tokenHash: hashPersonalGuestToken(token),
+  });
+}
+
 /**
  * Controlled capability creation after a server-owned project and active guest
  * have already been verified. It is shared by Guest Manager and Delivery Center
  * so raw token material is generated in exactly one authority path.
  */
 export async function createOrReplacePersonalGuestLinkForVerifiedGuest(input: {
-  guest: Guest;
+  guest: PersonalGuestLinkPreparationTarget;
   project: OwnedProject;
 }) {
   const guest = assertGuestBelongsToProject(input.guest, input.project.id);
@@ -96,4 +122,4 @@ export function isGuestLinkFailure(error: unknown) {
   return error instanceof GuestLinkRepositoryError || error instanceof GuestLinkUnavailableError;
 }
 
-export { GuestAccessDeniedError };
+export { GuestAccessDeniedError, GuestLinkActiveLinkExistsError };

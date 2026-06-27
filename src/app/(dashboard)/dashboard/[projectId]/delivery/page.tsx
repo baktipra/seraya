@@ -2,7 +2,10 @@ import { notFound } from 'next/navigation';
 
 import { GuestDeliveryCenter } from '@/components/projects/guest-delivery-center';
 import { getOwnedProjectContextForRequest } from '@/modules/auth/dashboard-request-context';
-import { preparePersonalGuestLinkForDeliveryAction } from '@/modules/delivery/delivery.actions';
+import {
+  prepareMissingPersonalGuestLinksForDeliveryAction,
+  preparePersonalGuestLinkForDeliveryAction,
+} from '@/modules/delivery/delivery.actions';
 import { getGuestDeliveryCenterForVerifiedProject } from '@/modules/delivery/delivery.service';
 import { getWeddingReadinessForRequest } from '@/modules/readiness';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
@@ -82,6 +85,9 @@ export default async function DeliveryCenterPage({ params }: DeliveryCenterPageP
     <GuestDeliveryCenter
       isPublished={deliveryCenter.isPublished}
       projectId={deliveryCenter.project.id}
+      prepareBatchAction={prepareMissingPersonalGuestLinksForDeliveryAction.bind(null, {
+        projectId: deliveryCenter.project.id,
+      })}
       rows={deliveryCenter.rows.map(({ guestId, ...row }, rowKey) => ({
         ...row,
         prepareAction: preparePersonalGuestLinkForDeliveryAction.bind(null, {

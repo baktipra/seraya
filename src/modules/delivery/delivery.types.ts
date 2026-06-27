@@ -3,6 +3,8 @@ import type { OwnedProject } from '@/modules/projects/project.repository';
 
 export type DeliveryPersonalLinkState = GuestPersonalLinkState | 'expired';
 
+export type DeliveryReadinessFilter = 'all' | 'missing_whatsapp' | 'not_ready' | 'ready';
+
 export type DeliveryWhatsAppAvailability = 'available' | 'missing';
 
 /**
@@ -26,8 +28,17 @@ export type DeliveryGuestActionRow = DeliveryGuestRow & {
 export type DeliveryReadinessSummary = {
   activeGuestCount: number;
   activePersonalLinkCount: number;
+  guestsWithoutActivePersonalLinkCount: number;
   whatsappAvailableCount: number;
   whatsappMissingCount: number;
+};
+
+/** No tokens, URLs, IDs, or per-guest details may leave the batch authority. */
+export type DeliveryBatchPreparationResult = {
+  createdCount: number;
+  failedCount: number;
+  skippedActiveLinkCount: number;
+  whatsappMissingCreatedCount: number;
 };
 
 export type OwnedGuestDeliveryCenter = {

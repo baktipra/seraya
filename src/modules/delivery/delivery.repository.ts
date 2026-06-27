@@ -3,12 +3,15 @@ import 'server-only';
 import type { OwnedProject } from '@/modules/projects/project.repository';
 import { createServerSupabaseClient } from '@/server/supabase/server';
 
-const deliveryGuestSelect = 'id, display_name, group_label, whatsapp_phone_e164';
+const deliveryGuestSelect =
+  'id, project_id, deleted_at, display_name, group_label, whatsapp_phone_e164';
 
 export type DeliveryGuestRecord = {
+  deleted_at: string | null;
   display_name: string;
   group_label: string | null;
   id: string;
+  project_id: string;
   whatsapp_phone_e164: string | null;
 };
 
@@ -20,8 +23,9 @@ export class DeliveryRepositoryError extends Error {
 }
 
 /**
- * One owner-scoped active guest query with only delivery workspace fields.
- * It intentionally omits RSVP, guestbook, payment, draft, and link secrets.
+ * One owner-scoped active guest query with only delivery workspace fields plus
+ * the server-only project/deletion guards needed by batch preparation. It
+ * intentionally omits RSVP, guestbook, payment, draft, and link secrets.
  */
 export async function listActiveDeliveryGuestsForVerifiedProject(
   project: OwnedProject,

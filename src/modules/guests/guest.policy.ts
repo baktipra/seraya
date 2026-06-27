@@ -9,8 +9,13 @@ export class GuestAccessDeniedError extends Error {
   }
 }
 
+type ProjectScopedActiveGuest = Pick<Guest, 'deleted_at' | 'project_id'>;
+
 /** Defense in depth for privileged server mutation paths. */
-export function assertGuestBelongsToProject(guest: Guest | null, projectId: string): Guest {
+export function assertGuestBelongsToProject<T extends ProjectScopedActiveGuest>(
+  guest: T | null,
+  projectId: string,
+): T {
   if (!guest || guest.project_id !== projectId || guest.deleted_at !== null) {
     throw new GuestAccessDeniedError();
   }

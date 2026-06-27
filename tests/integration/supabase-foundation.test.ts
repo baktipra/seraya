@@ -224,7 +224,7 @@ async function createPersonalGuestLink(db: PGlite, guestId: string, token: strin
   `);
 }
 
-describe('SRY-003 through SRY-028 Supabase migrations, ownership, drafts, publication, media, payments, guests, personal links, RSVP, private contact data, and guestbook', () => {
+describe('SRY-003 through SRY-037 Supabase migrations, ownership, drafts, publication, media, payments, guests, personal links, RSVP, private contact data, guestbook, and delivery readiness', () => {
   // Full Vitest runs compile the whole app beside this PGlite migration harness.
   // Allow the first cold database/migration setup enough room without weakening
   // any assertion or production behaviour.
@@ -2117,6 +2117,54 @@ describe('SRY-003 through SRY-028 Supabase migrations, ownership, drafts, public
         );
       `),
     ).rejects.toThrow(/guest_links_one_active_per_guest_idx|duplicate key/i);
+  });
+
+  it('batch-creates a missing personal link without replacing an already active capability', async () => {
+    const guestId = 'd5656565-5656-4565-8565-565656565656';
+    const firstToken = createRuntimePersonalGuestToken();
+    const secondToken = createRuntimePersonalGuestToken();
+
+    await resetToDatabaseOwner(database);
+    await database.exec(`
+      insert into public.guests (id, project_id, display_name)
+      values ('${guestId}', '${projectA}', 'Tamu Batch Aman');
+    `);
+
+    await database.query(`
+      select public.create_personal_guest_link_if_none_active_for_server(
+        '${guestId}',
+        encode(extensions.digest('${firstToken}', 'sha256'), 'hex')
+      );
+    `);
+
+    await expect(
+      database.query(`
+        select public.create_personal_guest_link_if_none_active_for_server(
+          '${guestId}',
+          encode(extensions.digest('${secondToken}', 'sha256'), 'hex')
+        );
+      `),
+    ).rejects.toThrow(/active personal guest link already exists/i);
+
+    const links = await database.query<{ status: string; token_hash: string }>(`
+      select status::text as status, token_hash
+      from public.guest_links
+      where guest_id = '${guestId}'
+      order by created_at asc;
+    `);
+    expect(links.rows).toEqual([
+      {
+        status: 'active',
+        token_hash: expect.stringMatching(/^[0-9a-f]{64}$/),
+      },
+    ]);
+    expect(links.rows[0]?.token_hash).toBe(
+      (
+        await database.query<{ token_hash: string }>(`
+        select encode(extensions.digest('${firstToken}', 'sha256'), 'hex') as token_hash;
+      `)
+      ).rows[0]?.token_hash,
+    );
   });
 
   it('keeps guest_links closed to browser table browsing and direct mutation', async () => {

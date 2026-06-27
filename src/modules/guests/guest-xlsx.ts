@@ -170,10 +170,10 @@ function getPartySizeValue(value: SpreadsheetScalar, rowNumber: number) {
         ? Number(source)
         : Number.NaN;
 
-  if (!Number.isFinite(numeric) || !Number.isInteger(numeric) || numeric < 1 || numeric > 10) {
+  if (!Number.isFinite(numeric) || !Number.isInteger(numeric) || numeric < 1 || numeric > 20) {
     throw new GuestXlsxValidationError(
       'validation',
-      `Baris ${rowNumber}: Jumlah Rombongan harus berupa angka 1 sampai 10.`,
+      `Baris ${rowNumber}: Jumlah Rombongan harus berupa angka 1 sampai 20.`,
     );
   }
 

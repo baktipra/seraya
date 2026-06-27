@@ -85,7 +85,7 @@ describe('SRY-036 private guest XLSX parser and template', () => {
   it('imports normalized guests with optional group, party size, and Indonesian WhatsApp formats', async () => {
     const file = await xlsxFile({
       rows: [
-        ['Rani', 'Teman', 2, '0812 3456 7890'],
+        ['Rani', 'Teman', 20, '0812 3456 7890'],
         ['Budi', '', { formula: '=1+1', result: 2 }, '6281234567891'],
         ['Citra', 'Keluarga', '2.0', '+6281234567892'],
       ],
@@ -95,7 +95,7 @@ describe('SRY-036 private guest XLSX parser and template', () => {
       {
         displayName: 'Rani',
         groupLabel: 'Teman',
-        partySize: 2,
+        partySize: 20,
         whatsappPhoneE164: '+6281234567890',
       },
       {
@@ -129,7 +129,7 @@ describe('SRY-036 private guest XLSX parser and template', () => {
 
   it.each([
     ['missing name', [['', 'Teman', 1, '']], 'Baris 2: Nama Tamu'],
-    ['invalid party size', [['Rani', '', 11, '']], 'Baris 2: Jumlah Rombongan'],
+    ['invalid party size', [['Rani', '', 21, '']], 'Baris 2: Jumlah Rombongan'],
     ['invalid phone', [['Rani', '', 1, '81234567890']], 'Baris 2: Nomor WhatsApp'],
   ])('rejects %s with the spreadsheet row number', async (_label, rows, expected) => {
     await expectXlsxFailure(await xlsxFile({ rows }), expected);

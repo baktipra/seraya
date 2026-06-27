@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { GuestAccessDeniedError } from '@/modules/guests/guest.policy';
 
 const {
+  ActiveLinkExistsErrorMock,
   createPersonalLinkMock,
   getGuestMock,
   getLatestStateMock,
@@ -10,8 +11,10 @@ const {
   hasPublishedMock,
   listDeliveryGuestsMock,
   listLatestStatesMock,
+  prepareWithoutRevealMock,
   requireCurrentUserMock,
 } = vi.hoisted(() => ({
+  ActiveLinkExistsErrorMock: class GuestLinkActiveLinkExistsError extends Error {},
   createPersonalLinkMock: vi.fn(),
   getGuestMock: vi.fn(),
   getLatestStateMock: vi.fn(),
@@ -19,6 +22,7 @@ const {
   hasPublishedMock: vi.fn(),
   listDeliveryGuestsMock: vi.fn(),
   listLatestStatesMock: vi.fn(),
+  prepareWithoutRevealMock: vi.fn(),
   requireCurrentUserMock: vi.fn(),
 }));
 
@@ -27,8 +31,10 @@ vi.mock('@/modules/guest-links/guest-link.repository', () => ({
   listLatestGuestLinkStatesForVerifiedGuestIds: listLatestStatesMock,
 }));
 vi.mock('@/modules/guest-links/guest-link.service', () => ({
+  GuestLinkActiveLinkExistsError: ActiveLinkExistsErrorMock,
   createOrReplacePersonalGuestLinkForVerifiedGuest: createPersonalLinkMock,
   getLatestPersonalGuestLinkStateForVerifiedGuest: getLatestStateMock,
+  preparePersonalGuestLinkForVerifiedGuestWithoutReveal: prepareWithoutRevealMock,
 }));
 vi.mock('@/modules/guests/guest.repository', () => ({
   getActiveGuestForVerifiedProjectWithAdmin: getGuestMock,
@@ -49,6 +55,7 @@ import {
   DeliveryPublicationRequiredError,
   getGuestDeliveryCenterForVerifiedProject,
   maskDeliveryWhatsAppPhone,
+  prepareMissingPersonalGuestLinksForDeliveryForCurrentUser,
   preparePersonalGuestLinkForDeliveryForCurrentUser,
 } from '../delivery.service';
 
@@ -81,32 +88,40 @@ const activeGuest = {
 
 const deliveryGuests = [
   {
+    deleted_at: null,
     display_name: 'Keluarga Budi',
     group_label: 'Keluarga',
     id: activeGuest.id,
+    project_id: project.id,
     whatsapp_phone_e164: '+6281234567890',
   },
   {
+    deleted_at: null,
     display_name: 'Rani',
     group_label: null,
     id: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+    project_id: project.id,
     whatsapp_phone_e164: null,
   },
   {
+    deleted_at: null,
     display_name: 'Dimas',
     group_label: 'Teman',
     id: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+    project_id: project.id,
     whatsapp_phone_e164: '+6289876543210',
   },
   {
+    deleted_at: null,
     display_name: 'Ayu',
     group_label: null,
     id: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
+    project_id: project.id,
     whatsapp_phone_e164: null,
   },
 ];
 
-describe('SRY-029 private Delivery Center service', () => {
+describe('SRY-037 private Delivery Center readiness and preparation service', () => {
   beforeEach(() => {
     createPersonalLinkMock.mockReset();
     getGuestMock.mockReset();
@@ -115,6 +130,7 @@ describe('SRY-029 private Delivery Center service', () => {
     hasPublishedMock.mockReset();
     listDeliveryGuestsMock.mockReset();
     listLatestStatesMock.mockReset();
+    prepareWithoutRevealMock.mockReset();
     requireCurrentUserMock.mockReset();
 
     requireCurrentUserMock.mockResolvedValue({ id: project.account_id });
@@ -122,10 +138,11 @@ describe('SRY-029 private Delivery Center service', () => {
     getGuestMock.mockResolvedValue(activeGuest);
     hasPublishedMock.mockResolvedValue(true);
     getLatestStateMock.mockResolvedValue('not_created');
+    listDeliveryGuestsMock.mockResolvedValue(deliveryGuests);
+    listLatestStatesMock.mockResolvedValue([]);
   });
 
-  it('maps active guests into a minimum delivery DTO with one bounded status batch', async () => {
-    listDeliveryGuestsMock.mockResolvedValue(deliveryGuests);
+  it('maps active guests into a minimum delivery DTO with one bounded status batch and readiness counts', async () => {
     listLatestStatesMock.mockResolvedValue([
       {
         created_at: '2027-01-03T00:00:00.000Z',
@@ -186,6 +203,7 @@ describe('SRY-029 private Delivery Center service', () => {
     expect(result.summary).toEqual({
       activeGuestCount: 4,
       activePersonalLinkCount: 1,
+      guestsWithoutActivePersonalLinkCount: 3,
       whatsappAvailableCount: 2,
       whatsappMissingCount: 2,
     });
@@ -199,6 +217,105 @@ describe('SRY-029 private Delivery Center service', () => {
       expect(row).not.toHaveProperty('guestbook');
       expect(row).not.toHaveProperty('payment');
     }
+  });
+
+  it('prepares only active guests that do not already have an active personal link and never returns capability material', async () => {
+    listLatestStatesMock.mockResolvedValue([
+      { created_at: '2027-01-03T00:00:00.000Z', guest_id: activeGuest.id, status: 'active' },
+      {
+        created_at: '2027-01-04T00:00:00.000Z',
+        guest_id: deliveryGuests[1]!.id,
+        status: 'revoked',
+      },
+      {
+        created_at: '2027-01-05T00:00:00.000Z',
+        guest_id: deliveryGuests[2]!.id,
+        status: 'expired',
+      },
+    ]);
+    prepareWithoutRevealMock.mockResolvedValue(undefined);
+
+    const result = await prepareMissingPersonalGuestLinksForDeliveryForCurrentUser({
+      projectId: project.id,
+    });
+
+    expect(prepareWithoutRevealMock).toHaveBeenCalledTimes(3);
+    expect(prepareWithoutRevealMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({ guest: expect.objectContaining({ id: activeGuest.id }) }),
+    );
+    expect(prepareWithoutRevealMock).toHaveBeenCalledWith({
+      guest: expect.objectContaining({ id: deliveryGuests[1]!.id, project_id: project.id }),
+      project,
+    });
+    expect(prepareWithoutRevealMock).toHaveBeenCalledWith({
+      guest: expect.objectContaining({ id: deliveryGuests[2]!.id, project_id: project.id }),
+      project,
+    });
+    expect(result).toEqual({
+      createdCount: 3,
+      failedCount: 0,
+      skippedActiveLinkCount: 1,
+      whatsappMissingCreatedCount: 2,
+    });
+    expect(result).not.toHaveProperty('personalUrl');
+    expect(result).not.toHaveProperty('token');
+    expect(result).not.toHaveProperty('links');
+  });
+
+  it('skips a concurrently active link instead of replacing it during batch preparation', async () => {
+    prepareWithoutRevealMock.mockImplementation(async ({ guest }) => {
+      if (guest.id === deliveryGuests[1]!.id) {
+        throw new ActiveLinkExistsErrorMock();
+      }
+    });
+
+    const result = await prepareMissingPersonalGuestLinksForDeliveryForCurrentUser({
+      projectId: project.id,
+    });
+
+    expect(result).toEqual({
+      createdCount: 3,
+      failedCount: 0,
+      skippedActiveLinkCount: 1,
+      whatsappMissingCreatedCount: 1,
+    });
+  });
+
+  it('reports partial batch outcomes without exposing per-guest details', async () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    prepareWithoutRevealMock
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new Error('race'))
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce(undefined);
+
+    const result = await prepareMissingPersonalGuestLinksForDeliveryForCurrentUser({
+      projectId: project.id,
+    });
+
+    expect(result).toEqual({
+      createdCount: 3,
+      failedCount: 1,
+      skippedActiveLinkCount: 0,
+      whatsappMissingCreatedCount: 1,
+    });
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Seraya delivery batch personal-link preparation item failed.',
+      expect.objectContaining({ errorName: 'Error' }),
+    );
+    consoleErrorSpy.mockRestore();
+    expect(JSON.stringify(result)).not.toContain('Rani');
+    expect(JSON.stringify(result)).not.toContain('token');
+  });
+
+  it('requires a current published snapshot before batch preparation', async () => {
+    hasPublishedMock.mockResolvedValue(false);
+
+    await expect(
+      prepareMissingPersonalGuestLinksForDeliveryForCurrentUser({ projectId: project.id }),
+    ).rejects.toBeInstanceOf(DeliveryPublicationRequiredError);
+
+    expect(prepareWithoutRevealMock).not.toHaveBeenCalled();
   });
 
   it('masks private numbers without returning the full canonical value', () => {

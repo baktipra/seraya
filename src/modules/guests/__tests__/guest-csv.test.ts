@@ -61,6 +61,12 @@ describe('SRY-014 private guest CSV parser and export serializer', () => {
     expectCsvFailure('display_name,group_label,party_size\n,Teman,1\n', 'display_name');
   });
 
+  it('keeps CSV party_size aligned with the 1 through 20 guest contract', () => {
+    expect(parse('display_name,group_label,party_size\nRani,,20\n')).toEqual([
+      { displayName: 'Rani', groupLabel: null, partySize: 20 },
+    ]);
+  });
+
   it('normalizes group_label and blank party_size through the existing guest contract', () => {
     expect(parse('display_name,group_label,party_size\n  Rani  ,   ,\n')).toEqual([
       { displayName: 'Rani', groupLabel: null, partySize: 1 },

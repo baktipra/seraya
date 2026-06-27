@@ -2,10 +2,13 @@
 
 import { revalidatePath } from 'next/cache';
 
-import type { DeliveryLinkActionState } from './delivery.action-state';
+import type { DeliveryBatchActionState, DeliveryLinkActionState } from './delivery.action-state';
 import {
+  parseDeliveryBatchBoundInput,
+  parseDeliveryBatchConfirmationFormData,
   parseDeliveryLinkBoundInput,
   parseDeliveryLinkConfirmationFormData,
+  type DeliveryBatchBoundInput,
   type DeliveryLinkBoundInput,
 } from './delivery.schema';
 import {
@@ -13,6 +16,7 @@ import {
   DeliveryPublicationRequiredError,
   GuestAccessDeniedError,
   isDeliveryFailure,
+  prepareMissingPersonalGuestLinksForDeliveryForCurrentUser,
   preparePersonalGuestLinkForDeliveryForCurrentUser,
 } from './delivery.service';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
@@ -89,6 +93,73 @@ export async function preparePersonalGuestLinkForDeliveryAction(
 
     return {
       message: 'Tautan pribadi belum bisa disiapkan. Coba lagi beberapa saat lagi.',
+      status: 'error',
+    };
+  }
+}
+
+/**
+ * Batch preparation exposes aggregate readiness only. Raw personal URLs and
+ * capability tokens remain confined to the existing one-time per-guest flow.
+ */
+export async function prepareMissingPersonalGuestLinksForDeliveryAction(
+  boundInput: DeliveryBatchBoundInput,
+  _previousState: DeliveryBatchActionState,
+  formData: FormData,
+): Promise<DeliveryBatchActionState> {
+  const [bound, confirmation] = [
+    parseDeliveryBatchBoundInput(boundInput),
+    parseDeliveryBatchConfirmationFormData(formData),
+  ];
+
+  if (!bound.success || !confirmation.success) {
+    return {
+      message: 'Undangan Pribadi belum dapat disiapkan. Konfirmasi kembali sebelum melanjutkan.',
+      status: 'error',
+    };
+  }
+
+  try {
+    const result = await prepareMissingPersonalGuestLinksForDeliveryForCurrentUser({
+      projectId: bound.data.projectId,
+    });
+    revalidatePrivateDeliverySurfaces(bound.data.projectId);
+
+    const status = result.failedCount > 0 ? 'partial' : 'success';
+    const message =
+      result.failedCount > 0
+        ? 'Sebagian Undangan Pribadi belum dapat disiapkan. Coba lagi untuk melanjutkan yang tersisa.'
+        : result.createdCount > 0
+          ? 'Undangan Pribadi sudah disiapkan. Lanjutkan pembagian manual per tamu di Delivery Center.'
+          : 'Tidak ada Undangan Pribadi baru yang perlu disiapkan.';
+
+    return {
+      ...result,
+      message,
+      status,
+    };
+  } catch (error) {
+    if (error instanceof DeliveryPublicationRequiredError) {
+      return {
+        message: 'Publikasikan undangan terlebih dahulu sebelum menyiapkan Undangan Pribadi.',
+        status: 'error',
+      };
+    }
+
+    if (error instanceof ProjectAccessDeniedError || error instanceof GuestAccessDeniedError) {
+      return { message: 'Undangan Pribadi tidak tersedia untuk project ini.', status: 'error' };
+    }
+
+    if (isDeliveryFailure(error)) {
+      console.error('Seraya delivery batch preparation failed.', { errorName: error.name });
+    } else {
+      console.error('Seraya delivery batch action failed.', {
+        errorName: error instanceof Error ? error.name : 'UnknownError',
+      });
+    }
+
+    return {
+      message: 'Undangan Pribadi belum bisa disiapkan. Coba lagi beberapa saat lagi.',
       status: 'error',
     };
   }

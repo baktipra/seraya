@@ -3,12 +3,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { GuestAccessDeniedError } from '@/modules/guests/guest.policy';
 
 const {
+  createIfNoneActiveLinkMock,
   getGuestMock,
   getOwnedProjectMock,
   replaceLinkMock,
   requireCurrentUserMock,
   revokeLinkMock,
 } = vi.hoisted(() => ({
+  createIfNoneActiveLinkMock: vi.fn(),
   getGuestMock: vi.fn(),
   getOwnedProjectMock: vi.fn(),
   replaceLinkMock: vi.fn(),
@@ -24,13 +26,16 @@ vi.mock('@/modules/guests/guest.repository', () => ({
   getActiveGuestForVerifiedProjectWithAdmin: getGuestMock,
 }));
 vi.mock('../guest-link.repository', () => ({
+  GuestLinkActiveLinkExistsError: class GuestLinkActiveLinkExistsError extends Error {},
   GuestLinkRepositoryError: class GuestLinkRepositoryError extends Error {},
+  createPersonalGuestLinkIfNoneActiveForVerifiedGuest: createIfNoneActiveLinkMock,
   replacePersonalGuestLinkForVerifiedGuest: replaceLinkMock,
   revokePersonalGuestLinkForVerifiedGuest: revokeLinkMock,
 }));
 
 import {
   createOrReplacePersonalGuestLinkForCurrentUser,
+  preparePersonalGuestLinkForVerifiedGuestWithoutReveal,
   revokePersonalGuestLinkForCurrentUser,
 } from '../guest-link.service';
 
@@ -63,6 +68,7 @@ const guest = {
 describe('SRY-013 owner personal-link service ownership guard', () => {
   beforeEach(() => {
     process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000';
+    createIfNoneActiveLinkMock.mockReset();
     getGuestMock.mockReset();
     getOwnedProjectMock.mockReset();
     replaceLinkMock.mockReset();
@@ -88,6 +94,20 @@ describe('SRY-013 owner personal-link service ownership guard', () => {
 
     expect(replaceLinkMock).not.toHaveBeenCalled();
     expect(revokeLinkMock).not.toHaveBeenCalled();
+  });
+
+  it('uses the create-only authority for batch preparation and never returns raw capability material', async () => {
+    createIfNoneActiveLinkMock.mockResolvedValue(undefined);
+
+    await expect(
+      preparePersonalGuestLinkForVerifiedGuestWithoutReveal({ guest, project }),
+    ).resolves.toBeUndefined();
+
+    expect(createIfNoneActiveLinkMock).toHaveBeenCalledWith({
+      guestId: guest.id,
+      tokenHash: expect.stringMatching(/^[0-9a-f]{64}$/),
+    });
+    expect(replaceLinkMock).not.toHaveBeenCalled();
   });
 
   it('hashes capability material before the repository mutation and returns a personal URL once', async () => {

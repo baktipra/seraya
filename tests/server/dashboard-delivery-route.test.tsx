@@ -34,6 +34,7 @@ vi.mock('@/modules/auth/dashboard-request-context', () => ({
   getOwnedProjectContextForRequest: getOwnedProjectContextMock,
 }));
 vi.mock('@/modules/delivery/delivery.actions', () => ({
+  prepareMissingPersonalGuestLinksForDeliveryAction: vi.fn(),
   preparePersonalGuestLinkForDeliveryAction: vi.fn(),
 }));
 vi.mock('@/modules/delivery/delivery.service', () => ({
@@ -87,6 +88,7 @@ describe('SRY-031 private Delivery Center route', () => {
       summary: {
         activeGuestCount: 1,
         activePersonalLinkCount: 1,
+        guestsWithoutActivePersonalLinkCount: 0,
         whatsappAvailableCount: 1,
         whatsappMissingCount: 0,
       },

@@ -3,6 +3,12 @@ import { describe, expect, it } from 'vitest';
 import { guestInputSchema, parseCreateGuestFormData } from '../guest.schema';
 
 describe('SRY-012 guest validation contract', () => {
+  it('keeps the manual guest party-size contract at 1 through 20', () => {
+    expect(
+      guestInputSchema.parse({ displayName: 'Keluarga Budi', groupLabel: null, partySize: 20 }),
+    ).toMatchObject({ partySize: 20 });
+  });
+
   it('normalizes an empty group label to null while preserving valid guest data', () => {
     expect(
       guestInputSchema.parse({

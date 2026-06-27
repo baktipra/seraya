@@ -14,6 +14,14 @@ export class GuestLinkRepositoryError extends Error {
   }
 }
 
+/** The batch-only creation guard detected a concurrently active capability. */
+export class GuestLinkActiveLinkExistsError extends Error {
+  constructor() {
+    super('An active personal guest link already exists.');
+    this.name = 'GuestLinkActiveLinkExistsError';
+  }
+}
+
 /** Never selects token_hash: dashboard DTOs must only receive factual link state. */
 export async function listGuestLinkStatesForVerifiedGuestIds(guestIds: string[]) {
   if (guestIds.length === 0) {
@@ -82,6 +90,29 @@ export async function replacePersonalGuestLinkForVerifiedGuest(input: {
     new_token_hash: input.tokenHash,
     target_guest_id: input.guestId,
   });
+
+  if (error) {
+    throw new GuestLinkRepositoryError();
+  }
+}
+
+/**
+ * Atomic batch-only creation. Unlike the existing replacement authority, this
+ * preserves an active capability that may have been created concurrently.
+ */
+export async function createPersonalGuestLinkIfNoneActiveForVerifiedGuest(input: {
+  guestId: string;
+  tokenHash: string;
+}) {
+  const supabase = createAdminSupabaseClient();
+  const { error } = await supabase.rpc('create_personal_guest_link_if_none_active_for_server', {
+    new_token_hash: input.tokenHash,
+    target_guest_id: input.guestId,
+  });
+
+  if (error?.code === 'P0001') {
+    throw new GuestLinkActiveLinkExistsError();
+  }
 
   if (error) {
     throw new GuestLinkRepositoryError();

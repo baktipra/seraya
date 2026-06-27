@@ -10,7 +10,10 @@ vi.mock('next/navigation', () => ({
 
 import { GuestDeliveryCenter } from '@/components/projects/guest-delivery-center';
 import { ToastProvider } from '@/design-system';
-import { initialDeliveryLinkActionState } from '@/modules/delivery/delivery.action-state';
+import {
+  initialDeliveryBatchActionState,
+  initialDeliveryLinkActionState,
+} from '@/modules/delivery/delivery.action-state';
 
 const projectId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 
@@ -18,12 +21,25 @@ async function prepareLink() {
   return initialDeliveryLinkActionState;
 }
 
-describe('SRY-029 owner Delivery Center UI', () => {
-  it('renders factual readiness, masked WhatsApp, link status, and manual preparation controls', () => {
+async function prepareBatch() {
+  return initialDeliveryBatchActionState;
+}
+
+const summary = {
+  activeGuestCount: 2,
+  activePersonalLinkCount: 1,
+  guestsWithoutActivePersonalLinkCount: 1,
+  whatsappAvailableCount: 1,
+  whatsappMissingCount: 1,
+};
+
+describe('SRY-037 owner Delivery Center UI', () => {
+  it('renders delivery readiness, filters, batch preparation, masked WhatsApp, and manual per-guest controls', () => {
     const html = renderToStaticMarkup(
       <ToastProvider>
         <GuestDeliveryCenter
           isPublished
+          prepareBatchAction={prepareBatch}
           projectId={projectId}
           rows={[
             {
@@ -45,30 +61,27 @@ describe('SRY-029 owner Delivery Center UI', () => {
               whatsappAvailability: 'missing',
             },
           ]}
-          summary={{
-            activeGuestCount: 2,
-            activePersonalLinkCount: 1,
-            whatsappAvailableCount: 1,
-            whatsappMissingCount: 1,
-          }}
+          summary={summary}
         />
       </ToastProvider>,
     );
 
-    expect(html).toContain('Pusat Pengiriman');
-    expect(html).toContain(
-      'Undangan Pribadi menyertakan sapaan, RSVP, dan ucapan tamu. Buat atau perbarui link untuk tamu sebelum membagikannya.',
-    );
+    expect(html).toContain('Delivery Center');
+    expect(html).toContain('Undangan Pribadi menyertakan sapaan, RSVP, dan ucapan tamu.');
     expect(html).toContain('Tamu aktif');
-    expect(html).toContain('Nomor WhatsApp tersedia');
-    expect(html).toContain('Tautan aktif');
-    expect(html).toContain('Nomor WhatsApp belum tersedia');
+    expect(html).toContain('Siap dibagikan');
+    expect(html).toContain('Belum punya Undangan Pribadi aktif');
+    expect(html).toContain('Belum punya Nomor WhatsApp');
+    expect(html).toContain('Siapkan Undangan Pribadi sekaligus');
+    expect(html).toContain('Siapkan 1 Undangan Pribadi');
+    expect(html).toContain('Filter kesiapan');
+    expect(html).toContain('Belum siap dibagikan');
+    expect(html).toContain('Siap dibagikan');
+    expect(html).toContain('Belum punya Nomor WhatsApp');
     expect(html).toContain('WhatsApp tersedia');
     expect(html).toContain('Nomor WhatsApp belum tersedia');
     expect(html).toContain('+62••••7890');
     expect(html).not.toContain('+6281234567890');
-    expect(html).toContain('Tautan aktif');
-    expect(html).toContain('Belum dibuat');
     expect(html).toContain('Buat ulang tautan &amp; bagikan');
     expect(html).toContain('Buat tautan &amp; bagikan');
     expect(html).toContain(`href="/dashboard/${projectId}/guests"`);
@@ -83,11 +96,13 @@ describe('SRY-029 owner Delivery Center UI', () => {
       <ToastProvider>
         <GuestDeliveryCenter
           isPublished={false}
+          prepareBatchAction={prepareBatch}
           projectId={projectId}
           rows={[]}
           summary={{
             activeGuestCount: 0,
             activePersonalLinkCount: 0,
+            guestsWithoutActivePersonalLinkCount: 0,
             whatsappAvailableCount: 0,
             whatsappMissingCount: 0,
           }}
@@ -97,9 +112,10 @@ describe('SRY-029 owner Delivery Center UI', () => {
 
     expect(html).toContain('Bagikan tersedia setelah undangan diterbitkan');
     expect(html).toContain(
-      'Terbitkan versi undangan yang sudah kalian setujui sebelum menyiapkan undangan pribadi.',
+      'Terbitkan versi undangan yang sudah kalian setujui sebelum menyiapkan Undangan Pribadi.',
     );
     expect(html).toContain(`href="/dashboard/${projectId}"`);
+    expect(html).not.toContain('Siapkan Undangan Pribadi sekaligus');
   });
 
   it('explains that RSVP requires guests and Undangan Pribadi when no active guests exist', () => {
@@ -107,11 +123,13 @@ describe('SRY-029 owner Delivery Center UI', () => {
       <ToastProvider>
         <GuestDeliveryCenter
           isPublished
+          prepareBatchAction={prepareBatch}
           projectId={projectId}
           rows={[]}
           summary={{
             activeGuestCount: 0,
             activePersonalLinkCount: 0,
+            guestsWithoutActivePersonalLinkCount: 0,
             whatsappAvailableCount: 0,
             whatsappMissingCount: 0,
           }}
@@ -125,7 +143,7 @@ describe('SRY-029 owner Delivery Center UI', () => {
     expect(html).not.toContain('Link Publik cukup untuk RSVP');
   });
 
-  it('keeps raw links and full phone numbers confined to the immediate result, with no browser persistence or custom send runtime', async () => {
+  it('keeps raw links and full phone numbers confined to the immediate per-guest result while batch state remains aggregate-only', async () => {
     const source = await readFile(
       path.join(process.cwd(), 'src/components/projects/guest-delivery-center.tsx'),
       'utf8',
@@ -134,18 +152,12 @@ describe('SRY-029 owner Delivery Center UI', () => {
     expect(source).toContain('<PersonalGuestLinkResultActions');
     expect(source).toContain('open={Boolean(revealedPersonalLink)}');
     expect(source).toContain('personalUrl={revealedPersonalLink.personalUrl}');
-    expect(source).toContain(
-      'recipientWhatsAppPhoneE164={revealedPersonalLink.recipientWhatsAppPhoneE164}',
-    );
     expect(source).toContain('confirmActiveReplacement');
-    expect(source).toContain(
-      'Tautan aktif sebelumnya akan berhenti berlaku setelah tautan baru dibuat.',
-    );
-    expect(source).not.toContain('guestId');
+    expect(source).toContain('confirmBatchPreparation');
+    expect(source).toContain('prepareBatchAction');
+    expect(source).toContain('URL mentah tidak ditampilkan dari proses batch.');
     expect(source).not.toContain('localStorage');
     expect(source).not.toContain('sessionStorage');
-    expect(source).not.toContain('document.cookie');
-    expect(source).not.toContain('router.prefetch');
-    expect(source).not.toContain('fetch(');
+    expect(source).not.toContain('bulk WhatsApp');
   });
 });

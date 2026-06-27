@@ -7,6 +7,7 @@ const {
   isMock,
   limitMock,
   orderMock,
+  rpcMock,
   selectMock,
 } = vi.hoisted(() => ({
   createAdminSupabaseClientMock: vi.fn(),
@@ -15,6 +16,7 @@ const {
   isMock: vi.fn(),
   limitMock: vi.fn(),
   orderMock: vi.fn(),
+  rpcMock: vi.fn(),
   selectMock: vi.fn(),
 }));
 
@@ -22,7 +24,11 @@ vi.mock('@/server/supabase/admin', () => ({
   createAdminSupabaseClient: createAdminSupabaseClientMock,
 }));
 
-import { listLatestGuestLinkStatesForVerifiedGuestIds } from '../guest-link.repository';
+import {
+  createPersonalGuestLinkIfNoneActiveForVerifiedGuest,
+  GuestLinkActiveLinkExistsError,
+  listLatestGuestLinkStatesForVerifiedGuestIds,
+} from '../guest-link.repository';
 
 const firstGuestId = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
 const secondGuestId = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
@@ -36,8 +42,9 @@ describe('latest owner guest-link delivery projection', () => {
     isMock.mockReset();
     orderMock.mockReset();
     limitMock.mockReset();
+    rpcMock.mockReset();
 
-    createAdminSupabaseClientMock.mockReturnValue({ from: fromMock });
+    createAdminSupabaseClientMock.mockReturnValue({ from: fromMock, rpc: rpcMock });
     fromMock.mockReturnValue({ select: selectMock });
     selectMock.mockReturnValue({ in: inMock });
     inMock.mockReturnValue({ is: isMock });
@@ -82,5 +89,40 @@ describe('latest owner guest-link delivery projection', () => {
   it('does not query when there are no active guests', async () => {
     await expect(listLatestGuestLinkStatesForVerifiedGuestIds([])).resolves.toEqual([]);
     expect(createAdminSupabaseClientMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('batch personal-link creation guard', () => {
+  beforeEach(() => {
+    createAdminSupabaseClientMock.mockReset();
+    rpcMock.mockReset();
+    createAdminSupabaseClientMock.mockReturnValue({ rpc: rpcMock });
+  });
+
+  it('calls the create-if-none-active authority with hash-only capability material', async () => {
+    rpcMock.mockResolvedValue({ error: null });
+
+    await expect(
+      createPersonalGuestLinkIfNoneActiveForVerifiedGuest({
+        guestId: firstGuestId,
+        tokenHash: 'a'.repeat(64),
+      }),
+    ).resolves.toBeUndefined();
+
+    expect(rpcMock).toHaveBeenCalledWith('create_personal_guest_link_if_none_active_for_server', {
+      new_token_hash: 'a'.repeat(64),
+      target_guest_id: firstGuestId,
+    });
+  });
+
+  it('maps the stable active-link conflict to a safe batch skip signal', async () => {
+    rpcMock.mockResolvedValue({ error: { code: 'P0001' } });
+
+    await expect(
+      createPersonalGuestLinkIfNoneActiveForVerifiedGuest({
+        guestId: firstGuestId,
+        tokenHash: 'b'.repeat(64),
+      }),
+    ).rejects.toBeInstanceOf(GuestLinkActiveLinkExistsError);
   });
 });

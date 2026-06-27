@@ -17,11 +17,14 @@ import {
   useToast,
 } from '@/design-system';
 import {
+  initialDeliveryBatchActionState,
   initialDeliveryLinkActionState,
+  type DeliveryBatchActionState,
   type DeliveryLinkActionState,
 } from '@/modules/delivery/delivery.action-state';
 import type {
   DeliveryPersonalLinkState,
+  DeliveryReadinessFilter,
   DeliveryReadinessSummary,
   DeliveryWhatsAppAvailability,
 } from '@/modules/delivery/delivery.types';
@@ -30,6 +33,11 @@ type BoundDeliveryLinkAction = (
   previousState: DeliveryLinkActionState,
   formData: FormData,
 ) => Promise<DeliveryLinkActionState>;
+
+type BoundDeliveryBatchAction = (
+  previousState: DeliveryBatchActionState,
+  formData: FormData,
+) => Promise<DeliveryBatchActionState>;
 
 type DeliveryGuestRowClient = {
   displayName: string;
@@ -43,6 +51,7 @@ type DeliveryGuestRowClient = {
 
 type GuestDeliveryCenterProps = {
   isPublished: boolean;
+  prepareBatchAction: BoundDeliveryBatchAction;
   projectId: string;
   rows: DeliveryGuestRowClient[];
   summary: DeliveryReadinessSummary;
@@ -186,6 +195,118 @@ function DeliveryLinkPreparationDialog({
   );
 }
 
+type DeliveryBatchPreparationDialogProps = {
+  guestCount: number;
+  onOpenChange: (open: boolean) => void;
+  open: boolean;
+  prepareBatchAction: BoundDeliveryBatchAction;
+};
+
+function BatchResultCopy({ actionState }: { actionState: DeliveryBatchActionState }) {
+  return (
+    <div
+      className="border-seraya-border-default bg-seraya-brand-soft rounded-[var(--seraya-radius-md)] border px-4 py-4 text-sm leading-6"
+      role={actionState.status === 'partial' ? 'alert' : 'status'}
+    >
+      <p className="text-seraya-text-primary font-semibold">
+        {actionState.createdCount ?? 0} Undangan Pribadi berhasil disiapkan.
+      </p>
+      {actionState.whatsappMissingCreatedCount ? (
+        <p className="text-seraya-text-secondary mt-1">
+          {actionState.whatsappMissingCreatedCount} tamu yang baru disiapkan belum memiliki Nomor
+          WhatsApp.
+        </p>
+      ) : null}
+      {actionState.skippedActiveLinkCount ? (
+        <p className="text-seraya-text-secondary mt-1">
+          {actionState.skippedActiveLinkCount} tamu dengan Undangan Pribadi aktif tidak diubah.
+        </p>
+      ) : null}
+      {actionState.failedCount ? (
+        <p className="text-seraya-status-error mt-1">
+          {actionState.failedCount} tamu belum dapat disiapkan. Coba lagi untuk melanjutkan yang
+          tersisa.
+        </p>
+      ) : null}
+      {actionState.message ? (
+        <p className="text-seraya-text-secondary mt-3">{actionState.message}</p>
+      ) : null}
+    </div>
+  );
+}
+
+/** Aggregate-only batch confirmation. It deliberately never receives raw guest URLs or tokens. */
+function DeliveryBatchPreparationDialog({
+  guestCount,
+  onOpenChange,
+  open,
+  prepareBatchAction: boundPrepareBatchAction,
+}: DeliveryBatchPreparationDialogProps) {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [actionState, prepareBatchAction, isPreparing] = useActionState(
+    boundPrepareBatchAction,
+    initialDeliveryBatchActionState,
+  );
+  const hasResult = actionState.status === 'success' || actionState.status === 'partial';
+
+  useEffect(() => {
+    if (!hasResult) {
+      return;
+    }
+
+    router.refresh();
+    toast({
+      title:
+        actionState.status === 'partial'
+          ? 'Sebagian Undangan Pribadi sudah disiapkan.'
+          : 'Undangan Pribadi sudah disiapkan.',
+      variant: actionState.status === 'partial' ? 'error' : 'success',
+    });
+  }, [actionState.status, hasResult, router, toast]);
+
+  return (
+    <Dialog
+      description="Tautan aktif yang sudah ada tidak akan diubah. URL mentah tidak ditampilkan dari proses batch."
+      onOpenChange={onOpenChange}
+      open={open}
+      title={`Siapkan Undangan Pribadi untuk ${guestCount} tamu?`}
+    >
+      {hasResult ? (
+        <div className="space-y-5">
+          <BatchResultCopy actionState={actionState} />
+          <div className="flex justify-end">
+            <Button onClick={() => onOpenChange(false)} type="button">
+              Selesai
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <form action={prepareBatchAction} className="space-y-5" noValidate>
+          <input name="confirmBatchPreparation" type="hidden" value="true" />
+          <p className="text-seraya-text-secondary text-sm leading-6">
+            Undangan Pribadi akan disiapkan untuk tamu yang belum memiliki link aktif. Pembagian
+            WhatsApp tetap dilakukan manual per tamu.
+          </p>
+          {actionState.status === 'error' && actionState.message ? (
+            <p className="text-seraya-status-error text-sm leading-6" role="alert">
+              {actionState.message}
+            </p>
+          ) : null}
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <Button onClick={() => onOpenChange(false)} type="button" variant="secondary">
+              Batal
+            </Button>
+            <Button loading={isPreparing} type="submit">
+              Siapkan Undangan Pribadi
+            </Button>
+          </div>
+        </form>
+      )}
+    </Dialog>
+  );
+}
+
 function DeliveryGuestRow({
   isPublished,
   projectId,
@@ -236,10 +357,15 @@ function DeliveryGuestRow({
           className="flex flex-wrap gap-2"
           aria-label={`Kesiapan pengiriman untuk ${row.displayName}`}
         >
+          <StatusPill tone={isActiveLink ? 'default' : 'soft'}>
+            {isActiveLink ? 'Siap dibagikan' : 'Belum siap dibagikan'}
+          </StatusPill>
+          {!isActiveLink && row.personalLinkState !== 'not_created' ? (
+            <StatusPill tone="soft">{personalLinkStateLabels[row.personalLinkState]}</StatusPill>
+          ) : null}
           <StatusPill tone={hasWhatsApp ? 'default' : 'soft'}>
             {hasWhatsApp ? 'WhatsApp tersedia' : 'Nomor WhatsApp belum tersedia'}
           </StatusPill>
-          <StatusPill>{personalLinkStateLabels[row.personalLinkState]}</StatusPill>
         </div>
         {hasWhatsApp && row.maskedWhatsAppNumber ? (
           <p className="text-seraya-text-muted text-sm leading-6">
@@ -248,7 +374,8 @@ function DeliveryGuestRow({
         ) : null}
         {isActiveLink ? (
           <p className="text-seraya-text-muted text-sm leading-6">
-            Tautan aktif tetap berlaku, tetapi URL mentahnya hanya ditampilkan saat tautan dibuat.
+            Undangan Pribadi sudah siap. URL mentah hanya ditampilkan saat tautan dibuat atau
+            diperbarui.
           </p>
         ) : null}
       </div>
@@ -334,16 +461,30 @@ function DeliveryGuestRow({
   );
 }
 
+function matchesReadinessFilter(row: DeliveryGuestRowClient, filter: DeliveryReadinessFilter) {
+  switch (filter) {
+    case 'ready':
+      return row.personalLinkState === 'active';
+    case 'not_ready':
+      return row.personalLinkState !== 'active';
+    case 'missing_whatsapp':
+      return row.whatsappAvailability === 'missing';
+    default:
+      return true;
+  }
+}
+
 /** Private, local-only operational workspace. It has no delivery tracking or send history. */
 export function GuestDeliveryCenter({
   isPublished,
+  prepareBatchAction,
   projectId,
   rows,
   summary,
 }: GuestDeliveryCenterProps) {
   const [query, setQuery] = useState('');
-  const [whatsAppFilter, setWhatsAppFilter] = useState<'all' | DeliveryWhatsAppAvailability>('all');
-  const [linkStateFilter, setLinkStateFilter] = useState<'all' | DeliveryPersonalLinkState>('all');
+  const [readinessFilter, setReadinessFilter] = useState<DeliveryReadinessFilter>('all');
+  const [batchOpen, setBatchOpen] = useState(false);
 
   const filteredRows = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase('id-ID');
@@ -353,14 +494,10 @@ export function GuestDeliveryCenter({
         normalizedQuery.length === 0 ||
         row.displayName.toLocaleLowerCase('id-ID').includes(normalizedQuery) ||
         row.groupLabel?.toLocaleLowerCase('id-ID').includes(normalizedQuery);
-      const matchesWhatsApp =
-        whatsAppFilter === 'all' || row.whatsappAvailability === whatsAppFilter;
-      const matchesLinkState =
-        linkStateFilter === 'all' || row.personalLinkState === linkStateFilter;
 
-      return matchesQuery && matchesWhatsApp && matchesLinkState;
+      return matchesQuery && matchesReadinessFilter(row, readinessFilter);
     });
-  }, [linkStateFilter, query, rows, whatsAppFilter]);
+  }, [query, readinessFilter, rows]);
 
   return (
     <section
@@ -375,15 +512,14 @@ export function GuestDeliveryCenter({
           ← Kembali ke project
         </Link>
         <h1 className="seraya-display-md mt-5" id="delivery-center-title">
-          Pusat Pengiriman
+          Delivery Center
         </h1>
         <p className="text-seraya-text-secondary mt-3 max-w-2xl text-base leading-7">
-          Undangan Pribadi menyertakan sapaan, RSVP, dan ucapan tamu. Buat atau perbarui link untuk
-          tamu sebelum membagikannya.
+          Undangan Pribadi menyertakan sapaan, RSVP, dan ucapan tamu. Siapkan link sebelum
+          membagikannya secara manual.
         </p>
         <p className="text-seraya-text-muted mt-4 text-sm leading-6">
-          Status di sini menunjukkan kesiapan tautan dan WhatsApp, bukan status pesan terkirim atau
-          dibaca.
+          Status di sini menunjukkan kesiapan Undangan Pribadi dan Nomor WhatsApp.
         </p>
       </header>
 
@@ -398,8 +534,8 @@ export function GuestDeliveryCenter({
                 Bagikan tersedia setelah undangan diterbitkan
               </h2>
               <p className="text-seraya-text-secondary mt-1 text-sm leading-6">
-                Terbitkan versi undangan yang sudah kalian setujui sebelum menyiapkan undangan
-                pribadi.
+                Terbitkan versi undangan yang sudah kalian setujui sebelum menyiapkan Undangan
+                Pribadi.
               </p>
             </div>
             <Link
@@ -417,13 +553,35 @@ export function GuestDeliveryCenter({
         className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
       >
         <ReadinessMetric label="Tamu aktif" value={summary.activeGuestCount} />
-        <ReadinessMetric label="Nomor WhatsApp tersedia" value={summary.whatsappAvailableCount} />
-        <ReadinessMetric label="Tautan aktif" value={summary.activePersonalLinkCount} />
+        <ReadinessMetric label="Siap dibagikan" value={summary.activePersonalLinkCount} />
         <ReadinessMetric
-          label="Nomor WhatsApp belum tersedia"
-          value={summary.whatsappMissingCount}
+          label="Belum punya Undangan Pribadi aktif"
+          value={summary.guestsWithoutActivePersonalLinkCount}
         />
+        <ReadinessMetric label="Belum punya Nomor WhatsApp" value={summary.whatsappMissingCount} />
       </section>
+
+      {isPublished && summary.guestsWithoutActivePersonalLinkCount > 0 ? (
+        <Card aria-labelledby="delivery-batch-title" tone="soft">
+          <CardContent className="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <h2
+                className="text-seraya-text-primary text-base font-semibold"
+                id="delivery-batch-title"
+              >
+                Siapkan Undangan Pribadi sekaligus
+              </h2>
+              <p className="text-seraya-text-secondary mt-1 max-w-2xl text-sm leading-6">
+                Siapkan untuk {summary.guestsWithoutActivePersonalLinkCount} tamu yang belum punya
+                link aktif. Tamu dengan link aktif tidak akan diubah.
+              </p>
+            </div>
+            <Button onClick={() => setBatchOpen(true)} type="button">
+              {`Siapkan ${summary.guestsWithoutActivePersonalLinkCount} Undangan Pribadi`}
+            </Button>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card aria-labelledby="delivery-guests-title">
         <CardHeader>
@@ -434,12 +592,12 @@ export function GuestDeliveryCenter({
             Kesiapan tamu
           </CardTitle>
           <CardDescription>
-            Cari tamu, lihat kesiapan WhatsApp, lalu siapkan tautan baru saat kalian siap
-            membagikan.
+            Pilih filter untuk melihat tamu yang siap dibagikan, masih perlu disiapkan, atau belum
+            memiliki Nomor WhatsApp.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5 pt-5 sm:pt-6">
-          <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_12rem_12rem]">
+          <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_15rem]">
             <div className="space-y-2">
               <label
                 className="text-seraya-text-primary text-sm font-semibold"
@@ -458,43 +616,22 @@ export function GuestDeliveryCenter({
             <div className="space-y-2">
               <label
                 className="text-seraya-text-primary text-sm font-semibold"
-                htmlFor="delivery-whatsapp-filter"
+                htmlFor="delivery-readiness-filter"
               >
-                WhatsApp
+                Filter kesiapan
               </label>
               <select
                 className="border-seraya-border-default bg-seraya-surface text-seraya-text-primary focus-visible:outline-seraya-focus-ring min-h-11 w-full rounded-[var(--seraya-radius-md)] border px-3.5 text-base focus-visible:outline-3 focus-visible:outline-offset-2"
-                id="delivery-whatsapp-filter"
+                id="delivery-readiness-filter"
                 onChange={(event) =>
-                  setWhatsAppFilter(event.target.value as 'all' | DeliveryWhatsAppAvailability)
+                  setReadinessFilter(event.target.value as DeliveryReadinessFilter)
                 }
-                value={whatsAppFilter}
+                value={readinessFilter}
               >
                 <option value="all">Semua</option>
-                <option value="available">Tersedia</option>
-                <option value="missing">Belum tersedia</option>
-              </select>
-            </div>
-            <div className="space-y-2">
-              <label
-                className="text-seraya-text-primary text-sm font-semibold"
-                htmlFor="delivery-link-filter"
-              >
-                Tautan pribadi
-              </label>
-              <select
-                className="border-seraya-border-default bg-seraya-surface text-seraya-text-primary focus-visible:outline-seraya-focus-ring min-h-11 w-full rounded-[var(--seraya-radius-md)] border px-3.5 text-base focus-visible:outline-3 focus-visible:outline-offset-2"
-                id="delivery-link-filter"
-                onChange={(event) =>
-                  setLinkStateFilter(event.target.value as 'all' | DeliveryPersonalLinkState)
-                }
-                value={linkStateFilter}
-              >
-                <option value="all">Semua</option>
-                <option value="not_created">Belum dibuat</option>
-                <option value="active">Aktif</option>
-                <option value="revoked">Dinonaktifkan</option>
-                <option value="expired">Kedaluwarsa</option>
+                <option value="not_ready">Belum siap dibagikan</option>
+                <option value="ready">Siap dibagikan</option>
+                <option value="missing_whatsapp">Belum punya Nomor WhatsApp</option>
               </select>
             </div>
           </div>
@@ -535,6 +672,15 @@ export function GuestDeliveryCenter({
           )}
         </CardContent>
       </Card>
+
+      {batchOpen ? (
+        <DeliveryBatchPreparationDialog
+          guestCount={summary.guestsWithoutActivePersonalLinkCount}
+          onOpenChange={setBatchOpen}
+          open={batchOpen}
+          prepareBatchAction={prepareBatchAction}
+        />
+      ) : null}
     </section>
   );
 }
