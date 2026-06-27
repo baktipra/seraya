@@ -42,7 +42,8 @@ export type WeddingReadinessV1 = {
     whatsappUnavailableCount: number;
   };
   primaryAction: {
-    href: string;
+    /** A route is present only when the primary action is a navigation. */
+    href?: string;
     key: WeddingReadinessPrimaryActionKey;
   };
   responses: {

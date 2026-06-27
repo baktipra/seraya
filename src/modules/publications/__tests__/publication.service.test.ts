@@ -135,4 +135,18 @@ describe('publication service payment gate', () => {
     });
     expect(publishSnapshotMock).toHaveBeenCalledWith(project.id);
   });
+
+  it('uses the same verified manual authority to replace an existing published snapshot', async () => {
+    getPaymentOverviewMock.mockResolvedValue({
+      publishEligibility: { allowed: true, reason: 'verified_payment' },
+    });
+    getCurrentPublishedMock.mockResolvedValue(snapshot());
+
+    await expect(publishInvitationForCurrentUser(project.id)).resolves.toMatchObject({
+      previousGalleryImageIds: [],
+      snapshot: { revision: 1, slug: project.slug },
+    });
+
+    expect(publishSnapshotMock).toHaveBeenCalledWith(project.id);
+  });
 });

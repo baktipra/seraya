@@ -11,6 +11,18 @@ import { initialPublishInvitationActionState } from '@/modules/publications/publ
 import { publishInvitationAction } from '@/modules/publications/publication.actions';
 
 type PublishInvitationControlsProps = {
+  /**
+   * The default surface retains the original publication panel. The readiness
+   * surface intentionally renders only the one explicit manual publish control
+   * so project home does not become a second billing or link-management page.
+   */
+  presentation?: 'default' | 'readiness';
+  /**
+   * Readiness knows whether the owner is creating the first snapshot or
+   * replacing an existing immutable snapshot without needing snapshot payload
+   * data in its DTO.
+   */
+  intent?: 'initial' | 'republish';
   hasActiveDraft: boolean;
   projectId: string;
   publishedSlug: string | null;
@@ -23,14 +35,14 @@ function getPublicInvitationUrl(slug: string) {
 
 function getBlockedPublishCopy(
   hasActiveDraft: boolean,
-  isPublished: boolean,
+  isRepublish: boolean,
   publishEligibility: ProjectPublishEligibility,
 ) {
   if (!hasActiveDraft) {
     return 'Draft undangan perlu tersedia sebelum bisa dipublikasikan.';
   }
 
-  if (isPublished) {
+  if (isRepublish) {
     return 'Pembayaran terverifikasi diperlukan untuk menerbitkan perubahan baru.';
   }
 
@@ -47,6 +59,8 @@ function getBlockedPublishCopy(
 
 export function PublishInvitationControls({
   hasActiveDraft,
+  intent,
+  presentation = 'default',
   projectId,
   publishedSlug,
   publishEligibility,
@@ -62,12 +76,29 @@ export function PublishInvitationControls({
   );
   const effectivePublishedSlug = publishedSlug ?? state.publishedSlug ?? null;
   const publicUrl = effectivePublishedSlug ? getPublicInvitationUrl(effectivePublishedSlug) : null;
-  const isPublished = Boolean(publicUrl);
+  const hasPublishedSnapshot = Boolean(publicUrl);
+  const isRepublish = intent ? intent === 'republish' : hasPublishedSnapshot;
   const canPublish = hasActiveDraft && publishEligibility.allowed;
-  const publishActionLabel = isPublished ? 'Terbitkan perubahan' : 'Publikasikan undangan';
+  const publishActionLabel =
+    presentation === 'readiness'
+      ? isRepublish
+        ? 'Terbitkan perubahan'
+        : 'Terbitkan undangan'
+      : isRepublish
+        ? 'Terbitkan perubahan'
+        : 'Publikasikan undangan';
+  const dialogTitle = isRepublish
+    ? 'Terbitkan perubahan?'
+    : presentation === 'readiness'
+      ? 'Terbitkan undangan?'
+      : 'Publikasikan undangan?';
+  const dialogDescription = isRepublish
+    ? 'Perubahan tersimpan akan menggantikan versi undangan yang saat ini dilihat tamu. Tamu hanya melihat perubahan ini setelah kalian menerbitkannya.'
+    : 'Link undangan kalian akan bisa dibuka oleh siapa saja yang memilikinya. Perubahan berikutnya tidak akan mengubah undangan publik sampai kalian menerbitkannya lagi.';
+  const confirmationLabel = isRepublish ? 'Terbitkan perubahan' : 'Terbitkan sekarang';
   const blockedCopy = canPublish
     ? null
-    : getBlockedPublishCopy(hasActiveDraft, isPublished, publishEligibility);
+    : getBlockedPublishCopy(hasActiveDraft, isRepublish, publishEligibility);
 
   useEffect(() => {
     if (state.status !== 'success' || !state.publishedSlug) {
@@ -81,11 +112,11 @@ export function PublishInvitationControls({
     lastPublishedSlugRef.current = state.publishedSlug;
     setIsDialogOpen(false);
     toast({
-      title: 'Undangan sudah dipublikasikan.',
+      title: isRepublish ? 'Perubahan undangan sudah diterbitkan.' : 'Undangan sudah diterbitkan.',
       variant: 'success',
     });
     router.refresh();
-  }, [router, state.publishedSlug, state.status, toast]);
+  }, [isRepublish, router, state.publishedSlug, state.status, toast]);
 
   async function handleCopyLink() {
     if (!publicUrl) {
@@ -109,50 +140,44 @@ export function PublishInvitationControls({
   }
 
   return (
-    <section aria-labelledby="publish-invitation-title" className="space-y-4">
-      {publicUrl && effectivePublishedSlug ? (
-        <div className="space-y-3">
+    <section aria-label="Kontrol penerbitan undangan" className="space-y-4">
+      {presentation === 'default' ? (
+        publicUrl && effectivePublishedSlug ? (
+          <div className="space-y-3">
+            <div>
+              <h2 className="text-seraya-text-primary text-base font-semibold">
+                Undangan sudah dipublikasikan.
+              </h2>
+              <p className="text-seraya-text-muted mt-1 text-sm leading-6">
+                Link undangan kalian sudah bisa dibuka oleh siapa saja yang memilikinya.
+              </p>
+            </div>
+            <p className="border-seraya-border-default bg-seraya-canvas text-seraya-text-primary rounded-[var(--seraya-radius-md)] border px-3 py-2 text-sm font-semibold break-all">
+              {publicUrl}
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={handleCopyLink} size="lg" type="button" variant="secondary">
+                Salin link
+              </Button>
+              <Link
+                className="bg-seraya-action-primary text-seraya-text-inverse hover:bg-seraya-action-primary-hover focus-visible:outline-seraya-focus-ring inline-flex min-h-12 items-center justify-center rounded-[var(--seraya-radius-md)] px-5 text-base font-semibold shadow-[0_8px_18px_rgb(142_75_82_/_0.16)] transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
+                href={`/${effectivePublishedSlug}`}
+                rel="noreferrer"
+                target="_blank"
+              >
+                Buka undangan
+              </Link>
+            </div>
+          </div>
+        ) : (
           <div>
-            <h2
-              className="text-seraya-text-primary text-base font-semibold"
-              id="publish-invitation-title"
-            >
-              Undangan sudah dipublikasikan.
-            </h2>
+            <h2 className="text-seraya-text-primary text-base font-semibold">Publikasi undangan</h2>
             <p className="text-seraya-text-muted mt-1 text-sm leading-6">
-              Link undangan kalian sudah bisa dibuka oleh siapa saja yang memilikinya.
+              Undangan akan tetap bisa ditinjau pribadi sampai kalian menerbitkannya.
             </p>
           </div>
-          <p className="border-seraya-border-default bg-seraya-canvas text-seraya-text-primary rounded-[var(--seraya-radius-md)] border px-3 py-2 text-sm font-semibold break-all">
-            {publicUrl}
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Button onClick={handleCopyLink} size="lg" type="button" variant="secondary">
-              Salin link
-            </Button>
-            <Link
-              className="bg-seraya-action-primary text-seraya-text-inverse hover:bg-seraya-action-primary-hover focus-visible:outline-seraya-focus-ring inline-flex min-h-12 items-center justify-center rounded-[var(--seraya-radius-md)] px-5 text-base font-semibold shadow-[0_8px_18px_rgb(142_75_82_/_0.16)] transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
-              href={`/${effectivePublishedSlug}`}
-              rel="noreferrer"
-              target="_blank"
-            >
-              Buka undangan
-            </Link>
-          </div>
-        </div>
-      ) : (
-        <div>
-          <h2
-            className="text-seraya-text-primary text-base font-semibold"
-            id="publish-invitation-title"
-          >
-            Publikasi undangan
-          </h2>
-          <p className="text-seraya-text-muted mt-1 text-sm leading-6">
-            Undangan akan tetap bisa ditinjau pribadi sampai kalian menerbitkannya.
-          </p>
-        </div>
-      )}
+        )
+      ) : null}
 
       {!canPublish ? (
         <div className="space-y-3">
@@ -175,10 +200,10 @@ export function PublishInvitationControls({
             {publishActionLabel}
           </Button>
           <Dialog
-            description="Link undangan kalian akan bisa dibuka oleh siapa saja yang memilikinya. Perubahan berikutnya tidak akan mengubah undangan publik sampai kalian menerbitkannya lagi."
+            description={dialogDescription}
             onOpenChange={setIsDialogOpen}
             open={isDialogOpen}
-            title="Publikasikan undangan?"
+            title={dialogTitle}
           >
             <form action={formAction} className="space-y-4">
               {state.status === 'error' && state.message ? (
@@ -196,7 +221,7 @@ export function PublishInvitationControls({
                   Batal
                 </Button>
                 <Button loading={isPending} type="submit">
-                  Publikasikan sekarang
+                  {confirmationLabel}
                 </Button>
               </div>
             </form>

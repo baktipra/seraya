@@ -18,7 +18,10 @@ vi.mock('../publication.service', () => ({
 }));
 
 import { publishInvitationAction } from '../publication.actions';
-import { PublicationPaymentRequiredError } from '../publication.repository';
+import {
+  PublicationAccessDeniedError,
+  PublicationPaymentRequiredError,
+} from '../publication.repository';
 import { initialPublishInvitationActionState } from '../publication.action-state';
 
 const projectId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
@@ -101,5 +104,30 @@ describe('publish invitation action', () => {
       message: 'Pembayaran terverifikasi diperlukan sebelum undangan dapat dipublikasikan.',
       status: 'error',
     });
+  });
+
+  it('keeps a foreign-owner publish attempt on the existing safe publication denial path', async () => {
+    publishMock.mockRejectedValue(new PublicationAccessDeniedError());
+
+    await expect(
+      publishInvitationAction(projectId, initialPublishInvitationActionState, new FormData()),
+    ).resolves.toEqual({
+      message: 'Undangan ini tidak dapat dipublikasikan dari akun kamu.',
+      status: 'error',
+    });
+  });
+
+  it('uses the same action to refresh the owner overview after a replacement snapshot', async () => {
+    publishMock.mockResolvedValue({
+      previousGalleryImageIds: [firstAssetId],
+      snapshot: createPublishedSnapshot([secondAssetId]),
+    });
+
+    await expect(
+      publishInvitationAction(projectId, initialPublishInvitationActionState, new FormData()),
+    ).resolves.toEqual({ publishedSlug: 'raka-nadia', status: 'success' });
+
+    expect(publishMock).toHaveBeenCalledWith(projectId);
+    expect(revalidatePathMock).toHaveBeenCalledWith(`/dashboard/${projectId}`);
   });
 });

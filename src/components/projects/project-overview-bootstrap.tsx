@@ -2,7 +2,10 @@ import type { Route } from 'next';
 import Link from 'next/link';
 
 import { Badge, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/design-system';
+import { type ProjectPublishEligibility } from '@/modules/payments/payment.types';
 import type { WeddingReadinessV1 } from '@/modules/readiness';
+
+import { PublishInvitationControls } from './publish-invitation-controls';
 
 type ProjectOverviewBootstrapProps = {
   projectId: string;
@@ -11,7 +14,8 @@ type ProjectOverviewBootstrapProps = {
 
 type ActionCopy = {
   description: string;
-  label: string;
+  label?: string;
+  publishIntent?: 'initial' | 'republish';
   secondary?: { href: Route; label: string };
   title: string;
 };
@@ -65,7 +69,7 @@ function getActionCopy(readiness: WeddingReadinessV1, projectId: string): Action
     case 'publish_invitation':
       return {
         description: 'Versi yang diterbitkan akan menjadi versi yang tamu lihat dan bagikan.',
-        label: 'Terbitkan undangan',
+        publishIntent: 'initial',
         secondary: {
           href: `/dashboard/${projectId}/preview` as Route,
           label: 'Lihat preview',
@@ -76,10 +80,10 @@ function getActionCopy(readiness: WeddingReadinessV1, projectId: string): Action
       return {
         description:
           'Tamu masih melihat versi undangan sebelumnya sampai kalian menerbitkan ulang.',
-        label: 'Tinjau perubahan',
+        publishIntent: 'republish',
         secondary: {
-          href: `/dashboard/${projectId}/billing` as Route,
-          label: 'Terbitkan perubahan',
+          href: `/dashboard/${projectId}/preview` as Route,
+          label: 'Tinjau preview',
         },
         title: 'Ada perubahan yang belum diterbitkan',
       };
@@ -135,14 +139,14 @@ function getInvitationChapter(readiness: WeddingReadinessV1, projectId: string):
       };
     case 'ready_to_publish':
       return {
-        action: { href: `${base}/billing` as Route, label: 'Terbitkan undangan' },
+        action: { href: `${base}/preview` as Route, label: 'Lihat preview' },
         facts: [{ label: 'Arah undangan', value: template }],
         status: 'Aktivasi terverifikasi. Versi terbit siap dibuat.',
         title: 'Undangan',
       };
     case 'published_with_unpublished_changes':
       return {
-        action: { href: `${base}/preview` as Route, label: 'Tinjau perubahan' },
+        action: { href: `${base}/preview` as Route, label: 'Tinjau preview' },
         facts: [{ label: 'Arah undangan', value: template }],
         status: 'Ada perubahan tersimpan yang belum dilihat tamu.',
         title: 'Undangan',
@@ -211,6 +215,12 @@ function getResponseChapter(readiness: WeddingReadinessV1, projectId: string): C
         : 'Status RSVP dan ucapan akan muncul saat mulai diterima.',
     title: 'Respons',
   };
+}
+
+function getReadinessPublishEligibility(readiness: WeddingReadinessV1): ProjectPublishEligibility {
+  return readiness.invitation.hasVerifiedActivation
+    ? { allowed: true, reason: 'verified_payment' }
+    : { allowed: false, reason: 'payment_not_verified' };
 }
 
 function ReadinessChapter({ chapter }: { chapter: Chapter }) {
@@ -286,13 +296,24 @@ export function ProjectOverviewBootstrap({ projectId, readiness }: ProjectOvervi
           <p className="text-seraya-text-secondary mt-3 max-w-2xl text-base leading-7">
             {action.description}
           </p>
-          <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Link
-              className="bg-seraya-action-primary text-seraya-text-inverse hover:bg-seraya-action-primary-hover focus-visible:outline-seraya-focus-ring inline-flex min-h-12 items-center justify-center rounded-[var(--seraya-radius-md)] px-5 text-base font-semibold shadow-[0_8px_18px_rgb(142_75_82_/_0.16)] transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
-              href={readiness.primaryAction.href as Route}
-            >
-              {action.label}
-            </Link>
+          <div className="mt-5 flex flex-col gap-3 sm:items-start">
+            {action.publishIntent ? (
+              <PublishInvitationControls
+                hasActiveDraft
+                intent={action.publishIntent}
+                presentation="readiness"
+                projectId={projectId}
+                publishedSlug={null}
+                publishEligibility={getReadinessPublishEligibility(readiness)}
+              />
+            ) : action.label && readiness.primaryAction.href ? (
+              <Link
+                className="bg-seraya-action-primary text-seraya-text-inverse hover:bg-seraya-action-primary-hover focus-visible:outline-seraya-focus-ring inline-flex min-h-12 items-center justify-center rounded-[var(--seraya-radius-md)] px-5 text-base font-semibold shadow-[0_8px_18px_rgb(142_75_82_/_0.16)] transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
+                href={readiness.primaryAction.href as Route}
+              >
+                {action.label}
+              </Link>
+            ) : null}
             {action.secondary ? (
               <Link
                 className="text-seraya-action-primary focus-visible:outline-seraya-focus-ring inline-flex min-h-11 items-center rounded-[var(--seraya-radius-sm)] px-1 text-sm font-semibold underline-offset-4 hover:underline focus-visible:outline-3 focus-visible:outline-offset-3"

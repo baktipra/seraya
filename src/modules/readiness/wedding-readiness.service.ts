@@ -116,10 +116,8 @@ function getPrimaryAction(input: {
   projectId: string;
   totals: WeddingReadinessAggregateCounts;
 }): WeddingReadinessV1['primaryAction'] {
-  const action = (key: WeddingReadinessPrimaryActionKey, path: string) => ({
-    href: `/dashboard/${input.projectId}${path}`,
-    key,
-  });
+  const action = (key: WeddingReadinessPrimaryActionKey, path?: string) =>
+    path ? { href: `/dashboard/${input.projectId}${path}`, key } : { key };
 
   if (input.invitationState === 'draft_incomplete') {
     return action('complete_invitation', '/invitation');
@@ -130,11 +128,16 @@ function getPrimaryAction(input: {
   }
 
   if (input.invitationState === 'ready_to_publish') {
-    return action('publish_invitation', '/billing');
+    // Publication is a deliberate server action in the readiness card, not a
+    // billing redirect. Payment eligibility remains enforced by the existing
+    // server action and M0011 authority.
+    return action('publish_invitation');
   }
 
   if (input.invitationState === 'published_with_unpublished_changes') {
-    return action('review_changes', '/preview');
+    // Republish uses that same deliberate manual publish action. Preview is a
+    // quiet secondary action rendered by the readiness surface.
+    return action('review_changes');
   }
 
   if (input.totals.activeGuestCount === 0) {

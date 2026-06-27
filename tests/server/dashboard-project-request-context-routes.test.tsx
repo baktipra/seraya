@@ -149,6 +149,8 @@ describe('SRY-031 project routes request-local verified context', () => {
     expect(getHistoryMock).toHaveBeenCalledWith(project);
     expect(getPaymentOverviewMock).toHaveBeenCalledWith(project);
     expect(html).toContain('Tagihan undangan');
+    expect(html).not.toContain('Terbitkan undangan');
+    expect(html).not.toContain('Terbitkan perubahan');
   });
 
   it('keeps foreign project handling generic before overview composition', async () => {

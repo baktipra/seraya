@@ -130,7 +130,6 @@ describe('SRY-031 wedding readiness composition', () => {
 
     expect(readiness.invitation.state).toBe('ready_to_publish');
     expect(readiness.primaryAction).toEqual({
-      href: `/dashboard/${project.id}/billing`,
       key: 'publish_invitation',
     });
   });
@@ -169,7 +168,7 @@ describe('SRY-031 wedding readiness composition', () => {
     const readiness = await getWeddingReadinessForVerifiedProject(project);
 
     expect(readiness.invitation.state).toBe('published_with_unpublished_changes');
-    expect(readiness.primaryAction.key).toBe('review_changes');
+    expect(readiness.primaryAction).toEqual({ key: 'review_changes' });
     expect(
       hasDeterministicSavedDraftChanges({
         draft,
