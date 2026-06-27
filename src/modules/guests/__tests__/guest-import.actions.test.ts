@@ -1,18 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { importGuestCsvMock, revalidatePathMock } = vi.hoisted(() => ({
+const { importGuestCsvMock, importGuestXlsxMock, revalidatePathMock } = vi.hoisted(() => ({
   importGuestCsvMock: vi.fn(),
+  importGuestXlsxMock: vi.fn(),
   revalidatePathMock: vi.fn(),
 }));
 
 vi.mock('next/cache', () => ({ revalidatePath: revalidatePathMock }));
 vi.mock('../guest.service', () => ({
   importGuestCsvForCurrentUser: importGuestCsvMock,
+  importGuestXlsxForCurrentUser: importGuestXlsxMock,
   isGuestRepositoryFailure: () => false,
 }));
 
 import { initialGuestImportActionState } from '../guest-import.action-state';
-import { importGuestsCsvAction } from '../guest-import.actions';
+import { importGuestsCsvAction, importGuestsXlsxAction } from '../guest-import.actions';
 
 const projectId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 
@@ -28,9 +30,22 @@ function validImportFormData() {
   return formData;
 }
 
+function validXlsxImportFormData() {
+  const formData = new FormData();
+  formData.set('projectId', projectId);
+  formData.set(
+    'file',
+    new File(['PK\x03\x04fixture'], 'guests.xlsx', {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    }),
+  );
+  return formData;
+}
+
 describe('SRY-014 guest CSV import server action', () => {
   beforeEach(() => {
     importGuestCsvMock.mockReset();
+    importGuestXlsxMock.mockReset();
     revalidatePathMock.mockReset();
   });
 
@@ -57,5 +72,26 @@ describe('SRY-014 guest CSV import server action', () => {
     expect(revalidatePathMock).toHaveBeenCalledWith(`/dashboard/${projectId}`);
     expect(revalidatePathMock).toHaveBeenCalledWith(`/dashboard/${projectId}/guests`);
     expect(revalidatePathMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('delegates XLSX bytes to the owner-scoped service, refreshes Delivery Center, and returns the manual preparation next step', async () => {
+    importGuestXlsxMock.mockResolvedValue(3);
+
+    await expect(
+      importGuestsXlsxAction(initialGuestImportActionState, validXlsxImportFormData()),
+    ).resolves.toEqual({
+      message:
+        '3 tamu berhasil ditambahkan. Buat Undangan Pribadi di Delivery Center sebelum membagikannya untuk RSVP dan ucapan.',
+      status: 'success',
+    });
+
+    expect(importGuestXlsxMock).toHaveBeenCalledWith({
+      file: expect.any(File),
+      projectId,
+    });
+    expect(revalidatePathMock).toHaveBeenCalledWith(`/dashboard/${projectId}`);
+    expect(revalidatePathMock).toHaveBeenCalledWith(`/dashboard/${projectId}/guests`);
+    expect(revalidatePathMock).toHaveBeenCalledWith(`/dashboard/${projectId}/delivery`);
+    expect(revalidatePathMock).toHaveBeenCalledTimes(3);
   });
 });

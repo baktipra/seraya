@@ -1,4 +1,5 @@
 export * from './guest-csv';
+export * from './guest-xlsx';
 export * from './guest-import.action-state';
 export * from './guest-import.actions';
 export { createGuestAction, removeGuestAction, updateGuestAction } from './guest.actions';
@@ -17,6 +18,8 @@ export {
 export {
   createGuestForCurrentUser,
   getGuestManagerForCurrentUser,
+  getGuestImportXlsxTemplateForCurrentUser,
+  importGuestXlsxForCurrentUser,
   softRemoveGuestForCurrentUser,
   updateGuestForCurrentUser,
 } from './guest.service';

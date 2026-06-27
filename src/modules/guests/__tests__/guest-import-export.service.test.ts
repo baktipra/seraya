@@ -2,13 +2,19 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 
-const { createGuestsMock, getOwnedProjectMock, listGuestsMock, requireCurrentUserMock } =
-  vi.hoisted(() => ({
-    createGuestsMock: vi.fn(),
-    getOwnedProjectMock: vi.fn(),
-    listGuestsMock: vi.fn(),
-    requireCurrentUserMock: vi.fn(),
-  }));
+const {
+  createGuestsMock,
+  getOwnedProjectMock,
+  listGuestsMock,
+  parseXlsxMock,
+  requireCurrentUserMock,
+} = vi.hoisted(() => ({
+  createGuestsMock: vi.fn(),
+  getOwnedProjectMock: vi.fn(),
+  listGuestsMock: vi.fn(),
+  parseXlsxMock: vi.fn(),
+  requireCurrentUserMock: vi.fn(),
+}));
 
 vi.mock('@/modules/auth/current-user', () => ({ requireCurrentUser: requireCurrentUserMock }));
 vi.mock('@/modules/projects/project.repository', () => ({
@@ -27,7 +33,16 @@ vi.mock('@/modules/guest-links/guest-link.repository', () => ({
   listGuestLinkStatesForVerifiedGuestIds: vi.fn(),
 }));
 
-import { getGuestDirectoryCsvForCurrentUser, importGuestCsvForCurrentUser } from '../guest.service';
+vi.mock('../guest-xlsx', () => ({
+  createGuestImportXlsxTemplate: vi.fn(),
+  parseGuestImportXlsxFile: parseXlsxMock,
+}));
+
+import {
+  getGuestDirectoryCsvForCurrentUser,
+  importGuestCsvForCurrentUser,
+  importGuestXlsxForCurrentUser,
+} from '../guest.service';
 
 const project = {
   account_id: '11111111-1111-1111-1111-111111111111',
@@ -51,6 +66,7 @@ describe('SRY-014 guest import/export owner service', () => {
     createGuestsMock.mockReset();
     getOwnedProjectMock.mockReset();
     listGuestsMock.mockReset();
+    parseXlsxMock.mockReset();
     requireCurrentUserMock.mockReset();
 
     requireCurrentUserMock.mockResolvedValue({ id: project.account_id });
@@ -132,5 +148,54 @@ describe('SRY-014 guest import/export owner service', () => {
     );
 
     expect(listGuestsMock).toHaveBeenCalledWith(project);
+  });
+
+  it('re-checks ownership, parses all XLSX rows first, and inserts one normalized add-only batch with WhatsApp values', async () => {
+    parseXlsxMock.mockResolvedValue([
+      {
+        displayName: 'Rani',
+        groupLabel: 'Teman',
+        partySize: 2,
+        whatsappPhoneE164: '+6281234567890',
+      },
+      { displayName: 'Budi', groupLabel: null, partySize: 1, whatsappPhoneE164: null },
+    ]);
+    createGuestsMock.mockResolvedValue(undefined);
+
+    await expect(
+      importGuestXlsxForCurrentUser({
+        file: new File(['fixture'], 'tamu.xlsx'),
+        projectId: project.id,
+      }),
+    ).resolves.toBe(2);
+
+    expect(requireCurrentUserMock).toHaveBeenCalledTimes(1);
+    expect(getOwnedProjectMock).toHaveBeenCalledWith(project.id, project.account_id);
+    expect(parseXlsxMock).toHaveBeenCalledTimes(1);
+    expect(createGuestsMock).toHaveBeenCalledWith({
+      guests: [
+        {
+          displayName: 'Rani',
+          groupLabel: 'Teman',
+          partySize: 2,
+          whatsappPhoneE164: '+6281234567890',
+        },
+        { displayName: 'Budi', groupLabel: null, partySize: 1, whatsappPhoneE164: null },
+      ],
+      project,
+    });
+  });
+
+  it('does not write XLSX guests when complete-file validation fails before the batch insert', async () => {
+    parseXlsxMock.mockRejectedValue(new Error('invalid workbook'));
+
+    await expect(
+      importGuestXlsxForCurrentUser({
+        file: new File(['fixture'], 'tamu.xlsx'),
+        projectId: project.id,
+      }),
+    ).rejects.toThrow('invalid workbook');
+
+    expect(createGuestsMock).not.toHaveBeenCalled();
   });
 });

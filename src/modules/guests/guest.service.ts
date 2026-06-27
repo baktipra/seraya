@@ -20,6 +20,7 @@ import {
   updateGuestForVerifiedProject,
 } from './guest.repository';
 import { parseGuestImportCsvFile, serializeGuestDirectoryCsv } from './guest-csv';
+import { createGuestImportXlsxTemplate, parseGuestImportXlsxFile } from './guest-xlsx';
 import type { CreateGuestInput, GuestListItem, UpdateGuestInput } from './guest.types';
 
 export class GuestUnavailableError extends Error {
@@ -102,6 +103,28 @@ export async function importGuestCsvForCurrentUser(input: {
 
   await createGuestsForVerifiedProject({ guests, project });
   return guests.length;
+}
+
+/** Parses the entire owner-uploaded XLSX before one controlled add-only batch insert. */
+export async function importGuestXlsxForCurrentUser(input: {
+  file: File;
+  projectId: string;
+}): Promise<number> {
+  const user = await requireCurrentUser();
+  const project = await getOwnedProjectById(input.projectId, user.id);
+  const guests = await parseGuestImportXlsxFile(input.file);
+
+  await createGuestsForVerifiedProject({ guests, project });
+  return guests.length;
+}
+
+/** Owner-only XLSX template generation; it persists no uploaded files or guest data. */
+export async function getGuestImportXlsxTemplateForCurrentUser(
+  projectId: string,
+): Promise<Uint8Array> {
+  const user = await requireCurrentUser();
+  await getOwnedProjectById(projectId, user.id);
+  return createGuestImportXlsxTemplate();
 }
 
 /** Owner-only active-directory CSV, kept separate from guest link and RSVP data. */
