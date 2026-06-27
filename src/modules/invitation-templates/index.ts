@@ -12,10 +12,14 @@ export { InvitationTemplateRenderer } from './invitation-template-renderer';
 export { getInvitationTemplate, invitationTemplateRegistry } from './invitation-template.registry';
 export {
   DEFAULT_PREVIEW_TEMPLATE_ID,
+  getPersonalInvitationPresentationSlots,
+  type InvitationRenderSurfaceV1,
   type InvitationTemplateComponent,
   type InvitationTemplateId,
   type InvitationTemplateProps,
   type InvitationTemplateRegistry,
+  type InvitationTemplateRenderContextV1,
+  type PersonalInvitationPresentationSlotsV1,
 } from './invitation-template.types';
 export { createInvitationViewModel, type InvitationViewModel } from './invitation-view-model';
 export { LarasTemplate } from './laras/laras-template';

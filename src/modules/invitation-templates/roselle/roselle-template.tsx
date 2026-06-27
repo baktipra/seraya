@@ -1,4 +1,7 @@
-import type { InvitationTemplateProps } from '../invitation-template.types';
+import {
+  getPersonalInvitationPresentationSlots,
+  type InvitationTemplateProps,
+} from '../invitation-template.types';
 
 import {
   RoselleClosing,
@@ -14,24 +17,31 @@ import {
 import styles from './roselle.module.css';
 
 /** Roselle presentation renderer. It accepts only an already mapped typed view model. */
-export function RoselleTemplate({ invitation }: InvitationTemplateProps) {
+export function RoselleTemplate({ invitation, renderContext }: InvitationTemplateProps) {
+  const personalSlots = getPersonalInvitationPresentationSlots(renderContext);
+
   return (
-    <article
-      aria-labelledby="roselle-invitation-title"
-      className={styles.invitation}
-      data-template="roselle"
-    >
-      <RoselleHero hero={invitation.hero} />
-      <div className={styles.content}>
-        <RoselleCouple couple={invitation.couple} />
-        <RoselleStory story={invitation.story} />
-        <RoselleEvents events={invitation.events} />
-        <RoselleLocation location={invitation.location} />
-        <RoselleGallery gallery={invitation.gallery} />
-        <RoselleRsvp rsvp={invitation.rsvp} />
-        <RoselleDigitalGift digitalGift={invitation.digitalGift} />
-        <RoselleClosing closing={invitation.closing} />
-      </div>
-    </article>
+    <>
+      {personalSlots?.greeting}
+      <article
+        aria-labelledby="roselle-invitation-title"
+        className={styles.invitation}
+        data-template="roselle"
+      >
+        <RoselleHero hero={invitation.hero} />
+        <div className={styles.content}>
+          <RoselleCouple couple={invitation.couple} />
+          <RoselleStory story={invitation.story} />
+          <RoselleEvents events={invitation.events} />
+          <RoselleLocation location={invitation.location} />
+          <RoselleGallery gallery={invitation.gallery} />
+          <RoselleRsvp rsvp={invitation.rsvp} />
+          <RoselleDigitalGift digitalGift={invitation.digitalGift} />
+          <RoselleClosing closing={invitation.closing} />
+        </div>
+      </article>
+      {personalSlots?.rsvp}
+      {personalSlots?.guestbook}
+    </>
   );
 }

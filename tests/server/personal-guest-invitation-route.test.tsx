@@ -407,6 +407,9 @@ describe('SRY-013 personal guest invitation route', () => {
     expect(routeSource).not.toContain('modules/readiness');
     expect(routeSource).not.toContain('invitation-draft.service');
     expect(routeSource).not.toContain('createServerSupabaseClient');
+    expect(routeSource).toContain('personalSlots={{');
+    expect(routeSource).toContain('surface="personal"');
+    expect(routeSource).not.toContain('</InvitationTemplateRenderer>');
   });
 
   it('uses token-free noindex metadata', () => {

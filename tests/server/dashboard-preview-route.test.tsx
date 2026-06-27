@@ -1,3 +1,7 @@
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import { renderToStaticMarkup } from 'react-dom/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -218,6 +222,22 @@ describe('SRY-021B private invitation preview route', () => {
 
     expect(getPrivateDraftMock).not.toHaveBeenCalled();
     expect(getPrivateGalleryMock).not.toHaveBeenCalled();
+  });
+
+  it('uses the preview render surface without constructing personal invitation slots', async () => {
+    const testDirectory = path.dirname(fileURLToPath(import.meta.url));
+    const routeSource = await readFile(
+      path.resolve(
+        testDirectory,
+        '../../src/app/(dashboard)/dashboard/[projectId]/preview/page.tsx',
+      ),
+      'utf8',
+    );
+
+    expect(routeSource).toContain('surface="preview"');
+    expect(routeSource).not.toContain('personalSlots');
+    expect(routeSource).not.toContain('personal-invitation');
+    expect(routeSource).not.toContain('guestToken');
   });
 
   it('does not render an active project when its draft is absent or soft-deleted', async () => {

@@ -41,7 +41,10 @@ function renderRoselle(
   galleryImages: Parameters<typeof createInvitationViewModel>[0]['galleryImages'] = [],
 ) {
   return renderToStaticMarkup(
-    <RoselleTemplate invitation={createInvitationViewModel({ draft, galleryImages, project })} />,
+    <RoselleTemplate
+      invitation={createInvitationViewModel({ draft, galleryImages, project })}
+      renderContext={{ surface: 'generic' }}
+    />,
   );
 }
 

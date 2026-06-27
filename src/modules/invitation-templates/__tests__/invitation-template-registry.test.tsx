@@ -106,6 +106,7 @@ describe('SRY-025 invitation template registry', () => {
       const html = renderToStaticMarkup(
         <InvitationTemplateRenderer
           invitation={createCompleteInvitation()}
+          surface="generic"
           templateKey={templateKey}
         />,
       );
@@ -139,6 +140,7 @@ describe('SRY-025 invitation template registry', () => {
       const html = renderToStaticMarkup(
         <InvitationTemplateRenderer
           invitation={createCompleteInvitation()}
+          surface="generic"
           templateKey={templateKey}
         />,
       );
@@ -162,6 +164,7 @@ describe('SRY-025 invitation template registry', () => {
       const html = renderToStaticMarkup(
         <InvitationTemplateRenderer
           invitation={createCompleteInvitation()}
+          surface="generic"
           templateKey={templateKey}
         />,
       );
@@ -198,7 +201,11 @@ describe('SRY-025 invitation template registry', () => {
         project: { event_date_primary: project.event_date_primary },
       });
       const html = renderToStaticMarkup(
-        <InvitationTemplateRenderer invitation={invitation} templateKey={templateKey} />,
+        <InvitationTemplateRenderer
+          invitation={invitation}
+          surface="generic"
+          templateKey={templateKey}
+        />,
       );
 
       expect(html).toContain(`data-template=\"${templateKey}\"`);
@@ -216,7 +223,11 @@ describe('SRY-025 invitation template registry', () => {
         project: { event_date_primary: project.event_date_primary },
       });
       const html = renderToStaticMarkup(
-        <InvitationTemplateRenderer invitation={invitation} templateKey={templateKey} />,
+        <InvitationTemplateRenderer
+          invitation={invitation}
+          surface="generic"
+          templateKey={templateKey}
+        />,
       );
 
       expect(html).not.toContain('src="/media/');

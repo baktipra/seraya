@@ -85,6 +85,7 @@ export default async function InvitationPreviewPage({ params }: InvitationPrevie
 
       <InvitationTemplateRenderer
         invitation={invitation}
+        surface="preview"
         templateKey={privateDraft.draft.content.templateKey}
       />
     </section>

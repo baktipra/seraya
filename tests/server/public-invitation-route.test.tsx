@@ -289,6 +289,9 @@ describe('SRY-008 public invitation route', () => {
     expect(routeSource).not.toContain('cookies(');
     expect(routeSource).not.toContain('createServerSupabaseClient');
     expect(routeSource).not.toContain('guestbook');
+    expect(routeSource).not.toContain('personal-invitation');
+    expect(routeSource).toContain('surface="generic"');
+    expect(routeSource).not.toContain('personalSlots');
     expect(routeSource).not.toContain('modules/readiness');
   });
 });

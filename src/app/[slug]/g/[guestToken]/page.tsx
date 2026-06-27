@@ -85,26 +85,31 @@ export default async function PersonalGuestInvitationPage({
 
   return (
     <main className="bg-seraya-ivory min-h-screen px-0 py-0 sm:px-6 sm:py-8">
-      <PersonalGuestGreeting displayName={personalInvitation.guestDisplayName} />
       <InvitationTemplateRenderer
         invitation={invitation}
+        personalSlots={{
+          greeting: <PersonalGuestGreeting displayName={personalInvitation.guestDisplayName} />,
+          guestbook: (
+            <PersonalGuestbook
+              entry={personalGuestbookEntry}
+              feedback={guestbookFeedback}
+              guestToken={guestToken}
+              slug={slug}
+            />
+          ),
+          rsvp: snapshot.draft.rsvp.enabled ? (
+            <PersonalGuestRsvp
+              guestToken={guestToken}
+              feedback={rsvpFeedback}
+              partySize={personalInvitation.partySize}
+              rsvpAttendeeCount={personalInvitation.rsvpAttendeeCount}
+              rsvpStatus={personalInvitation.rsvpStatus}
+              slug={slug}
+            />
+          ) : undefined,
+        }}
+        surface="personal"
         templateKey={snapshot.draft.templateKey}
-      />
-      {snapshot.draft.rsvp.enabled ? (
-        <PersonalGuestRsvp
-          guestToken={guestToken}
-          feedback={rsvpFeedback}
-          partySize={personalInvitation.partySize}
-          rsvpAttendeeCount={personalInvitation.rsvpAttendeeCount}
-          rsvpStatus={personalInvitation.rsvpStatus}
-          slug={slug}
-        />
-      ) : null}
-      <PersonalGuestbook
-        entry={personalGuestbookEntry}
-        feedback={guestbookFeedback}
-        guestToken={guestToken}
-        slug={slug}
       />
     </main>
   );
