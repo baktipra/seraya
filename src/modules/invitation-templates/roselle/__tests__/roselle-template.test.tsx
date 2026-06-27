@@ -57,7 +57,11 @@ describe('RoselleTemplate', () => {
     expect(html).toContain('Raka &amp; Nadia');
     expect(html).toContain('17 Agustus 2027');
     expect(html).toContain('Dengan penuh cinta');
-    expect(html).toContain('Konfirmasi kehadiran akan segera tersedia.');
+    expect(html).toContain('data-generic-response-note="roselle"');
+    expect(html).toContain(
+      'Konfirmasi kehadiran dan ucapan dapat dikirim melalui undangan pribadi dari pasangan.',
+    );
+    expect(html).not.toContain('id="roselle-rsvp-title"');
     expect(html).not.toContain('Cerita kami');
     expect(html).not.toContain('Tempat kami bersua');
     expect(html).not.toContain('Buka peta lokasi');

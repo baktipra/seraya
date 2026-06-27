@@ -63,7 +63,6 @@
 .sectionHeading h2,
 .storySection h2,
 .locationSection h2,
-.rsvpSection h2,
 .closingSection h2,
 .personName,
 .eventCard h3 {
@@ -114,7 +113,6 @@
 .eventsSection,
 .locationSection,
 .gallerySection,
-.rsvpSection,
 .digitalGiftSection,
 .closingSection {
   padding: clamp(3rem, 8vw, 5.25rem) 0;
@@ -124,7 +122,6 @@
 .eventsSection,
 .locationSection,
 .gallerySection,
-.rsvpSection,
 .digitalGiftSection,
 .closingSection {
   border-top: 1px solid var(--aruna-sand);
@@ -137,7 +134,6 @@
 .sectionHeading h2,
 .storySection h2,
 .locationSection h2,
-.rsvpSection h2,
 .closingSection h2 {
   max-width: 16ch;
   margin: 0.65rem 0 0;
@@ -305,23 +301,6 @@
   font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.1em;
-}
-
-.rsvpSection {
-  padding-right: clamp(1rem, 4vw, 2.5rem);
-  padding-left: clamp(1rem, 4vw, 2.5rem);
-  background: var(--aruna-ink);
-  color: var(--aruna-paper);
-}
-
-.rsvpSection .sectionKicker,
-.rsvpSection h2,
-.rsvpSection .prose {
-  color: inherit;
-}
-
-.rsvpSection .sectionKicker {
-  color: #f3b49d;
 }
 
 .digitalGiftSection {
@@ -498,4 +477,201 @@
 
 .eventCard .mapsLink {
   margin-top: 1rem;
+}
+
+/* SRY-033: Aruna keeps response behavior shared, but makes its editorial presentation local. */
+.personalGreeting {
+  padding: clamp(2.3rem, 6vw, 3.5rem) 0 0;
+  border-bottom: 1px solid var(--aruna-sand);
+}
+
+.personalGreeting [data-personal-guest-greeting] {
+  max-width: 34rem;
+  padding: 0 0 clamp(2.3rem, 6vw, 3.5rem);
+  border-left: 2px solid var(--aruna-clay);
+  padding-left: 1rem;
+}
+
+.personalGreeting [data-personal-greeting-eyebrow],
+.personalResponseJourney [data-personal-response-eyebrow] {
+  margin: 0;
+  color: var(--aruna-clay-deep);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.personalGreeting [data-personal-greeting-title],
+.personalResponseJourney [data-personal-response-title] {
+  max-width: 15ch;
+  margin: 0.65rem 0 0;
+  color: var(--aruna-ink);
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: clamp(1.95rem, 5.8vw, 3.1rem);
+  font-weight: 400;
+  letter-spacing: -0.045em;
+  line-height: 0.98;
+}
+
+.personalGreeting [data-personal-greeting-lead],
+.personalResponseJourney [data-personal-response-copy],
+.personalResponseJourney [data-personal-rsvp-attendance-copy],
+.personalResponseJourney [data-personal-guestbook-help] {
+  max-width: 36rem;
+  margin: 0.9rem 0 0;
+  color: var(--aruna-muted);
+  font-size: 0.96rem;
+  line-height: 1.72;
+}
+
+.personalResponseJourney {
+  display: grid;
+  gap: clamp(2.3rem, 6vw, 3.5rem);
+  padding: clamp(3rem, 8vw, 5.25rem) 0;
+  border-top: 1px solid var(--aruna-sand);
+}
+
+.personalResponseSection {
+  padding-left: clamp(0.9rem, 3vw, 1.45rem);
+  border-left: 2px solid var(--aruna-clay);
+}
+
+.personalResponseSection + .personalResponseSection {
+  border-top: 1px solid var(--aruna-sand);
+  padding-top: clamp(2.3rem, 6vw, 3.5rem);
+}
+
+.personalResponseJourney [data-personal-response-status],
+.personalResponseJourney [data-personal-rsvp-attendance-title],
+.personalResponseJourney [data-personal-rsvp-attendance-label],
+.personalResponseJourney [data-personal-guestbook-field] > span {
+  color: var(--aruna-ink);
+  font-weight: 800;
+}
+
+.personalResponseJourney [data-personal-response-notice],
+.personalResponseJourney [data-personal-response-success],
+.personalResponseJourney [data-personal-response-error] {
+  max-width: 36rem;
+  margin: 1rem 0 0;
+  padding: 0.85rem 0;
+  border-top: 1px solid var(--aruna-sand);
+  border-bottom: 1px solid var(--aruna-sand);
+  color: var(--aruna-muted);
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+.personalResponseJourney [data-personal-response-success] {
+  color: #35623a;
+}
+
+.personalResponseJourney [data-personal-response-error] {
+  color: #9b3d35;
+}
+
+.personalResponseJourney [data-personal-response-form] {
+  display: grid;
+  gap: 1rem;
+  max-width: 36rem;
+  margin-top: 1.4rem;
+}
+
+.personalResponseJourney [data-personal-rsvp-choices] {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  padding: 0;
+  border: 0;
+}
+
+.personalResponseJourney [data-personal-rsvp-choice] {
+  display: flex;
+  min-height: 2.9rem;
+  align-items: center;
+  justify-content: flex-start;
+  border-bottom: 1px solid var(--aruna-sand);
+  color: var(--aruna-muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.personalResponseJourney [data-personal-rsvp-choice][data-selected='true'] {
+  border-bottom-color: var(--aruna-clay);
+  color: var(--aruna-clay-deep);
+}
+
+.personalResponseJourney [data-personal-rsvp-attendance] {
+  padding: 0.95rem 0;
+  border-top: 1px solid var(--aruna-sand);
+  border-bottom: 1px solid var(--aruna-sand);
+}
+
+.personalResponseJourney [data-personal-rsvp-attendance] p {
+  margin: 0.35rem 0 0;
+}
+
+.personalResponseJourney select,
+.personalResponseJourney textarea {
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 0.7rem;
+  border: 1px solid var(--aruna-sand);
+  background: var(--aruna-paper);
+  color: var(--aruna-ink);
+  font: inherit;
+}
+
+.personalResponseJourney select {
+  min-height: 2.85rem;
+  padding: 0 0.75rem;
+}
+
+.personalResponseJourney textarea {
+  min-height: 8.5rem;
+  padding: 0.8rem;
+  resize: vertical;
+}
+
+.personalResponseJourney [data-personal-response-submit] {
+  justify-self: start;
+  min-height: 2.85rem;
+  padding: 0.7rem 0;
+  border: 0;
+  border-bottom: 2px solid var(--aruna-clay);
+  background: transparent;
+  color: var(--aruna-clay-deep);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.personalResponseJourney [data-personal-response-submit]:hover {
+  color: var(--aruna-ink);
+}
+
+.personalResponseJourney :is(input, select, textarea, button):focus-visible {
+  outline: 3px solid rgb(185 95 72 / 0.42);
+  outline-offset: 3px;
+}
+
+.genericResponseNote {
+  max-width: 31rem;
+  margin: clamp(2.3rem, 6vw, 3.5rem) 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--aruna-sand);
+  color: var(--aruna-muted);
+  font-size: 0.85rem;
+  font-style: italic;
+  line-height: 1.65;
+}
+
+@media (max-width: 36rem) {
+  .personalResponseJourney [data-personal-rsvp-choices] {
+    grid-template-columns: 1fr;
+  }
 }

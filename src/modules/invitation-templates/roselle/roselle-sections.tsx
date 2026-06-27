@@ -176,22 +176,6 @@ export function RoselleGallery({ gallery }: Pick<InvitationViewModel, 'gallery'>
   );
 }
 
-export function RoselleRsvp({ rsvp }: Pick<InvitationViewModel, 'rsvp'>) {
-  if (!rsvp) {
-    return null;
-  }
-
-  return (
-    <section aria-labelledby="roselle-rsvp-title" className={styles.rsvpSection}>
-      <p className={styles.sectionEyebrow}>RSVP</p>
-      <h2 className={styles.sectionTitle} id="roselle-rsvp-title">
-        {rsvp.heading}
-      </h2>
-      <p className={styles.prose}>{rsvp.lead}</p>
-    </section>
-  );
-}
-
 export function RoselleDigitalGift({ digitalGift }: Pick<InvitationViewModel, 'digitalGift'>) {
   if (!digitalGift) {
     return null;

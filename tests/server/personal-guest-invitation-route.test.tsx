@@ -102,6 +102,11 @@ describe('SRY-013 personal guest invitation route', () => {
     expect(html).toContain('Raka &amp; Nadia');
     expect(html).toContain('Ucapan &amp; Doa');
     expect(html).toContain('Kirim ucapan');
+    expect(html).toContain('data-template-personal-greeting="roselle"');
+    expect(html).toContain('data-template-response-journey="roselle"');
+    expect(html).toContain('data-template-response-slot="rsvp"');
+    expect(html).toContain('data-template-response-slot="guestbook"');
+    expect(html).not.toContain('data-generic-response-note');
     expect(getPersonalGuestbookEntryMock).toHaveBeenCalledWith({
       slug: 'raka-nadia',
       token: guestToken,
@@ -409,7 +414,11 @@ describe('SRY-013 personal guest invitation route', () => {
     expect(routeSource).not.toContain('createServerSupabaseClient');
     expect(routeSource).toContain('personalSlots={{');
     expect(routeSource).toContain('surface="personal"');
+    expect(routeSource).toContain('personalSlots={{');
     expect(routeSource).not.toContain('</InvitationTemplateRenderer>');
+    expect(routeSource).toContain('greeting: <PersonalGuestGreeting');
+    expect(routeSource).toContain('rsvp: snapshot.draft.rsvp.enabled ? (');
+    expect(routeSource).toContain('guestbook: (');
   });
 
   it('uses token-free noindex metadata', () => {

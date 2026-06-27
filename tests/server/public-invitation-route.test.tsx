@@ -83,6 +83,11 @@ describe('SRY-008 public invitation route', () => {
     expect(html).not.toContain('Belum dipublikasikan');
     expect(html).not.toContain('published-private-id');
     expect(html).not.toContain('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
+    expect(html).toContain('data-generic-response-note="roselle"');
+    expect(html).not.toContain('data-personal-guest-rsvp');
+    expect(html).not.toContain('data-personal-guestbook');
+    expect(html).not.toContain('personal-guest-rsvp-title');
+    expect(html).not.toContain('personal-guestbook-title');
   });
 
   it('renders the template stored in the immutable published snapshot only', async () => {

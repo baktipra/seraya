@@ -148,7 +148,6 @@
 }
 
 .section,
-.rsvpSection,
 .digitalGiftSection {
   position: relative;
   padding: clamp(2.8rem, 8vw, 4.75rem) 0;
@@ -222,11 +221,8 @@
 }
 
 .section + .section,
-.section + .rsvpSection,
 .section + .digitalGiftSection,
-.rsvpSection + .digitalGiftSection,
 .digitalGiftSection + .closing,
-.rsvpSection + .closing,
 .section + .closing {
   border-top: 1px solid var(--roselle-line);
 }
@@ -363,15 +359,7 @@
   outline-offset: 3px;
 }
 
-.rsvpSection {
-  margin-top: 0;
-  padding-right: clamp(1rem, 4vw, 2rem);
-  padding-left: clamp(1rem, 4vw, 2rem);
-  border-radius: 1.1rem;
-  background: linear-gradient(135deg, rgb(247 236 231 / 0.94), rgb(243 241 231 / 0.86));
-}
-
-.rsvpSection + .closing {
+.closing {
   border-top: 0;
 }
 
@@ -494,4 +482,208 @@
 
 .eventPart .mapsLink {
   margin-top: 1rem;
+}
+
+/* SRY-033: Roselle owns personal invitation rhythm; shared forms expose only semantic hooks. */
+.personalGreeting {
+  padding: 0 clamp(1.35rem, 6vw, 4.5rem) clamp(2.4rem, 6vw, 3.5rem);
+  text-align: center;
+}
+
+.personalGreeting [data-personal-guest-greeting] {
+  max-width: 34rem;
+  margin: 0 auto;
+  padding: 1.35rem 1.15rem 0;
+  border-top: 1px solid rgb(151 99 109 / 0.28);
+}
+
+.personalGreeting [data-personal-greeting-eyebrow],
+.personalResponseJourney [data-personal-response-eyebrow] {
+  margin: 0;
+  color: var(--roselle-mauve);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+.personalGreeting [data-personal-greeting-title],
+.personalResponseJourney [data-personal-response-title] {
+  margin: 0.7rem auto 0;
+  color: var(--roselle-plum);
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: clamp(1.8rem, 5vw, 2.65rem);
+  font-weight: 400;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+}
+
+.personalGreeting [data-personal-greeting-lead],
+.personalResponseJourney [data-personal-response-copy],
+.personalResponseJourney [data-personal-rsvp-attendance-copy],
+.personalResponseJourney [data-personal-guestbook-help] {
+  max-width: 34rem;
+  margin: 0.85rem auto 0;
+  color: #5f4c53;
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.personalResponseJourney {
+  display: grid;
+  gap: 1.1rem;
+  margin-top: clamp(2.8rem, 7vw, 4.5rem);
+  padding: clamp(1.35rem, 5vw, 2.25rem);
+  border-top: 1px solid var(--roselle-line);
+  border-bottom: 1px solid var(--roselle-line);
+  background: linear-gradient(135deg, rgb(247 236 231 / 0.88), rgb(255 254 251 / 0.72));
+}
+
+.personalResponseSection + .personalResponseSection {
+  padding-top: 1.35rem;
+  border-top: 1px solid rgb(151 99 109 / 0.22);
+}
+
+.personalResponseJourney [data-personal-guest-rsvp],
+.personalResponseJourney [data-personal-guestbook] {
+  text-align: center;
+}
+
+.personalResponseJourney [data-personal-response-status],
+.personalResponseJourney [data-personal-rsvp-attendance-title],
+.personalResponseJourney [data-personal-rsvp-attendance-label],
+.personalResponseJourney [data-personal-guestbook-field] > span {
+  color: var(--roselle-plum);
+  font-weight: 700;
+}
+
+.personalResponseJourney [data-personal-response-notice],
+.personalResponseJourney [data-personal-response-success],
+.personalResponseJourney [data-personal-response-error] {
+  margin: 1rem 0 0;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid rgb(151 99 109 / 0.24);
+  border-radius: 0.75rem;
+  color: #5f4c53;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.personalResponseJourney [data-personal-response-success] {
+  border-color: rgb(84 123 88 / 0.35);
+  background: rgb(230 242 229 / 0.68);
+}
+
+.personalResponseJourney [data-personal-response-error] {
+  border-color: rgb(157 70 70 / 0.35);
+  background: rgb(255 238 238 / 0.7);
+}
+
+.personalResponseJourney [data-personal-response-form] {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.35rem;
+  text-align: left;
+}
+
+.personalResponseJourney [data-personal-rsvp-choices] {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+  padding: 0;
+  border: 0;
+}
+
+.personalResponseJourney [data-personal-rsvp-choice] {
+  display: flex;
+  min-height: 2.85rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--roselle-line);
+  border-radius: 999px;
+  background: var(--roselle-paper);
+  color: #5f4c53;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.personalResponseJourney [data-personal-rsvp-choice][data-selected='true'] {
+  border-color: var(--roselle-mauve);
+  background: var(--roselle-mauve);
+  color: var(--roselle-paper);
+}
+
+.personalResponseJourney [data-personal-rsvp-attendance] {
+  padding: 1rem;
+  border: 1px solid var(--roselle-line);
+  border-radius: 0.75rem;
+  background: rgb(255 254 251 / 0.76);
+}
+
+.personalResponseJourney [data-personal-rsvp-attendance] p {
+  margin: 0.35rem 0 0;
+}
+
+.personalResponseJourney select,
+.personalResponseJourney textarea {
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 0.65rem;
+  border: 1px solid var(--roselle-line);
+  border-radius: 0.7rem;
+  background: var(--roselle-paper);
+  color: var(--roselle-plum);
+  font: inherit;
+}
+
+.personalResponseJourney select {
+  min-height: 2.8rem;
+  padding: 0 0.8rem;
+}
+
+.personalResponseJourney textarea {
+  min-height: 8rem;
+  padding: 0.75rem 0.8rem;
+  resize: vertical;
+}
+
+.personalResponseJourney [data-personal-response-submit] {
+  justify-self: center;
+  min-height: 2.85rem;
+  padding: 0.7rem 1.2rem;
+  border: 1px solid var(--roselle-mauve);
+  border-radius: 999px;
+  background: var(--roselle-mauve);
+  color: var(--roselle-paper);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.personalResponseJourney [data-personal-response-submit]:hover {
+  background: var(--roselle-plum);
+}
+
+.personalResponseJourney :is(input, select, textarea, button):focus-visible {
+  outline: 3px solid rgb(151 99 109 / 0.42);
+  outline-offset: 3px;
+}
+
+.genericResponseNote {
+  max-width: 31rem;
+  margin: clamp(2.2rem, 6vw, 3.25rem) auto 0;
+  color: #68545c;
+  font-size: 0.86rem;
+  font-style: italic;
+  line-height: 1.65;
+  text-align: center;
+}
+
+@media (max-width: 31rem) {
+  .personalResponseJourney [data-personal-rsvp-choices] {
+    grid-template-columns: 1fr;
+  }
 }

@@ -122,7 +122,8 @@ describe('SRY-025 invitation template registry', () => {
       expect(html).toContain('src="/media/one"');
       expect(html).toContain('src="/media/two"');
       expect(html.indexOf('src="/media/one"')).toBeLessThan(html.indexOf('src="/media/two"'));
-      expect(html).toContain('Konfirmasi Kehadiran');
+      expect(html).toContain('data-generic-response-note');
+      expect(html).not.toContain(`id="${templateKey}-rsvp-title"`);
       expect(html).toContain('Amplop Digital');
       expect(html).toContain('Bank Seraya');
       expect(html).toContain('Raka Pratama');
