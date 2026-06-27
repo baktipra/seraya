@@ -222,7 +222,8 @@ describe('SRY-031 wedding readiness composition', () => {
     );
 
     expect(source).toContain("select('id', { count: 'exact', head: true })");
-    expect(source).toContain("select('rsvp_attendee_count.sum()')");
+    expect(source).toContain("select('rsvp_attendee_count')");
+    expect(source).not.toContain(['rsvp_attendee_count', '.sum()'].join(''));
     expect(source).toContain(".eq('status', 'active')");
     expect(source).not.toMatch(
       /listActiveGuestsForVerifiedProject|listLatestGuestLinkStates|listGuestbookEntries/,
