@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useActionState, useEffect, useRef, useState } from 'react';
+import { useActionState, useEffect, useMemo, useRef, useState } from 'react';
 
 import { OverflowMenuAction, RowOverflowMenu } from '@/components/projects/row-overflow-menu';
 
@@ -65,6 +65,34 @@ const personalLinkStateLabels: Record<GuestListItem['link_state'], string> = {
   not_created: 'Belum dibuat',
   revoked: 'Dinonaktifkan',
 };
+
+type GuestOperationsFilter =
+  | 'all'
+  | 'attending'
+  | 'declined'
+  | 'has_active_link'
+  | 'has_whatsapp'
+  | 'missing_active_link'
+  | 'missing_whatsapp'
+  | 'pending';
+
+function matchesGuestOperationsFilter(guest: GuestListItem, filter: GuestOperationsFilter) {
+  if (filter === 'pending') return guest.rsvp_status === 'pending';
+  if (filter === 'attending') return guest.rsvp_status === 'attending';
+  if (filter === 'declined') return guest.rsvp_status === 'declined';
+  if (filter === 'has_whatsapp') return Boolean(guest.whatsapp_phone_e164);
+  if (filter === 'missing_whatsapp') return !guest.whatsapp_phone_e164;
+  if (filter === 'has_active_link') return guest.link_state === 'active';
+  if (filter === 'missing_active_link') return guest.link_state !== 'active';
+  return true;
+}
+
+function getGuestAttentionLabel(guest: GuestListItem) {
+  if (!guest.whatsapp_phone_e164) return 'Butuh perhatian: belum punya Nomor WhatsApp';
+  if (guest.link_state !== 'active') return 'Butuh perhatian: belum punya Undangan Pribadi';
+  if (guest.rsvp_status === 'pending') return 'Butuh perhatian: belum merespons RSVP';
+  return null;
+}
 
 function getRsvpDisplay(guest: GuestListItem): string {
   if (guest.rsvp_status !== 'attending') {
@@ -322,6 +350,8 @@ export function GuestManager({ initialGuests, prepareBatchAction, projectId }: G
   const [selectedGuestIds, setSelectedGuestIds] = useState<string[]>([]);
   const [batchOpen, setBatchOpen] = useState(false);
   const [openOverflowGuestId, setOpenOverflowGuestId] = useState<string | null>(null);
+  const [query, setQuery] = useState('');
+  const [operationsFilter, setOperationsFilter] = useState<GuestOperationsFilter>('all');
   const lastRevealedUrl = useRef<string | null>(null);
   const [createState, createAction, createPending] = useActionState(
     createGuestAction,
@@ -412,9 +442,21 @@ export function GuestManager({ initialGuests, prepareBatchAction, projectId }: G
     }
   }
 
-  const allGuestIds = initialGuests.map((guest) => guest.id);
-  const allSelected = allGuestIds.length > 0 && selectedGuestIds.length === allGuestIds.length;
-  const selectedGuests = initialGuests.filter((guest) => selectedGuestIds.includes(guest.id));
+  const filteredGuests = useMemo(() => {
+    const normalizedQuery = query.trim().toLocaleLowerCase('id-ID');
+    return initialGuests.filter((guest) => {
+      const matchesQuery =
+        !normalizedQuery ||
+        guest.display_name.toLocaleLowerCase('id-ID').includes(normalizedQuery) ||
+        guest.group_label?.toLocaleLowerCase('id-ID').includes(normalizedQuery) ||
+        guest.whatsapp_phone_e164?.includes(normalizedQuery);
+      return matchesQuery && matchesGuestOperationsFilter(guest, operationsFilter);
+    });
+  }, [initialGuests, operationsFilter, query]);
+  const allGuestIds = filteredGuests.map((guest) => guest.id);
+  const selectedVisibleIds = selectedGuestIds.filter((id) => allGuestIds.includes(id));
+  const allSelected = allGuestIds.length > 0 && selectedVisibleIds.length === allGuestIds.length;
+  const selectedGuests = filteredGuests.filter((guest) => selectedGuestIds.includes(guest.id));
   const selectedEligibleIds = selectedGuests
     .filter((guest) => guest.link_state !== 'active')
     .map((guest) => guest.id);
@@ -433,7 +475,7 @@ export function GuestManager({ initialGuests, prepareBatchAction, projectId }: G
     try {
       const response = await fetch(`/dashboard/${projectId}/guests/export-xlsx`, {
         body: JSON.stringify({
-          guestIds: selectedGuestIds.length ? selectedGuestIds : allGuestIds,
+          guestIds: selectedVisibleIds.length ? selectedVisibleIds : allGuestIds,
         }),
         headers: { 'Content-Type': 'application/json' },
         method: 'POST',
@@ -513,6 +555,51 @@ export function GuestManager({ initialGuests, prepareBatchAction, projectId }: G
       <CardContent className="space-y-5 pt-5 sm:pt-6">
         {initialGuests.length > 0 ? (
           <>
+            <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_15rem]">
+              <div className="space-y-2">
+                <label
+                  className="text-seraya-text-primary text-sm font-semibold"
+                  htmlFor="guest-operations-search"
+                >
+                  Cari tamu
+                </label>
+                <Input
+                  id="guest-operations-search"
+                  onChange={(event) => {
+                    setQuery(event.target.value);
+                    setSelectedGuestIds([]);
+                  }}
+                  placeholder="Cari nama, grup, atau nomor"
+                  type="search"
+                  value={query}
+                />
+              </div>
+              <div className="space-y-2">
+                <label
+                  className="text-seraya-text-primary text-sm font-semibold"
+                  htmlFor="guest-operations-filter"
+                >
+                  Filter operasional
+                </label>
+                <select
+                  className="border-seraya-border-default bg-seraya-surface text-seraya-text-primary min-h-11 w-full rounded-[var(--seraya-radius-md)] border px-3.5 text-base"
+                  id="guest-operations-filter"
+                  onChange={(event) =>
+                    setOperationsFilter(event.target.value as GuestOperationsFilter)
+                  }
+                  value={operationsFilter}
+                >
+                  <option value="all">Semua tamu</option>
+                  <option value="pending">Belum merespons RSVP</option>
+                  <option value="attending">Hadir</option>
+                  <option value="declined">Tidak hadir</option>
+                  <option value="has_whatsapp">Punya nomor WhatsApp</option>
+                  <option value="missing_whatsapp">Belum punya nomor WhatsApp</option>
+                  <option value="has_active_link">Undangan Pribadi aktif</option>
+                  <option value="missing_active_link">Belum punya Undangan Pribadi aktif</option>
+                </select>
+              </div>
+            </div>
             <div className="border-seraya-border-default overflow-x-auto rounded-[var(--seraya-radius-md)] border">
               <table className="w-full min-w-[1080px] border-collapse text-left text-sm">
                 <thead className="bg-seraya-canvas text-seraya-text-muted text-xs font-semibold tracking-[0.06em] uppercase">
@@ -535,7 +622,7 @@ export function GuestManager({ initialGuests, prepareBatchAction, projectId }: G
                   </tr>
                 </thead>
                 <tbody className="divide-seraya-border-default bg-seraya-surface divide-y">
-                  {initialGuests.map((guest) => (
+                  {filteredGuests.map((guest) => (
                     <tr key={guest.id}>
                       <td className="px-4 py-4 align-top">
                         <input
@@ -562,6 +649,11 @@ export function GuestManager({ initialGuests, prepareBatchAction, projectId }: G
                       </td>
                       <td className="text-seraya-text-secondary px-3 py-4 align-top">
                         {personalLinkStateLabels[guest.link_state]}
+                        {getGuestAttentionLabel(guest) ? (
+                          <p className="text-seraya-text-muted mt-1 max-w-44 text-xs leading-5">
+                            {getGuestAttentionLabel(guest)}
+                          </p>
+                        ) : null}
                       </td>
                       <td className="px-3 py-4 align-top">
                         <RowOverflowMenu
@@ -615,7 +707,7 @@ export function GuestManager({ initialGuests, prepareBatchAction, projectId }: G
             <div className="border-seraya-border-default bg-seraya-canvas sticky bottom-0 flex flex-col gap-3 rounded-[var(--seraya-radius-md)] border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
               <p aria-live="polite" className="text-seraya-text-secondary text-sm">
                 <span className="text-seraya-text-primary font-semibold">
-                  {selectedGuestIds.length} tamu terpilih
+                  {selectedVisibleIds.length} tamu terpilih
                 </span>
               </p>
               <div className="flex flex-wrap gap-2">
@@ -628,7 +720,7 @@ export function GuestManager({ initialGuests, prepareBatchAction, projectId }: G
                   Siapkan Undangan Pribadi
                 </Button>
                 <Button
-                  disabled={selectedGuestIds.length === 0}
+                  disabled={selectedVisibleIds.length === 0}
                   onClick={() => void exportSelectedGuests()}
                   size="sm"
                   type="button"
@@ -637,7 +729,7 @@ export function GuestManager({ initialGuests, prepareBatchAction, projectId }: G
                   Export Excel (.xlsx)
                 </Button>
                 <Button
-                  disabled={selectedGuestIds.length === 0}
+                  disabled={selectedVisibleIds.length === 0}
                   onClick={() => setSelectedGuestIds([])}
                   size="sm"
                   type="button"

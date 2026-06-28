@@ -32,11 +32,12 @@ describe('SRY-038 Delivery Center XLSX export', () => {
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(excelJsBuffer(bytes));
     const sheet = workbook.getWorksheet('Delivery Center');
-    const values = worksheetText(sheet, 6);
+    const values = worksheetText(sheet, 7);
 
     expect(values).toContain('Status Kesiapan');
     expect(values).toContain('+6281234567890');
     expect(values).toContain('Siap dibagikan');
+    expect(values).toContain('Status Tindak Lanjut');
     expect(values).not.toContain('/g/');
     expect(values).not.toContain('token_ciphertext');
     expect(values).not.toContain('token_key_version');

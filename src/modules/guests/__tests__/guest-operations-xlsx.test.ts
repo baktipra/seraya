@@ -35,11 +35,13 @@ describe('SRY-038 guest operations XLSX export', () => {
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(excelJsBuffer(bytes));
     const sheet = workbook.getWorksheet('Tamu');
-    const values = worksheetText(sheet, 6);
+    const values = worksheetText(sheet, 7);
 
     expect(values).toContain('Nama Tamu');
     expect(values).toContain('+6281234567890');
     expect(values).toContain('Aktif');
+    expect(values).toContain('Status Tindak Lanjut');
+    expect(values).toContain('Belum merespons RSVP');
     expect(values).not.toContain('/g/');
     expect(values).not.toContain('token_hash');
     expect(values).not.toContain('token_ciphertext');

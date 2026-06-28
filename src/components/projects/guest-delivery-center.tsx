@@ -220,7 +220,7 @@ function PersonalLinkReaccessControls({
   reaccessAction: boundReaccessAction,
 }: {
   guestDisplayName: string;
-  mode: 'link' | 'whatsapp';
+  mode: 'link' | 'open' | 'whatsapp';
   reaccessAction: BoundDeliveryLinkAction;
 }) {
   const { toast } = useToast();
@@ -275,30 +275,29 @@ function PersonalLinkReaccessControls({
     <form action={reaccessAction} className="flex flex-wrap gap-2">
       <input name="operation" ref={operationInput} type="hidden" value="copy" />
       {mode === 'link' ? (
-        <>
-          <Button
-            disabled={pending}
-            onClick={() => {
-              if (operationInput.current) operationInput.current.value = 'copy';
-            }}
-            size="sm"
-            type="submit"
-            variant="secondary"
-          >
-            Copy tautan
-          </Button>
-          <Button
-            disabled={pending}
-            onClick={() => {
-              if (operationInput.current) operationInput.current.value = 'open';
-            }}
-            size="sm"
-            type="submit"
-            variant="text"
-          >
-            Buka undangan
-          </Button>
-        </>
+        <Button
+          disabled={pending}
+          onClick={() => {
+            if (operationInput.current) operationInput.current.value = 'copy';
+          }}
+          size="sm"
+          type="submit"
+          variant="secondary"
+        >
+          Copy tautan
+        </Button>
+      ) : mode === 'open' ? (
+        <Button
+          disabled={pending}
+          onClick={() => {
+            if (operationInput.current) operationInput.current.value = 'open';
+          }}
+          size="sm"
+          type="submit"
+          variant="text"
+        >
+          Buka undangan
+        </Button>
       ) : (
         <Button
           disabled={pending}
@@ -479,7 +478,22 @@ function matchesReadinessFilter(row: DeliveryGuestRowClient, filter: DeliveryRea
   if (filter === 'ready') return row.personalLinkState === 'active';
   if (filter === 'not_ready') return row.personalLinkState !== 'active';
   if (filter === 'missing_whatsapp') return row.whatsappAvailability === 'missing';
+  if (filter === 'pending') return row.rsvpStatus === 'pending';
+  if (filter === 'attending') return row.rsvpStatus === 'attending';
+  if (filter === 'declined') return row.rsvpStatus === 'declined';
+  if (filter === 'legacy_link')
+    return row.personalLinkState === 'active' && row.personalLinkReaccessState === 'legacy';
   return true;
+}
+
+function getAttentionLabel(row: DeliveryGuestRowClient) {
+  if (row.personalLinkState === 'active' && row.whatsappAvailability === 'missing')
+    return 'Butuh perhatian: belum punya Nomor WhatsApp';
+  if (row.personalLinkState !== 'active') return 'Butuh perhatian: belum punya Undangan Pribadi';
+  if (row.personalLinkReaccessState === 'legacy')
+    return 'Butuh perhatian: tautan lama perlu diperbarui';
+  if (row.rsvpStatus === 'pending') return 'Butuh perhatian: belum merespons RSVP';
+  return null;
 }
 
 /** Private, compact operational workspace. It contains no sending, tracking, or history. */
@@ -614,7 +628,10 @@ export function GuestDeliveryCenter({
               </label>
               <Input
                 id="delivery-search"
-                onChange={(event) => setQuery(event.target.value)}
+                onChange={(event) => {
+                  setQuery(event.target.value);
+                  setSelectedIds([]);
+                }}
                 placeholder="Cari nama atau kelompok"
                 type="search"
                 value={query}
@@ -630,15 +647,20 @@ export function GuestDeliveryCenter({
               <select
                 className="border-seraya-border-default bg-seraya-surface text-seraya-text-primary focus-visible:outline-seraya-focus-ring min-h-11 w-full rounded-[var(--seraya-radius-md)] border px-3.5 text-base focus-visible:outline-3 focus-visible:outline-offset-2"
                 id="delivery-readiness-filter"
-                onChange={(event) =>
-                  setReadinessFilter(event.target.value as DeliveryReadinessFilter)
-                }
+                onChange={(event) => {
+                  setReadinessFilter(event.target.value as DeliveryReadinessFilter);
+                  setSelectedIds([]);
+                }}
                 value={readinessFilter}
               >
                 <option value="all">Semua</option>
-                <option value="not_ready">Belum siap dibagikan</option>
                 <option value="ready">Siap dibagikan</option>
+                <option value="not_ready">Belum siap dibagikan</option>
                 <option value="missing_whatsapp">Belum punya Nomor WhatsApp</option>
+                <option value="pending">Belum merespons RSVP</option>
+                <option value="attending">Sudah hadir</option>
+                <option value="declined">Tidak hadir</option>
+                <option value="legacy_link">Tautan lama perlu diperbarui</option>
               </select>
             </div>
           </div>
@@ -729,6 +751,11 @@ export function GuestDeliveryCenter({
                           <p className="text-seraya-text-muted mt-1 text-xs">
                             RSVP: {rsvpStatusLabels[row.rsvpStatus]}
                           </p>
+                          {getAttentionLabel(row) ? (
+                            <p className="text-seraya-text-muted mt-1 max-w-48 text-xs leading-5">
+                              {getAttentionLabel(row)}
+                            </p>
+                          ) : null}
                         </td>
                         <td className="px-3 py-4 align-top">
                           {active && row.personalLinkReaccessState === 'recoverable' ? (
@@ -790,17 +817,25 @@ export function GuestDeliveryCenter({
                                   setPrepareGuest(row);
                                 }}
                               >
-                                Buat Undangan Pribadi
+                                Siapkan Undangan Pribadi
                               </OverflowMenuAction>
-                            ) : (
+                            ) : row.personalLinkReaccessState === 'legacy' ? (
                               <OverflowMenuAction
                                 onClick={() => {
                                   setOpenOverflowGuestId(null);
                                   setReplaceGuest(row);
                                 }}
                               >
-                                Buat ulang tautan
+                                Perbarui tautan agar dapat dikelola
                               </OverflowMenuAction>
+                            ) : (
+                              <div className="px-1 py-1">
+                                <PersonalLinkReaccessControls
+                                  guestDisplayName={row.displayName}
+                                  mode="open"
+                                  reaccessAction={row.reaccessAction}
+                                />
+                              </div>
                             )}
                           </RowOverflowMenu>
                         </td>

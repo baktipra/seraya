@@ -7,7 +7,15 @@ import type { OwnedProject } from '@/modules/projects/project.repository';
 
 export type DeliveryPersonalLinkState = GuestPersonalLinkState | 'expired';
 
-export type DeliveryReadinessFilter = 'all' | 'missing_whatsapp' | 'not_ready' | 'ready';
+export type DeliveryReadinessFilter =
+  | 'all'
+  | 'attending'
+  | 'declined'
+  | 'legacy_link'
+  | 'missing_whatsapp'
+  | 'not_ready'
+  | 'pending'
+  | 'ready';
 
 export type DeliveryWhatsAppAvailability = 'available' | 'missing';
 

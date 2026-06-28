@@ -83,15 +83,17 @@ describe('SRY-038 owner Delivery Center table UI', () => {
         />
       </ToastProvider>,
     );
-    expect(html).toContain('data-delivery-center-table');
     expect(html).toContain('<table');
     expect(html).toContain('Pilih semua tamu pada hasil aktif');
     expect(html).toContain('0 tamu terpilih');
-    expect(html).toContain('Copy');
+    expect(html).toContain('Copy tautan');
     expect(html).toContain('Tautan lama belum dapat disalin');
-    expect(html).toContain('Perbarui tautan');
-    expect(html).toContain('Buka undangan');
-    expect(html).toContain('WhatsApp');
+    expect(html).toContain('Perbarui tautan agar dapat dikelola');
+    expect(html).toContain('Aksi untuk Keluarga Budi');
+    expect(html).not.toContain('Buat ulang tautan');
+    expect(html).toContain('Belum merespons RSVP');
+    expect(html).toContain('Tautan lama perlu diperbarui');
+    expect(html).toContain('Bagikan WhatsApp');
     expect(html).toContain('Copy nomor WhatsApp');
     expect(html).toContain('Export Excel (.xlsx)');
     expect(html).toContain('+62••••7890');

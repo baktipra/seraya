@@ -37,6 +37,16 @@ function rsvp(value: DeliveryReadinessExportRow['rsvpStatus']) {
   return value === 'attending' ? 'Hadir' : value === 'declined' ? 'Tidak hadir' : 'Belum merespons';
 }
 
+function followUp(row: DeliveryReadinessExportRow) {
+  if (row.personalLinkState === 'active' && row.whatsappAvailability === 'available')
+    return 'Siap dibagikan';
+  if (row.personalLinkState === 'active') return 'Belum punya nomor WhatsApp';
+  if (row.personalLinkState === 'revoked' || row.personalLinkState === 'expired')
+    return 'Tautan perlu diperbarui';
+  if (row.rsvpStatus === 'pending') return 'Belum merespons RSVP';
+  return 'Belum punya Undangan Pribadi';
+}
+
 /** Owner-private delivery export. No raw URL, token, ciphertext, or key metadata is accepted. */
 export async function createDeliveryReadinessXlsx(rows: readonly DeliveryReadinessExportRow[]) {
   const workbook = new ExcelJS.Workbook();
@@ -47,6 +57,7 @@ export async function createDeliveryReadinessXlsx(rows: readonly DeliveryReadine
     { header: 'Status Undangan Pribadi', key: 'link', width: 26 },
     { header: 'Status Kesiapan', key: 'readiness', width: 32 },
     { header: 'Status RSVP', key: 'rsvp', width: 20 },
+    { header: 'Status Tindak Lanjut', key: 'followUp', width: 30 },
   ];
   styleHeader(sheet.getRow(1));
   for (const row of rows) {
@@ -55,6 +66,7 @@ export async function createDeliveryReadinessXlsx(rows: readonly DeliveryReadine
       link: linkStatus(row),
       readiness: readiness(row),
       rsvp: rsvp(row.rsvpStatus),
+      followUp: followUp(row),
       whatsapp: row.whatsappPhoneE164 ?? '',
     });
   }

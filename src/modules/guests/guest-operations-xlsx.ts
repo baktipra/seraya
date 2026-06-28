@@ -19,6 +19,13 @@ function getGuestLinkStatus(value: GuestListItem['link_state']) {
   return 'Belum tersedia';
 }
 
+function getFollowUpStatus(guest: GuestListItem) {
+  if (guest.link_state !== 'active') return 'Belum punya Undangan Pribadi';
+  if (!guest.whatsapp_phone_e164) return 'Belum punya nomor WhatsApp';
+  if (guest.rsvp_status === 'pending') return 'Belum merespons RSVP';
+  return 'Siap dibagikan';
+}
+
 function getRsvpStatus(value: GuestListItem['rsvp_status']) {
   if (value === 'attending') return 'Hadir';
   if (value === 'declined') return 'Tidak hadir';
@@ -36,6 +43,7 @@ export async function createGuestOperationsXlsx(guests: readonly GuestListItem[]
     { header: 'Nomor WhatsApp', key: 'whatsapp', width: 22 },
     { header: 'Status RSVP', key: 'rsvp', width: 20 },
     { header: 'Status Undangan Pribadi', key: 'link', width: 26 },
+    { header: 'Status Tindak Lanjut', key: 'followUp', width: 30 },
   ];
   styleHeader(sheet.getRow(1));
   for (const guest of guests) {
@@ -46,6 +54,7 @@ export async function createGuestOperationsXlsx(guests: readonly GuestListItem[]
       partySize: guest.party_size,
       rsvp: getRsvpStatus(guest.rsvp_status),
       whatsapp: guest.whatsapp_phone_e164 ?? '',
+      followUp: getFollowUpStatus(guest),
     });
   }
   return new Uint8Array(await workbook.xlsx.writeBuffer());
