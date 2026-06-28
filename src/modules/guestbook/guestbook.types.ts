@@ -6,6 +6,8 @@ export type PersonalGuestbookEntry = {
 export type OwnerGuestbookEntry = {
   /** Owner-only correlation for the RSVP response workspace. */
   guestId?: string;
+  createdAt: string;
+  groupLabel: string | null;
   id: string;
   message: string;
   guestDisplayName: string;

@@ -2,13 +2,19 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 
-const { getOwnedProjectMock, listRsvpAnalyticsGuestsMock, requireCurrentUserMock } = vi.hoisted(
-  () => ({
-    getOwnedProjectMock: vi.fn(),
-    listRsvpAnalyticsGuestsMock: vi.fn(),
-    requireCurrentUserMock: vi.fn(),
-  }),
-);
+const {
+  createRsvpResponseXlsxMock,
+  getOwnedProjectMock,
+  listRsvpAnalyticsGuestsMock,
+  listRsvpExportGuestsMock,
+  requireCurrentUserMock,
+} = vi.hoisted(() => ({
+  createRsvpResponseXlsxMock: vi.fn(),
+  getOwnedProjectMock: vi.fn(),
+  listRsvpAnalyticsGuestsMock: vi.fn(),
+  listRsvpExportGuestsMock: vi.fn(),
+  requireCurrentUserMock: vi.fn(),
+}));
 
 vi.mock('@/modules/auth/current-user', () => ({ requireCurrentUser: requireCurrentUserMock }));
 vi.mock('@/modules/projects/project.repository', () => ({
@@ -16,11 +22,16 @@ vi.mock('@/modules/projects/project.repository', () => ({
 }));
 vi.mock('../rsvp-analytics.repository', () => ({
   listRsvpAnalyticsGuestsForVerifiedProject: listRsvpAnalyticsGuestsMock,
+  listRsvpExportGuestsForVerifiedProject: listRsvpExportGuestsMock,
+}));
+vi.mock('../rsvp-response-xlsx', () => ({
+  createRsvpResponseXlsx: createRsvpResponseXlsxMock,
 }));
 
 import {
   createRsvpAnalyticsViewModel,
   getRsvpAnalyticsForCurrentUser,
+  getRsvpResponseXlsxForCurrentUser,
 } from '../rsvp-analytics.service';
 
 const project = {
@@ -45,6 +56,7 @@ function guest(
     rsvp_attendee_count: number | null;
     rsvp_status: 'attending' | 'declined' | 'pending';
     updated_at: string;
+    whatsapp_phone_e164: string | null;
   }> = {},
 ) {
   return {
@@ -55,14 +67,17 @@ function guest(
     rsvp_attendee_count: null,
     rsvp_status: 'pending' as const,
     updated_at: '2027-08-17T09:00:00.000Z',
+    whatsapp_phone_e164: null,
     ...overrides,
   };
 }
 
-describe('SRY-039 RSVP response analytics', () => {
+describe('SRY-040 RSVP response analytics', () => {
   beforeEach(() => {
+    createRsvpResponseXlsxMock.mockReset().mockResolvedValue(new Uint8Array([1, 2, 3]));
     getOwnedProjectMock.mockReset().mockResolvedValue(project);
     listRsvpAnalyticsGuestsMock.mockReset();
+    listRsvpExportGuestsMock.mockReset();
     requireCurrentUserMock.mockReset().mockResolvedValue({ id: project.account_id });
   });
 
@@ -153,5 +168,33 @@ describe('SRY-039 RSVP response analytics', () => {
     expect(serialized).not.toContain('ciphertext');
     expect(serialized).not.toContain('guestbook');
     expect(analytics.responseRows[0]).toMatchObject({ displayName: 'Alya', partySize: 2 });
+  });
+
+  it('builds the private XLSX only after owner verification and keeps WhatsApp in the server-only export map', async () => {
+    listRsvpExportGuestsMock.mockResolvedValue([
+      guest('Alya', {
+        id: 'guest-alya',
+        rsvp_attendee_count: 2,
+        rsvp_status: 'attending',
+        whatsapp_phone_e164: '+628111111111',
+      }),
+      guest('Bima', { id: 'guest-bima', whatsapp_phone_e164: null }),
+    ]);
+
+    await expect(getRsvpResponseXlsxForCurrentUser(project.id)).resolves.toEqual(
+      new Uint8Array([1, 2, 3]),
+    );
+
+    expect(getOwnedProjectMock).toHaveBeenCalledWith(project.id, project.account_id);
+    expect(listRsvpExportGuestsMock).toHaveBeenCalledWith(project);
+    const exportInput = createRsvpResponseXlsxMock.mock.calls[0]?.[0];
+    expect(exportInput.rows).toEqual([
+      expect.objectContaining({ guestId: 'guest-alya', rsvpAttendeeCount: 2 }),
+      expect.objectContaining({ guestId: 'guest-bima', rsvpStatus: 'pending' }),
+    ]);
+    expect(Array.from(exportInput.whatsappPhoneE164ByGuestId.entries())).toEqual([
+      ['guest-alya', '+628111111111'],
+      ['guest-bima', null],
+    ]);
   });
 });

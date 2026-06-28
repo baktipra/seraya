@@ -11,6 +11,11 @@ export type RsvpAnalyticsGuestRecord = {
   updated_at: string;
 };
 
+/** Export-only extension. Contact data never enters the response workspace DTO. */
+export type RsvpExportGuestRecord = RsvpAnalyticsGuestRecord & {
+  whatsapp_phone_e164: string | null;
+};
+
 /** Deliberately minimal owner-visible pending sample: no links or party-size data. */
 export type PendingRsvpGuest = {
   displayName: string;

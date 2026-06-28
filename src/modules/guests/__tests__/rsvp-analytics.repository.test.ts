@@ -14,7 +14,10 @@ vi.mock('@/server/supabase/server', () => ({
   createServerSupabaseClient: createServerSupabaseClientMock,
 }));
 
-import { listRsvpAnalyticsGuestsForVerifiedProject } from '../rsvp-analytics.repository';
+import {
+  listRsvpAnalyticsGuestsForVerifiedProject,
+  listRsvpExportGuestsForVerifiedProject,
+} from '../rsvp-analytics.repository';
 
 const project = {
   account_id: '11111111-1111-1111-1111-111111111111',
@@ -96,6 +99,42 @@ describe('SRY-028 RSVP analytics repository', () => {
         rsvp_attendee_count: null,
         rsvp_status: 'pending',
         updated_at: '2026-06-27T08:00:00.000Z',
+      },
+    ]);
+  });
+
+  it('uses a separate export-only projection for owner-safe WhatsApp data without expanding the dashboard query', async () => {
+    orderMock.mockResolvedValue({
+      data: [
+        {
+          display_name: 'Alya',
+          group_label: 'Keluarga',
+          id: '11111111-1111-1111-1111-111111111111',
+          party_size: 3,
+          rsvp_attendee_count: 2,
+          rsvp_status: 'attending',
+          updated_at: '2026-06-28T08:00:00.000Z',
+          whatsapp_phone_e164: '+628111111111',
+        },
+      ],
+      error: null,
+    });
+
+    const records = await listRsvpExportGuestsForVerifiedProject(project);
+
+    expect(selectMock).toHaveBeenCalledWith(
+      'id, display_name, group_label, party_size, rsvp_status, rsvp_attendee_count, updated_at, whatsapp_phone_e164',
+    );
+    expect(records).toEqual([
+      {
+        display_name: 'Alya',
+        group_label: 'Keluarga',
+        id: '11111111-1111-1111-1111-111111111111',
+        party_size: 3,
+        rsvp_attendee_count: 2,
+        rsvp_status: 'attending',
+        updated_at: '2026-06-28T08:00:00.000Z',
+        whatsapp_phone_e164: '+628111111111',
       },
     ]);
   });

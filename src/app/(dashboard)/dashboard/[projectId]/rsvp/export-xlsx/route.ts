@@ -23,7 +23,7 @@ function unavailableResponse() {
   });
 }
 
-/** Private owner RSVP export. No URL, token, ciphertext, or contact number leaves this route. */
+/** Private owner RSVP export. It permits only approved owner RSVP/contact columns, never capability material. */
 export async function GET(_request: Request, { params }: ExportRouteProps) {
   const { projectId } = await params;
   try {

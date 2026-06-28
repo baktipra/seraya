@@ -3,9 +3,10 @@ import 'server-only';
 import { requireCurrentUser } from '@/modules/auth/current-user';
 import { getOwnedProjectById, type OwnedProject } from '@/modules/projects/project.repository';
 
-import { getGuestbookInboxForVerifiedProject } from '@/modules/guestbook';
-
-import { listRsvpAnalyticsGuestsForVerifiedProject } from './rsvp-analytics.repository';
+import {
+  listRsvpAnalyticsGuestsForVerifiedProject,
+  listRsvpExportGuestsForVerifiedProject,
+} from './rsvp-analytics.repository';
 import { createRsvpResponseXlsx } from './rsvp-response-xlsx';
 import type { RsvpAnalyticsGuestRecord, RsvpAnalyticsViewModel } from './rsvp-analytics.types';
 
@@ -109,18 +110,20 @@ export async function getRsvpAnalyticsForCurrentUser(
   return getRsvpAnalyticsForVerifiedProject(project);
 }
 
-/** Owner-only XLSX export for RSVP follow-up. It never loads guest-link or contact material. */
+/**
+ * Owner-only XLSX export for RSVP follow-up. Contact data is selected only for
+ * this private file and never exposes links, tokens, hashes, ciphertext, or ucapan.
+ */
 export async function getRsvpResponseXlsxForCurrentUser(projectId: string): Promise<Uint8Array> {
   const user = await requireCurrentUser();
   const project = await getOwnedProjectById(projectId, user.id);
-  const [analytics, guestbook] = await Promise.all([
-    getRsvpAnalyticsForVerifiedProject(project),
-    getGuestbookInboxForVerifiedProject(project),
-  ]);
+  const guests = await listRsvpExportGuestsForVerifiedProject(project);
+  const analytics = createRsvpAnalyticsViewModel(guests);
+
   return createRsvpResponseXlsx({
-    guestbookGuestIds: new Set(
-      guestbook.entries.flatMap((entry) => (entry.guestId ? [entry.guestId] : [])),
+    rows: analytics.responseRows,
+    whatsappPhoneE164ByGuestId: new Map(
+      guests.map((guest) => [guest.id, guest.whatsapp_phone_e164]),
     ),
-    rows: analytics.analytics.responseRows,
   });
 }

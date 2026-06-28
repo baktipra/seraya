@@ -17,10 +17,10 @@ function rsvpStatus(value: RsvpResponseRow['rsvpStatus']) {
   return 'Belum merespons';
 }
 
-/** Private owner export for response follow-up. It accepts no link material or contact data. */
+/** Private owner export with RSVP data only; capability, link, and ucapan material never enter. */
 export async function createRsvpResponseXlsx(input: {
-  guestbookGuestIds: ReadonlySet<string>;
   rows: readonly RsvpResponseRow[];
+  whatsappPhoneE164ByGuestId: ReadonlyMap<string, string | null>;
 }) {
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet('Respons Tamu');
@@ -28,31 +28,23 @@ export async function createRsvpResponseXlsx(input: {
     { header: 'Nama Tamu', key: 'displayName', width: 30 },
     { header: 'Grup / Kategori', key: 'groupLabel', width: 22 },
     { header: 'Status RSVP', key: 'rsvpStatus', width: 20 },
-    { header: 'Rombongan Hadir', key: 'attendeeCount', width: 22 },
+    { header: 'Jumlah Rombongan Hadir', key: 'attendeeCount', width: 28 },
+    { header: 'Nomor WhatsApp', key: 'whatsappPhoneE164', width: 22 },
     { header: 'Terakhir Diperbarui', key: 'updatedAt', width: 24 },
-    { header: 'Status Tindak Lanjut', key: 'followUp', width: 28 },
   ];
   styleHeader(sheet.getRow(1));
 
   for (const row of input.rows) {
-    const followUp =
-      row.rsvpStatus === 'pending'
-        ? 'Belum merespons RSVP'
-        : input.guestbookGuestIds.has(row.guestId)
-          ? 'Ada ucapan'
-          : 'Respons tercatat';
     sheet.addRow({
       attendeeCount:
-        row.rsvpStatus === 'attending'
-          ? row.rsvpAttendeeCount === null
-            ? 'Belum dicantumkan'
-            : row.rsvpAttendeeCount
-          : '—',
+        row.rsvpStatus === 'attending' && row.rsvpAttendeeCount !== null
+          ? row.rsvpAttendeeCount
+          : '',
       displayName: row.displayName,
-      followUp,
       groupLabel: row.groupLabel ?? '',
       rsvpStatus: rsvpStatus(row.rsvpStatus),
       updatedAt: row.updatedAt,
+      whatsappPhoneE164: input.whatsappPhoneE164ByGuestId.get(row.guestId) ?? '',
     });
   }
 

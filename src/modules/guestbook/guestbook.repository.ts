@@ -7,7 +7,7 @@ import { createPublicSupabaseClient } from '@/server/supabase/public';
 import type { OwnerGuestbookEntry, PersonalGuestbookEntry } from './guestbook.types';
 
 const ownerGuestbookSelect =
-  'id, guest_id, message, updated_at, guests!inner(display_name, project_id, deleted_at)';
+  'id, guest_id, message, created_at, updated_at, guests!inner(display_name, group_label, project_id, deleted_at)';
 
 export class GuestbookRepositoryError extends Error {
   constructor() {
@@ -27,7 +27,7 @@ export async function listGuestbookEntriesForVerifiedProject(
     .eq('guests.project_id', project.id)
     .is('deleted_at', null)
     .is('guests.deleted_at', null)
-    .order('updated_at', { ascending: false });
+    .order('created_at', { ascending: false });
 
   if (error) {
     throw new GuestbookRepositoryError();
@@ -40,6 +40,7 @@ export async function listGuestbookEntriesForVerifiedProject(
       !guest ||
       typeof record.id !== 'string' ||
       typeof record.message !== 'string' ||
+      typeof record.created_at !== 'string' ||
       typeof record.updated_at !== 'string' ||
       typeof guest.display_name !== 'string'
     ) {
@@ -48,6 +49,8 @@ export async function listGuestbookEntriesForVerifiedProject(
 
     return [
       {
+        createdAt: record.created_at,
+        groupLabel: typeof guest.group_label === 'string' ? guest.group_label : null,
         guestDisplayName: guest.display_name,
         guestId: typeof record.guest_id === 'string' ? record.guest_id : undefined,
         id: record.id,
