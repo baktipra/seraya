@@ -16,6 +16,7 @@ vi.mock('@/design-system', async (importOriginal) => {
 
 import { GuestManager } from '@/components/projects/guest-manager';
 import { ToastProvider } from '@/design-system';
+import { initialDeliveryBatchActionState } from '@/modules/delivery/delivery.action-state';
 
 const projectId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 
@@ -23,7 +24,11 @@ describe('SRY-036 owner XLSX import preparation UI', () => {
   it('makes Excel the recommended path, preserves CSV as an alternate, and points successful preparation toward Delivery Center', () => {
     const html = renderToStaticMarkup(
       <ToastProvider>
-        <GuestManager initialGuests={[]} projectId={projectId} />
+        <GuestManager
+          initialGuests={[]}
+          prepareBatchAction={async () => initialDeliveryBatchActionState}
+          projectId={projectId}
+        />
       </ToastProvider>,
     );
 

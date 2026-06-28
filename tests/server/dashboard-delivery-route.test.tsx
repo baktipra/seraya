@@ -34,8 +34,10 @@ vi.mock('@/modules/auth/dashboard-request-context', () => ({
   getOwnedProjectContextForRequest: getOwnedProjectContextMock,
 }));
 vi.mock('@/modules/delivery/delivery.actions', () => ({
+  copySelectedDeliveryWhatsAppNumbersAction: vi.fn(),
   prepareMissingPersonalGuestLinksForDeliveryAction: vi.fn(),
   preparePersonalGuestLinkForDeliveryAction: vi.fn(),
+  reaccessPersonalGuestLinkForDeliveryAction: vi.fn(),
 }));
 vi.mock('@/modules/delivery/delivery.service', () => ({
   getGuestDeliveryCenterForVerifiedProject: getDeliveryCenterMock,

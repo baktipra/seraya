@@ -3,7 +3,11 @@ import 'server-only';
 import { createAdminSupabaseClient } from '@/server/supabase/admin';
 import { createPublicSupabaseClient } from '@/server/supabase/public';
 
-import type { GuestLinkStateRecord, LatestGuestLinkStateRecord } from './guest-link.types';
+import type {
+  ActiveRecoverableGuestLinkRecord,
+  GuestLinkStateRecord,
+  LatestGuestLinkStateRecord,
+} from './guest-link.types';
 
 const ownerStateSelect = 'guest_id, status';
 
@@ -42,9 +46,9 @@ export async function listGuestLinkStatesForVerifiedGuestIds(guestIds: string[])
 }
 
 /**
- * Owner delivery projection. The relationship embed limits guest_links to the
- * latest status-only row per already-verified active guest. It never selects
- * raw capability material, hashes, or a guest-link history list.
+ * Owner delivery projection. It reads only status and nullable key-version
+ * metadata to derive a boolean recoverability fact. Ciphertext, hash, raw token,
+ * and raw URL never enter this list query or browser DTO.
  */
 export async function listLatestGuestLinkStatesForVerifiedGuestIds(guestIds: string[]) {
   if (guestIds.length === 0) {
@@ -54,7 +58,7 @@ export async function listLatestGuestLinkStatesForVerifiedGuestIds(guestIds: str
   const supabase = createAdminSupabaseClient();
   const { data, error } = await supabase
     .from('guests')
-    .select('id, guest_links(status, created_at)')
+    .select('id, guest_links(status, created_at, token_key_version)')
     .in('id', guestIds)
     .is('deleted_at', null)
     .order('created_at', { ascending: false, foreignTable: 'guest_links' })
@@ -73,6 +77,8 @@ export async function listLatestGuestLinkStatesForVerifiedGuestIds(guestIds: str
           {
             created_at: latestLink.created_at,
             guest_id: guest.id,
+            hasRecoverableCapability:
+              latestLink.status === 'active' && latestLink.token_key_version !== null,
             status: latestLink.status,
           },
         ]
@@ -80,7 +86,27 @@ export async function listLatestGuestLinkStatesForVerifiedGuestIds(guestIds: str
   }) as LatestGuestLinkStateRecord[];
 }
 
-/** Atomic, service-role-only mutation after Server Action ownership verification. */
+/**
+ * Fetches encrypted capability material only after a service has independently
+ * verified owner, project, and active-guest scope. Never call from a list path.
+ */
+export async function getActiveRecoverableGuestLinkRecordForVerifiedGuest(guestId: string) {
+  const supabase = createAdminSupabaseClient();
+  const { data, error } = await supabase
+    .from('guest_links')
+    .select('guest_id, token_hash, token_ciphertext, token_key_version')
+    .eq('guest_id', guestId)
+    .eq('status', 'active')
+    .maybeSingle();
+
+  if (error) {
+    throw new GuestLinkRepositoryError();
+  }
+
+  return (data ?? null) as ActiveRecoverableGuestLinkRecord | null;
+}
+
+/** Legacy low-level authority retained for historical callers only. */
 export async function replacePersonalGuestLinkForVerifiedGuest(input: {
   guestId: string;
   tokenHash: string;
@@ -96,10 +122,27 @@ export async function replacePersonalGuestLinkForVerifiedGuest(input: {
   }
 }
 
-/**
- * Atomic batch-only creation. Unlike the existing replacement authority, this
- * preserves an active capability that may have been created concurrently.
- */
+/** Atomic owner replacement that persists hash plus encrypted capability material. */
+export async function replacePersonalGuestLinkWithCiphertextForVerifiedGuest(input: {
+  guestId: string;
+  tokenCiphertext: string;
+  tokenHash: string;
+  tokenKeyVersion: number;
+}) {
+  const supabase = createAdminSupabaseClient();
+  const { error } = await supabase.rpc('replace_personal_guest_link_with_ciphertext_for_server', {
+    new_token_ciphertext: input.tokenCiphertext,
+    new_token_hash: input.tokenHash,
+    new_token_key_version: input.tokenKeyVersion,
+    target_guest_id: input.guestId,
+  });
+
+  if (error) {
+    throw new GuestLinkRepositoryError();
+  }
+}
+
+/** Legacy batch authority retained for historical callers only. */
 export async function createPersonalGuestLinkIfNoneActiveForVerifiedGuest(input: {
   guestId: string;
   tokenHash: string;
@@ -109,6 +152,33 @@ export async function createPersonalGuestLinkIfNoneActiveForVerifiedGuest(input:
     new_token_hash: input.tokenHash,
     target_guest_id: input.guestId,
   });
+
+  if (error?.code === 'P0001') {
+    throw new GuestLinkActiveLinkExistsError();
+  }
+
+  if (error) {
+    throw new GuestLinkRepositoryError();
+  }
+}
+
+/** Atomic batch-only creation without replacing a concurrently active capability. */
+export async function createPersonalGuestLinkIfNoneActiveWithCiphertextForVerifiedGuest(input: {
+  guestId: string;
+  tokenCiphertext: string;
+  tokenHash: string;
+  tokenKeyVersion: number;
+}) {
+  const supabase = createAdminSupabaseClient();
+  const { error } = await supabase.rpc(
+    'create_personal_guest_link_if_none_active_with_ciphertext_for_server',
+    {
+      new_token_ciphertext: input.tokenCiphertext,
+      new_token_hash: input.tokenHash,
+      new_token_key_version: input.tokenKeyVersion,
+      target_guest_id: input.guestId,
+    },
+  );
 
   if (error?.code === 'P0001') {
     throw new GuestLinkActiveLinkExistsError();

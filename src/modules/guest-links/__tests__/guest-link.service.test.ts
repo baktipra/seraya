@@ -4,6 +4,7 @@ import { GuestAccessDeniedError } from '@/modules/guests/guest.policy';
 
 const {
   createIfNoneActiveLinkMock,
+  getActiveRecoverableLinkMock,
   getGuestMock,
   getOwnedProjectMock,
   replaceLinkMock,
@@ -11,6 +12,7 @@ const {
   revokeLinkMock,
 } = vi.hoisted(() => ({
   createIfNoneActiveLinkMock: vi.fn(),
+  getActiveRecoverableLinkMock: vi.fn(),
   getGuestMock: vi.fn(),
   getOwnedProjectMock: vi.fn(),
   replaceLinkMock: vi.fn(),
@@ -28,16 +30,21 @@ vi.mock('@/modules/guests/guest.repository', () => ({
 vi.mock('../guest-link.repository', () => ({
   GuestLinkActiveLinkExistsError: class GuestLinkActiveLinkExistsError extends Error {},
   GuestLinkRepositoryError: class GuestLinkRepositoryError extends Error {},
-  createPersonalGuestLinkIfNoneActiveForVerifiedGuest: createIfNoneActiveLinkMock,
-  replacePersonalGuestLinkForVerifiedGuest: replaceLinkMock,
+  createPersonalGuestLinkIfNoneActiveWithCiphertextForVerifiedGuest: createIfNoneActiveLinkMock,
+  getActiveRecoverableGuestLinkRecordForVerifiedGuest: getActiveRecoverableLinkMock,
+  replacePersonalGuestLinkWithCiphertextForVerifiedGuest: replaceLinkMock,
   revokePersonalGuestLinkForVerifiedGuest: revokeLinkMock,
 }));
 
 import {
   createOrReplacePersonalGuestLinkForCurrentUser,
+  GuestLinkLegacyUpgradeRequiredError,
   preparePersonalGuestLinkForVerifiedGuestWithoutReveal,
+  reaccessPersonalGuestLinkForCurrentUser,
   revokePersonalGuestLinkForCurrentUser,
 } from '../guest-link.service';
+import { encryptPersonalGuestToken } from '../guest-link-encryption';
+import { generatePersonalGuestToken, hashPersonalGuestToken } from '../guest-link-token';
 
 const project = {
   account_id: '11111111-1111-1111-1111-111111111111',
@@ -69,6 +76,7 @@ describe('SRY-013 owner personal-link service ownership guard', () => {
   beforeEach(() => {
     process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000';
     createIfNoneActiveLinkMock.mockReset();
+    getActiveRecoverableLinkMock.mockReset();
     getGuestMock.mockReset();
     getOwnedProjectMock.mockReset();
     replaceLinkMock.mockReset();
@@ -106,6 +114,8 @@ describe('SRY-013 owner personal-link service ownership guard', () => {
     expect(createIfNoneActiveLinkMock).toHaveBeenCalledWith({
       guestId: guest.id,
       tokenHash: expect.stringMatching(/^[0-9a-f]{64}$/),
+      tokenCiphertext: expect.stringMatching(/^v1\./),
+      tokenKeyVersion: 1,
     });
     expect(replaceLinkMock).not.toHaveBeenCalled();
   });
@@ -123,11 +133,60 @@ describe('SRY-013 owner personal-link service ownership guard', () => {
       expect.objectContaining({
         guestId: guest.id,
         tokenHash: expect.stringMatching(/^[0-9a-f]{64}$/),
+        tokenCiphertext: expect.stringMatching(/^v1\./),
+        tokenKeyVersion: 1,
       }),
     );
     expect(result.personalUrl).toMatch(
       /^http:\/\/localhost:3000\/raka-nadia\/g\/[A-Za-z0-9_-]{43}$/,
     );
     expect(result.recipientWhatsAppPhoneE164).toBe('+6281234567890');
+  });
+
+  it('re-accesses only an owner-authorized recoverable active link and verifies its hash', async () => {
+    getGuestMock.mockResolvedValue(guest);
+    const token = generatePersonalGuestToken();
+    const encrypted = encryptPersonalGuestToken(token);
+    getActiveRecoverableLinkMock.mockResolvedValue({
+      guest_id: guest.id,
+      token_ciphertext: encrypted.ciphertext,
+      token_hash: hashPersonalGuestToken(token),
+      token_key_version: encrypted.keyVersion,
+    });
+
+    await expect(
+      reaccessPersonalGuestLinkForCurrentUser({ guestId: guest.id, projectId: project.id }),
+    ).resolves.toEqual({
+      personalUrl: `http://localhost:3000/raka-nadia/g/${token}`,
+      recipientWhatsAppPhoneE164: '+6281234567890',
+    });
+
+    expect(getActiveRecoverableLinkMock).toHaveBeenCalledWith(guest.id);
+  });
+
+  it('never selects encrypted material for a guessed guest outside the verified project', async () => {
+    getGuestMock.mockResolvedValue(null);
+
+    await expect(
+      reaccessPersonalGuestLinkForCurrentUser({ guestId: guest.id, projectId: project.id }),
+    ).rejects.toBeInstanceOf(GuestAccessDeniedError);
+
+    expect(getActiveRecoverableLinkMock).not.toHaveBeenCalled();
+  });
+
+  it('keeps legacy hashed-only active links valid but requires explicit replacement before re-access', async () => {
+    getGuestMock.mockResolvedValue(guest);
+    getActiveRecoverableLinkMock.mockResolvedValue({
+      guest_id: guest.id,
+      token_ciphertext: null,
+      token_hash: 'a'.repeat(64),
+      token_key_version: null,
+    });
+
+    await expect(
+      reaccessPersonalGuestLinkForCurrentUser({ guestId: guest.id, projectId: project.id }),
+    ).rejects.toBeInstanceOf(GuestLinkLegacyUpgradeRequiredError);
+
+    expect(replaceLinkMock).not.toHaveBeenCalled();
   });
 });

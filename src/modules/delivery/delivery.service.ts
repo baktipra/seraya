@@ -3,8 +3,9 @@ import 'server-only';
 import { requireCurrentUser } from '@/modules/auth/current-user';
 import {
   createOrReplacePersonalGuestLinkForVerifiedGuest,
-  getLatestPersonalGuestLinkStateForVerifiedGuest,
   GuestLinkActiveLinkExistsError,
+  reaccessPersonalGuestLinkForCurrentUser,
+  getLatestPersonalGuestLinkStateForVerifiedGuest,
   preparePersonalGuestLinkForVerifiedGuestWithoutReveal,
 } from '@/modules/guest-links/guest-link.service';
 import { listLatestGuestLinkStatesForVerifiedGuestIds } from '@/modules/guest-links/guest-link.repository';
@@ -12,6 +13,8 @@ import type { LatestGuestLinkStateRecord } from '@/modules/guest-links/guest-lin
 import { assertGuestBelongsToProject, GuestAccessDeniedError } from '@/modules/guests/guest.policy';
 import { getActiveGuestForVerifiedProjectWithAdmin } from '@/modules/guests/guest.repository';
 import { hasCurrentPublishedInvitationForVerifiedProject } from '@/modules/publications/publication.repository';
+
+import { createDeliveryReadinessXlsx } from './delivery-xlsx';
 import { getOwnedProjectById, type OwnedProject } from '@/modules/projects/project.repository';
 
 import {
@@ -44,21 +47,27 @@ export class DeliveryActiveLinkConfirmationRequiredError extends Error {
   }
 }
 
+type LatestLinkState = {
+  hasRecoverableCapability: boolean;
+  state: DeliveryPersonalLinkState;
+};
+
 function getLatestLinkStates(records: LatestGuestLinkStateRecord[]) {
   const latestRecords = new Map<string, LatestGuestLinkStateRecord>();
 
   for (const record of records) {
     const current = latestRecords.get(record.guest_id);
-
     if (!current || record.created_at > current.created_at) {
       latestRecords.set(record.guest_id, record);
     }
   }
 
-  const latestStates = new Map<string, DeliveryPersonalLinkState>();
-
+  const latestStates = new Map<string, LatestLinkState>();
   for (const [guestId, record] of latestRecords) {
-    latestStates.set(guestId, record.status);
+    latestStates.set(guestId, {
+      hasRecoverableCapability: record.hasRecoverableCapability === true,
+      state: record.status,
+    });
   }
 
   return latestStates;
@@ -75,8 +84,9 @@ export function maskDeliveryWhatsAppPhone(phone: string): string {
 
 function mapDeliveryGuestRow(
   guest: DeliveryGuestRecord,
-  personalLinkState: DeliveryPersonalLinkState,
+  link: LatestLinkState | undefined,
 ): DeliveryGuestActionRow {
+  const personalLinkState = link?.state ?? 'not_created';
   const whatsappPhone = guest.whatsapp_phone_e164;
 
   return {
@@ -84,7 +94,14 @@ function mapDeliveryGuestRow(
     groupLabel: guest.group_label,
     guestId: guest.id,
     maskedWhatsAppNumber: whatsappPhone ? maskDeliveryWhatsAppPhone(whatsappPhone) : null,
+    personalLinkReaccessState:
+      personalLinkState !== 'active'
+        ? 'unavailable'
+        : link?.hasRecoverableCapability
+          ? 'recoverable'
+          : 'legacy',
     personalLinkState,
+    rsvpStatus: guest.rsvp_status,
     whatsappAvailability: whatsappPhone ? 'available' : 'missing',
   };
 }
@@ -93,7 +110,6 @@ function createReadinessSummary(rows: DeliveryGuestRow[]): DeliveryReadinessSumm
   return rows.reduce<DeliveryReadinessSummary>(
     (summary, row) => {
       const readyToShare = hasActivePersonalLink(row.personalLinkState);
-
       return {
         activeGuestCount: summary.activeGuestCount + 1,
         activePersonalLinkCount: summary.activePersonalLinkCount + (readyToShare ? 1 : 0),
@@ -120,14 +136,10 @@ async function getDeliveryGuestsWithLatestStates(project: OwnedProject) {
   const latestLinkStates = getLatestLinkStates(
     await listLatestGuestLinkStatesForVerifiedGuestIds(guests.map((guest) => guest.id)),
   );
-
   return { guests, latestLinkStates };
 }
 
-/**
- * Private owner delivery data. It is intentionally one guest query, one
- * bounded link-state batch, and one narrow current-publication existence check.
- */
+/** Private owner delivery data: one guest query, one bounded status batch, one publication check. */
 export async function getGuestDeliveryCenterForVerifiedProject(
   project: OwnedProject,
 ): Promise<OwnedGuestDeliveryCenter> {
@@ -135,20 +147,10 @@ export async function getGuestDeliveryCenterForVerifiedProject(
     getDeliveryGuestsWithLatestStates(project),
     hasCurrentPublishedInvitationForVerifiedProject(project),
   ]);
-
-  const rows = guests.map((guest) =>
-    mapDeliveryGuestRow(guest, latestLinkStates.get(guest.id) ?? 'not_created'),
-  );
-
-  return {
-    isPublished,
-    project,
-    rows,
-    summary: createReadinessSummary(rows),
-  };
+  const rows = guests.map((guest) => mapDeliveryGuestRow(guest, latestLinkStates.get(guest.id)));
+  return { isPublished, project, rows, summary: createReadinessSummary(rows) };
 }
 
-/** Standalone owner-scoped delivery loader for non-RSC callers. */
 export async function getGuestDeliveryCenterForCurrentUser(
   projectId: string,
 ): Promise<OwnedGuestDeliveryCenter> {
@@ -157,11 +159,7 @@ export async function getGuestDeliveryCenterForCurrentUser(
   return getGuestDeliveryCenterForVerifiedProject(project);
 }
 
-/**
- * Delivery-only command gate. The existing low-level personal-link authority is
- * reused after owner, guest, current publication, and active-link confirmation
- * checks have all completed server-side.
- */
+/** Delivery-only command gate for explicit create/replacement. */
 export async function preparePersonalGuestLinkForDeliveryForCurrentUser(input: {
   confirmActiveReplacement: boolean;
   guestId: string;
@@ -173,108 +171,130 @@ export async function preparePersonalGuestLinkForDeliveryForCurrentUser(input: {
     await getActiveGuestForVerifiedProjectWithAdmin(project, input.guestId),
     project.id,
   );
-
   const isPublished = await hasCurrentPublishedInvitationForVerifiedProject(project);
-
   if (!isPublished) {
     throw new DeliveryPublicationRequiredError();
   }
-
   const currentLinkState = await getLatestPersonalGuestLinkStateForVerifiedGuest(guest.id);
-
   if (currentLinkState === 'active' && !input.confirmActiveReplacement) {
     throw new DeliveryActiveLinkConfirmationRequiredError();
   }
-
   return createOrReplacePersonalGuestLinkForVerifiedGuest({ guest, project });
+}
+
+/** Explicit owner re-access used only by a per-row Delivery Center action. */
+export async function reaccessPersonalGuestLinkForDeliveryForCurrentUser(input: {
+  guestId: string;
+  projectId: string;
+}) {
+  const user = await requireCurrentUser();
+  const project = await getOwnedProjectById(input.projectId, user.id);
+  const isPublished = await hasCurrentPublishedInvitationForVerifiedProject(project);
+  if (!isPublished) {
+    throw new DeliveryPublicationRequiredError();
+  }
+  // The guest ownership assertion happens again in the link service before decrypt.
+  return reaccessPersonalGuestLinkForCurrentUser(input);
 }
 
 async function settlePreparationBatch(
   project: OwnedProject,
   guests: DeliveryGuestRecord[],
-): Promise<{
-  createdCount: number;
-  failedCount: number;
-  skippedActiveLinkCount: number;
-  whatsappMissingCreatedCount: number;
-}> {
-  let nextIndex = 0;
+): Promise<DeliveryBatchPreparationResult> {
   let createdCount = 0;
   let failedCount = 0;
   let skippedActiveLinkCount = 0;
   let whatsappMissingCreatedCount = 0;
+  let index = 0;
 
   async function worker() {
-    while (true) {
-      const currentIndex = nextIndex;
-      nextIndex += 1;
-      const guest = guests[currentIndex];
-
-      if (!guest) {
-        return;
-      }
-
+    while (index < guests.length) {
+      const guest = guests[index++];
+      if (!guest) continue;
       try {
         await preparePersonalGuestLinkForVerifiedGuestWithoutReveal({ guest, project });
         createdCount += 1;
-
-        if (!guest.whatsapp_phone_e164) {
-          whatsappMissingCreatedCount += 1;
-        }
+        if (!guest.whatsapp_phone_e164) whatsappMissingCreatedCount += 1;
       } catch (error) {
         if (error instanceof GuestLinkActiveLinkExistsError) {
           skippedActiveLinkCount += 1;
-          continue;
+        } else {
+          failedCount += 1;
+          console.error('Seraya delivery batch personal-link preparation item failed.', {
+            errorName: error instanceof Error ? error.name : 'UnknownError',
+          });
         }
-
-        failedCount += 1;
-        console.error('Seraya delivery batch personal-link preparation item failed.', {
-          errorName: error instanceof Error ? error.name : 'UnknownError',
-        });
       }
     }
   }
 
   await Promise.all(
-    Array.from({ length: Math.min(DELIVERY_BATCH_CONCURRENCY, guests.length) }, () => worker()),
+    Array.from({ length: Math.min(DELIVERY_BATCH_CONCURRENCY, guests.length) }, worker),
   );
-
   return { createdCount, failedCount, skippedActiveLinkCount, whatsappMissingCreatedCount };
 }
 
-/**
- * Creates active personal-link state only for owner-scoped active guests that
- * did not have an active link in the bounded status projection. It intentionally
- * discards every raw token/URL; manual sharing remains a per-guest one-time
- * flow through the existing Delivery Center action.
- */
+/** Batch authority returns aggregate-only results and never reveals capability material. */
 export async function prepareMissingPersonalGuestLinksForDeliveryForCurrentUser(input: {
+  guestIds?: string[];
   projectId: string;
-}): Promise<DeliveryBatchPreparationResult> {
+}) {
   const user = await requireCurrentUser();
   const project = await getOwnedProjectById(input.projectId, user.id);
-  const [isPublished, { guests, latestLinkStates }] = await Promise.all([
-    hasCurrentPublishedInvitationForVerifiedProject(project),
-    getDeliveryGuestsWithLatestStates(project),
-  ]);
+  const isPublished = await hasCurrentPublishedInvitationForVerifiedProject(project);
+  if (!isPublished) throw new DeliveryPublicationRequiredError();
 
-  if (!isPublished) {
-    throw new DeliveryPublicationRequiredError();
-  }
-
-  const guestsWithActiveLinks = guests.filter(
-    (guest) => (latestLinkStates.get(guest.id) ?? 'not_created') === 'active',
-  );
-  const eligibleGuests = guests.filter(
-    (guest) => (latestLinkStates.get(guest.id) ?? 'not_created') !== 'active',
-  );
+  const { guests, latestLinkStates } = await getDeliveryGuestsWithLatestStates(project);
+  const selected = input.guestIds ? new Set(input.guestIds) : null;
+  const eligibleGuests = guests.filter((guest) => {
+    const state = latestLinkStates.get(guest.id)?.state ?? 'not_created';
+    return state !== 'active' && (!selected || selected.has(guest.id));
+  });
+  const skippedActiveLinkCount = guests.filter((guest) => {
+    const state = latestLinkStates.get(guest.id)?.state ?? 'not_created';
+    return state === 'active' && (!selected || selected.has(guest.id));
+  }).length;
 
   const result = await settlePreparationBatch(project, eligibleGuests);
-
   return {
     ...result,
-    skippedActiveLinkCount: guestsWithActiveLinks.length + result.skippedActiveLinkCount,
+    skippedActiveLinkCount: result.skippedActiveLinkCount + skippedActiveLinkCount,
   };
+}
+
+/** Owner-only numbers for a local clipboard action. It does not send or open WhatsApp. */
+/** Owner-only XLSX delivery export, intersected with the verified project delivery list. */
+export async function getDeliveryReadinessXlsxForCurrentUser(input: {
+  guestIds: string[];
+  projectId: string;
+}): Promise<Uint8Array> {
+  const user = await requireCurrentUser();
+  const project = await getOwnedProjectById(input.projectId, user.id);
+  const { guests, latestLinkStates } = await getDeliveryGuestsWithLatestStates(project);
+  const selected = new Set(input.guestIds);
+  const exportGuests =
+    input.guestIds.length === 0 ? guests : guests.filter((guest) => selected.has(guest.id));
+  const rows = exportGuests.map((guest) => {
+    const row = mapDeliveryGuestRow(guest, latestLinkStates.get(guest.id));
+    return {
+      ...row,
+      whatsappPhoneE164: guest.whatsapp_phone_e164,
+    };
+  });
+  return createDeliveryReadinessXlsx(rows);
+}
+
+export async function getSelectedDeliveryWhatsAppNumbersForCurrentUser(input: {
+  guestIds: string[];
+  projectId: string;
+}) {
+  const user = await requireCurrentUser();
+  const project = await getOwnedProjectById(input.projectId, user.id);
+  const selected = new Set(input.guestIds);
+  const guests = await listActiveDeliveryGuestsForVerifiedProject(project);
+  return guests
+    .filter((guest) => selected.has(guest.id))
+    .flatMap((guest) => (guest.whatsapp_phone_e164 ? [guest.whatsapp_phone_e164] : []));
 }
 
 export function isDeliveryFailure(error: unknown) {

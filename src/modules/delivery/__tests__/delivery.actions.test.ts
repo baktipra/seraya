@@ -5,16 +5,20 @@ const {
   DeliveryPublicationRequiredError,
   GuestAccessDeniedError,
   ProjectAccessDeniedError,
+  copyNumbersMock,
   prepareBatchMock,
   prepareLinkMock,
+  reaccessLinkMock,
   revalidatePathMock,
 } = vi.hoisted(() => ({
   DeliveryActiveLinkConfirmationRequiredError: class DeliveryActiveLinkConfirmationRequiredError extends Error {},
   DeliveryPublicationRequiredError: class DeliveryPublicationRequiredError extends Error {},
   GuestAccessDeniedError: class GuestAccessDeniedError extends Error {},
   ProjectAccessDeniedError: class ProjectAccessDeniedError extends Error {},
+  copyNumbersMock: vi.fn(),
   prepareBatchMock: vi.fn(),
   prepareLinkMock: vi.fn(),
+  reaccessLinkMock: vi.fn(),
   revalidatePathMock: vi.fn(),
 }));
 
@@ -24,18 +28,23 @@ vi.mock('../delivery.service', () => ({
   DeliveryPublicationRequiredError,
   GuestAccessDeniedError,
   isDeliveryFailure: () => false,
+  getSelectedDeliveryWhatsAppNumbersForCurrentUser: copyNumbersMock,
   prepareMissingPersonalGuestLinksForDeliveryForCurrentUser: prepareBatchMock,
   preparePersonalGuestLinkForDeliveryForCurrentUser: prepareLinkMock,
+  reaccessPersonalGuestLinkForDeliveryForCurrentUser: reaccessLinkMock,
 }));
 vi.mock('@/modules/projects/project.policy', () => ({ ProjectAccessDeniedError }));
 
 import {
+  copySelectedDeliveryWhatsAppNumbersAction,
   prepareMissingPersonalGuestLinksForDeliveryAction,
   preparePersonalGuestLinkForDeliveryAction,
+  reaccessPersonalGuestLinkForDeliveryAction,
 } from '../delivery.actions';
 import {
   initialDeliveryBatchActionState,
   initialDeliveryLinkActionState,
+  initialDeliveryWhatsAppClipboardActionState,
 } from '../delivery.action-state';
 
 const boundInput = {
@@ -60,10 +69,26 @@ function createBatchFormData(confirmBatchPreparation = 'true') {
   return formData;
 }
 
+function createReaccessFormData(operation: 'copy' | 'open' | 'share') {
+  const formData = new FormData();
+  formData.set('operation', operation);
+  formData.set('projectId', 'attacker-controlled');
+  formData.set('guestId', 'attacker-controlled');
+  return formData;
+}
+
+function createCopyNumbersFormData(ids = [boundInput.guestId]) {
+  const formData = new FormData();
+  formData.set('selectedGuestIds', JSON.stringify(ids));
+  return formData;
+}
+
 describe('SRY-037 delivery link preparation Server Actions', () => {
   beforeEach(() => {
+    copyNumbersMock.mockReset();
     prepareBatchMock.mockReset();
     prepareLinkMock.mockReset();
+    reaccessLinkMock.mockReset();
     revalidatePathMock.mockReset();
   });
 
@@ -211,5 +236,51 @@ describe('SRY-037 delivery link preparation Server Actions', () => {
     });
 
     expect(prepareLinkMock).not.toHaveBeenCalled();
+  });
+
+  it('re-accesses an active recoverable URL only through the bound owner action and does not regenerate it', async () => {
+    reaccessLinkMock.mockResolvedValue({
+      personalUrl: 'https://seraya.example/raka-nadia/g/recoverable-token',
+      recipientWhatsAppPhoneE164: '+6281234567890',
+    });
+
+    await expect(
+      reaccessPersonalGuestLinkForDeliveryAction(
+        boundInput,
+        initialDeliveryLinkActionState,
+        createReaccessFormData('copy'),
+      ),
+    ).resolves.toEqual({
+      message: 'copy',
+      personalUrl: 'https://seraya.example/raka-nadia/g/recoverable-token',
+      recipientWhatsAppPhoneE164: '+6281234567890',
+      status: 'success',
+    });
+
+    expect(reaccessLinkMock).toHaveBeenCalledWith(boundInput);
+    expect(prepareLinkMock).not.toHaveBeenCalled();
+    expect(revalidatePathMock).not.toHaveBeenCalled();
+  });
+
+  it('returns only valid selected WhatsApp numbers for local clipboard use and never opens or sends WhatsApp', async () => {
+    copyNumbersMock.mockResolvedValue(['+6281234567890']);
+
+    await expect(
+      copySelectedDeliveryWhatsAppNumbersAction(
+        batchBoundInput,
+        initialDeliveryWhatsAppClipboardActionState,
+        createCopyNumbersFormData(),
+      ),
+    ).resolves.toEqual({
+      message: '1 Nomor WhatsApp siap disalin.',
+      numbersText: '+6281234567890',
+      status: 'success',
+    });
+
+    expect(copyNumbersMock).toHaveBeenCalledWith({
+      guestIds: [boundInput.guestId],
+      projectId: batchBoundInput.projectId,
+    });
+    expect(prepareBatchMock).not.toHaveBeenCalled();
   });
 });

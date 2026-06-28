@@ -16,6 +16,10 @@ import {
   useToast,
 } from '@/design-system';
 import {
+  initialDeliveryBatchActionState,
+  type DeliveryBatchActionState,
+} from '@/modules/delivery/delivery.action-state';
+import {
   createOrReplacePersonalGuestLinkAction,
   revokePersonalGuestLinkAction,
 } from '@/modules/guest-links/guest-link.actions';
@@ -37,8 +41,14 @@ import {
 } from '@/modules/guests/guest-import.actions';
 import type { GuestListItem, GuestRsvpStatus } from '@/modules/guests/guest.types';
 
+type BoundGuestBatchAction = (
+  previousState: DeliveryBatchActionState,
+  formData: FormData,
+) => Promise<DeliveryBatchActionState>;
+
 type GuestManagerProps = {
   initialGuests: GuestListItem[];
+  prepareBatchAction: BoundGuestBatchAction;
   projectId: string;
 };
 
@@ -54,6 +64,18 @@ const personalLinkStateLabels: Record<GuestListItem['link_state'], string> = {
   revoked: 'Dinonaktifkan',
 };
 
+function getRsvpDisplay(guest: GuestListItem): string {
+  if (guest.rsvp_status !== 'attending') {
+    return rsvpStatusLabels[guest.rsvp_status];
+  }
+
+  if (guest.rsvp_attendee_count === null) {
+    return 'Hadir — jumlah belum dikonfirmasi';
+  }
+
+  return `Hadir — ${guest.rsvp_attendee_count} dari ${guest.party_size} orang`;
+}
+
 function FieldError({ id, message }: { id: string; message?: string }) {
   if (!message) {
     return null;
@@ -63,6 +85,85 @@ function FieldError({ id, message }: { id: string; message?: string }) {
     <p className="text-seraya-status-error text-sm leading-6" id={id} role="alert">
       {message}
     </p>
+  );
+}
+
+function GuestManagerBatchPreparationDialog({
+  guestIds,
+  onOpenChange,
+  open,
+  prepareBatchAction: boundPrepareBatchAction,
+}: {
+  guestIds: string[];
+  onOpenChange: (open: boolean) => void;
+  open: boolean;
+  prepareBatchAction: BoundGuestBatchAction;
+}) {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [actionState, prepareBatchAction, pending] = useActionState(
+    boundPrepareBatchAction,
+    initialDeliveryBatchActionState,
+  );
+  const hasResult = actionState.status === 'success' || actionState.status === 'partial';
+
+  useEffect(() => {
+    if (!hasResult) {
+      return;
+    }
+
+    router.refresh();
+    toast({
+      title:
+        actionState.status === 'partial'
+          ? 'Sebagian Undangan Pribadi sudah disiapkan.'
+          : 'Undangan Pribadi sudah disiapkan.',
+      variant: actionState.status === 'partial' ? 'error' : 'success',
+    });
+  }, [actionState.status, hasResult, router, toast]);
+
+  return (
+    <Dialog
+      description="Tautan aktif yang sudah ada tidak akan diubah. Link baru tidak ditampilkan dari proses batch."
+      onOpenChange={onOpenChange}
+      open={open}
+      title={`Siapkan Undangan Pribadi untuk ${guestIds.length} tamu?`}
+    >
+      {hasResult ? (
+        <div className="space-y-5">
+          <p className="text-seraya-text-secondary text-sm leading-6">
+            {actionState.createdCount ?? 0} Undangan Pribadi berhasil disiapkan.
+          </p>
+          <div className="flex justify-end">
+            <Button onClick={() => onOpenChange(false)} type="button">
+              Selesai
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <form action={prepareBatchAction} className="space-y-5" noValidate>
+          <input name="confirmBatchPreparation" type="hidden" value="true" />
+          <input name="selectedGuestIds" type="hidden" value={JSON.stringify(guestIds)} />
+          <p className="text-seraya-text-secondary text-sm leading-6">
+            Tamu dengan link aktif tidak akan diubah. Pembagian WhatsApp tetap dilakukan manual per
+            tamu.
+          </p>
+          {actionState.status === 'error' && actionState.message ? (
+            <p className="text-seraya-status-error text-sm leading-6" role="alert">
+              {actionState.message}
+            </p>
+          ) : null}
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <Button onClick={() => onOpenChange(false)} type="button" variant="secondary">
+              Batal
+            </Button>
+            <Button loading={pending} type="submit">
+              Siapkan Undangan Pribadi
+            </Button>
+          </div>
+        </form>
+      )}
+    </Dialog>
   );
 }
 
@@ -200,44 +301,7 @@ function useGuestActionFeedback(state: SuccessActionState, options: { onSuccess:
   }, [options, router, state.message, state.status, toast]);
 }
 
-function getOwnerRsvpSummary(guest: GuestListItem) {
-  if (guest.rsvp_status !== 'attending') {
-    return rsvpStatusLabels[guest.rsvp_status];
-  }
-
-  if (guest.rsvp_attendee_count === null) {
-    return 'Hadir — jumlah belum dikonfirmasi';
-  }
-
-  return `Hadir — ${guest.rsvp_attendee_count} dari ${guest.party_size} orang`;
-}
-
-function GuestStateSummary({ guest }: { guest: GuestListItem }) {
-  return (
-    <dl className="text-seraya-text-muted grid grid-cols-1 gap-x-4 gap-y-1 text-xs leading-5 sm:grid-cols-2 sm:text-sm">
-      <div>
-        <dt className="sr-only">Status RSVP</dt>
-        <dd>
-          RSVP:{' '}
-          <span className="text-seraya-text-primary font-semibold">
-            {getOwnerRsvpSummary(guest)}
-          </span>
-        </dd>
-      </div>
-      <div>
-        <dt className="sr-only">Status tautan pribadi</dt>
-        <dd>
-          Tautan:{' '}
-          <span className="text-seraya-text-primary font-semibold">
-            {personalLinkStateLabels[guest.link_state]}
-          </span>
-        </dd>
-      </div>
-    </dl>
-  );
-}
-
-export function GuestManager({ initialGuests, projectId }: GuestManagerProps) {
+export function GuestManager({ initialGuests, prepareBatchAction, projectId }: GuestManagerProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [addOpen, setAddOpen] = useState(false);
@@ -253,6 +317,8 @@ export function GuestManager({ initialGuests, projectId }: GuestManagerProps) {
     recipientWhatsAppPhoneE164: string | null;
   } | null>(null);
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
+  const [selectedGuestIds, setSelectedGuestIds] = useState<string[]>([]);
+  const [batchOpen, setBatchOpen] = useState(false);
   const lastRevealedUrl = useRef<string | null>(null);
   const [createState, createAction, createPending] = useActionState(
     createGuestAction,
@@ -343,6 +409,52 @@ export function GuestManager({ initialGuests, projectId }: GuestManagerProps) {
     }
   }
 
+  const allGuestIds = initialGuests.map((guest) => guest.id);
+  const allSelected = allGuestIds.length > 0 && selectedGuestIds.length === allGuestIds.length;
+  const selectedGuests = initialGuests.filter((guest) => selectedGuestIds.includes(guest.id));
+  const selectedEligibleIds = selectedGuests
+    .filter((guest) => guest.link_state !== 'active')
+    .map((guest) => guest.id);
+
+  function toggleGuestSelection(guestId: string) {
+    setSelectedGuestIds((current) =>
+      current.includes(guestId) ? current.filter((id) => id !== guestId) : [...current, guestId],
+    );
+  }
+
+  function toggleAllGuests() {
+    setSelectedGuestIds(allSelected ? [] : allGuestIds);
+  }
+
+  async function exportSelectedGuests() {
+    try {
+      const response = await fetch(`/dashboard/${projectId}/guests/export-xlsx`, {
+        body: JSON.stringify({
+          guestIds: selectedGuestIds.length ? selectedGuestIds : allGuestIds,
+        }),
+        headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        throw new Error('Guest export unavailable');
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.download = 'seraya-daftar-tamu.xlsx';
+      anchor.href = url;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      toast({
+        title: 'Export Excel belum bisa disiapkan. Coba lagi beberapa saat lagi.',
+        variant: 'error',
+      });
+    }
+  }
+
   return (
     <Card aria-labelledby="guest-manager-title" className="max-w-4xl overflow-hidden">
       <div className="bg-seraya-brand-soft px-5 py-7 sm:px-8 sm:py-9">
@@ -370,12 +482,14 @@ export function GuestManager({ initialGuests, projectId }: GuestManagerProps) {
           </CardDescription>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
-          <a
-            className="border-seraya-border-default bg-seraya-surface text-seraya-text-primary hover:border-seraya-border-strong hover:bg-seraya-canvas focus-visible:outline-seraya-focus-ring inline-flex min-h-11 items-center justify-center rounded-[var(--seraya-radius-md)] border px-4 text-sm font-semibold transition-colors duration-200 focus-visible:outline-3 focus-visible:outline-offset-2"
-            href={`/dashboard/${projectId}/guests/export`}
+          <Button
+            onClick={() => void exportSelectedGuests()}
+            size="lg"
+            type="button"
+            variant="secondary"
           >
-            Export CSV
-          </a>
+            Export Excel (.xlsx)
+          </Button>
           <Button
             onClick={() => {
               setImportMode('xlsx');
@@ -395,68 +509,138 @@ export function GuestManager({ initialGuests, projectId }: GuestManagerProps) {
 
       <CardContent className="space-y-5 pt-5 sm:pt-6">
         {initialGuests.length > 0 ? (
-          <ul className="divide-seraya-border-default overflow-hidden rounded-[var(--seraya-radius-md)] border">
-            {initialGuests.map((guest) => (
-              <li
-                className="bg-seraya-surface flex flex-col gap-4 px-4 py-4 lg:flex-row lg:items-center lg:justify-between"
-                key={guest.id}
-              >
-                <div className="min-w-0 space-y-1">
-                  <p className="text-seraya-text-primary truncate text-base font-semibold">
-                    {guest.display_name}
-                  </p>
-                  <p className="text-seraya-text-muted text-sm leading-6">
-                    {guest.group_label ? `${guest.group_label} · ` : ''}
-                    {guest.party_size} orang
-                  </p>
-                  {guest.whatsapp_phone_e164 ? (
-                    <p className="text-seraya-text-muted text-sm leading-6">
-                      WhatsApp: {guest.whatsapp_phone_e164}
-                    </p>
-                  ) : null}
-                  <GuestStateSummary guest={guest} />
-                </div>
-                <div className="flex shrink-0 flex-wrap gap-2">
-                  <Button
-                    onClick={() => setLinkGuest(guest)}
-                    size="sm"
-                    type="button"
-                    variant="secondary"
-                  >
-                    {guest.link_state === 'active'
-                      ? 'Buat ulang tautan pribadi'
-                      : 'Buat tautan pribadi'}
-                  </Button>
-                  {guest.link_state === 'active' ? (
-                    <Button
-                      onClick={() => setRevokeLinkGuest(guest)}
-                      size="sm"
-                      type="button"
-                      variant="text"
-                    >
-                      Nonaktifkan tautan
-                    </Button>
-                  ) : null}
-                  <Button
-                    onClick={() => setEditGuest(guest)}
-                    size="sm"
-                    type="button"
-                    variant="secondary"
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    onClick={() => setRemoveGuest(guest)}
-                    size="sm"
-                    type="button"
-                    variant="text"
-                  >
-                    Hapus
-                  </Button>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <>
+            <div className="border-seraya-border-default overflow-x-auto rounded-[var(--seraya-radius-md)] border">
+              <table className="w-full min-w-[1080px] border-collapse text-left text-sm">
+                <thead className="bg-seraya-canvas text-seraya-text-muted text-xs font-semibold tracking-[0.06em] uppercase">
+                  <tr>
+                    <th className="w-12 px-4 py-3">
+                      <input
+                        aria-label="Pilih semua tamu pada hasil aktif"
+                        checked={allSelected}
+                        onChange={toggleAllGuests}
+                        type="checkbox"
+                      />
+                    </th>
+                    <th className="px-3 py-3">Nama Tamu</th>
+                    <th className="px-3 py-3">Grup</th>
+                    <th className="px-3 py-3">Rombongan</th>
+                    <th className="px-3 py-3">Nomor WhatsApp</th>
+                    <th className="px-3 py-3">RSVP</th>
+                    <th className="px-3 py-3">Undangan Pribadi</th>
+                    <th className="px-3 py-3">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-seraya-border-default bg-seraya-surface divide-y">
+                  {initialGuests.map((guest) => (
+                    <tr key={guest.id}>
+                      <td className="px-4 py-4 align-top">
+                        <input
+                          aria-label={`Pilih ${guest.display_name}`}
+                          checked={selectedGuestIds.includes(guest.id)}
+                          onChange={() => toggleGuestSelection(guest.id)}
+                          type="checkbox"
+                        />
+                      </td>
+                      <td className="text-seraya-text-primary px-3 py-4 align-top font-semibold">
+                        {guest.display_name}
+                      </td>
+                      <td className="text-seraya-text-secondary px-3 py-4 align-top">
+                        {guest.group_label ?? '—'}
+                      </td>
+                      <td className="text-seraya-text-secondary px-3 py-4 align-top">
+                        {guest.party_size}
+                      </td>
+                      <td className="text-seraya-text-secondary px-3 py-4 align-top">
+                        {guest.whatsapp_phone_e164 ?? 'Belum tersedia'}
+                      </td>
+                      <td className="text-seraya-text-secondary px-3 py-4 align-top">
+                        {getRsvpDisplay(guest)}
+                      </td>
+                      <td className="text-seraya-text-secondary px-3 py-4 align-top">
+                        {personalLinkStateLabels[guest.link_state]}
+                      </td>
+                      <td className="px-3 py-4 align-top">
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            onClick={() => setLinkGuest(guest)}
+                            size="sm"
+                            type="button"
+                            variant="secondary"
+                          >
+                            {guest.link_state === 'active'
+                              ? 'Buat ulang tautan'
+                              : 'Buat Undangan Pribadi'}
+                          </Button>
+                          {guest.link_state === 'active' ? (
+                            <Button
+                              onClick={() => setRevokeLinkGuest(guest)}
+                              size="sm"
+                              type="button"
+                              variant="text"
+                            >
+                              Nonaktifkan tautan
+                            </Button>
+                          ) : null}
+                          <Button
+                            onClick={() => setEditGuest(guest)}
+                            size="sm"
+                            type="button"
+                            variant="text"
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            onClick={() => setRemoveGuest(guest)}
+                            size="sm"
+                            type="button"
+                            variant="text"
+                          >
+                            Hapus
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="border-seraya-border-default bg-seraya-canvas sticky bottom-0 flex flex-col gap-3 rounded-[var(--seraya-radius-md)] border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+              <p aria-live="polite" className="text-seraya-text-secondary text-sm">
+                <span className="text-seraya-text-primary font-semibold">
+                  {selectedGuestIds.length} tamu terpilih
+                </span>
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  disabled={selectedEligibleIds.length === 0}
+                  onClick={() => setBatchOpen(true)}
+                  size="sm"
+                  type="button"
+                >
+                  Siapkan Undangan Pribadi
+                </Button>
+                <Button
+                  disabled={selectedGuestIds.length === 0}
+                  onClick={() => void exportSelectedGuests()}
+                  size="sm"
+                  type="button"
+                  variant="secondary"
+                >
+                  Export Excel (.xlsx)
+                </Button>
+                <Button
+                  disabled={selectedGuestIds.length === 0}
+                  onClick={() => setSelectedGuestIds([])}
+                  size="sm"
+                  type="button"
+                  variant="text"
+                >
+                  Batalkan pilihan
+                </Button>
+              </div>
+            </div>
+          </>
         ) : (
           <div className="border-seraya-border-default rounded-[var(--seraya-radius-md)] border border-dashed px-5 py-10 text-center">
             <p className="text-seraya-text-primary font-semibold">Belum ada tamu yang disiapkan.</p>
@@ -692,7 +876,7 @@ export function GuestManager({ initialGuests, projectId }: GuestManagerProps) {
       <Dialog
         description={
           linkGuest
-            ? `Tautan ini hanya akan ditampilkan sekali untuk ${linkGuest.display_name}. Simpan atau salin sebelum menutup hasilnya.`
+            ? `Tautan baru untuk ${linkGuest.display_name} siap digunakan. Simpan atau salin sekarang; selama masih aktif, tautan dapat dikelola ulang dari Delivery Center.`
             : undefined
         }
         onOpenChange={(open) => !open && setLinkGuest(null)}
@@ -726,7 +910,7 @@ export function GuestManager({ initialGuests, projectId }: GuestManagerProps) {
       </Dialog>
 
       <Dialog
-        description="Simpan tautan ini sekarang. Setelah dialog ditutup, tautan tidak dapat dibuka kembali dari daftar tamu."
+        description="Simpan atau salin tautan ini sekarang. Selama tautan masih aktif, owner dapat mengelolanya ulang dari Delivery Center."
         onOpenChange={(open) => {
           if (!open) {
             setRevealedPersonalLink(null);
@@ -750,6 +934,15 @@ export function GuestManager({ initialGuests, projectId }: GuestManagerProps) {
           />
         ) : null}
       </Dialog>
+
+      {batchOpen ? (
+        <GuestManagerBatchPreparationDialog
+          guestIds={selectedEligibleIds}
+          onOpenChange={setBatchOpen}
+          open={batchOpen}
+          prepareBatchAction={prepareBatchAction}
+        />
+      ) : null}
 
       <Dialog
         description={

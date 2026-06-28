@@ -56,7 +56,9 @@ describe('latest owner guest-link delivery projection', () => {
     limitMock.mockResolvedValue({
       data: [
         {
-          guest_links: [{ created_at: '2027-01-05T00:00:00.000Z', status: 'active' }],
+          guest_links: [
+            { created_at: '2027-01-05T00:00:00.000Z', status: 'active', token_key_version: 1 },
+          ],
           id: firstGuestId,
         },
         { guest_links: [], id: secondGuestId },
@@ -70,13 +72,16 @@ describe('latest owner guest-link delivery projection', () => {
       {
         created_at: '2027-01-05T00:00:00.000Z',
         guest_id: firstGuestId,
+        hasRecoverableCapability: true,
         status: 'active',
       },
     ]);
 
     expect(fromMock).toHaveBeenCalledTimes(1);
     expect(fromMock).toHaveBeenCalledWith('guests');
-    expect(selectMock).toHaveBeenCalledWith('id, guest_links(status, created_at)');
+    expect(selectMock).toHaveBeenCalledWith(
+      'id, guest_links(status, created_at, token_key_version)',
+    );
     expect(inMock).toHaveBeenCalledWith('id', [firstGuestId, secondGuestId]);
     expect(isMock).toHaveBeenCalledWith('deleted_at', null);
     expect(orderMock).toHaveBeenCalledWith('created_at', {

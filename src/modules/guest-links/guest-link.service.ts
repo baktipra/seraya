@@ -9,11 +9,17 @@ import { getOwnedProjectById, type OwnedProject } from '@/modules/projects/proje
 import {
   GuestLinkActiveLinkExistsError,
   GuestLinkRepositoryError,
-  createPersonalGuestLinkIfNoneActiveForVerifiedGuest,
+  createPersonalGuestLinkIfNoneActiveWithCiphertextForVerifiedGuest,
+  getActiveRecoverableGuestLinkRecordForVerifiedGuest,
   listLatestGuestLinkStatesForVerifiedGuestIds,
-  replacePersonalGuestLinkForVerifiedGuest,
+  replacePersonalGuestLinkWithCiphertextForVerifiedGuest,
   revokePersonalGuestLinkForVerifiedGuest,
 } from './guest-link.repository';
+import {
+  decryptPersonalGuestToken,
+  encryptPersonalGuestToken,
+  PersonalGuestLinkEncryptionError,
+} from './guest-link-encryption';
 import { buildPersonalGuestInvitationUrl } from './guest-link-url';
 import type { GuestPersonalLinkCurrentState } from './guest-link.types';
 import { generatePersonalGuestToken, hashPersonalGuestToken } from './guest-link-token';
@@ -25,11 +31,29 @@ export class GuestLinkUnavailableError extends Error {
   }
 }
 
+/** Active legacy links remain valid but cannot be re-accessed until an owner explicitly replaces them. */
+export class GuestLinkLegacyUpgradeRequiredError extends Error {
+  constructor() {
+    super('The active personal guest link is legacy and cannot be re-accessed.');
+    this.name = 'GuestLinkLegacyUpgradeRequiredError';
+  }
+}
+
 /** Minimum server-only guest shape required by the existing link authority. */
 export type PersonalGuestLinkPreparationTarget = Pick<
   Guest,
   'deleted_at' | 'id' | 'project_id' | 'whatsapp_phone_e164'
 >;
+
+function createEncryptedCapability(token: string) {
+  const encrypted = encryptPersonalGuestToken(token);
+
+  return {
+    tokenCiphertext: encrypted.ciphertext,
+    tokenHash: hashPersonalGuestToken(token),
+    tokenKeyVersion: encrypted.keyVersion,
+  };
+}
 
 /**
  * One private capability mutation. Raw capability material never leaves this
@@ -43,9 +67,9 @@ export async function preparePersonalGuestLinkForVerifiedGuestWithoutReveal(inpu
   const guest = assertGuestBelongsToProject(input.guest, input.project.id);
   const token = generatePersonalGuestToken();
 
-  await createPersonalGuestLinkIfNoneActiveForVerifiedGuest({
+  await createPersonalGuestLinkIfNoneActiveWithCiphertextForVerifiedGuest({
     guestId: guest.id,
-    tokenHash: hashPersonalGuestToken(token),
+    ...createEncryptedCapability(token),
   });
 }
 
@@ -61,9 +85,9 @@ export async function createOrReplacePersonalGuestLinkForVerifiedGuest(input: {
   const guest = assertGuestBelongsToProject(input.guest, input.project.id);
   const token = generatePersonalGuestToken();
 
-  await replacePersonalGuestLinkForVerifiedGuest({
+  await replacePersonalGuestLinkWithCiphertextForVerifiedGuest({
     guestId: guest.id,
-    tokenHash: hashPersonalGuestToken(token),
+    ...createEncryptedCapability(token),
   });
 
   return {
@@ -85,6 +109,46 @@ export async function createOrReplacePersonalGuestLinkForCurrentUser(input: {
   );
 
   return createOrReplacePersonalGuestLinkForVerifiedGuest({ guest, project });
+}
+
+/**
+ * Owner-only, explicit re-access. It verifies project ownership and active guest
+ * scope before selecting encrypted material, then verifies the decrypted token
+ * still matches the persisted SHA-256 authorization hash.
+ */
+export async function reaccessPersonalGuestLinkForCurrentUser(input: {
+  guestId: string;
+  projectId: string;
+}) {
+  const user = await requireCurrentUser();
+  const project = await getOwnedProjectById(input.projectId, user.id);
+  const guest = assertGuestBelongsToProject(
+    await getActiveGuestForVerifiedProjectWithAdmin(project, input.guestId),
+    project.id,
+  );
+  const link = await getActiveRecoverableGuestLinkRecordForVerifiedGuest(guest.id);
+
+  if (!link) {
+    throw new GuestLinkUnavailableError();
+  }
+
+  if (!link.token_ciphertext || link.token_key_version === null) {
+    throw new GuestLinkLegacyUpgradeRequiredError();
+  }
+
+  const token = decryptPersonalGuestToken({
+    ciphertext: link.token_ciphertext,
+    keyVersion: link.token_key_version,
+  });
+
+  if (hashPersonalGuestToken(token) !== link.token_hash) {
+    throw new GuestLinkUnavailableError();
+  }
+
+  return {
+    personalUrl: buildPersonalGuestInvitationUrl({ slug: project.slug, token }),
+    recipientWhatsAppPhoneE164: guest.whatsapp_phone_e164,
+  };
 }
 
 /** Owner-only status check for Delivery Center replacement confirmation. */
@@ -119,7 +183,11 @@ export async function revokePersonalGuestLinkForCurrentUser(input: {
 }
 
 export function isGuestLinkFailure(error: unknown) {
-  return error instanceof GuestLinkRepositoryError || error instanceof GuestLinkUnavailableError;
+  return (
+    error instanceof GuestLinkRepositoryError ||
+    error instanceof GuestLinkUnavailableError ||
+    error instanceof PersonalGuestLinkEncryptionError
+  );
 }
 
 export { GuestAccessDeniedError, GuestLinkActiveLinkExistsError };

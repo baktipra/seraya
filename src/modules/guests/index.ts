@@ -1,3 +1,4 @@
+export * from './guest-operations-xlsx';
 export * from './guest-csv';
 export * from './guest-xlsx';
 export * from './guest-import.action-state';

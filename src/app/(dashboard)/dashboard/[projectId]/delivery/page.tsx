@@ -3,8 +3,10 @@ import { notFound } from 'next/navigation';
 import { GuestDeliveryCenter } from '@/components/projects/guest-delivery-center';
 import { getOwnedProjectContextForRequest } from '@/modules/auth/dashboard-request-context';
 import {
+  copySelectedDeliveryWhatsAppNumbersAction,
   prepareMissingPersonalGuestLinksForDeliveryAction,
   preparePersonalGuestLinkForDeliveryAction,
+  reaccessPersonalGuestLinkForDeliveryAction,
 } from '@/modules/delivery/delivery.actions';
 import { getGuestDeliveryCenterForVerifiedProject } from '@/modules/delivery/delivery.service';
 import { getWeddingReadinessForRequest } from '@/modules/readiness';
@@ -83,6 +85,9 @@ export default async function DeliveryCenterPage({ params }: DeliveryCenterPageP
 
   return (
     <GuestDeliveryCenter
+      copyWhatsAppNumbersAction={copySelectedDeliveryWhatsAppNumbersAction.bind(null, {
+        projectId: deliveryCenter.project.id,
+      })}
       isPublished={deliveryCenter.isPublished}
       projectId={deliveryCenter.project.id}
       prepareBatchAction={prepareMissingPersonalGuestLinksForDeliveryAction.bind(null, {
@@ -94,6 +99,11 @@ export default async function DeliveryCenterPage({ params }: DeliveryCenterPageP
           guestId,
           projectId: deliveryCenter.project.id,
         }),
+        reaccessAction: reaccessPersonalGuestLinkForDeliveryAction.bind(null, {
+          guestId,
+          projectId: deliveryCenter.project.id,
+        }),
+        guestId,
         rowKey,
       }))}
       summary={deliveryCenter.summary}

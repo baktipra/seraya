@@ -5,9 +5,7 @@ export type DeliveryLinkActionState = {
   status: 'idle' | 'error' | 'success';
 };
 
-export const initialDeliveryLinkActionState: DeliveryLinkActionState = {
-  status: 'idle',
-};
+export const initialDeliveryLinkActionState: DeliveryLinkActionState = { status: 'idle' };
 
 /** Batch state intentionally exposes aggregate counts only, never raw capability material. */
 export type DeliveryBatchActionState = {
@@ -19,6 +17,15 @@ export type DeliveryBatchActionState = {
   whatsappMissingCreatedCount?: number;
 };
 
-export const initialDeliveryBatchActionState: DeliveryBatchActionState = {
+export const initialDeliveryBatchActionState: DeliveryBatchActionState = { status: 'idle' };
+
+/** Explicit owner clipboard action; phone values are not persisted in list DTOs or exports. */
+export type DeliveryWhatsAppClipboardActionState = {
+  message?: string;
+  numbersText?: string;
+  status: 'idle' | 'error' | 'success';
+};
+
+export const initialDeliveryWhatsAppClipboardActionState: DeliveryWhatsAppClipboardActionState = {
   status: 'idle',
 };

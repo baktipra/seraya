@@ -1,4 +1,8 @@
-import type { GuestPersonalLinkState } from '@/modules/guest-links/guest-link.types';
+import type {
+  GuestPersonalLinkReaccessState,
+  GuestPersonalLinkState,
+} from '@/modules/guest-links/guest-link.types';
+import type { GuestRsvpStatus } from '@/modules/guests/guest.types';
 import type { OwnedProject } from '@/modules/projects/project.repository';
 
 export type DeliveryPersonalLinkState = GuestPersonalLinkState | 'expired';
@@ -7,16 +11,14 @@ export type DeliveryReadinessFilter = 'all' | 'missing_whatsapp' | 'not_ready' |
 
 export type DeliveryWhatsAppAvailability = 'available' | 'missing';
 
-/**
- * Owner-private row presentation. guestId is a server-only action target and
- * must never be rendered as visible UI or returned by a public route.
- */
-/** Safe row shape for rendering in the owner browser. It intentionally has no guest ID. */
+/** Safe row shape for the owner browser. It intentionally has no token, URL, ciphertext, or key metadata. */
 export type DeliveryGuestRow = {
   displayName: string;
   groupLabel: string | null;
   maskedWhatsAppNumber: string | null;
+  personalLinkReaccessState: GuestPersonalLinkReaccessState;
   personalLinkState: DeliveryPersonalLinkState;
+  rsvpStatus: GuestRsvpStatus;
   whatsappAvailability: DeliveryWhatsAppAvailability;
 };
 

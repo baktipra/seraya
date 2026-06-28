@@ -21,6 +21,7 @@ import {
 } from './guest.repository';
 import { parseGuestImportCsvFile, serializeGuestDirectoryCsv } from './guest-csv';
 import { createGuestImportXlsxTemplate, parseGuestImportXlsxFile } from './guest-xlsx';
+import { createGuestOperationsXlsx } from './guest-operations-xlsx';
 import type { CreateGuestInput, GuestListItem, UpdateGuestInput } from './guest.types';
 
 export class GuestUnavailableError extends Error {
@@ -133,6 +134,20 @@ export async function getGuestDirectoryCsvForCurrentUser(projectId: string): Pro
   const project = await getOwnedProjectById(projectId, user.id);
   const guests = await listActiveGuestsForVerifiedProject(project);
   return serializeGuestDirectoryCsv(guests);
+}
+
+/** Owner-only XLSX operations export; selected IDs are intersected with verified active project rows. */
+export async function getGuestOperationsXlsxForCurrentUser(input: {
+  guestIds: string[];
+  projectId: string;
+}): Promise<Uint8Array> {
+  const manager = await getGuestManagerForCurrentUser(input.projectId);
+  const selected = new Set(input.guestIds);
+  const guests =
+    input.guestIds.length === 0
+      ? manager.guests
+      : manager.guests.filter((guest) => selected.has(guest.id));
+  return createGuestOperationsXlsx(guests);
 }
 
 export async function updateGuestForCurrentUser(input: {

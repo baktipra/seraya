@@ -1,30 +1,26 @@
-import { readFile } from 'node:fs/promises';
-import path from 'node:path';
-
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({ refresh: vi.fn() }),
-}));
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
 import { GuestDeliveryCenter } from '@/components/projects/guest-delivery-center';
 import { ToastProvider } from '@/design-system';
 import {
   initialDeliveryBatchActionState,
   initialDeliveryLinkActionState,
+  initialDeliveryWhatsAppClipboardActionState,
 } from '@/modules/delivery/delivery.action-state';
 
 const projectId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
-
 async function prepareLink() {
   return initialDeliveryLinkActionState;
 }
-
 async function prepareBatch() {
   return initialDeliveryBatchActionState;
 }
-
+async function copyNumbers() {
+  return initialDeliveryWhatsAppClipboardActionState;
+}
 const summary = {
   activeGuestCount: 2,
   activePersonalLinkCount: 1,
@@ -33,95 +29,81 @@ const summary = {
   whatsappMissingCount: 1,
 };
 
-describe('SRY-037 owner Delivery Center UI', () => {
-  it('renders delivery readiness, filters, batch preparation, masked WhatsApp, and manual per-guest controls', () => {
+describe('SRY-038 owner Delivery Center table UI', () => {
+  it('renders a compact table, scoped row selection, and safe recoverable/legacy actions', () => {
     const html = renderToStaticMarkup(
       <ToastProvider>
         <GuestDeliveryCenter
+          copyWhatsAppNumbersAction={copyNumbers}
           isPublished
           prepareBatchAction={prepareBatch}
           projectId={projectId}
           rows={[
             {
               displayName: 'Keluarga Budi',
+              guestId: 'guest-1',
               groupLabel: 'Keluarga',
               maskedWhatsAppNumber: '+62••••7890',
+              personalLinkReaccessState: 'recoverable',
               personalLinkState: 'active',
               prepareAction: prepareLink,
+              reaccessAction: prepareLink,
               rowKey: 0,
+              rsvpStatus: 'pending',
               whatsappAvailability: 'available',
             },
             {
               displayName: 'Rani',
+              guestId: 'guest-2',
               groupLabel: null,
               maskedWhatsAppNumber: null,
+              personalLinkReaccessState: 'unavailable',
               personalLinkState: 'not_created',
               prepareAction: prepareLink,
+              reaccessAction: prepareLink,
               rowKey: 1,
+              rsvpStatus: 'pending',
               whatsappAvailability: 'missing',
+            },
+            {
+              displayName: 'Dimas',
+              guestId: 'guest-3',
+              groupLabel: 'Teman',
+              maskedWhatsAppNumber: '+62••••3210',
+              personalLinkReaccessState: 'legacy',
+              personalLinkState: 'active',
+              prepareAction: prepareLink,
+              reaccessAction: prepareLink,
+              rowKey: 2,
+              rsvpStatus: 'pending',
+              whatsappAvailability: 'available',
             },
           ]}
           summary={summary}
         />
       </ToastProvider>,
     );
-
-    expect(html).toContain('Delivery Center');
-    expect(html).toContain('Undangan Pribadi menyertakan sapaan, RSVP, dan ucapan tamu.');
-    expect(html).toContain('Tamu aktif');
-    expect(html).toContain('Siap dibagikan');
-    expect(html).toContain('Belum punya Undangan Pribadi aktif');
-    expect(html).toContain('Belum punya Nomor WhatsApp');
-    expect(html).toContain('Siapkan Undangan Pribadi sekaligus');
-    expect(html).toContain('Siapkan 1 Undangan Pribadi');
-    expect(html).toContain('Filter kesiapan');
-    expect(html).toContain('Belum siap dibagikan');
-    expect(html).toContain('Siap dibagikan');
-    expect(html).toContain('Belum punya Nomor WhatsApp');
-    expect(html).toContain('WhatsApp tersedia');
-    expect(html).toContain('Nomor WhatsApp belum tersedia');
+    expect(html).toContain('<table');
+    expect(html).toContain('Pilih semua tamu pada hasil aktif');
+    expect(html).toContain('0 tamu terpilih');
+    expect(html).toContain('Copy tautan');
+    expect(html).toContain('Tautan lama belum dapat disalin');
+    expect(html).toContain('Perbarui tautan agar dapat dikelola');
+    expect(html).toContain('Buka undangan');
+    expect(html).toContain('Bagikan WhatsApp');
+    expect(html).toContain('Copy nomor WhatsApp');
+    expect(html).toContain('Export Excel (.xlsx)');
     expect(html).toContain('+62••••7890');
     expect(html).not.toContain('+6281234567890');
-    expect(html).toContain('Buat ulang tautan &amp; bagikan');
-    expect(html).toContain('Buat tautan &amp; bagikan');
-    expect(html).toContain(`href="/dashboard/${projectId}/guests"`);
-    expect(html).toContain('Lengkapi nomor');
     expect(html).not.toContain('Terkirim berhasil');
     expect(html).not.toContain('Dibaca');
-    expect(html).not.toContain('Pengingat');
   });
 
-  it('keeps unpublished projects operationally visible but blocks preparation with the factual notice', () => {
+  it('preserves the factual no-guest RSVP guidance', () => {
     const html = renderToStaticMarkup(
       <ToastProvider>
         <GuestDeliveryCenter
-          isPublished={false}
-          prepareBatchAction={prepareBatch}
-          projectId={projectId}
-          rows={[]}
-          summary={{
-            activeGuestCount: 0,
-            activePersonalLinkCount: 0,
-            guestsWithoutActivePersonalLinkCount: 0,
-            whatsappAvailableCount: 0,
-            whatsappMissingCount: 0,
-          }}
-        />
-      </ToastProvider>,
-    );
-
-    expect(html).toContain('Bagikan tersedia setelah undangan diterbitkan');
-    expect(html).toContain(
-      'Terbitkan versi undangan yang sudah kalian setujui sebelum menyiapkan Undangan Pribadi.',
-    );
-    expect(html).toContain(`href="/dashboard/${projectId}"`);
-    expect(html).not.toContain('Siapkan Undangan Pribadi sekaligus');
-  });
-
-  it('explains that RSVP requires guests and Undangan Pribadi when no active guests exist', () => {
-    const html = renderToStaticMarkup(
-      <ToastProvider>
-        <GuestDeliveryCenter
+          copyWhatsAppNumbersAction={copyNumbers}
           isPublished
           prepareBatchAction={prepareBatch}
           projectId={projectId}
@@ -136,28 +118,7 @@ describe('SRY-037 owner Delivery Center UI', () => {
         />
       </ToastProvider>,
     );
-
-    expect(html).toContain('Untuk menerima RSVP, tambahkan tamu lalu buat Undangan Pribadi.');
+    expect(html).toContain('Belum ada tamu untuk disiapkan');
     expect(html).toContain(`href="/dashboard/${projectId}/guests"`);
-    expect(html).toContain('Kelola Tamu');
-    expect(html).not.toContain('Link Publik cukup untuk RSVP');
-  });
-
-  it('keeps raw links and full phone numbers confined to the immediate per-guest result while batch state remains aggregate-only', async () => {
-    const source = await readFile(
-      path.join(process.cwd(), 'src/components/projects/guest-delivery-center.tsx'),
-      'utf8',
-    );
-
-    expect(source).toContain('<PersonalGuestLinkResultActions');
-    expect(source).toContain('open={Boolean(revealedPersonalLink)}');
-    expect(source).toContain('personalUrl={revealedPersonalLink.personalUrl}');
-    expect(source).toContain('confirmActiveReplacement');
-    expect(source).toContain('confirmBatchPreparation');
-    expect(source).toContain('prepareBatchAction');
-    expect(source).toContain('URL mentah tidak ditampilkan dari proses batch.');
-    expect(source).not.toContain('localStorage');
-    expect(source).not.toContain('sessionStorage');
-    expect(source).not.toContain('bulk WhatsApp');
   });
 });

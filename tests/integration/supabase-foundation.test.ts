@@ -224,7 +224,7 @@ async function createPersonalGuestLink(db: PGlite, guestId: string, token: strin
   `);
 }
 
-describe('SRY-003 through SRY-037 Supabase migrations, ownership, drafts, publication, media, payments, guests, personal links, RSVP, private contact data, guestbook, and delivery readiness', () => {
+describe('SRY-003 through SRY-038 Supabase migrations, ownership, drafts, publication, media, payments, guests, personal links, RSVP, private contact data, guestbook, delivery readiness, and owner-safe link re-access', () => {
   // Full Vitest runs compile the whole app beside this PGlite migration harness.
   // Allow the first cold database/migration setup enough room without weakening
   // any assertion or production behaviour.
@@ -2064,7 +2064,7 @@ describe('SRY-003 through SRY-037 Supabase migrations, ownership, drafts, public
     ]);
   });
 
-  it('creates private guest_links with hashed-only capability storage and one active link maximum', async () => {
+  it('keeps legacy hashed-only guest links valid with one active link maximum', async () => {
     const guestId = 'd5555555-5555-4555-8555-555555555555';
     const token = createRuntimePersonalGuestToken();
 
@@ -2088,6 +2088,8 @@ describe('SRY-003 through SRY-037 Supabase migrations, ownership, drafts, public
       'created_at',
       'updated_at',
       'revoked_at',
+      'token_ciphertext',
+      'token_key_version',
     ]);
 
     await expect(
@@ -2117,6 +2119,133 @@ describe('SRY-003 through SRY-037 Supabase migrations, ownership, drafts, public
         );
       `),
     ).rejects.toThrow(/guest_links_one_active_per_guest_idx|duplicate key/i);
+  });
+
+  it('stores encrypted versioned owner re-access material for new SRY-038 links without plaintext token storage', async () => {
+    const guestId = 'd5757575-5757-4575-8575-575757575757';
+    const token = createRuntimePersonalGuestToken();
+    const ciphertext = 'v1.c2FsdGVkX2l2X2RhdGE.c2FsdGVkX3RhZw.c2FsdGVkX2NpcGhlcnRleHQ';
+
+    await resetToDatabaseOwner(database);
+    await database.exec(`
+      insert into public.guests (id, project_id, display_name)
+      values ('${guestId}', '${projectA}', 'Tamu Recoverable');
+    `);
+
+    await database.query(`
+      select public.create_personal_guest_link_if_none_active_with_ciphertext_for_server(
+        '${guestId}',
+        encode(extensions.digest('${token}', 'sha256'), 'hex'),
+        '${ciphertext}',
+        1
+      );
+    `);
+
+    const stored = await database.query<{
+      token_ciphertext: string | null;
+      token_hash: string;
+      token_key_version: number | null;
+    }>(`
+      select token_hash, token_ciphertext, token_key_version
+      from public.guest_links
+      where guest_id = '${guestId}' and status = 'active'::public.guest_link_status;
+    `);
+
+    expect(stored.rows).toEqual([
+      {
+        token_ciphertext: ciphertext,
+        token_hash: expect.stringMatching(/^[0-9a-f]{64}$/),
+        token_key_version: 1,
+      },
+    ]);
+    expect(stored.rows[0]?.token_hash).not.toBe(token);
+    expect(stored.rows[0]?.token_ciphertext).not.toContain(token);
+
+    await expect(
+      database.query(`
+        select public.create_personal_guest_link_if_none_active_with_ciphertext_for_server(
+          '${guestId}',
+          repeat('a', 64),
+          '${ciphertext}',
+          1
+        );
+      `),
+    ).rejects.toThrow(/active personal guest link already exists/i);
+  });
+
+  it('keeps an active personal capability unchanged when template selection changes and a snapshot is republished', async () => {
+    const guestId = 'd5858585-5858-4585-8585-585858585858';
+    const token = createRuntimePersonalGuestToken();
+    const ciphertext = 'v1.c2FsdGVkX2l2X2RhdGE.c2FsdGVkX3RhZw.c2FsdGVkX3JlcHVibGlzaA';
+
+    await resetToDatabaseOwner(database);
+    await database.exec(`
+      insert into public.guests (id, project_id, display_name)
+      values ('${guestId}', '${projectA}', 'Tamu Snapshot Tetap');
+    `);
+    await database.query(`
+      select public.create_personal_guest_link_if_none_active_with_ciphertext_for_server(
+        '${guestId}',
+        encode(extensions.digest('${token}', 'sha256'), 'hex'),
+        '${ciphertext}',
+        1
+      );
+    `);
+
+    const before = await database.query<{
+      token_ciphertext: string;
+      token_hash: string;
+      token_key_version: number;
+    }>(`
+      select token_hash, token_ciphertext, token_key_version
+      from public.guest_links
+      where guest_id = '${guestId}' and status = 'active'::public.guest_link_status;
+    `);
+
+    await createVerifiedPaidActivationPayment(database, projectA, userA);
+    await impersonateAuthenticatedUser(database, userA);
+    await database.query(`select * from public.publish_invitation_snapshot('${projectA}')`);
+    await database.query(`
+      update public.invitation_drafts
+      set content = jsonb_set(content, '{templateKey}', '"laras"'::jsonb)
+      where project_id = '${projectA}';
+    `);
+    await database.query(`select * from public.publish_invitation_snapshot('${projectA}')`);
+
+    await resetToDatabaseOwner(database);
+    const after = await database.query<{
+      active_count: string;
+      token_ciphertext: string;
+      token_hash: string;
+      token_key_version: number;
+    }>(`
+      select
+        count(*) filter (where status = 'active'::public.guest_link_status)::text as active_count,
+        max(token_hash) filter (where status = 'active'::public.guest_link_status) as token_hash,
+        max(token_ciphertext) filter (where status = 'active'::public.guest_link_status) as token_ciphertext,
+        max(token_key_version) filter (where status = 'active'::public.guest_link_status) as token_key_version
+      from public.guest_links
+      where guest_id = '${guestId}';
+    `);
+    const snapshots = await database.query<{ revision: number; template_id: string }>(`
+      select revision, template_id
+      from public.published_invitation_snapshots
+      where project_id = '${projectA}'
+      order by revision;
+    `);
+
+    expect(after.rows).toEqual([
+      {
+        active_count: '1',
+        token_ciphertext: before.rows[0]?.token_ciphertext,
+        token_hash: before.rows[0]?.token_hash,
+        token_key_version: before.rows[0]?.token_key_version,
+      },
+    ]);
+    expect(snapshots.rows).toEqual([
+      { revision: 1, template_id: 'roselle' },
+      { revision: 2, template_id: 'laras' },
+    ]);
   });
 
   it('batch-creates a missing personal link without replacing an already active capability', async () => {

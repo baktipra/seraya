@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 
 import { GuestManager } from '@/components/projects/guest-manager';
 import { getOwnedProjectContextForRequest } from '@/modules/auth/dashboard-request-context';
+import { prepareMissingPersonalGuestLinksForDeliveryAction } from '@/modules/delivery/delivery.actions';
 import { getGuestManagerForVerifiedProject } from '@/modules/guests/guest.service';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 
@@ -28,5 +29,13 @@ export default async function GuestsPage({ params }: GuestsPageProps) {
   const { projectId } = await params;
   const manager = await loadGuestManager(projectId);
 
-  return <GuestManager initialGuests={manager.guests} projectId={manager.project.id} />;
+  return (
+    <GuestManager
+      initialGuests={manager.guests}
+      prepareBatchAction={prepareMissingPersonalGuestLinksForDeliveryAction.bind(null, {
+        projectId: manager.project.id,
+      })}
+      projectId={manager.project.id}
+    />
+  );
 }
