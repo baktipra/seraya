@@ -2,25 +2,29 @@ import 'server-only';
 
 import { requireCurrentUser } from '@/modules/auth/current-user';
 import {
-  createOrReplacePersonalGuestLinkForVerifiedGuest,
   GuestLinkActiveLinkExistsError,
-  reaccessPersonalGuestLinkForCurrentUser,
+  GuestLinkRepositoryError,
+  listLatestGuestLinkStatesForVerifiedGuestIds,
+} from '@/modules/guest-links/guest-link.repository';
+import {
+  createOrReplacePersonalGuestLinkForVerifiedGuest,
   getLatestPersonalGuestLinkStateForVerifiedGuest,
   preparePersonalGuestLinkForVerifiedGuestWithoutReveal,
+  reaccessPersonalGuestLinkForCurrentUser,
 } from '@/modules/guest-links/guest-link.service';
-import { listLatestGuestLinkStatesForVerifiedGuestIds } from '@/modules/guest-links/guest-link.repository';
+import { PersonalGuestLinkEncryptionError } from '@/modules/guest-links/guest-link-encryption';
 import type { LatestGuestLinkStateRecord } from '@/modules/guest-links/guest-link.types';
 import { assertGuestBelongsToProject, GuestAccessDeniedError } from '@/modules/guests/guest.policy';
 import { getActiveGuestForVerifiedProjectWithAdmin } from '@/modules/guests/guest.repository';
 import { hasCurrentPublishedInvitationForVerifiedProject } from '@/modules/publications/publication.repository';
-
-import { createDeliveryReadinessXlsx } from './delivery-xlsx';
 import { getOwnedProjectById, type OwnedProject } from '@/modules/projects/project.repository';
 
+import { createDeliveryReadinessXlsx } from './delivery-xlsx';
 import {
-  listActiveDeliveryGuestsForVerifiedProject,
-  type DeliveryGuestRecord,
   DeliveryRepositoryError,
+  listActiveDeliveryGuestsForVerifiedProject,
+  listDeliveryGuestSelectionEligibilityForVerifiedProject,
+  type DeliveryGuestRecord,
 } from './delivery.repository';
 import type {
   DeliveryBatchPreparationResult,
@@ -51,6 +55,13 @@ type LatestLinkState = {
   hasRecoverableCapability: boolean;
   state: DeliveryPersonalLinkState;
 };
+
+type DeliveryBatchItemFailureClassification =
+  | 'encryption_runtime'
+  | 'inactive_or_removed'
+  | 'persistence_authority'
+  | 'persistence_runtime'
+  | 'unexpected';
 
 function getLatestLinkStates(records: LatestGuestLinkStateRecord[]) {
   const latestRecords = new Map<string, LatestGuestLinkStateRecord>();
@@ -197,32 +208,93 @@ export async function reaccessPersonalGuestLinkForDeliveryForCurrentUser(input: 
   return reaccessPersonalGuestLinkForCurrentUser(input);
 }
 
+function classifyBatchItemFailure(error: unknown): DeliveryBatchItemFailureClassification {
+  if (error instanceof PersonalGuestLinkEncryptionError) return 'encryption_runtime';
+  if (error instanceof GuestLinkRepositoryError) {
+    if (error.classification === 'active_guest_unavailable') return 'inactive_or_removed';
+    if (error.classification === 'authority_unavailable') return 'persistence_authority';
+    return 'persistence_runtime';
+  }
+  return 'unexpected';
+}
+
+function createEmptyBatchResult(requestedGuestCount: number): DeliveryBatchPreparationResult {
+  return {
+    createdCount: 0,
+    failedCount: 0,
+    failedEncryptionCount: 0,
+    failedUnexpectedCount: 0,
+    requestedGuestCount,
+    skippedActiveLinkCount: 0,
+    skippedInactiveGuestCount: 0,
+    skippedInvalidProjectCount: 0,
+    whatsappMissingCreatedCount: 0,
+  };
+}
+
+function logBatchItemFailure(
+  classification: DeliveryBatchItemFailureClassification,
+  error: unknown,
+) {
+  console.error('Seraya delivery batch personal-link preparation item failed.', {
+    errorClassification: classification,
+    errorName: error instanceof Error ? error.name : 'UnknownError',
+    operation: 'prepare_personal_link_batch_item',
+  });
+}
+
+function logBatchSummary(result: DeliveryBatchPreparationResult) {
+  if (result.failedCount === 0) return;
+
+  console.error('Seraya delivery batch personal-link preparation completed with failures.', {
+    createdCount: result.createdCount,
+    failedCount: result.failedCount,
+    failedEncryptionCount: result.failedEncryptionCount,
+    failedUnexpectedCount: result.failedUnexpectedCount,
+    operation: 'prepare_personal_link_batch',
+    requestedGuestCount: result.requestedGuestCount,
+    skippedActiveLinkCount: result.skippedActiveLinkCount,
+    skippedInactiveGuestCount: result.skippedInactiveGuestCount,
+    skippedInvalidProjectCount: result.skippedInvalidProjectCount,
+  });
+}
+
 async function settlePreparationBatch(
   project: OwnedProject,
   guests: DeliveryGuestRecord[],
+  initialResult: DeliveryBatchPreparationResult,
 ): Promise<DeliveryBatchPreparationResult> {
-  let createdCount = 0;
-  let failedCount = 0;
-  let skippedActiveLinkCount = 0;
-  let whatsappMissingCreatedCount = 0;
+  const result = initialResult;
   let index = 0;
 
   async function worker() {
     while (index < guests.length) {
       const guest = guests[index++];
       if (!guest) continue;
+
       try {
+        // The helper uses the same createEncryptedCapability path as explicit
+        // one-guest creation, then preserves M0018/M0019 create-if-none-active safety.
         await preparePersonalGuestLinkForVerifiedGuestWithoutReveal({ guest, project });
-        createdCount += 1;
-        if (!guest.whatsapp_phone_e164) whatsappMissingCreatedCount += 1;
+        result.createdCount += 1;
+        if (!guest.whatsapp_phone_e164) result.whatsappMissingCreatedCount += 1;
       } catch (error) {
         if (error instanceof GuestLinkActiveLinkExistsError) {
-          skippedActiveLinkCount += 1;
+          result.skippedActiveLinkCount += 1;
+          continue;
+        }
+
+        const classification = classifyBatchItemFailure(error);
+        if (classification === 'inactive_or_removed') {
+          result.skippedInactiveGuestCount += 1;
+        } else if (classification === 'encryption_runtime') {
+          result.failedEncryptionCount += 1;
+          result.failedCount += 1;
+          logBatchItemFailure(classification, error);
         } else {
-          failedCount += 1;
-          console.error('Seraya delivery batch personal-link preparation item failed.', {
-            errorName: error instanceof Error ? error.name : 'UnknownError',
-          });
+          result.failedUnexpectedCount += 1;
+          result.failedCount += 1;
+          logBatchItemFailure(classification, error);
         }
       }
     }
@@ -231,12 +303,17 @@ async function settlePreparationBatch(
   await Promise.all(
     Array.from({ length: Math.min(DELIVERY_BATCH_CONCURRENCY, guests.length) }, worker),
   );
-  return { createdCount, failedCount, skippedActiveLinkCount, whatsappMissingCreatedCount };
+
+  return result;
 }
 
-/** Batch authority returns aggregate-only results and never reveals capability material. */
+/**
+ * Batch authority accepts a required, exact visible-selection list. It never
+ * expands a missing client selection into every project guest. The server
+ * re-intersects that list with the verified owner project before any mutation.
+ */
 export async function prepareMissingPersonalGuestLinksForDeliveryForCurrentUser(input: {
-  guestIds?: string[];
+  guestIds: string[];
   projectId: string;
 }) {
   const user = await requireCurrentUser();
@@ -244,22 +321,44 @@ export async function prepareMissingPersonalGuestLinksForDeliveryForCurrentUser(
   const isPublished = await hasCurrentPublishedInvitationForVerifiedProject(project);
   if (!isPublished) throw new DeliveryPublicationRequiredError();
 
-  const { guests, latestLinkStates } = await getDeliveryGuestsWithLatestStates(project);
-  const selected = input.guestIds ? new Set(input.guestIds) : null;
-  const eligibleGuests = guests.filter((guest) => {
-    const state = latestLinkStates.get(guest.id)?.state ?? 'not_created';
-    return state !== 'active' && (!selected || selected.has(guest.id));
-  });
-  const skippedActiveLinkCount = guests.filter((guest) => {
-    const state = latestLinkStates.get(guest.id)?.state ?? 'not_created';
-    return state === 'active' && (!selected || selected.has(guest.id));
-  }).length;
+  const requestedGuestIds = [...new Set(input.guestIds)];
+  const [{ guests, latestLinkStates }, selectedProjectRecords] = await Promise.all([
+    getDeliveryGuestsWithLatestStates(project),
+    listDeliveryGuestSelectionEligibilityForVerifiedProject(project, requestedGuestIds),
+  ]);
+  const activeGuestsById = new Map(guests.map((guest) => [guest.id, guest]));
+  const selectedProjectRecordsById = new Map(
+    selectedProjectRecords.map((guest) => [guest.id, guest]),
+  );
+  const result = createEmptyBatchResult(requestedGuestIds.length);
+  const eligibleGuests: DeliveryGuestRecord[] = [];
 
-  const result = await settlePreparationBatch(project, eligibleGuests);
-  return {
-    ...result,
-    skippedActiveLinkCount: result.skippedActiveLinkCount + skippedActiveLinkCount,
-  };
+  for (const guestId of requestedGuestIds) {
+    const activeGuest = activeGuestsById.get(guestId);
+    if (!activeGuest) {
+      const selectedProjectRecord = selectedProjectRecordsById.get(guestId);
+      if (selectedProjectRecord?.deleted_at) {
+        result.skippedInactiveGuestCount += 1;
+      } else {
+        // Missing rows and other-project IDs are deliberately merged so the
+        // response cannot reveal another project's guest existence.
+        result.skippedInvalidProjectCount += 1;
+      }
+      continue;
+    }
+
+    const state = latestLinkStates.get(activeGuest.id)?.state ?? 'not_created';
+    if (state === 'active') {
+      result.skippedActiveLinkCount += 1;
+      continue;
+    }
+
+    eligibleGuests.push(activeGuest);
+  }
+
+  const settled = await settlePreparationBatch(project, eligibleGuests, result);
+  logBatchSummary(settled);
+  return settled;
 }
 
 /** Owner-only numbers for a local clipboard action. It does not send or open WhatsApp. */

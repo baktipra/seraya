@@ -42,3 +42,33 @@ export async function listActiveDeliveryGuestsForVerifiedProject(
 
   return (data ?? []) as DeliveryGuestRecord[];
 }
+
+export type DeliveryGuestSelectionEligibilityRecord = {
+  deleted_at: string | null;
+  id: string;
+};
+
+/**
+ * Resolves only the selected IDs inside the already verified project. It never
+ * queries another project's guests, so an invalid selected ID can be counted
+ * without becoming a cross-project existence oracle.
+ */
+export async function listDeliveryGuestSelectionEligibilityForVerifiedProject(
+  project: OwnedProject,
+  guestIds: string[],
+): Promise<DeliveryGuestSelectionEligibilityRecord[]> {
+  if (guestIds.length === 0) return [];
+
+  const supabase = await createServerSupabaseClient();
+  const { data, error } = await supabase
+    .from('guests')
+    .select('id, deleted_at')
+    .eq('project_id', project.id)
+    .in('id', guestIds);
+
+  if (error) {
+    throw new DeliveryRepositoryError();
+  }
+
+  return (data ?? []) as DeliveryGuestSelectionEligibilityRecord[];
+}

@@ -16,7 +16,7 @@ const deliveryLinkFormSchema = z
 const deliveryBatchFormSchema = z
   .object({
     confirmBatchPreparation: z.literal('true'),
-    selectedGuestIds: z.array(uuidSchema).max(maxSelectedGuestIds).optional(),
+    selectedGuestIds: z.array(uuidSchema).min(1).max(maxSelectedGuestIds),
   })
   .strict();
 

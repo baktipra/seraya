@@ -26,7 +26,9 @@ vi.mock('@/server/supabase/admin', () => ({
 
 import {
   createPersonalGuestLinkIfNoneActiveForVerifiedGuest,
+  createPersonalGuestLinkIfNoneActiveWithCiphertextForVerifiedGuest,
   GuestLinkActiveLinkExistsError,
+  GuestLinkRepositoryError,
   listLatestGuestLinkStatesForVerifiedGuestIds,
 } from '../guest-link.repository';
 
@@ -129,5 +131,41 @@ describe('batch personal-link creation guard', () => {
         tokenHash: 'b'.repeat(64),
       }),
     ).rejects.toBeInstanceOf(GuestLinkActiveLinkExistsError);
+  });
+
+  it('classifies the encrypted batch authority without retaining raw provider details', async () => {
+    rpcMock.mockResolvedValue({ error: { code: 'P0002', message: 'private database detail' } });
+
+    const failure = await createPersonalGuestLinkIfNoneActiveWithCiphertextForVerifiedGuest({
+      guestId: firstGuestId,
+      tokenCiphertext: 'v1.c2FsdGVkX2l2X2RhdGE.c2FsdGVkX3RhZw.c2FsdGVkX2NpcGhlcnRleHQ',
+      tokenHash: 'c'.repeat(64),
+      tokenKeyVersion: 1,
+    }).catch((error: unknown) => error);
+
+    expect(failure).toBeInstanceOf(GuestLinkRepositoryError);
+    expect(failure).toMatchObject({ classification: 'active_guest_unavailable' });
+    expect(JSON.stringify(failure)).not.toContain('private database detail');
+  });
+
+  it('sends only hash plus encrypted material to the M0019 atomic authority', async () => {
+    rpcMock.mockResolvedValue({ error: null });
+
+    await createPersonalGuestLinkIfNoneActiveWithCiphertextForVerifiedGuest({
+      guestId: firstGuestId,
+      tokenCiphertext: 'v1.c2FsdGVkX2l2X2RhdGE.c2FsdGVkX3RhZw.c2FsdGVkX2NpcGhlcnRleHQ',
+      tokenHash: 'd'.repeat(64),
+      tokenKeyVersion: 1,
+    });
+
+    expect(rpcMock).toHaveBeenCalledWith(
+      'create_personal_guest_link_if_none_active_with_ciphertext_for_server',
+      {
+        new_token_ciphertext: 'v1.c2FsdGVkX2l2X2RhdGE.c2FsdGVkX3RhZw.c2FsdGVkX2NpcGhlcnRleHQ',
+        new_token_hash: 'd'.repeat(64),
+        new_token_key_version: 1,
+        target_guest_id: firstGuestId,
+      },
+    );
   });
 });

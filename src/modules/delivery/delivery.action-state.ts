@@ -11,8 +11,13 @@ export const initialDeliveryLinkActionState: DeliveryLinkActionState = { status:
 export type DeliveryBatchActionState = {
   createdCount?: number;
   failedCount?: number;
+  failedEncryptionCount?: number;
+  failedUnexpectedCount?: number;
   message?: string;
+  requestedGuestCount?: number;
   skippedActiveLinkCount?: number;
+  skippedInactiveGuestCount?: number;
+  skippedInvalidProjectCount?: number;
   status: 'idle' | 'error' | 'partial' | 'success';
   whatsappMissingCreatedCount?: number;
 };

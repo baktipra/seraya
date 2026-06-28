@@ -62,9 +62,10 @@ function createFormData(confirmActiveReplacement = 'false') {
   return formData;
 }
 
-function createBatchFormData(confirmBatchPreparation = 'true') {
+function createBatchFormData(ids = [boundInput.guestId], confirmBatchPreparation = 'true') {
   const formData = new FormData();
   formData.set('confirmBatchPreparation', confirmBatchPreparation);
+  formData.set('selectedGuestIds', JSON.stringify(ids));
   formData.set('projectId', 'attacker-controlled');
   return formData;
 }
@@ -125,7 +126,12 @@ describe('SRY-037 delivery link preparation Server Actions', () => {
     prepareBatchMock.mockResolvedValue({
       createdCount: 4,
       failedCount: 0,
+      failedEncryptionCount: 0,
+      failedUnexpectedCount: 0,
+      requestedGuestCount: 1,
       skippedActiveLinkCount: 2,
+      skippedInactiveGuestCount: 0,
+      skippedInvalidProjectCount: 0,
       whatsappMissingCreatedCount: 1,
     });
 
@@ -135,10 +141,18 @@ describe('SRY-037 delivery link preparation Server Actions', () => {
       createBatchFormData(),
     );
 
-    expect(prepareBatchMock).toHaveBeenCalledWith({ projectId: batchBoundInput.projectId });
+    expect(prepareBatchMock).toHaveBeenCalledWith({
+      guestIds: [boundInput.guestId],
+      projectId: batchBoundInput.projectId,
+    });
     expect(result).toEqual({
       createdCount: 4,
       failedCount: 0,
+      failedEncryptionCount: 0,
+      failedUnexpectedCount: 0,
+      requestedGuestCount: 1,
+      skippedInactiveGuestCount: 0,
+      skippedInvalidProjectCount: 0,
       message:
         'Undangan Pribadi sudah disiapkan. Lanjutkan pembagian manual per tamu di Delivery Center.',
       skippedActiveLinkCount: 2,
@@ -155,7 +169,12 @@ describe('SRY-037 delivery link preparation Server Actions', () => {
     prepareBatchMock.mockResolvedValue({
       createdCount: 3,
       failedCount: 1,
+      failedEncryptionCount: 0,
+      failedUnexpectedCount: 1,
+      requestedGuestCount: 1,
       skippedActiveLinkCount: 2,
+      skippedInactiveGuestCount: 0,
+      skippedInvalidProjectCount: 0,
       whatsappMissingCreatedCount: 0,
     });
 
@@ -168,12 +187,35 @@ describe('SRY-037 delivery link preparation Server Actions', () => {
     ).resolves.toEqual({
       createdCount: 3,
       failedCount: 1,
+      failedEncryptionCount: 0,
+      failedUnexpectedCount: 1,
+      requestedGuestCount: 1,
+      skippedInactiveGuestCount: 0,
+      skippedInvalidProjectCount: 0,
       message:
-        'Sebagian Undangan Pribadi belum dapat disiapkan. Coba lagi untuk melanjutkan yang tersisa.',
+        'Sebagian Undangan Pribadi sudah diproses. Lihat ringkasan untuk tamu yang sudah aktif, dilewati, atau belum dapat disiapkan.',
       skippedActiveLinkCount: 2,
       status: 'partial',
       whatsappMissingCreatedCount: 0,
     });
+  });
+
+  it('requires an exact non-empty selectedGuestIds payload instead of falling back to all project guests', async () => {
+    const formData = new FormData();
+    formData.set('confirmBatchPreparation', 'true');
+
+    await expect(
+      prepareMissingPersonalGuestLinksForDeliveryAction(
+        batchBoundInput,
+        initialDeliveryBatchActionState,
+        formData,
+      ),
+    ).resolves.toEqual({
+      message: 'Undangan Pribadi belum dapat disiapkan. Konfirmasi kembali sebelum melanjutkan.',
+      status: 'error',
+    });
+
+    expect(prepareBatchMock).not.toHaveBeenCalled();
   });
 
   it('rejects malformed batch bound targets before calling delivery authority', async () => {

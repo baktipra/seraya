@@ -366,7 +366,19 @@ function DeliveryBatchPreparationDialog({
             </p>
             {actionState.skippedActiveLinkCount ? (
               <p className="text-seraya-text-secondary mt-1">
-                {actionState.skippedActiveLinkCount} tamu dengan link aktif tidak diubah.
+                {actionState.skippedActiveLinkCount} tamu sudah memiliki tautan aktif dan tidak
+                diubah.
+              </p>
+            ) : null}
+            {actionState.skippedInactiveGuestCount ? (
+              <p className="text-seraya-text-secondary mt-1">
+                {actionState.skippedInactiveGuestCount} tamu tidak lagi aktif dan dilewati.
+              </p>
+            ) : null}
+            {actionState.skippedInvalidProjectCount ? (
+              <p className="text-seraya-text-secondary mt-1">
+                {actionState.skippedInvalidProjectCount} pilihan tidak tersedia untuk project ini
+                dan dilewati.
               </p>
             ) : null}
             {actionState.whatsappMissingCreatedCount ? (
@@ -377,7 +389,7 @@ function DeliveryBatchPreparationDialog({
             ) : null}
             {actionState.failedCount ? (
               <p className="text-seraya-status-error mt-1">
-                {actionState.failedCount} tamu belum dapat disiapkan.
+                {actionState.failedCount} tamu belum dapat diproses. Coba lagi beberapa saat lagi.
               </p>
             ) : null}
           </div>
@@ -494,10 +506,6 @@ export function GuestDeliveryCenter({
   const selectedVisibleIds = selectedIds.filter((id) => visibleIds.includes(id));
   const allVisibleSelected =
     visibleIds.length > 0 && selectedVisibleIds.length === visibleIds.length;
-  const selectedRows = filteredRows.filter((row) => selectedIds.includes(row.guestId));
-  const selectedEligibleIds = selectedRows
-    .filter((row) => row.personalLinkState !== 'active')
-    .map((row) => row.guestId);
 
   function toggleSelected(guestId: string) {
     setSelectedIds((current) =>
@@ -836,7 +844,7 @@ export function GuestDeliveryCenter({
 
       {batchOpen ? (
         <DeliveryBatchPreparationDialog
-          guestIds={selectedEligibleIds}
+          guestIds={selectedVisibleIds}
           onOpenChange={setBatchOpen}
           open={batchOpen}
           prepareBatchAction={prepareBatchAction}

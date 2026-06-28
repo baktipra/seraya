@@ -172,10 +172,12 @@ export async function prepareMissingPersonalGuestLinksForDeliveryAction(
     const status = result.failedCount > 0 ? 'partial' : 'success';
     const message =
       result.failedCount > 0
-        ? 'Sebagian Undangan Pribadi belum dapat disiapkan. Coba lagi untuk melanjutkan yang tersisa.'
+        ? 'Sebagian Undangan Pribadi sudah diproses. Lihat ringkasan untuk tamu yang sudah aktif, dilewati, atau belum dapat disiapkan.'
         : result.createdCount > 0
           ? 'Undangan Pribadi sudah disiapkan. Lanjutkan pembagian manual per tamu di Delivery Center.'
-          : 'Tidak ada Undangan Pribadi baru yang perlu disiapkan.';
+          : result.skippedActiveLinkCount > 0
+            ? 'Tamu terpilih sudah memiliki tautan aktif. Tidak ada tautan baru yang dibuat.'
+            : 'Tidak ada tamu eligible yang perlu disiapkan.';
     return { ...result, message, status };
   } catch (error) {
     if (error instanceof DeliveryPublicationRequiredError) {

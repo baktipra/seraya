@@ -11,11 +11,40 @@ import type {
 
 const ownerStateSelect = 'guest_id, status';
 
+export type GuestLinkRepositoryFailureClassification =
+  | 'active_guest_unavailable'
+  | 'authority_unavailable'
+  | 'repository_failure';
+
+/**
+ * Carries a safe server-only classification. It intentionally does not retain
+ * Supabase messages, SQL text, token material, or database identifiers.
+ */
 export class GuestLinkRepositoryError extends Error {
-  constructor() {
+  readonly classification: GuestLinkRepositoryFailureClassification;
+
+  constructor(classification: GuestLinkRepositoryFailureClassification = 'repository_failure') {
     super('The personal guest-link repository could not complete the request.');
     this.name = 'GuestLinkRepositoryError';
+    this.classification = classification;
   }
+}
+
+type SupabaseRepositoryErrorLike = { code?: unknown };
+
+function classifyGuestLinkRepositoryFailure(
+  error: SupabaseRepositoryErrorLike | null | undefined,
+): GuestLinkRepositoryFailureClassification {
+  const code = typeof error?.code === 'string' ? error.code : '';
+
+  if (code === 'P0002') return 'active_guest_unavailable';
+  if (code === '42883' || code === 'PGRST202') return 'authority_unavailable';
+
+  return 'repository_failure';
+}
+
+function toGuestLinkRepositoryError(error: SupabaseRepositoryErrorLike | null | undefined) {
+  return new GuestLinkRepositoryError(classifyGuestLinkRepositoryFailure(error));
 }
 
 /** The batch-only creation guard detected a concurrently active capability. */
@@ -185,7 +214,7 @@ export async function createPersonalGuestLinkIfNoneActiveWithCiphertextForVerifi
   }
 
   if (error) {
-    throw new GuestLinkRepositoryError();
+    throw toGuestLinkRepositoryError(error);
   }
 }
 

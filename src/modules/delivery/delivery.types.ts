@@ -35,11 +35,20 @@ export type DeliveryReadinessSummary = {
   whatsappMissingCount: number;
 };
 
-/** No tokens, URLs, IDs, or per-guest details may leave the batch authority. */
+/**
+ * Aggregate-only batch outcome. It never identifies a guest or exposes a
+ * capability. The counts make selection, eligibility, and runtime failures
+ * observable without leaking link material or cross-project facts.
+ */
 export type DeliveryBatchPreparationResult = {
   createdCount: number;
   failedCount: number;
+  failedEncryptionCount: number;
+  failedUnexpectedCount: number;
+  requestedGuestCount: number;
   skippedActiveLinkCount: number;
+  skippedInactiveGuestCount: number;
+  skippedInvalidProjectCount: number;
   whatsappMissingCreatedCount: number;
 };
 
