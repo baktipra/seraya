@@ -218,7 +218,7 @@ function PersonalLinkReaccessControls({
   reaccessAction: boundReaccessAction,
 }: {
   guestDisplayName: string;
-  mode: 'link' | 'whatsapp';
+  mode: 'link' | 'open' | 'whatsapp';
   reaccessAction: BoundDeliveryLinkAction;
 }) {
   const { toast } = useToast();
@@ -273,41 +273,43 @@ function PersonalLinkReaccessControls({
     <form action={reaccessAction} className="flex flex-wrap gap-2">
       <input name="operation" ref={operationInput} type="hidden" value="copy" />
       {mode === 'link' ? (
-        <>
-          <Button
-            disabled={pending}
-            onClick={() => {
-              if (operationInput.current) operationInput.current.value = 'copy';
-            }}
-            size="sm"
-            type="submit"
-            variant="secondary"
-          >
-            Copy tautan
-          </Button>
-          <Button
-            disabled={pending}
-            onClick={() => {
-              if (operationInput.current) operationInput.current.value = 'open';
-            }}
-            size="sm"
-            type="submit"
-            variant="text"
-          >
-            Buka undangan
-          </Button>
-        </>
+        <Button
+          aria-label="Copy tautan Undangan Pribadi"
+          disabled={pending}
+          onClick={() => {
+            if (operationInput.current) operationInput.current.value = 'copy';
+          }}
+          size="sm"
+          type="submit"
+          variant="secondary"
+        >
+          Copy
+        </Button>
+      ) : mode === 'open' ? (
+        <Button
+          aria-label="Buka Undangan Pribadi"
+          disabled={pending}
+          onClick={() => {
+            if (operationInput.current) operationInput.current.value = 'open';
+          }}
+          size="sm"
+          type="submit"
+          variant="text"
+        >
+          Buka undangan
+        </Button>
       ) : (
         <Button
+          aria-label="Bagikan Undangan Pribadi lewat WhatsApp"
           disabled={pending}
           onClick={() => {
             if (operationInput.current) operationInput.current.value = 'share';
           }}
           size="sm"
           type="submit"
-          variant="text"
+          variant="secondary"
         >
-          Bagikan WhatsApp
+          WhatsApp
         </Button>
       )}
       <span aria-live="polite" className="sr-only">
@@ -657,11 +659,14 @@ export function GuestDeliveryCenter({
               <p className="text-seraya-text-primary font-semibold">Tidak ada tamu yang sesuai.</p>
             </div>
           ) : (
-            <div className="border-seraya-border-default overflow-x-auto rounded-[var(--seraya-radius-md)] border">
-              <table className="w-full min-w-[1110px] border-collapse text-left text-sm">
+            <div
+              className="border-seraya-border-default overflow-x-auto rounded-[var(--seraya-radius-md)] border"
+              data-delivery-center-table
+            >
+              <table className="w-full min-w-[760px] border-collapse text-left text-sm">
                 <thead className="bg-seraya-canvas text-seraya-text-muted text-xs font-semibold tracking-[0.06em] uppercase">
                   <tr>
-                    <th className="w-12 px-4 py-3">
+                    <th className="w-11 px-3 py-2.5">
                       <input
                         aria-label="Pilih semua tamu pada hasil aktif"
                         checked={allVisibleSelected}
@@ -669,22 +674,23 @@ export function GuestDeliveryCenter({
                         type="checkbox"
                       />
                     </th>
-                    <th className="px-3 py-3">Nama Tamu</th>
-                    <th className="px-3 py-3">Nomor WhatsApp</th>
-                    <th className="px-3 py-3">Status Link</th>
-                    <th className="px-3 py-3">Kesiapan</th>
-                    <th className="px-3 py-3">Link</th>
-                    <th className="px-3 py-3">WhatsApp</th>
-                    <th className="px-3 py-3">Aksi</th>
+                    <th className="min-w-44 px-3 py-2.5">Tamu</th>
+                    <th className="px-3 py-2.5">WhatsApp</th>
+                    <th className="px-3 py-2.5">Status</th>
+                    <th className="px-3 py-2.5">RSVP</th>
+                    <th className="min-w-40 px-3 py-2.5">Aksi cepat</th>
                   </tr>
                 </thead>
                 <tbody className="divide-seraya-border-default bg-seraya-surface divide-y">
                   {filteredRows.map((row) => {
                     const isSelected = selectedIds.includes(row.guestId);
                     const active = row.personalLinkState === 'active';
+                    const status = active
+                      ? 'Aktif · Siap dibagikan'
+                      : personalLinkStateLabels[row.personalLinkState];
                     return (
-                      <tr key={row.rowKey}>
-                        <td className="px-4 py-4 align-top">
+                      <tr key={row.rowKey} className="align-middle">
+                        <td className="px-3 py-2.5">
                           <input
                             aria-label={`Pilih ${row.displayName}`}
                             checked={isSelected}
@@ -692,108 +698,133 @@ export function GuestDeliveryCenter({
                             type="checkbox"
                           />
                         </td>
-                        <td className="px-3 py-4 align-top">
+                        <td className="px-3 py-2.5">
                           <p className="text-seraya-text-primary font-semibold">
                             {row.displayName}
                           </p>
                           {row.groupLabel ? (
-                            <p className="text-seraya-text-muted mt-1">{row.groupLabel}</p>
+                            <p className="text-seraya-text-muted mt-0.5 text-xs">
+                              {row.groupLabel}
+                            </p>
                           ) : null}
                         </td>
-                        <td className="px-3 py-4 align-top">
-                          {row.maskedWhatsAppNumber ? (
-                            <span className="text-seraya-text-secondary">
-                              {row.maskedWhatsAppNumber}
-                            </span>
-                          ) : (
-                            <StatusPill>Belum tersedia</StatusPill>
-                          )}
+                        <td className="px-3 py-2.5 whitespace-nowrap">
+                          {row.maskedWhatsAppNumber ?? 'Belum ada nomor'}
                         </td>
-                        <td className="px-3 py-4 align-top">
-                          <StatusPill tone={active ? 'default' : 'soft'}>
-                            {personalLinkStateLabels[row.personalLinkState]}
-                          </StatusPill>
+                        <td className="px-3 py-2.5">
+                          <StatusPill tone={active ? 'default' : 'soft'}>{status}</StatusPill>
                           {active && row.personalLinkReaccessState === 'legacy' ? (
-                            <p className="text-seraya-text-muted mt-1 max-w-40 text-xs leading-5">
+                            <p className="text-seraya-text-muted mt-0.5 text-xs">
                               Tautan lama belum dapat disalin
                             </p>
                           ) : null}
                         </td>
-                        <td className="px-3 py-4 align-top">
-                          <StatusPill tone={active ? 'default' : 'soft'}>
-                            {active ? 'Siap dibagikan' : 'Belum siap dibagikan'}
-                          </StatusPill>
-                          <p className="text-seraya-text-muted mt-1 text-xs">
-                            RSVP: {rsvpStatusLabels[row.rsvpStatus]}
-                          </p>
+                        <td className="px-3 py-2.5 whitespace-nowrap">
+                          {rsvpStatusLabels[row.rsvpStatus]}
                         </td>
-                        <td className="px-3 py-4 align-top">
-                          {active && row.personalLinkReaccessState === 'recoverable' ? (
-                            <PersonalLinkReaccessControls
-                              guestDisplayName={row.displayName}
-                              mode="link"
-                              reaccessAction={row.reaccessAction}
-                            />
-                          ) : active && row.personalLinkReaccessState === 'legacy' ? (
-                            <Button
-                              disabled={!isPublished}
-                              onClick={() => setReplaceGuest(row)}
-                              size="sm"
-                              type="button"
-                              variant="secondary"
-                            >
-                              Perbarui tautan agar dapat dikelola
-                            </Button>
-                          ) : (
-                            <span className="text-seraya-text-muted">—</span>
-                          )}
-                        </td>
-                        <td className="px-3 py-4 align-top">
-                          {active && row.personalLinkReaccessState === 'recoverable' ? (
-                            <PersonalLinkReaccessControls
-                              guestDisplayName={row.displayName}
-                              mode="whatsapp"
-                              reaccessAction={row.reaccessAction}
-                            />
-                          ) : active && row.personalLinkReaccessState === 'legacy' ? (
-                            <span className="text-seraya-text-muted text-sm">
-                              Tautan perlu diperbarui
-                            </span>
-                          ) : row.whatsappAvailability === 'available' ? (
-                            <span className="text-seraya-text-secondary text-sm">
-                              Siap untuk share manual
-                            </span>
-                          ) : (
-                            <Link
-                              className="text-seraya-action-primary text-sm font-semibold underline-offset-4 hover:underline"
-                              href={`/dashboard/${projectId}/guests`}
-                            >
-                              Lengkapi nomor
-                            </Link>
-                          )}
-                        </td>
-                        <td className="px-3 py-4 align-top">
-                          {!active ? (
-                            <Button
-                              disabled={!isPublished}
-                              onClick={() => setPrepareGuest(row)}
-                              size="sm"
-                              type="button"
-                              variant="secondary"
-                            >
-                              Buat Undangan Pribadi
-                            </Button>
-                          ) : (
-                            <Button
-                              disabled={!isPublished}
-                              onClick={() => setReplaceGuest(row)}
-                              size="sm"
-                              type="button"
-                              variant="text"
-                            >
-                              Buat ulang tautan
-                            </Button>
-                          )}
+                        <td className="px-3 py-2.5">
+                          <div className="flex items-center gap-1.5 whitespace-nowrap">
+                            {active && row.personalLinkReaccessState === 'recoverable' ? (
+                              <>
+                                <PersonalLinkReaccessControls
+                                  guestDisplayName={row.displayName}
+                                  mode="link"
+                                  reaccessAction={row.reaccessAction}
+                                />
+                                <PersonalLinkReaccessControls
+                                  guestDisplayName={row.displayName}
+                                  mode="whatsapp"
+                                  reaccessAction={row.reaccessAction}
+                                />
+                                <details className="relative inline-block">
+                                  <summary
+                                    aria-label={`Aksi lain untuk ${row.displayName}`}
+                                    className="text-seraya-action-primary border-seraya-border-default inline-flex min-h-9 min-w-9 cursor-pointer items-center justify-center rounded-[var(--seraya-radius-sm)] border text-lg font-semibold"
+                                  >
+                                    ⋯
+                                  </summary>
+                                  <div className="border-seraya-border-default bg-seraya-surface absolute right-0 z-10 mt-1 flex w-48 flex-col rounded-[var(--seraya-radius-md)] border p-1 shadow-lg">
+                                    <PersonalLinkReaccessControls
+                                      guestDisplayName={row.displayName}
+                                      mode="open"
+                                      reaccessAction={row.reaccessAction}
+                                    />
+                                    <Button
+                                      disabled={!isPublished}
+                                      onClick={() => setReplaceGuest(row)}
+                                      size="sm"
+                                      type="button"
+                                      variant="text"
+                                    >
+                                      Buat ulang tautan
+                                    </Button>
+                                  </div>
+                                </details>
+                              </>
+                            ) : active && row.personalLinkReaccessState === 'legacy' ? (
+                              <>
+                                <Button
+                                  disabled={!isPublished}
+                                  onClick={() => setReplaceGuest(row)}
+                                  size="sm"
+                                  type="button"
+                                  variant="secondary"
+                                >
+                                  Perbarui tautan
+                                </Button>
+                                <details className="relative inline-block">
+                                  <summary
+                                    aria-label={`Aksi lain untuk ${row.displayName}`}
+                                    className="text-seraya-action-primary border-seraya-border-default inline-flex min-h-9 min-w-9 cursor-pointer items-center justify-center rounded-[var(--seraya-radius-sm)] border text-lg font-semibold"
+                                  >
+                                    ⋯
+                                  </summary>
+                                  <div className="border-seraya-border-default bg-seraya-surface absolute right-0 z-10 mt-1 flex w-48 flex-col rounded-[var(--seraya-radius-md)] border p-1 shadow-lg">
+                                    <Button
+                                      disabled={!isPublished}
+                                      onClick={() => setReplaceGuest(row)}
+                                      size="sm"
+                                      type="button"
+                                      variant="text"
+                                    >
+                                      Buat ulang tautan
+                                    </Button>
+                                  </div>
+                                </details>
+                              </>
+                            ) : (
+                              <>
+                                <Button
+                                  disabled={!isPublished}
+                                  onClick={() => setPrepareGuest(row)}
+                                  size="sm"
+                                  type="button"
+                                  variant="secondary"
+                                >
+                                  Siapkan
+                                </Button>
+                                <details className="relative inline-block">
+                                  <summary
+                                    aria-label={`Aksi lain untuk ${row.displayName}`}
+                                    className="text-seraya-action-primary border-seraya-border-default inline-flex min-h-9 min-w-9 cursor-pointer items-center justify-center rounded-[var(--seraya-radius-sm)] border text-lg font-semibold"
+                                  >
+                                    ⋯
+                                  </summary>
+                                  <div className="border-seraya-border-default bg-seraya-surface absolute right-0 z-10 mt-1 flex w-48 flex-col rounded-[var(--seraya-radius-md)] border p-1 shadow-lg">
+                                    <Button
+                                      disabled={!isPublished}
+                                      onClick={() => setPrepareGuest(row)}
+                                      size="sm"
+                                      type="button"
+                                      variant="text"
+                                    >
+                                      Buat Undangan Pribadi
+                                    </Button>
+                                  </div>
+                                </details>
+                              </>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     );

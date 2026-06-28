@@ -64,18 +64,6 @@ const personalLinkStateLabels: Record<GuestListItem['link_state'], string> = {
   revoked: 'Dinonaktifkan',
 };
 
-function getRsvpDisplay(guest: GuestListItem): string {
-  if (guest.rsvp_status !== 'attending') {
-    return rsvpStatusLabels[guest.rsvp_status];
-  }
-
-  if (guest.rsvp_attendee_count === null) {
-    return 'Hadir — jumlah belum dikonfirmasi';
-  }
-
-  return `Hadir — ${guest.rsvp_attendee_count} dari ${guest.party_size} orang`;
-}
-
 function FieldError({ id, message }: { id: string; message?: string }) {
   if (!message) {
     return null;
@@ -510,11 +498,14 @@ export function GuestManager({ initialGuests, prepareBatchAction, projectId }: G
       <CardContent className="space-y-5 pt-5 sm:pt-6">
         {initialGuests.length > 0 ? (
           <>
-            <div className="border-seraya-border-default overflow-x-auto rounded-[var(--seraya-radius-md)] border">
-              <table className="w-full min-w-[1080px] border-collapse text-left text-sm">
+            <div
+              className="border-seraya-border-default overflow-x-auto rounded-[var(--seraya-radius-md)] border"
+              data-guest-manager-table
+            >
+              <table className="w-full min-w-[760px] border-collapse text-left text-sm">
                 <thead className="bg-seraya-canvas text-seraya-text-muted text-xs font-semibold tracking-[0.06em] uppercase">
                   <tr>
-                    <th className="w-12 px-4 py-3">
+                    <th className="w-11 px-3 py-2.5">
                       <input
                         aria-label="Pilih semua tamu pada hasil aktif"
                         checked={allSelected}
@@ -522,19 +513,20 @@ export function GuestManager({ initialGuests, prepareBatchAction, projectId }: G
                         type="checkbox"
                       />
                     </th>
-                    <th className="px-3 py-3">Nama Tamu</th>
-                    <th className="px-3 py-3">Grup</th>
-                    <th className="px-3 py-3">Rombongan</th>
-                    <th className="px-3 py-3">Nomor WhatsApp</th>
-                    <th className="px-3 py-3">RSVP</th>
-                    <th className="px-3 py-3">Undangan Pribadi</th>
-                    <th className="px-3 py-3">Aksi</th>
+                    <th className="min-w-44 px-3 py-2.5">Tamu</th>
+                    <th className="px-3 py-2.5 text-center">Rombongan</th>
+                    <th className="px-3 py-2.5">WhatsApp</th>
+                    <th className="px-3 py-2.5">RSVP</th>
+                    <th className="px-3 py-2.5">Link</th>
+                    <th className="w-14 px-3 py-2.5">
+                      <span className="sr-only">Aksi</span>⋯
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-seraya-border-default bg-seraya-surface divide-y">
                   {initialGuests.map((guest) => (
-                    <tr key={guest.id}>
-                      <td className="px-4 py-4 align-top">
+                    <tr key={guest.id} className="align-middle">
+                      <td className="px-3 py-2.5">
                         <input
                           aria-label={`Pilih ${guest.display_name}`}
                           checked={selectedGuestIds.includes(guest.id)}
@@ -542,63 +534,75 @@ export function GuestManager({ initialGuests, prepareBatchAction, projectId }: G
                           type="checkbox"
                         />
                       </td>
-                      <td className="text-seraya-text-primary px-3 py-4 align-top font-semibold">
-                        {guest.display_name}
+                      <td className="px-3 py-2.5">
+                        <p className="text-seraya-text-primary font-semibold">
+                          {guest.display_name}
+                        </p>
+                        {guest.group_label ? (
+                          <p className="text-seraya-text-muted mt-0.5 text-xs">
+                            {guest.group_label}
+                          </p>
+                        ) : null}
                       </td>
-                      <td className="text-seraya-text-secondary px-3 py-4 align-top">
-                        {guest.group_label ?? '—'}
+                      <td className="text-seraya-text-secondary px-3 py-2.5 text-center whitespace-nowrap">
+                        {guest.party_size} orang
                       </td>
-                      <td className="text-seraya-text-secondary px-3 py-4 align-top">
-                        {guest.party_size}
+                      <td className="text-seraya-text-secondary px-3 py-2.5 whitespace-nowrap">
+                        {guest.whatsapp_phone_e164 ?? 'Belum ada'}
                       </td>
-                      <td className="text-seraya-text-secondary px-3 py-4 align-top">
-                        {guest.whatsapp_phone_e164 ?? 'Belum tersedia'}
+                      <td className="text-seraya-text-secondary px-3 py-2.5 whitespace-nowrap">
+                        {rsvpStatusLabels[guest.rsvp_status]}
                       </td>
-                      <td className="text-seraya-text-secondary px-3 py-4 align-top">
-                        {getRsvpDisplay(guest)}
-                      </td>
-                      <td className="text-seraya-text-secondary px-3 py-4 align-top">
+                      <td className="text-seraya-text-secondary px-3 py-2.5 whitespace-nowrap">
                         {personalLinkStateLabels[guest.link_state]}
                       </td>
-                      <td className="px-3 py-4 align-top">
-                        <div className="flex flex-wrap gap-2">
-                          <Button
-                            onClick={() => setLinkGuest(guest)}
-                            size="sm"
-                            type="button"
-                            variant="secondary"
+                      <td className="px-3 py-2.5 text-right">
+                        <details className="relative inline-block">
+                          <summary
+                            aria-label={`Aksi untuk ${guest.display_name}`}
+                            className="text-seraya-action-primary border-seraya-border-default inline-flex min-h-9 min-w-9 cursor-pointer items-center justify-center rounded-[var(--seraya-radius-sm)] border text-lg font-semibold"
                           >
-                            {guest.link_state === 'active'
-                              ? 'Buat ulang tautan'
-                              : 'Buat Undangan Pribadi'}
-                          </Button>
-                          {guest.link_state === 'active' ? (
+                            ⋯
+                          </summary>
+                          <div className="border-seraya-border-default bg-seraya-surface absolute right-0 z-10 mt-1 flex w-52 flex-col rounded-[var(--seraya-radius-md)] border p-1 shadow-lg">
                             <Button
-                              onClick={() => setRevokeLinkGuest(guest)}
+                              onClick={() => setEditGuest(guest)}
                               size="sm"
                               type="button"
                               variant="text"
                             >
-                              Nonaktifkan tautan
+                              Edit tamu
                             </Button>
-                          ) : null}
-                          <Button
-                            onClick={() => setEditGuest(guest)}
-                            size="sm"
-                            type="button"
-                            variant="text"
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            onClick={() => setRemoveGuest(guest)}
-                            size="sm"
-                            type="button"
-                            variant="text"
-                          >
-                            Hapus
-                          </Button>
-                        </div>
+                            <Button
+                              onClick={() => setLinkGuest(guest)}
+                              size="sm"
+                              type="button"
+                              variant="text"
+                            >
+                              {guest.link_state === 'active'
+                                ? 'Buat ulang tautan'
+                                : 'Siapkan Undangan Pribadi'}
+                            </Button>
+                            {guest.link_state === 'active' ? (
+                              <Button
+                                onClick={() => setRevokeLinkGuest(guest)}
+                                size="sm"
+                                type="button"
+                                variant="text"
+                              >
+                                Nonaktifkan tautan
+                              </Button>
+                            ) : null}
+                            <Button
+                              onClick={() => setRemoveGuest(guest)}
+                              size="sm"
+                              type="button"
+                              variant="text"
+                            >
+                              Hapus tamu
+                            </Button>
+                          </div>
+                        </details>
                       </td>
                     </tr>
                   ))}

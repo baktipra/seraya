@@ -39,15 +39,16 @@ describe('SRY-038 Guest Manager compact operations table', () => {
       </ToastProvider>,
     );
 
+    expect(html).toContain('data-guest-manager-table');
     expect(html).toContain('<table');
     expect(html).toContain('Pilih semua tamu pada hasil aktif');
-    expect(html).toContain('Nama Tamu');
-    expect(html).toContain('Undangan Pribadi');
+    expect(html).toContain('>Tamu<');
+    expect(html).toContain('>Link<');
     expect(html).toContain('Export Excel (.xlsx)');
     expect(html).toContain('0 tamu terpilih');
     expect(html).toContain('Siapkan Undangan Pribadi');
     expect(html).toContain('Nonaktifkan tautan');
-    expect(html).toContain('Edit');
-    expect(html).toContain('Hapus');
+    expect(html).toContain('Edit tamu');
+    expect(html).toContain('Hapus tamu');
   });
 });
