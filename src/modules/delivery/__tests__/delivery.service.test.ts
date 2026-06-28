@@ -88,6 +88,7 @@ import {
   DeliveryActiveLinkConfirmationRequiredError,
   DeliveryPublicationRequiredError,
   getGuestDeliveryCenterForVerifiedProject,
+  getSelectedDeliveryWhatsAppNumbersForCurrentUser,
   maskDeliveryWhatsAppPhone,
   prepareMissingPersonalGuestLinksForDeliveryForCurrentUser,
   preparePersonalGuestLinkForDeliveryForCurrentUser,
@@ -197,17 +198,14 @@ describe('SRY-038A private Delivery Center batch preparation service', () => {
       {
         created_at: '2027-01-03T00:00:00.000Z',
         guest_id: activeGuest.id,
+        hasRecoverableCapability: true,
         status: 'active',
-      },
-      {
-        created_at: '2027-01-02T00:00:00.000Z',
-        guest_id: activeGuest.id,
-        status: 'revoked',
       },
       {
         created_at: '2027-01-04T00:00:00.000Z',
         guest_id: deliveryGuests[1]!.id,
-        status: 'revoked',
+        hasRecoverableCapability: true,
+        status: 'active',
       },
       {
         created_at: '2027-01-05T00:00:00.000Z',
@@ -223,11 +221,17 @@ describe('SRY-038A private Delivery Center batch preparation service', () => {
     expect(listLatestStatesMock).toHaveBeenCalledWith(deliveryGuests.map((guest) => guest.id));
     expect(result.summary).toEqual({
       activeGuestCount: 4,
-      activePersonalLinkCount: 1,
-      guestsWithoutActivePersonalLinkCount: 3,
-      whatsappAvailableCount: 2,
-      whatsappMissingCount: 2,
+      needsLinkUpdateCount: 1,
+      needsWhatsAppCount: 1,
+      noPersonalInvitationCount: 1,
+      readyToDistributeCount: 1,
     });
+    expect(result.rows.map((row) => row.personalLinkState)).toEqual([
+      'active',
+      'active',
+      'expired',
+      'not_created',
+    ]);
 
     for (const row of result.rows) {
       expect(row).not.toHaveProperty('personalUrl');
@@ -464,6 +468,41 @@ describe('SRY-038A private Delivery Center batch preparation service', () => {
     ).rejects.toBeInstanceOf(DeliveryPublicationRequiredError);
 
     expect(prepareWithoutRevealMock).not.toHaveBeenCalled();
+  });
+
+  it('copies WhatsApp numbers only for guests derived as ready to distribute', async () => {
+    listLatestStatesMock.mockResolvedValue([
+      {
+        created_at: '2027-01-03T00:00:00.000Z',
+        guest_id: deliveryGuests[0]!.id,
+        hasRecoverableCapability: true,
+        status: 'active',
+      },
+      {
+        created_at: '2027-01-04T00:00:00.000Z',
+        guest_id: deliveryGuests[1]!.id,
+        hasRecoverableCapability: true,
+        status: 'active',
+      },
+      {
+        created_at: '2027-01-05T00:00:00.000Z',
+        guest_id: deliveryGuests[2]!.id,
+        hasRecoverableCapability: false,
+        status: 'active',
+      },
+      {
+        created_at: '2027-01-06T00:00:00.000Z',
+        guest_id: deliveryGuests[3]!.id,
+        status: 'revoked',
+      },
+    ]);
+
+    await expect(
+      getSelectedDeliveryWhatsAppNumbersForCurrentUser({
+        guestIds: deliveryGuests.map((guest) => guest.id),
+        projectId: project.id,
+      }),
+    ).resolves.toEqual(['+6281234567890']);
   });
 
   it('masks private numbers without returning the full canonical value', () => {

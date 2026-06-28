@@ -26,6 +26,10 @@ import {
   type DeliveryLinkActionState,
   type DeliveryWhatsAppClipboardActionState,
 } from '@/modules/delivery/delivery.action-state';
+import {
+  deriveDeliveryReadiness,
+  matchesDeliveryReadinessFilter,
+} from '@/modules/delivery/delivery-readiness';
 import type {
   DeliveryGuestRow,
   DeliveryReadinessFilter,
@@ -48,8 +52,8 @@ type BoundDeliveryClipboardAction = (
 
 type DeliveryGuestRowClient = DeliveryGuestRow & {
   guestId: string;
-  prepareAction: BoundDeliveryLinkAction;
-  reaccessAction: BoundDeliveryLinkAction;
+  prepareAction?: BoundDeliveryLinkAction;
+  reaccessAction?: BoundDeliveryLinkAction;
   rowKey: number;
 };
 
@@ -131,7 +135,6 @@ async function downloadOwnerXlsx(pathname: string, guestIds: string[]) {
 }
 
 function DeliveryLinkPreparationDialog({
-  confirmActiveReplacement,
   description,
   onOpenChange,
   onPrepared,
@@ -139,7 +142,6 @@ function DeliveryLinkPreparationDialog({
   prepareAction: boundPrepareAction,
   title,
 }: {
-  confirmActiveReplacement: boolean;
   description: string;
   onOpenChange: (open: boolean) => void;
   onPrepared: (result: { personalUrl: string; recipientWhatsAppPhoneE164: string | null }) => void;
@@ -161,7 +163,7 @@ function DeliveryLinkPreparationDialog({
       recipientWhatsAppPhoneE164: actionState.recipientWhatsAppPhoneE164 ?? null,
     });
     onOpenChange(false);
-    toast({ title: 'Tautan pribadi siap untuk disalin.', variant: 'success' });
+    toast({ title: 'Undangan Pribadi siap untuk disalin.', variant: 'success' });
     router.refresh();
   }, [
     actionState.personalUrl,
@@ -176,11 +178,7 @@ function DeliveryLinkPreparationDialog({
   return (
     <Dialog description={description} onOpenChange={onOpenChange} open={open} title={title}>
       <form action={prepareAction} className="space-y-5" noValidate>
-        <input
-          name="confirmActiveReplacement"
-          type="hidden"
-          value={confirmActiveReplacement ? 'true' : 'false'}
-        />
+        <input name="confirmActiveReplacement" type="hidden" value="false" />
         {actionState.status === 'error' && actionState.message ? (
           <p className="text-seraya-status-error text-sm leading-6" role="alert">
             {actionState.message}
@@ -191,7 +189,7 @@ function DeliveryLinkPreparationDialog({
             Batal
           </Button>
           <Button loading={isPreparing} type="submit">
-            {confirmActiveReplacement ? 'Perbarui tautan' : 'Buat Undangan Pribadi'}
+            Siapkan Undangan Pribadi
           </Button>
         </div>
       </form>
@@ -320,7 +318,7 @@ function DeliveryBatchPreparationDialog({
 
   return (
     <Dialog
-      description="Tautan aktif yang sudah ada tidak akan diubah. URL mentah tidak ditampilkan dari proses batch."
+      description="Undangan Pribadi aktif yang sudah ada tidak akan diubah. URL mentah tidak ditampilkan dari proses batch."
       onOpenChange={onOpenChange}
       open={open}
       title={`Siapkan Undangan Pribadi untuk ${guestIds.length} tamu?`}
@@ -338,17 +336,6 @@ function DeliveryBatchPreparationDialog({
               <p className="text-seraya-text-secondary mt-1">
                 {actionState.skippedActiveLinkCount} tamu sudah memiliki tautan aktif dan tidak
                 diubah.
-              </p>
-            ) : null}
-            {actionState.replacedRevokedLinkCount ? (
-              <p className="text-seraya-text-secondary mt-1">
-                {actionState.replacedRevokedLinkCount} tautan lama yang sudah dicabut diperbarui.
-              </p>
-            ) : null}
-            {actionState.replacedExpiredLinkCount ? (
-              <p className="text-seraya-text-secondary mt-1">
-                {actionState.replacedExpiredLinkCount} tautan lama yang sudah kedaluwarsa
-                diperbarui.
               </p>
             ) : null}
             {actionState.skippedInactiveGuestCount ? (
@@ -385,8 +372,8 @@ function DeliveryBatchPreparationDialog({
           <input name="confirmBatchPreparation" type="hidden" value="true" />
           <input name="selectedGuestIds" type="hidden" value={JSON.stringify(guestIds)} />
           <p className="text-seraya-text-secondary text-sm leading-6">
-            Tamu dengan link aktif tidak akan diubah. Pembagian WhatsApp tetap dilakukan manual per
-            tamu.
+            Hanya tamu tanpa Undangan Pribadi yang dapat disiapkan dari Bagikan. Pembagian WhatsApp
+            tetap dilakukan manual per tamu.
           </p>
           {actionState.status === 'error' && actionState.message ? (
             <p className="text-seraya-status-error text-sm leading-6" role="alert">
@@ -443,30 +430,6 @@ function DeliveryWhatsAppCopyControl({
   );
 }
 
-function matchesReadinessFilter(row: DeliveryGuestRowClient, filter: DeliveryReadinessFilter) {
-  if (filter === 'ready') return row.personalLinkState === 'active';
-  if (filter === 'not_ready') return row.personalLinkState !== 'active';
-  if (filter === 'missing_whatsapp') return row.whatsappAvailability === 'missing';
-  if (filter === 'legacy_link') {
-    return row.personalLinkState === 'active' && row.personalLinkReaccessState === 'legacy';
-  }
-  return true;
-}
-
-function getDeliveryStatus(row: DeliveryGuestRowClient) {
-  if (row.personalLinkState === 'active' && row.personalLinkReaccessState === 'legacy') {
-    return 'Tautan perlu diperbarui';
-  }
-  if (row.personalLinkState === 'active') {
-    return row.whatsappAvailability === 'available'
-      ? 'Siap dibagikan'
-      : 'Siap dibagikan · tanpa Nomor WhatsApp';
-  }
-  if (row.personalLinkState === 'expired') return 'Tautan kedaluwarsa';
-  if (row.personalLinkState === 'revoked') return 'Tautan dinonaktifkan';
-  return 'Belum punya Undangan Pribadi';
-}
-
 /** Private delivery workspace. It prepares and shares; lifecycle stays in Kelola Tamu. */
 export function GuestDeliveryCenter({
   copyWhatsAppNumbersAction,
@@ -495,7 +458,7 @@ export function GuestDeliveryCenter({
         !normalizedQuery ||
         row.displayName.toLocaleLowerCase('id-ID').includes(normalizedQuery) ||
         row.groupLabel?.toLocaleLowerCase('id-ID').includes(normalizedQuery);
-      return matchesQuery && matchesReadinessFilter(row, readinessFilter);
+      return matchesQuery && matchesDeliveryReadinessFilter(row, readinessFilter);
     });
   }, [query, readinessFilter, rows]);
 
@@ -505,10 +468,10 @@ export function GuestDeliveryCenter({
     selectedVisibleIds.includes(row.guestId),
   );
   const selectedPreparationIds = selectedVisibleRows
-    .filter((row) => row.personalLinkState !== 'active')
+    .filter((row) => deriveDeliveryReadiness(row).canPrepareNewLink)
     .map((row) => row.guestId);
-  const selectedWhatsAppIds = selectedVisibleRows
-    .filter((row) => row.whatsappAvailability === 'available')
+  const selectedReadyIds = selectedVisibleRows
+    .filter((row) => deriveDeliveryReadiness(row).isReadyToDistribute)
     .map((row) => row.guestId);
   const allVisibleSelected =
     visibleIds.length > 0 && selectedVisibleIds.length === visibleIds.length;
@@ -541,10 +504,7 @@ export function GuestDeliveryCenter({
 
   async function exportSelected() {
     try {
-      await downloadOwnerXlsx(
-        `/dashboard/${projectId}/delivery/export-xlsx`,
-        selectedVisibleIds.length ? selectedVisibleIds : visibleIds,
-      );
+      await downloadOwnerXlsx(`/dashboard/${projectId}/delivery/export-xlsx`, selectedReadyIds);
     } catch {
       setCopyFeedback('Export Excel belum bisa disiapkan. Coba lagi beberapa saat lagi.');
     }
@@ -573,8 +533,8 @@ export function GuestDeliveryCenter({
           Siapkan dan bagikan undangan
         </h1>
         <p className="text-seraya-text-secondary mt-3 max-w-2xl text-base leading-7">
-          Bagikan menggunakan Undangan Pribadi agar tamu dapat menerima sapaan, mengisi RSVP, dan
-          meninggalkan ucapan.
+          Siapkan Undangan Pribadi yang siap dibagikan, lalu lanjutkan pengiriman manual melalui
+          WhatsApp.
         </p>
       </header>
 
@@ -583,21 +543,13 @@ export function GuestDeliveryCenter({
         className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5"
       >
         <ReadinessMetric label="Tamu aktif" value={summary.activeGuestCount} />
-        <ReadinessMetric label="Siap dibagikan" value={summary.activePersonalLinkCount} />
+        <ReadinessMetric label="Siap dibagikan" value={summary.readyToDistributeCount} />
+        <ReadinessMetric label="Butuh nomor WhatsApp" value={summary.needsWhatsAppCount} />
         <ReadinessMetric
           label="Belum punya Undangan Pribadi"
-          value={summary.guestsWithoutActivePersonalLinkCount}
+          value={summary.noPersonalInvitationCount}
         />
-        <ReadinessMetric label="Belum punya Nomor WhatsApp" value={summary.whatsappMissingCount} />
-        <ReadinessMetric
-          label="Tautan lama perlu diperbarui"
-          value={
-            rows.filter(
-              (row) =>
-                row.personalLinkState === 'active' && row.personalLinkReaccessState === 'legacy',
-            ).length
-          }
-        />
+        <ReadinessMetric label="Tautan perlu diperbarui" value={summary.needsLinkUpdateCount} />
       </section>
 
       <Card aria-labelledby="delivery-guests-title">
@@ -610,8 +562,8 @@ export function GuestDeliveryCenter({
               Kesiapan Undangan Pribadi
             </CardTitle>
             <CardDescription>
-              Siapkan link, salin link aktif, atau lanjutkan handoff WhatsApp secara manual per
-              tamu.
+              Gunakan kesiapan yang sama untuk menyiapkan Undangan Pribadi, membagikan tautan, dan
+              menindaklanjuti data yang perlu dirapikan di Tamu.
             </CardDescription>
           </div>
           <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_15rem]">
@@ -645,10 +597,10 @@ export function GuestDeliveryCenter({
                 value={readinessFilter}
               >
                 <option value="all">Semua</option>
-                <option value="ready">Siap dibagikan</option>
-                <option value="not_ready">Belum punya Undangan Pribadi</option>
-                <option value="missing_whatsapp">Belum punya Nomor WhatsApp</option>
-                <option value="legacy_link">Tautan lama perlu diperbarui</option>
+                <option value="ready_to_distribute">Siap dibagikan</option>
+                <option value="needs_whatsapp">Butuh nomor WhatsApp</option>
+                <option value="no_personal_invitation">Belum punya Undangan Pribadi</option>
+                <option value="needs_link_update">Tautan perlu diperbarui</option>
               </select>
             </div>
           </div>
@@ -699,12 +651,9 @@ export function GuestDeliveryCenter({
                 </thead>
                 <tbody className="divide-seraya-border-default bg-seraya-surface divide-y">
                   {filteredRows.map((row) => {
-                    const activeRecoverable =
-                      row.personalLinkState === 'active' &&
-                      row.personalLinkReaccessState === 'recoverable';
-                    const legacyActive =
-                      row.personalLinkState === 'active' &&
-                      row.personalLinkReaccessState === 'legacy';
+                    const readiness = deriveDeliveryReadiness(row);
+                    const canReaccess = readiness.isReadyToDistribute && row.reaccessAction;
+                    const canPrepare = readiness.canPrepareNewLink && row.prepareAction;
                     return (
                       <tr key={row.rowKey}>
                         <td className="px-3 py-3 align-top">
@@ -740,22 +689,22 @@ export function GuestDeliveryCenter({
                           )}
                         </td>
                         <td className="px-3 py-3 align-top">
-                          <StatusPill tone={activeRecoverable ? 'default' : 'soft'}>
-                            {getDeliveryStatus(row)}
+                          <StatusPill tone={readiness.isReadyToDistribute ? 'default' : 'soft'}>
+                            {readiness.deliveryReadinessLabel}
                           </StatusPill>
                         </td>
                         <td className="px-3 py-3 text-right align-top">
-                          {activeRecoverable ? (
+                          {canReaccess ? (
                             <div className="flex flex-wrap justify-end gap-1.5">
                               <PersonalLinkReaccessControl
                                 guestDisplayName={row.displayName}
                                 operation="copy"
-                                reaccessAction={row.reaccessAction}
+                                reaccessAction={canReaccess}
                               />
                               <PersonalLinkReaccessControl
                                 guestDisplayName={row.displayName}
                                 operation="share"
-                                reaccessAction={row.reaccessAction}
+                                reaccessAction={canReaccess}
                               />
                               <RowOverflowMenu
                                 ariaLabel={`Aksi untuk ${row.displayName}`}
@@ -768,14 +717,25 @@ export function GuestDeliveryCenter({
                                   guestDisplayName={row.displayName}
                                   menuItem
                                   operation="open"
-                                  reaccessAction={row.reaccessAction}
+                                  reaccessAction={canReaccess}
                                 />
                               </RowOverflowMenu>
                             </div>
-                          ) : legacyActive ? (
+                          ) : canPrepare ? (
+                            <Button onClick={() => setPrepareGuest(row)} size="sm" type="button">
+                              Siapkan Undangan Pribadi
+                            </Button>
+                          ) : readiness.deliveryReadinessState === 'needs_whatsapp' ? (
+                            <Link
+                              className="text-seraya-action-primary text-sm font-semibold underline-offset-4 hover:underline"
+                              href={`/dashboard/${projectId}/guests`}
+                            >
+                              Lengkapi di Tamu
+                            </Link>
+                          ) : (
                             <div className="flex flex-col items-end gap-1">
                               <span className="text-seraya-text-muted text-xs">
-                                Tautan perlu diperbarui
+                                Tautan ini perlu diperbarui sebelum dapat dibagikan.
                               </span>
                               <Link
                                 className="text-seraya-action-primary text-sm font-semibold underline-offset-4 hover:underline"
@@ -784,10 +744,6 @@ export function GuestDeliveryCenter({
                                 Kelola di Tamu
                               </Link>
                             </div>
-                          ) : (
-                            <Button onClick={() => setPrepareGuest(row)} size="sm" type="button">
-                              Siapkan Undangan Pribadi
-                            </Button>
                           )}
                         </td>
                       </tr>
@@ -807,27 +763,33 @@ export function GuestDeliveryCenter({
                 dari hasil aktif
               </p>
               <div className="flex flex-wrap gap-2">
-                <Button
-                  disabled={selectedPreparationIds.length === 0}
-                  onClick={() => setBatchOpen(true)}
-                  size="sm"
-                  type="button"
-                >
-                  Siapkan Undangan Pribadi
-                </Button>
-                <Button
-                  disabled={selectedVisibleIds.length === 0}
-                  onClick={() => void exportSelected()}
-                  size="sm"
-                  type="button"
-                  variant="secondary"
-                >
-                  Export Excel readiness
-                </Button>
-                <DeliveryWhatsAppCopyControl
-                  copyAction={copyWhatsAppNumbersAction}
-                  guestIds={selectedWhatsAppIds}
-                />
+                {readinessFilter === 'no_personal_invitation' ? (
+                  <Button
+                    disabled={selectedPreparationIds.length === 0}
+                    onClick={() => setBatchOpen(true)}
+                    size="sm"
+                    type="button"
+                  >
+                    Siapkan Undangan Pribadi
+                  </Button>
+                ) : null}
+                {readinessFilter === 'ready_to_distribute' ? (
+                  <>
+                    <Button
+                      disabled={selectedReadyIds.length === 0}
+                      onClick={() => void exportSelected()}
+                      size="sm"
+                      type="button"
+                      variant="secondary"
+                    >
+                      Export Excel readiness
+                    </Button>
+                    <DeliveryWhatsAppCopyControl
+                      copyAction={copyWhatsAppNumbersAction}
+                      guestIds={selectedReadyIds}
+                    />
+                  </>
+                ) : null}
                 <Button
                   disabled={selectedVisibleIds.length === 0}
                   onClick={() => setSelectedIds([])}
@@ -854,10 +816,9 @@ export function GuestDeliveryCenter({
           prepareBatchAction={prepareBatchAction}
         />
       ) : null}
-      {prepareGuest ? (
+      {prepareGuest?.prepareAction ? (
         <DeliveryLinkPreparationDialog
-          confirmActiveReplacement={false}
-          description={`Tautan baru untuk ${prepareGuest.displayName} hanya ditampilkan satu kali setelah dibuat.`}
+          description={`Undangan Pribadi untuk ${prepareGuest.displayName} hanya ditampilkan satu kali setelah dibuat.`}
           onOpenChange={(open) => !open && setPrepareGuest(null)}
           onPrepared={(result) => {
             setPrepareGuest(null);
@@ -865,7 +826,7 @@ export function GuestDeliveryCenter({
           }}
           open={Boolean(prepareGuest)}
           prepareAction={prepareGuest.prepareAction}
-          title="Buat Undangan Pribadi"
+          title="Siapkan Undangan Pribadi"
         />
       ) : null}
       <Dialog
@@ -877,7 +838,7 @@ export function GuestDeliveryCenter({
           }
         }}
         open={Boolean(revealedPersonalLink)}
-        title="Tautan pribadi siap"
+        title="Undangan Pribadi siap"
       >
         {revealedPersonalLink ? (
           <PersonalGuestLinkResultActions

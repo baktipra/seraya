@@ -73,16 +73,18 @@ describe('SRY-031 private Delivery Center route', () => {
           groupLabel: null,
           guestId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
           maskedWhatsAppNumber: '+62••••7890',
+          personalLinkReaccessState: 'recoverable',
           personalLinkState: 'active',
+          rsvpStatus: 'pending',
           whatsappAvailability: 'available',
         },
       ],
       summary: {
         activeGuestCount: 1,
-        activePersonalLinkCount: 1,
-        guestsWithoutActivePersonalLinkCount: 0,
-        whatsappAvailableCount: 1,
-        whatsappMissingCount: 0,
+        needsLinkUpdateCount: 0,
+        needsWhatsAppCount: 0,
+        noPersonalInvitationCount: 0,
+        readyToDistributeCount: 1,
       },
     });
 

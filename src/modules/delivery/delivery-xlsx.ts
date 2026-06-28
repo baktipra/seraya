@@ -2,11 +2,16 @@ import 'server-only';
 
 import ExcelJS from 'exceljs';
 
+import { deriveDeliveryReadiness } from './delivery-readiness';
 import type { DeliveryGuestRow } from './delivery.types';
 
 export type DeliveryReadinessExportRow = Pick<
   DeliveryGuestRow,
-  'displayName' | 'personalLinkState' | 'rsvpStatus' | 'whatsappAvailability'
+  | 'displayName'
+  | 'personalLinkReaccessState'
+  | 'personalLinkState'
+  | 'rsvpStatus'
+  | 'whatsappAvailability'
 > & {
   /** Owner-only export value. This type is never used by the browser table DTO. */
   whatsappPhoneE164: string | null;
@@ -20,53 +25,34 @@ function styleHeader(row: ExcelJS.Row) {
 }
 
 function linkStatus(row: DeliveryReadinessExportRow) {
-  if (row.personalLinkState === 'active') return 'Aktif';
+  if (row.personalLinkState === 'active' && row.personalLinkReaccessState === 'recoverable') {
+    return 'Aktif';
+  }
+  if (row.personalLinkState === 'active') return 'Aktif · perlu diperbarui';
   if (row.personalLinkState === 'revoked') return 'Dinonaktifkan';
   if (row.personalLinkState === 'expired') return 'Kedaluwarsa';
   return 'Belum tersedia';
 }
 
-function readiness(row: DeliveryReadinessExportRow) {
-  if (row.personalLinkState === 'active' && row.whatsappAvailability === 'available')
-    return 'Siap dibagikan';
-  if (row.personalLinkState === 'active') return 'Siap dibagikan — tanpa Nomor WhatsApp';
-  return 'Belum siap dibagikan';
-}
-
-function rsvp(value: DeliveryReadinessExportRow['rsvpStatus']) {
-  return value === 'attending' ? 'Hadir' : value === 'declined' ? 'Tidak hadir' : 'Belum merespons';
-}
-
-function followUp(row: DeliveryReadinessExportRow) {
-  if (row.personalLinkState === 'active' && row.whatsappAvailability === 'available')
-    return 'Siap dibagikan';
-  if (row.personalLinkState === 'active') return 'Belum punya nomor WhatsApp';
-  if (row.personalLinkState === 'revoked' || row.personalLinkState === 'expired')
-    return 'Tautan perlu diperbarui';
-  if (row.rsvpStatus === 'pending') return 'Belum merespons RSVP';
-  return 'Belum punya Undangan Pribadi';
-}
-
 /** Owner-private delivery export. No raw URL, token, ciphertext, or key metadata is accepted. */
 export async function createDeliveryReadinessXlsx(rows: readonly DeliveryReadinessExportRow[]) {
   const workbook = new ExcelJS.Workbook();
-  const sheet = workbook.addWorksheet('Delivery Center');
+  const sheet = workbook.addWorksheet('Bagikan');
   sheet.columns = [
     { header: 'Nama Tamu', key: 'displayName', width: 30 },
     { header: 'Nomor WhatsApp', key: 'whatsapp', width: 22 },
-    { header: 'Status Undangan Pribadi', key: 'link', width: 26 },
-    { header: 'Status Kesiapan', key: 'readiness', width: 32 },
-    { header: 'Status RSVP', key: 'rsvp', width: 20 },
-    { header: 'Status Tindak Lanjut', key: 'followUp', width: 30 },
+    { header: 'Status Undangan Pribadi', key: 'link', width: 28 },
+    { header: 'Status Kesiapan Dibagikan', key: 'readiness', width: 32 },
+    { header: 'Status Tindak Lanjut', key: 'followUp', width: 36 },
   ];
   styleHeader(sheet.getRow(1));
   for (const row of rows) {
+    const readiness = deriveDeliveryReadiness(row);
     sheet.addRow({
       displayName: row.displayName,
+      followUp: readiness.deliveryFollowUpLabel,
       link: linkStatus(row),
-      readiness: readiness(row),
-      rsvp: rsvp(row.rsvpStatus),
-      followUp: followUp(row),
+      readiness: readiness.deliveryReadinessLabel,
       whatsapp: row.whatsappPhoneE164 ?? '',
     });
   }

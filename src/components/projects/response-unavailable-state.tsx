@@ -39,7 +39,7 @@ export function ResponseUnavailableState({
               className="bg-seraya-action-primary text-seraya-text-inverse hover:bg-seraya-action-primary-hover focus-visible:outline-seraya-focus-ring inline-flex min-h-11 items-center justify-center rounded-[var(--seraya-radius-md)] px-4 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
               href={`/dashboard/${projectId}/delivery`}
             >
-              Buka pusat pengiriman
+              Buka Bagikan
             </Link>
           ) : null}
           <Link

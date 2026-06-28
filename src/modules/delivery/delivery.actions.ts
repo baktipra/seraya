@@ -61,7 +61,7 @@ export async function preparePersonalGuestLinkForDeliveryAction(
     });
     revalidatePrivateDeliverySurfaces(bound.data.projectId);
     return {
-      message: 'Tautan pribadi siap untuk disalin.',
+      message: 'Undangan Pribadi siap untuk disalin.',
       personalUrl: result.personalUrl,
       ...(result.recipientWhatsAppPhoneE164
         ? { recipientWhatsAppPhoneE164: result.recipientWhatsAppPhoneE164 }
@@ -178,7 +178,7 @@ export async function prepareMissingPersonalGuestLinksForDeliveryAction(
       result.failedCount > 0
         ? 'Sebagian Undangan Pribadi sudah diproses. Lihat ringkasan untuk tautan aktif, tautan lama yang diperbarui, atau tamu yang belum dapat diproses.'
         : preparedCount > 0
-          ? 'Undangan Pribadi sudah disiapkan. Lanjutkan pembagian manual per tamu di Delivery Center.'
+          ? 'Undangan Pribadi sudah disiapkan. Lanjutkan pembagian manual per tamu di Bagikan.'
           : result.skippedActiveLinkCount > 0
             ? 'Tamu terpilih sudah memiliki tautan aktif. Tidak ada tautan baru yang dibuat.'
             : 'Tidak ada tamu eligible yang perlu disiapkan.';

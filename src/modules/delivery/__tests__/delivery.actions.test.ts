@@ -106,7 +106,7 @@ describe('SRY-037 delivery link preparation Server Actions', () => {
         createFormData('true'),
       ),
     ).resolves.toEqual({
-      message: 'Tautan pribadi siap untuk disalin.',
+      message: 'Undangan Pribadi siap untuk disalin.',
       personalUrl: 'https://seraya.example/raka-nadia/g/opaque-token',
       recipientWhatsAppPhoneE164: '+6281234567890',
       status: 'success',
@@ -153,8 +153,7 @@ describe('SRY-037 delivery link preparation Server Actions', () => {
       requestedGuestCount: 1,
       skippedInactiveGuestCount: 0,
       skippedInvalidProjectCount: 0,
-      message:
-        'Undangan Pribadi sudah disiapkan. Lanjutkan pembagian manual per tamu di Delivery Center.',
+      message: 'Undangan Pribadi sudah disiapkan. Lanjutkan pembagian manual per tamu di Bagikan.',
       skippedActiveLinkCount: 2,
       status: 'success',
       whatsappMissingCreatedCount: 1,

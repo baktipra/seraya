@@ -8,6 +8,7 @@ import {
   preparePersonalGuestLinkForDeliveryAction,
   reaccessPersonalGuestLinkForDeliveryAction,
 } from '@/modules/delivery/delivery.actions';
+import { deriveDeliveryReadiness } from '@/modules/delivery/delivery-readiness';
 import { getGuestDeliveryCenterForVerifiedProject } from '@/modules/delivery/delivery.service';
 import { getWeddingReadinessForRequest } from '@/modules/readiness';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
@@ -92,19 +93,30 @@ export default async function DeliveryCenterPage({ params }: DeliveryCenterPageP
       prepareBatchAction={prepareMissingPersonalGuestLinksForDeliveryAction.bind(null, {
         projectId: deliveryCenter.project.id,
       })}
-      rows={deliveryCenter.rows.map(({ guestId, ...row }, rowKey) => ({
-        ...row,
-        prepareAction: preparePersonalGuestLinkForDeliveryAction.bind(null, {
+      rows={deliveryCenter.rows.map(({ guestId, ...row }, rowKey) => {
+        const readiness = deriveDeliveryReadiness(row);
+        return {
+          ...row,
+          ...(readiness.canPrepareNewLink
+            ? {
+                prepareAction: preparePersonalGuestLinkForDeliveryAction.bind(null, {
+                  guestId,
+                  projectId: deliveryCenter.project.id,
+                }),
+              }
+            : {}),
+          ...(readiness.isReadyToDistribute
+            ? {
+                reaccessAction: reaccessPersonalGuestLinkForDeliveryAction.bind(null, {
+                  guestId,
+                  projectId: deliveryCenter.project.id,
+                }),
+              }
+            : {}),
           guestId,
-          projectId: deliveryCenter.project.id,
-        }),
-        reaccessAction: reaccessPersonalGuestLinkForDeliveryAction.bind(null, {
-          guestId,
-          projectId: deliveryCenter.project.id,
-        }),
-        guestId,
-        rowKey,
-      }))}
+          rowKey,
+        };
+      })}
       summary={deliveryCenter.summary}
     />
   );

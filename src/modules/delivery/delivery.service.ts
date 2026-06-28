@@ -17,9 +17,11 @@ import { PersonalGuestLinkEncryptionError } from '@/modules/guest-links/guest-li
 import type { LatestGuestLinkStateRecord } from '@/modules/guest-links/guest-link.types';
 import { assertGuestBelongsToProject, GuestAccessDeniedError } from '@/modules/guests/guest.policy';
 import { getActiveGuestForVerifiedProjectWithAdmin } from '@/modules/guests/guest.repository';
+import { isCanonicalGuestWhatsAppPhoneE164 } from '@/modules/guests/whatsapp-phone';
 import { hasCurrentPublishedInvitationForVerifiedProject } from '@/modules/publications/publication.repository';
 import { getOwnedProjectById, type OwnedProject } from '@/modules/projects/project.repository';
 
+import { createDeliveryReadinessSummary, deriveDeliveryReadiness } from './delivery-readiness';
 import { createDeliveryReadinessXlsx } from './delivery-xlsx';
 import {
   DeliveryRepositoryError,
@@ -30,9 +32,7 @@ import {
 import type {
   DeliveryBatchPreparationResult,
   DeliveryGuestActionRow,
-  DeliveryGuestRow,
   DeliveryPersonalLinkState,
-  DeliveryReadinessSummary,
   OwnedGuestDeliveryCenter,
 } from './delivery.types';
 
@@ -85,10 +85,6 @@ function getLatestLinkStates(records: LatestGuestLinkStateRecord[]) {
   return latestStates;
 }
 
-function hasActivePersonalLink(state: DeliveryPersonalLinkState) {
-  return state === 'active';
-}
-
 export function maskDeliveryWhatsAppPhone(phone: string): string {
   const prefixLength = Math.min(3, Math.max(2, phone.length - 4));
   return `${phone.slice(0, prefixLength)}••••${phone.slice(-4)}`;
@@ -100,12 +96,14 @@ function mapDeliveryGuestRow(
 ): DeliveryGuestActionRow {
   const personalLinkState = link?.state ?? 'not_created';
   const whatsappPhone = guest.whatsapp_phone_e164;
+  const hasValidWhatsApp = isCanonicalGuestWhatsAppPhoneE164(whatsappPhone);
 
   return {
     displayName: guest.display_name,
     groupLabel: guest.group_label,
     guestId: guest.id,
-    maskedWhatsAppNumber: whatsappPhone ? maskDeliveryWhatsAppPhone(whatsappPhone) : null,
+    maskedWhatsAppNumber:
+      hasValidWhatsApp && whatsappPhone ? maskDeliveryWhatsAppPhone(whatsappPhone) : null,
     personalLinkReaccessState:
       personalLinkState !== 'active'
         ? 'unavailable'
@@ -114,33 +112,8 @@ function mapDeliveryGuestRow(
           : 'legacy',
     personalLinkState,
     rsvpStatus: guest.rsvp_status,
-    whatsappAvailability: whatsappPhone ? 'available' : 'missing',
+    whatsappAvailability: hasValidWhatsApp ? 'available' : 'missing',
   };
-}
-
-function createReadinessSummary(rows: DeliveryGuestRow[]): DeliveryReadinessSummary {
-  return rows.reduce<DeliveryReadinessSummary>(
-    (summary, row) => {
-      const readyToShare = hasActivePersonalLink(row.personalLinkState);
-      return {
-        activeGuestCount: summary.activeGuestCount + 1,
-        activePersonalLinkCount: summary.activePersonalLinkCount + (readyToShare ? 1 : 0),
-        guestsWithoutActivePersonalLinkCount:
-          summary.guestsWithoutActivePersonalLinkCount + (readyToShare ? 0 : 1),
-        whatsappAvailableCount:
-          summary.whatsappAvailableCount + (row.whatsappAvailability === 'available' ? 1 : 0),
-        whatsappMissingCount:
-          summary.whatsappMissingCount + (row.whatsappAvailability === 'missing' ? 1 : 0),
-      };
-    },
-    {
-      activeGuestCount: 0,
-      activePersonalLinkCount: 0,
-      guestsWithoutActivePersonalLinkCount: 0,
-      whatsappAvailableCount: 0,
-      whatsappMissingCount: 0,
-    },
-  );
 }
 
 async function getDeliveryGuestsWithLatestStates(project: OwnedProject) {
@@ -160,7 +133,7 @@ export async function getGuestDeliveryCenterForVerifiedProject(
     hasCurrentPublishedInvitationForVerifiedProject(project),
   ]);
   const rows = guests.map((guest) => mapDeliveryGuestRow(guest, latestLinkStates.get(guest.id)));
-  return { isPublished, project, rows, summary: createReadinessSummary(rows) };
+  return { isPublished, project, rows, summary: createDeliveryReadinessSummary(rows) };
 }
 
 export async function getGuestDeliveryCenterForCurrentUser(
@@ -404,10 +377,15 @@ export async function getSelectedDeliveryWhatsAppNumbersForCurrentUser(input: {
   const user = await requireCurrentUser();
   const project = await getOwnedProjectById(input.projectId, user.id);
   const selected = new Set(input.guestIds);
-  const guests = await listActiveDeliveryGuestsForVerifiedProject(project);
-  return guests
-    .filter((guest) => selected.has(guest.id))
-    .flatMap((guest) => (guest.whatsapp_phone_e164 ? [guest.whatsapp_phone_e164] : []));
+  const { guests, latestLinkStates } = await getDeliveryGuestsWithLatestStates(project);
+  return guests.flatMap((guest) => {
+    if (!selected.has(guest.id)) return [];
+    const row = mapDeliveryGuestRow(guest, latestLinkStates.get(guest.id));
+    const readiness = deriveDeliveryReadiness(row);
+    return readiness.isReadyToDistribute && guest.whatsapp_phone_e164
+      ? [guest.whatsapp_phone_e164]
+      : [];
+  });
 }
 
 export function isDeliveryFailure(error: unknown) {

@@ -7,14 +7,36 @@ import type { OwnedProject } from '@/modules/projects/project.repository';
 
 export type DeliveryPersonalLinkState = GuestPersonalLinkState | 'expired';
 
-export type DeliveryReadinessFilter =
-  | 'all'
-  | 'legacy_link'
-  | 'missing_whatsapp'
-  | 'not_ready'
-  | 'ready';
+/**
+ * Mutually exclusive owner-facing delivery states. These states are derived
+ * from existing guest/link projections only; they are never persisted.
+ */
+export type DeliveryReadinessState =
+  | 'ready_to_distribute'
+  | 'needs_whatsapp'
+  | 'no_personal_invitation'
+  | 'needs_link_update';
+
+export type DeliveryReadinessFilter = 'all' | DeliveryReadinessState;
 
 export type DeliveryWhatsAppAvailability = 'available' | 'missing';
+
+/**
+ * One pure, UI-safe readiness result shared by summary, filters, row actions,
+ * bulk eligibility, and export. It deliberately contains no link material.
+ */
+export type DeliveryReadinessDerivation = {
+  canCopyLink: boolean;
+  canOpenInvitation: boolean;
+  canPrepareNewLink: boolean;
+  canStartWhatsAppHandoff: boolean;
+  deliveryFollowUpLabel: string;
+  deliveryReadinessLabel: string;
+  deliveryReadinessState: DeliveryReadinessState;
+  hasValidWhatsApp: boolean;
+  isReadyToDistribute: boolean;
+  requiresGuestManagerLifecycleAction: boolean;
+};
 
 /** Safe row shape for the owner browser. It intentionally has no token, URL, ciphertext, or key metadata. */
 export type DeliveryGuestRow = {
@@ -32,12 +54,16 @@ export type DeliveryGuestActionRow = DeliveryGuestRow & {
   guestId: string;
 };
 
+/**
+ * Every active guest belongs to exactly one state bucket. This is intentionally
+ * independent of broader project readiness counts used by the overview.
+ */
 export type DeliveryReadinessSummary = {
   activeGuestCount: number;
-  activePersonalLinkCount: number;
-  guestsWithoutActivePersonalLinkCount: number;
-  whatsappAvailableCount: number;
-  whatsappMissingCount: number;
+  needsLinkUpdateCount: number;
+  needsWhatsAppCount: number;
+  noPersonalInvitationCount: number;
+  readyToDistributeCount: number;
 };
 
 /**

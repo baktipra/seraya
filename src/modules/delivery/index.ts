@@ -1,3 +1,8 @@
+export {
+  createDeliveryReadinessSummary,
+  deriveDeliveryReadiness,
+  matchesDeliveryReadinessFilter,
+} from './delivery-readiness';
 export * from './delivery-xlsx';
 export {
   initialDeliveryBatchActionState,
@@ -20,7 +25,9 @@ export type {
   DeliveryBatchPreparationResult,
   DeliveryGuestRow,
   DeliveryPersonalLinkState,
+  DeliveryReadinessDerivation,
   DeliveryReadinessFilter,
+  DeliveryReadinessState,
   DeliveryReadinessSummary,
   DeliveryWhatsAppAvailability,
   OwnedGuestDeliveryCenter,
