@@ -42,6 +42,11 @@ export type WeddingReadinessV1 = {
     guestsWithoutActivePersonalLinkCount: number;
     whatsappAvailableCount: number;
     whatsappUnavailableCount: number;
+    /** SRY-039A authoritative delivery readiness counts. */
+    readyToDistributeCount?: number;
+    noPersonalInvitationCount?: number;
+    needsLinkUpdateCount?: number;
+    needsWhatsAppCount?: number;
   };
   primaryAction: {
     /** A route is present only when the primary action is a navigation. */
@@ -67,4 +72,8 @@ export type WeddingReadinessAggregateCounts = {
   declinedCount: number;
   nonPendingRsvpCount: number;
   whatsappAvailableCount: number;
+  readyToDistributeCount: number;
+  noPersonalInvitationCount: number;
+  needsLinkUpdateCount: number;
+  needsWhatsAppCount: number;
 };

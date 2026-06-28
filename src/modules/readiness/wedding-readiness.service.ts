@@ -205,6 +205,10 @@ export async function getWeddingReadinessForVerifiedProject(
         0,
         totals.activeGuestCount - Math.min(totals.activeGuestCount, totals.whatsappAvailableCount),
       ),
+      readyToDistributeCount: totals.readyToDistributeCount,
+      noPersonalInvitationCount: totals.noPersonalInvitationCount,
+      needsLinkUpdateCount: totals.needsLinkUpdateCount,
+      needsWhatsAppCount: totals.needsWhatsAppCount,
     },
     primaryAction: getPrimaryAction({ invitationState: state, projectId: project.id, totals }),
     responses: {

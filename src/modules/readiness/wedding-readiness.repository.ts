@@ -1,6 +1,7 @@
 import 'server-only';
 
 import type { OwnedProject } from '@/modules/projects/project.repository';
+import { isCanonicalGuestWhatsAppPhoneE164 } from '@/modules/guests/whatsapp-phone';
 import { createAdminSupabaseClient } from '@/server/supabase/admin';
 import { createServerSupabaseClient } from '@/server/supabase/server';
 
@@ -14,7 +15,8 @@ type WeddingReadinessQueryKey =
   | 'declined_rsvp_count'
   | 'confirmed_attendee_values'
   | 'active_personal_link_count'
-  | 'active_guestbook_count';
+  | 'active_guestbook_count'
+  | 'delivery_readiness_rows';
 
 type ReadinessQueryResult = {
   error: unknown;
@@ -143,6 +145,7 @@ export async function getWeddingReadinessAggregateCountsForVerifiedProject(
     confirmedAttendeeResult,
     activePersonalLinksResult,
     activeGuestbookResult,
+    deliveryReadinessRowsResult,
   ] = await Promise.all([
     ownerSupabase
       .from('guests')
@@ -195,6 +198,14 @@ export async function getWeddingReadinessAggregateCountsForVerifiedProject(
       .eq('guests.project_id', project.id)
       .is('deleted_at', null)
       .is('guests.deleted_at', null),
+    adminSupabase
+      .from('guest_links')
+      .select(
+        'guest_id, status, token_key_version, created_at, guests!inner(project_id, deleted_at, whatsapp_phone_e164)',
+      )
+      .eq('guests.project_id', project.id)
+      .is('guests.deleted_at', null)
+      .order('created_at', { ascending: false }),
   ]);
 
   throwForReadinessQueryFailures([
@@ -206,10 +217,43 @@ export async function getWeddingReadinessAggregateCountsForVerifiedProject(
     ['confirmed_attendee_values', confirmedAttendeeResult],
     ['active_personal_link_count', activePersonalLinksResult],
     ['active_guestbook_count', activeGuestbookResult],
+    ['delivery_readiness_rows', deliveryReadinessRowsResult],
   ]);
 
+  const latestLinks = new Map<
+    string,
+    { status: string; token_key_version: number | null; whatsapp_phone_e164: string | null }
+  >();
+  for (const candidate of deliveryReadinessRowsResult.data ?? []) {
+    const row = candidate as {
+      guest_id?: string;
+      status?: string;
+      token_key_version?: number | null;
+      guests?: { whatsapp_phone_e164?: string | null } | { whatsapp_phone_e164?: string | null }[];
+    };
+    if (!row.guest_id || latestLinks.has(row.guest_id)) continue;
+    const joinedGuest = Array.isArray(row.guests) ? row.guests[0] : row.guests;
+    latestLinks.set(row.guest_id, {
+      status: row.status ?? 'unknown',
+      token_key_version: row.token_key_version ?? null,
+      whatsapp_phone_e164: joinedGuest?.whatsapp_phone_e164 ?? null,
+    });
+  }
+  let readyToDistributeCount = 0;
+  let needsWhatsAppCount = 0;
+  let needsLinkUpdateCount = 0;
+  for (const link of latestLinks.values()) {
+    const recoverable = link.status === 'active' && link.token_key_version !== null;
+    if (recoverable && isCanonicalGuestWhatsAppPhoneE164(link.whatsapp_phone_e164))
+      readyToDistributeCount += 1;
+    else if (recoverable) needsWhatsAppCount += 1;
+    else needsLinkUpdateCount += 1;
+  }
+  const activeGuestCount = toNonNegativeCount(activeGuestsResult.count);
+  const noPersonalInvitationCount = Math.max(0, activeGuestCount - latestLinks.size);
+
   return {
-    activeGuestCount: toNonNegativeCount(activeGuestsResult.count),
+    activeGuestCount,
     activeGuestbookCount: toNonNegativeCount(activeGuestbookResult.count),
     activePersonalLinkGuestCount: toNonNegativeCount(activePersonalLinksResult.count),
     attendingCount: toNonNegativeCount(attendingResult.count),
@@ -217,5 +261,9 @@ export async function getWeddingReadinessAggregateCountsForVerifiedProject(
     declinedCount: toNonNegativeCount(declinedResult.count),
     nonPendingRsvpCount: toNonNegativeCount(nonPendingRsvpResult.count),
     whatsappAvailableCount: toNonNegativeCount(whatsappAvailableResult.count),
+    readyToDistributeCount,
+    noPersonalInvitationCount,
+    needsLinkUpdateCount,
+    needsWhatsAppCount,
   };
 }

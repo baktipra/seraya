@@ -62,6 +62,10 @@ const defaultCounts = {
   declinedCount: 0,
   nonPendingRsvpCount: 0,
   whatsappAvailableCount: 0,
+  readyToDistributeCount: 0,
+  noPersonalInvitationCount: 0,
+  needsLinkUpdateCount: 0,
+  needsWhatsAppCount: 0,
 };
 
 function createDraft() {
@@ -198,6 +202,10 @@ describe('SRY-031 wedding readiness composition', () => {
       confirmedAttendeeCount: 2,
       nonPendingRsvpCount: 1,
       whatsappAvailableCount: 2,
+      readyToDistributeCount: 2,
+      noPersonalInvitationCount: 0,
+      needsLinkUpdateCount: 1,
+      needsWhatsAppCount: 1,
     });
 
     const readiness = await getWeddingReadinessForVerifiedProject(project);
@@ -209,6 +217,10 @@ describe('SRY-031 wedding readiness composition', () => {
       guestsWithoutActivePersonalLinkCount: 0,
       whatsappAvailableCount: 2,
       whatsappUnavailableCount: 2,
+      readyToDistributeCount: 2,
+      noPersonalInvitationCount: 0,
+      needsLinkUpdateCount: 1,
+      needsWhatsAppCount: 1,
     });
     expect(readiness.responses.hasActivePersonalLinks).toBe(true);
     expect(readiness.primaryAction.key).toBe('view_guest_responses');

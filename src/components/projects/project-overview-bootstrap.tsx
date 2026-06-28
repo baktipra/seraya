@@ -2,230 +2,124 @@ import type { Route } from 'next';
 import Link from 'next/link';
 
 import { Badge, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/design-system';
-import type { ProjectPublishEligibility } from '@/modules/payments/payment.types';
+import { deriveProjectCompassNextStep } from '@/modules/readiness/project-compass';
 import type { WeddingReadinessV1 } from '@/modules/readiness';
 
-import { PublishInvitationControls } from './publish-invitation-controls';
-
-type ProjectOverviewBootstrapProps = {
-  projectId: string;
-  readiness: WeddingReadinessV1;
-};
-
-type NextStep = {
-  description: string;
-  href?: Route;
-  label?: string;
-  publishIntent?: 'initial' | 'republish';
-  title: string;
-};
-
-type AttentionItem = {
-  description: string;
-  href: Route;
-  label: string;
-  title: string;
-};
-
-const templateLabels = {
-  aruna: 'Aruna — editorial modern',
-  laras: 'Laras — formal malam',
-  roselle: 'Roselle — romantis hangat',
-} as const;
+type ProjectOverviewBootstrapProps = { projectId: string; readiness: WeddingReadinessV1 };
+type AttentionItem = { description: string; href: Route; label: string; title: string };
 
 function getStatus(readiness: WeddingReadinessV1) {
-  switch (readiness.invitation.state) {
-    case 'published':
-      return {
-        badge: 'Sudah dipublikasikan',
-        description: 'Tamu dapat melihat informasi umum melalui Link Publik.',
-        title: 'Undangan sudah dipublikasikan.',
-      };
-    case 'published_with_unpublished_changes':
-      return {
-        badge: 'Perubahan belum diterbitkan',
-        description:
-          'Tamu masih melihat versi undangan sebelumnya sampai kalian menerbitkan ulang.',
-        title: 'Ada perubahan yang belum diterbitkan.',
-      };
-    case 'ready_to_publish':
-      return {
-        badge: 'Siap diterbitkan',
-        description: 'Versi undangan sudah siap ditinjau dan diterbitkan saat kalian setuju.',
-        title: 'Undangan siap diterbitkan.',
-      };
-    case 'draft_ready_unactivated':
-      return {
-        badge: 'Draft siap ditinjau',
-        description: 'Undangan dapat dilihat secara privat sebelum dapat diterbitkan.',
-        title: 'Undangan siap ditinjau.',
-      };
-    case 'draft_incomplete':
-      return {
-        badge: 'Draft belum siap',
-        description: 'Lengkapi informasi utama agar undangan siap ditinjau.',
-        title: 'Undangan masih disusun.',
-      };
-  }
-
+  if (readiness.invitation.hasPublishedSnapshot && readiness.invitation.hasUnpublishedChanges)
+    return {
+      badge: 'Perubahan belum diterbitkan',
+      title: 'Ada perubahan yang belum diterbitkan.',
+      description: 'Tamu masih melihat versi undangan sebelumnya sampai Anda menerbitkan ulang.',
+    };
+  if (readiness.invitation.hasPublishedSnapshot)
+    return {
+      badge: 'Sudah dipublikasikan',
+      title: 'Undangan sudah dipublikasikan.',
+      description: 'Tamu dapat melihat informasi umum melalui Link Publik.',
+    };
   return {
-    badge: 'Draft belum siap',
-    description: 'Lengkapi informasi utama agar undangan siap ditinjau.',
-    title: 'Undangan masih disusun.',
-  };
-}
-
-function getNextStep(readiness: WeddingReadinessV1, projectId: string): NextStep {
-  const base = `/dashboard/${projectId}`;
-
-  switch (readiness.primaryAction.key) {
-    case 'complete_invitation':
-      return {
-        description: 'Lengkapi bagian utama undangan sebelum melangkah ke proses berikutnya.',
-        href: `${base}/invitation` as Route,
-        label: 'Lengkapi undangan',
-        title: 'Selesaikan undangan kalian',
-      };
-    case 'preview_invitation':
-      return {
-        description: 'Tinjau undangan privat dan siapkan versi yang akan dilihat tamu.',
-        href: `${base}/invitation` as Route,
-        label: 'Tinjau undangan',
-        title: 'Tinjau undangan sebelum diterbitkan',
-      };
-    case 'publish_invitation':
-      return {
-        description: 'Versi yang diterbitkan akan menjadi versi yang dilihat tamu.',
-        publishIntent: 'initial',
-        title: 'Tinjau dan terbitkan undangan',
-      };
-    case 'review_changes':
-      return {
-        description: 'Tamu masih melihat versi sebelumnya sampai perubahan ini diterbitkan ulang.',
-        publishIntent: 'republish',
-        title: 'Terbitkan perubahan undangan',
-      };
-    case 'add_guests':
-      return {
-        description: 'Tambahkan tamu agar data penerima undangan mulai rapi.',
-        href: `${base}/guests` as Route,
-        label: 'Tambahkan tamu',
-        title: 'Siapkan daftar tamu kalian',
-      };
-    case 'prepare_personal_invitations':
-      return {
-        description: 'Siapkan Undangan Pribadi untuk tamu yang akan menerima RSVP dan ucapan.',
-        href: `${base}/delivery` as Route,
-        label: 'Siapkan Undangan Pribadi',
-        title: 'Siapkan undangan untuk dibagikan',
-      };
-    case 'open_delivery_center':
-      return {
-        description: 'Undangan Pribadi sudah siap untuk dibagikan secara manual.',
-        href: `${base}/delivery` as Route,
-        label: 'Mulai bagikan',
-        title: 'Mulai bagikan undangan',
-      };
-    case 'view_guest_responses':
-      return {
-        description: 'Lihat respons RSVP dan ucapan yang mulai masuk dari tamu.',
-        href: `${base}/rsvp` as Route,
-        label: 'Lihat Respons Tamu',
-        title: 'Respons tamu mulai masuk',
-      };
-  }
-
-  return {
-    description: 'Lengkapi informasi utama agar undangan siap ditinjau.',
-    href: `${base}/invitation` as Route,
-    label: 'Lengkapi undangan',
-    title: 'Selesaikan undangan kalian',
+    badge: 'Draft belum dipublikasikan',
+    title: 'Undangan belum dipublikasikan.',
+    description: 'Lengkapi dan tinjau undangan sebelum membagikannya kepada tamu.',
   };
 }
 
 function getAttentionItems(readiness: WeddingReadinessV1, projectId: string): AttentionItem[] {
   const base = `/dashboard/${projectId}`;
   const items: AttentionItem[] = [];
-
-  if (!readiness.invitation.hasPublishedSnapshot || readiness.invitation.hasUnpublishedChanges) {
+  if (readiness.invitation.hasUnpublishedChanges)
     items.push({
-      description: readiness.invitation.hasPublishedSnapshot
-        ? 'Perubahan draft belum dilihat tamu.'
-        : 'Undangan belum tersedia untuk dilihat tamu.',
+      title: 'Perubahan undangan belum diterbitkan',
+      description: 'Tamu masih melihat versi undangan sebelumnya.',
+      label: 'Tinjau di Undangan',
       href: `${base}/invitation` as Route,
-      label: 'Buka Undangan',
-      title: readiness.invitation.hasPublishedSnapshot
-        ? 'Perubahan undangan belum diterbitkan'
-        : 'Undangan belum diterbitkan',
     });
-  }
-
-  if (readiness.guests.whatsappUnavailableCount > 0) {
+  if ((readiness.guests.needsWhatsAppCount ?? 0) > 0)
     items.push({
-      description: `${readiness.guests.whatsappUnavailableCount} tamu belum memiliki Nomor WhatsApp.`,
+      title: 'Nomor WhatsApp perlu dilengkapi',
+      description: `${readiness.guests.needsWhatsAppCount ?? 0} tamu belum memiliki Nomor WhatsApp valid.`,
+      label: 'Lengkapi di Tamu',
       href: `${base}/guests` as Route,
-      label: 'Kelola Tamu',
-      title: 'Data kontak perlu dilengkapi',
     });
-  }
-
-  if (
-    readiness.invitation.hasPublishedSnapshot &&
-    readiness.guests.guestsWithoutActivePersonalLinkCount > 0
-  ) {
+  if ((readiness.guests.noPersonalInvitationCount ?? 0) > 0)
     items.push({
-      description: `${readiness.guests.guestsWithoutActivePersonalLinkCount} tamu belum memiliki Undangan Pribadi aktif.`,
+      title: 'Undangan Pribadi belum disiapkan',
+      description: `${readiness.guests.noPersonalInvitationCount ?? 0} tamu belum memiliki Undangan Pribadi.`,
+      label: 'Siapkan di Bagikan',
       href: `${base}/delivery` as Route,
-      label: 'Buka Bagikan',
-      title: 'Undangan Pribadi belum siap',
     });
-  }
-
-  const pendingResponseCount = Math.max(
+  if ((readiness.guests.needsLinkUpdateCount ?? 0) > 0)
+    items.push({
+      title: 'Tautan perlu diperbarui',
+      description: `${readiness.guests.needsLinkUpdateCount ?? 0} tautan perlu dikelola sebelum dapat dibagikan.`,
+      label: 'Kelola di Tamu',
+      href: `${base}/guests` as Route,
+    });
+  const pending = Math.max(
     0,
     readiness.guests.activeGuestCount - readiness.responses.nonPendingRsvpCount,
   );
-  if (readiness.responses.hasActivePersonalLinks && pendingResponseCount > 0) {
+  if (pending > 0 && readiness.responses.hasActivePersonalLinks)
     items.push({
-      description: `${pendingResponseCount} tamu belum merespons RSVP.`,
-      href: `${base}/rsvp` as Route,
+      title: 'Respons tamu belum lengkap',
+      description: `${pending} tamu belum merespons RSVP.`,
       label: 'Lihat Respons Tamu',
-      title: 'Respons tamu perlu ditindaklanjuti',
+      href: `${base}/rsvp` as Route,
     });
-  }
-
-  return items;
+  return items.slice(0, 3);
 }
 
-function getReadinessPublishEligibility(readiness: WeddingReadinessV1): ProjectPublishEligibility {
-  return readiness.invitation.hasVerifiedActivation
-    ? { allowed: true, reason: 'verified_payment' }
-    : { allowed: false, reason: 'payment_not_verified' };
-}
-
-function ProgressItem({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="border-seraya-border-default min-w-0 border-l pl-4 first:border-l-0 first:pl-0">
+function ProgressItem({
+  label,
+  value,
+  href,
+}: {
+  label: string;
+  value: string | number;
+  href?: Route;
+}) {
+  const content = (
+    <>
       <dt className="text-seraya-text-muted text-xs font-semibold tracking-[0.08em] uppercase">
         {label}
       </dt>
       <dd className="text-seraya-text-primary mt-2 text-lg font-semibold tracking-[-0.02em]">
         {value}
       </dd>
+    </>
+  );
+  return href ? (
+    <Link
+      className="border-seraya-border-default focus-visible:outline-seraya-focus-ring min-w-0 rounded-[var(--seraya-radius-sm)] border-l pl-4 first:border-l-0 first:pl-0 focus-visible:outline-3 focus-visible:outline-offset-3"
+      href={href}
+    >
+      {content}
+    </Link>
+  ) : (
+    <div className="border-seraya-border-default min-w-0 border-l pl-4 first:border-l-0 first:pl-0">
+      {content}
     </div>
   );
 }
 
-/** Aggregate-only project compass. Per-guest operations intentionally live elsewhere. */
+/** Aggregate-only project compass. Detailed work stays in Undangan, Tamu, Bagikan, and Respons Tamu. */
 export function ProjectOverviewBootstrap({ projectId, readiness }: ProjectOverviewBootstrapProps) {
+  const base = `/dashboard/${projectId}`;
   const status = getStatus(readiness);
-  const nextStep = getNextStep(readiness, projectId);
+  const nextStep = deriveProjectCompassNextStep(readiness, projectId);
   const attentionItems = getAttentionItems(readiness, projectId);
   const invitationProgress = readiness.invitation.hasPublishedSnapshot
     ? readiness.invitation.hasUnpublishedChanges
       ? 'Perubahan belum terbit'
-      : 'Sudah live'
-    : 'Draft';
+      : 'Sudah dipublikasikan'
+    : 'Belum dipublikasikan';
+  const publicHref = readiness.invitation.publishedSlug
+    ? (`/${readiness.invitation.publishedSlug}` as Route)
+    : null;
 
   return (
     <section
@@ -239,11 +133,6 @@ export function ProjectOverviewBootstrap({ projectId, readiness }: ProjectOvervi
         <p className="text-seraya-text-secondary mt-5 text-sm font-semibold">
           {readiness.identity.coupleLabel}
         </p>
-        {readiness.identity.templateKey ? (
-          <p className="text-seraya-text-muted mt-1 text-sm">
-            {templateLabels[readiness.identity.templateKey]}
-          </p>
-        ) : null}
         <h1 className="seraya-display-md mt-3" id="owner-workspace-overview-title">
           {status.title}
         </h1>
@@ -258,30 +147,17 @@ export function ProjectOverviewBootstrap({ projectId, readiness }: ProjectOvervi
             Langkah berikutnya
           </p>
           <h2 className="seraya-display-sm mt-3" id="workspace-next-step-title">
-            {nextStep.title}
+            {nextStep.label}
           </h2>
           <p className="text-seraya-text-secondary mt-3 max-w-2xl text-base leading-7">
             {nextStep.description}
           </p>
-          <div className="mt-5">
-            {nextStep.publishIntent ? (
-              <PublishInvitationControls
-                hasActiveDraft
-                intent={nextStep.publishIntent}
-                presentation="readiness"
-                projectId={projectId}
-                publishedSlug={readiness.invitation.publishedSlug}
-                publishEligibility={getReadinessPublishEligibility(readiness)}
-              />
-            ) : nextStep.href && nextStep.label ? (
-              <Link
-                className="bg-seraya-action-primary text-seraya-text-inverse hover:bg-seraya-action-primary-hover focus-visible:outline-seraya-focus-ring inline-flex min-h-12 items-center justify-center rounded-[var(--seraya-radius-md)] px-5 text-base font-semibold shadow-[0_8px_18px_rgb(142_75_82_/_0.16)] transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
-                href={nextStep.href}
-              >
-                {nextStep.label}
-              </Link>
-            ) : null}
-          </div>
+          <Link
+            className="bg-seraya-action-primary text-seraya-text-inverse hover:bg-seraya-action-primary-hover focus-visible:outline-seraya-focus-ring mt-5 inline-flex min-h-12 items-center justify-center rounded-[var(--seraya-radius-md)] px-5 text-base font-semibold shadow-[0_8px_18px_rgb(142_75_82_/_0.16)] transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
+            href={nextStep.href}
+          >
+            {nextStep.label}
+          </Link>
         </div>
       </Card>
 
@@ -291,26 +167,39 @@ export function ProjectOverviewBootstrap({ projectId, readiness }: ProjectOvervi
             className="font-sans text-lg font-semibold tracking-[-0.02em]"
             id="workspace-progress-title"
           >
-            Gambaran singkat
+            Progress singkat
           </CardTitle>
           <CardDescription>
-            Empat hal yang menunjukkan posisi persiapan kalian saat ini.
+            Posisi persiapan secara ringkas, tanpa menggantikan halaman kerja detail.
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-5 sm:pt-6">
           <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            <ProgressItem label="Undangan" value={invitationProgress} />
-            <ProgressItem label="Tamu aktif" value={readiness.guests.activeGuestCount} />
+            <ProgressItem
+              label="Undangan"
+              value={invitationProgress}
+              href={`${base}/invitation` as Route}
+            />
+            <ProgressItem
+              label="Tamu aktif"
+              value={`${readiness.guests.activeGuestCount} tersimpan`}
+              href={`${base}/guests` as Route}
+            />
             <ProgressItem
               label="Siap dibagikan"
-              value={readiness.guests.activePersonalLinkGuestCount}
+              value={`${readiness.guests.readyToDistributeCount ?? 0} tamu`}
+              href={`${base}/delivery` as Route}
             />
-            <ProgressItem label="Respons masuk" value={readiness.responses.nonPendingRsvpCount} />
+            <ProgressItem
+              label="Respons"
+              value={`${readiness.responses.nonPendingRsvpCount} sudah merespons`}
+              href={`${base}/rsvp` as Route}
+            />
           </dl>
         </CardContent>
       </Card>
 
-      {attentionItems.length > 0 ? (
+      {attentionItems.length ? (
         <Card aria-labelledby="workspace-attention-title">
           <CardHeader>
             <CardTitle
@@ -319,9 +208,7 @@ export function ProjectOverviewBootstrap({ projectId, readiness }: ProjectOvervi
             >
               Butuh perhatian
             </CardTitle>
-            <CardDescription>
-              Hal yang paling perlu dibereskan agar perjalanan berikutnya lancar.
-            </CardDescription>
+            <CardDescription>Hal yang paling relevan untuk dibereskan berikutnya.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 pt-5 sm:pt-6">
             {attentionItems.map((item) => (
@@ -330,7 +217,7 @@ export function ProjectOverviewBootstrap({ projectId, readiness }: ProjectOvervi
                 key={item.title}
               >
                 <div>
-                  <h2 className="text-seraya-text-primary text-sm font-semibold">{item.title}</h2>
+                  <h3 className="text-seraya-text-primary text-sm font-semibold">{item.title}</h3>
                   <p className="text-seraya-text-secondary mt-1 text-sm leading-6">
                     {item.description}
                   </p>
@@ -346,6 +233,23 @@ export function ProjectOverviewBootstrap({ projectId, readiness }: ProjectOvervi
           </CardContent>
         </Card>
       ) : null}
+
+      <nav aria-label="Akses cepat" className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
+        <Link
+          className="text-seraya-action-primary font-semibold underline-offset-4 hover:underline"
+          href={`${base}/preview` as Route}
+        >
+          Preview undangan
+        </Link>
+        {publicHref ? (
+          <Link
+            className="text-seraya-action-primary font-semibold underline-offset-4 hover:underline"
+            href={publicHref}
+          >
+            Buka Link Publik
+          </Link>
+        ) : null}
+      </nav>
     </section>
   );
 }

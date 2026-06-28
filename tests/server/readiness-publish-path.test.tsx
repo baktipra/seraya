@@ -81,6 +81,10 @@ function createReadiness(overrides: Partial<WeddingReadinessV1> = {}): WeddingRe
       guestsWithoutActivePersonalLinkCount: 0,
       whatsappAvailableCount: 0,
       whatsappUnavailableCount: 0,
+      readyToDistributeCount: 0,
+      noPersonalInvitationCount: 0,
+      needsLinkUpdateCount: 0,
+      needsWhatsAppCount: 0,
     },
     primaryAction: { key: 'publish_invitation' },
     responses: {
@@ -95,27 +99,25 @@ function createReadiness(overrides: Partial<WeddingReadinessV1> = {}): WeddingRe
   };
 }
 
-describe('SRY-031 readiness publish path repair', () => {
+describe('SRY-041 project compass publish handoff', () => {
   beforeEach(() => {
     publishActionMock.mockReset().mockResolvedValue({ status: 'idle' });
     refreshMock.mockReset();
     toastMock.mockReset();
   });
 
-  it('mounts the existing manual publish control on readiness instead of redirecting verified owners to Billing', () => {
+  it('hands draft publication review to Undangan with one calm primary CTA', () => {
     const html = renderToStaticMarkup(
       <ProjectOverviewBootstrap projectId={projectId} readiness={createReadiness()} />,
     );
 
-    expect(html).toContain('Terbitkan undangan');
-    expect(html).toContain('aria-label="Terbitkan undangan?"');
-    expect(html).toContain('Terbitkan sekarang');
+    expect(html).toContain('Lengkapi undangan');
     expect(html).toContain(`href="/dashboard/${projectId}/invitation"`);
     expect(html).not.toContain(`href="/dashboard/${projectId}/billing"`);
     expect(publishActionMock).not.toHaveBeenCalled();
   });
 
-  it('uses the same manual control for deterministic saved changes while Ringkasan stays focused on one primary action', () => {
+  it('hands deterministic saved changes to Undangan while Ringkasan stays focused on one primary CTA', () => {
     const readiness = createReadiness({
       invitation: {
         hasPublishedSnapshot: true,
@@ -130,9 +132,8 @@ describe('SRY-031 readiness publish path repair', () => {
       <ProjectOverviewBootstrap projectId={projectId} readiness={readiness} />,
     );
 
-    expect(html).toContain('Terbitkan perubahan');
-    expect(html).toContain('aria-label="Terbitkan perubahan?"');
-    expect(html).toContain('Buka Undangan');
+    expect(html).toContain('Tinjau dan terbitkan ulang');
+    expect(html).toContain('Tinjau di Undangan');
     expect(html).toContain(`href="/dashboard/${projectId}/invitation"`);
     expect(html).not.toContain(`href="/dashboard/${projectId}/billing"`);
     expect(publishActionMock).not.toHaveBeenCalled();
