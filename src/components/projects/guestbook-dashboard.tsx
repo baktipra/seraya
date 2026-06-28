@@ -89,6 +89,43 @@ function GuestbookEntryCard({
   );
 }
 
+export function GuestbookInboxPanel({ entries, projectId, timezone }: GuestbookDashboardProps) {
+  return (
+    <Card aria-labelledby="guestbook-inbox-title">
+      <CardHeader>
+        <CardTitle
+          className="font-sans text-lg font-semibold tracking-[-0.02em]"
+          id="guestbook-inbox-title"
+        >
+          Ucapan dari tamu
+        </CardTitle>
+        <CardDescription>Pesan terbaru ditampilkan paling atas.</CardDescription>
+      </CardHeader>
+      <CardContent className="pt-5 sm:pt-6">
+        {entries.length === 0 ? (
+          <div className="border-seraya-border-default rounded-[var(--seraya-radius-md)] border border-dashed px-5 py-10 text-center">
+            <p className="text-seraya-text-primary font-semibold">Belum ada ucapan yang masuk.</p>
+            <p className="text-seraya-text-muted mt-2 text-sm leading-6">
+              Ucapan akan muncul setelah tamu menggunakan Undangan Pribadi mereka.
+            </p>
+          </div>
+        ) : (
+          <ul className="space-y-4">
+            {entries.map((entry) => (
+              <GuestbookEntryCard
+                entry={entry}
+                key={entry.id}
+                projectId={projectId}
+                timezone={timezone}
+              />
+            ))}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 /** Owner-only private guestbook inbox. It has no guest mutation except soft removal. */
 export function GuestbookDashboard({ entries, projectId, timezone }: GuestbookDashboardProps) {
   return (
@@ -120,38 +157,7 @@ export function GuestbookDashboard({ entries, projectId, timezone }: GuestbookDa
         </p>
       </header>
 
-      <Card aria-labelledby="guestbook-inbox-title">
-        <CardHeader>
-          <CardTitle
-            className="font-sans text-lg font-semibold tracking-[-0.02em]"
-            id="guestbook-inbox-title"
-          >
-            Pesan dari tamu
-          </CardTitle>
-          <CardDescription>Pesan terbaru ditampilkan paling atas.</CardDescription>
-        </CardHeader>
-        <CardContent className="pt-5 sm:pt-6">
-          {entries.length === 0 ? (
-            <div className="border-seraya-border-default rounded-[var(--seraya-radius-md)] border border-dashed px-5 py-10 text-center">
-              <p className="text-seraya-text-primary font-semibold">Belum ada ucapan yang masuk.</p>
-              <p className="text-seraya-text-muted mt-2 text-sm leading-6">
-                Bagikan tautan pribadi tamu untuk mulai menerima ucapan dan doa.
-              </p>
-            </div>
-          ) : (
-            <ul className="space-y-4">
-              {entries.map((entry) => (
-                <GuestbookEntryCard
-                  entry={entry}
-                  key={entry.id}
-                  projectId={projectId}
-                  timezone={timezone}
-                />
-              ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
+      <GuestbookInboxPanel entries={entries} projectId={projectId} timezone={timezone} />
     </section>
   );
 }

@@ -35,7 +35,6 @@ describe('SRY-038 owner Delivery Center table UI', () => {
       <ToastProvider>
         <GuestDeliveryCenter
           copyWhatsAppNumbersAction={copyNumbers}
-          isPublished
           prepareBatchAction={prepareBatch}
           projectId={projectId}
           rows={[
@@ -86,16 +85,12 @@ describe('SRY-038 owner Delivery Center table UI', () => {
     expect(html).toContain('<table');
     expect(html).toContain('Pilih semua tamu pada hasil aktif');
     expect(html).toContain('0 tamu terpilih');
-    expect(html).toContain('Copy tautan');
-    expect(html).toContain('Tautan lama belum dapat disalin');
-    expect(html).toContain('Perbarui tautan agar dapat dikelola');
-    expect(html).toContain('Aksi untuk Keluarga Budi');
-    expect(html).not.toContain('Buat ulang tautan');
-    expect(html).toContain('Belum merespons RSVP');
-    expect(html).toContain('Tautan lama perlu diperbarui');
-    expect(html).toContain('Bagikan WhatsApp');
+    expect(html).toContain('Copy');
+    expect(html).toContain('Tautan perlu diperbarui');
+    expect(html).toContain('Kelola di Tamu');
+    expect(html).toContain('WhatsApp');
     expect(html).toContain('Copy nomor WhatsApp');
-    expect(html).toContain('Export Excel (.xlsx)');
+    expect(html).toContain('Export Excel readiness');
     expect(html).toContain('+62••••7890');
     expect(html).not.toContain('+6281234567890');
     expect(html).not.toContain('Terkirim berhasil');
@@ -107,7 +102,6 @@ describe('SRY-038 owner Delivery Center table UI', () => {
       <ToastProvider>
         <GuestDeliveryCenter
           copyWhatsAppNumbersAction={copyNumbers}
-          isPublished
           prepareBatchAction={prepareBatch}
           projectId={projectId}
           rows={[]}
@@ -121,7 +115,7 @@ describe('SRY-038 owner Delivery Center table UI', () => {
         />
       </ToastProvider>,
     );
-    expect(html).toContain('Belum ada tamu untuk disiapkan');
+    expect(html).toContain('Belum ada tamu yang disiapkan');
     expect(html).toContain(`href="/dashboard/${projectId}/guests"`);
   });
 });

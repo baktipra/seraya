@@ -19,6 +19,7 @@ const analytics = {
   pendingGuests: [{ displayName: 'Alya' }, { displayName: 'Bima' }, { displayName: 'Citra' }],
   respondedCount: 5,
   respondedPercentage: 63,
+  responseRows: [],
 };
 
 describe('SRY-028 RSVP attendance owner UI', () => {
@@ -67,6 +68,7 @@ describe('SRY-028 RSVP attendance owner UI', () => {
           pendingGuests: [],
           respondedCount: 0,
           respondedPercentage: 0,
+          responseRows: [],
         }}
         projectId={projectId}
       />,
@@ -84,6 +86,7 @@ describe('SRY-028 RSVP attendance owner UI', () => {
           pendingGuests: [],
           respondedCount: 2,
           respondedPercentage: 100,
+          responseRows: [],
         }}
         projectId={projectId}
       />,

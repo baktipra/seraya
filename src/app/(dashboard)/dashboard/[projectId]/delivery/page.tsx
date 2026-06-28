@@ -88,7 +88,6 @@ export default async function DeliveryCenterPage({ params }: DeliveryCenterPageP
       copyWhatsAppNumbersAction={copySelectedDeliveryWhatsAppNumbersAction.bind(null, {
         projectId: deliveryCenter.project.id,
       })}
-      isPublished={deliveryCenter.isPublished}
       projectId={deliveryCenter.project.id}
       prepareBatchAction={prepareMissingPersonalGuestLinksForDeliveryAction.bind(null, {
         projectId: deliveryCenter.project.id,

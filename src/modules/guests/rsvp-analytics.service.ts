@@ -3,7 +3,10 @@ import 'server-only';
 import { requireCurrentUser } from '@/modules/auth/current-user';
 import { getOwnedProjectById, type OwnedProject } from '@/modules/projects/project.repository';
 
+import { getGuestbookInboxForVerifiedProject } from '@/modules/guestbook';
+
 import { listRsvpAnalyticsGuestsForVerifiedProject } from './rsvp-analytics.repository';
+import { createRsvpResponseXlsx } from './rsvp-response-xlsx';
 import type { RsvpAnalyticsGuestRecord, RsvpAnalyticsViewModel } from './rsvp-analytics.types';
 
 const PENDING_GUEST_SAMPLE_LIMIT = 5;
@@ -59,6 +62,16 @@ export function createRsvpAnalyticsViewModel(
   const respondedPercentage =
     activeGuestCount === 0 ? 0 : Math.round((respondedCount / activeGuestCount) * 100);
 
+  const responseRows = guests.map((guest) => ({
+    displayName: guest.display_name,
+    groupLabel: guest.group_label,
+    guestId: guest.id,
+    partySize: guest.party_size,
+    rsvpAttendeeCount: guest.rsvp_attendee_count,
+    rsvpStatus: guest.rsvp_status,
+    updatedAt: guest.updated_at,
+  }));
+
   return {
     activeGuestCount,
     attendingCountUnknownGuestCount,
@@ -70,6 +83,7 @@ export function createRsvpAnalyticsViewModel(
     pendingGuests,
     respondedCount,
     respondedPercentage,
+    responseRows,
   };
 }
 
@@ -93,4 +107,20 @@ export async function getRsvpAnalyticsForCurrentUser(
   const project = await getOwnedProjectById(projectId, user.id);
 
   return getRsvpAnalyticsForVerifiedProject(project);
+}
+
+/** Owner-only XLSX export for RSVP follow-up. It never loads guest-link or contact material. */
+export async function getRsvpResponseXlsxForCurrentUser(projectId: string): Promise<Uint8Array> {
+  const user = await requireCurrentUser();
+  const project = await getOwnedProjectById(projectId, user.id);
+  const [analytics, guestbook] = await Promise.all([
+    getRsvpAnalyticsForVerifiedProject(project),
+    getGuestbookInboxForVerifiedProject(project),
+  ]);
+  return createRsvpResponseXlsx({
+    guestbookGuestIds: new Set(
+      guestbook.entries.flatMap((entry) => (entry.guestId ? [entry.guestId] : [])),
+    ),
+    rows: analytics.analytics.responseRows,
+  });
 }

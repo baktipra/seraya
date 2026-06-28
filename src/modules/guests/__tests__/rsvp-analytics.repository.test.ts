@@ -48,8 +48,24 @@ describe('SRY-028 RSVP analytics repository', () => {
   it('uses one narrow active-guest query with the fields needed for truthful current counts', async () => {
     orderMock.mockResolvedValue({
       data: [
-        { display_name: 'Alya', party_size: 3, rsvp_attendee_count: 2, rsvp_status: 'attending' },
-        { display_name: 'Bima', party_size: 1, rsvp_attendee_count: null, rsvp_status: 'pending' },
+        {
+          display_name: 'Alya',
+          group_label: 'Keluarga',
+          id: '11111111-1111-1111-1111-111111111111',
+          party_size: 3,
+          rsvp_attendee_count: 2,
+          rsvp_status: 'attending',
+          updated_at: '2026-06-28T08:00:00.000Z',
+        },
+        {
+          display_name: 'Bima',
+          group_label: null,
+          id: '22222222-2222-2222-2222-222222222222',
+          party_size: 1,
+          rsvp_attendee_count: null,
+          rsvp_status: 'pending',
+          updated_at: '2026-06-27T08:00:00.000Z',
+        },
       ],
       error: null,
     });
@@ -57,14 +73,30 @@ describe('SRY-028 RSVP analytics repository', () => {
     const records = await listRsvpAnalyticsGuestsForVerifiedProject(project);
 
     expect(selectMock).toHaveBeenCalledWith(
-      'display_name, party_size, rsvp_status, rsvp_attendee_count',
+      'id, display_name, group_label, party_size, rsvp_status, rsvp_attendee_count, updated_at',
     );
     expect(eqMock).toHaveBeenCalledWith('project_id', project.id);
     expect(isMock).toHaveBeenCalledWith('deleted_at', null);
     expect(orderMock).toHaveBeenCalledWith('created_at', { ascending: true });
     expect(records).toEqual([
-      { display_name: 'Alya', party_size: 3, rsvp_attendee_count: 2, rsvp_status: 'attending' },
-      { display_name: 'Bima', party_size: 1, rsvp_attendee_count: null, rsvp_status: 'pending' },
+      {
+        display_name: 'Alya',
+        group_label: 'Keluarga',
+        id: '11111111-1111-1111-1111-111111111111',
+        party_size: 3,
+        rsvp_attendee_count: 2,
+        rsvp_status: 'attending',
+        updated_at: '2026-06-28T08:00:00.000Z',
+      },
+      {
+        display_name: 'Bima',
+        group_label: null,
+        id: '22222222-2222-2222-2222-222222222222',
+        party_size: 1,
+        rsvp_attendee_count: null,
+        rsvp_status: 'pending',
+        updated_at: '2026-06-27T08:00:00.000Z',
+      },
     ]);
   });
 });

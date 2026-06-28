@@ -7,7 +7,7 @@ import { createPublicSupabaseClient } from '@/server/supabase/public';
 import type { OwnerGuestbookEntry, PersonalGuestbookEntry } from './guestbook.types';
 
 const ownerGuestbookSelect =
-  'id, message, updated_at, guests!inner(display_name, project_id, deleted_at)';
+  'id, guest_id, message, updated_at, guests!inner(display_name, project_id, deleted_at)';
 
 export class GuestbookRepositoryError extends Error {
   constructor() {
@@ -49,6 +49,7 @@ export async function listGuestbookEntriesForVerifiedProject(
     return [
       {
         guestDisplayName: guest.display_name,
+        guestId: typeof record.guest_id === 'string' ? record.guest_id : undefined,
         id: record.id,
         message: record.message,
         updatedAt: record.updated_at,

@@ -2,9 +2,7 @@ import type { Route } from 'next';
 import Link from 'next/link';
 import type { ComponentType, SVGProps } from 'react';
 
-import type { WeddingReadinessV1 } from '@/modules/readiness';
-
-import { GuestsIcon, InvitationIcon, OverviewIcon, ShareIcon, HelpIcon } from './dashboard-icons';
+import { GuestsIcon, HelpIcon, InvitationIcon, OverviewIcon, ShareIcon } from './dashboard-icons';
 
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
@@ -14,26 +12,21 @@ type ProjectNavigationItem = {
   label: string;
 };
 
-function getProjectNavigationItems(input: {
-  projectId: string;
-  readiness: WeddingReadinessV1;
-}): ProjectNavigationItem[] {
-  const base = `/dashboard/${input.projectId}`;
-  const items: ProjectNavigationItem[] = [
+/**
+ * The owner workspace follows one stable journey. Individual pages still own
+ * their access/unavailable states; keeping the path visible prevents the
+ * workspace from feeling like a collection of conditionally hidden tools.
+ */
+function getProjectNavigationItems(projectId: string): ProjectNavigationItem[] {
+  const base = `/dashboard/${projectId}`;
+
+  return [
     { href: base as Route, icon: OverviewIcon, label: 'Ringkasan' },
     { href: `${base}/invitation` as Route, icon: InvitationIcon, label: 'Undangan' },
     { href: `${base}/guests` as Route, icon: GuestsIcon, label: 'Tamu' },
+    { href: `${base}/delivery` as Route, icon: ShareIcon, label: 'Bagikan' },
+    { href: `${base}/rsvp` as Route, icon: HelpIcon, label: 'Respons Tamu' },
   ];
-
-  if (input.readiness.invitation.hasPublishedSnapshot) {
-    items.push({ href: `${base}/delivery` as Route, icon: ShareIcon, label: 'Bagikan' });
-  }
-
-  if (input.readiness.responses.hasActivePersonalLinks) {
-    items.push({ href: `${base}/rsvp` as Route, icon: HelpIcon, label: 'Respons Tamu' });
-  }
-
-  return items;
 }
 
 function ProjectNavigationLink({
@@ -61,24 +54,14 @@ function ProjectNavigationLink({
   );
 }
 
-/**
- * Server-rendered project navigation. Its visibility is based on the same
- * owner-only readiness DTO used by the overview; route authorization remains
- * in every direct project route and does not depend on this UI.
- */
-export function ProjectNavigation({
-  projectId,
-  readiness,
-}: {
-  projectId: string;
-  readiness: WeddingReadinessV1;
-}) {
-  const items = getProjectNavigationItems({ projectId, readiness });
+/** Server-rendered owner workspace navigation. Route authorization remains local to each page. */
+export function ProjectNavigation({ projectId }: { projectId: string }) {
+  const items = getProjectNavigationItems(projectId);
 
   return (
     <>
       <nav
-        aria-label="Navigasi project"
+        aria-label="Navigasi workspace"
         className="border-seraya-border-default bg-seraya-surface hidden rounded-[var(--seraya-radius-lg)] border p-2 shadow-[var(--seraya-shadow-soft)] md:flex md:flex-wrap md:items-center md:gap-1"
       >
         {items.map((item) => (
@@ -86,7 +69,7 @@ export function ProjectNavigation({
         ))}
       </nav>
       <nav
-        aria-label="Navigasi project mobile"
+        aria-label="Navigasi workspace mobile"
         className="border-seraya-border-default bg-seraya-surface fixed inset-x-0 bottom-0 z-30 flex min-h-[4.5rem] items-stretch border-t px-1 pt-1 pb-[max(0.25rem,env(safe-area-inset-bottom))] shadow-[0_-8px_24px_rgb(43_37_35_/_0.05)] md:hidden"
       >
         {items.map((item) => (

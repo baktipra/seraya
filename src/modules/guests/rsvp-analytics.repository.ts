@@ -6,11 +6,12 @@ import { createServerSupabaseClient } from '@/server/supabase/server';
 import { GuestRepositoryError } from './guest.repository';
 import type { RsvpAnalyticsGuestRecord } from './rsvp-analytics.types';
 
-const rsvpAnalyticsSelect = 'display_name, party_size, rsvp_status, rsvp_attendee_count';
+const rsvpAnalyticsSelect =
+  'id, display_name, group_label, party_size, rsvp_status, rsvp_attendee_count, updated_at';
 
 /**
- * Narrow owner-scoped source for RSVP current-state insight. Existing project
- * verification happens before this query; RLS still remains active.
+ * One owner-scoped response source for current RSVP insight and response list.
+ * Existing project verification happens before this query; RLS remains active.
  */
 export async function listRsvpAnalyticsGuestsForVerifiedProject(
   project: OwnedProject,
@@ -29,8 +30,11 @@ export async function listRsvpAnalyticsGuestsForVerifiedProject(
 
   return (data ?? []).map((guest) => ({
     display_name: guest.display_name,
+    group_label: guest.group_label ?? null,
+    id: guest.id,
     party_size: guest.party_size,
     rsvp_attendee_count: guest.rsvp_attendee_count ?? null,
     rsvp_status: guest.rsvp_status,
+    updated_at: guest.updated_at,
   }));
 }

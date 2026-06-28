@@ -36,7 +36,30 @@ const project = {
   status: 'published',
 };
 
-describe('SRY-028 RSVP attendance analytics', () => {
+function guest(
+  displayName: string,
+  overrides: Partial<{
+    group_label: string | null;
+    id: string;
+    party_size: number;
+    rsvp_attendee_count: number | null;
+    rsvp_status: 'attending' | 'declined' | 'pending';
+    updated_at: string;
+  }> = {},
+) {
+  return {
+    display_name: displayName,
+    group_label: null,
+    id: `guest-${displayName.toLowerCase()}`,
+    party_size: 1,
+    rsvp_attendee_count: null,
+    rsvp_status: 'pending' as const,
+    updated_at: '2027-08-17T09:00:00.000Z',
+    ...overrides,
+  };
+}
+
+describe('SRY-039 RSVP response analytics', () => {
   beforeEach(() => {
     getOwnedProjectMock.mockReset().mockResolvedValue(project);
     listRsvpAnalyticsGuestsMock.mockReset();
@@ -45,13 +68,13 @@ describe('SRY-028 RSVP attendance analytics', () => {
 
   it('keeps guest-group metrics separate from invited and confirmed people totals', () => {
     const analytics = createRsvpAnalyticsViewModel([
-      { display_name: 'Alya', party_size: 4, rsvp_attendee_count: null, rsvp_status: 'pending' },
-      { display_name: 'Bima', party_size: 3, rsvp_attendee_count: 2, rsvp_status: 'attending' },
-      { display_name: 'Citra', party_size: 2, rsvp_attendee_count: null, rsvp_status: 'attending' },
-      { display_name: 'Dara', party_size: 1, rsvp_attendee_count: null, rsvp_status: 'declined' },
+      guest('Alya', { party_size: 4 }),
+      guest('Bima', { party_size: 3, rsvp_attendee_count: 2, rsvp_status: 'attending' }),
+      guest('Citra', { party_size: 2, rsvp_status: 'attending' }),
+      guest('Dara', { rsvp_status: 'declined' }),
     ]);
 
-    expect(analytics).toEqual({
+    expect(analytics).toMatchObject({
       activeGuestCount: 4,
       attendingCountUnknownGuestCount: 1,
       attendingGuestCount: 2,
@@ -63,18 +86,19 @@ describe('SRY-028 RSVP attendance analytics', () => {
       respondedCount: 3,
       respondedPercentage: 75,
     });
+    expect(analytics.responseRows).toEqual([
+      expect.objectContaining({ displayName: 'Alya', rsvpStatus: 'pending' }),
+      expect.objectContaining({ displayName: 'Bima', rsvpStatus: 'attending' }),
+      expect.objectContaining({ displayName: 'Citra', rsvpStatus: 'attending' }),
+      expect.objectContaining({ displayName: 'Dara', rsvpStatus: 'declined' }),
+    ]);
   });
 
   it('caps pending sample by active pending guest order and never weights attendance by party size', () => {
-    const guests = Array.from({ length: 6 }, (_, index) => ({
-      display_name: `Tamu ${index + 1}`,
-      party_size: 20,
-      rsvp_attendee_count: null,
-      rsvp_status: 'pending' as const,
-    }));
-
+    const guests = Array.from({ length: 6 }, (_, index) =>
+      guest(`Tamu ${index + 1}`, { party_size: 20 }),
+    );
     const analytics = createRsvpAnalyticsViewModel(guests);
-
     expect(analytics.pendingGuests).toEqual([
       { displayName: 'Tamu 1' },
       { displayName: 'Tamu 2' },
@@ -99,51 +123,35 @@ describe('SRY-028 RSVP attendance analytics', () => {
       pendingGuests: [],
       respondedCount: 0,
       respondedPercentage: 0,
+      responseRows: [],
     });
   });
 
   it('verifies owner scope before the narrow RSVP record read', async () => {
     listRsvpAnalyticsGuestsMock.mockResolvedValue([
-      { display_name: 'Alya', party_size: 2, rsvp_attendee_count: 1, rsvp_status: 'attending' },
+      guest('Alya', { party_size: 2, rsvp_attendee_count: 1, rsvp_status: 'attending' }),
     ]);
-
     const result = await getRsvpAnalyticsForCurrentUser(project.id);
-
     expect(getOwnedProjectMock).toHaveBeenCalledWith(project.id, project.account_id);
     expect(listRsvpAnalyticsGuestsMock).toHaveBeenCalledWith(project);
-    expect(result.analytics).toMatchObject({
-      attendingGuestCount: 1,
-      confirmedAttendeeCount: 1,
-    });
+    expect(result.analytics).toMatchObject({ attendingGuestCount: 1, confirmedAttendeeCount: 1 });
   });
 
   it('does not read guest records when owner-project verification fails', async () => {
     getOwnedProjectMock.mockRejectedValue(new ProjectAccessDeniedError());
-
     await expect(
       getRsvpAnalyticsForCurrentUser('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'),
     ).rejects.toBeInstanceOf(ProjectAccessDeniedError);
-
     expect(listRsvpAnalyticsGuestsMock).not.toHaveBeenCalled();
   });
 
-  it('does not expose IDs, link state, guest contacts, or raw party rows in the DTO', () => {
-    const analytics = createRsvpAnalyticsViewModel([
-      { display_name: 'Alya', party_size: 2, rsvp_attendee_count: null, rsvp_status: 'pending' },
-    ]);
-
-    expect(Object.keys(analytics).sort()).toEqual([
-      'activeGuestCount',
-      'attendingCountUnknownGuestCount',
-      'attendingGuestCount',
-      'confirmedAttendeeCount',
-      'declinedGuestCount',
-      'invitedPeopleCount',
-      'pendingGuestCount',
-      'pendingGuests',
-      'respondedCount',
-      'respondedPercentage',
-    ]);
-    expect(analytics.pendingGuests[0]).toEqual({ displayName: 'Alya' });
+  it('does not expose link, contact, token, or guestbook content in the analytics DTO', () => {
+    const analytics = createRsvpAnalyticsViewModel([guest('Alya', { party_size: 2 })]);
+    const serialized = JSON.stringify(analytics);
+    expect(serialized).not.toContain('token');
+    expect(serialized).not.toContain('whatsapp');
+    expect(serialized).not.toContain('ciphertext');
+    expect(serialized).not.toContain('guestbook');
+    expect(analytics.responseRows[0]).toMatchObject({ displayName: 'Alya', partySize: 2 });
   });
 });

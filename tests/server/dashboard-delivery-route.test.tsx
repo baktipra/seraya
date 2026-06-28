@@ -16,18 +16,8 @@ const { getDeliveryCenterMock, getOwnedProjectContextMock, getReadinessMock, not
 
 vi.mock('next/navigation', () => ({ notFound: notFoundMock }));
 vi.mock('@/components/projects/guest-delivery-center', () => ({
-  GuestDeliveryCenter: ({
-    isPublished,
-    projectId,
-    rows,
-  }: {
-    isPublished: boolean;
-    projectId: string;
-    rows: unknown[];
-  }) => (
-    <div data-delivery-published={String(isPublished)} data-delivery-project-id={projectId}>
-      {rows.length} rows
-    </div>
+  GuestDeliveryCenter: ({ projectId, rows }: { projectId: string; rows: unknown[] }) => (
+    <div data-delivery-project-id={projectId}>{rows.length} rows</div>
   ),
 }));
 vi.mock('@/modules/auth/dashboard-request-context', () => ({
@@ -105,7 +95,6 @@ describe('SRY-031 private Delivery Center route', () => {
     expect(getReadinessMock).toHaveBeenCalledWith(projectId);
     expect(getOwnedProjectContextMock).toHaveBeenCalledWith(projectId);
     expect(getDeliveryCenterMock).toHaveBeenCalledWith(project);
-    expect(html).toContain('data-delivery-published="true"');
     expect(html).toContain(`data-delivery-project-id="${projectId}"`);
     expect(html).toContain('1 rows');
   });

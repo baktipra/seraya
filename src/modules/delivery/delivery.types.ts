@@ -9,12 +9,9 @@ export type DeliveryPersonalLinkState = GuestPersonalLinkState | 'expired';
 
 export type DeliveryReadinessFilter =
   | 'all'
-  | 'attending'
-  | 'declined'
   | 'legacy_link'
   | 'missing_whatsapp'
   | 'not_ready'
-  | 'pending'
   | 'ready';
 
 export type DeliveryWhatsAppAvailability = 'available' | 'missing';

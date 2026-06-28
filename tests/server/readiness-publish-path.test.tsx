@@ -110,12 +110,12 @@ describe('SRY-031 readiness publish path repair', () => {
     expect(html).toContain('Terbitkan undangan');
     expect(html).toContain('aria-label="Terbitkan undangan?"');
     expect(html).toContain('Terbitkan sekarang');
-    expect(html).toContain(`href="/dashboard/${projectId}/preview"`);
+    expect(html).toContain(`href="/dashboard/${projectId}/invitation"`);
     expect(html).not.toContain(`href="/dashboard/${projectId}/billing"`);
     expect(publishActionMock).not.toHaveBeenCalled();
   });
 
-  it('uses the same manual control for deterministic saved changes with preview as the quiet secondary action', () => {
+  it('uses the same manual control for deterministic saved changes while Ringkasan stays focused on one primary action', () => {
     const readiness = createReadiness({
       invitation: {
         hasPublishedSnapshot: true,
@@ -132,8 +132,8 @@ describe('SRY-031 readiness publish path repair', () => {
 
     expect(html).toContain('Terbitkan perubahan');
     expect(html).toContain('aria-label="Terbitkan perubahan?"');
-    expect(html).toContain('Tinjau preview');
-    expect(html).toContain(`href="/dashboard/${projectId}/preview"`);
+    expect(html).toContain('Buka Undangan');
+    expect(html).toContain(`href="/dashboard/${projectId}/invitation"`);
     expect(html).not.toContain(`href="/dashboard/${projectId}/billing"`);
     expect(publishActionMock).not.toHaveBeenCalled();
   });

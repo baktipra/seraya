@@ -12,6 +12,7 @@ import {
 } from 'react';
 
 import {
+  Badge,
   Button,
   Card,
   CardContent,
@@ -29,10 +30,15 @@ import { saveInvitationEditorAction } from '@/modules/invitations/invitation-edi
 import type { InvitationEditorFieldErrors } from '@/modules/invitations/invitation-editor.schema';
 import type { InvitationTemplateKey } from '@/modules/invitation-templates/invitation-template.keys';
 import type { InvitationDraft } from '@/modules/invitations/invitation-draft.types';
+import type { ProjectPublishEligibility } from '@/modules/payments/payment.types';
+import type { WeddingReadinessV1 } from '@/modules/readiness';
+
+import { PublishInvitationControls } from './publish-invitation-controls';
 
 export type InvitationEditorProps = {
   draft: InvitationDraft;
   projectId: string;
+  readiness?: Pick<WeddingReadinessV1, 'identity' | 'invitation'>;
 };
 
 type EditorFieldProps = {
@@ -604,10 +610,70 @@ function InvitationTemplatePicker({
   );
 }
 
+const fallbackWorkspaceReadiness: Pick<WeddingReadinessV1, 'identity' | 'invitation'> = {
+  identity: { coupleLabel: 'Undangan kalian', templateKey: null },
+  invitation: {
+    hasPublishedSnapshot: false,
+    hasUnpublishedChanges: false,
+    hasVerifiedActivation: false,
+    publishedSlug: null,
+    state: 'draft_incomplete',
+  },
+};
+
 /**
  * Local-only presentation state for the explicit draft save flow. It never
  * changes server behavior and never treats browser edits as persisted data.
  */
+export function getInvitationWorkspaceStatus(readiness?: InvitationEditorProps['readiness']) {
+  const workspaceReadiness = readiness ?? fallbackWorkspaceReadiness;
+
+  switch (workspaceReadiness.invitation.state) {
+    case 'published_with_unpublished_changes':
+      return {
+        badge: 'Perubahan belum diterbitkan',
+        description:
+          'Perubahan draft tidak langsung terlihat oleh tamu. Tamu melihat perubahan setelah kalian menerbitkan ulang.',
+        title: 'Ada perubahan yang belum diterbitkan.',
+      };
+    case 'published':
+      return {
+        badge: 'Sudah dipublikasikan',
+        description:
+          'Undangan sudah live. Perubahan baru akan tetap menjadi draft sampai kalian menerbitkan ulang.',
+        title: 'Undangan sudah dipublikasikan.',
+      };
+    case 'ready_to_publish':
+      return {
+        badge: 'Siap diterbitkan',
+        description:
+          'Perubahan draft tidak langsung terlihat oleh tamu. Tinjau lalu terbitkan saat undangan sudah kalian setujui.',
+        title: 'Undangan siap diterbitkan.',
+      };
+    case 'draft_ready_unactivated':
+      return {
+        badge: 'Draft siap ditinjau',
+        description: 'Perubahan draft tetap privat sampai undangan dapat diterbitkan.',
+        title: 'Undangan siap ditinjau.',
+      };
+    case 'draft_incomplete':
+      return {
+        badge: 'Draft belum siap',
+        description:
+          'Lengkapi informasi utama lalu simpan untuk melihat hasil undangan secara privat.',
+        title: 'Undangan masih disusun.',
+      };
+  }
+}
+
+function getInvitationPublishEligibility(
+  readiness?: InvitationEditorProps['readiness'],
+): ProjectPublishEligibility {
+  return (readiness ?? fallbackWorkspaceReadiness).invitation.hasVerifiedActivation
+    ? { allowed: true, reason: 'verified_payment' }
+    : { allowed: false, reason: 'payment_not_verified' };
+}
+
 export function getInvitationEditorSaveStatus({
   actionStatus,
   hasSaved,
@@ -641,7 +707,7 @@ export function getInvitationEditorSaveStatus({
   };
 }
 
-export function InvitationEditor({ draft, projectId }: InvitationEditorProps) {
+export function InvitationEditor({ draft, projectId, readiness }: InvitationEditorProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [state, formAction, isPending] = useActionState(
@@ -649,6 +715,11 @@ export function InvitationEditor({ draft, projectId }: InvitationEditorProps) {
     initialInvitationEditorActionState,
   );
   const content = draft.content;
+  const workspaceReadiness = readiness ?? fallbackWorkspaceReadiness;
+  const workspaceStatus = getInvitationWorkspaceStatus(workspaceReadiness);
+  const shouldShowPublishControl =
+    workspaceReadiness.invitation.state === 'ready_to_publish' ||
+    workspaceReadiness.invitation.state === 'published_with_unpublished_changes';
   const [isDirty, setIsDirty] = useState(false);
   const [hasSaved, setHasSaved] = useState(false);
   const [selectedTemplateKey, setSelectedTemplateKey] = useState<InvitationTemplateKey>(
@@ -687,40 +758,56 @@ export function InvitationEditor({ draft, projectId }: InvitationEditorProps) {
   return (
     <Card aria-labelledby="invitation-editor-title" className="max-w-4xl overflow-visible">
       <div className="bg-seraya-brand-soft rounded-t-[var(--seraya-radius-lg)] px-5 py-8 sm:px-8 sm:py-10">
-        <p className="text-seraya-action-primary text-xs font-semibold tracking-[0.14em] uppercase">
-          Undangan kalian
+        <Badge variant={workspaceReadiness.invitation.hasPublishedSnapshot ? 'success' : 'brand'}>
+          {workspaceStatus.badge}
+        </Badge>
+        <p className="text-seraya-text-secondary mt-5 text-sm font-semibold">
+          {workspaceReadiness.identity.coupleLabel}
         </p>
         <h1
-          className="seraya-display-md mt-4 max-w-2xl text-[clamp(2.25rem,5vw,3.5rem)]"
+          className="seraya-display-md mt-3 max-w-2xl text-[clamp(2.25rem,5vw,3.5rem)]"
           id="invitation-editor-title"
         >
-          Edit undangan
+          {workspaceStatus.title}
         </h1>
-        <div className="text-seraya-text-secondary mt-4 max-w-2xl space-y-2 text-base leading-7">
-          <p>Lengkapi detail undangan kalian, lalu simpan untuk melihat hasilnya di preview.</p>
-          <p>
-            Perubahan ini tersimpan sebagai draft pribadi. Tamu baru melihatnya setelah kalian
-            menerbitkan atau menerbitkan ulang undangan.
-          </p>
-        </div>
+        <p className="text-seraya-text-secondary mt-4 max-w-2xl text-base leading-7">
+          {workspaceStatus.description}
+        </p>
       </div>
 
       <CardHeader className="border-seraya-border-default gap-5 border-b pb-5 sm:pb-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <CardTitle className="font-sans text-lg font-semibold tracking-[-0.02em]">
-              Lengkapi undangan kalian
+              Edit undangan
             </CardTitle>
             <CardDescription className="mt-1.5 max-w-2xl">
-              Isi setiap bagian sesuai kebutuhan. Perubahan baru masuk ke preview setelah disimpan.
+              Template, detail pasangan, jadwal, lokasi, galeri, Amplop Digital, dan penutup
+              semuanya dikelola di sini.
             </CardDescription>
           </div>
-          <Link
-            className="border-seraya-border-default bg-seraya-surface text-seraya-text-primary hover:border-seraya-border-strong hover:bg-seraya-canvas focus-visible:outline-seraya-focus-ring inline-flex min-h-11 shrink-0 items-center justify-center rounded-[var(--seraya-radius-md)] border px-4 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
-            href={`/dashboard/${projectId}`}
-          >
-            Kembali ke project
-          </Link>
+          <div className="flex shrink-0 flex-col gap-2 sm:items-start">
+            <Link
+              className="border-seraya-border-default bg-seraya-surface text-seraya-text-primary hover:border-seraya-border-strong hover:bg-seraya-canvas focus-visible:outline-seraya-focus-ring inline-flex min-h-11 items-center justify-center rounded-[var(--seraya-radius-md)] border px-4 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
+              href={`/dashboard/${projectId}/preview`}
+            >
+              Preview undangan
+            </Link>
+            {shouldShowPublishControl ? (
+              <PublishInvitationControls
+                hasActiveDraft
+                intent={
+                  workspaceReadiness.invitation.state === 'published_with_unpublished_changes'
+                    ? 'republish'
+                    : 'initial'
+                }
+                presentation="readiness"
+                projectId={projectId}
+                publishedSlug={workspaceReadiness.invitation.publishedSlug}
+                publishEligibility={getInvitationPublishEligibility(workspaceReadiness)}
+              />
+            ) : null}
+          </div>
         </div>
 
         <ol aria-label="Alur melengkapi undangan" className="grid gap-2.5 sm:grid-cols-3 sm:gap-3">

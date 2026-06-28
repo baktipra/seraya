@@ -23,17 +23,16 @@ async function getProjectReadinessOrNotFound(projectId: string): Promise<Wedding
 }
 
 /**
- * Defense-in-depth project shell. Navigation visibility comes from an
- * owner-scoped request-local readiness projection; direct routes keep their
- * own authorization and never rely on this presentation layer.
+ * Defense-in-depth project shell. The readiness read verifies the owner scope
+ * before navigation renders; every direct route still owns its own authorization.
  */
 export default async function ProjectDashboardLayout({ children, params }: ProjectLayoutProps) {
   const { projectId } = await params;
-  const readiness = await getProjectReadinessOrNotFound(projectId);
+  await getProjectReadinessOrNotFound(projectId);
 
   return (
     <div className="space-y-5 sm:space-y-7">
-      <ProjectNavigation projectId={projectId} readiness={readiness} />
+      <ProjectNavigation projectId={projectId} />
       {children}
     </div>
   );

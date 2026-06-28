@@ -108,9 +108,10 @@ describe('SRY-030 invitation editor multi-event owner UI', () => {
     }
 
     expect(html).toContain(
-      'Lengkapi detail undangan kalian, lalu simpan untuk melihat hasilnya di preview.',
+      'Lengkapi informasi utama lalu simpan untuk melihat hasil undangan secara privat.',
     );
-    expect(html).toContain('Perubahan ini tersimpan sebagai draft pribadi.');
+    expect(html).toContain('Draft belum siap');
+    expect(html).toContain('Undangan masih disusun.');
     expect(html).toContain(
       '1</span><span class="text-seraya-text-primary text-sm font-semibold">Lengkapi detail</span>',
     );
@@ -121,7 +122,7 @@ describe('SRY-030 invitation editor multi-event owner UI', () => {
     expect(html).toContain('Aruna');
     expect(html).toContain('Laras');
     expect(html).toContain('Lihat hasil undangan');
-    expect(html).toContain('Kembali ke project');
+    expect(html).toContain('Preview undangan');
     expect(html).toContain('Sapaan kecil');
     expect(html).toContain('Nama yang tampil di undangan');
     expect(html).toContain('Tampilkan konfirmasi kehadiran');
