@@ -193,7 +193,7 @@ describe('SRY-037 delivery link preparation Server Actions', () => {
       skippedInactiveGuestCount: 0,
       skippedInvalidProjectCount: 0,
       message:
-        'Sebagian Undangan Pribadi sudah diproses. Lihat ringkasan untuk tamu yang sudah aktif, dilewati, atau belum dapat disiapkan.',
+        'Sebagian Undangan Pribadi sudah diproses. Lihat ringkasan untuk tautan aktif, tautan lama yang diperbarui, atau tamu yang belum dapat diproses.',
       skippedActiveLinkCount: 2,
       status: 'partial',
       whatsappMissingCreatedCount: 0,

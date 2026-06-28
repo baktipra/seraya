@@ -85,34 +85,46 @@ export async function listLatestGuestLinkStatesForVerifiedGuestIds(guestIds: str
   }
 
   const supabase = createAdminSupabaseClient();
+  // Read link history directly so lifecycle decisions are based on the actual
+  // latest state per selected guest. This avoids relying on nested relation
+  // limits when a guest has revoked/expired history plus a replacement.
   const { data, error } = await supabase
-    .from('guests')
-    .select('id, guest_links(status, created_at, token_key_version)')
-    .in('id', guestIds)
-    .is('deleted_at', null)
-    .order('created_at', { ascending: false, foreignTable: 'guest_links' })
-    .limit(1, { foreignTable: 'guest_links' });
+    .from('guest_links')
+    .select('guest_id, status, created_at, token_key_version')
+    .in('guest_id', guestIds)
+    .order('created_at', { ascending: false });
 
   if (error) {
     throw new GuestLinkRepositoryError();
   }
 
-  return (data ?? []).flatMap((guest) => {
-    const guestLinks = Array.isArray(guest.guest_links) ? guest.guest_links : [];
-    const latestLink = guestLinks[0];
+  const latestByGuest = new Map<
+    string,
+    {
+      created_at: string;
+      status: 'active' | 'revoked' | 'expired';
+      token_key_version: number | null;
+    }
+  >();
+  for (const record of data ?? []) {
+    if (!latestByGuest.has(record.guest_id)) {
+      latestByGuest.set(
+        record.guest_id,
+        record as {
+          created_at: string;
+          status: 'active' | 'revoked' | 'expired';
+          token_key_version: number | null;
+        },
+      );
+    }
+  }
 
-    return latestLink
-      ? [
-          {
-            created_at: latestLink.created_at,
-            guest_id: guest.id,
-            hasRecoverableCapability:
-              latestLink.status === 'active' && latestLink.token_key_version !== null,
-            status: latestLink.status,
-          },
-        ]
-      : [];
-  }) as LatestGuestLinkStateRecord[];
+  return [...latestByGuest.entries()].map(([guest_id, record]) => ({
+    created_at: record.created_at,
+    guest_id,
+    hasRecoverableCapability: record.status === 'active' && record.token_key_version !== null,
+    status: record.status,
+  })) as LatestGuestLinkStateRecord[];
 }
 
 /**

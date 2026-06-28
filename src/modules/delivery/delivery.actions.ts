@@ -170,10 +170,14 @@ export async function prepareMissingPersonalGuestLinksForDeliveryAction(
     });
     revalidatePrivateDeliverySurfaces(bound.data.projectId);
     const status = result.failedCount > 0 ? 'partial' : 'success';
+    const preparedCount =
+      result.createdCount +
+      (result.replacedRevokedLinkCount ?? 0) +
+      (result.replacedExpiredLinkCount ?? 0);
     const message =
       result.failedCount > 0
-        ? 'Sebagian Undangan Pribadi sudah diproses. Lihat ringkasan untuk tamu yang sudah aktif, dilewati, atau belum dapat disiapkan.'
-        : result.createdCount > 0
+        ? 'Sebagian Undangan Pribadi sudah diproses. Lihat ringkasan untuk tautan aktif, tautan lama yang diperbarui, atau tamu yang belum dapat diproses.'
+        : preparedCount > 0
           ? 'Undangan Pribadi sudah disiapkan. Lanjutkan pembagian manual per tamu di Delivery Center.'
           : result.skippedActiveLinkCount > 0
             ? 'Tamu terpilih sudah memiliki tautan aktif. Tidak ada tautan baru yang dibuat.'

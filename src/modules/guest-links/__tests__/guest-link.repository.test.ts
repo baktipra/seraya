@@ -49,21 +49,24 @@ describe('latest owner guest-link delivery projection', () => {
     createAdminSupabaseClientMock.mockReturnValue({ from: fromMock, rpc: rpcMock });
     fromMock.mockReturnValue({ select: selectMock });
     selectMock.mockReturnValue({ in: inMock });
-    inMock.mockReturnValue({ is: isMock });
-    isMock.mockReturnValue({ order: orderMock });
-    orderMock.mockReturnValue({ limit: limitMock });
+    inMock.mockReturnValue({ order: orderMock });
   });
 
-  it('uses one guest-scoped embedded latest-state query without capability material or history rows', async () => {
-    limitMock.mockResolvedValue({
+  it('uses one direct guest-link lifecycle query without capability material', async () => {
+    orderMock.mockResolvedValue({
       data: [
         {
-          guest_links: [
-            { created_at: '2027-01-05T00:00:00.000Z', status: 'active', token_key_version: 1 },
-          ],
-          id: firstGuestId,
+          created_at: '2027-01-05T00:00:00.000Z',
+          guest_id: firstGuestId,
+          status: 'active',
+          token_key_version: 1,
         },
-        { guest_links: [], id: secondGuestId },
+        {
+          created_at: '2027-01-04T00:00:00.000Z',
+          guest_id: firstGuestId,
+          status: 'revoked',
+          token_key_version: null,
+        },
       ],
       error: null,
     });
@@ -80,17 +83,10 @@ describe('latest owner guest-link delivery projection', () => {
     ]);
 
     expect(fromMock).toHaveBeenCalledTimes(1);
-    expect(fromMock).toHaveBeenCalledWith('guests');
-    expect(selectMock).toHaveBeenCalledWith(
-      'id, guest_links(status, created_at, token_key_version)',
-    );
-    expect(inMock).toHaveBeenCalledWith('id', [firstGuestId, secondGuestId]);
-    expect(isMock).toHaveBeenCalledWith('deleted_at', null);
-    expect(orderMock).toHaveBeenCalledWith('created_at', {
-      ascending: false,
-      foreignTable: 'guest_links',
-    });
-    expect(limitMock).toHaveBeenCalledWith(1, { foreignTable: 'guest_links' });
+    expect(fromMock).toHaveBeenCalledWith('guest_links');
+    expect(selectMock).toHaveBeenCalledWith('guest_id, status, created_at, token_key_version');
+    expect(inMock).toHaveBeenCalledWith('guest_id', [firstGuestId, secondGuestId]);
+    expect(orderMock).toHaveBeenCalledWith('created_at', { ascending: false });
   });
 
   it('does not query when there are no active guests', async () => {

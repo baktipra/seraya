@@ -45,6 +45,8 @@ export type DeliveryBatchPreparationResult = {
   failedCount: number;
   failedEncryptionCount: number;
   failedUnexpectedCount: number;
+  replacedExpiredLinkCount: number;
+  replacedRevokedLinkCount: number;
   requestedGuestCount: number;
   skippedActiveLinkCount: number;
   skippedInactiveGuestCount: number;

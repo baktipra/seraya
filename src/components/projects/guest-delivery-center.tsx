@@ -370,6 +370,17 @@ function DeliveryBatchPreparationDialog({
                 diubah.
               </p>
             ) : null}
+            {actionState.replacedRevokedLinkCount ? (
+              <p className="text-seraya-text-secondary mt-1">
+                {actionState.replacedRevokedLinkCount} tautan lama yang sudah dicabut diperbarui.
+              </p>
+            ) : null}
+            {actionState.replacedExpiredLinkCount ? (
+              <p className="text-seraya-text-secondary mt-1">
+                {actionState.replacedExpiredLinkCount} tautan lama yang sudah kedaluwarsa
+                diperbarui.
+              </p>
+            ) : null}
             {actionState.skippedInactiveGuestCount ? (
               <p className="text-seraya-text-secondary mt-1">
                 {actionState.skippedInactiveGuestCount} tamu tidak lagi aktif dan dilewati.

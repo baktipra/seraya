@@ -10,6 +10,7 @@ import {
   createOrReplacePersonalGuestLinkForVerifiedGuest,
   getLatestPersonalGuestLinkStateForVerifiedGuest,
   preparePersonalGuestLinkForVerifiedGuestWithoutReveal,
+  replaceNonActivePersonalGuestLinkForVerifiedGuestWithoutReveal,
   reaccessPersonalGuestLinkForCurrentUser,
 } from '@/modules/guest-links/guest-link.service';
 import { PersonalGuestLinkEncryptionError } from '@/modules/guest-links/guest-link-encryption';
@@ -224,6 +225,8 @@ function createEmptyBatchResult(requestedGuestCount: number): DeliveryBatchPrepa
     failedCount: 0,
     failedEncryptionCount: 0,
     failedUnexpectedCount: 0,
+    replacedExpiredLinkCount: 0,
+    replacedRevokedLinkCount: 0,
     requestedGuestCount,
     skippedActiveLinkCount: 0,
     skippedInactiveGuestCount: 0,
@@ -252,6 +255,8 @@ function logBatchSummary(result: DeliveryBatchPreparationResult) {
     failedEncryptionCount: result.failedEncryptionCount,
     failedUnexpectedCount: result.failedUnexpectedCount,
     operation: 'prepare_personal_link_batch',
+    replacedExpiredLinkCount: result.replacedExpiredLinkCount,
+    replacedRevokedLinkCount: result.replacedRevokedLinkCount,
     requestedGuestCount: result.requestedGuestCount,
     skippedActiveLinkCount: result.skippedActiveLinkCount,
     skippedInactiveGuestCount: result.skippedInactiveGuestCount,
@@ -261,7 +266,7 @@ function logBatchSummary(result: DeliveryBatchPreparationResult) {
 
 async function settlePreparationBatch(
   project: OwnedProject,
-  guests: DeliveryGuestRecord[],
+  guests: Array<{ guest: DeliveryGuestRecord; latestLinkState: DeliveryPersonalLinkState }>,
   initialResult: DeliveryBatchPreparationResult,
 ): Promise<DeliveryBatchPreparationResult> {
   const result = initialResult;
@@ -269,14 +274,20 @@ async function settlePreparationBatch(
 
   async function worker() {
     while (index < guests.length) {
-      const guest = guests[index++];
-      if (!guest) continue;
+      const item = guests[index++];
+      if (!item) continue;
+      const { guest, latestLinkState } = item;
 
       try {
-        // The helper uses the same createEncryptedCapability path as explicit
-        // one-guest creation, then preserves M0018/M0019 create-if-none-active safety.
-        await preparePersonalGuestLinkForVerifiedGuestWithoutReveal({ guest, project });
-        result.createdCount += 1;
+        if (latestLinkState === 'revoked' || latestLinkState === 'expired') {
+          await replaceNonActivePersonalGuestLinkForVerifiedGuestWithoutReveal({ guest, project });
+          if (latestLinkState === 'revoked') result.replacedRevokedLinkCount += 1;
+          else result.replacedExpiredLinkCount += 1;
+        } else {
+          // No previous link: preserve M0018/M0019 create-if-none-active safety.
+          await preparePersonalGuestLinkForVerifiedGuestWithoutReveal({ guest, project });
+          result.createdCount += 1;
+        }
         if (!guest.whatsapp_phone_e164) result.whatsappMissingCreatedCount += 1;
       } catch (error) {
         if (error instanceof GuestLinkActiveLinkExistsError) {
@@ -331,7 +342,10 @@ export async function prepareMissingPersonalGuestLinksForDeliveryForCurrentUser(
     selectedProjectRecords.map((guest) => [guest.id, guest]),
   );
   const result = createEmptyBatchResult(requestedGuestIds.length);
-  const eligibleGuests: DeliveryGuestRecord[] = [];
+  const eligibleGuests: Array<{
+    guest: DeliveryGuestRecord;
+    latestLinkState: DeliveryPersonalLinkState;
+  }> = [];
 
   for (const guestId of requestedGuestIds) {
     const activeGuest = activeGuestsById.get(guestId);
@@ -353,7 +367,7 @@ export async function prepareMissingPersonalGuestLinksForDeliveryForCurrentUser(
       continue;
     }
 
-    eligibleGuests.push(activeGuest);
+    eligibleGuests.push({ guest: activeGuest, latestLinkState: state });
   }
 
   const settled = await settlePreparationBatch(project, eligibleGuests, result);

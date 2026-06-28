@@ -14,6 +14,7 @@ const {
   listLatestStatesMock,
   listSelectionEligibilityMock,
   prepareWithoutRevealMock,
+  replaceNonActiveWithoutRevealMock,
   RepositoryErrorMock,
   requireCurrentUserMock,
 } = vi.hoisted(() => ({
@@ -33,6 +34,7 @@ const {
   listLatestStatesMock: vi.fn(),
   listSelectionEligibilityMock: vi.fn(),
   prepareWithoutRevealMock: vi.fn(),
+  replaceNonActiveWithoutRevealMock: vi.fn(),
   RepositoryErrorMock: class GuestLinkRepositoryError extends Error {
     classification: 'active_guest_unavailable' | 'authority_unavailable' | 'repository_failure';
 
@@ -61,6 +63,7 @@ vi.mock('@/modules/guest-links/guest-link.service', () => ({
   GuestLinkLegacyUpgradeRequiredError: class GuestLinkLegacyUpgradeRequiredError extends Error {},
   GuestLinkUnavailableError: class GuestLinkUnavailableError extends Error {},
   preparePersonalGuestLinkForVerifiedGuestWithoutReveal: prepareWithoutRevealMock,
+  replaceNonActivePersonalGuestLinkForVerifiedGuestWithoutReveal: replaceNonActiveWithoutRevealMock,
   reaccessPersonalGuestLinkForCurrentUser: vi.fn(),
 }));
 vi.mock('@/modules/guest-links/guest-link-encryption', () => ({
@@ -174,6 +177,7 @@ describe('SRY-038A private Delivery Center batch preparation service', () => {
     listLatestStatesMock.mockReset();
     listSelectionEligibilityMock.mockReset();
     prepareWithoutRevealMock.mockReset();
+    replaceNonActiveWithoutRevealMock.mockReset();
     requireCurrentUserMock.mockReset();
 
     requireCurrentUserMock.mockResolvedValue({ id: project.account_id });
@@ -185,6 +189,7 @@ describe('SRY-038A private Delivery Center batch preparation service', () => {
     listLatestStatesMock.mockResolvedValue([]);
     listSelectionEligibilityMock.mockResolvedValue([]);
     prepareWithoutRevealMock.mockResolvedValue(undefined);
+    replaceNonActiveWithoutRevealMock.mockResolvedValue(undefined);
   });
 
   it('maps active guests into a minimum delivery DTO with one bounded status batch and readiness counts', async () => {
@@ -249,12 +254,82 @@ describe('SRY-038A private Delivery Center batch preparation service', () => {
       failedCount: 0,
       failedEncryptionCount: 0,
       failedUnexpectedCount: 0,
+      replacedExpiredLinkCount: 0,
+      replacedRevokedLinkCount: 0,
       requestedGuestCount: 1,
       skippedActiveLinkCount: 0,
       skippedInactiveGuestCount: 0,
       skippedInvalidProjectCount: 0,
       whatsappMissingCreatedCount: 1,
     });
+  });
+
+  it('replaces a revoked latest link through the encrypted non-active authority without revealing a capability', async () => {
+    listLatestStatesMock.mockResolvedValue([
+      {
+        created_at: '2027-01-03T00:00:00.000Z',
+        guest_id: deliveryGuests[1]!.id,
+        status: 'revoked',
+      },
+    ]);
+
+    const result = await prepareMissingPersonalGuestLinksForDeliveryForCurrentUser(
+      selected(deliveryGuests[1]!.id),
+    );
+
+    expect(replaceNonActiveWithoutRevealMock).toHaveBeenCalledWith({
+      guest: expect.objectContaining({ id: deliveryGuests[1]!.id }),
+      project,
+    });
+    expect(prepareWithoutRevealMock).not.toHaveBeenCalled();
+    expect(result).toMatchObject({
+      createdCount: 0,
+      failedCount: 0,
+      replacedRevokedLinkCount: 1,
+      replacedExpiredLinkCount: 0,
+    });
+    expect(JSON.stringify(result)).not.toMatch(/token|url|ciphertext|key/i);
+  });
+
+  it('replaces an expired latest link through the encrypted non-active authority', async () => {
+    listLatestStatesMock.mockResolvedValue([
+      {
+        created_at: '2027-01-03T00:00:00.000Z',
+        guest_id: deliveryGuests[1]!.id,
+        status: 'expired',
+      },
+    ]);
+
+    const result = await prepareMissingPersonalGuestLinksForDeliveryForCurrentUser(
+      selected(deliveryGuests[1]!.id),
+    );
+
+    expect(replaceNonActiveWithoutRevealMock).toHaveBeenCalledTimes(1);
+    expect(result).toMatchObject({
+      createdCount: 0,
+      failedCount: 0,
+      replacedExpiredLinkCount: 1,
+      replacedRevokedLinkCount: 0,
+    });
+  });
+
+  it('keeps an active legacy hashed-only link unchanged and classifies it as active', async () => {
+    listLatestStatesMock.mockResolvedValue([
+      {
+        created_at: '2027-01-03T00:00:00.000Z',
+        guest_id: deliveryGuests[1]!.id,
+        hasRecoverableCapability: false,
+        status: 'active',
+      },
+    ]);
+
+    const result = await prepareMissingPersonalGuestLinksForDeliveryForCurrentUser(
+      selected(deliveryGuests[1]!.id),
+    );
+
+    expect(prepareWithoutRevealMock).not.toHaveBeenCalled();
+    expect(replaceNonActiveWithoutRevealMock).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ skippedActiveLinkCount: 1, failedCount: 0 });
   });
 
   it('uses the exact visible multi-select IDs and does not expand a missing selection to every guest', async () => {
@@ -289,6 +364,8 @@ describe('SRY-038A private Delivery Center batch preparation service', () => {
       failedCount: 0,
       failedEncryptionCount: 0,
       failedUnexpectedCount: 0,
+      replacedExpiredLinkCount: 0,
+      replacedRevokedLinkCount: 0,
       requestedGuestCount: 3,
       skippedActiveLinkCount: 1,
       skippedInactiveGuestCount: 1,

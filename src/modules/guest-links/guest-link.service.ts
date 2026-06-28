@@ -74,6 +74,24 @@ export async function preparePersonalGuestLinkForVerifiedGuestWithoutReveal(inpu
 }
 
 /**
+ * Batch lifecycle replacement for a selected guest whose latest link is
+ * revoked/expired. It uses the exact encrypted capability authority as the
+ * explicit single-link flow but never reveals raw capability material.
+ */
+export async function replaceNonActivePersonalGuestLinkForVerifiedGuestWithoutReveal(input: {
+  guest: PersonalGuestLinkPreparationTarget;
+  project: OwnedProject;
+}): Promise<void> {
+  const guest = assertGuestBelongsToProject(input.guest, input.project.id);
+  const token = generatePersonalGuestToken();
+
+  await replacePersonalGuestLinkWithCiphertextForVerifiedGuest({
+    guestId: guest.id,
+    ...createEncryptedCapability(token),
+  });
+}
+
+/**
  * Controlled capability creation after a server-owned project and active guest
  * have already been verified. It is shared by Guest Manager and Delivery Center
  * so raw token material is generated in exactly one authority path.

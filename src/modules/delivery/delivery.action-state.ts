@@ -13,6 +13,8 @@ export type DeliveryBatchActionState = {
   failedCount?: number;
   failedEncryptionCount?: number;
   failedUnexpectedCount?: number;
+  replacedExpiredLinkCount?: number;
+  replacedRevokedLinkCount?: number;
   message?: string;
   requestedGuestCount?: number;
   skippedActiveLinkCount?: number;
