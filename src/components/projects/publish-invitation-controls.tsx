@@ -93,8 +93,8 @@ export function PublishInvitationControls({
       ? 'Terbitkan undangan?'
       : 'Publikasikan undangan?';
   const dialogDescription = isRepublish
-    ? 'Perubahan tersimpan akan menggantikan versi undangan yang saat ini dilihat tamu. Tamu hanya melihat perubahan ini setelah kalian menerbitkannya.'
-    : 'Link undangan kalian akan bisa dibuka oleh siapa saja yang memilikinya. Perubahan berikutnya tidak akan mengubah undangan publik sampai kalian menerbitkannya lagi.';
+    ? 'Perubahan ini akan terlihat pada Link Publik dan semua Undangan Pribadi aktif. Tautan tamu tidak berubah.'
+    : 'Setelah diterbitkan, Link Publik dapat dibuka oleh tamu. Undangan Pribadi dapat disiapkan dari halaman Bagikan.';
   const confirmationLabel = isRepublish ? 'Terbitkan perubahan' : 'Terbitkan sekarang';
   const blockedCopy = canPublish
     ? null

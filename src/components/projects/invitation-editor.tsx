@@ -31,7 +31,11 @@ import type { InvitationEditorFieldErrors } from '@/modules/invitations/invitati
 import type { InvitationTemplateKey } from '@/modules/invitation-templates/invitation-template.keys';
 import type { InvitationDraft } from '@/modules/invitations/invitation-draft.types';
 import type { ProjectPublishEligibility } from '@/modules/payments/payment.types';
-import type { WeddingReadinessV1 } from '@/modules/readiness';
+import {
+  getInvitationConfidenceChecklist,
+  getInvitationConfidenceStatus,
+} from '@/modules/readiness/invitation-confidence';
+import type { WeddingReadinessV1 } from '@/modules/readiness/wedding-readiness.types';
 
 import { PublishInvitationControls } from './publish-invitation-controls';
 
@@ -716,7 +720,8 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
   );
   const content = draft.content;
   const workspaceReadiness = readiness ?? fallbackWorkspaceReadiness;
-  const workspaceStatus = getInvitationWorkspaceStatus(workspaceReadiness);
+  const confidenceStatus = getInvitationConfidenceStatus(workspaceReadiness.invitation.state);
+  const confidenceChecklist = getInvitationConfidenceChecklist(draft);
   const shouldShowPublishControl =
     workspaceReadiness.invitation.state === 'ready_to_publish' ||
     workspaceReadiness.invitation.state === 'published_with_unpublished_changes';
@@ -759,7 +764,7 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
     <Card aria-labelledby="invitation-editor-title" className="max-w-4xl overflow-visible">
       <div className="bg-seraya-brand-soft rounded-t-[var(--seraya-radius-lg)] px-5 py-8 sm:px-8 sm:py-10">
         <Badge variant={workspaceReadiness.invitation.hasPublishedSnapshot ? 'success' : 'brand'}>
-          {workspaceStatus.badge}
+          {confidenceStatus.badge}
         </Badge>
         <p className="text-seraya-text-secondary mt-5 text-sm font-semibold">
           {workspaceReadiness.identity.coupleLabel}
@@ -768,14 +773,63 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
           className="seraya-display-md mt-3 max-w-2xl text-[clamp(2.25rem,5vw,3.5rem)]"
           id="invitation-editor-title"
         >
-          {workspaceStatus.title}
+          {confidenceStatus.title}
         </h1>
         <p className="text-seraya-text-secondary mt-4 max-w-2xl text-base leading-7">
-          {workspaceStatus.description}
+          {confidenceStatus.description}
         </p>
       </div>
 
       <CardHeader className="border-seraya-border-default gap-5 border-b pb-5 sm:pb-6">
+        <section
+          aria-label="Ringkasan undangan"
+          className="bg-seraya-canvas rounded-[var(--seraya-radius-md)] px-4 py-3.5"
+        >
+          <dl className="grid gap-2 text-sm sm:grid-cols-3 sm:gap-4">
+            <div>
+              <dt className="text-seraya-text-muted">Pasangan</dt>
+              <dd className="text-seraya-text-primary mt-0.5 font-semibold">
+                {workspaceReadiness.identity.coupleLabel}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-seraya-text-muted">Template</dt>
+              <dd className="text-seraya-text-primary mt-0.5 font-semibold">
+                {workspaceReadiness.identity.templateKey ?? 'Belum dipilih'}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-seraya-text-muted">Status</dt>
+              <dd className="text-seraya-text-primary mt-0.5 font-semibold">
+                {confidenceStatus.badge}
+              </dd>
+            </div>
+          </dl>
+        </section>
+        <section
+          aria-labelledby="invitation-readiness-title"
+          className="bg-seraya-surface rounded-[var(--seraya-radius-md)] px-4 py-4"
+        >
+          <h2
+            className="text-seraya-text-primary text-base font-semibold"
+            id="invitation-readiness-title"
+          >
+            Siap ditinjau
+          </h2>
+          <ul className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+            {confidenceChecklist.map((item) => (
+              <li className="text-seraya-text-secondary flex items-center gap-2" key={item.key}>
+                <span aria-hidden="true">{item.complete ? '✓' : '○'}</span>
+                <span>
+                  {item.label}
+                  {item.optional && !item.complete
+                    ? ' — Opsional, dapat ditambahkan bila diperlukan'
+                    : ''}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <CardTitle className="font-sans text-lg font-semibold tracking-[-0.02em]">
