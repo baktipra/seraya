@@ -66,10 +66,10 @@ describe('SRY-039 Project Compass surfaces', () => {
     const html = renderToStaticMarkup(
       <ProjectOverviewBootstrap projectId={projectId} readiness={readiness()} />,
     );
-    expect(html).toContain('Undangan masih disusun.');
+    expect(html).toContain('Undangan belum dipublikasikan.');
     expect(html).toContain('Langkah berikutnya');
     expect(html).toContain('Lengkapi undangan');
-    expect(html).toContain('Gambaran singkat');
+    expect(html).toContain('Progress singkat');
     expect(html).toContain('Tamu aktif');
     expect(html).not.toContain('<table');
     expect(html).not.toContain('Copy tautan');
