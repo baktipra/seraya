@@ -170,6 +170,7 @@ revoke all on function public.append_guest_follow_up_event_for_server(uuid, uuid
 do $$
 begin
   if exists (select 1 from pg_roles where rolname = 'service_role') then
+    execute 'revoke all on table public.guest_follow_up_events from service_role';
     execute 'grant select, insert on table public.guest_follow_up_events to service_role';
     execute 'grant execute on function public.append_guest_follow_up_event_for_server(uuid, uuid, uuid, text, text, text, timestamptz, jsonb) to service_role';
   end if;
