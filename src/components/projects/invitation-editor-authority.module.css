@@ -53,6 +53,20 @@
   line-height: 1.15rem;
 }
 
+:global(
+  [aria-labelledby='invitation-editor-title']:not([data-editor-authority-state])
+    [data-invitation-editor-mobile-navigation]
+    > div:first-child
+    > div:first-child::after
+) {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--seraya-text-muted);
+  content: 'Status bagian mengikuti draf tersimpan.';
+  font-size: 0.68rem;
+  line-height: 1rem;
+}
+
 @media (max-width: 639px) {
   :global(
     [aria-labelledby='invitation-editor-title']
