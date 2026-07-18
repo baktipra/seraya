@@ -9,6 +9,7 @@ import { createInvitationEditorPreviewViewModel } from '@/modules/invitations/in
 import type { InvitationDraftContent } from '@/modules/invitations/invitation-draft.schema';
 import type { InvitationGalleryImage } from '@/modules/media/media.types';
 
+import { useInvitationEditorContextualSaveAction } from './invitation-editor-contextual-actions';
 import styles from './invitation-editor-live-preview.module.css';
 
 export type InvitationEditorLivePreviewProps = {
@@ -34,6 +35,8 @@ export function InvitationEditorLivePreview({
     () => createInvitationEditorPreviewViewModel({ content, galleryImages, project }),
     [content, galleryImages, project],
   );
+
+  useInvitationEditorContextualSaveAction(isDirty);
 
   useEffect(() => {
     if (!isOpen) {

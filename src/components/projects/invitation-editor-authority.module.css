@@ -67,6 +67,15 @@
   line-height: 1rem;
 }
 
+/* Slice G: Save is primary only while there are local changes to commit. */
+:global(button[data-editor-contextual-save-action='clean']) {
+  border: 1px solid var(--seraya-border-default) !important;
+  background: var(--seraya-surface) !important;
+  color: var(--seraya-text-muted) !important;
+  box-shadow: none !important;
+  opacity: 0.72 !important;
+}
+
 @media (max-width: 639px) {
   :global(
     [aria-labelledby='invitation-editor-title']
