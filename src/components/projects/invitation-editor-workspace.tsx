@@ -147,7 +147,7 @@ function SectionState({
     <span
       aria-label={copy.label}
       className={[
-        'inline-flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold',
+        'inline-flex size-5 shrink-0 items-center justify-center rounded-full text-[0.68rem] font-bold',
         current
           ? 'bg-seraya-action-primary text-white'
           : status === 'error'
@@ -160,6 +160,41 @@ function SectionState({
     >
       <span aria-hidden="true">{copy.symbol}</span>
     </span>
+  );
+}
+
+function SectionButton({
+  current,
+  onSelect,
+  section,
+  status,
+}: {
+  current: boolean;
+  onSelect: (section: InvitationEditorSectionKey) => void;
+  section: (typeof invitationEditorSections)[number];
+  status: InvitationEditorSectionStatus;
+}) {
+  return (
+    <button
+      aria-controls={`invitation-editor-panel-${section.key}`}
+      aria-current={current ? 'step' : undefined}
+      className={[
+        'focus-visible:outline-seraya-focus-ring inline-flex min-h-11 shrink-0 items-center gap-2 rounded-[var(--seraya-radius-md)] px-3 text-left text-sm transition-colors focus-visible:outline-3 focus-visible:outline-offset-2',
+        current
+          ? 'bg-seraya-brand-soft text-seraya-action-primary font-semibold'
+          : 'bg-seraya-surface text-seraya-text-secondary hover:bg-seraya-canvas hover:text-seraya-text-primary',
+      ].join(' ')}
+      onClick={() => onSelect(section.key)}
+      type="button"
+    >
+      <SectionState current={current} status={status} />
+      <span className="whitespace-nowrap">
+        <span className="text-seraya-text-muted mr-1.5 text-[0.68rem] font-bold tracking-[0.06em]">
+          {section.number}
+        </span>
+        {section.label}
+      </span>
+    </button>
   );
 }
 
@@ -179,35 +214,46 @@ export function InvitationWorkspaceNavigation({
 
   return (
     <>
-      <div className="border-seraya-border-default bg-seraya-surface rounded-[var(--seraya-radius-lg)] border p-4 shadow-[var(--seraya-shadow-soft)] lg:hidden">
+      <nav
+        aria-label="Bagian undangan"
+        className="border-seraya-border-default bg-seraya-surface/95 sticky top-16 z-20 -mx-5 border-y px-5 py-3 shadow-[0_8px_18px_rgb(62_42_34_/_0.06)] backdrop-blur sm:mx-0 sm:rounded-[var(--seraya-radius-lg)] sm:border sm:px-4 lg:hidden"
+        data-invitation-editor-mobile-navigation
+      >
         <div className="flex items-center justify-between gap-4">
-          <div>
-            <p className="text-seraya-text-muted text-xs font-bold tracking-[0.08em] uppercase">
+          <div className="min-w-0">
+            <p className="text-seraya-text-muted text-[0.68rem] font-bold tracking-[0.08em] uppercase">
               Bagian {activeIndex + 1} dari {invitationEditorSections.length}
             </p>
-            <p className="text-seraya-text-primary mt-1 font-semibold">{active.label}</p>
+            <p className="text-seraya-text-primary mt-0.5 truncate text-sm font-semibold">
+              {active.label}
+            </p>
           </div>
           <SectionState current status={statuses[activeSection]} />
         </div>
-        <label
-          className="text-seraya-text-primary mt-4 block text-sm font-semibold"
-          htmlFor="invitation-editor-section-select"
+
+        <div
+          aria-label="Pindah bagian"
+          className="-mx-1 mt-2.5 flex snap-x gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          data-invitation-editor-mobile-section-strip
+          role="list"
         >
-          Pindah bagian
-        </label>
-        <select
-          className="border-seraya-border-default bg-seraya-surface text-seraya-text-primary focus-visible:outline-seraya-focus-ring mt-2 min-h-11 w-full rounded-[var(--seraya-radius-md)] border px-3 text-sm focus-visible:outline-3 focus-visible:outline-offset-2"
-          id="invitation-editor-section-select"
-          onChange={(event) => onSelect(event.target.value as InvitationEditorSectionKey)}
-          value={activeSection}
-        >
-          {invitationEditorSections.map((section) => (
-            <option key={section.key} value={section.key}>
-              {section.number} · {section.label}
-            </option>
-          ))}
-        </select>
-        <div className="mt-3 grid grid-cols-2 gap-2">
+          {invitationEditorSections.map((section) => {
+            const current = section.key === activeSection;
+
+            return (
+              <div className="snap-start" key={section.key} role="listitem">
+                <SectionButton
+                  current={current}
+                  onSelect={onSelect}
+                  section={section}
+                  status={statuses[section.key]}
+                />
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="mt-2.5 grid grid-cols-2 gap-2">
           <button
             className="border-seraya-border-default text-seraya-text-primary focus-visible:outline-seraya-focus-ring min-h-11 rounded-[var(--seraya-radius-md)] border px-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-45"
             disabled={activeIndex === 0}
@@ -220,7 +266,7 @@ export function InvitationWorkspaceNavigation({
             Sebelumnya
           </button>
           <button
-            className="border-seraya-border-default text-seraya-text-primary focus-visible:outline-seraya-focus-ring min-h-11 rounded-[var(--seraya-radius-md)] border px-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-45"
+            className="bg-seraya-brand-soft text-seraya-action-primary focus-visible:outline-seraya-focus-ring min-h-11 rounded-[var(--seraya-radius-md)] px-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-45"
             disabled={activeIndex === invitationEditorSections.length - 1}
             onClick={() => {
               const next = invitationEditorSections[activeIndex + 1];
@@ -231,28 +277,32 @@ export function InvitationWorkspaceNavigation({
             Berikutnya
           </button>
         </div>
-      </div>
+      </nav>
 
       <nav
         aria-label="Bagian undangan"
-        className="border-seraya-border-default bg-seraya-surface sticky top-24 hidden self-start rounded-[var(--seraya-radius-lg)] border p-3 shadow-[var(--seraya-shadow-soft)] lg:block"
+        className="border-seraya-border-default bg-seraya-surface sticky top-20 hidden max-h-[calc(100svh-6rem)] self-start overflow-y-auto rounded-[var(--seraya-radius-lg)] border p-2.5 shadow-[var(--seraya-shadow-soft)] lg:block"
+        data-invitation-editor-desktop-navigation
       >
-        <p className="text-seraya-text-muted px-3 pt-2 text-xs font-bold tracking-[0.08em] uppercase">
-          Susunan undangan
-        </p>
-        <p className="text-seraya-text-muted mt-1 px-3 text-xs leading-5">
-          Status berasal dari draft terakhir tersimpan.
-        </p>
-        <ol className="mt-3 space-y-1">
+        <div className="px-2.5 pt-1.5 pb-2">
+          <p className="text-seraya-text-muted text-[0.68rem] font-bold tracking-[0.08em] uppercase">
+            Susunan undangan
+          </p>
+          <p className="text-seraya-text-muted mt-1 text-xs leading-5">
+            Status draft tersimpan
+          </p>
+        </div>
+        <ol className="space-y-0.5">
           {invitationEditorSections.map((section) => {
             const current = section.key === activeSection;
 
             return (
               <li key={section.key}>
                 <button
+                  aria-controls={`invitation-editor-panel-${section.key}`}
                   aria-current={current ? 'step' : undefined}
                   className={[
-                    'focus-visible:outline-seraya-focus-ring flex min-h-11 w-full items-center gap-3 rounded-[var(--seraya-radius-md)] px-3 py-2 text-left text-sm transition-colors focus-visible:outline-3 focus-visible:outline-offset-2',
+                    'focus-visible:outline-seraya-focus-ring flex min-h-10 w-full items-center gap-2.5 rounded-[var(--seraya-radius-md)] px-2.5 py-1.5 text-left text-sm transition-colors focus-visible:outline-3 focus-visible:outline-offset-2',
                     current
                       ? 'bg-seraya-brand-soft text-seraya-action-primary font-semibold'
                       : 'text-seraya-text-secondary hover:bg-seraya-canvas hover:text-seraya-text-primary',
@@ -261,11 +311,9 @@ export function InvitationWorkspaceNavigation({
                   type="button"
                 >
                   <SectionState current={current} status={statuses[section.key]} />
-                  <span className="min-w-0">
-                    <span className="text-seraya-text-muted block text-[0.68rem] font-bold tracking-[0.08em]">
-                      {section.number}
-                    </span>
-                    <span className="block leading-5">{section.label}</span>
+                  <span className="min-w-0 flex-1 truncate leading-5">{section.label}</span>
+                  <span className="text-seraya-text-muted text-[0.68rem] font-bold tracking-[0.06em]">
+                    {section.number}
                   </span>
                 </button>
               </li>
@@ -289,6 +337,7 @@ export function InvitationWorkspacePanel({
   return (
     <div
       data-invitation-editor-panel={section}
+      data-invitation-editor-panel-active={active ? 'true' : 'false'}
       hidden={!active}
       id={`invitation-editor-panel-${section}`}
     >
