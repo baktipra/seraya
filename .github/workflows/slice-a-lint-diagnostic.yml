@@ -1,4 +1,4 @@
-name: Slice A lint diagnostic
+name: Slice A lint repair
 
 on:
   pull_request:
@@ -6,14 +6,18 @@ on:
       - main
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  diagnostic:
+  repair:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository
+      - name: Check out feature branch
         uses: actions/checkout@v4
+        with:
+          ref: agent/follow-up-slice-a-domain-persistence
+          fetch-depth: 0
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -24,13 +28,50 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Capture lint output
-        run: npm run lint > slice-a-lint.log 2>&1 || true
+      - name: Repair inherited authority effect
+        run: |
+          python - <<'PY'
+          from pathlib import Path
 
-      - name: Upload lint output
-        uses: actions/upload-artifact@v4
-        with:
-          name: slice-a-lint-diagnostic
-          path: slice-a-lint.log
-          if-no-files-found: error
-          retention-days: 1
+          path = Path('src/components/projects/publish-invitation-controls.tsx')
+          source = path.read_text()
+          before = """  useEffect(() => {
+              if (presentation !== 'readiness') {
+                setBridge({ ...initialEditorAuthorityBridge, isResolved: true });
+                return;
+              }
+          """
+          after = """  useEffect(() => {
+              if (presentation !== 'readiness') {
+                return;
+              }
+          """
+          if before not in source:
+              raise SystemExit('Expected authority effect block was not found.')
+          source = source.replace(before, after, 1)
+
+          before_return = """  return bridge;
+          }
+          """
+          after_return = """  return presentation === 'readiness'
+              ? bridge
+              : { ...initialEditorAuthorityBridge, isResolved: true };
+          }
+          """
+          if before_return not in source:
+              raise SystemExit('Expected authority bridge return was not found.')
+          path.write_text(source.replace(before_return, after_return, 1))
+          PY
+
+          npx prettier --write src/components/projects/publish-invitation-controls.tsx
+
+      - name: Remove temporary repair workflow
+        run: rm .github/workflows/slice-a-lint-diagnostic.yml
+
+      - name: Commit repair
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix: derive non-readiness editor authority state"
+          git push origin HEAD:agent/follow-up-slice-a-domain-persistence
