@@ -1,0 +1,42 @@
+name: Slice A format audit
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Format repository
+        run: npx prettier --write .
+
+      - name: Capture formatter delta
+        run: |
+          git diff --name-only > formatted-files.txt
+          git diff > formatted-diff.patch
+          tar -czf formatted-audit.tar.gz formatted-files.txt formatted-diff.patch
+
+      - name: Upload formatter audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: formatted-audit
+          path: formatted-audit.tar.gz
+          if-no-files-found: error
+          retention-days: 1
