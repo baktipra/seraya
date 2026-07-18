@@ -41,12 +41,8 @@ function mapMetadata(value: unknown): GuestFollowUpMetadata {
 
   const record = value as Record<string, unknown>;
   return {
-    ...(typeof record.note_category === 'string'
-      ? { noteCategory: record.note_category }
-      : {}),
-    ...(typeof record.source_surface === 'string'
-      ? { sourceSurface: record.source_surface }
-      : {}),
+    ...(typeof record.note_category === 'string' ? { noteCategory: record.note_category } : {}),
+    ...(typeof record.source_surface === 'string' ? { sourceSurface: record.source_surface } : {}),
     ...(typeof record.template_version === 'string'
       ? { templateVersion: record.template_version }
       : {}),
@@ -115,12 +111,8 @@ export async function appendGuestFollowUpEventForVerifiedProject(input: {
     requested_event_type: input.eventType,
     requested_message_kind: input.messageKind,
     requested_metadata: {
-      ...(input.metadata.noteCategory
-        ? { note_category: input.metadata.noteCategory }
-        : {}),
-      ...(input.metadata.sourceSurface
-        ? { source_surface: input.metadata.sourceSurface }
-        : {}),
+      ...(input.metadata.noteCategory ? { note_category: input.metadata.noteCategory } : {}),
+      ...(input.metadata.sourceSurface ? { source_surface: input.metadata.sourceSurface } : {}),
       ...(input.metadata.templateVersion
         ? { template_version: input.metadata.templateVersion }
         : {}),
