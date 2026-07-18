@@ -49,7 +49,7 @@ export function DashboardShell({
           <DashboardDesktopNavigation />
         </aside>
         <main className="min-w-0 flex-1 px-4 py-7 pb-24 sm:px-6 sm:py-10 sm:pb-24 lg:px-10 lg:py-12">
-          <div className="mx-auto w-full max-w-5xl">{children}</div>
+          <div className="seraya-dashboard-content mx-auto w-full">{children}</div>
         </main>
       </div>
     </div>
