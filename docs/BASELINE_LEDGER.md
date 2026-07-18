@@ -7,27 +7,38 @@ status, and source-of-truth rules. It is a governance record, not a deployment r
 
 ## Source-of-truth rule
 
-1. The latest **full ZIP explicitly marked Locked** by Command Center is the implementation source
-   of truth.
-2. Current governance status overrides older README text, historical ticket notes, Git branches,
-   and deployments.
-3. A `changed-files-only` ZIP is a delta reference only. It is **not** a standalone baseline and
-   must be reconstructed against its named full baseline.
-4. Source code describes the runtime currently packaged in a baseline; it does not by itself grant
-   a release Locked status.
-5. This ledger records evidence available in the locked baseline and governance history. It does
-   not invent deployment, production-migration, or validation facts that are not evidenced.
+1. The `main` branch of `baktipra/seraya` is the canonical implementation source of truth.
+2. Feature branches and pull requests are release candidates until merged into `main`.
+3. ZIP archives, historical ticket notes, deployments, and AI Studio copies are reference evidence;
+   they do not override the canonical repository.
+4. Governance status may describe acceptance and validation, but must refer to an identifiable
+   repository commit when it claims to represent the current implementation.
+5. This ledger does not invent deployment, production-migration, or validation facts that are not
+   evidenced.
 
-## Current authoritative baseline
+## Current authoritative implementation baseline
 
-| Field             | Record                                                               |
-| ----------------- | -------------------------------------------------------------------- |
-| Baseline          | **SRY-033 Generic–Personal Composition Correction V1**               |
-| Status            | **Accepted / Locked with deferred validation**                       |
-| Full ZIP          | `seraya-sry-033-generic-personal-composition-correction-v1-full.zip` |
-| SHA-256           | `64d57de2f86c33dfa45177384786a9a1d1a3a97486f89b7069e6e033e2fe0d79`   |
-| Previous baseline | SRY-032 Invitation Composition Foundation V1 — **Superseded**        |
-| Migration impact  | No new migration; repository remains M0001 through M0017             |
+| Field                     | Record                                                          |
+| ------------------------- | --------------------------------------------------------------- |
+| Repository                | `baktipra/seraya`                                               |
+| Canonical branch          | `main`                                                          |
+| Head at confirmation      | `de78286dd7f2acbc81393884e1f64bdf88236869` (`SRY-42`)           |
+| Status                    | **Canonical GitHub implementation baseline confirmed by owner** |
+| Migration range at head   | M0001 through M0019                                             |
+| Candidate migration range | M0001 through M0020                                             |
+| Runtime validation        | Controlled end-to-end Supabase smoke remains outstanding        |
+
+## Historical locked SRY-033 record
+
+The former ZIP-governed baseline remains historical evidence and is no longer the implementation
+source of truth.
+
+| Field    | Record                                                               |
+| -------- | -------------------------------------------------------------------- |
+| Baseline | **SRY-033 Generic–Personal Composition Correction V1**               |
+| Status   | **Accepted / Locked with deferred validation**                       |
+| Full ZIP | `seraya-sry-033-generic-personal-composition-correction-v1-full.zip` |
+| SHA-256  | `64d57de2f86c33dfa45177384786a9a1d1a3a97486f89b7069e6e033e2fe0d79`   |
 
 ### Locked SRY-033 scope
 

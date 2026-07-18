@@ -48,8 +48,8 @@ describe('SRY-038 Guest Manager compact operations table', () => {
     expect(html).toContain('Siapkan Undangan Pribadi');
     expect(html).toContain('Aksi untuk Rani');
     expect(html).toContain('Cari tamu');
-    expect(html).toContain('Filter operasional');
-    expect(html).toContain('Belum punya nomor WhatsApp');
+    expect(html).toContain('Filter data');
+    expect(html).toContain('Belum punya Nomor WhatsApp');
     expect(html).toContain('aria-haspopup="menu"');
     expect(html).toContain('aria-haspopup="menu"');
     expect(html).toContain('aria-expanded="false"');

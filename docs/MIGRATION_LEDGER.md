@@ -3,7 +3,7 @@
 This ledger lists migration files present in the current repository baseline. It records repository
 migration availability, not whether a particular deployed environment has applied them.
 
-**SRY-033 introduced no new migration.** SRY-037 adds M0018; this SRY-038 candidate repository range is M0001 through M0019.
+**SRY-033 introduced no new migration.** SRY-037 adds M0018, SRY-038 adds M0019, and SRY-043 adds M0020. The current repository range is M0001 through M0020.
 
 | Migration | File                                                                                 | Confirmed purpose                                                                               | Status                     |
 | --------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- | -------------------------- |
@@ -26,9 +26,14 @@ migration availability, not whether a particular deployed environment has applie
 | M0017     | `20260626001700_m0017_add_rsvp_attendance_party_count.sql`                           | Private explicit RSVP attendee count separate from invited party size.                          | Present in locked baseline |
 | M0018     | `20260627001800_m0018_add_delivery_batch_personal_link_guard.sql`                    | Atomic server-only create-if-no-active-link guard for batch personal-link preparation.          | Present in baseline        |
 | M0019     | `20260627001900_m0019_add_owner_safe_guest_link_reaccess.sql`                        | Encrypted, versioned server-only capability material for owner re-access of new personal links. | Added by SRY-038 candidate |
+| M0020     | `20260718084331_m0020_add_postgrest_safe_guest_link_authority.sql`                   | Short PostgREST-safe wrapper for atomic encrypted batch personal-link creation.                 | Added by SRY-043 candidate |
 
 Do not add, reorder, rewrite, or patch migrations merely to support documentation work. Migration
 state for a deployed environment must be verified in that environment separately.
+
+## SRY-043 migration statement
+
+SRY-043 adds M0020. It preserves M0019's validation, locking, and capability-storage authority while exposing it through a PostgreSQL identifier shorter than the 63-byte limit. The wrapper is server-only and does not expand anonymous or authenticated access.
 
 ## SRY-038 migration statement
 

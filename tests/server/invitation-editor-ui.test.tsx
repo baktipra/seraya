@@ -108,10 +108,10 @@ describe('SRY-030 invitation editor multi-event owner UI', () => {
     }
 
     expect(html).toContain(
-      'Lengkapi informasi utama lalu simpan untuk melihat hasil undangan secara privat.',
+      'Undangan belum dipublikasikan. Perubahan Anda hanya terlihat di preview pribadi sampai undangan diterbitkan.',
     );
-    expect(html).toContain('Draft belum siap');
-    expect(html).toContain('Undangan masih disusun.');
+    expect(html).toContain('Belum dipublikasikan');
+    expect(html).toContain('Undangan belum dipublikasikan.');
     expect(html).toContain(
       '1</span><span class="text-seraya-text-primary text-sm font-semibold">Lengkapi detail</span>',
     );

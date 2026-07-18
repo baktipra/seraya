@@ -2133,7 +2133,7 @@ describe('SRY-003 through SRY-038 Supabase migrations, ownership, drafts, public
     `);
 
     await database.query(`
-      select public.create_personal_guest_link_if_none_active_with_ciphertext_for_server(
+      select public.create_personal_guest_link_with_ciphertext_for_server(
         '${guestId}',
         encode(extensions.digest('${token}', 'sha256'), 'hex'),
         '${ciphertext}',
@@ -2163,7 +2163,7 @@ describe('SRY-003 through SRY-038 Supabase migrations, ownership, drafts, public
 
     await expect(
       database.query(`
-        select public.create_personal_guest_link_if_none_active_with_ciphertext_for_server(
+        select public.create_personal_guest_link_with_ciphertext_for_server(
           '${guestId}',
           repeat('a', 64),
           '${ciphertext}',
@@ -2184,7 +2184,7 @@ describe('SRY-003 through SRY-038 Supabase migrations, ownership, drafts, public
       values ('${guestId}', '${projectA}', 'Tamu Snapshot Tetap');
     `);
     await database.query(`
-      select public.create_personal_guest_link_if_none_active_with_ciphertext_for_server(
+      select public.create_personal_guest_link_with_ciphertext_for_server(
         '${guestId}',
         encode(extensions.digest('${token}', 'sha256'), 'hex'),
         '${ciphertext}',

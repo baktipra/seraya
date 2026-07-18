@@ -211,15 +211,12 @@ export async function createPersonalGuestLinkIfNoneActiveWithCiphertextForVerifi
   tokenKeyVersion: number;
 }) {
   const supabase = createAdminSupabaseClient();
-  const { error } = await supabase.rpc(
-    'create_personal_guest_link_if_none_active_with_ciphertext_for_server',
-    {
-      new_token_ciphertext: input.tokenCiphertext,
-      new_token_hash: input.tokenHash,
-      new_token_key_version: input.tokenKeyVersion,
-      target_guest_id: input.guestId,
-    },
-  );
+  const { error } = await supabase.rpc('create_personal_guest_link_with_ciphertext_for_server', {
+    new_token_ciphertext: input.tokenCiphertext,
+    new_token_hash: input.tokenHash,
+    new_token_key_version: input.tokenKeyVersion,
+    target_guest_id: input.guestId,
+  });
 
   if (error?.code === 'P0001') {
     throw new GuestLinkActiveLinkExistsError();

@@ -49,6 +49,7 @@ type QueryDouble = {
   is: ReturnType<typeof vi.fn>;
   neq: ReturnType<typeof vi.fn>;
   not: ReturnType<typeof vi.fn>;
+  order: ReturnType<typeof vi.fn>;
   select: ReturnType<typeof vi.fn>;
   then: (
     onFulfilled?: (value: QueryResult) => unknown,
@@ -62,6 +63,7 @@ function createQuery(result: QueryResult): QueryDouble {
     is: vi.fn(),
     neq: vi.fn(),
     not: vi.fn(),
+    order: vi.fn(),
     select: vi.fn(),
     then: (
       onFulfilled?: (value: QueryResult) => unknown,
@@ -74,6 +76,7 @@ function createQuery(result: QueryResult): QueryDouble {
   query.is.mockReturnValue(query);
   query.neq.mockReturnValue(query);
   query.not.mockReturnValue(query);
+  query.order.mockReturnValue(query);
 
   return query;
 }
@@ -102,6 +105,7 @@ function setupRepositoryQueries(overrides: Partial<QueryResult> = {}) {
   const adminQueries = [
     createQuery({ count: 3, error: null }),
     createQuery({ count: 1, error: null }),
+    createQuery({ data: [], error: null }),
   ];
 
   const ownerQueryLog = [...ownerQueries];
@@ -163,10 +167,11 @@ describe('SRY-031 readiness aggregate repository compatibility repair', () => {
     await getWeddingReadinessAggregateCountsForVerifiedProject(project);
 
     expect(ownerFromMock).toHaveBeenCalledTimes(6);
-    expect(adminFromMock).toHaveBeenCalledTimes(2);
+    expect(adminFromMock).toHaveBeenCalledTimes(3);
     expect(ownerFromMock).toHaveBeenNthCalledWith(6, 'guests');
     expect(adminFromMock).toHaveBeenNthCalledWith(1, 'guest_links');
     expect(adminFromMock).toHaveBeenNthCalledWith(2, 'guestbook_entries');
+    expect(adminFromMock).toHaveBeenNthCalledWith(3, 'guest_links');
   });
 
   it('logs only a stable key plus safe code/message when attendee scalar loading fails, then keeps the browser error generic', async () => {
