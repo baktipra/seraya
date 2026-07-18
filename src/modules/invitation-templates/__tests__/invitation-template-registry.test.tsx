@@ -118,7 +118,9 @@ describe('SRY-025 invitation template registry', () => {
       expect(html).toContain('Akad Nikah');
       expect(html).toContain('Resepsi');
       expect(html).toContain('Gedung Bahagia');
-      expect(html).toContain('Buka peta acara (tab baru)');
+      expect(html).toContain(
+        templateKey === 'roselle' ? '>Buka peta</a>' : 'Buka peta acara (tab baru)',
+      );
       expect(html).toContain('src="/media/one"');
       expect(html).toContain('src="/media/two"');
       expect(html.indexOf('src="/media/one"')).toBeLessThan(html.indexOf('src="/media/two"'));
@@ -149,7 +151,9 @@ describe('SRY-025 invitation template registry', () => {
       expect(html.match(new RegExp(`data-schedule-event=\"${templateKey}\"`, 'g'))).toHaveLength(2);
       expect(html).toContain('Akad Nikah');
       expect(html).toContain('Resepsi');
-      expect(html).toContain('Buka peta acara (tab baru)');
+      expect(html).toContain(
+        templateKey === 'roselle' ? '>Buka peta</a>' : 'Buka peta acara (tab baru)',
+      );
       expect(html).not.toContain('Buka peta lokasi (tab baru)');
       expect(html).not.toContain('<iframe');
     },
