@@ -1,7 +1,7 @@
-import {
-  isLegacyEventScheduleDerived,
-  type EventScheduleItemV1,
-  type InvitationDraftContent,
+import { isLegacyEventScheduleDerived } from '@/modules/invitations/invitation-draft-legacy-schedule';
+import type {
+  EventScheduleItemV1,
+  InvitationDraftContent,
 } from '@/modules/invitations/invitation-draft.schema';
 
 import type { InvitationGalleryImage } from '@/modules/media/media.types';

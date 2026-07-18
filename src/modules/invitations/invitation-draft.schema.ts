@@ -6,13 +6,15 @@ import {
 } from '@/modules/invitation-templates/invitation-template.keys';
 
 import { normalizeDigitalGiftAccountNumber } from './digital-gift-account-number';
+import { markLegacyEventScheduleDerived } from './invitation-draft-legacy-schedule';
+
+export { isLegacyEventScheduleDerived } from './invitation-draft-legacy-schedule';
 
 export const INVITATION_DRAFT_SCHEMA_VERSION = 1 as const;
 
 const htmlTagPattern = /<\/?[a-z][^>]*>|<!--[\s\S]*?-->|<!doctype\s+html[^>]*>/i;
 const dateOnlyPattern = /^\d{4}-\d{2}-\d{2}$/;
 const timePattern = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
-const legacyEventScheduleMarker = Symbol('legacy-event-schedule-derived');
 const legacyEventScheduleItemId = '00000000-0000-4000-8000-000000000001';
 
 function isIsoDateOnly(value: string) {
@@ -322,14 +324,7 @@ const legacyInvitationDraftContentSchema = invitationDraftContentBaseSchema.tran
     eventSchedule: deriveLegacyEventSchedule(content),
   };
 
-  Object.defineProperty(normalizedContent, legacyEventScheduleMarker, {
-    configurable: false,
-    enumerable: false,
-    value: true,
-    writable: false,
-  });
-
-  return normalizedContent;
+  return markLegacyEventScheduleDerived(normalizedContent);
 });
 
 /**
@@ -355,14 +350,6 @@ export const invitationDraftDocumentSchema = z
     schemaVersion: z.literal(INVITATION_DRAFT_SCHEMA_VERSION),
   })
   .strict();
-
-export function isLegacyEventScheduleDerived(content: InvitationDraftContent) {
-  return Boolean(
-    (content as InvitationDraftContent & { [legacyEventScheduleMarker]?: boolean })[
-      legacyEventScheduleMarker
-    ],
-  );
-}
 
 /**
  * Existing `events` and `location` JSON stay as compatibility mirrors only.

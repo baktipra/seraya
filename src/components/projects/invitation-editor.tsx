@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useActionState, useCallback, useEffect, useRef, useState } from 'react';
+import { useActionState, useCallback, useEffect, useReducer, useRef, useState } from 'react';
 
 import {
   Badge,
@@ -19,8 +19,13 @@ import {
   type InvitationEditorActionState,
 } from '@/modules/invitations/invitation-editor.action-state';
 import { saveInvitationEditorAction } from '@/modules/invitations/invitation-editor.actions';
-import type { InvitationTemplateKey } from '@/modules/invitation-templates/invitation-template.keys';
+import {
+  invitationEditorLocalContentReducer,
+  type InvitationEditorLocalAction,
+} from '@/modules/invitations/invitation-editor-local-state';
+import type { InvitationRendererProjectMetadata } from '@/modules/invitation-templates/invitation-view-model';
 import type { InvitationDraft } from '@/modules/invitations/invitation-draft.types';
+import type { InvitationGalleryImage } from '@/modules/media/media.types';
 import type { ProjectPublishEligibility } from '@/modules/payments/payment.types';
 import {
   getInvitationConfidenceChecklist,
@@ -39,9 +44,8 @@ import {
   FieldError,
   getError,
   InvitationTemplatePicker,
-  type DigitalGiftAccountEditorValue,
-  type EventScheduleEditorValue,
 } from './invitation-editor-fields';
+import { InvitationEditorLivePreview } from './invitation-editor-live-preview';
 import { PublishInvitationControls } from './publish-invitation-controls';
 import {
   getInvitationEditorErrorSections,
@@ -54,6 +58,8 @@ import {
 
 export type InvitationEditorProps = {
   draft: InvitationDraft;
+  galleryImages?: InvitationGalleryImage[];
+  project?: InvitationRendererProjectMetadata;
   projectId: string;
   readiness?: Pick<WeddingReadinessV1, 'identity' | 'invitation'>;
 };
@@ -69,6 +75,8 @@ type InvitationEditorSaveStatus = {
   description: string;
   label: string;
 };
+export const invitationEditorDirtyNavigationMessage =
+  'Perubahan undangan belum disimpan. Yakin ingin meninggalkan halaman ini?';
 const fallbackWorkspaceReadiness: Pick<WeddingReadinessV1, 'identity' | 'invitation'> = {
   identity: { coupleLabel: 'Undangan kalian', templateKey: null },
   invitation: {
@@ -148,14 +156,15 @@ export function getInvitationEditorSaveStatus({
 
   if (actionStatus === 'error' || isDirty) {
     return {
-      description: 'Simpan perubahan agar hasil terbaru dapat dilihat di preview.',
+      description:
+        'Pratinjau lokal sudah diperbarui. Simpan agar perubahan menjadi bagian dari draf tersimpan.',
       label: 'Belum disimpan',
     };
   }
 
   if (actionStatus === 'success' && hasSaved) {
     return {
-      description: 'Perubahan siap dipreview.',
+      description: 'Perubahan sudah tersimpan dan siap diperiksa di preview tersimpan.',
       label: 'Tersimpan',
     };
   }
@@ -166,14 +175,34 @@ export function getInvitationEditorSaveStatus({
   };
 }
 
-export function InvitationEditor({ draft, projectId, readiness }: InvitationEditorProps) {
+export function shouldConfirmInvitationEditorNavigation(currentHref: string, nextHref: string) {
+  const currentUrl = new URL(currentHref);
+  const nextUrl = new URL(nextHref, currentUrl);
+  const isSameDocumentHash =
+    nextUrl.pathname === currentUrl.pathname &&
+    nextUrl.search === currentUrl.search &&
+    nextUrl.hash.length > 0;
+
+  return !isSameDocumentHash;
+}
+
+export function InvitationEditor({
+  draft,
+  galleryImages = [],
+  project = { event_date_primary: null },
+  projectId,
+  readiness,
+}: InvitationEditorProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [state, formAction, isPending] = useActionState(
     saveInvitationEditorAction,
     initialInvitationEditorActionState,
   );
-  const content = draft.content;
+  const [content, dispatchLocalContent] = useReducer(
+    invitationEditorLocalContentReducer,
+    draft.content,
+  );
   const workspaceReadiness = readiness ?? fallbackWorkspaceReadiness;
   const confidenceStatus = getInvitationConfidenceStatus(workspaceReadiness.invitation.state);
   const confidenceChecklist = getInvitationConfidenceChecklist(draft);
@@ -182,21 +211,10 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
     workspaceReadiness.invitation.state === 'published_with_unpublished_changes';
   const [isDirty, setIsDirty] = useState(false);
   const [hasSaved, setHasSaved] = useState(false);
+  const [isLocalPreviewOpen, setIsLocalPreviewOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<InvitationEditorSectionKey>('style');
-  const [storyEnabled, setStoryEnabled] = useState(content.story.enabled);
-  const [rsvpEnabled, setRsvpEnabled] = useState(content.rsvp.enabled);
-  const [digitalGiftEnabled, setDigitalGiftEnabled] = useState(content.digitalGift.enabled);
-  const [closingEnabled, setClosingEnabled] = useState(content.closing.enabled);
-  const [selectedTemplateKey, setSelectedTemplateKey] = useState<InvitationTemplateKey>(
-    content.templateKey,
-  );
-  const [digitalGiftAccounts, setDigitalGiftAccounts] = useState<DigitalGiftAccountEditorValue[]>(
-    content.digitalGift.accounts,
-  );
-  const [eventScheduleEvents, setEventScheduleEvents] = useState<EventScheduleEditorValue[]>(
-    content.eventSchedule.events,
-  );
   const lastHandledSuccessState = useRef<InvitationEditorActionState | null>(null);
+  const lastSyncedDraftUpdatedAt = useRef(draft.updated_at);
   const errorSummaryRef = useRef<HTMLDivElement | null>(null);
   const workspaceStartRef = useRef<HTMLDivElement | null>(null);
   const sectionStatuses = getInvitationEditorSectionStatuses(draft, state.fieldErrors);
@@ -207,6 +225,11 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
     isDirty,
     isPending,
   });
+
+  const updateLocalContent = useCallback((action: InvitationEditorLocalAction) => {
+    dispatchLocalContent(action);
+    setIsDirty(true);
+  }, []);
 
   const handleSectionSelect = useCallback((section: InvitationEditorSectionKey) => {
     setActiveSection(section);
@@ -236,11 +259,20 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
   }, []);
 
   useEffect(() => {
+    if (draft.updated_at === lastSyncedDraftUpdatedAt.current || isDirty) {
+      return;
+    }
+
+    lastSyncedDraftUpdatedAt.current = draft.updated_at;
+    dispatchLocalContent({ content: draft.content, type: 'replace' });
+  }, [draft.content, draft.updated_at, isDirty]);
+
+  useEffect(() => {
     if (!isDirty) {
       return;
     }
 
-    const message = 'Perubahan undangan belum disimpan. Yakin ingin meninggalkan halaman ini?';
+    const message = invitationEditorDirtyNavigationMessage;
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
       event.preventDefault();
       event.returnValue = message;
@@ -258,13 +290,10 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
         return;
       }
 
-      const nextUrl = new URL(anchor.href, window.location.href);
-      const isSameDocumentHash =
-        nextUrl.pathname === window.location.pathname &&
-        nextUrl.search === window.location.search &&
-        nextUrl.hash.length > 0;
-
-      if (isSameDocumentHash || window.confirm(message)) {
+      if (
+        !shouldConfirmInvitationEditorNavigation(window.location.href, anchor.href) ||
+        window.confirm(message)
+      ) {
         return;
       }
 
@@ -290,7 +319,7 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
     setHasSaved(true);
     setIsDirty(false);
     toast({
-      description: 'Perubahan siap dipreview.',
+      description: 'Draft terbaru siap dibuka di preview tersimpan.',
       title: 'Tersimpan',
       variant: 'success',
     });
@@ -401,7 +430,7 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
                 className="border-seraya-border-default bg-seraya-surface text-seraya-text-primary hover:border-seraya-border-strong hover:bg-seraya-canvas focus-visible:outline-seraya-focus-ring inline-flex min-h-11 items-center justify-center rounded-[var(--seraya-radius-md)] border px-4 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
                 href={`/dashboard/${projectId}/preview`}
               >
-                Preview undangan
+                Preview tersimpan
               </Link>
               {shouldShowPublishControl ? (
                 <PublishInvitationControls
@@ -447,7 +476,7 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
 
         <CardContent className="pt-5 sm:pt-6">
           <div
-            className="grid scroll-mt-24 gap-4 lg:grid-cols-[14.5rem_minmax(0,1fr)] lg:items-start xl:gap-6"
+            className="grid scroll-mt-24 gap-4 lg:grid-cols-[14.5rem_minmax(0,1fr)] lg:items-start xl:gap-6 2xl:grid-cols-[14.5rem_minmax(26rem,1fr)_minmax(21rem,24.5rem)]"
             ref={workspaceStartRef}
           >
             <InvitationWorkspaceNavigation
@@ -455,11 +484,7 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
               onSelect={handleSectionSelect}
               statuses={sectionStatuses}
             />
-            <form
-              action={formAction}
-              className="min-w-0 space-y-5 pb-28 sm:pb-0"
-              onChange={() => setIsDirty(true)}
-            >
+            <form action={formAction} className="min-w-0 space-y-5 pb-28 sm:pb-0">
               <input name="projectId" type="hidden" value={projectId} />
 
               {state.status === 'error' && state.message ? (
@@ -497,10 +522,9 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
                 <InvitationTemplatePicker
                   error={getError(state.fieldErrors, 'templateKey')}
                   onSelect={(templateKey) => {
-                    setSelectedTemplateKey(templateKey);
-                    setIsDirty(true);
+                    updateLocalContent({ templateKey, type: 'template' });
                   }}
-                  selectedTemplateKey={selectedTemplateKey}
+                  selectedTemplateKey={content.templateKey}
                 />
               </InvitationWorkspacePanel>
 
@@ -515,12 +539,18 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
                       error={getError(state.fieldErrors, 'hero.eyebrow')}
                       label="Sapaan kecil"
                       name="hero.eyebrow"
+                      onValueChange={(value) =>
+                        updateLocalContent({ field: 'eyebrow', type: 'hero', value })
+                      }
                       value={content.hero.eyebrow}
                     />
                     <EditorTextField
                       error={getError(state.fieldErrors, 'hero.title')}
                       label="Judul utama undangan"
                       name="hero.title"
+                      onValueChange={(value) =>
+                        updateLocalContent({ field: 'title', type: 'hero', value })
+                      }
                       value={content.hero.title}
                     />
                     <div className="sm:col-span-2">
@@ -528,6 +558,9 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
                         error={getError(state.fieldErrors, 'hero.subtitle')}
                         label="Kalimat pendamping"
                         name="hero.subtitle"
+                        onValueChange={(value) =>
+                          updateLocalContent({ field: 'subtitle', type: 'hero', value })
+                        }
                         value={content.hero.subtitle}
                       />
                     </div>
@@ -550,6 +583,14 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
                         error={getError(state.fieldErrors, 'couple.personOne.displayName')}
                         label="Nama yang tampil di undangan"
                         name="couple.personOne.displayName"
+                        onValueChange={(value) =>
+                          updateLocalContent({
+                            field: 'displayName',
+                            person: 'personOne',
+                            type: 'person',
+                            value,
+                          })
+                        }
                         required
                         value={content.couple.personOne.displayName}
                       />
@@ -557,12 +598,28 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
                         error={getError(state.fieldErrors, 'couple.personOne.fullName')}
                         label="Nama lengkap (opsional)"
                         name="couple.personOne.fullName"
+                        onValueChange={(value) =>
+                          updateLocalContent({
+                            field: 'fullName',
+                            person: 'personOne',
+                            type: 'person',
+                            value,
+                          })
+                        }
                         value={content.couple.personOne.fullName}
                       />
                       <EditorTextField
                         error={getError(state.fieldErrors, 'couple.personOne.parentLine')}
                         label="Orang tua atau keluarga (opsional)"
                         name="couple.personOne.parentLine"
+                        onValueChange={(value) =>
+                          updateLocalContent({
+                            field: 'parentLine',
+                            person: 'personOne',
+                            type: 'person',
+                            value,
+                          })
+                        }
                         value={content.couple.personOne.parentLine}
                       />
                     </fieldset>
@@ -574,6 +631,14 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
                         error={getError(state.fieldErrors, 'couple.personTwo.displayName')}
                         label="Nama yang tampil di undangan"
                         name="couple.personTwo.displayName"
+                        onValueChange={(value) =>
+                          updateLocalContent({
+                            field: 'displayName',
+                            person: 'personTwo',
+                            type: 'person',
+                            value,
+                          })
+                        }
                         required
                         value={content.couple.personTwo.displayName}
                       />
@@ -581,12 +646,28 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
                         error={getError(state.fieldErrors, 'couple.personTwo.fullName')}
                         label="Nama lengkap (opsional)"
                         name="couple.personTwo.fullName"
+                        onValueChange={(value) =>
+                          updateLocalContent({
+                            field: 'fullName',
+                            person: 'personTwo',
+                            type: 'person',
+                            value,
+                          })
+                        }
                         value={content.couple.personTwo.fullName}
                       />
                       <EditorTextField
                         error={getError(state.fieldErrors, 'couple.personTwo.parentLine')}
                         label="Orang tua atau keluarga (opsional)"
                         name="couple.personTwo.parentLine"
+                        onValueChange={(value) =>
+                          updateLocalContent({
+                            field: 'parentLine',
+                            person: 'personTwo',
+                            type: 'person',
+                            value,
+                          })
+                        }
                         value={content.couple.personTwo.parentLine}
                       />
                     </fieldset>
@@ -607,19 +688,27 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
                       help="Tampilkan bagian ini pada undangan setelah diterbitkan. Isi tetap tersimpan meskipun bagian ini belum ditampilkan."
                       label="Tampilkan cerita kalian"
                       name="story.enabled"
-                      onToggle={setStoryEnabled}
+                      onToggle={(value) =>
+                        updateLocalContent({ field: 'enabled', type: 'story', value })
+                      }
                     />
-                    <div className="space-y-5" hidden={!storyEnabled}>
+                    <div className="space-y-5" hidden={!content.story.enabled}>
                       <EditorTextField
                         error={getError(state.fieldErrors, 'story.heading')}
                         label="Judul cerita"
                         name="story.heading"
+                        onValueChange={(value) =>
+                          updateLocalContent({ field: 'heading', type: 'story', value })
+                        }
                         value={content.story.heading}
                       />
                       <EditorTextAreaField
                         error={getError(state.fieldErrors, 'story.body')}
                         label="Cerita kalian"
                         name="story.body"
+                        onValueChange={(value) =>
+                          updateLocalContent({ field: 'body', type: 'story', value })
+                        }
                         value={content.story.body}
                       />
                     </div>
@@ -644,13 +733,12 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
                         </p>
                       </div>
                       <Button
-                        disabled={eventScheduleEvents.length >= 4}
+                        disabled={content.eventSchedule.events.length >= 4}
                         onClick={() => {
-                          setEventScheduleEvents((current) => [
-                            ...current,
-                            createEventScheduleItem(),
-                          ]);
-                          setIsDirty(true);
+                          updateLocalContent({
+                            events: [...content.eventSchedule.events, createEventScheduleItem()],
+                            type: 'schedule',
+                          });
                         }}
                         size="sm"
                         type="button"
@@ -661,48 +749,58 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
                     </div>
 
                     <div className="space-y-4">
-                      {eventScheduleEvents.map((event, index) => (
+                      {content.eventSchedule.events.map((event, index) => (
                         <EditorScheduleEventCard
                           errors={state.fieldErrors}
                           event={event}
                           index={index}
                           key={event.id}
-                          onMoveDown={() => {
-                            setEventScheduleEvents((current) => {
-                              if (index === current.length - 1) {
-                                return current;
-                              }
-
-                              const next = [...current];
-                              [next[index], next[index + 1]] = [next[index + 1]!, next[index]!];
-                              return next;
+                          onChange={(nextEvent) => {
+                            updateLocalContent({
+                              events: content.eventSchedule.events.map((candidate) =>
+                                candidate.id === nextEvent.id ? nextEvent : candidate,
+                              ),
+                              type: 'schedule',
                             });
-                            setIsDirty(true);
+                          }}
+                          onMoveDown={() => {
+                            if (index === content.eventSchedule.events.length - 1) {
+                              return;
+                            }
+
+                            const events = [...content.eventSchedule.events];
+                            [events[index], events[index + 1]] = [
+                              events[index + 1]!,
+                              events[index]!,
+                            ];
+                            updateLocalContent({ events, type: 'schedule' });
                           }}
                           onMoveUp={() => {
-                            setEventScheduleEvents((current) => {
-                              if (index === 0) {
-                                return current;
-                              }
+                            if (index === 0) {
+                              return;
+                            }
 
-                              const next = [...current];
-                              [next[index - 1], next[index]] = [next[index]!, next[index - 1]!];
-                              return next;
-                            });
-                            setIsDirty(true);
+                            const events = [...content.eventSchedule.events];
+                            [events[index - 1], events[index]] = [
+                              events[index]!,
+                              events[index - 1]!,
+                            ];
+                            updateLocalContent({ events, type: 'schedule' });
                           }}
                           onRemove={() => {
-                            setEventScheduleEvents((current) => {
-                              if (current.length === 1) {
-                                return current;
-                              }
+                            if (content.eventSchedule.events.length === 1) {
+                              return;
+                            }
 
-                              return current.filter((item) => item.id !== event.id);
+                            updateLocalContent({
+                              events: content.eventSchedule.events.filter(
+                                (item) => item.id !== event.id,
+                              ),
+                              type: 'schedule',
                             });
-                            setIsDirty(true);
                           }}
-                          removable={eventScheduleEvents.length > 1}
-                          total={eventScheduleEvents.length}
+                          removable={content.eventSchedule.events.length > 1}
+                          total={content.eventSchedule.events.length}
                         />
                       ))}
                     </div>
@@ -753,19 +851,27 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
                       help="Tampilkan bagian ini pada undangan setelah diterbitkan. Isi tetap tersimpan meskipun bagian ini belum ditampilkan."
                       label="Tampilkan konfirmasi kehadiran"
                       name="rsvp.enabled"
-                      onToggle={setRsvpEnabled}
+                      onToggle={(value) =>
+                        updateLocalContent({ field: 'enabled', type: 'rsvp', value })
+                      }
                     />
-                    <div className="space-y-5" hidden={!rsvpEnabled}>
+                    <div className="space-y-5" hidden={!content.rsvp.enabled}>
                       <EditorTextField
                         error={getError(state.fieldErrors, 'rsvp.heading')}
                         label="Judul bagian RSVP"
                         name="rsvp.heading"
+                        onValueChange={(value) =>
+                          updateLocalContent({ field: 'heading', type: 'rsvp', value })
+                        }
                         value={content.rsvp.heading}
                       />
                       <EditorTextAreaField
                         error={getError(state.fieldErrors, 'rsvp.lead')}
                         label="Pesan untuk tamu"
                         name="rsvp.lead"
+                        onValueChange={(value) =>
+                          updateLocalContent({ field: 'lead', type: 'rsvp', value })
+                        }
                         value={content.rsvp.lead}
                       />
                     </div>
@@ -786,19 +892,27 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
                       help="Tampilkan informasi transfer ini pada undangan setelah diterbitkan."
                       label="Tampilkan Amplop Digital"
                       name="digitalGift.enabled"
-                      onToggle={setDigitalGiftEnabled}
+                      onToggle={(value) =>
+                        updateLocalContent({ field: 'enabled', type: 'digital-gift', value })
+                      }
                     />
-                    <div className="space-y-5" hidden={!digitalGiftEnabled}>
+                    <div className="space-y-5" hidden={!content.digitalGift.enabled}>
                       <EditorTextField
                         error={getError(state.fieldErrors, 'digitalGift.heading')}
                         label="Judul Amplop Digital (opsional)"
                         name="digitalGift.heading"
+                        onValueChange={(value) =>
+                          updateLocalContent({ field: 'heading', type: 'digital-gift', value })
+                        }
                         value={content.digitalGift.heading}
                       />
                       <EditorTextAreaField
                         error={getError(state.fieldErrors, 'digitalGift.lead')}
                         label="Pesan pengantar (opsional)"
                         name="digitalGift.lead"
+                        onValueChange={(value) =>
+                          updateLocalContent({ field: 'lead', type: 'digital-gift', value })
+                        }
                         value={content.digitalGift.lead}
                       />
 
@@ -813,18 +927,20 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
                             </p>
                           </div>
                           <Button
-                            disabled={digitalGiftAccounts.length >= 3}
+                            disabled={content.digitalGift.accounts.length >= 3}
                             onClick={() => {
-                              setDigitalGiftAccounts((current) => [
-                                ...current,
-                                {
-                                  accountHolder: '',
-                                  accountNumber: '',
-                                  id: createDigitalGiftAccountId(),
-                                  providerName: '',
-                                },
-                              ]);
-                              setIsDirty(true);
+                              updateLocalContent({
+                                accounts: [
+                                  ...content.digitalGift.accounts,
+                                  {
+                                    accountHolder: '',
+                                    accountNumber: '',
+                                    id: createDigitalGiftAccountId(),
+                                    providerName: '',
+                                  },
+                                ],
+                                type: 'digital-gift-accounts',
+                              });
                             }}
                             size="sm"
                             type="button"
@@ -834,14 +950,14 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
                           </Button>
                         </div>
 
-                        {digitalGiftAccounts.length === 0 ? (
+                        {content.digitalGift.accounts.length === 0 ? (
                           <p className="text-seraya-text-muted bg-seraya-canvas mt-5 rounded-[var(--seraya-radius-sm)] px-3.5 py-3 text-sm leading-6">
                             Tambahkan setidaknya satu rekening atau e-wallet sebelum menampilkan
                             Amplop Digital.
                           </p>
                         ) : (
                           <div className="mt-5 space-y-4">
-                            {digitalGiftAccounts.map((account, index) => {
+                            {content.digitalGift.accounts.map((account, index) => {
                               const accountPrefix = `digitalGift.accounts.${index}`;
 
                               return (
@@ -855,10 +971,12 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
                                   <div className="mt-2 flex justify-end">
                                     <Button
                                       onClick={() => {
-                                        setDigitalGiftAccounts((current) =>
-                                          current.filter((item) => item.id !== account.id),
-                                        );
-                                        setIsDirty(true);
+                                        updateLocalContent({
+                                          accounts: content.digitalGift.accounts.filter(
+                                            (item) => item.id !== account.id,
+                                          ),
+                                          type: 'digital-gift-accounts',
+                                        });
                                       }}
                                       size="sm"
                                       type="button"
@@ -880,6 +998,16 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
                                       )}
                                       label="Penyedia / Bank / E-wallet"
                                       name={`${accountPrefix}.providerName`}
+                                      onValueChange={(value) =>
+                                        updateLocalContent({
+                                          accounts: content.digitalGift.accounts.map((candidate) =>
+                                            candidate.id === account.id
+                                              ? { ...candidate, providerName: value }
+                                              : candidate,
+                                          ),
+                                          type: 'digital-gift-accounts',
+                                        })
+                                      }
                                       required
                                       value={account.providerName}
                                     />
@@ -891,6 +1019,16 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
                                       )}
                                       label="Nama pemilik rekening"
                                       name={`${accountPrefix}.accountHolder`}
+                                      onValueChange={(value) =>
+                                        updateLocalContent({
+                                          accounts: content.digitalGift.accounts.map((candidate) =>
+                                            candidate.id === account.id
+                                              ? { ...candidate, accountHolder: value }
+                                              : candidate,
+                                          ),
+                                          type: 'digital-gift-accounts',
+                                        })
+                                      }
                                       required
                                       value={account.accountHolder}
                                     />
@@ -904,6 +1042,16 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
                                       inputMode="numeric"
                                       label="Nomor rekening / nomor e-wallet"
                                       name={`${accountPrefix}.accountNumber`}
+                                      onValueChange={(value) =>
+                                        updateLocalContent({
+                                          accounts: content.digitalGift.accounts.map((candidate) =>
+                                            candidate.id === account.id
+                                              ? { ...candidate, accountNumber: value }
+                                              : candidate,
+                                          ),
+                                          type: 'digital-gift-accounts',
+                                        })
+                                      }
                                       required
                                       value={account.accountNumber}
                                     />
@@ -936,19 +1084,27 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
                       help="Tampilkan bagian ini pada undangan setelah diterbitkan. Isi tetap tersimpan meskipun bagian ini belum ditampilkan."
                       label="Tampilkan penutup"
                       name="closing.enabled"
-                      onToggle={setClosingEnabled}
+                      onToggle={(value) =>
+                        updateLocalContent({ field: 'enabled', type: 'closing', value })
+                      }
                     />
-                    <div className="space-y-5" hidden={!closingEnabled}>
+                    <div className="space-y-5" hidden={!content.closing.enabled}>
                       <EditorTextAreaField
                         error={getError(state.fieldErrors, 'closing.message')}
                         label="Pesan penutup"
                         name="closing.message"
+                        onValueChange={(value) =>
+                          updateLocalContent({ field: 'message', type: 'closing', value })
+                        }
                         value={content.closing.message}
                       />
                       <EditorTextField
                         error={getError(state.fieldErrors, 'closing.signature')}
                         label="Nama penutup"
                         name="closing.signature"
+                        onValueChange={(value) =>
+                          updateLocalContent({ field: 'signature', type: 'closing', value })
+                        }
                         value={content.closing.signature}
                       />
                     </div>
@@ -972,22 +1128,43 @@ export function InvitationEditor({ draft, projectId, readiness }: InvitationEdit
                     </p>
                   </div>
                   <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-56">
-                    <Button loading={isPending} size="lg" type="submit">
-                      Simpan perubahan
-                    </Button>
+                    <div className="grid grid-cols-2 gap-2 2xl:grid-cols-1">
+                      <Button
+                        aria-haspopup="dialog"
+                        className="2xl:hidden"
+                        data-local-preview-trigger
+                        onClick={() => setIsLocalPreviewOpen(true)}
+                        size="lg"
+                        type="button"
+                        variant="secondary"
+                      >
+                        Preview lokal
+                      </Button>
+                      <Button loading={isPending} size="lg" type="submit">
+                        Simpan perubahan
+                      </Button>
+                    </div>
                     <Link
                       className="text-seraya-action-primary focus-visible:outline-seraya-focus-ring inline-flex min-h-10 items-center justify-center rounded-[var(--seraya-radius-sm)] px-3 text-sm font-semibold underline-offset-4 hover:underline focus-visible:outline-3 focus-visible:outline-offset-3"
                       href={`/dashboard/${projectId}/preview`}
                     >
-                      Lihat hasil undangan
+                      Buka preview tersimpan
                     </Link>
                     <p className="text-seraya-text-muted text-center text-xs leading-5">
-                      Preview menampilkan perubahan yang sudah disimpan.
+                      Preview tersimpan tetap mengikuti draft dari server.
                     </p>
                   </div>
                 </div>
               </div>
             </form>
+            <InvitationEditorLivePreview
+              content={content}
+              galleryImages={galleryImages}
+              isDirty={isDirty}
+              isOpen={isLocalPreviewOpen}
+              onOpenChange={setIsLocalPreviewOpen}
+              project={project}
+            />
           </div>
         </CardContent>
       </Card>

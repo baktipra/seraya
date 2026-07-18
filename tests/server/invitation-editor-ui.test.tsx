@@ -27,6 +27,8 @@ vi.mock('@/design-system', async () => {
 import {
   getInvitationEditorSaveStatus,
   InvitationEditor,
+  invitationEditorDirtyNavigationMessage,
+  shouldConfirmInvitationEditorNavigation,
 } from '@/components/projects/invitation-editor';
 
 const project = {
@@ -121,8 +123,14 @@ describe('SRY-030 invitation editor multi-event owner UI', () => {
     expect(html).toContain('Roselle');
     expect(html).toContain('Aruna');
     expect(html).toContain('Laras');
-    expect(html).toContain('Lihat hasil undangan');
-    expect(html).toContain('Preview undangan');
+    expect(html).toContain('Buka preview tersimpan');
+    expect(html).toContain('Preview tersimpan');
+    expect(html).toContain('Preview lokal');
+    expect(html).toContain('data-local-preview-trigger="true"');
+    expect(html).toContain('data-local-preview-desktop="true"');
+    expect(html).toContain('Pratinjau lokal');
+    expect(html).toContain('Draf tersimpan');
+    expect(html).not.toContain('Sudah dipublikasikan</span>');
     expect(html).toContain('Sapaan kecil');
     expect(html).toContain('Nama yang tampil di undangan');
     expect(html).toContain('Tampilkan konfirmasi kehadiran');
@@ -191,8 +199,8 @@ describe('SRY-030 invitation editor multi-event owner UI', () => {
         digitalGift: {
           accounts: [
             {
-              accountHolder: 'Raka Pratama',
-              accountNumber: '123456789012',
+              accountHolder: 'Synthetic Test Couple',
+              accountNumber: 'TEST-ACCOUNT-0001',
               id: '11111111-1111-4111-8111-111111111111',
               providerName: 'Bank Seraya',
             },
@@ -217,16 +225,18 @@ describe('SRY-030 invitation editor multi-event owner UI', () => {
     expect(html).toContain('name="digitalGift.accounts.0.accountNumber"');
     expect(html).toContain('Tambah rekening');
     expect(html).toContain('Hapus rekening');
-    expect(html).toContain('value="123456789012"');
+    expect(html).toContain('value="TEST-ACCOUNT-0001"');
   });
 
-  it('shows an initial truthful save status and explains that preview uses saved draft changes only', () => {
+  it('distinguishes the immediate local preview from the authoritative saved preview', () => {
     const html = renderToStaticMarkup(<InvitationEditor draft={draft} projectId={project.id} />);
 
     expect(html).toContain('data-testid="invitation-editor-save-status"');
     expect(html).toContain('Belum ada perubahan');
     expect(html).not.toContain('>Tersimpan</p>');
-    expect(html).toContain('Preview menampilkan perubahan yang sudah disimpan.');
+    expect(html).toContain('Preview tersimpan tetap mengikuti draft dari server.');
+    expect(html).toContain('Diperbarui langsung dari editor. Belum dipublikasikan dari sini.');
+    expect(html).toContain('data-surface="preview"');
     expect(html).toContain(`href="/dashboard/${project.id}/preview"`);
   });
 
@@ -284,13 +294,31 @@ describe('SRY-030 invitation editor multi-event owner UI', () => {
         isPending: false,
       }),
     ).toMatchObject({
-      description: 'Perubahan siap dipreview.',
+      description: 'Perubahan sudah tersimpan dan siap diperiksa di preview tersimpan.',
       label: 'Tersimpan',
     });
   });
 
+  it('requires confirmation only when dirty navigation leaves the current editor document', () => {
+    const current = `https://seraya.test/dashboard/${project.id}/invitation#bagian-opening`;
+
+    expect(
+      shouldConfirmInvitationEditorNavigation(
+        current,
+        `https://seraya.test/dashboard/${project.id}/invitation#bagian-couple`,
+      ),
+    ).toBe(false);
+    expect(
+      shouldConfirmInvitationEditorNavigation(
+        current,
+        `https://seraya.test/dashboard/${project.id}/preview`,
+      ),
+    ).toBe(true);
+    expect(invitationEditorDirtyNavigationMessage).toContain('belum disimpan');
+  });
+
   it('keeps the server action, accessible field-error boundary, and editor-local mobile action treatment', async () => {
-    const [source, fieldSource] = await Promise.all([
+    const [source, fieldSource, previewSource] = await Promise.all([
       readFile(
         path.resolve(process.cwd(), 'src/components/projects/invitation-editor.tsx'),
         'utf8',
@@ -299,18 +327,30 @@ describe('SRY-030 invitation editor multi-event owner UI', () => {
         path.resolve(process.cwd(), 'src/components/projects/invitation-editor-fields.tsx'),
         'utf8',
       ),
+      readFile(
+        path.resolve(process.cwd(), 'src/components/projects/invitation-editor-live-preview.tsx'),
+        'utf8',
+      ),
     ]);
 
     expect(source).toContain(
       "import { saveInvitationEditorAction } from '@/modules/invitations/invitation-editor.actions';",
     );
     expect(source).toMatch(/<form\s+action=\{formAction\}/);
-    expect(source).toContain('onChange={() => setIsDirty(true)}');
+    expect(source).toContain('invitationEditorLocalContentReducer');
+    expect(fieldSource).toContain("value={value ?? ''}");
+    expect(fieldSource).toContain('onValueChange(event.currentTarget.value)');
     expect(source).toContain('role="alert"');
     expect(fieldSource).toContain('aria-describedby');
     expect(fieldSource).toContain('role="alert"');
     expect(source).toContain('sticky bottom-0');
     expect(source).toContain('safe-area-inset-bottom');
+    expect(source).toContain('data-local-preview-trigger');
+    expect(source).toContain('InvitationEditorLivePreview');
+    expect(previewSource).toContain('surface="preview"');
+    expect(previewSource).not.toContain('fetch(');
+    expect(previewSource).not.toContain('/g/');
+    expect(previewSource).not.toContain('personalSlots');
     expect(source).not.toContain('localStorage');
     expect(source).not.toContain('sessionStorage');
     expect(source).not.toContain('revalidateTag');
