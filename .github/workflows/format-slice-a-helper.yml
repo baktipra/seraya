@@ -1,9 +1,9 @@
 name: Slice A format helper
 
 on:
-  push:
+  pull_request:
     branches:
-      - agent/follow-up-slice-a-domain-persistence
+      - main
 
 permissions:
   contents: read
