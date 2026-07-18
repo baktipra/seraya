@@ -145,20 +145,20 @@ fallback.
 
 ## 7. Mobile-first guest journey
 
-| Chapter | Required behavior | Composition direction |
-| --- | --- | --- |
-| Opening | Couple label/title and primary date visible immediately | Near-full opening viewport, controlled botanical frame, strong editorial names, one quiet scroll cue |
-| Personal greeting | Personal surface only, immediately after opening | A letter-like greeting with guest name; no app-card wrapper |
-| Couple | Identify both partners and optional family lines | Two balanced portraits made from typography, not boxed profile cards |
-| Story | Render only when enabled and meaningful | Short reading measure, pull-quote rhythm, no oversized empty block |
-| Events | Present 1–4 events with the first as primary | Date-led schedule sheet or timeline; clear title, time, venue, address, and map action |
-| Legacy location | Render only for normalized legacy content | Same practical treatment as events; never create a duplicate-looking chapter |
-| Gallery | Make photos the main visual release | Deterministic editorial mosaic based on image count; intentional crops and spacing |
-| Digital gift | Optional and visually secondary | Quiet “Hadiah & doa” chapter; compact account disclosure and copy action |
-| Personal RSVP | Personal surface only | Roselle-owned response chapter after practical details; attendance choice is the primary action |
-| Personal Guestbook | Personal surface only, after RSVP | Continuation of the response chapter, not a second unrelated form card |
-| Generic response note | Generic and preview surfaces only when RSVP enabled | One quiet explanatory sentence; never looks interactive |
-| Closing | End with gratitude and signature | Distinct closing field with a final botanical gesture and no trailing utility UI |
+| Chapter               | Required behavior                                       | Composition direction                                                                                |
+| --------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Opening               | Couple label/title and primary date visible immediately | Near-full opening viewport, controlled botanical frame, strong editorial names, one quiet scroll cue |
+| Personal greeting     | Personal surface only, immediately after opening        | A letter-like greeting with guest name; no app-card wrapper                                          |
+| Couple                | Identify both partners and optional family lines        | Two balanced portraits made from typography, not boxed profile cards                                 |
+| Story                 | Render only when enabled and meaningful                 | Short reading measure, pull-quote rhythm, no oversized empty block                                   |
+| Events                | Present 1–4 events with the first as primary            | Date-led schedule sheet or timeline; clear title, time, venue, address, and map action               |
+| Legacy location       | Render only for normalized legacy content               | Same practical treatment as events; never create a duplicate-looking chapter                         |
+| Gallery               | Make photos the main visual release                     | Deterministic editorial mosaic based on image count; intentional crops and spacing                   |
+| Digital gift          | Optional and visually secondary                         | Quiet “Hadiah & doa” chapter; compact account disclosure and copy action                             |
+| Personal RSVP         | Personal surface only                                   | Roselle-owned response chapter after practical details; attendance choice is the primary action      |
+| Personal Guestbook    | Personal surface only, after RSVP                       | Continuation of the response chapter, not a second unrelated form card                               |
+| Generic response note | Generic and preview surfaces only when RSVP enabled     | One quiet explanatory sentence; never looks interactive                                              |
+| Closing               | End with gratitude and signature                        | Distinct closing field with a final botanical gesture and no trailing utility UI                     |
 
 ## 8. Roselle composition specification
 
@@ -284,11 +284,11 @@ language.
 
 At widths of approximately 1280px and above, use three purposeful regions:
 
-| Region | Target width | Responsibility |
-| --- | ---: | --- |
-| Section rail | 220–248px | Navigation, completion, errors, optional visibility |
-| Active editor | 420–520px | Fields for exactly one active section |
-| Live preview | 390–460px | Sticky mobile invitation viewport and preview controls |
+| Region        | Target width | Responsibility                                         |
+| ------------- | -----------: | ------------------------------------------------------ |
+| Section rail  |    220–248px | Navigation, completion, errors, optional visibility    |
+| Active editor |    420–520px | Fields for exactly one active section                  |
+| Live preview  |    390–460px | Sticky mobile invitation viewport and preview controls |
 
 The workspace may use the remaining width for controlled gutters. It must not remain constrained by
 the current dashboard `max-w-5xl` and editor `max-w-4xl` combination.
@@ -426,19 +426,19 @@ The public generic and personal routes remain free of owner controls.
 
 ## 18. Current-source implementation map
 
-| Current source | Planned responsibility |
-| --- | --- |
-| `src/components/projects/invitation-editor.tsx` | Decompose into workspace shell, section rail, active-section editors, state reducer, save bar, and preview bridge |
-| `src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx` | Load owner-authorized draft, readiness, and preview media required by the workspace |
-| `src/app/(dashboard)/dashboard/[projectId]/preview/page.tsx` | Become focused saved-preview inspection route |
-| `src/components/dashboard/dashboard-shell.tsx` | Gain an intentional width/shell contract instead of forcing all experiences through one max width |
-| `src/components/dashboard/project-navigation.tsx` | Stay canonical for normal project pages; do not compete inside focused editor/preview mode |
-| `src/modules/invitation-templates/roselle/roselle-template.tsx` | Preserve renderer order and authorized slots while adopting the new chapter composition |
-| `src/modules/invitation-templates/roselle/roselle-sections.tsx` | Split into chapter components with distinct layout behavior |
-| `src/modules/invitation-templates/roselle/roselle.module.css` | Replace repeated centered-section/card rhythm with the flagship responsive system |
-| `src/modules/invitation-templates/invitation-view-model.ts` | Remain the sole server-safe mapping boundary; extend only if strictly required without personal data |
-| `src/modules/invitations/invitation-draft.schema.ts` | Remain unchanged for V1 |
-| `src/modules/invitation-templates/invitation-template.types.ts` | Preserve generic/personal/preview and opaque personal-slot contracts |
+| Current source                                                  | Planned responsibility                                                                                            |
+| --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `src/components/projects/invitation-editor.tsx`                 | Decompose into workspace shell, section rail, active-section editors, state reducer, save bar, and preview bridge |
+| `src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx` | Load owner-authorized draft, readiness, and preview media required by the workspace                               |
+| `src/app/(dashboard)/dashboard/[projectId]/preview/page.tsx`    | Become focused saved-preview inspection route                                                                     |
+| `src/components/dashboard/dashboard-shell.tsx`                  | Gain an intentional width/shell contract instead of forcing all experiences through one max width                 |
+| `src/components/dashboard/project-navigation.tsx`               | Stay canonical for normal project pages; do not compete inside focused editor/preview mode                        |
+| `src/modules/invitation-templates/roselle/roselle-template.tsx` | Preserve renderer order and authorized slots while adopting the new chapter composition                           |
+| `src/modules/invitation-templates/roselle/roselle-sections.tsx` | Split into chapter components with distinct layout behavior                                                       |
+| `src/modules/invitation-templates/roselle/roselle.module.css`   | Replace repeated centered-section/card rhythm with the flagship responsive system                                 |
+| `src/modules/invitation-templates/invitation-view-model.ts`     | Remain the sole server-safe mapping boundary; extend only if strictly required without personal data              |
+| `src/modules/invitations/invitation-draft.schema.ts`            | Remain unchanged for V1                                                                                           |
+| `src/modules/invitation-templates/invitation-template.types.ts` | Preserve generic/personal/preview and opaque personal-slot contracts                                              |
 
 ## 19. Preservation boundaries
 
