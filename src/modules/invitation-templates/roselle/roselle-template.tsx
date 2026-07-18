@@ -25,6 +25,7 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
     <article
       aria-labelledby="roselle-invitation-title"
       className={styles.invitation}
+      data-surface={renderContext.surface}
       data-template="roselle"
     >
       <RoselleHero hero={invitation.hero} />
@@ -42,6 +43,13 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
         <RoselleDigitalGift digitalGift={invitation.digitalGift} />
         {hasPersonalResponse ? (
           <div className={styles.personalResponseJourney} data-template-response-journey="roselle">
+            <div className={styles.responseIntroduction}>
+              <p className={styles.sectionEyebrow}>Untuk tamu terkasih</p>
+              <h2 className={styles.responseTitle}>Kabar dari Anda</h2>
+              <p className={styles.responseLead}>
+                Kehadiran dan doa Anda akan melengkapi hari bahagia kami.
+              </p>
+            </div>
             {personalSlots?.rsvp ? (
               <div className={styles.personalResponseSection} data-template-response-slot="rsvp">
                 {personalSlots.rsvp}
