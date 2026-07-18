@@ -290,10 +290,16 @@ describe('SRY-030 invitation editor multi-event owner UI', () => {
   });
 
   it('keeps the server action, accessible field-error boundary, and editor-local mobile action treatment', async () => {
-    const source = await readFile(
-      path.resolve(process.cwd(), 'src/components/projects/invitation-editor.tsx'),
-      'utf8',
-    );
+    const [source, fieldSource] = await Promise.all([
+      readFile(
+        path.resolve(process.cwd(), 'src/components/projects/invitation-editor.tsx'),
+        'utf8',
+      ),
+      readFile(
+        path.resolve(process.cwd(), 'src/components/projects/invitation-editor-fields.tsx'),
+        'utf8',
+      ),
+    ]);
 
     expect(source).toContain(
       "import { saveInvitationEditorAction } from '@/modules/invitations/invitation-editor.actions';",
@@ -301,7 +307,8 @@ describe('SRY-030 invitation editor multi-event owner UI', () => {
     expect(source).toMatch(/<form\s+action=\{formAction\}/);
     expect(source).toContain('onChange={() => setIsDirty(true)}');
     expect(source).toContain('role="alert"');
-    expect(source).toContain('aria-describedby');
+    expect(fieldSource).toContain('aria-describedby');
+    expect(fieldSource).toContain('role="alert"');
     expect(source).toContain('sticky bottom-0');
     expect(source).toContain('safe-area-inset-bottom');
     expect(source).not.toContain('localStorage');
