@@ -2,6 +2,22 @@
 
 import { useEffect } from 'react';
 
+export type InvitationEditorContextualSaveActionState = 'clean' | 'dirty' | 'saving';
+
+export function getInvitationEditorContextualSaveActionState({
+  isDirty,
+  statusLabel,
+}: {
+  isDirty: boolean;
+  statusLabel: string;
+}): InvitationEditorContextualSaveActionState {
+  if (statusLabel.startsWith('Menyimpan perubahan')) {
+    return 'saving';
+  }
+
+  return isDirty ? 'dirty' : 'clean';
+}
+
 /**
  * Slice G finalizes the editor action matrix without changing save or publish
  * authority. The local preview is always mounted and already receives the
@@ -29,9 +45,11 @@ export function useInvitationEditorContextualSaveAction(isDirty: boolean) {
 
     const syncSaveAction = () => {
       const statusLabel = saveStatus?.querySelector('p')?.textContent?.trim() ?? '';
-      const isSaving = statusLabel.startsWith('Menyimpan perubahan');
-      const canSave = isDirty && !isSaving;
-      const actionState = isSaving ? 'saving' : canSave ? 'dirty' : 'clean';
+      const actionState = getInvitationEditorContextualSaveActionState({
+        isDirty,
+        statusLabel,
+      });
+      const canSave = actionState === 'dirty';
 
       if (saveButton.disabled === canSave) {
         saveButton.disabled = !canSave;
@@ -41,7 +59,7 @@ export function useInvitationEditorContextualSaveAction(isDirty: boolean) {
 
       if (canSave) {
         saveButton.removeAttribute('title');
-      } else if (!isSaving) {
+      } else if (actionState === 'clean') {
         saveButton.title = 'Tidak ada perubahan untuk disimpan.';
       }
     };
