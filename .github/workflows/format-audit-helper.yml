@@ -27,11 +27,11 @@ jobs:
       - name: Format repository
         run: npx prettier --write .
 
-      - name: Capture formatter delta
+      - name: Package formatter delta
         run: |
           git diff --name-only > formatted-files.txt
-          git diff > formatted-diff.patch
-          tar -czf formatted-audit.tar.gz formatted-files.txt formatted-diff.patch
+          git diff --name-only -z | tar --null -T - -czf formatted-repository-files.tar.gz
+          tar -czf formatted-audit.tar.gz formatted-files.txt formatted-repository-files.tar.gz
 
       - name: Upload formatter audit
         uses: actions/upload-artifact@v4
