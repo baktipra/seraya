@@ -1,4 +1,4 @@
--- SRY-043 / M0020
+-- P0 stabilization / M0020
 -- Exposes the encrypted create-if-none-active authority under a PostgREST-safe
 -- identifier. M0019's original 68-character identifier is truncated by
 -- PostgreSQL to 63 characters and therefore cannot be addressed reliably by
