@@ -234,6 +234,85 @@
   gap: 0.8rem !important;
 }
 
+/* Slice E pass 2: strengthen scan hierarchy while preserving 44px actions. */
+:global([data-dashboard-width='wide']):has(.device)
+  :global([data-invitation-editor-panel] > section > div:first-child),
+:global([data-dashboard-width='wide']):has(.device)
+  :global([data-invitation-editor-panel='style'] > fieldset > div:first-child) {
+  align-items: center;
+  gap: 0.75rem !important;
+  margin-bottom: 1rem !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--seraya-border-default) 72%, transparent);
+  padding-bottom: 0.75rem;
+}
+
+:global([data-dashboard-width='wide']):has(.device)
+  :global([data-invitation-editor-panel] > section > div:first-child > span[aria-hidden='true']) {
+  width: 2rem !important;
+  height: 2rem !important;
+  font-size: 0.65rem !important;
+}
+
+:global([data-dashboard-width='wide']):has(.device)
+  :global([data-invitation-editor-panel] h2) {
+  font-size: 1.125rem !important;
+  line-height: 1.45rem;
+}
+
+:global([data-dashboard-width='wide']):has(.device)
+  :global([data-invitation-editor-panel] h2 + p) {
+  margin-top: 0.25rem !important;
+  line-height: 1.35rem;
+}
+
+:global([data-dashboard-width='wide']):has(.device)
+  :global([data-invitation-editor-panel] label) {
+  line-height: 1.3rem;
+}
+
+:global([data-dashboard-width='wide']):has(.device)
+  :global(
+    [data-invitation-editor-panel]
+      input:not([type='hidden']):not([type='checkbox']):not([type='radio'])
+  ),
+:global([data-dashboard-width='wide']):has(.device)
+  :global([data-invitation-editor-panel] textarea) {
+  min-height: 2.75rem;
+}
+
+:global([data-dashboard-width='wide']):has(.device)
+  :global(
+    fieldset:has(> input[name^='eventSchedule.events.']) > div:first-of-type > div:last-child
+  ) {
+  gap: 0.25rem !important;
+}
+
+:global([data-dashboard-width='wide']):has(.device)
+  :global(fieldset:has(> input[name^='eventSchedule.events.']) button),
+:global([data-dashboard-width='wide']):has(.device)
+  :global(fieldset:has(> input[name^='digitalGift.accounts.']) button),
+:global([data-dashboard-width='wide']):has(.device)
+  :global([data-invitation-editor-panel='schedule'] button),
+:global([data-dashboard-width='wide']):has(.device)
+  :global([data-invitation-editor-panel='gift'] button) {
+  min-height: 2.75rem;
+}
+
+:global([data-dashboard-width='wide']):has(.device)
+  :global(fieldset:has(> input[name^='digitalGift.accounts.']) legend) {
+  padding-right: 0;
+  padding-left: 0;
+  font-size: 0.9rem;
+}
+
+:global([data-dashboard-width='wide']):has(.device)
+  :global([data-invitation-editor-panel='gallery'] > section > div:nth-child(2) a) {
+  border: 0 !important;
+  background: var(--seraya-brand-soft) !important;
+  color: var(--seraya-action-primary) !important;
+  box-shadow: none !important;
+}
+
 @media (max-width: 639px) {
   :global([data-dashboard-width='wide']):has(.device)
     :global([aria-labelledby='invitation-editor-title'])
@@ -270,6 +349,20 @@
     :global(fieldset:has(> input[name^='digitalGift.accounts.'])) {
     border-radius: var(--seraya-radius-md);
     padding: 0.875rem !important;
+  }
+
+  :global([data-dashboard-width='wide']):has(.device)
+    :global(
+      fieldset:has(> input[name^='eventSchedule.events.']) > div:first-of-type > div:last-child
+    ) {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  :global([data-dashboard-width='wide']):has(.device)
+    :global([data-invitation-editor-panel] > section > div:first-child) {
+    align-items: flex-start;
   }
 }
 
