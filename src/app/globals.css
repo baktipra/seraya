@@ -213,6 +213,19 @@ button:not(:disabled),
   line-height: 1.35;
 }
 
+/*
+ * Dashboard children opt into a wider canvas explicitly. This keeps regular
+ * owner pages readable while giving composition workspaces room for their
+ * navigation rail and active editor without coupling the shell to a route.
+ */
+.seraya-dashboard-content {
+  max-width: 64rem;
+}
+
+.seraya-dashboard-content:has([data-dashboard-width='wide']) {
+  max-width: 82rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
