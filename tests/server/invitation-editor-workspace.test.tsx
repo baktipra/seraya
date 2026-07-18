@@ -95,7 +95,7 @@ describe('Slice A invitation editor workspace foundation', () => {
     expect(navigation).toContain('aria-label="Bagian undangan"');
     expect(navigation).toContain('Bagian 2 dari 9');
     expect(navigation).toContain('aria-current="step"');
-    expect(navigation).toContain('Status berasal dari draft terakhir tersimpan.');
+    expect(navigation).toContain('Status draft tersimpan');
     expect(inactivePanel).toContain('hidden=""');
     expect(inactivePanel).toContain('name="closing.signature"');
   });
