@@ -1,0 +1,75 @@
+.authority {
+  width: 100%;
+}
+
+.authority :global(button) {
+  width: 100%;
+}
+
+.mobileStatusContext {
+  margin-top: 0.2rem;
+  color: var(--seraya-text-muted);
+  font-size: 0.68rem;
+  line-height: 1rem;
+}
+
+/* Slice F: the sticky dock is the single authority for save, preview, and publish. */
+:global(
+  [aria-labelledby='invitation-editor-title']
+    > div:has(> section[aria-label='Ringkasan undangan'])
+    a[href$='/preview']
+) {
+  display: none !important;
+}
+
+:global(
+  [aria-labelledby='invitation-editor-title'][data-editor-authority-state='dirty']
+    form
+    > div:has([data-testid='invitation-editor-save-status'])
+    a[href$='/preview']
+) {
+  display: none !important;
+}
+
+:global(
+  [aria-labelledby='invitation-editor-title']
+    form
+    > div:has([data-testid='invitation-editor-save-status'])
+    [data-editor-publication-authority]
+) {
+  margin-top: 0.25rem;
+}
+
+:global(
+  [aria-labelledby='invitation-editor-title']
+    form
+    > div:has([data-testid='invitation-editor-save-status'])
+    [data-editor-publication-authority]
+    p
+) {
+  margin-top: 0.45rem;
+  text-align: center;
+  font-size: 0.75rem;
+  line-height: 1.15rem;
+}
+
+@media (max-width: 639px) {
+  :global(
+    [aria-labelledby='invitation-editor-title']
+      form
+      > div:has([data-testid='invitation-editor-save-status'])
+      [data-editor-publication-authority]
+  ) {
+    margin-top: 0;
+  }
+
+  :global(
+    [aria-labelledby='invitation-editor-title']
+      form
+      > div:has([data-testid='invitation-editor-save-status'])
+      [data-editor-publication-authority]
+      p
+  ) {
+    margin-top: 0.35rem;
+  }
+}
