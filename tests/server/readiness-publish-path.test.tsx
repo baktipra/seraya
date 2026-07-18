@@ -144,7 +144,7 @@ describe('SRY-041 project compass publish handoff', () => {
       <PublishInvitationControls
         hasActiveDraft
         intent="initial"
-        presentation="readiness"
+        presentation="default"
         projectId={projectId}
         publishedSlug={null}
         publishEligibility={{ allowed: false, reason: 'payment_not_verified' }}
