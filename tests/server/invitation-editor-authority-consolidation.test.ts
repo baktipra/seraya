@@ -33,6 +33,8 @@ describe('Slice F editor save-preview-publish authority', () => {
     );
     expect(source).toContain("section[aria-label='Ringkasan undangan']");
     expect(source).toContain("[data-editor-authority-state='dirty']");
+    expect(source).toContain(':not([data-editor-authority-state])');
+    expect(source).toContain("content: 'Status bagian mengikuti draf tersimpan.';");
     expect(source).toContain("a[href$='/preview']");
     expect(source).toContain('[data-editor-publication-authority]');
   });
