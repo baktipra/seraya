@@ -9,10 +9,7 @@ import {
   appendGuestFollowUpEventForVerifiedProject,
   listGuestFollowUpEventsForVerifiedProject,
 } from './follow-up.repository';
-import type {
-  AppendGuestFollowUpEventInput,
-  GuestFollowUpEvent,
-} from './follow-up.types';
+import type { AppendGuestFollowUpEventInput, GuestFollowUpEvent } from './follow-up.types';
 import { normalizeGuestFollowUpMetadata } from './follow-up.validation';
 
 export async function getGuestFollowUpEventsForVerifiedProject(
