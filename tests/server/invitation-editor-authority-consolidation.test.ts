@@ -21,10 +21,7 @@ describe('Slice F editor save-preview-publish authority', () => {
 
   it('keeps one saved-preview authority and hides it while local changes are dirty', async () => {
     const source = await readFile(
-      path.resolve(
-        process.cwd(),
-        'src/components/projects/invitation-editor-authority.module.css',
-      ),
+      path.resolve(process.cwd(), 'src/components/projects/invitation-editor-authority.module.css'),
       'utf8',
     );
 
