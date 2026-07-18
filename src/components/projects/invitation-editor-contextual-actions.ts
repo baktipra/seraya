@@ -39,22 +39,19 @@ export function useInvitationEditorContextualSaveAction(isDirty: boolean) {
         : null;
     const saveButton = actionTarget?.querySelector<HTMLButtonElement>('button[type="submit"]');
 
-    if (!saveButton) {
+    if (!saveButton || !saveStatus) {
       return;
     }
 
     const syncSaveAction = () => {
-      const statusLabel = saveStatus?.querySelector('p')?.textContent?.trim() ?? '';
+      const statusLabel = saveStatus.querySelector('p')?.textContent?.trim() ?? '';
       const actionState = getInvitationEditorContextualSaveActionState({
         isDirty,
         statusLabel,
       });
       const canSave = actionState === 'dirty';
 
-      if (saveButton.disabled === canSave) {
-        saveButton.disabled = !canSave;
-      }
-
+      saveButton.disabled = !canSave;
       saveButton.setAttribute('data-editor-contextual-save-action', actionState);
 
       if (canSave) {
@@ -67,14 +64,10 @@ export function useInvitationEditorContextualSaveAction(isDirty: boolean) {
     syncSaveAction();
 
     const observer = new MutationObserver(syncSaveAction);
-    observer.observe(saveStatus ?? saveButton, {
+    observer.observe(saveStatus, {
       characterData: true,
       childList: true,
       subtree: true,
-    });
-    observer.observe(saveButton, {
-      attributeFilter: ['disabled'],
-      attributes: true,
     });
 
     return () => {
