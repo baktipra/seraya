@@ -93,7 +93,6 @@ function useInvitationEditorAuthority(
 
   useEffect(() => {
     if (presentation !== 'readiness') {
-      setBridge({ ...initialEditorAuthorityBridge, isResolved: true });
       return;
     }
 
@@ -143,7 +142,9 @@ function useInvitationEditorAuthority(
     };
   }, [presentation]);
 
-  return bridge;
+  return presentation === 'readiness'
+    ? bridge
+    : { ...initialEditorAuthorityBridge, isResolved: true };
 }
 
 export function PublishInvitationControls({
