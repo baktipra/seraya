@@ -23,15 +23,15 @@ describe('Guest Follow-up Slice A foundation', () => {
     });
 
     expect(normalizeGuestFollowUpMetadata(undefined)).toEqual({});
-    expect(() =>
-      normalizeGuestFollowUpMetadata({ personalUrl: 'secret' } as never),
-    ).toThrow(GuestFollowUpValidationError);
+    expect(() => normalizeGuestFollowUpMetadata({ personalUrl: 'secret' } as never)).toThrow(
+      GuestFollowUpValidationError,
+    );
     expect(() => normalizeGuestFollowUpMetadata({ sourceSurface: '   ' })).toThrow(
       GuestFollowUpValidationError,
     );
-    expect(() =>
-      normalizeGuestFollowUpMetadata({ templateVersion: 'x'.repeat(81) }),
-    ).toThrow(GuestFollowUpValidationError);
+    expect(() => normalizeGuestFollowUpMetadata({ templateVersion: 'x'.repeat(81) })).toThrow(
+      GuestFollowUpValidationError,
+    );
   });
 
   it('keeps server authority narrow and capability-free', async () => {
@@ -52,11 +52,19 @@ describe('Guest Follow-up Slice A foundation', () => {
     );
 
     expect(migration).toContain('create table public.guest_follow_up_events');
-    expect(migration).toContain('alter table public.guest_follow_up_events enable row level security');
-    expect(migration).toContain('grant select on table public.guest_follow_up_events to authenticated');
+    expect(migration).toContain(
+      'alter table public.guest_follow_up_events enable row level security',
+    );
+    expect(migration).toContain(
+      'grant select on table public.guest_follow_up_events to authenticated',
+    );
     expect(migration).toContain('append_guest_follow_up_event_for_server');
-    expect(migration).toContain("normalized_metadata - array['source_surface', 'template_version', 'note_category']");
-    expect(migration).not.toMatch(/token_ciphertext|token_hash|personal_url|message_body|whatsapp_phone/u);
+    expect(migration).toContain(
+      "normalized_metadata - array['source_surface', 'template_version', 'note_category']",
+    );
+    expect(migration).not.toMatch(
+      /token_ciphertext|token_hash|personal_url|message_body|whatsapp_phone/u,
+    );
 
     expect(repository).toContain(".rpc('append_guest_follow_up_event_for_server'");
     expect(repository).toContain(".eq('project_id', project.id)");
