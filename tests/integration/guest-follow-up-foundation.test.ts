@@ -200,9 +200,9 @@ describe('M0021 guest follow-up domain and persistence foundation', () => {
     await appendEvent({});
 
     await impersonateAnonymousUser();
-    await expect(
-      database.query('select id from public.guest_follow_up_events'),
-    ).rejects.toThrow(/permission denied/i);
+    await expect(database.query('select id from public.guest_follow_up_events')).rejects.toThrow(
+      /permission denied/i,
+    );
 
     await impersonateAuthenticatedUser(userA);
     await expect(
@@ -234,9 +234,9 @@ describe('M0021 guest follow-up domain and persistence foundation', () => {
   });
 
   it('rejects cross-project, wrong-owner, inactive-guest, and unsafe metadata writes', async () => {
-    await expect(
-      appendEvent({ guestId: guestB, projectId: projectA }),
-    ).rejects.toThrow(/target is unavailable/i);
+    await expect(appendEvent({ guestId: guestB, projectId: projectA })).rejects.toThrow(
+      /target is unavailable/i,
+    );
 
     await expect(appendEvent({ createdBy: userB })).rejects.toThrow(/target is unavailable/i);
 
