@@ -7,19 +7,38 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createDefaultInvitationDraftContent } from '@/modules/invitations/invitation-draft.defaults';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 
-const { getEditorMock, getOwnedProjectContextMock, getReadinessMock, notFoundMock } = vi.hoisted(
-  () => ({
-    getEditorMock: vi.fn(),
-    getOwnedProjectContextMock: vi.fn(),
-    getReadinessMock: vi.fn(),
-    notFoundMock: vi.fn(),
-  }),
-);
+const {
+  getEditorMock,
+  getOwnedProjectContextMock,
+  getPrivateGalleryMock,
+  getReadinessMock,
+  notFoundMock,
+} = vi.hoisted(() => ({
+  getEditorMock: vi.fn(),
+  getOwnedProjectContextMock: vi.fn(),
+  getPrivateGalleryMock: vi.fn(),
+  getReadinessMock: vi.fn(),
+  notFoundMock: vi.fn(),
+}));
 
 vi.mock('next/navigation', () => ({ notFound: notFoundMock }));
 vi.mock('@/components/projects/invitation-editor', () => ({
-  InvitationEditor: ({ projectId }: { projectId: string }) => (
-    <div data-editor-project-id={projectId}>Edit undangan</div>
+  InvitationEditor: ({
+    galleryImages,
+    project,
+    projectId,
+  }: {
+    galleryImages: unknown[];
+    project: { event_date_primary: string | null };
+    projectId: string;
+  }) => (
+    <div
+      data-editor-gallery-count={galleryImages.length}
+      data-editor-primary-date={project.event_date_primary}
+      data-editor-project-id={projectId}
+    >
+      Edit undangan
+    </div>
   ),
 }));
 vi.mock('@/modules/auth/dashboard-request-context', () => ({
@@ -31,6 +50,9 @@ vi.mock('@/modules/readiness', () => ({
 vi.mock('@/modules/invitations/invitation-editor.service', () => ({
   InvitationEditorDraftUnavailableError: class InvitationEditorDraftUnavailableError extends Error {},
   getInvitationEditorForVerifiedProject: getEditorMock,
+}));
+vi.mock('@/modules/media/media.service', () => ({
+  getPrivateGalleryImagesForVerifiedProject: getPrivateGalleryMock,
 }));
 
 import InvitationEditorPage, {
@@ -77,6 +99,13 @@ describe('SRY-016 private invitation editor route', () => {
       },
     });
     getOwnedProjectContextMock.mockReset().mockResolvedValue(project);
+    getPrivateGalleryMock.mockReset().mockResolvedValue([
+      {
+        alt: 'Foto pasangan 1',
+        id: '11111111-1111-4111-8111-111111111111',
+        src: '/dashboard/media/11111111-1111-4111-8111-111111111111',
+      },
+    ]);
     notFoundMock.mockReset();
     notFoundMock.mockImplementation(() => {
       throw new Error('NEXT_NOT_FOUND');
@@ -95,8 +124,14 @@ describe('SRY-016 private invitation editor route', () => {
     expect(getOwnedProjectContextMock).toHaveBeenCalledWith(project.id);
     expect(getEditorMock).toHaveBeenCalledWith(project);
     expect(getReadinessMock).toHaveBeenCalledWith(project.id);
+    expect(getPrivateGalleryMock).toHaveBeenCalledWith({
+      draftImageIds: draft.content.gallery.imageIds,
+      project,
+    });
     expect(html).toContain('Edit undangan');
     expect(html).toContain(`data-editor-project-id="${project.id}"`);
+    expect(html).toContain('data-editor-gallery-count="1"');
+    expect(html).toContain(`data-editor-primary-date="${project.event_date_primary}"`);
     expect(html).not.toContain('draft-private-id');
     expect(html).not.toContain(project.account_id);
   });
@@ -126,6 +161,7 @@ describe('SRY-016 private invitation editor route', () => {
     expect(source).toContain('getOwnedProjectContextForRequest');
     expect(source).toContain('getInvitationEditorForVerifiedProject');
     expect(source).toContain('getWeddingReadinessForRequest');
+    expect(source).toContain('getPrivateGalleryImagesForVerifiedProject');
     expect(source).not.toContain('getInvitationEditorForCurrentUser');
     expect(source).not.toContain('createServerSupabaseClient');
     expect(source).not.toContain('cookies(');

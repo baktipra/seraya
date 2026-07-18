@@ -12,6 +12,7 @@ type EditorFieldProps = {
   inputMode?: InputHTMLAttributes<HTMLInputElement>['inputMode'];
   label: string;
   name: string;
+  onValueChange: (value: string) => void;
   placeholder?: string;
   required?: boolean;
   type?: InputHTMLAttributes<HTMLInputElement>['type'];
@@ -50,6 +51,7 @@ export function EditorTextField({
   inputMode,
   label,
   name,
+  onValueChange,
   placeholder,
   required = false,
   type,
@@ -68,12 +70,13 @@ export function EditorTextField({
       </label>
       <Input
         aria-describedby={describedBy || undefined}
-        defaultValue={value ?? ''}
+        value={value ?? ''}
         hasError={Boolean(error)}
         id={id}
         autoComplete={autoComplete}
         inputMode={inputMode}
         name={name}
+        onChange={(event) => onValueChange(event.currentTarget.value)}
         placeholder={placeholder}
         required={required}
         type={type}
@@ -88,7 +91,7 @@ export function EditorTextField({
   );
 }
 
-function EditorDateField({ error, label, name, value }: EditorFieldProps) {
+function EditorDateField({ error, label, name, onValueChange, value }: EditorFieldProps) {
   const id = fieldId(name);
 
   return (
@@ -98,10 +101,11 @@ function EditorDateField({ error, label, name, value }: EditorFieldProps) {
       </label>
       <Input
         aria-describedby={error ? `${id}-error` : undefined}
-        defaultValue={value ?? ''}
+        value={value ?? ''}
         hasError={Boolean(error)}
         id={id}
         name={name}
+        onChange={(event) => onValueChange(event.currentTarget.value)}
         type="date"
       />
       <FieldError message={error} name={name} />
@@ -109,7 +113,7 @@ function EditorDateField({ error, label, name, value }: EditorFieldProps) {
   );
 }
 
-function EditorTimeField({ error, label, name, value }: EditorFieldProps) {
+function EditorTimeField({ error, label, name, onValueChange, value }: EditorFieldProps) {
   const id = fieldId(name);
 
   return (
@@ -119,10 +123,11 @@ function EditorTimeField({ error, label, name, value }: EditorFieldProps) {
       </label>
       <Input
         aria-describedby={error ? `${id}-error` : undefined}
-        defaultValue={value ?? ''}
+        value={value ?? ''}
         hasError={Boolean(error)}
         id={id}
         name={name}
+        onChange={(event) => onValueChange(event.currentTarget.value)}
         type="time"
       />
       <FieldError message={error} name={name} />
@@ -130,7 +135,14 @@ function EditorTimeField({ error, label, name, value }: EditorFieldProps) {
   );
 }
 
-export function EditorTextAreaField({ error, help, label, name, value }: EditorFieldProps) {
+export function EditorTextAreaField({
+  error,
+  help,
+  label,
+  name,
+  onValueChange,
+  value,
+}: EditorFieldProps) {
   const id = fieldId(name);
   const describedBy = [help ? `${id}-help` : null, error ? `${id}-error` : null]
     .filter(Boolean)
@@ -149,9 +161,10 @@ export function EditorTextAreaField({ error, help, label, name, value }: EditorF
             ? 'border-seraya-status-error focus-visible:border-seraya-status-error focus-visible:ring-3 focus-visible:ring-[color:color-mix(in_srgb,var(--seraya-status-error)_20%,transparent)]'
             : 'border-seraya-border-default hover:border-seraya-border-strong focus-visible:border-seraya-action-primary focus-visible:ring-3 focus-visible:ring-[color:color-mix(in_srgb,var(--seraya-focus-ring)_30%,transparent)]',
         ].join(' ')}
-        defaultValue={value ?? ''}
+        value={value ?? ''}
         id={id}
         name={name}
+        onChange={(event) => onValueChange(event.currentTarget.value)}
       />
       {help ? (
         <p className="text-seraya-text-muted text-sm leading-6" id={`${id}-help`}>
@@ -176,7 +189,7 @@ export function EditorToggle({
   help?: string;
   label: string;
   name: string;
-  onToggle?: (checked: boolean) => void;
+  onToggle: (checked: boolean) => void;
 }) {
   const id = fieldId(name);
   const describedBy = [help ? `${id}-help` : null, error ? `${id}-error` : null]
@@ -189,10 +202,10 @@ export function EditorToggle({
         <input
           aria-describedby={describedBy || undefined}
           className="accent-seraya-action-primary mt-0.5 size-4 shrink-0"
-          defaultChecked={checked}
+          checked={checked}
           id={id}
           name={name}
-          onChange={(event) => onToggle?.(event.currentTarget.checked)}
+          onChange={(event) => onToggle(event.currentTarget.checked)}
           type="checkbox"
           value="true"
         />
@@ -290,6 +303,7 @@ export function EditorScheduleEventCard({
   index,
   onMoveDown,
   onMoveUp,
+  onChange,
   onRemove,
   removable,
   total,
@@ -299,6 +313,7 @@ export function EditorScheduleEventCard({
   index: number;
   onMoveDown: () => void;
   onMoveUp: () => void;
+  onChange: (event: EventScheduleEditorValue) => void;
   onRemove: () => void;
   removable: boolean;
   total: number;
@@ -367,6 +382,7 @@ export function EditorScheduleEventCard({
             error={getError(errors, `${eventPrefix}.title`)}
             label="Nama acara"
             name={`${eventPrefix}.title`}
+            onValueChange={(value) => onChange({ ...event, title: value })}
             placeholder="Contoh: Akad Nikah, Resepsi, atau Ngunduh Mantu"
             required
             value={event.title}
@@ -376,24 +392,28 @@ export function EditorScheduleEventCard({
           error={getError(errors, `${eventPrefix}.date`)}
           label="Tanggal"
           name={`${eventPrefix}.date`}
+          onValueChange={(value) => onChange({ ...event, date: value })}
           value={event.date}
         />
         <EditorTimeField
           error={getError(errors, `${eventPrefix}.startTime`)}
           label="Waktu mulai"
           name={`${eventPrefix}.startTime`}
+          onValueChange={(value) => onChange({ ...event, startTime: value })}
           value={event.startTime}
         />
         <EditorTimeField
           error={getError(errors, `${eventPrefix}.endTime`)}
           label="Waktu selesai (opsional)"
           name={`${eventPrefix}.endTime`}
+          onValueChange={(value) => onChange({ ...event, endTime: value })}
           value={event.endTime}
         />
         <EditorTextField
           error={getError(errors, `${eventPrefix}.venueName`)}
           label="Nama tempat (opsional)"
           name={`${eventPrefix}.venueName`}
+          onValueChange={(value) => onChange({ ...event, venueName: value })}
           value={event.venueName}
         />
         <div className="sm:col-span-2">
@@ -401,6 +421,7 @@ export function EditorScheduleEventCard({
             error={getError(errors, `${eventPrefix}.venueAddress`)}
             label="Alamat tempat (opsional)"
             name={`${eventPrefix}.venueAddress`}
+            onValueChange={(value) => onChange({ ...event, venueAddress: value })}
             value={event.venueAddress}
           />
         </div>
@@ -410,6 +431,7 @@ export function EditorScheduleEventCard({
             help="Gunakan tautan HTTPS yang valid."
             label="Tautan peta (opsional)"
             name={`${eventPrefix}.mapsUrl`}
+            onValueChange={(value) => onChange({ ...event, mapsUrl: value })}
             value={event.mapsUrl}
           />
         </div>

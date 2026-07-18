@@ -6,6 +6,8 @@ import {
   InvitationEditorDraftUnavailableError,
   getInvitationEditorForVerifiedProject,
 } from '@/modules/invitations/invitation-editor.service';
+import { getPrivateGalleryImagesForVerifiedProject } from '@/modules/media/media.service';
+import type { InvitationGalleryImage } from '@/modules/media/media.types';
 import { getWeddingReadinessForRequest } from '@/modules/readiness';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 
@@ -15,6 +17,7 @@ type InvitationEditorPageProps = {
 
 type InvitationEditorScreen = {
   editor: Awaited<ReturnType<typeof getInvitationEditorForVerifiedProject>>;
+  galleryImages: InvitationGalleryImage[];
   readiness: Awaited<ReturnType<typeof getWeddingReadinessForRequest>>;
 };
 
@@ -34,7 +37,23 @@ async function getInvitationEditorScreenOrNotFound(
       getWeddingReadinessForRequest(projectId),
     ]);
 
-    return { editor, readiness };
+    let galleryImages: InvitationGalleryImage[] = [];
+
+    try {
+      galleryImages = await getPrivateGalleryImagesForVerifiedProject({
+        draftImageIds: editor.draft.content.gallery.imageIds,
+        project: editor.project,
+      });
+    } catch (error) {
+      // Media stays optional in the local preview. Resolver failures omit the
+      // gallery instead of exposing Storage details or weakening owner scope.
+      console.error('Seraya editor live preview gallery resolution failed.', {
+        errorName: error instanceof Error ? error.name : 'UnknownError',
+        projectId,
+      });
+    }
+
+    return { editor, galleryImages, readiness };
   } catch (error) {
     if (
       error instanceof ProjectAccessDeniedError ||
@@ -54,6 +73,8 @@ export default async function InvitationEditorPage({ params }: InvitationEditorP
   return (
     <InvitationEditor
       draft={screen.editor.draft}
+      galleryImages={screen.galleryImages}
+      project={{ event_date_primary: screen.editor.project.event_date_primary }}
       projectId={screen.editor.project.id}
       readiness={{
         identity: screen.readiness.identity,
