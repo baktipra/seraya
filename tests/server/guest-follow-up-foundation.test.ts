@@ -58,6 +58,9 @@ describe('Guest Follow-up Slice A foundation', () => {
     expect(migration).toContain(
       'grant select on table public.guest_follow_up_events to authenticated',
     );
+    expect(migration).toContain(
+      'revoke all on table public.guest_follow_up_events from service_role',
+    );
     expect(migration).toContain('append_guest_follow_up_event_for_server');
     expect(migration).toContain(
       "normalized_metadata - array['source_surface', 'template_version', 'note_category']",
