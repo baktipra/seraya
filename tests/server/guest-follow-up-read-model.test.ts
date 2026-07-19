@@ -17,6 +17,7 @@ describe('Guest Follow-up Slice B privacy-safe read model contract', () => {
     expect(serviceSource).toContain('getGuestDeliveryCenterForVerifiedProject');
     expect(serviceSource).toContain('listGuestFollowUpEventsForVerifiedProject');
     expect(serviceSource).toContain('createFollowUpGuestRows');
+    expect(serviceSource).not.toContain('createAdminSupabaseClient');
     expect(segmentationSource).toContain("if (readiness === 'needs_link_update')");
     expect(segmentationSource).toContain("if (readiness === 'needs_whatsapp')");
     expect(segmentationSource).toContain("if (readiness === 'no_personal_invitation')");
