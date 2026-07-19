@@ -13,6 +13,11 @@ export const guestFollowUpMessageKinds = [
   'event_reminder',
   'other',
 ] as const;
+export const guestFollowUpHandoffMessageKinds = [
+  'initial_invitation',
+  'rsvp_reminder',
+  'event_reminder',
+] as const;
 export const guestFollowUpChannels = ['whatsapp', 'other'] as const;
 export const guestFollowUpSegments = [
   'needs_link_update',
@@ -25,6 +30,7 @@ export const guestFollowUpSegments = [
 
 export type GuestFollowUpEventType = (typeof guestFollowUpEventTypes)[number];
 export type GuestFollowUpMessageKind = (typeof guestFollowUpMessageKinds)[number];
+export type GuestFollowUpHandoffMessageKind = (typeof guestFollowUpHandoffMessageKinds)[number];
 export type GuestFollowUpChannel = (typeof guestFollowUpChannels)[number];
 export type GuestFollowUpSegment = (typeof guestFollowUpSegments)[number];
 export type GuestFollowUpSegmentFilter = 'all' | GuestFollowUpSegment;
@@ -76,6 +82,18 @@ export type GuestFollowUpEligibility = {
   canPrepareEventReminder: boolean;
   canPrepareInitialInvitation: boolean;
   canPrepareRsvpReminder: boolean;
+};
+
+/**
+ * Temporary server-action result. It exists only long enough for the owner
+ * browser to open WhatsApp or copy a fallback; none of these fields are stored.
+ */
+export type GuestFollowUpHandoffResult = {
+  messageKind: GuestFollowUpHandoffMessageKind;
+  messageText: string;
+  personalUrl: string;
+  preparedAt: string;
+  whatsappComposeUrl: string;
 };
 
 /**
