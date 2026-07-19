@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { requireCurrentUser } from '@/modules/auth/current-user';
+import { getGuestDeliveryCenterForVerifiedProject } from '@/modules/delivery/delivery.service';
 import { assertGuestBelongsToProject } from '@/modules/guests/guest.policy';
 import { getActiveGuestForVerifiedProjectWithAdmin } from '@/modules/guests/guest.repository';
 import { getOwnedProjectById, type OwnedProject } from '@/modules/projects/project.repository';
@@ -9,7 +10,12 @@ import {
   appendGuestFollowUpEventForVerifiedProject,
   listGuestFollowUpEventsForVerifiedProject,
 } from './follow-up.repository';
-import type { AppendGuestFollowUpEventInput, GuestFollowUpEvent } from './follow-up.types';
+import { createFollowUpGuestRows, createGuestFollowUpSummary } from './follow-up-segmentation';
+import type {
+  AppendGuestFollowUpEventInput,
+  GuestFollowUpEvent,
+  OwnedGuestFollowUpCenter,
+} from './follow-up.types';
 import { normalizeGuestFollowUpMetadata } from './follow-up.validation';
 
 export async function getGuestFollowUpEventsForVerifiedProject(
@@ -24,6 +30,35 @@ export async function getGuestFollowUpEventsForCurrentUser(
   const user = await requireCurrentUser();
   const project = await getOwnedProjectById(projectId, user.id);
   return getGuestFollowUpEventsForVerifiedProject(project);
+}
+
+/**
+ * Owner-only read model composed from the existing delivery authority and the
+ * project-scoped M0021 event log. No raw capability or contact field is added.
+ */
+export async function getGuestFollowUpCenterForVerifiedProject(
+  project: OwnedProject,
+): Promise<OwnedGuestFollowUpCenter> {
+  const [deliveryCenter, events] = await Promise.all([
+    getGuestDeliveryCenterForVerifiedProject(project),
+    listGuestFollowUpEventsForVerifiedProject(project),
+  ]);
+  const rows = createFollowUpGuestRows(deliveryCenter.rows, events);
+
+  return {
+    isPublished: deliveryCenter.isPublished,
+    project,
+    rows,
+    summary: createGuestFollowUpSummary(rows),
+  };
+}
+
+export async function getGuestFollowUpCenterForCurrentUser(
+  projectId: string,
+): Promise<OwnedGuestFollowUpCenter> {
+  const user = await requireCurrentUser();
+  const project = await getOwnedProjectById(projectId, user.id);
+  return getGuestFollowUpCenterForVerifiedProject(project);
 }
 
 /**
