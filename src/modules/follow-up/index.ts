@@ -1,3 +1,4 @@
+export { buildGuestFollowUpHandoff, buildGuestFollowUpHandoffMessage } from './follow-up-handoff';
 export {
   createFollowUpGuestRows,
   createGuestFollowUpActivityProjections,
@@ -11,6 +12,11 @@ export {
   getGuestFollowUpCenterForVerifiedProject,
   getGuestFollowUpEventsForCurrentUser,
   getGuestFollowUpEventsForVerifiedProject,
+  GuestFollowUpHandoffNotEligibleError,
+  GuestFollowUpPublicationRequiredError,
+  GuestFollowUpRsvpUnavailableError,
+  prepareGuestFollowUpHandoffForCurrentUser,
+  prepareGuestFollowUpHandoffForVerifiedProject,
   recordGuestFollowUpEventForCurrentUser,
   recordGuestFollowUpEventForVerifiedProject,
 } from './follow-up.service';
@@ -21,6 +27,8 @@ export type {
   GuestFollowUpEligibility,
   GuestFollowUpEvent,
   GuestFollowUpEventType,
+  GuestFollowUpHandoffMessageKind,
+  GuestFollowUpHandoffResult,
   GuestFollowUpMessageKind,
   GuestFollowUpMetadata,
   GuestFollowUpSegment,
