@@ -67,7 +67,11 @@ describe('Guest Follow-up Slice B segmentation read model', () => {
       }),
       'no_personal_invitation',
     ],
-    ['marks an attending response as responded', row({ rsvpStatus: 'attending' }), 'rsvp_responded'],
+    [
+      'marks an attending response as responded',
+      row({ rsvpStatus: 'attending' }),
+      'rsvp_responded',
+    ],
     ['marks a declined response as responded', row({ rsvpStatus: 'declined' }), 'rsvp_responded'],
   ])('%s', (_name, input, expected) => {
     expect(

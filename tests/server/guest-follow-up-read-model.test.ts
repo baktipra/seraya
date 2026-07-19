@@ -6,10 +6,7 @@ import { describe, expect, it } from 'vitest';
 describe('Guest Follow-up Slice B privacy-safe read model contract', () => {
   it('composes the existing delivery authority and exposes no sensitive read-model fields', async () => {
     const [serviceSource, typesSource, segmentationSource] = await Promise.all([
-      readFile(
-        path.resolve(process.cwd(), 'src/modules/follow-up/follow-up.service.ts'),
-        'utf8',
-      ),
+      readFile(path.resolve(process.cwd(), 'src/modules/follow-up/follow-up.service.ts'), 'utf8'),
       readFile(path.resolve(process.cwd(), 'src/modules/follow-up/follow-up.types.ts'), 'utf8'),
       readFile(
         path.resolve(process.cwd(), 'src/modules/follow-up/follow-up-segmentation.ts'),

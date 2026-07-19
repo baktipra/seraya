@@ -86,8 +86,7 @@ export function deriveGuestFollowUpEligibility(input: {
   segment: GuestFollowUpSegment;
 }): GuestFollowUpEligibility {
   return {
-    canPrepareEventReminder:
-      input.segment === 'rsvp_responded' && input.rsvpStatus === 'attending',
+    canPrepareEventReminder: input.segment === 'rsvp_responded' && input.rsvpStatus === 'attending',
     canPrepareInitialInvitation: input.segment === 'no_follow_up_recorded',
     canPrepareRsvpReminder: input.segment === 'awaiting_rsvp',
   };
@@ -148,15 +147,12 @@ export function createGuestFollowUpSummary(
           current.needsLinkUpdateCount + (segment === 'needs_link_update' ? 1 : 0),
         needsPreparationCount:
           current.needsPreparationCount + (segment === 'no_personal_invitation' ? 1 : 0),
-        needsWhatsAppCount:
-          current.needsWhatsAppCount + (segment === 'needs_whatsapp' ? 1 : 0),
+        needsWhatsAppCount: current.needsWhatsAppCount + (segment === 'needs_whatsapp' ? 1 : 0),
         noFollowUpRecordedCount:
           current.noFollowUpRecordedCount + (segment === 'no_follow_up_recorded' ? 1 : 0),
         noPersonalInvitationCount:
-          current.noPersonalInvitationCount +
-          (segment === 'no_personal_invitation' ? 1 : 0),
-        rsvpRespondedCount:
-          current.rsvpRespondedCount + (segment === 'rsvp_responded' ? 1 : 0),
+          current.noPersonalInvitationCount + (segment === 'no_personal_invitation' ? 1 : 0),
+        rsvpRespondedCount: current.rsvpRespondedCount + (segment === 'rsvp_responded' ? 1 : 0),
       };
     },
     {

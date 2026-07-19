@@ -1,16 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const {
-  getDeliveryCenterMock,
-  getOwnedProjectMock,
-  listEventsMock,
-  requireCurrentUserMock,
-} = vi.hoisted(() => ({
-  getDeliveryCenterMock: vi.fn(),
-  getOwnedProjectMock: vi.fn(),
-  listEventsMock: vi.fn(),
-  requireCurrentUserMock: vi.fn(),
-}));
+const { getDeliveryCenterMock, getOwnedProjectMock, listEventsMock, requireCurrentUserMock } =
+  vi.hoisted(() => ({
+    getDeliveryCenterMock: vi.fn(),
+    getOwnedProjectMock: vi.fn(),
+    listEventsMock: vi.fn(),
+    requireCurrentUserMock: vi.fn(),
+  }));
 
 vi.mock('@/modules/auth/current-user', () => ({ requireCurrentUser: requireCurrentUserMock }));
 vi.mock('@/modules/delivery/delivery.service', () => ({
