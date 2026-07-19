@@ -41,6 +41,7 @@ import {
   GuestLinkLegacyUpgradeRequiredError,
   preparePersonalGuestLinkForVerifiedGuestWithoutReveal,
   reaccessPersonalGuestLinkForCurrentUser,
+  reaccessPersonalGuestLinkForVerifiedGuest,
   revokePersonalGuestLinkForCurrentUser,
 } from '../guest-link.service';
 import { encryptPersonalGuestToken } from '../guest-link-encryption';
@@ -141,6 +142,27 @@ describe('SRY-013 owner personal-link service ownership guard', () => {
       /^http:\/\/localhost:3000\/raka-nadia\/g\/[A-Za-z0-9_-]{43}$/,
     );
     expect(result.recipientWhatsAppPhoneE164).toBe('+6281234567890');
+  });
+
+  it('shares the exact verified-guest re-access authority without repeating current-user lookup', async () => {
+    const token = generatePersonalGuestToken();
+    const encrypted = encryptPersonalGuestToken(token);
+    getActiveRecoverableLinkMock.mockResolvedValue({
+      guest_id: guest.id,
+      token_ciphertext: encrypted.ciphertext,
+      token_hash: hashPersonalGuestToken(token),
+      token_key_version: encrypted.keyVersion,
+    });
+
+    await expect(reaccessPersonalGuestLinkForVerifiedGuest({ guest, project })).resolves.toEqual({
+      personalUrl: `http://localhost:3000/raka-nadia/g/${token}`,
+      recipientWhatsAppPhoneE164: '+6281234567890',
+    });
+
+    expect(requireCurrentUserMock).not.toHaveBeenCalled();
+    expect(getOwnedProjectMock).not.toHaveBeenCalled();
+    expect(getGuestMock).not.toHaveBeenCalled();
+    expect(getActiveRecoverableLinkMock).toHaveBeenCalledWith(guest.id);
   });
 
   it('re-accesses only an owner-authorized recoverable active link and verifies its hash', async () => {
