@@ -1,9 +1,9 @@
 name: Slice D source export
 
 on:
-  push:
+  pull_request:
     branches:
-      - agent/follow-up-slice-d-workspace
+      - main
 
 permissions:
   contents: read
@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Check out feature branch
         uses: actions/checkout@v4
+        with:
+          ref: agent/follow-up-slice-d-workspace
 
       - name: Package source
         run: zip -qr seraya-slice-d-source.zip . -x '.git/*' 'node_modules/*' 'seraya-slice-d-source.zip'
