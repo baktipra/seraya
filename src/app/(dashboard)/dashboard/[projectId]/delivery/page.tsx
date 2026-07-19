@@ -6,9 +6,9 @@ import {
   copySelectedDeliveryWhatsAppNumbersAction,
   prepareMissingPersonalGuestLinksForDeliveryAction,
   preparePersonalGuestLinkForDeliveryAction,
-  reaccessPersonalGuestLinkForDeliveryAction,
 } from '@/modules/delivery/delivery.actions';
 import { deriveDeliveryReadiness } from '@/modules/delivery/delivery-readiness';
+import { reaccessOrPrepareCanonicalInitialHandoffAction } from '@/modules/delivery/canonical-initial-handoff.actions';
 import { getGuestDeliveryCenterForVerifiedProject } from '@/modules/delivery/delivery.service';
 import { getWeddingReadinessForRequest } from '@/modules/readiness';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
@@ -107,7 +107,7 @@ export default async function DeliveryCenterPage({ params }: DeliveryCenterPageP
             : {}),
           ...(readiness.isReadyToDistribute
             ? {
-                reaccessAction: reaccessPersonalGuestLinkForDeliveryAction.bind(null, {
+                reaccessAction: reaccessOrPrepareCanonicalInitialHandoffAction.bind(null, {
                   guestId,
                   projectId: deliveryCenter.project.id,
                 }),
