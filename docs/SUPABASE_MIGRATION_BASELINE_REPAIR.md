@@ -15,15 +15,15 @@ The repository contained 20 timestamped migration files, while the remote migrat
 
 A pre-repair product-schema fingerprint was recorded:
 
-| Surface | MD5 |
-| --- | --- |
-| Public columns | `4c2cb3a51ea9a0d8a43d5a6580e0f0c3` |
+| Surface            | MD5                                |
+| ------------------ | ---------------------------------- |
+| Public columns     | `4c2cb3a51ea9a0d8a43d5a6580e0f0c3` |
 | Public constraints | `13e8fe78c148342d7b14324907180331` |
-| Public functions | `8ad27f954cb18a516312c45096b969f6` |
-| Public indexes | `03d41b2233098501e8d346410d15e474` |
-| Public policies | `71dbe8ed14fefa80b570bac34a3196e1` |
-| Public triggers | `97b332cf889a3adc6f82b8cf1b373848` |
-| Storage buckets | `4988888806c90d36be0d43a332f89bc` |
+| Public functions   | `8ad27f954cb18a516312c45096b969f6` |
+| Public indexes     | `03d41b2233098501e8d346410d15e474` |
+| Public policies    | `71dbe8ed14fefa80b570bac34a3196e1` |
+| Public triggers    | `97b332cf889a3adc6f82b8cf1b373848` |
+| Storage buckets    | `4988888806c90d36be0d43a332f89bc`  |
 
 ## Repair performed
 

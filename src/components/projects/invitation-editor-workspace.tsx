@@ -233,7 +233,7 @@ export function InvitationWorkspaceNavigation({
 
         <div
           aria-label="Pindah bagian"
-          className="-mx-1 mt-2.5 flex snap-x gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="-mx-1 mt-2.5 flex snap-x [scrollbar-width:none] gap-1.5 overflow-x-auto px-1 pb-1 [&::-webkit-scrollbar]:hidden"
           data-invitation-editor-mobile-section-strip
           role="list"
         >
@@ -288,9 +288,7 @@ export function InvitationWorkspaceNavigation({
           <p className="text-seraya-text-muted text-[0.68rem] font-bold tracking-[0.08em] uppercase">
             Susunan undangan
           </p>
-          <p className="text-seraya-text-muted mt-1 text-xs leading-5">
-            Status draft tersimpan
-          </p>
+          <p className="text-seraya-text-muted mt-1 text-xs leading-5">Status draft tersimpan</p>
         </div>
         <ol className="space-y-0.5">
           {invitationEditorSections.map((section) => {

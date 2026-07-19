@@ -18,15 +18,15 @@ status, and source-of-truth rules. It is a governance record, not a deployment r
 
 ## Current authoritative implementation baseline
 
-| Field                    | Record                                                               |
-| ------------------------ | -------------------------------------------------------------------- |
-| Repository               | `baktipra/seraya`                                                    |
-| Canonical branch         | `main`                                                               |
+| Field                    | Record                                                           |
+| ------------------------ | ---------------------------------------------------------------- |
+| Repository               | `baktipra/seraya`                                                |
+| Canonical branch         | `main`                                                           |
 | Head at confirmation     | `8adbdf6a8b2a4c4eee2b957b536409364bb7e248` (PR #1 stabilization) |
-| Status                   | **Canonical GitHub implementation baseline confirmed by owner**      |
-| Migration range at head  | M0001 through M0020                                                  |
-| Remote migration history | M0001 through M0020 aligned on `seraya-dev` (2026-07-18)             |
-| Runtime validation       | Hosted Supabase smoke passed on the merge commit (2026-07-18)        |
+| Status                   | **Canonical GitHub implementation baseline confirmed by owner**  |
+| Migration range at head  | M0001 through M0020                                              |
+| Remote migration history | M0001 through M0020 aligned on `seraya-dev` (2026-07-18)         |
+| Runtime validation       | Hosted Supabase smoke passed on the merge commit (2026-07-18)    |
 
 ## Current stabilization record
 

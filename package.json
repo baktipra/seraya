@@ -18,7 +18,7 @@
     "db:migration:list": "supabase migration list --local",
     "db:test": "supabase test db",
     "db:types": "node scripts/generate-supabase-types.mjs",
-    "test:db": "vitest run tests/integration/supabase-foundation.test.ts",
+    "test:db": "vitest run tests/integration/supabase-foundation.test.ts tests/integration/guest-follow-up-foundation.test.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",

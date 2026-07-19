@@ -93,7 +93,6 @@ function useInvitationEditorAuthority(
 
   useEffect(() => {
     if (presentation !== 'readiness') {
-      setBridge({ ...initialEditorAuthorityBridge, isResolved: true });
       return;
     }
 
@@ -104,9 +103,7 @@ function useInvitationEditorAuthority(
       '[data-testid="invitation-editor-save-status"]',
     );
     const actionTarget =
-      saveStatus?.nextElementSibling instanceof HTMLElement
-        ? saveStatus.nextElementSibling
-        : null;
+      saveStatus?.nextElementSibling instanceof HTMLElement ? saveStatus.nextElementSibling : null;
     const mobileNavigation = editorRoot?.querySelector<HTMLElement>(
       '[data-invitation-editor-mobile-navigation]',
     );
@@ -145,7 +142,9 @@ function useInvitationEditorAuthority(
     };
   }, [presentation]);
 
-  return bridge;
+  return presentation === 'readiness'
+    ? bridge
+    : { ...initialEditorAuthorityBridge, isResolved: true };
 }
 
 export function PublishInvitationControls({
@@ -171,9 +170,7 @@ export function PublishInvitationControls({
   const hasPublishedSnapshot = Boolean(publicUrl);
   const isRepublish = intent ? intent === 'republish' : hasPublishedSnapshot;
   const canPublish =
-    hasActiveDraft &&
-    publishEligibility.allowed &&
-    !editorAuthority.hasUnsavedEditorChanges;
+    hasActiveDraft && publishEligibility.allowed && !editorAuthority.hasUnsavedEditorChanges;
   const publishActionLabel =
     presentation === 'readiness'
       ? isRepublish

@@ -34,9 +34,7 @@ export function useInvitationEditorContextualSaveAction(isDirty: boolean) {
       '[data-testid="invitation-editor-save-status"]',
     );
     const actionTarget =
-      saveStatus?.nextElementSibling instanceof HTMLElement
-        ? saveStatus.nextElementSibling
-        : null;
+      saveStatus?.nextElementSibling instanceof HTMLElement ? saveStatus.nextElementSibling : null;
     const saveButton = actionTarget?.querySelector<HTMLButtonElement>('button[type="submit"]');
 
     if (!saveButton || !saveStatus) {

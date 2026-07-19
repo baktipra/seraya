@@ -17,14 +17,15 @@ describe('Slice F editor save-preview-publish authority', () => {
     expect(source).toContain('Simpan perubahan sebelum menerbitkan versi ini.');
     expect(source).toContain('createPortal(controls, editorAuthority.actionTarget)');
     expect(source).toContain('Status bagian mengikuti draf tersimpan.');
+    expect(source).toContain("return presentation === 'readiness'");
+    expect(source).not.toContain(
+      'setBridge({ ...initialEditorAuthorityBridge, isResolved: true });',
+    );
   });
 
   it('keeps one saved-preview authority and hides it while local changes are dirty', async () => {
     const source = await readFile(
-      path.resolve(
-        process.cwd(),
-        'src/components/projects/invitation-editor-authority.module.css',
-      ),
+      path.resolve(process.cwd(), 'src/components/projects/invitation-editor-authority.module.css'),
       'utf8',
     );
 
