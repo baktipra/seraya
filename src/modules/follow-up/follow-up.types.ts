@@ -1,3 +1,11 @@
+import type {
+  DeliveryPersonalLinkState,
+  DeliveryWhatsAppAvailability,
+} from '@/modules/delivery/delivery.types';
+import type { GuestPersonalLinkReaccessState } from '@/modules/guest-links/guest-link.types';
+import type { GuestRsvpStatus } from '@/modules/guests/guest.types';
+import type { OwnedProject } from '@/modules/projects/project.repository';
+
 export const guestFollowUpEventTypes = ['handoff_prepared', 'manual_contact_recorded'] as const;
 export const guestFollowUpMessageKinds = [
   'initial_invitation',
@@ -6,10 +14,20 @@ export const guestFollowUpMessageKinds = [
   'other',
 ] as const;
 export const guestFollowUpChannels = ['whatsapp', 'other'] as const;
+export const guestFollowUpSegments = [
+  'needs_link_update',
+  'needs_whatsapp',
+  'no_personal_invitation',
+  'rsvp_responded',
+  'no_follow_up_recorded',
+  'awaiting_rsvp',
+] as const;
 
 export type GuestFollowUpEventType = (typeof guestFollowUpEventTypes)[number];
 export type GuestFollowUpMessageKind = (typeof guestFollowUpMessageKinds)[number];
 export type GuestFollowUpChannel = (typeof guestFollowUpChannels)[number];
+export type GuestFollowUpSegment = (typeof guestFollowUpSegments)[number];
+export type GuestFollowUpSegmentFilter = 'all' | GuestFollowUpSegment;
 
 /**
  * Deliberately narrow metadata. Raw phone numbers, capability URLs, tokens, and
@@ -52,4 +70,51 @@ export type GuestFollowUpEventDatabaseRecord = {
   metadata: unknown;
   occurred_at: string;
   project_id: string;
+};
+
+export type GuestFollowUpEligibility = {
+  canPrepareEventReminder: boolean;
+  canPrepareInitialInvitation: boolean;
+  canPrepareRsvpReminder: boolean;
+};
+
+/**
+ * Owner-browser read model. It deliberately repeats only the privacy-safe
+ * delivery projection and never includes a raw phone, capability, or event
+ * metadata payload.
+ */
+export type FollowUpGuestRow = {
+  displayName: string;
+  eligibility: GuestFollowUpEligibility;
+  followUpCount: number;
+  followUpSegment: GuestFollowUpSegment;
+  groupLabel: string | null;
+  guestId: string;
+  lastFollowUpAt: string | null;
+  lastMessageKind: GuestFollowUpMessageKind | null;
+  maskedWhatsAppNumber: string | null;
+  personalLinkReaccessState: GuestPersonalLinkReaccessState;
+  personalLinkState: DeliveryPersonalLinkState;
+  rsvpStatus: GuestRsvpStatus;
+  whatsappAvailability: DeliveryWhatsAppAvailability;
+};
+
+/** Every active guest belongs to exactly one segment count. */
+export type GuestFollowUpSummary = {
+  activeGuestCount: number;
+  awaitingRsvpCount: number;
+  needsDataRepairCount: number;
+  needsLinkUpdateCount: number;
+  needsPreparationCount: number;
+  needsWhatsAppCount: number;
+  noFollowUpRecordedCount: number;
+  noPersonalInvitationCount: number;
+  rsvpRespondedCount: number;
+};
+
+export type OwnedGuestFollowUpCenter = {
+  isPublished: boolean;
+  project: OwnedProject;
+  rows: FollowUpGuestRow[];
+  summary: GuestFollowUpSummary;
 };
