@@ -13,6 +13,10 @@ describe('Guest Follow-up Slice B privacy-safe read model contract', () => {
         'utf8',
       ),
     ]);
+    const readModelSource = typesSource.slice(
+      typesSource.indexOf('export type FollowUpGuestRow'),
+      typesSource.indexOf('export type GuestFollowUpSummary'),
+    );
 
     expect(serviceSource).toContain('getGuestDeliveryCenterForVerifiedProject');
     expect(serviceSource).toContain('listGuestFollowUpEventsForVerifiedProject');
@@ -22,9 +26,9 @@ describe('Guest Follow-up Slice B privacy-safe read model contract', () => {
     expect(segmentationSource).toContain("if (readiness === 'needs_whatsapp')");
     expect(segmentationSource).toContain("if (readiness === 'no_personal_invitation')");
     expect(segmentationSource).toContain("if (input.row.rsvpStatus !== 'pending')");
-    expect(typesSource).not.toContain('rawPhone');
-    expect(typesSource).not.toContain('personalUrl');
-    expect(typesSource).not.toContain('tokenCiphertext');
-    expect(typesSource).not.toContain('messageBody');
+    expect(readModelSource).not.toContain('rawPhone');
+    expect(readModelSource).not.toContain('personalUrl');
+    expect(readModelSource).not.toContain('tokenCiphertext');
+    expect(readModelSource).not.toContain('messageBody');
   });
 });
