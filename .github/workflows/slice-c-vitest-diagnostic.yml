@@ -1,0 +1,41 @@
+name: Slice C Vitest diagnostic
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/follow-up-slice-c-manual-reminder-handoff
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Run Vitest with captured output
+        shell: bash
+        run: |
+          set +e
+          npm test -- --reporter=verbose > vitest-output.txt 2>&1
+          status=$?
+          echo "$status" > vitest-status.txt
+          exit 0
+      - name: Upload diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: slice-c-vitest-diagnostic
+          path: |
+            vitest-output.txt
+            vitest-status.txt
+          retention-days: 1
