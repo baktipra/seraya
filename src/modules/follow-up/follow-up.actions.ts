@@ -26,6 +26,7 @@ import {
 function revalidatePrivateFollowUpSurfaces(projectId: string) {
   revalidatePath(`/dashboard/${projectId}`);
   revalidatePath(`/dashboard/${projectId}/delivery`);
+  revalidatePath(`/dashboard/${projectId}/follow-up`);
 }
 
 /**

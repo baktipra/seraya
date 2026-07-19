@@ -2,7 +2,14 @@ import type { Route } from 'next';
 import Link from 'next/link';
 import type { ComponentType, SVGProps } from 'react';
 
-import { GuestsIcon, HelpIcon, InvitationIcon, OverviewIcon, ShareIcon } from './dashboard-icons';
+import {
+  FollowUpIcon,
+  GuestsIcon,
+  HelpIcon,
+  InvitationIcon,
+  OverviewIcon,
+  ShareIcon,
+} from './dashboard-icons';
 
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
@@ -10,6 +17,7 @@ type ProjectNavigationItem = {
   href: Route;
   icon: IconComponent;
   label: string;
+  mobileLabel?: string;
 };
 
 /**
@@ -25,7 +33,18 @@ function getProjectNavigationItems(projectId: string): ProjectNavigationItem[] {
     { href: `${base}/invitation` as Route, icon: InvitationIcon, label: 'Undangan' },
     { href: `${base}/guests` as Route, icon: GuestsIcon, label: 'Tamu' },
     { href: `${base}/delivery` as Route, icon: ShareIcon, label: 'Bagikan' },
-    { href: `${base}/rsvp` as Route, icon: HelpIcon, label: 'Respons Tamu' },
+    {
+      href: `${base}/rsvp` as Route,
+      icon: HelpIcon,
+      label: 'Respons Tamu',
+      mobileLabel: 'Respons',
+    },
+    {
+      href: `${base}/follow-up` as Route,
+      icon: FollowUpIcon,
+      label: 'Tindak Lanjut',
+      mobileLabel: 'Lanjut',
+    },
   ];
 }
 
@@ -49,7 +68,9 @@ function ProjectNavigationLink({
       prefetch={false}
     >
       <Icon className={mode === 'desktop' ? 'size-[1.05rem]' : 'size-[1.1rem]'} />
-      <span className={mode === 'mobile' ? 'truncate' : undefined}>{item.label}</span>
+      <span className={mode === 'mobile' ? 'truncate' : undefined}>
+        {mode === 'mobile' ? (item.mobileLabel ?? item.label) : item.label}
+      </span>
     </Link>
   );
 }
