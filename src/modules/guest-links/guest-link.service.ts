@@ -130,20 +130,15 @@ export async function createOrReplacePersonalGuestLinkForCurrentUser(input: {
 }
 
 /**
- * Owner-only, explicit re-access. It verifies project ownership and active guest
- * scope before selecting encrypted material, then verifies the decrypted token
- * still matches the persisted SHA-256 authorization hash.
+ * Re-accesses capability material only after an upstream service has already
+ * verified the owner project and active guest. Hash verification remains here
+ * so every caller uses the exact same encrypted-link authority.
  */
-export async function reaccessPersonalGuestLinkForCurrentUser(input: {
-  guestId: string;
-  projectId: string;
+export async function reaccessPersonalGuestLinkForVerifiedGuest(input: {
+  guest: PersonalGuestLinkPreparationTarget;
+  project: OwnedProject;
 }) {
-  const user = await requireCurrentUser();
-  const project = await getOwnedProjectById(input.projectId, user.id);
-  const guest = assertGuestBelongsToProject(
-    await getActiveGuestForVerifiedProjectWithAdmin(project, input.guestId),
-    project.id,
-  );
+  const guest = assertGuestBelongsToProject(input.guest, input.project.id);
   const link = await getActiveRecoverableGuestLinkRecordForVerifiedGuest(guest.id);
 
   if (!link) {
@@ -164,9 +159,27 @@ export async function reaccessPersonalGuestLinkForCurrentUser(input: {
   }
 
   return {
-    personalUrl: buildPersonalGuestInvitationUrl({ slug: project.slug, token }),
+    personalUrl: buildPersonalGuestInvitationUrl({ slug: input.project.slug, token }),
     recipientWhatsAppPhoneE164: guest.whatsapp_phone_e164,
   };
+}
+
+/**
+ * Owner-only, explicit re-access. It verifies project ownership and active guest
+ * scope before delegating to the shared encrypted capability authority.
+ */
+export async function reaccessPersonalGuestLinkForCurrentUser(input: {
+  guestId: string;
+  projectId: string;
+}) {
+  const user = await requireCurrentUser();
+  const project = await getOwnedProjectById(input.projectId, user.id);
+  const guest = assertGuestBelongsToProject(
+    await getActiveGuestForVerifiedProjectWithAdmin(project, input.guestId),
+    project.id,
+  );
+
+  return reaccessPersonalGuestLinkForVerifiedGuest({ guest, project });
 }
 
 /** Owner-only status check for Delivery Center replacement confirmation. */
