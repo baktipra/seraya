@@ -91,6 +91,7 @@ describe('Guest Follow-up Slice C handoff Server Action', () => {
     });
     expect(revalidatePathMock).toHaveBeenCalledWith(`/dashboard/${boundInput.projectId}`);
     expect(revalidatePathMock).toHaveBeenCalledWith(`/dashboard/${boundInput.projectId}/delivery`);
+    expect(revalidatePathMock).toHaveBeenCalledWith(`/dashboard/${boundInput.projectId}/follow-up`);
   });
 
   it('rejects malformed bound targets and unsupported message kinds before authority', async () => {

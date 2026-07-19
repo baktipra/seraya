@@ -38,13 +38,21 @@ describe('SRY-039 owner workspace navigation', () => {
     expect(html).toContain('Buat undangan');
   });
 
-  it('keeps the project journey stable as Ringkasan, Undangan, Tamu, Bagikan, and Respons Tamu', () => {
+  it('keeps the project journey stable through Respons Tamu and Tindak Lanjut', () => {
     const html = renderToStaticMarkup(<ProjectNavigation projectId={projectId} />);
-    for (const label of ['Ringkasan', 'Undangan', 'Tamu', 'Bagikan', 'Respons Tamu']) {
+    for (const label of [
+      'Ringkasan',
+      'Undangan',
+      'Tamu',
+      'Bagikan',
+      'Respons Tamu',
+      'Tindak Lanjut',
+    ]) {
       expect(html).toContain(label);
     }
     expect(html).toContain(`href="/dashboard/${projectId}/delivery"`);
     expect(html).toContain(`href="/dashboard/${projectId}/rsvp"`);
+    expect(html).toContain(`href="/dashboard/${projectId}/follow-up"`);
     expect(html).not.toContain('coming-soon');
   });
 

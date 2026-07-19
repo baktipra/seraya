@@ -59,6 +59,17 @@ export function ShareIcon(props: IconProps) {
   );
 }
 
+export function FollowUpIcon(props: IconProps) {
+  return (
+    <IconFrame {...props}>
+      <path d="M5 18h14" />
+      <path d="M7 15.5V10a5 5 0 0 1 10 0v5.5" />
+      <path d="M9.5 18a2.5 2.5 0 0 0 5 0" />
+      <path d="M17.5 6.5 20 4" />
+    </IconFrame>
+  );
+}
+
 export function BillingIcon(props: IconProps) {
   return (
     <IconFrame {...props}>
