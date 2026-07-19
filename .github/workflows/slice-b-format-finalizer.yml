@@ -1,0 +1,51 @@
+name: Slice B format finalizer
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/follow-up-slice-b-segmentation-read-model
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Format Slice B files
+        run: |
+          npx prettier --write \
+            src/modules/follow-up/follow-up.types.ts \
+            src/modules/follow-up/follow-up-segmentation.ts \
+            src/modules/follow-up/follow-up.service.ts \
+            src/modules/follow-up/index.ts \
+            src/modules/follow-up/__tests__/follow-up-segmentation.test.ts \
+            src/modules/follow-up/__tests__/follow-up-read-model.service.test.ts \
+            tests/server/guest-follow-up-read-model.test.ts
+
+      - name: Remove temporary workflow
+        run: rm .github/workflows/slice-b-format-finalizer.yml
+
+      - name: Commit formatter output
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "style: format Slice B read model" || exit 0
+          git push origin HEAD:agent/follow-up-slice-b-segmentation-read-model
