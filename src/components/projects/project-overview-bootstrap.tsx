@@ -121,17 +121,19 @@ function ProgressItem({
   href: Route;
 }) {
   return (
-    <Link
-      className="border-seraya-border-default hover:bg-seraya-soft focus-visible:outline-seraya-focus-ring group min-w-0 border-b py-4 transition-colors last:border-b-0 focus-visible:relative focus-visible:z-10 focus-visible:outline-3 focus-visible:outline-offset-3 sm:px-5 sm:first:pl-0 sm:last:pr-0 md:border-r md:border-b-0 md:last:border-r-0"
-      href={href}
-    >
+    <div className="border-seraya-border-default min-w-0 border-b py-4 last:border-b-0 md:border-r md:border-b-0 md:px-5 md:first:pl-0 md:last:border-r-0 md:last:pr-0">
       <dt className="text-seraya-text-muted text-[0.6875rem] font-semibold tracking-[0.14em] uppercase">
         {label}
       </dt>
-      <dd className="text-seraya-text-primary group-hover:text-seraya-action-primary mt-2 text-base font-semibold tracking-[-0.02em] transition-colors">
-        {value}
+      <dd className="mt-2">
+        <Link
+          className="text-seraya-text-primary hover:text-seraya-action-primary focus-visible:outline-seraya-focus-ring inline-flex min-h-11 items-center text-base font-semibold tracking-[-0.02em] transition-colors focus-visible:outline-3 focus-visible:outline-offset-3"
+          href={href}
+        >
+          {value}
+        </Link>
       </dd>
-    </Link>
+    </div>
   );
 }
 
@@ -239,7 +241,7 @@ export function ProjectOverviewBootstrap({ projectId, readiness }: ProjectOvervi
           </p>
         </div>
 
-        <dl className="border-seraya-border-default mt-5 grid border-y sm:grid-cols-2 md:grid-cols-4">
+        <dl className="border-seraya-border-default mt-5 grid border-y md:grid-cols-4">
           <ProgressItem
             label="Status undangan"
             value={invitationProgress}
