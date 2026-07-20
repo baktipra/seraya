@@ -16,7 +16,10 @@ export interface DashboardShellProps {
   hasActiveProject: boolean;
 }
 
-function getDashboardGreetingName(displayName?: string | null, email?: string | null) {
+function getDashboardGreetingName(
+  displayName?: string | null,
+  email?: string | null,
+) {
   const profileName = displayName?.trim();
 
   if (profileName) {
@@ -53,7 +56,9 @@ export function DashboardShell({
               aria-hidden="true"
               className="bg-seraya-border-default hidden h-5 w-px sm:block"
             />
-            <p className="seraya-eyebrow hidden truncate lg:block">{contextLabel}</p>
+            <p className="seraya-eyebrow hidden truncate lg:block">
+              {contextLabel}
+            </p>
             <DashboardDesktopNavigation />
           </div>
           <AccountMenu displayName={displayName} email={email} />
@@ -73,16 +78,19 @@ export function DashboardShell({
                 className="flex flex-col gap-7 border-b border-[var(--seraya-border-default)] pb-10 sm:flex-row sm:items-end sm:justify-between lg:pb-12"
               >
                 <div className="max-w-3xl">
-                  <p className="seraya-eyebrow text-seraya-action-primary">Ruang proyek</p>
+                  <p className="seraya-eyebrow text-seraya-action-primary">
+                    Ruang proyek
+                  </p>
                   <h1
                     className="text-seraya-text-primary mt-3 max-w-[48rem] font-serif text-[clamp(2.7rem,6vw,4.4rem)] leading-[0.98] font-medium tracking-[-0.035em]"
                     id="dashboard-home-title"
                   >
-                    Selamat datang kembali{greetingName ? `, ${greetingName}` : ''}.
+                    Selamat datang kembali
+                    {greetingName ? `, ${greetingName}` : ''}.
                   </h1>
                   <p className="text-seraya-text-secondary mt-4 max-w-xl text-base leading-7">
-                    Semua persiapan pernikahan kalian ada di satu tempat yang tenang. Buka proyek
-                    untuk melanjutkan.
+                    Semua persiapan pernikahan kalian ada di satu tempat yang
+                    tenang. Buka proyek untuk melanjutkan.
                   </p>
                 </div>
                 <form action="/dashboard/new" method="get">
@@ -103,11 +111,16 @@ export function DashboardShell({
                 className="pt-10 lg:pt-12"
               >
                 {hasActiveProject ? (
-                  <p className="seraya-eyebrow" id="dashboard-active-projects-title">
+                  <p
+                    className="seraya-eyebrow"
+                    id="dashboard-active-projects-title"
+                  >
                     Sedang berjalan
                   </p>
                 ) : null}
-                <div className={hasActiveProject ? 'mt-4' : undefined}>{children}</div>
+                <div className={hasActiveProject ? 'mt-4' : undefined}>
+                  {children}
+                </div>
               </section>
 
               <section
@@ -118,8 +131,8 @@ export function DashboardShell({
                   Arsip
                 </p>
                 <p className="text-seraya-text-muted mt-3 max-w-lg text-sm leading-6">
-                  Kalian belum memiliki proyek arsip. Proyek yang sudah selesai akan disimpan di
-                  sini agar tetap dapat diakses.
+                  Kalian belum memiliki proyek arsip. Proyek yang sudah selesai
+                  akan disimpan di sini agar tetap dapat diakses.
                 </p>
               </section>
             </>
@@ -255,6 +268,154 @@ export function DashboardShell({
 
         .seraya-dashboard-home [aria-label^='Project ']:hover > div:last-child button::after {
           transform: translateX(0.2rem);
+        }
+
+        /* Invitation Studio: remove the dashboard-style intro and keep the
+           project rail aligned with every other owner workspace. */
+        .seraya-dashboard-content
+          > [data-dashboard-width='wide']:has([data-invitation-editor-panel]) {
+          grid-template-columns: 15rem minmax(0, 1fr) !important;
+          gap: 2rem !important;
+        }
+
+        .seraya-dashboard-content
+          > [data-dashboard-width='wide']:has([data-invitation-editor-panel])
+          > aside:first-child {
+          width: auto !important;
+          padding-right: 0 !important;
+        }
+
+        .seraya-dashboard-content
+          [data-dashboard-width='wide']:has([data-invitation-editor-panel])
+          section[aria-labelledby='invitation-editor-title']
+          > :first-child,
+        .seraya-dashboard-content
+          [data-dashboard-width='wide']:has([data-invitation-editor-panel])
+          section[aria-labelledby='invitation-editor-title']
+          > :nth-child(2) {
+          display: none !important;
+        }
+
+        .seraya-dashboard-content
+          [data-dashboard-width='wide']:has([data-invitation-editor-panel])
+          section[aria-labelledby='invitation-editor-title']
+          > :last-child {
+          padding: 0 !important;
+        }
+
+        @media (min-width: 1024px) {
+          .seraya-dashboard-content
+            [data-dashboard-width='wide']:has([data-invitation-editor-panel])
+            form
+            > div:has([data-testid='invitation-editor-save-status']) {
+            margin-top: 1.5rem !important;
+            padding: 0.8rem 0.9rem !important;
+          }
+
+          .seraya-dashboard-content
+            [data-dashboard-width='wide']:has([data-invitation-editor-panel])
+            form
+            > div:has([data-testid='invitation-editor-save-status'])
+            > div {
+            display: grid !important;
+            grid-template-columns: minmax(10rem, 1fr) minmax(0, auto) !important;
+            align-items: center !important;
+            gap: 1rem !important;
+          }
+
+          .seraya-dashboard-content
+            [data-dashboard-width='wide']:has([data-invitation-editor-panel])
+            form
+            > div:has([data-testid='invitation-editor-save-status'])
+            > div
+            > div:last-child {
+            display: flex !important;
+            width: auto !important;
+            min-width: 0 !important;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 0.55rem !important;
+          }
+
+          .seraya-dashboard-content
+            [data-dashboard-width='wide']:has([data-invitation-editor-panel])
+            form
+            > div:has([data-testid='invitation-editor-save-status'])
+            > div
+            > div:last-child
+            > div:first-child {
+            display: flex !important;
+            width: auto !important;
+            grid-template-columns: none !important;
+            align-items: center;
+            gap: 0.55rem !important;
+          }
+
+          .seraya-dashboard-content
+            [data-dashboard-width='wide']:has([data-invitation-editor-panel])
+            form
+            > div:has([data-testid='invitation-editor-save-status'])
+            > div
+            > div:last-child
+            > div:first-child
+            button {
+            width: auto !important;
+            min-width: 9rem;
+          }
+
+          .seraya-dashboard-content
+            [data-dashboard-width='wide']:has([data-invitation-editor-panel])
+            form
+            > div:has([data-testid='invitation-editor-save-status'])
+            a[href$='/preview'] {
+            min-height: 2.75rem;
+            border: 1px solid var(--seraya-border-default);
+            padding: 0 0.9rem;
+            text-decoration: none;
+          }
+
+          .seraya-dashboard-content
+            [data-dashboard-width='wide']:has([data-invitation-editor-panel])
+            [data-editor-publication-authority] {
+            width: auto !important;
+            margin: 0 !important;
+          }
+
+          .seraya-dashboard-content
+            [data-dashboard-width='wide']:has([data-invitation-editor-panel])
+            [data-editor-publication-authority]
+            button {
+            width: auto !important;
+            min-width: 10rem;
+          }
+
+          .seraya-dashboard-content
+            [data-dashboard-width='wide']:has([data-invitation-editor-panel])
+            [data-editor-publication-authority]
+            > div {
+            display: flex !important;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 0.55rem !important;
+          }
+
+          .seraya-dashboard-content
+            [data-dashboard-width='wide']:has([data-invitation-editor-panel])
+            [data-editor-publication-authority]
+            p {
+            max-width: 15rem;
+            margin: 0 !important;
+            text-align: left !important;
+          }
+        }
+
+        @media (min-width: 1280px) {
+          .seraya-dashboard-content
+            > [data-dashboard-width='wide']:has([data-invitation-editor-panel]) {
+            gap: 2.5rem !important;
+          }
         }
 
         @media (min-width: 768px) {
