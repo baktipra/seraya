@@ -72,9 +72,9 @@ section[aria-labelledby='owner-workspace-overview-title'] dl dd a {
 
 @media (max-width: 1023px) {
   :is(
-      section[aria-labelledby='guest-manager-title'] div.sticky:has(> p[aria-live='polite']),
-      section[aria-labelledby='delivery-guests-title'] > div:nth-child(2) > div.sticky
-    ) {
+    section[aria-labelledby='guest-manager-title'] div.sticky:has(> p[aria-live='polite']),
+    section[aria-labelledby='delivery-guests-title'] > div:nth-child(2) > div.sticky
+  ) {
     bottom: 4.5rem !important;
   }
 
@@ -106,7 +106,8 @@ section[aria-labelledby='owner-workspace-overview-title'] dl dd a {
   :is(
       section[aria-label='Ringkasan kesiapan pengiriman'],
       section[aria-label='Ringkasan tindak lanjut']
-    ) > div:last-child {
+    )
+    > div:last-child {
     border-right: 0 !important;
     padding-right: 1rem !important;
   }

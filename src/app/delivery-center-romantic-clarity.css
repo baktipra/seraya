@@ -21,7 +21,10 @@ section[aria-labelledby='delivery-center-title'] > header {
 }
 
 section[aria-labelledby='delivery-center-title'] > header > p:first-child,
-section[aria-labelledby='delivery-guests-title'] > div:first-child > div:first-child > p:first-child {
+section[aria-labelledby='delivery-guests-title']
+  > div:first-child
+  > div:first-child
+  > p:first-child {
   color: var(--seraya-text-muted);
   font-size: 0.6875rem;
   letter-spacing: 0.18em;
@@ -191,18 +194,24 @@ section[aria-labelledby='delivery-guests-title'] tbody td:nth-child(4) > span.bg
   background: var(--seraya-bg-brand-soft);
 }
 
-section[aria-labelledby='delivery-guests-title'] form:has(input[name='operation'][value='share']) > button {
+section[aria-labelledby='delivery-guests-title']
+  form:has(input[name='operation'][value='share'])
+  > button {
   border-color: var(--seraya-action-primary);
   background: var(--seraya-action-primary);
   color: var(--seraya-text-inverse);
   text-decoration: none;
 }
 
-section[aria-labelledby='delivery-guests-title'] form:has(input[name='operation'][value='share']) > button:hover {
+section[aria-labelledby='delivery-guests-title']
+  form:has(input[name='operation'][value='share'])
+  > button:hover {
   background: var(--seraya-action-primary-hover);
 }
 
-section[aria-labelledby='delivery-guests-title'] form:has(input[name='operation'][value='copy']) > button {
+section[aria-labelledby='delivery-guests-title']
+  form:has(input[name='operation'][value='copy'])
+  > button {
   border-color: var(--seraya-border-strong);
   background: var(--seraya-bg-surface);
 }

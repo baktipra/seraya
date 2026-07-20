@@ -11,13 +11,13 @@
 }
 
 :is(
-    section[aria-labelledby='owner-workspace-overview-title'],
-    section[aria-labelledby='invitation-editor-title'],
-    section[aria-labelledby='guest-manager-title'],
-    section[aria-labelledby='delivery-center-title'],
-    section[aria-labelledby='guest-response-workspace-title'],
-    section:has(> section[aria-label='Ringkasan tindak lanjut'])
-  ) {
+  section[aria-labelledby='owner-workspace-overview-title'],
+  section[aria-labelledby='invitation-editor-title'],
+  section[aria-labelledby='guest-manager-title'],
+  section[aria-labelledby='delivery-center-title'],
+  section[aria-labelledby='guest-response-workspace-title'],
+  section:has(> section[aria-label='Ringkasan tindak lanjut'])
+) {
   width: 100%;
   max-width: var(--rc-workspace-max) !important;
   min-width: 0;
@@ -31,18 +31,19 @@
     section[aria-labelledby='delivery-center-title'],
     section[aria-labelledby='guest-response-workspace-title'],
     section:has(> section[aria-label='Ringkasan tindak lanjut'])
-  ) > * {
+  )
+  > * {
   min-width: 0;
 }
 
 :is(
-    section[aria-labelledby='owner-workspace-overview-title'] > header,
-    section[aria-labelledby='invitation-editor-title'] > :first-child,
-    section[aria-labelledby='guest-manager-title'] > :first-child,
-    section[aria-labelledby='delivery-center-title'] > header,
-    section[aria-labelledby='guest-response-workspace-title'] > header,
-    section:has(> section[aria-label='Ringkasan tindak lanjut']) > header
-  ) {
+  section[aria-labelledby='owner-workspace-overview-title'] > header,
+  section[aria-labelledby='invitation-editor-title'] > :first-child,
+  section[aria-labelledby='guest-manager-title'] > :first-child,
+  section[aria-labelledby='delivery-center-title'] > header,
+  section[aria-labelledby='guest-response-workspace-title'] > header,
+  section:has(> section[aria-label='Ringkasan tindak lanjut']) > header
+) {
   border: 0 !important;
   border-bottom: 1px solid var(--rc-rule) !important;
   border-radius: 0 !important;
@@ -52,13 +53,13 @@
 }
 
 :is(
-    #owner-workspace-overview-title,
-    #invitation-editor-title,
-    #guest-manager-title,
-    #delivery-center-title,
-    #guest-response-workspace-title,
-    section:has(> section[aria-label='Ringkasan tindak lanjut']) > header h1
-  ) {
+  #owner-workspace-overview-title,
+  #invitation-editor-title,
+  #guest-manager-title,
+  #delivery-center-title,
+  #guest-response-workspace-title,
+  section:has(> section[aria-label='Ringkasan tindak lanjut']) > header h1
+) {
   max-width: 44rem !important;
   font-size: var(--rc-page-title-size) !important;
   font-weight: 500 !important;
@@ -67,12 +68,12 @@
 }
 
 :is(
-    section[aria-labelledby='owner-workspace-overview-title'] > header > div > div > p:first-child,
-    section[aria-labelledby='invitation-editor-title'] > :first-child > p:first-child,
-    section[aria-labelledby='guest-manager-title'] > :first-child > p:first-child,
-    section[aria-labelledby='delivery-center-title'] > header > p:first-child,
-    section:has(> section[aria-label='Ringkasan tindak lanjut']) > header > p:first-child
-  ) {
+  section[aria-labelledby='owner-workspace-overview-title'] > header > div > div > p:first-child,
+  section[aria-labelledby='invitation-editor-title'] > :first-child > p:first-child,
+  section[aria-labelledby='guest-manager-title'] > :first-child > p:first-child,
+  section[aria-labelledby='delivery-center-title'] > header > p:first-child,
+  section:has(> section[aria-label='Ringkasan tindak lanjut']) > header > p:first-child
+) {
   color: var(--seraya-action-primary) !important;
   font-size: 0.6875rem !important;
   font-weight: 650 !important;
@@ -94,7 +95,8 @@ section[aria-labelledby='guest-response-workspace-title'] > header::before {
     #delivery-center-title,
     #guest-response-workspace-title,
     section:has(> section[aria-label='Ringkasan tindak lanjut']) > header h1
-  ) + p {
+  )
+  + p {
   max-width: 45rem !important;
   margin-top: 0.875rem !important;
   color: var(--seraya-text-secondary) !important;
@@ -103,12 +105,12 @@ section[aria-labelledby='guest-response-workspace-title'] > header::before {
 }
 
 :is(
-    section[aria-labelledby='owner-workspace-overview-title'] dl,
-    section[aria-labelledby='guest-manager-title'] dl[aria-label='Kualitas data tamu'],
-    section[aria-label='Ringkasan kesiapan pengiriman'],
-    section[aria-label='Ringkasan RSVP seluruh tamu aktif'] > div,
-    section[aria-label='Ringkasan tindak lanjut']
-  ) {
+  section[aria-labelledby='owner-workspace-overview-title'] dl,
+  section[aria-labelledby='guest-manager-title'] dl[aria-label='Kualitas data tamu'],
+  section[aria-label='Ringkasan kesiapan pengiriman'],
+  section[aria-label='Ringkasan RSVP seluruh tamu aktif'] > div,
+  section[aria-label='Ringkasan tindak lanjut']
+) {
   gap: 0 !important;
   border-block: 1px solid var(--rc-rule) !important;
   border-inline: 0 !important;
@@ -122,7 +124,8 @@ section[aria-labelledby='guest-response-workspace-title'] > header::before {
     section[aria-label='Ringkasan kesiapan pengiriman'],
     section[aria-label='Ringkasan RSVP seluruh tamu aktif'] > div,
     section[aria-label='Ringkasan tindak lanjut']
-  ) > div {
+  )
+  > div {
   min-width: 0;
   min-height: 6.25rem;
   border: 0 !important;
@@ -138,7 +141,8 @@ section[aria-labelledby='guest-response-workspace-title'] > header::before {
     section[aria-label='Ringkasan kesiapan pengiriman'],
     section[aria-label='Ringkasan RSVP seluruh tamu aktif'] > div,
     section[aria-label='Ringkasan tindak lanjut']
-  ) > div:first-child {
+  )
+  > div:first-child {
   padding-left: 0 !important;
 }
 
@@ -148,18 +152,19 @@ section[aria-labelledby='guest-response-workspace-title'] > header::before {
     section[aria-label='Ringkasan kesiapan pengiriman'],
     section[aria-label='Ringkasan RSVP seluruh tamu aktif'] > div,
     section[aria-label='Ringkasan tindak lanjut']
-  ) > div:last-child {
+  )
+  > div:last-child {
   border-right: 0 !important;
   padding-right: 0 !important;
 }
 
 :is(
-    section[aria-labelledby='owner-workspace-overview-title'] dl dt,
-    section[aria-labelledby='guest-manager-title'] dl[aria-label='Kualitas data tamu'] dt,
-    section[aria-label='Ringkasan kesiapan pengiriman'] > div > p:first-child,
-    section[aria-label='Ringkasan RSVP seluruh tamu aktif'] > div > div > p:first-child,
-    section[aria-label='Ringkasan tindak lanjut'] > div > p:first-child
-  ) {
+  section[aria-labelledby='owner-workspace-overview-title'] dl dt,
+  section[aria-labelledby='guest-manager-title'] dl[aria-label='Kualitas data tamu'] dt,
+  section[aria-label='Ringkasan kesiapan pengiriman'] > div > p:first-child,
+  section[aria-label='Ringkasan RSVP seluruh tamu aktif'] > div > div > p:first-child,
+  section[aria-label='Ringkasan tindak lanjut'] > div > p:first-child
+) {
   color: var(--seraya-text-muted) !important;
   font-size: 0.65rem !important;
   font-weight: 650 !important;
@@ -169,12 +174,12 @@ section[aria-labelledby='guest-response-workspace-title'] > header::before {
 }
 
 :is(
-    section[aria-labelledby='owner-workspace-overview-title'] dl dd a,
-    section[aria-labelledby='guest-manager-title'] dl[aria-label='Kualitas data tamu'] dd,
-    section[aria-label='Ringkasan kesiapan pengiriman'] > div > p:last-child,
-    section[aria-label='Ringkasan RSVP seluruh tamu aktif'] > div > div > p:nth-child(2),
-    section[aria-label='Ringkasan tindak lanjut'] > div > p:last-child
-  ) {
+  section[aria-labelledby='owner-workspace-overview-title'] dl dd a,
+  section[aria-labelledby='guest-manager-title'] dl[aria-label='Kualitas data tamu'] dd,
+  section[aria-label='Ringkasan kesiapan pengiriman'] > div > p:last-child,
+  section[aria-label='Ringkasan RSVP seluruh tamu aktif'] > div > div > p:nth-child(2),
+  section[aria-label='Ringkasan tindak lanjut'] > div > p:last-child
+) {
   margin-top: 0.5rem !important;
   font-family: var(--font-editorial) !important;
   font-size: 2rem !important;
@@ -183,11 +188,16 @@ section[aria-labelledby='guest-response-workspace-title'] > header::before {
 }
 
 :is(
-    section[aria-labelledby='guest-manager-title'] div.grid:has(> div #guest-search):has(> div #guest-data-quality-filter),
-    section[aria-labelledby='delivery-guests-title'] > div:first-child > div:last-child,
-    #response-panel > div:first-of-type,
-    section:has(> section[aria-label='Ringkasan tindak lanjut']) > section[aria-label='Ringkasan tindak lanjut'] + section > div:first-child > div:last-child
-  ) {
+  section[aria-labelledby='guest-manager-title']
+    div.grid:has(> div #guest-search):has(> div #guest-data-quality-filter),
+  section[aria-labelledby='delivery-guests-title'] > div:first-child > div:last-child,
+  #response-panel > div:first-of-type,
+  section:has(> section[aria-label='Ringkasan tindak lanjut'])
+    > section[aria-label='Ringkasan tindak lanjut']
+    + section
+    > div:first-child
+    > div:last-child
+) {
   align-items: end !important;
   gap: 0.75rem !important;
   width: 100% !important;
@@ -203,7 +213,8 @@ section[aria-labelledby='guest-response-workspace-title'] > header::before {
     section[aria-labelledby='delivery-guests-title'],
     #response-panel,
     section:has(> section[aria-label='Ringkasan tindak lanjut'])
-  ) label {
+  )
+  label {
   color: var(--seraya-text-muted) !important;
   font-size: 0.6875rem !important;
   font-weight: 650 !important;
@@ -212,15 +223,16 @@ section[aria-labelledby='guest-response-workspace-title'] > header::before {
 }
 
 :is(
-    #guest-search,
-    #guest-data-quality-filter,
-    section[aria-labelledby='delivery-guests-title'] input:not([type='checkbox']):not([type='hidden']),
-    section[aria-labelledby='delivery-guests-title'] select,
-    #response-panel input,
-    #response-panel select,
-    section:has(> section[aria-label='Ringkasan tindak lanjut']) input,
-    section:has(> section[aria-label='Ringkasan tindak lanjut']) select
-  ) {
+  #guest-search,
+  #guest-data-quality-filter,
+  section[aria-labelledby='delivery-guests-title']
+    input:not([type='checkbox']):not([type='hidden']),
+  section[aria-labelledby='delivery-guests-title'] select,
+  #response-panel input,
+  #response-panel select,
+  section:has(> section[aria-label='Ringkasan tindak lanjut']) input,
+  section:has(> section[aria-label='Ringkasan tindak lanjut']) select
+) {
   min-height: 2.7rem !important;
   border: 1px solid var(--seraya-border-default) !important;
   border-radius: var(--seraya-radius-sm) !important;
@@ -230,10 +242,10 @@ section[aria-labelledby='guest-response-workspace-title'] > header::before {
 }
 
 :is(
-    section[aria-labelledby='guest-manager-title'] div:has(> table),
-    section[aria-labelledby='delivery-guests-title'] div:has(> table),
-    #response-panel > div:has(> table)
-  ) {
+  section[aria-labelledby='guest-manager-title'] div:has(> table),
+  section[aria-labelledby='delivery-guests-title'] div:has(> table),
+  #response-panel > div:has(> table)
+) {
   max-width: 100%;
   border-color: var(--rc-rule) !important;
   border-radius: 0 !important;
@@ -243,7 +255,9 @@ section[aria-labelledby='guest-response-workspace-title'] > header::before {
     section[aria-labelledby='guest-manager-title'],
     section[aria-labelledby='delivery-guests-title'],
     #response-panel
-  ) table thead {
+  )
+  table
+  thead {
   background: var(--rc-soft) !important;
 }
 
@@ -251,7 +265,9 @@ section[aria-labelledby='guest-response-workspace-title'] > header::before {
     section[aria-labelledby='guest-manager-title'],
     section[aria-labelledby='delivery-guests-title'],
     #response-panel
-  ) table th {
+  )
+  table
+  th {
   padding-block: 0.7rem !important;
   color: var(--seraya-text-muted) !important;
   font-size: 0.65rem !important;
@@ -262,7 +278,9 @@ section[aria-labelledby='guest-response-workspace-title'] > header::before {
     section[aria-labelledby='guest-manager-title'],
     section[aria-labelledby='delivery-guests-title'],
     #response-panel
-  ) table td {
+  )
+  table
+  td {
   padding-block: 0.8rem !important;
 }
 
@@ -270,7 +288,10 @@ section[aria-labelledby='guest-response-workspace-title'] > header::before {
     section[aria-labelledby='guest-manager-title'],
     section[aria-labelledby='delivery-guests-title'],
     #response-panel
-  ) table tbody tr:hover {
+  )
+  table
+  tbody
+  tr:hover {
   background: color-mix(in srgb, var(--seraya-bg-soft) 48%, transparent) !important;
 }
 
@@ -279,17 +300,20 @@ section[aria-labelledby='guest-response-workspace-title'] > header::before {
     section[aria-labelledby='delivery-guests-title'],
     section[aria-labelledby='guest-response-workspace-title'],
     section:has(> section[aria-label='Ringkasan tindak lanjut'])
-  ) [class*='border-dashed'] {
+  )
+  [class*='border-dashed'] {
   border-inline: 0 !important;
   border-radius: 0 !important;
   padding-block: 3rem !important;
 }
 
 :is(
-    section[aria-labelledby='guest-manager-title'] div.sticky:has(> p[aria-live='polite']),
-    section[aria-labelledby='delivery-guests-title'] > div:nth-child(2) > div.sticky,
-    section[aria-labelledby='invitation-editor-title'] form > div:has([data-testid='invitation-editor-save-status'])
-  ) {
+  section[aria-labelledby='guest-manager-title'] div.sticky:has(> p[aria-live='polite']),
+  section[aria-labelledby='delivery-guests-title'] > div:nth-child(2) > div.sticky,
+  section[aria-labelledby='invitation-editor-title']
+    form
+    > div:has([data-testid='invitation-editor-save-status'])
+) {
   bottom: 0 !important;
   border: 0 !important;
   border-top: 1px solid var(--rc-rule) !important;
@@ -302,51 +326,54 @@ section[aria-labelledby='guest-response-workspace-title'] > header::before {
 
 @media (max-width: 1023px) {
   :is(
-      section[aria-labelledby='guest-manager-title'] div.sticky:has(> p[aria-live='polite']),
-      section[aria-labelledby='delivery-guests-title'] > div:nth-child(2) > div.sticky,
-      section[aria-labelledby='invitation-editor-title'] form > div:has([data-testid='invitation-editor-save-status'])
-    ) {
+    section[aria-labelledby='guest-manager-title'] div.sticky:has(> p[aria-live='polite']),
+    section[aria-labelledby='delivery-guests-title'] > div:nth-child(2) > div.sticky,
+    section[aria-labelledby='invitation-editor-title']
+      form
+      > div:has([data-testid='invitation-editor-save-status'])
+  ) {
     bottom: calc(4.5rem + env(safe-area-inset-bottom)) !important;
   }
 }
 
 @media (max-width: 900px) {
   :is(
-      #owner-workspace-overview-title,
-      #invitation-editor-title,
-      #guest-manager-title,
-      #delivery-center-title,
-      #guest-response-workspace-title,
-      section:has(> section[aria-label='Ringkasan tindak lanjut']) > header h1
-    ) {
+    #owner-workspace-overview-title,
+    #invitation-editor-title,
+    #guest-manager-title,
+    #delivery-center-title,
+    #guest-response-workspace-title,
+    section:has(> section[aria-label='Ringkasan tindak lanjut']) > header h1
+  ) {
     font-size: var(--rc-page-title-mobile) !important;
   }
 
   :is(
-      section[aria-labelledby='owner-workspace-overview-title'] > header,
-      section[aria-labelledby='invitation-editor-title'] > :first-child,
-      section[aria-labelledby='guest-manager-title'] > :first-child,
-      section[aria-labelledby='delivery-center-title'] > header,
-      section[aria-labelledby='guest-response-workspace-title'] > header,
-      section:has(> section[aria-label='Ringkasan tindak lanjut']) > header
-    ) {
+    section[aria-labelledby='owner-workspace-overview-title'] > header,
+    section[aria-labelledby='invitation-editor-title'] > :first-child,
+    section[aria-labelledby='guest-manager-title'] > :first-child,
+    section[aria-labelledby='delivery-center-title'] > header,
+    section[aria-labelledby='guest-response-workspace-title'] > header,
+    section:has(> section[aria-label='Ringkasan tindak lanjut']) > header
+  ) {
     padding-bottom: 1.5rem !important;
   }
 
   :is(
-      section[aria-labelledby='owner-workspace-overview-title'] dl,
-      section[aria-labelledby='guest-manager-title'] dl[aria-label='Kualitas data tamu'],
-      section[aria-label='Ringkasan kesiapan pengiriman'],
-      section[aria-label='Ringkasan RSVP seluruh tamu aktif'] > div,
-      section[aria-label='Ringkasan tindak lanjut']
-    ) {
+    section[aria-labelledby='owner-workspace-overview-title'] dl,
+    section[aria-labelledby='guest-manager-title'] dl[aria-label='Kualitas data tamu'],
+    section[aria-label='Ringkasan kesiapan pengiriman'],
+    section[aria-label='Ringkasan RSVP seluruh tamu aktif'] > div,
+    section[aria-label='Ringkasan tindak lanjut']
+  ) {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 
   :is(
       section[aria-label='Ringkasan kesiapan pengiriman'],
       section[aria-label='Ringkasan tindak lanjut']
-    ) > div:last-child {
+    )
+    > div:last-child {
     grid-column: 1 / -1;
   }
 
@@ -356,7 +383,8 @@ section[aria-labelledby='guest-response-workspace-title'] > header::before {
       section[aria-label='Ringkasan kesiapan pengiriman'],
       section[aria-label='Ringkasan RSVP seluruh tamu aktif'] > div,
       section[aria-label='Ringkasan tindak lanjut']
-    ) > div {
+    )
+    > div {
     border-right: 1px solid var(--rc-rule) !important;
     border-bottom: 1px solid var(--rc-rule) !important;
     padding-inline: 1rem !important;
@@ -368,16 +396,22 @@ section[aria-labelledby='guest-response-workspace-title'] > header::before {
       section[aria-label='Ringkasan kesiapan pengiriman'],
       section[aria-label='Ringkasan RSVP seluruh tamu aktif'] > div,
       section[aria-label='Ringkasan tindak lanjut']
-    ) > div:nth-child(even) {
+    )
+    > div:nth-child(even) {
     border-right: 0 !important;
   }
 
   :is(
-      section[aria-labelledby='guest-manager-title'] div.grid:has(> div #guest-search):has(> div #guest-data-quality-filter),
-      section[aria-labelledby='delivery-guests-title'] > div:first-child > div:last-child,
-      #response-panel > div:first-of-type,
-      section:has(> section[aria-label='Ringkasan tindak lanjut']) > section[aria-label='Ringkasan tindak lanjut'] + section > div:first-child > div:last-child
-    ) {
+    section[aria-labelledby='guest-manager-title']
+      div.grid:has(> div #guest-search):has(> div #guest-data-quality-filter),
+    section[aria-labelledby='delivery-guests-title'] > div:first-child > div:last-child,
+    #response-panel > div:first-of-type,
+    section:has(> section[aria-label='Ringkasan tindak lanjut'])
+      > section[aria-label='Ringkasan tindak lanjut']
+      + section
+      > div:first-child
+      > div:last-child
+  ) {
     grid-template-columns: 1fr !important;
   }
 

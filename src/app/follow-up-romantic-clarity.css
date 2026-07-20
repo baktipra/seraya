@@ -38,10 +38,9 @@ section:has(> section[aria-label='Ringkasan tindak lanjut']) > header h1 + p {
 }
 
 /* Unpublished guidance remains a truthful prerequisite, presented as a strip. */
-section:has(> section[aria-label='Ringkasan tindak lanjut'])
-  > header
-  + section:not([aria-label]) {
-  border: 1px solid color-mix(in srgb, var(--seraya-status-warning) 28%, var(--seraya-border-default));
+section:has(> section[aria-label='Ringkasan tindak lanjut']) > header + section:not([aria-label]) {
+  border: 1px solid
+    color-mix(in srgb, var(--seraya-status-warning) 28%, var(--seraya-border-default));
   border-radius: var(--seraya-radius-sm);
   background: var(--seraya-status-warning-soft);
   box-shadow: none;
@@ -193,7 +192,8 @@ section:has(> section[aria-label='Ringkasan tindak lanjut'])
   + section
   li
   span.rounded-full {
-  border: 1px solid color-mix(in srgb, var(--seraya-action-primary) 16%, var(--seraya-border-default));
+  border: 1px solid
+    color-mix(in srgb, var(--seraya-action-primary) 16%, var(--seraya-border-default));
   border-radius: var(--seraya-radius-pill);
   background: color-mix(in srgb, var(--seraya-bg-brand-soft) 54%, transparent);
   color: var(--seraya-text-secondary);

@@ -221,8 +221,7 @@
   font-size: 0.62rem !important;
 }
 
-:global([data-dashboard-width='wide']):has(.workspace)
-  :global([data-invitation-editor-panel] h2),
+:global([data-dashboard-width='wide']):has(.workspace) :global([data-invitation-editor-panel] h2),
 :global([data-dashboard-width='wide']):has(.workspace)
   :global([data-invitation-editor-panel='style'] legend) {
   font-family: var(--font-editorial) !important;

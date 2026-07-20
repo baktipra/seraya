@@ -161,7 +161,7 @@ export function ProjectOverviewBootstrap({ projectId, readiness }: ProjectOvervi
     >
       <header className="border-seraya-border-default bg-seraya-surface border px-5 py-7 sm:px-8 sm:py-9">
         <div className="flex flex-col gap-7 lg:flex-row lg:items-start lg:justify-between lg:gap-10">
-          <div className="min-w-0 max-w-2xl">
+          <div className="max-w-2xl min-w-0">
             <p className="text-seraya-text-muted text-[0.6875rem] font-semibold tracking-[0.16em] uppercase">
               Ringkasan proyek
             </p>
@@ -179,7 +179,10 @@ export function ProjectOverviewBootstrap({ projectId, readiness }: ProjectOvervi
             </p>
           </div>
 
-          <nav aria-label="Akses undangan" className="flex shrink-0 flex-wrap gap-x-5 gap-y-2 text-sm">
+          <nav
+            aria-label="Akses undangan"
+            className="flex shrink-0 flex-wrap gap-x-5 gap-y-2 text-sm"
+          >
             <Link
               className="text-seraya-action-primary focus-visible:outline-seraya-focus-ring inline-flex min-h-11 items-center font-semibold underline-offset-4 hover:underline focus-visible:outline-3 focus-visible:outline-offset-3"
               href={`${base}/preview` as Route}

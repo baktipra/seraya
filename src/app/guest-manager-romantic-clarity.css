@@ -132,8 +132,7 @@ section[aria-labelledby='guest-manager-title'] #guest-data-quality-filter:focus-
 }
 
 /* Desktop list: compact scan rhythm and quieter chrome. */
-section[aria-labelledby='guest-manager-title']
-  div:has(> table.min-w-\[820px\]) {
+section[aria-labelledby='guest-manager-title'] div:has(> table.min-w-\[820px\]) {
   overflow: visible !important;
   border-right: 0 !important;
   border-left: 0 !important;
@@ -192,8 +191,7 @@ section[aria-labelledby='guest-manager-title'] table input[type='checkbox'] {
 }
 
 /* Selection dock stays available but no longer reads as another floating card. */
-section[aria-labelledby='guest-manager-title']
-  div.sticky:has(> p[aria-live='polite']) {
+section[aria-labelledby='guest-manager-title'] div.sticky:has(> p[aria-live='polite']) {
   bottom: 0;
   gap: 0.75rem !important;
   border-right: 0 !important;
@@ -206,14 +204,11 @@ section[aria-labelledby='guest-manager-title']
   backdrop-filter: blur(12px);
 }
 
-section[aria-labelledby='guest-manager-title']
-  div.sticky:has(> p[aria-live='polite'])
-  > div {
+section[aria-labelledby='guest-manager-title'] div.sticky:has(> p[aria-live='polite']) > div {
   gap: 0.4rem !important;
 }
 
-section[aria-labelledby='guest-manager-title']
-  div[class*='border-dashed'] {
+section[aria-labelledby='guest-manager-title'] div[class*='border-dashed'] {
   border-right: 0 !important;
   border-left: 0 !important;
   border-radius: 0 !important;
@@ -221,9 +216,7 @@ section[aria-labelledby='guest-manager-title']
   padding-bottom: 3rem !important;
 }
 
-section[aria-labelledby='guest-manager-title']
-  > :nth-child(3)
-  > div:last-child {
+section[aria-labelledby='guest-manager-title'] > :nth-child(3) > div:last-child {
   margin-top: 1.5rem;
   padding-top: 1rem !important;
 }
@@ -286,7 +279,10 @@ section[aria-labelledby='guest-manager-title']
     width: 100%;
   }
 
-  section[aria-labelledby='guest-manager-title'] > :nth-child(2) > div:last-child > button:last-child {
+  section[aria-labelledby='guest-manager-title']
+    > :nth-child(2)
+    > div:last-child
+    > button:last-child {
     grid-column: 1 / -1;
   }
 
@@ -295,8 +291,7 @@ section[aria-labelledby='guest-manager-title']
     grid-template-columns: 1fr !important;
   }
 
-  section[aria-labelledby='guest-manager-title']
-    div:has(> table.min-w-\[820px\]) {
+  section[aria-labelledby='guest-manager-title'] div:has(> table.min-w-\[820px\]) {
     border: 0 !important;
   }
 
@@ -409,25 +404,20 @@ section[aria-labelledby='guest-manager-title']
     content: 'RSVP';
   }
 
-  section[aria-labelledby='guest-manager-title']
-    div.sticky:has(> p[aria-live='polite']) {
+  section[aria-labelledby='guest-manager-title'] div.sticky:has(> p[aria-live='polite']) {
     margin-right: -1rem;
     margin-left: -1rem;
     padding-right: 1rem !important;
     padding-left: 1rem !important;
   }
 
-  section[aria-labelledby='guest-manager-title']
-    div.sticky:has(> p[aria-live='polite'])
-    > div {
+  section[aria-labelledby='guest-manager-title'] div.sticky:has(> p[aria-live='polite']) > div {
     display: grid;
     grid-template-columns: 1fr;
     width: 100%;
   }
 
-  section[aria-labelledby='guest-manager-title']
-    div.sticky:has(> p[aria-live='polite'])
-    button {
+  section[aria-labelledby='guest-manager-title'] div.sticky:has(> p[aria-live='polite']) button {
     width: 100%;
   }
 }
