@@ -4,9 +4,9 @@ import { cn } from '@/lib/cn';
 
 export const buttonVariants = {
   primary:
-    'bg-seraya-action-primary text-seraya-text-inverse hover:bg-seraya-action-primary-hover focus-visible:outline-seraya-focus-ring shadow-[0_8px_18px_rgb(142_75_82_/_0.16)]',
+    'bg-seraya-action-primary text-seraya-text-inverse hover:bg-seraya-action-primary-hover focus-visible:outline-seraya-focus-ring',
   secondary:
-    'border-seraya-border-default bg-seraya-surface text-seraya-text-primary hover:border-seraya-border-strong hover:bg-seraya-canvas focus-visible:outline-seraya-focus-ring',
+    'border-seraya-border-strong bg-seraya-surface text-seraya-text-primary hover:bg-seraya-soft focus-visible:outline-seraya-focus-ring',
   ghost:
     'bg-transparent text-seraya-text-primary hover:bg-seraya-soft focus-visible:outline-seraya-focus-ring',
   text: 'bg-transparent px-0 text-seraya-action-primary hover:text-seraya-action-primary-hover focus-visible:outline-seraya-focus-ring',
@@ -50,7 +50,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       ref={ref}
       aria-busy={loading || undefined}
       className={cn(
-        'inline-flex items-center justify-center rounded-[var(--seraya-radius-md)] font-semibold transition-colors duration-200 focus-visible:outline-3 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-55',
+        'inline-flex items-center justify-center rounded-[var(--seraya-radius-sm)] font-medium tracking-[0.01em] transition-[background-color,border-color,color,box-shadow] duration-200 focus-visible:outline-3 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-55',
         buttonVariants[variant],
         buttonSizes[size],
         fullWidth && 'w-full',
