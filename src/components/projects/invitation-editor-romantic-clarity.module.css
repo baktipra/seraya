@@ -1,0 +1,404 @@
+.workspace {
+  --editor-rail-width: 13rem;
+  --editor-form-width: 32.5rem;
+  --editor-preview-width: 27.5rem;
+}
+
+/* The production editor keeps its state machine and form tree. This layer only
+   changes composition, density, and visual hierarchy inside the existing
+   editor boundaries. */
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global(section[aria-labelledby='invitation-editor-title']) {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global(section[aria-labelledby='invitation-editor-title'])
+  > :first-child {
+  border-bottom: 1px solid var(--seraya-border-default);
+  border-radius: 0 !important;
+  background: transparent !important;
+  padding: 0 0 1.6rem !important;
+}
+
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global(section[aria-labelledby='invitation-editor-title'])
+  > :first-child
+  :global(#invitation-editor-title) {
+  margin-top: 0.7rem !important;
+  max-width: 42rem;
+  font-size: clamp(2.35rem, 4vw, 3.5rem) !important;
+  font-weight: 500;
+  line-height: 0.98;
+}
+
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global(section[aria-labelledby='invitation-editor-title'])
+  > :first-child
+  :global(#invitation-editor-title)
+  + p {
+  margin-top: 0.85rem !important;
+  max-width: 42rem;
+}
+
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global(section[aria-labelledby='invitation-editor-title'])
+  > :nth-child(2) {
+  gap: 0 !important;
+  border-bottom: 1px solid var(--seraya-border-default);
+  padding: 1rem 0 !important;
+}
+
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global(section[aria-label='Ringkasan undangan']),
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global(section[aria-labelledby='invitation-readiness-title']),
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global(ol[aria-label='Alur melengkapi undangan']) {
+  display: none !important;
+}
+
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global(section[aria-labelledby='invitation-editor-title'])
+  > :nth-child(2)
+  > div {
+  align-items: center !important;
+  gap: 1rem !important;
+}
+
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global(section[aria-labelledby='invitation-editor-title'])
+  > :nth-child(2)
+  h2 {
+  font-family: var(--font-editorial) !important;
+  font-size: 1.55rem !important;
+  font-weight: 500 !important;
+  line-height: 1.05;
+}
+
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global(section[aria-labelledby='invitation-editor-title'])
+  > :nth-child(2)
+  h2
+  + p {
+  max-width: 44rem;
+  margin-top: 0.35rem !important;
+}
+
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global(section[aria-labelledby='invitation-editor-title'])
+  > :last-child {
+  padding: 1.4rem 0 0 !important;
+}
+
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global(div:has(> [data-invitation-editor-desktop-navigation])) {
+  gap: 1.25rem !important;
+}
+
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global(form:has([data-invitation-editor-panel])) {
+  width: 100%;
+  max-width: var(--editor-form-width);
+  margin-inline: auto;
+}
+
+/* Chapter rail */
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global([data-invitation-editor-desktop-navigation]) {
+  top: 4.75rem !important;
+  max-height: calc(100svh - 5.75rem) !important;
+  border: 0 !important;
+  border-right: 1px solid var(--seraya-border-default) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0.35rem 1rem 0.5rem 0 !important;
+}
+
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global([data-invitation-editor-desktop-navigation] > div:first-child) {
+  padding: 0 0.75rem 0.8rem !important;
+}
+
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global([data-invitation-editor-desktop-navigation] button) {
+  min-height: 2.75rem !important;
+  border-left: 2px solid transparent;
+  border-radius: 0 !important;
+  background: transparent !important;
+  padding: 0.45rem 0.65rem !important;
+}
+
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global([data-invitation-editor-desktop-navigation] button[aria-current='step']) {
+  border-left-color: var(--seraya-action-primary);
+  background: color-mix(in srgb, var(--seraya-brand-soft) 62%, transparent) !important;
+}
+
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global([data-invitation-editor-desktop-navigation] button span[aria-label]) {
+  border-radius: 50% !important;
+}
+
+/* Mobile chapter navigation remains horizontal but loses the floating card feel. */
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global([data-invitation-editor-mobile-navigation]) {
+  top: 3.75rem !important;
+  border-right: 0 !important;
+  border-left: 0 !important;
+  border-radius: 0 !important;
+  background: color-mix(in srgb, var(--seraya-surface) 94%, transparent) !important;
+  box-shadow: none !important;
+}
+
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global([data-invitation-editor-mobile-section-strip] button) {
+  border: 1px solid var(--seraya-border-default);
+  border-radius: var(--seraya-radius-pill) !important;
+  background: var(--seraya-surface) !important;
+}
+
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global([data-invitation-editor-mobile-section-strip] button[aria-current='step']) {
+  border-color: var(--seraya-action-primary);
+  background: var(--seraya-action-primary) !important;
+  color: var(--seraya-text-inverse) !important;
+}
+
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global([data-invitation-editor-mobile-section-strip] button[aria-current='step'] span) {
+  color: inherit !important;
+}
+
+/* Form canvas */
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global([data-invitation-editor-panel] > section),
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global([data-invitation-editor-panel='style'] > fieldset) {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0.35rem 0 1.5rem !important;
+}
+
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global([data-invitation-editor-panel] > section > div:first-child),
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global([data-invitation-editor-panel='style'] > fieldset > div:first-child) {
+  position: relative;
+  align-items: flex-start !important;
+  gap: 0.85rem !important;
+  margin-bottom: 1.65rem !important;
+  border-bottom: 0 !important;
+  padding-bottom: 1rem !important;
+}
+
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global([data-invitation-editor-panel] > section > div:first-child)::after,
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global([data-invitation-editor-panel='style'] > fieldset > div:first-child)::after {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 4rem;
+  height: 1px;
+  background: color-mix(in srgb, var(--seraya-action-primary) 62%, transparent);
+  content: '';
+}
+
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global([data-invitation-editor-panel] > section > div:first-child > span[aria-hidden='true']) {
+  width: 1.9rem !important;
+  height: 1.9rem !important;
+  border: 1px solid var(--seraya-border-default);
+  border-radius: 50% !important;
+  background: transparent !important;
+  font-size: 0.62rem !important;
+}
+
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global([data-invitation-editor-panel] h2),
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global([data-invitation-editor-panel='style'] legend) {
+  font-family: var(--font-editorial) !important;
+  font-size: clamp(1.9rem, 3vw, 2.35rem) !important;
+  font-weight: 500 !important;
+  line-height: 1 !important;
+  letter-spacing: -0.025em !important;
+}
+
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global([data-invitation-editor-panel] h2 + p) {
+  margin-top: 0.55rem !important;
+  max-width: 34rem;
+  font-size: 0.875rem;
+  line-height: 1.45rem;
+}
+
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global([data-invitation-editor-panel] label) {
+  font-size: 0.8125rem !important;
+  font-weight: 600 !important;
+}
+
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global(
+    [data-invitation-editor-panel]
+      input:not([type='hidden']):not([type='checkbox']):not([type='radio'])
+  ),
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global([data-invitation-editor-panel] textarea) {
+  border-radius: var(--seraya-radius-sm) !important;
+  background: var(--seraya-surface) !important;
+}
+
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global([data-invitation-editor-panel] textarea) {
+  min-height: 6.5rem;
+}
+
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global(
+    [data-invitation-editor-panel] div:has(> div > input[type='checkbox'][name$='.enabled'])
+  ) {
+  border: 0 !important;
+  border-left: 2px solid var(--seraya-action-primary) !important;
+  border-radius: 0 !important;
+  background: color-mix(in srgb, var(--seraya-brand-soft) 58%, transparent) !important;
+  padding: 0.8rem 0.95rem !important;
+}
+
+/* Repeated entities keep a light container because their internal actions need a boundary. */
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global(fieldset:has(> input[name^='eventSchedule.events.'])),
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global(fieldset:has(> input[name^='digitalGift.accounts.'])) {
+  border: 1px solid var(--seraya-border-default) !important;
+  border-radius: var(--seraya-radius-sm) !important;
+  background: var(--seraya-surface) !important;
+  box-shadow: none !important;
+}
+
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global([data-invitation-editor-panel='schedule'] > section > div:nth-child(2) > div:first-child),
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global([data-invitation-editor-panel='gallery'] > section > div:nth-child(2)) {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Save dock: truthful status on the left, local preview + explicit save on the right. */
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global(form > div:has([data-testid='invitation-editor-save-status'])) {
+  bottom: 0 !important;
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+  border: 0 !important;
+  border-top: 1px solid var(--seraya-border-default) !important;
+  border-radius: 0 !important;
+  background: color-mix(in srgb, var(--seraya-surface) 95%, transparent) !important;
+  box-shadow: none !important;
+  padding: 0.85rem 0 1rem !important;
+  backdrop-filter: blur(14px);
+}
+
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global(form > div:has([data-testid='invitation-editor-save-status']) button),
+:global([data-dashboard-width='wide']):has(.workspace)
+  :global(form > div:has([data-testid='invitation-editor-save-status']) a) {
+  border-radius: var(--seraya-radius-sm) !important;
+}
+
+/* Desktop live preview */
+.workspace:not([data-local-preview-overlay]) {
+  top: 4.75rem !important;
+  min-width: 0;
+  max-height: calc(100svh - 5.75rem);
+  border-left: 1px solid var(--seraya-border-default);
+  background: color-mix(in srgb, var(--seraya-brand-soft) 34%, transparent);
+  padding-left: 1rem;
+}
+
+.workspace:not([data-local-preview-overlay]) > div {
+  max-height: inherit !important;
+  border-radius: var(--seraya-radius-sm) !important;
+  box-shadow: none !important;
+}
+
+.workspace:not([data-local-preview-overlay]) > div > div:first-child {
+  padding: 0.8rem 0.9rem !important;
+}
+
+.workspace:not([data-local-preview-overlay]) > div > div:last-child {
+  background: color-mix(in srgb, var(--seraya-brand-soft) 52%, var(--seraya-canvas)) !important;
+  padding: 0.7rem !important;
+}
+
+.workspace[data-local-preview-overlay] {
+  background: color-mix(in srgb, var(--seraya-text-primary) 38%, transparent) !important;
+  backdrop-filter: blur(10px);
+}
+
+.workspace[data-local-preview-overlay] > div {
+  border-radius: var(--seraya-radius-sm) !important;
+  box-shadow: var(--seraya-shadow-float) !important;
+}
+
+@media (min-width: 1024px) {
+  :global([data-dashboard-width='wide']):has(.workspace)
+    :global(div:has(> [data-invitation-editor-desktop-navigation])) {
+    grid-template-columns: var(--editor-rail-width) minmax(0, var(--editor-form-width)) !important;
+    justify-content: center;
+  }
+}
+
+@media (min-width: 1536px) {
+  :global([data-dashboard-width='wide']):has(.workspace)
+    :global(div:has(> [data-invitation-editor-desktop-navigation])) {
+    grid-template-columns:
+      var(--editor-rail-width)
+      minmax(0, var(--editor-form-width))
+      minmax(23rem, var(--editor-preview-width)) !important;
+    justify-content: stretch;
+    gap: 1.5rem !important;
+  }
+}
+
+@media (max-width: 639px) {
+  :global([data-dashboard-width='wide']):has(.workspace)
+    :global(section[aria-labelledby='invitation-editor-title'])
+    > :first-child {
+    padding: 0 0 1.2rem !important;
+  }
+
+  :global([data-dashboard-width='wide']):has(.workspace)
+    :global(section[aria-labelledby='invitation-editor-title'])
+    > :first-child
+    :global(#invitation-editor-title) {
+    font-size: clamp(2.1rem, 12vw, 2.8rem) !important;
+  }
+
+  :global([data-dashboard-width='wide']):has(.workspace)
+    :global(section[aria-labelledby='invitation-editor-title'])
+    > :nth-child(2) {
+    padding: 0.9rem 0 !important;
+  }
+
+  :global([data-dashboard-width='wide']):has(.workspace)
+    :global(section[aria-labelledby='invitation-editor-title'])
+    > :last-child {
+    padding-top: 0.85rem !important;
+  }
+
+  :global([data-dashboard-width='wide']):has(.workspace)
+    :global([data-invitation-editor-panel] > section),
+  :global([data-dashboard-width='wide']):has(.workspace)
+    :global([data-invitation-editor-panel='style'] > fieldset) {
+    padding-bottom: 1rem !important;
+  }
+}
