@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import '@fontsource-variable/cormorant-garamond/wght.css';
 @import './guest-manager-romantic-clarity.css';
+@import './delivery-center-romantic-clarity.css';
 
 :root {
   color-scheme: light;
