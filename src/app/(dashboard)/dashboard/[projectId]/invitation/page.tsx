@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 
 import { InvitationEditor } from '@/components/projects/invitation-editor';
+import { InvitationStudioShell } from '@/components/projects/invitation-studio-shell';
 import { getOwnedProjectContextForRequest } from '@/modules/auth/dashboard-request-context';
 import {
   InvitationEditorDraftUnavailableError,
@@ -8,8 +9,8 @@ import {
 } from '@/modules/invitations/invitation-editor.service';
 import { getPrivateGalleryImagesForVerifiedProject } from '@/modules/media/media.service';
 import type { InvitationGalleryImage } from '@/modules/media/media.types';
-import { getWeddingReadinessForRequest } from '@/modules/readiness';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
+import { getWeddingReadinessForRequest } from '@/modules/readiness';
 
 type InvitationEditorPageProps = {
   params: Promise<{ projectId: string }>;
@@ -71,15 +72,19 @@ export default async function InvitationEditorPage({ params }: InvitationEditorP
   const screen = await getInvitationEditorScreenOrNotFound(projectId);
 
   return (
-    <InvitationEditor
-      draft={screen.editor.draft}
-      galleryImages={screen.galleryImages}
-      project={{ event_date_primary: screen.editor.project.event_date_primary }}
-      projectId={screen.editor.project.id}
-      readiness={{
-        identity: screen.readiness.identity,
-        invitation: screen.readiness.invitation,
-      }}
-    />
+    <InvitationStudioShell>
+      <InvitationEditor
+        draft={screen.editor.draft}
+        galleryImages={screen.galleryImages}
+        project={{
+          event_date_primary: screen.editor.project.event_date_primary,
+        }}
+        projectId={screen.editor.project.id}
+        readiness={{
+          identity: screen.readiness.identity,
+          invitation: screen.readiness.invitation,
+        }}
+      />
+    </InvitationStudioShell>
   );
 }

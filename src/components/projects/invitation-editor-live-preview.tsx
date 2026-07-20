@@ -11,7 +11,6 @@ import type { InvitationGalleryImage } from '@/modules/media/media.types';
 
 import { useInvitationEditorContextualSaveAction } from './invitation-editor-contextual-actions';
 import styles from './invitation-editor-live-preview.module.css';
-import workspaceStyles from './invitation-editor-romantic-clarity.module.css';
 
 export type InvitationEditorLivePreviewProps = {
   content: InvitationDraftContent;
@@ -33,7 +32,12 @@ export function InvitationEditorLivePreview({
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const scrollPositionRef = useRef(0);
   const invitation = useMemo(
-    () => createInvitationEditorPreviewViewModel({ content, galleryImages, project }),
+    () =>
+      createInvitationEditorPreviewViewModel({
+        content,
+        galleryImages,
+        project,
+      }),
     [content, galleryImages, project],
   );
 
@@ -73,12 +77,11 @@ export function InvitationEditorLivePreview({
     <aside
       aria-labelledby="invitation-editor-live-preview-title"
       aria-modal={isOpen || undefined}
-      className={[
-        workspaceStyles.workspace,
+      className={
         isOpen
           ? 'bg-seraya-canvas fixed inset-0 z-[60] flex min-h-0 flex-col px-3 py-3 sm:px-5 sm:py-5'
-          : 'sticky top-24 hidden self-start 2xl:block',
-      ].join(' ')}
+          : 'sticky top-24 hidden self-start 2xl:block'
+      }
       data-local-preview-desktop={!isOpen || undefined}
       data-local-preview-overlay={isOpen || undefined}
       role={isOpen ? 'dialog' : 'complementary'}
