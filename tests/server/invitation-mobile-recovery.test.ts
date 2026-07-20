@@ -11,7 +11,7 @@ describe('P0 mobile invitation workspace recovery', () => {
     ]);
 
     expect(layout).toContain("import './invitation-mobile-recovery.css';");
-    expect(source).toContain("html:has(#invitation-editor-title)");
+    expect(source).toContain('html:has(#invitation-editor-title)');
     expect(source).toContain("nav[aria-label='Navigasi workspace mobile']");
     expect(source).toContain('max-width: 100vw !important;');
     expect(source).toContain('[data-invitation-editor-mobile-navigation]');
