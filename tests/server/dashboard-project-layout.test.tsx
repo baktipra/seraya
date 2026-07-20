@@ -21,7 +21,8 @@ vi.mock('@/modules/readiness', () => ({
 import ProjectDashboardLayout from '@/app/(dashboard)/dashboard/[projectId]/layout';
 
 const readiness = {
-  invitation: { hasPublishedSnapshot: false },
+  identity: { coupleLabel: 'Raka & Nadia', templateKey: 'roselle' },
+  invitation: { hasPublishedSnapshot: false, state: 'draft_incomplete' },
   responses: { hasActivePersonalLinks: false },
 };
 

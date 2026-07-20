@@ -133,7 +133,7 @@ describe('SRY-041 project compass publish handoff', () => {
     );
 
     expect(html).toContain('Tinjau dan terbitkan ulang');
-    expect(html).toContain('Tinjau di Undangan');
+    expect(html).not.toContain('Tinjau di Undangan');
     expect(html).toContain(`href="/dashboard/${projectId}/invitation"`);
     expect(html).not.toContain(`href="/dashboard/${projectId}/billing"`);
     expect(publishActionMock).not.toHaveBeenCalled();
