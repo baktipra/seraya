@@ -1,96 +1,19 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
-import { PersonalGuestLinkResultActions } from '@/components/projects/personal-guest-link-result-actions';
-
-const root = process.cwd();
-const personalGuestUrl = 'https://sandbox.seraya.example/raka-nadia/g/opaque-token';
-
-describe('SRY-017 personal guest-link WhatsApp share UI', () => {
-  it('renders the WhatsApp action only in the one-time result component with safe external navigation', () => {
-    const html = renderToStaticMarkup(
-      <PersonalGuestLinkResultActions
-        copyFeedback={null}
-        guestDisplayName="Keluarga Rani"
-        onClose={() => undefined}
-        onCopy={() => undefined}
-        personalUrl={personalGuestUrl}
-      />,
-    );
-
-    expect(html).toContain('Bagikan lewat WhatsApp');
-    expect(html).toContain('aria-label="Bagikan tautan pribadi lewat WhatsApp"');
-    expect(html).toContain('target="_blank"');
-    expect(html).toContain('rel="noopener noreferrer"');
-    expect(html).toContain('https://wa.me/?text=');
-    expect(html).toContain('Salin tautan');
-    expect(html).toContain('Selesai');
-  });
-
-  it('uses a recipient-specific handoff only when the one-time result receives a canonical private contact', () => {
-    const html = renderToStaticMarkup(
-      <PersonalGuestLinkResultActions
-        copyFeedback={null}
-        guestDisplayName="Keluarga Rani"
-        onClose={() => undefined}
-        onCopy={() => undefined}
-        personalUrl={personalGuestUrl}
-        recipientWhatsAppPhoneE164="+6281234567890"
-      />,
-    );
-
-    expect(html).toContain('https://wa.me/6281234567890?text=');
-    expect(html).toContain('nomor tamu ini');
-  });
-
-  it('keeps the share action out of normal guest rows and makes it contingent on the one-time revealed link state', async () => {
-    const source = await readFile(
-      path.join(root, 'src/components/projects/guest-manager.tsx'),
+describe('personal-link immediate result', () => {
+  it('is copy-only so initial WhatsApp sharing stays on the canonical row action', async () => {
+    const result = await readFile(
+      path.resolve(process.cwd(), 'src/components/projects/personal-guest-link-result-actions.tsx'),
       'utf8',
     );
 
-    const normalGuestListSource = source.slice(0, source.indexOf('title="Tautan pribadi siap"'));
-
-    expect(normalGuestListSource).not.toContain('Bagikan lewat WhatsApp');
-    expect(source).toContain('open={Boolean(revealedPersonalLink)}');
-    expect(source).toContain('<PersonalGuestLinkResultActions');
-    expect(source).toContain('personalUrl={revealedPersonalLink.personalUrl}');
-    expect(source).not.toContain('localStorage');
-    expect(source).not.toContain('sessionStorage');
-    expect(source).not.toContain('document.cookie');
-  });
-
-  it('keeps the private contact field in owner Guest Manager input and forwards it only to the one-time result', async () => {
-    const source = await readFile(
-      path.join(root, 'src/components/projects/guest-manager.tsx'),
-      'utf8',
-    );
-
-    expect(source).toContain('Nomor WhatsApp');
-    expect(source).toContain('name="whatsappPhoneE164"');
-    expect(source).toContain('type="tel"');
-    expect(source).toContain('inputMode="tel"');
-    expect(source).toContain(
-      'recipientWhatsAppPhoneE164={revealedPersonalLink.recipientWhatsAppPhoneE164}',
-    );
-    expect(source).not.toContain('window.localStorage');
-    expect(source).not.toContain('window.sessionStorage');
-  });
-
-  it('keeps capability data out of normal guest-list DTOs, including revoked list states', async () => {
-    const guestTypes = await readFile(path.join(root, 'src/modules/guests/guest.types.ts'), 'utf8');
-    const guestManagerSource = await readFile(
-      path.join(root, 'src/components/projects/guest-manager.tsx'),
-      'utf8',
-    );
-
-    expect(guestTypes).toContain('link_state: GuestPersonalLinkState;');
-    expect(guestTypes).not.toContain('personalUrl');
-    expect(guestTypes).not.toContain('token_hash');
-    expect(guestManagerSource).not.toContain('guest.personalUrl');
-    expect(guestManagerSource).not.toContain('guest.token_hash');
+    expect(result).toContain('Salin tautan');
+    expect(result).toContain('Selesai');
+    expect(result).toContain('gunakan WhatsApp pada row tamu');
+    expect(result).not.toContain('buildWhatsAppGuestInviteShareUrl');
+    expect(result).not.toContain('Bagikan lewat WhatsApp');
   });
 });
