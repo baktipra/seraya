@@ -1,0 +1,46 @@
+name: Temporary TypeScript diagnostic
+
+on:
+  push:
+    branches:
+      - release/romantic-clarity-owner-workspace
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out release branch
+        uses: actions/checkout@v4
+        with:
+          ref: release/romantic-clarity-owner-workspace
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Capture TypeScript output
+        shell: bash
+        run: |
+          set +e
+          npm run typecheck > typecheck-output.txt 2>&1
+          status=$?
+          echo "exit_code=$status" >> typecheck-output.txt
+          exit 0
+
+      - name: Commit diagnostic output
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add typecheck-output.txt
+          git commit -m "Capture Romantic Clarity typecheck output"
+          git push origin HEAD:release/romantic-clarity-owner-workspace
