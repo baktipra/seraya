@@ -1,0 +1,29 @@
+ FAIL  tests/server/dashboard-project-creation-surfaces.test.tsx > SRY-039 Project Compass surfaces > renders Ringkasan as aggregate compass with one primary next step and no guest table or per-guest actions
+Expected: "Langkah berikutnya"
+Received: "<section aria-labelledby="owner-workspace-overview-title" class="mx-auto max-w-5xl space-y-10 sm:space-y-12"><header class="border-seraya-border-default bg-seraya-surface border px-5 py-7 sm:px-8 sm:py-9"><div class="flex flex-col gap-7 lg:flex-row lg:items-start lg:justify-between lg:gap-10"><div class="max-w-2xl min-w-0"><p class="text-seraya-text-muted text-[0.6875rem] font-semibold tracking-[0.16em] uppercase">Ringkasan proyek</p><p class="text-seraya-text-secondary mt-3 text-sm font-semibold">Raka &amp; Nadia</p><div class="mt-4 flex flex-wrap items-center gap-3"><span class="inline-flex min-h-6 items-center rounded-[var(--seraya-radius-pill)] border px-2.5 py-1 text-[0.6875r
+ ❯ tests/server/dashboard-project-creation-surfaces.test.tsx:70:18
+AssertionError: expected '<section aria-labelledby="owner-works…' to contain 'Langkah berikutnya'
+Expected: "Langkah berikutnya"
+Received: "<section aria-labelledby="owner-workspace-overview-title" class="mx-auto max-w-5xl space-y-10 sm:space-y-12"><header class="border-seraya-border-default bg-seraya-surface border px-5 py-7 sm:px-8 sm:py-9"><div class="flex flex-col gap-7 lg:flex-row lg:items-start lg:justify-between lg:gap-10"><div class="max-w-2xl min-w-0"><p class="text-seraya-text-muted text-[0.6875rem] font-semibold tracking-[0.16em] uppercase">Ringkasan proyek</p><p class="text-seraya-text-secondary mt-3 text-sm font-semibold">Raka &amp; Nadia</p><div class="mt-4 flex flex-wrap items-center gap-3"><span class="inline-flex min-h-6 items-center rounded-[var(--seraya-radius-pill)] border px-2.5 py-1 text-[0.6875r
+ ❯ tests/server/dashboard-project-creation-surfaces.test.tsx:70:18
+ FAIL  tests/server/dashboard-project-layout.test.tsx > SRY-031 project dashboard layout readiness scope > establishes project-scoped owner readiness for conditional navigation without relying on child-route visibility
+ ❯ tests/server/dashboard-project-layout.test.tsx:38:18
+TypeError: Cannot read properties of undefined (reading 'coupleLabel')
+ ❯ tests/server/dashboard-project-layout.test.tsx:38:18
+ FAIL  tests/server/invitation-editor-ui.test.tsx > SRY-030 invitation editor multi-event owner UI > renders the seven guided editing chapters in the required order with owner-friendly copy
+ ❯ tests/server/invitation-editor-ui.test.tsx:131:18
+AssertionError: expected '<div data-dashboard-width="wide"><sec…' to contain 'Pratinjau lokal'
+ ❯ tests/server/invitation-editor-ui.test.tsx:131:18
+ FAIL  tests/server/invitation-editor-ui.test.tsx > SRY-030 invitation editor multi-event owner UI > distinguishes the immediate local preview from the authoritative saved preview
+ ❯ tests/server/invitation-editor-ui.test.tsx:238:18
+AssertionError: expected '<div data-dashboard-width="wide"><sec…' to contain 'Diperbarui langsung dari editor. Belu…'
+ ❯ tests/server/invitation-editor-ui.test.tsx:238:18
+ FAIL  tests/server/readiness-publish-path.test.tsx > SRY-041 project compass publish handoff > hands deterministic saved changes to Undangan while Ringkasan stays focused on one primary CTA
+Expected: "Tinjau di Undangan"
+Received: "<section aria-labelledby="owner-workspace-overview-title" class="mx-auto max-w-5xl space-y-10 sm:space-y-12"><header class="border-seraya-border-default bg-seraya-surface border px-5 py-7 sm:px-8 sm:py-9"><div class="flex flex-col gap-7 lg:flex-row lg:items-start lg:justify-between lg:gap-10"><div class="max-w-2xl min-w-0"><p class="text-seraya-text-muted text-[0.6875rem] font-semibold tracking-[0.16em] uppercase">Ringkasan proyek</p><p class="text-seraya-text-secondary mt-3 text-sm font-semibold">Raka &amp; Nadia</p><div class="mt-4 flex flex-wrap items-center gap-3"><span>Perubahan belum diterbitkan</span></div><h1 class="seraya-display-md mt-4" id="owner-workspace-overview-titl
+ ❯ tests/server/readiness-publish-path.test.tsx:136:18
+AssertionError: expected '<section aria-labelledby="owner-works…' to contain 'Tinjau di Undangan'
+Expected: "Tinjau di Undangan"
+Received: "<section aria-labelledby="owner-workspace-overview-title" class="mx-auto max-w-5xl space-y-10 sm:space-y-12"><header class="border-seraya-border-default bg-seraya-surface border px-5 py-7 sm:px-8 sm:py-9"><div class="flex flex-col gap-7 lg:flex-row lg:items-start lg:justify-between lg:gap-10"><div class="max-w-2xl min-w-0"><p class="text-seraya-text-muted text-[0.6875rem] font-semibold tracking-[0.16em] uppercase">Ringkasan proyek</p><p class="text-seraya-text-secondary mt-3 text-sm font-semibold">Raka &amp; Nadia</p><div class="mt-4 flex flex-wrap items-center gap-3"><span>Perubahan belum diterbitkan</span></div><h1 class="seraya-display-md mt-4" id="owner-workspace-overview-titl
+ ❯ tests/server/readiness-publish-path.test.tsx:136:18
+exit_code=1
