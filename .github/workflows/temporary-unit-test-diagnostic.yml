@@ -1,0 +1,47 @@
+name: Temporary unit test diagnostic
+
+on:
+  push:
+    branches:
+      - release/romantic-clarity-owner-workspace
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out release branch
+        uses: actions/checkout@v4
+        with:
+          ref: release/romantic-clarity-owner-workspace
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Capture unit test output
+        shell: bash
+        run: |
+          set +e
+          npm test > /tmp/unit-test-full.log 2>&1
+          status=$?
+          tail -n 180 /tmp/unit-test-full.log > unit-test-output.txt
+          echo "exit_code=$status" >> unit-test-output.txt
+          exit 0
+
+      - name: Commit diagnostic output
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add unit-test-output.txt
+          git commit -m "Capture Romantic Clarity unit test output"
+          git push origin HEAD:release/romantic-clarity-owner-workspace
