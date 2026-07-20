@@ -1,0 +1,6 @@
+
+> seraya@0.1.0 typecheck
+> tsc --noEmit
+
+tests/server/dashboard-shell.test.tsx(42,40): error TS2739: Type '{ projectId: string; }' is missing the following properties from type '{ coupleLabel: string; projectId: string; statusLabel: string; }': coupleLabel, statusLabel
+exit_code=2
