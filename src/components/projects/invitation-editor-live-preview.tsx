@@ -11,6 +11,7 @@ import type { InvitationGalleryImage } from '@/modules/media/media.types';
 
 import { useInvitationEditorContextualSaveAction } from './invitation-editor-contextual-actions';
 import styles from './invitation-editor-live-preview.module.css';
+import workspaceStyles from './invitation-editor-romantic-clarity.module.css';
 
 export type InvitationEditorLivePreviewProps = {
   content: InvitationDraftContent;
@@ -73,6 +74,7 @@ export function InvitationEditorLivePreview({
       aria-labelledby="invitation-editor-live-preview-title"
       aria-modal={isOpen || undefined}
       className={[
+        workspaceStyles.workspace,
         isOpen
           ? 'bg-seraya-canvas fixed inset-0 z-[60] flex min-h-0 flex-col px-3 py-3 sm:px-5 sm:py-5'
           : 'sticky top-24 hidden self-start 2xl:block',
@@ -95,10 +97,10 @@ export function InvitationEditorLivePreview({
               className="text-seraya-text-primary text-sm font-semibold"
               id="invitation-editor-live-preview-title"
             >
-              Pratinjau lokal
+              Pratinjau langsung
             </p>
             <p className="text-seraya-text-muted mt-1 text-xs leading-5">
-              Diperbarui langsung dari editor. Belum dipublikasikan dari sini.
+              Mengikuti perubahan lokal. Belum dipublikasikan dari sini.
             </p>
           </div>
           <div className="flex shrink-0 flex-col items-end gap-2">
