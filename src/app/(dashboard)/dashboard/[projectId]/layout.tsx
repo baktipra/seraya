@@ -22,18 +22,40 @@ async function getProjectReadinessOrNotFound(projectId: string): Promise<Wedding
   }
 }
 
+function getWorkspaceStatusLabel(readiness: WeddingReadinessV1) {
+  switch (readiness.invitation.state) {
+    case 'published':
+      return 'Sudah dipublikasikan';
+    case 'published_with_unpublished_changes':
+      return 'Perubahan belum diterbitkan';
+    case 'ready_to_publish':
+      return 'Siap diterbitkan';
+    case 'draft_ready_unactivated':
+      return 'Draft siap ditinjau';
+    case 'draft_incomplete':
+      return 'Draft sedang disusun';
+  }
+}
+
 /**
  * Defense-in-depth project shell. The readiness read verifies the owner scope
  * before navigation renders; every direct route still owns its own authorization.
  */
 export default async function ProjectDashboardLayout({ children, params }: ProjectLayoutProps) {
   const { projectId } = await params;
-  await getProjectReadinessOrNotFound(projectId);
+  const readiness = await getProjectReadinessOrNotFound(projectId);
 
   return (
-    <div className="space-y-5 sm:space-y-7">
-      <ProjectNavigation projectId={projectId} />
-      {children}
+    <div
+      className="min-w-0 lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] lg:items-start lg:gap-8 xl:gap-10"
+      data-dashboard-width="wide"
+    >
+      <ProjectNavigation
+        coupleLabel={readiness.identity.coupleLabel}
+        projectId={projectId}
+        statusLabel={getWorkspaceStatusLabel(readiness)}
+      />
+      <div className="min-w-0">{children}</div>
     </div>
   );
 }

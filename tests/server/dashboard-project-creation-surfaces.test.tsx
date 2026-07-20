@@ -67,7 +67,7 @@ describe('SRY-039 Project Compass surfaces', () => {
       <ProjectOverviewBootstrap projectId={projectId} readiness={readiness()} />,
     );
     expect(html).toContain('Undangan belum dipublikasikan.');
-    expect(html).toContain('Langkah berikutnya');
+    expect(html).toContain('Fokus berikutnya');
     expect(html).toContain('Lengkapi undangan');
     expect(html).toContain('Progress singkat');
     expect(html).toContain('Tamu aktif');

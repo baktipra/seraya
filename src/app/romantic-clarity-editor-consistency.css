@@ -1,0 +1,114 @@
+/* Slice H editor-specific alignment. Deliberately higher specificity than Slice C. */
+
+.seraya-dashboard-content.seraya-dashboard-content
+  [data-dashboard-width='wide']
+  section[aria-labelledby='invitation-editor-title'] {
+  width: 100%;
+  max-width: var(--rc-workspace-max) !important;
+  min-width: 0;
+  margin-inline: auto;
+}
+
+.seraya-dashboard-content.seraya-dashboard-content
+  [data-dashboard-width='wide']
+  section[aria-labelledby='invitation-editor-title']
+  > :first-child {
+  border: 0 !important;
+  border-bottom: 1px solid var(--rc-rule) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  padding: 0 0 2rem !important;
+  box-shadow: none !important;
+}
+
+.seraya-dashboard-content.seraya-dashboard-content
+  [data-dashboard-width='wide']
+  section[aria-labelledby='invitation-editor-title']
+  > :first-child
+  #invitation-editor-title {
+  max-width: 44rem !important;
+  margin-top: 0.75rem !important;
+  font-size: var(--rc-page-title-size) !important;
+  font-weight: 500 !important;
+  line-height: 0.98 !important;
+  letter-spacing: -0.025em !important;
+}
+
+.seraya-dashboard-content.seraya-dashboard-content
+  [data-dashboard-width='wide']
+  section[aria-labelledby='invitation-editor-title']
+  > :first-child
+  #invitation-editor-title
+  + p {
+  max-width: 45rem !important;
+  margin-top: 0.875rem !important;
+  color: var(--seraya-text-secondary) !important;
+  font-size: 0.9375rem !important;
+  line-height: 1.7 !important;
+}
+
+.seraya-dashboard-content.seraya-dashboard-content
+  [data-dashboard-width='wide']
+  section[aria-labelledby='invitation-editor-title']
+  form
+  > div:has([data-testid='invitation-editor-save-status']) {
+  bottom: 0 !important;
+  border: 0 !important;
+  border-top: 1px solid var(--rc-rule) !important;
+  border-radius: 0 !important;
+  background: var(--rc-sticky) !important;
+  padding: 0.8rem 0 calc(0.8rem + env(safe-area-inset-bottom)) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(14px);
+}
+
+/* Ringkasan progress values are descriptive text, not large numeric metrics. */
+section[aria-labelledby='owner-workspace-overview-title'] dl dd a {
+  min-height: 2.75rem;
+  align-items: flex-start;
+  font-size: clamp(1.25rem, 2vw, 1.5rem) !important;
+  line-height: 1.15 !important;
+}
+
+@media (max-width: 1023px) {
+  :is(
+    section[aria-labelledby='guest-manager-title'] div.sticky:has(> p[aria-live='polite']),
+    section[aria-labelledby='delivery-guests-title'] > div:nth-child(2) > div.sticky
+  ) {
+    bottom: 4.5rem !important;
+  }
+
+  .seraya-dashboard-content.seraya-dashboard-content
+    [data-dashboard-width='wide']
+    section[aria-labelledby='invitation-editor-title']
+    form
+    > div:has([data-testid='invitation-editor-save-status']) {
+    bottom: 4.5rem !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .seraya-dashboard-content.seraya-dashboard-content
+    [data-dashboard-width='wide']
+    section[aria-labelledby='invitation-editor-title']
+    > :first-child {
+    padding-bottom: 1.5rem !important;
+  }
+
+  .seraya-dashboard-content.seraya-dashboard-content
+    [data-dashboard-width='wide']
+    section[aria-labelledby='invitation-editor-title']
+    > :first-child
+    #invitation-editor-title {
+    font-size: var(--rc-page-title-mobile) !important;
+  }
+
+  :is(
+      section[aria-label='Ringkasan kesiapan pengiriman'],
+      section[aria-label='Ringkasan tindak lanjut']
+    )
+    > div:last-child {
+    border-right: 0 !important;
+    padding-right: 1rem !important;
+  }
+}

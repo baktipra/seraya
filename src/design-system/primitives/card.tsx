@@ -18,7 +18,7 @@ export function Card({ className, tone = 'default', ...props }: CardProps) {
   return (
     <section
       className={cn(
-        'text-seraya-text-primary rounded-[var(--seraya-radius-lg)] border',
+        'text-seraya-text-primary rounded-[var(--seraya-radius-md)] border',
         cardToneClasses[tone],
         className,
       )}
@@ -37,7 +37,7 @@ export function CardTitle({ className, ...props }: ComponentPropsWithoutRef<'h2'
   return (
     <h2
       className={cn(
-        'text-seraya-text-primary font-serif text-[1.375rem] leading-[1.15] tracking-[-0.02em]',
+        'text-seraya-text-primary font-serif text-[1.375rem] leading-[1.08] font-medium tracking-[-0.015em]',
         className,
       )}
       {...props}
@@ -75,13 +75,11 @@ export interface CardStatProps {
 export function CardStat({ detail, label, value }: CardStatProps) {
   return (
     <div>
-      <p className="text-seraya-text-muted text-xs font-semibold tracking-[0.08em] uppercase">
-        {label}
-      </p>
-      <p className="text-seraya-text-primary mt-2 text-2xl font-semibold tracking-[-0.03em]">
+      <p className="seraya-eyebrow">{label}</p>
+      <p className="text-seraya-text-primary mt-2 font-serif text-[1.75rem] leading-none font-medium tracking-[-0.02em]">
         {value}
       </p>
-      {detail ? <p className="text-seraya-text-secondary mt-1 text-sm">{detail}</p> : null}
+      {detail ? <p className="text-seraya-text-secondary mt-1.5 text-sm">{detail}</p> : null}
     </div>
   );
 }

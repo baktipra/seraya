@@ -4,6 +4,8 @@ import { ToastProvider } from '@/design-system';
 import { siteConfig } from '@/config/site';
 
 import './globals.css';
+import './romantic-clarity-consistency.css';
+import './romantic-clarity-editor-consistency.css';
 
 export const metadata: Metadata = {
   title: {

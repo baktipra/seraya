@@ -19,15 +19,15 @@ export function DashboardShell({
   email,
   hasActiveProject,
 }: DashboardShellProps) {
-  const contextLabel = hasActiveProject ? 'Ruang undangan' : 'Belum ada undangan';
+  const contextLabel = hasActiveProject ? 'Workspace proyek' : 'Ruang undangan';
 
   return (
     <div className="bg-seraya-canvas min-h-screen">
-      <header className="border-seraya-border-default bg-seraya-surface sticky top-0 z-20 h-16 border-b">
-        <div className="mx-auto flex h-full max-w-[96rem] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-          <div className="flex min-w-0 items-center gap-4">
+      <header className="border-seraya-border-default bg-seraya-canvas/95 sticky top-0 z-40 h-16 border-b backdrop-blur-md">
+        <div className="mx-auto flex h-full max-w-[90rem] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+          <div className="flex min-w-0 items-center gap-4 lg:gap-6">
             <Link
-              className="text-seraya-text-primary shrink-0 font-serif text-2xl tracking-[-0.04em] focus-visible:rounded-sm"
+              className="text-seraya-text-primary shrink-0 font-serif text-[1.75rem] leading-none font-medium tracking-[-0.025em] focus-visible:rounded-sm"
               href="/dashboard"
             >
               {siteConfig.name}
@@ -36,22 +36,16 @@ export function DashboardShell({
               aria-hidden="true"
               className="bg-seraya-border-default hidden h-5 w-px sm:block"
             />
-            <p className="text-seraya-text-secondary hidden truncate text-sm font-medium sm:block">
-              {contextLabel}
-            </p>
+            <p className="seraya-eyebrow hidden truncate lg:block">{contextLabel}</p>
+            <DashboardDesktopNavigation />
           </div>
           <AccountMenu displayName={displayName} email={email} />
         </div>
       </header>
 
-      <div className="mx-auto flex max-w-[96rem]">
-        <aside className="border-seraya-border-default bg-seraya-surface sticky top-16 hidden h-[calc(100vh-4rem)] w-52 shrink-0 border-r px-4 py-6 md:flex md:flex-col">
-          <DashboardDesktopNavigation />
-        </aside>
-        <main className="min-w-0 flex-1 px-4 py-7 pb-24 sm:px-6 sm:py-10 sm:pb-24 lg:px-10 lg:py-12">
-          <div className="seraya-dashboard-content mx-auto w-full">{children}</div>
-        </main>
-      </div>
+      <main className="mx-auto max-w-[90rem] min-w-0 px-4 py-7 pb-24 sm:px-6 sm:py-10 sm:pb-24 lg:px-8 lg:py-12">
+        <div className="seraya-dashboard-content mx-auto w-full">{children}</div>
+      </main>
     </div>
   );
 }

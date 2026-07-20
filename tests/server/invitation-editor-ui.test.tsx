@@ -128,7 +128,7 @@ describe('SRY-030 invitation editor multi-event owner UI', () => {
     expect(html).toContain('Preview lokal');
     expect(html).toContain('data-local-preview-trigger="true"');
     expect(html).toContain('data-local-preview-desktop="true"');
-    expect(html).toContain('Pratinjau lokal');
+    expect(html).toContain('Pratinjau langsung');
     expect(html).toContain('Draf tersimpan');
     expect(html).not.toContain('Sudah dipublikasikan</span>');
     expect(html).toContain('Sapaan kecil');
@@ -235,7 +235,7 @@ describe('SRY-030 invitation editor multi-event owner UI', () => {
     expect(html).toContain('Belum ada perubahan');
     expect(html).not.toContain('>Tersimpan</p>');
     expect(html).toContain('Preview tersimpan tetap mengikuti draft dari server.');
-    expect(html).toContain('Diperbarui langsung dari editor. Belum dipublikasikan dari sini.');
+    expect(html).toContain('Mengikuti perubahan lokal. Belum dipublikasikan dari sini.');
     expect(html).toContain('data-surface="preview"');
     expect(html).toContain(`href="/dashboard/${project.id}/preview"`);
   });

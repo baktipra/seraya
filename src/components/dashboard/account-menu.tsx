@@ -38,22 +38,22 @@ export function AccountMenu({ displayName, email }: AccountMenuProps) {
         aria-controls={menuId}
         aria-expanded={open}
         aria-haspopup="menu"
-        className="border-seraya-border-default bg-seraya-surface text-seraya-text-primary hover:bg-seraya-soft focus-visible:outline-seraya-focus-ring inline-flex min-h-11 max-w-[13rem] items-center gap-2 rounded-[var(--seraya-radius-md)] border px-3 text-left text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
+        className="border-seraya-border-default bg-seraya-surface text-seraya-text-primary hover:bg-seraya-soft focus-visible:outline-seraya-focus-ring inline-flex min-h-10 max-w-[13rem] items-center gap-2 rounded-[var(--seraya-radius-sm)] border px-2.5 text-left text-sm font-medium transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
         onClick={() => setOpen((current) => !current)}
         type="button"
       >
-        <span className="bg-seraya-brand-soft text-seraya-action-primary inline-flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-bold">
+        <span className="bg-seraya-brand-soft text-seraya-action-primary inline-flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
           {label.slice(0, 1).toUpperCase()}
         </span>
-        <span className="truncate">{label}</span>
+        <span className="hidden truncate sm:block">{label}</span>
         <svg
           aria-hidden="true"
-          className="size-4 shrink-0"
+          className="hidden size-4 shrink-0 sm:block"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
-          <path d="m7 10 5 5 5-5" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+          <path d="m7 10 5 5 5-5" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" />
         </svg>
       </button>
 
@@ -61,12 +61,12 @@ export function AccountMenu({ displayName, email }: AccountMenuProps) {
         <div
           id={menuId}
           aria-label="Menu akun"
-          className="border-seraya-border-default bg-seraya-surface absolute right-0 z-40 mt-2 w-64 rounded-[var(--seraya-radius-lg)] border p-2 shadow-[var(--seraya-shadow-float)]"
+          className="border-seraya-border-default bg-seraya-surface absolute right-0 z-40 mt-2 w-64 rounded-[var(--seraya-radius-md)] border p-2 shadow-[var(--seraya-shadow-float)]"
           role="menu"
         >
           <div className="border-seraya-border-default border-b px-3 py-3">
             {displayName ? (
-              <p className="text-seraya-text-primary text-sm font-semibold">{displayName}</p>
+              <p className="text-seraya-text-primary text-sm font-medium">{displayName}</p>
             ) : null}
             <p className="text-seraya-text-secondary mt-1 truncate text-sm">
               {email ?? 'Email tidak tersedia'}
