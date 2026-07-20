@@ -18,6 +18,10 @@ vi.mock('next/link', () => ({
   ),
 }));
 
+vi.mock('next/navigation', () => ({
+  usePathname: () => '/dashboard/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+}));
+
 import { LoginForm } from '@/components/auth/login-form';
 import { DashboardEmptyState } from '@/components/dashboard/dashboard-empty-state';
 import { DashboardDesktopNavigation } from '@/components/dashboard/dashboard-navigation';
@@ -39,7 +43,13 @@ describe('SRY-039 owner workspace navigation', () => {
   });
 
   it('keeps the project journey stable through Respons Tamu and Tindak Lanjut', () => {
-    const html = renderToStaticMarkup(<ProjectNavigation projectId={projectId} />);
+    const html = renderToStaticMarkup(
+      <ProjectNavigation
+        coupleLabel="Ayu & Bima"
+        projectId={projectId}
+        statusLabel="Draft sedang disusun"
+      />,
+    );
     for (const label of [
       'Ringkasan',
       'Undangan',
@@ -53,6 +63,7 @@ describe('SRY-039 owner workspace navigation', () => {
     expect(html).toContain(`href="/dashboard/${projectId}/delivery"`);
     expect(html).toContain(`href="/dashboard/${projectId}/rsvp"`);
     expect(html).toContain(`href="/dashboard/${projectId}/follow-up"`);
+    expect(html).toContain('aria-current="page"');
     expect(html).not.toContain('coming-soon');
   });
 
