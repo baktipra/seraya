@@ -62,13 +62,28 @@
   backdrop-filter: blur(14px);
 }
 
+/* Ringkasan progress values are descriptive text, not large numeric metrics. */
+section[aria-labelledby='owner-workspace-overview-title'] dl dd a {
+  min-height: 2.75rem;
+  align-items: flex-start;
+  font-size: clamp(1.25rem, 2vw, 1.5rem) !important;
+  line-height: 1.15 !important;
+}
+
 @media (max-width: 1023px) {
+  :is(
+      section[aria-labelledby='guest-manager-title'] div.sticky:has(> p[aria-live='polite']),
+      section[aria-labelledby='delivery-guests-title'] > div:nth-child(2) > div.sticky
+    ) {
+    bottom: 4.5rem !important;
+  }
+
   .seraya-dashboard-content.seraya-dashboard-content
     [data-dashboard-width='wide']
     section[aria-labelledby='invitation-editor-title']
     form
     > div:has([data-testid='invitation-editor-save-status']) {
-    bottom: calc(4.5rem + env(safe-area-inset-bottom)) !important;
+    bottom: 4.5rem !important;
   }
 }
 
@@ -86,5 +101,13 @@
     > :first-child
     #invitation-editor-title {
     font-size: var(--rc-page-title-mobile) !important;
+  }
+
+  :is(
+      section[aria-label='Ringkasan kesiapan pengiriman'],
+      section[aria-label='Ringkasan tindak lanjut']
+    ) > div:last-child {
+    border-right: 0 !important;
+    padding-right: 1rem !important;
   }
 }
