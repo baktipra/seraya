@@ -27,21 +27,41 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Capture unit test output
+      - name: Capture concise unit test failures
         shell: bash
         run: |
           set +e
           npm test > /tmp/unit-test-full.log 2>&1
           status=$?
-          tail -n 180 /tmp/unit-test-full.log > unit-test-output.txt
-          echo "exit_code=$status" >> unit-test-output.txt
+          node <<'NODE'
+          const fs = require('fs');
+          const raw = fs.readFileSync('/tmp/unit-test-full.log', 'utf8')
+            .replace(/\u001b\[[0-9;]*m/g, '');
+          const lines = raw.split(/\r?\n/);
+          const useful = [];
+          for (let i = 0; i < lines.length; i += 1) {
+            const line = lines[i];
+            if (/^ FAIL /.test(line) || /^(AssertionError|TypeError|Error):/.test(line)) {
+              useful.push(line.slice(0, 700));
+              for (let j = i + 1; j < Math.min(lines.length, i + 10); j += 1) {
+                const next = lines[j];
+                if (/^ FAIL /.test(next)) break;
+                if (/tests\/.*:\d+:\d+/.test(next) || /^Expected:/.test(next) || /^Received:/.test(next)) {
+                  useful.push(next.slice(0, 700));
+                }
+              }
+            }
+          }
+          fs.writeFileSync('unit-test-summary.txt', `${useful.join('\n')}\n`);
+          NODE
+          echo "exit_code=$status" >> unit-test-summary.txt
           exit 0
 
-      - name: Commit diagnostic output
+      - name: Commit diagnostic summary
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add unit-test-output.txt
-          git commit -m "Capture Romantic Clarity unit test output"
+          git add unit-test-summary.txt
+          git commit -m "Capture Romantic Clarity unit test summary"
           git push origin HEAD:release/romantic-clarity-owner-workspace
