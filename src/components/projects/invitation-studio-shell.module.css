@@ -1,15 +1,14 @@
 .studio {
-  --studio-section-rail: 10.5rem;
+  --studio-section-rail: 10rem;
   --studio-preview: 17.5rem;
   --studio-sticky-top: 5rem;
-  --studio-action-height: 4.75rem;
 
   width: 100%;
   min-width: 0;
 }
 
-/* The global project layout remains the sole owner of the project sidebar.
-   Everything below is scoped to the invitation studio main-content slot. */
+/* The global project shell remains the sole owner of the project sidebar.
+   This stylesheet owns only the invitation studio inside the main slot. */
 .studio :global([data-dashboard-width='wide']) {
   width: 100%;
   min-width: 0;
@@ -103,10 +102,10 @@
   line-height: 1.4rem !important;
 }
 
-/* Three compact, readable template cards. */
+/* Template gallery: three real cards with a fixed visual rhythm. */
 .studio :global([data-invitation-editor-panel='style'] > fieldset > div:nth-child(2)) {
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  gap: 0.75rem !important;
+  gap: 0.8rem !important;
   margin-top: 0 !important;
 }
 
@@ -115,7 +114,7 @@
   position: relative;
   display: flex !important;
   min-width: 0;
-  min-height: 15.5rem;
+  min-height: 14.25rem;
   overflow: hidden;
   gap: 0 !important;
   border-radius: 0.25rem !important;
@@ -128,8 +127,8 @@
   :global(
     [data-invitation-editor-panel='style'] > fieldset > div:nth-child(2) > label > div
   ) {
-  height: 8.75rem !important;
-  min-height: 8.75rem;
+  height: 8.25rem !important;
+  min-height: 8.25rem;
   border: 0 !important;
   border-bottom: 1px solid var(--seraya-border-default) !important;
   border-radius: 0 !important;
@@ -141,7 +140,7 @@
   ) {
   display: block !important;
   min-width: 0;
-  padding: 0.75rem 0.8rem 0.85rem;
+  padding: 0.72rem 0.78rem 0.82rem;
 }
 
 .studio
@@ -153,8 +152,9 @@
       > span
       > span:first-child
   ) {
-  display: block;
+  display: block !important;
   min-width: 0;
+  overflow: hidden;
 }
 
 .studio
@@ -167,10 +167,14 @@
       > span:first-child
       > span:first-child
   ) {
+  display: block !important;
+  overflow: hidden;
   font-family: var(--font-editorial);
   font-size: 1rem !important;
   font-weight: 600 !important;
   line-height: 1.2 !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .studio
@@ -183,14 +187,13 @@
       > span:first-child
       > span:nth-child(2)
   ) {
-  display: -webkit-box !important;
-  min-height: 2.25rem;
+  display: block !important;
+  height: 2.2rem !important;
+  max-height: 2.2rem !important;
   margin-top: 0.35rem !important;
-  overflow: hidden;
+  overflow: hidden !important;
   font-size: 0.72rem !important;
   line-height: 1.1rem !important;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
 }
 
 .studio
@@ -221,7 +224,7 @@
   border-radius: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
-  padding: 1rem 0.75rem 1rem 0 !important;
+  padding: 1rem 0.72rem 1rem 0 !important;
   scrollbar-width: thin;
 }
 
@@ -235,7 +238,7 @@
   border-left: 2px solid transparent;
   border-radius: 0 !important;
   background: transparent !important;
-  padding: 0.38rem 0.5rem !important;
+  padding: 0.38rem 0.48rem !important;
 }
 
 .studio :global([data-invitation-editor-desktop-navigation] button[aria-current='step']) {
@@ -343,16 +346,19 @@
   }
 }
 
-/* Wide desktop becomes a real viewport studio: navigation, editor and preview
-   occupy row one; the action bar is an explicit second row and never overlays
-   the preview. The form stays semantically intact through display: contents. */
+/* Wide desktop uses the dashboard's otherwise-unused right gutter. The project
+   sidebar and its alignment remain untouched; only the studio main slot grows. */
 @media (min-width: 1440px) {
+  .studio {
+    width: calc(100% + clamp(0rem, (100vw - 90rem) / 2, 10rem));
+  }
+
   .studio
     :global(section[aria-labelledby='invitation-editor-title'] > :last-child > div:first-child) {
     display: grid !important;
     grid-template-columns:
       var(--studio-section-rail)
-      minmax(0, 1fr)
+      minmax(30rem, 1fr)
       var(--studio-preview) !important;
     grid-template-rows: minmax(0, 1fr) auto;
     align-items: stretch !important;
@@ -542,8 +548,8 @@
 
 @media (min-width: 1640px) {
   .studio {
-    --studio-section-rail: 11rem;
-    --studio-preview: 18.5rem;
+    --studio-section-rail: 10.5rem;
+    --studio-preview: 18rem;
   }
 
   .studio :global([data-invitation-editor-panel]) {
