@@ -1,18 +1,15 @@
 .studio {
-  --studio-section-rail: 11rem;
-  --studio-section-rail-offset: -11rem;
-  --studio-editor-min: 29rem;
-  --studio-editor-padding: 1.75rem;
-  --studio-editor-padding-offset: -1.75rem;
-  --studio-preview: 18.5rem;
+  --studio-section-rail: 10.5rem;
+  --studio-preview: 17.5rem;
   --studio-sticky-top: 5rem;
+  --studio-action-height: 4.75rem;
 
   width: 100%;
   min-width: 0;
 }
 
-/* ProjectDashboardLayout remains the only owner of the global project rail.
-   This shell controls only the invitation studio inside the main-content slot. */
+/* The global project layout remains the sole owner of the project sidebar.
+   Everything below is scoped to the invitation studio main-content slot. */
 .studio :global([data-dashboard-width='wide']) {
   width: 100%;
   min-width: 0;
@@ -51,6 +48,10 @@
   margin: 0 !important;
 }
 
+.studio :global([data-invitation-editor-panel]) {
+  min-width: 0;
+}
+
 .studio :global([data-invitation-editor-panel] > section),
 .studio :global([data-invitation-editor-panel='style'] > fieldset) {
   border: 0 !important;
@@ -65,9 +66,9 @@
   position: relative;
   align-items: flex-start !important;
   gap: 0.75rem !important;
-  margin-bottom: 1.5rem !important;
+  margin-bottom: 1.35rem !important;
   border: 0 !important;
-  padding: 0 0 1.05rem !important;
+  padding: 0 0 1rem !important;
 }
 
 .studio :global([data-invitation-editor-panel] > section > div:first-child)::after,
@@ -75,7 +76,7 @@
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 4rem;
+  width: 3.75rem;
   height: 1px;
   background: color-mix(in srgb, var(--seraya-action-primary) 65%, transparent);
   content: '';
@@ -89,20 +90,20 @@
 .studio :global([data-invitation-editor-panel] h2),
 .studio :global([data-invitation-editor-panel='style'] legend) {
   font-family: var(--font-editorial) !important;
-  font-size: clamp(2rem, 3vw, 2.55rem) !important;
+  font-size: clamp(2rem, 3vw, 2.5rem) !important;
   font-weight: 500 !important;
-  line-height: 0.98 !important;
+  line-height: 1 !important;
   letter-spacing: -0.025em !important;
 }
 
 .studio :global([data-invitation-editor-panel] h2 + p) {
   max-width: 36rem;
-  margin-top: 0.55rem !important;
+  margin-top: 0.5rem !important;
   font-size: 0.875rem !important;
-  line-height: 1.45rem !important;
+  line-height: 1.4rem !important;
 }
 
-/* Lovable-style three-card template gallery. */
+/* Three compact, readable template cards. */
 .studio :global([data-invitation-editor-panel='style'] > fieldset > div:nth-child(2)) {
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   gap: 0.75rem !important;
@@ -114,10 +115,10 @@
   position: relative;
   display: flex !important;
   min-width: 0;
-  min-height: 19rem;
+  min-height: 15.5rem;
   overflow: hidden;
   gap: 0 !important;
-  border-radius: 0.3rem !important;
+  border-radius: 0.25rem !important;
   background: var(--seraya-surface) !important;
   padding: 0 !important;
   box-shadow: none !important;
@@ -127,8 +128,8 @@
   :global(
     [data-invitation-editor-panel='style'] > fieldset > div:nth-child(2) > label > div
   ) {
-  height: 10.25rem !important;
-  min-height: 10.25rem;
+  height: 8.75rem !important;
+  min-height: 8.75rem;
   border: 0 !important;
   border-bottom: 1px solid var(--seraya-border-default) !important;
   border-radius: 0 !important;
@@ -140,7 +141,7 @@
   ) {
   display: block !important;
   min-width: 0;
-  padding: 0.85rem 0.9rem 1rem;
+  padding: 0.75rem 0.8rem 0.85rem;
 }
 
 .studio
@@ -167,9 +168,9 @@
       > span:first-child
   ) {
   font-family: var(--font-editorial);
-  font-size: 1.08rem !important;
+  font-size: 1rem !important;
   font-weight: 600 !important;
-  line-height: 1.15 !important;
+  line-height: 1.2 !important;
 }
 
 .studio
@@ -183,13 +184,13 @@
       > span:nth-child(2)
   ) {
   display: -webkit-box !important;
-  min-height: 3.45rem;
-  margin-top: 0.4rem !important;
+  min-height: 2.25rem;
+  margin-top: 0.35rem !important;
   overflow: hidden;
-  font-size: 0.75rem !important;
-  line-height: 1.15rem !important;
+  font-size: 0.72rem !important;
+  line-height: 1.1rem !important;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
 }
 
 .studio
@@ -202,159 +203,39 @@
       > span:last-child:not(:first-child)
   ) {
   position: absolute;
-  top: 0.65rem;
-  right: 0.65rem;
+  top: 0.55rem;
+  right: 0.55rem;
+  z-index: 2;
   border: 1px solid color-mix(in srgb, var(--seraya-action-primary) 24%, transparent);
-  background: color-mix(in srgb, var(--seraya-surface) 92%, transparent) !important;
+  background: color-mix(in srgb, var(--seraya-surface) 94%, transparent) !important;
   box-shadow: 0 4px 12px rgb(62 42 34 / 0.08);
   backdrop-filter: blur(8px);
 }
 
-/* The existing save and publish authority stays intact. The real surface is
-   visually expanded across the complete studio, like Lovable's bottom bar. */
-.studio :global(form > div:has([data-testid='invitation-editor-save-status'])) {
-  position: sticky;
-  bottom: 0;
-  z-index: 30;
-  box-sizing: border-box;
-  width: 100% !important;
-  margin-top: 1.75rem !important;
-  border: 1px solid var(--seraya-border-default) !important;
-  border-radius: 0 !important;
-  background: color-mix(in srgb, var(--seraya-surface) 97%, transparent) !important;
-  padding: 0.8rem 0.95rem !important;
-  box-shadow: 0 -10px 28px rgb(62 42 34 / 0.07) !important;
-  backdrop-filter: blur(18px);
-}
-
-.studio :global(form > div:has([data-testid='invitation-editor-save-status']) > div) {
-  display: grid !important;
-  grid-template-columns: minmax(11rem, 1fr) auto;
-  align-items: center !important;
-  gap: 1.25rem !important;
-}
-
-.studio
-  :global(form > div:has([data-testid='invitation-editor-save-status']) > div > div:first-child) {
-  max-width: 25rem;
-}
-
-.studio
-  :global(form > div:has([data-testid='invitation-editor-save-status']) > div > div:first-child p:first-child) {
-  font-size: 0.8125rem !important;
-  line-height: 1.2rem !important;
-}
-
-.studio
-  :global(form > div:has([data-testid='invitation-editor-save-status']) > div > div:first-child p:last-child) {
-  margin-top: 0.15rem !important;
-  font-size: 0.72rem !important;
-  line-height: 1.05rem !important;
-}
-
-.studio
-  :global(form > div:has([data-testid='invitation-editor-save-status']) > div > div:last-child) {
-  display: flex !important;
-  width: auto !important;
-  min-width: 0 !important;
-  flex-wrap: nowrap;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.55rem !important;
-}
-
-.studio
-  :global(
-    form
-      > div:has([data-testid='invitation-editor-save-status'])
-      > div
-      > div:last-child
-      > div:first-child
-  ) {
-  display: flex !important;
-  width: auto !important;
-  grid-template-columns: none !important;
-  align-items: center;
-  gap: 0.55rem !important;
-}
-
-.studio
-  :global(
-    form > div:has([data-testid='invitation-editor-save-status']) > div > div:last-child > p
-  ) {
-  display: none !important;
-}
-
-.studio
-  :global(
-    form > div:has([data-testid='invitation-editor-save-status']) > div > div:last-child button
-  ) {
-  width: auto !important;
-  min-width: 8.75rem;
-  min-height: 2.75rem;
-  border-radius: var(--seraya-radius-sm) !important;
-}
-
-.studio :global(form > div:has([data-testid='invitation-editor-save-status']) a[href$='/preview']) {
-  min-height: 2.75rem;
-  border: 1px solid var(--seraya-border-default);
-  border-radius: var(--seraya-radius-sm) !important;
-  padding: 0 0.9rem;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.studio :global([data-editor-publication-authority]) {
-  width: auto !important;
-  margin: 0 !important;
-}
-
-.studio :global([data-editor-publication-authority] > div) {
-  display: flex !important;
-  flex-wrap: nowrap;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.55rem !important;
-}
-
-.studio :global([data-editor-publication-authority] button) {
-  width: auto !important;
-  min-width: 9.5rem;
-  min-height: 2.75rem;
-  border-radius: var(--seraya-radius-sm) !important;
-}
-
-.studio :global([data-editor-publication-authority] p) {
-  max-width: 13rem;
-  margin: 0 !important;
-  text-align: left !important;
-  font-size: 0.68rem !important;
-  line-height: 1rem !important;
-}
-
+/* Section navigation belongs to the studio, not the project shell. */
 .studio :global([data-invitation-editor-desktop-navigation]) {
-  top: var(--studio-sticky-top) !important;
-  max-height: calc(100svh - 6rem) !important;
+  min-width: 0;
   overflow-y: auto;
   border: 0 !important;
   border-right: 1px solid var(--seraya-border-default) !important;
   border-radius: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
-  padding: 1.15rem 0.8rem 1rem 0 !important;
+  padding: 1rem 0.75rem 1rem 0 !important;
+  scrollbar-width: thin;
 }
 
 .studio :global([data-invitation-editor-desktop-navigation] > div:first-child) {
-  padding-right: 0.55rem !important;
-  padding-left: 0.55rem !important;
+  padding-right: 0.5rem !important;
+  padding-left: 0.5rem !important;
 }
 
 .studio :global([data-invitation-editor-desktop-navigation] button) {
-  min-height: 2.65rem !important;
+  min-height: 2.55rem !important;
   border-left: 2px solid transparent;
   border-radius: 0 !important;
   background: transparent !important;
-  padding: 0.42rem 0.55rem !important;
+  padding: 0.38rem 0.5rem !important;
 }
 
 .studio :global([data-invitation-editor-desktop-navigation] button[aria-current='step']) {
@@ -362,20 +243,19 @@
   background: color-mix(in srgb, var(--seraya-brand-soft) 62%, transparent) !important;
 }
 
+/* Real live preview panel. */
 .studio :global(aside[data-local-preview-desktop]:not([data-local-preview-overlay])) {
-  top: var(--studio-sticky-top) !important;
   min-width: 0;
-  height: calc(100svh - 6rem);
-  max-height: calc(100svh - 6rem) !important;
+  overflow: hidden;
   border-left: 1px solid var(--seraya-border-default);
-  background: color-mix(in srgb, var(--seraya-brand-soft) 25%, transparent);
-  padding: 0.85rem 0 1rem 0.95rem;
+  background: color-mix(in srgb, var(--seraya-brand-soft) 22%, transparent);
+  padding: 0.75rem 0 0.75rem 0.85rem;
 }
 
 .studio :global(aside[data-local-preview-desktop]:not([data-local-preview-overlay]) > div) {
   height: 100% !important;
   max-height: none !important;
-  overflow: visible !important;
+  overflow: hidden !important;
   border: 0 !important;
   border-radius: 0 !important;
   background: transparent !important;
@@ -389,7 +269,7 @@
       > div:first-child
   ) {
   border-bottom: 1px solid var(--seraya-border-default) !important;
-  padding: 0 0 0.75rem !important;
+  padding: 0 0 0.7rem !important;
 }
 
 .studio
@@ -398,19 +278,19 @@
   ) {
   position: relative;
   flex: none !important;
-  width: min(100%, 17.5rem);
-  height: calc(100svh - 12rem);
-  min-height: 27rem;
-  margin: 0.85rem auto 0;
+  width: min(100%, 15.75rem);
+  height: calc(100% - 4.25rem);
+  min-height: 25rem;
+  margin: 0.7rem auto 0;
   overflow-y: auto !important;
   border: 0.48rem solid #332e2b !important;
-  border-radius: 1.95rem !important;
+  border-radius: 1.9rem !important;
   outline: 1px solid rgb(255 255 255 / 0.18);
   background: #332e2b !important;
-  padding: 0.26rem !important;
+  padding: 0.24rem !important;
   box-shadow:
-    0 22px 52px rgb(50 38 32 / 0.18),
-    0 3px 10px rgb(50 38 32 / 0.12) !important;
+    0 20px 44px rgb(50 38 32 / 0.17),
+    0 3px 9px rgb(50 38 32 / 0.12) !important;
   scrollbar-width: thin;
 }
 
@@ -424,10 +304,21 @@
   min-height: 100%;
   margin-inline: auto;
   overflow: hidden;
-  border-radius: 1.3rem !important;
+  border-radius: 1.25rem !important;
 }
 
-@media (min-width: 1024px) {
+/* Mobile and laptop keep the proven vertical editor flow. */
+.studio :global(form > div:has([data-testid='invitation-editor-save-status'])) {
+  z-index: 20;
+  width: 100% !important;
+  margin: 1.5rem 0 0 !important;
+  border: 1px solid var(--seraya-border-default) !important;
+  background: color-mix(in srgb, var(--seraya-surface) 97%, transparent) !important;
+  box-shadow: 0 -8px 24px rgb(62 42 34 / 0.05) !important;
+  backdrop-filter: blur(16px);
+}
+
+@media (min-width: 1024px) and (max-width: 1439px) {
   .studio
     :global(section[aria-labelledby='invitation-editor-title'] > :last-child > div:first-child) {
     display: grid !important;
@@ -437,58 +328,227 @@
   }
 
   .studio :global(form:has([data-invitation-editor-panel])) {
-    overflow: visible;
-    padding: 1.85rem var(--studio-editor-padding) 5.5rem !important;
-  }
-
-  .studio :global(form > div:has([data-testid='invitation-editor-save-status'])) {
-    width: calc(
-      100% + var(--studio-section-rail) + var(--studio-editor-padding) +
-        var(--studio-editor-padding)
-    ) !important;
-    margin-left: calc(var(--studio-section-rail-offset) + var(--studio-editor-padding-offset)) !important;
+    padding: 1.75rem 1.75rem 5.5rem !important;
   }
 
   .studio :global([data-invitation-editor-mobile-navigation]) {
     display: none !important;
   }
+
+  .studio :global(form > div:has([data-testid='invitation-editor-save-status']) > div) {
+    display: grid !important;
+    grid-template-columns: minmax(10rem, 1fr) auto;
+    align-items: center !important;
+    gap: 1rem !important;
+  }
 }
 
+/* Wide desktop becomes a real viewport studio: navigation, editor and preview
+   occupy row one; the action bar is an explicit second row and never overlays
+   the preview. The form stays semantically intact through display: contents. */
 @media (min-width: 1440px) {
   .studio
     :global(section[aria-labelledby='invitation-editor-title'] > :last-child > div:first-child) {
+    display: grid !important;
     grid-template-columns:
       var(--studio-section-rail)
-      minmax(var(--studio-editor-min), 1fr)
-      minmax(18rem, var(--studio-preview)) !important;
+      minmax(0, 1fr)
+      var(--studio-preview) !important;
+    grid-template-rows: minmax(0, 1fr) auto;
+    align-items: stretch !important;
+    height: calc(100svh - 7.25rem);
+    min-height: 37rem;
+    overflow: hidden;
   }
 
-  .studio :global(form > div:has([data-testid='invitation-editor-save-status'])) {
-    width: calc(
-      100% + var(--studio-section-rail) + var(--studio-preview) + var(--studio-editor-padding) +
-        var(--studio-editor-padding)
-    ) !important;
+  .studio :global([data-invitation-editor-desktop-navigation]) {
+    position: relative !important;
+    top: auto !important;
+    grid-column: 1;
+    grid-row: 1;
+    height: 100%;
+    max-height: none !important;
+    align-self: stretch;
+  }
+
+  .studio :global(form:has([data-invitation-editor-panel])) {
+    display: contents;
+  }
+
+  .studio :global(form:has([data-invitation-editor-panel]) > [role='alert']) {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: start;
+    z-index: 2;
+    margin: 1rem 1.5rem 0 !important;
+  }
+
+  .studio :global([data-invitation-editor-panel]) {
+    grid-column: 2;
+    grid-row: 1;
+    height: 100%;
+    min-height: 0;
+    margin: 0 !important;
+    overflow-y: auto;
+    padding: 1.35rem 1.5rem 1.5rem !important;
+    scrollbar-width: thin;
+  }
+
+  .studio
+    :global(form:has(> [role='alert']) > [data-invitation-editor-panel]) {
+    padding-top: 6rem !important;
   }
 
   .studio :global(aside[data-local-preview-desktop]:not([data-local-preview-overlay])) {
+    position: relative !important;
+    top: auto !important;
     display: block !important;
+    grid-column: 3;
+    grid-row: 1;
+    height: 100%;
+    max-height: none !important;
+    align-self: stretch;
   }
 
   .studio :global(button[data-local-preview-trigger]) {
     display: none !important;
   }
+
+  .studio :global(form > div:has([data-testid='invitation-editor-save-status'])) {
+    position: relative !important;
+    bottom: auto !important;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100% !important;
+    margin: 0 !important;
+    border-width: 1px 0 0 !important;
+    border-radius: 0 !important;
+    padding: 0.7rem 0.85rem !important;
+    box-shadow: 0 -8px 24px rgb(62 42 34 / 0.06) !important;
+  }
+
+  .studio :global(form > div:has([data-testid='invitation-editor-save-status']) > div) {
+    display: grid !important;
+    grid-template-columns: minmax(12rem, 1fr) auto;
+    align-items: center !important;
+    gap: 1.25rem !important;
+  }
+
+  .studio
+    :global(form > div:has([data-testid='invitation-editor-save-status']) > div > div:first-child) {
+    max-width: 27rem;
+  }
+
+  .studio
+    :global(
+      form > div:has([data-testid='invitation-editor-save-status']) > div > div:first-child p:first-child
+    ) {
+    font-size: 0.8rem !important;
+    line-height: 1.15rem !important;
+  }
+
+  .studio
+    :global(
+      form > div:has([data-testid='invitation-editor-save-status']) > div > div:first-child p:last-child
+    ) {
+    margin-top: 0.1rem !important;
+    font-size: 0.7rem !important;
+    line-height: 1rem !important;
+  }
+
+  .studio
+    :global(form > div:has([data-testid='invitation-editor-save-status']) > div > div:last-child) {
+    display: flex !important;
+    width: auto !important;
+    min-width: 0 !important;
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem !important;
+  }
+
+  .studio
+    :global(
+      form
+        > div:has([data-testid='invitation-editor-save-status'])
+        > div
+        > div:last-child
+        > div:first-child
+    ) {
+    display: flex !important;
+    width: auto !important;
+    align-items: center;
+    gap: 0.5rem !important;
+    order: 2;
+  }
+
+  .studio
+    :global(form > div:has([data-testid='invitation-editor-save-status']) a[href$='/preview']) {
+    min-height: 2.65rem;
+    border: 1px solid var(--seraya-border-default);
+    border-radius: var(--seraya-radius-sm) !important;
+    padding: 0 0.85rem;
+    text-decoration: none;
+    white-space: nowrap;
+    order: 1;
+  }
+
+  .studio
+    :global(
+      form > div:has([data-testid='invitation-editor-save-status']) > div > div:last-child > p
+    ) {
+    display: none !important;
+  }
+
+  .studio
+    :global(
+      form > div:has([data-testid='invitation-editor-save-status']) > div > div:last-child button
+    ) {
+    width: auto !important;
+    min-width: 8.75rem;
+    min-height: 2.65rem;
+    border-radius: var(--seraya-radius-sm) !important;
+  }
+
+  .studio :global([data-editor-publication-authority]) {
+    width: auto !important;
+    margin: 0 !important;
+    order: 3;
+  }
+
+  .studio :global([data-editor-publication-authority] > div) {
+    display: flex !important;
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem !important;
+  }
+
+  .studio :global([data-editor-publication-authority] button) {
+    width: auto !important;
+    min-width: 9.5rem;
+    min-height: 2.65rem;
+    border-radius: var(--seraya-radius-sm) !important;
+  }
+
+  .studio :global([data-editor-publication-authority] p) {
+    max-width: 13rem;
+    margin: 0 !important;
+    text-align: left !important;
+    font-size: 0.68rem !important;
+    line-height: 1rem !important;
+  }
 }
 
 @media (min-width: 1640px) {
   .studio {
-    --studio-preview: 20rem;
+    --studio-section-rail: 11rem;
+    --studio-preview: 18.5rem;
   }
-}
 
-@media (max-width: 1279px) and (min-width: 1024px) {
-  .studio
-    :global(form > div:has([data-testid='invitation-editor-save-status']) > div > div:last-child) {
-    flex-wrap: wrap;
+  .studio :global([data-invitation-editor-panel]) {
+    padding-right: 1.75rem !important;
+    padding-left: 1.75rem !important;
   }
 }
 
@@ -502,21 +562,8 @@
     min-height: 0;
   }
 
-  .studio :global(form > div:has([data-testid='invitation-editor-save-status'])) {
-    width: 100% !important;
-    margin-left: 0 !important;
-    border-radius: var(--seraya-radius-sm) !important;
-  }
-
   .studio :global(form > div:has([data-testid='invitation-editor-save-status']) > div) {
     grid-template-columns: minmax(0, 1fr) !important;
-  }
-
-  .studio
-    :global(form > div:has([data-testid='invitation-editor-save-status']) > div > div:last-child) {
-    width: 100% !important;
-    flex-wrap: wrap;
-    justify-content: stretch;
   }
 }
 
