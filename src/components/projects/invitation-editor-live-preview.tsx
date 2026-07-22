@@ -121,16 +121,20 @@ export function InvitationEditorLivePreview({
           </div>
         </div>
 
-        <div
-          className={`${styles.device} bg-seraya-soft min-h-0 flex-1 overflow-y-auto overscroll-contain p-2 sm:p-3`}
-          data-local-preview-device
-          tabIndex={0}
-        >
-          <InvitationTemplateRenderer
-            invitation={invitation}
-            surface="preview"
-            templateKey={content.templateKey}
-          />
+        <div className={styles.deviceShell} data-local-preview-device>
+          <span aria-hidden="true" className={styles.deviceSpeaker} />
+          <div
+            className={styles.deviceScreen}
+            data-local-preview-screen
+            tabIndex={0}
+          >
+            <InvitationTemplateRenderer
+              invitation={invitation}
+              surface="preview"
+              templateKey={content.templateKey}
+            />
+          </div>
+          <span aria-hidden="true" className={styles.deviceHomeIndicator} />
         </div>
       </div>
     </aside>
