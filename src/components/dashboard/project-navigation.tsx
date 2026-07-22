@@ -113,7 +113,7 @@ export function ProjectNavigation({
 
   return (
     <>
-      <aside className="border-seraya-border-default hidden min-w-0 border-r pr-6 lg:sticky lg:top-24 lg:flex lg:h-[calc(100vh-7rem)] lg:w-60 lg:flex-col">
+      <aside className="border-seraya-border-default hidden min-w-0 border-r pr-6 lg:sticky lg:top-24 lg:flex lg:h-[calc(100svh-7.25rem)] lg:w-60 lg:flex-col">
         <div className="px-2 pt-1">
           <p className="seraya-eyebrow">Proyek</p>
           <p className="text-seraya-text-primary mt-2 font-serif text-xl leading-tight font-medium tracking-[-0.015em]">
@@ -131,7 +131,7 @@ export function ProjectNavigation({
             />
           ))}
         </nav>
-        <div className="border-seraya-border-default mt-auto border-t px-2 pt-5 pb-2">
+        <div className="border-seraya-border-default mt-auto flex min-h-[4.25rem] items-center border-t px-2">
           <Link
             className="text-seraya-text-muted hover:text-seraya-action-primary focus-visible:outline-seraya-focus-ring inline-flex min-h-10 items-center text-sm font-medium transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
             href="/dashboard"
