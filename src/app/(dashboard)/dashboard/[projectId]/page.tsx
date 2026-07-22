@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 
 import { ProjectOverviewBootstrap } from '@/components/projects/project-overview-bootstrap';
+import { WorkspacePage } from '@/components/workspace/workspace-page';
 import { getWeddingReadinessForRequest } from '@/modules/readiness';
 import type { WeddingReadinessV1 } from '@/modules/readiness';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
@@ -29,5 +30,9 @@ export default async function ProjectDashboardPage({ params }: ProjectDashboardP
   const { projectId } = await params;
   const readiness = await getProjectReadinessOrNotFound(projectId);
 
-  return <ProjectOverviewBootstrap projectId={projectId} readiness={readiness} />;
+  return (
+    <WorkspacePage width="standard">
+      <ProjectOverviewBootstrap projectId={projectId} readiness={readiness} />
+    </WorkspacePage>
+  );
 }
