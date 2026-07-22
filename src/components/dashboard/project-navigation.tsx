@@ -131,7 +131,7 @@ export function ProjectNavigation({
             />
           ))}
         </nav>
-        <div className="border-seraya-border-default mt-auto flex min-h-[4.25rem] items-center border-t px-2">
+        <div className="border-seraya-border-default mt-auto flex min-h-20 items-center border-t px-2">
           <Link
             className="text-seraya-text-muted hover:text-seraya-action-primary focus-visible:outline-seraya-focus-ring inline-flex min-h-10 items-center text-sm font-medium transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
             href="/dashboard"
