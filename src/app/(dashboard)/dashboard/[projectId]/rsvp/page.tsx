@@ -50,7 +50,7 @@ export default async function RsvpAnalyticsPage({ params, searchParams }: RsvpAn
   const screen = await getResponseScreenOrNotFound(projectId);
 
   return (
-    <WorkspacePage width="operations">
+    <WorkspacePage kind="responses" width="operations">
       <GuestResponseWorkspace
         analytics={screen.rsvp.analytics}
         entries={screen.guestbook.entries}

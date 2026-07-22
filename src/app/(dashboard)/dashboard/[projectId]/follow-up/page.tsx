@@ -33,7 +33,7 @@ export default async function GuestFollowUpPage({ params }: GuestFollowUpPagePro
   const center = await getFollowUpCenterOrNotFound(projectId);
 
   return (
-    <WorkspacePage width="operations">
+    <WorkspacePage kind="follow-up" width="operations">
       <CanonicalGuestFollowUpCenter
         isPublished={center.isPublished}
         projectId={center.project.id}

@@ -73,7 +73,7 @@ export default async function InvitationEditorPage({ params }: InvitationEditorP
   const screen = await getInvitationEditorScreenOrNotFound(projectId);
 
   return (
-    <WorkspacePage width="studio">
+    <WorkspacePage kind="studio" width="studio">
       <InvitationStudioShell>
         <InvitationEditor
           draft={screen.editor.draft}

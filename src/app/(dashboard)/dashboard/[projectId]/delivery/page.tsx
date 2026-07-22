@@ -81,7 +81,7 @@ export default async function DeliveryCenterPage({ params }: DeliveryCenterPageP
 
   if (screen.kind === 'blocked') {
     return (
-      <WorkspacePage width="operations">
+      <WorkspacePage kind="delivery" width="operations">
         <DeliveryBlockedState projectId={projectId} />
       </WorkspacePage>
     );
@@ -90,7 +90,7 @@ export default async function DeliveryCenterPage({ params }: DeliveryCenterPageP
   const { deliveryCenter } = screen;
 
   return (
-    <WorkspacePage width="operations">
+    <WorkspacePage kind="delivery" width="operations">
       <GuestDeliveryCenter
         copyWhatsAppNumbersAction={copySelectedDeliveryWhatsAppNumbersAction.bind(null, {
           projectId: deliveryCenter.project.id,

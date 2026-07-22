@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export default function NewProjectPage() {
   return (
-    <WorkspacePage align="center" width="standard">
+    <WorkspacePage align="center" kind="onboarding" width="standard">
       <ProjectSetupForm />
     </WorkspacePage>
   );

@@ -1,0 +1,80 @@
+:root {
+  --seraya-workspace-flow-gap: clamp(1.75rem, 2.2vw, 2.25rem);
+  --seraya-workspace-flow-gap-compact: clamp(1.35rem, 1.8vw, 1.75rem);
+  --seraya-workspace-section-gap: clamp(1rem, 1.4vw, 1.25rem);
+  --seraya-workspace-header-end-space: clamp(1.5rem, 2vw, 2rem);
+}
+
+[data-workspace-page] {
+  min-width: 0;
+}
+
+[data-workspace-page] > * {
+  width: 100%;
+  min-width: 0;
+}
+
+[data-workspace-page][data-workspace-anatomy='compass'] {
+  --workspace-page-flow-gap: var(--seraya-workspace-flow-gap);
+}
+
+[data-workspace-page][data-workspace-anatomy='operations'] {
+  --workspace-page-flow-gap: var(--seraya-workspace-flow-gap-compact);
+}
+
+[data-workspace-page][data-workspace-anatomy='onboarding'] > *,
+[data-workspace-page][data-workspace-anatomy='studio'] > *,
+[data-workspace-page][data-workspace-kind='guests'] > * {
+  margin-block: 0;
+  margin-inline: 0;
+}
+
+[data-workspace-page][data-workspace-kind='compass'] > section,
+[data-workspace-page][data-workspace-kind='delivery'] > section,
+[data-workspace-page][data-workspace-kind='responses'] > section,
+[data-workspace-page][data-workspace-kind='follow-up'] > section {
+  display: grid;
+  gap: var(--workspace-page-flow-gap);
+  margin-block: 0;
+  margin-inline: 0;
+}
+
+[data-workspace-page][data-workspace-kind='compass'] > section > :where(* + *),
+[data-workspace-page][data-workspace-kind='delivery'] > section > :where(* + *),
+[data-workspace-page][data-workspace-kind='responses'] > section > :where(* + *),
+[data-workspace-page][data-workspace-kind='follow-up'] > section > :where(* + *) {
+  margin-top: 0;
+}
+
+[data-workspace-page][data-workspace-kind='compass'] > section > header,
+[data-workspace-page][data-workspace-kind='delivery'] > section > header,
+[data-workspace-page][data-workspace-kind='responses'] > section > header,
+[data-workspace-page][data-workspace-kind='follow-up'] > section > header {
+  min-width: 0;
+  margin: 0;
+}
+
+[data-workspace-page][data-workspace-kind='delivery'] > section > section,
+[data-workspace-page][data-workspace-kind='responses'] > section > section,
+[data-workspace-page][data-workspace-kind='follow-up'] > section > section {
+  min-width: 0;
+  margin: 0;
+}
+
+[data-workspace-page][data-workspace-kind='responses'] > section > section {
+  padding-top: 0;
+}
+
+[data-workspace-page][data-workspace-anatomy='compass'] h1,
+[data-workspace-page][data-workspace-anatomy='operations'] h1 {
+  scroll-margin-top: 5.5rem;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --seraya-workspace-flow-gap: 1.75rem;
+    --seraya-workspace-flow-gap-compact: 1.4rem;
+    --seraya-workspace-section-gap: 1rem;
+    --seraya-workspace-header-end-space: 1.4rem;
+  }
+}

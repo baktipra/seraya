@@ -31,7 +31,7 @@ export default async function ProjectDashboardPage({ params }: ProjectDashboardP
   const readiness = await getProjectReadinessOrNotFound(projectId);
 
   return (
-    <WorkspacePage width="standard">
+    <WorkspacePage kind="compass" width="standard">
       <ProjectOverviewBootstrap projectId={projectId} readiness={readiness} />
     </WorkspacePage>
   );

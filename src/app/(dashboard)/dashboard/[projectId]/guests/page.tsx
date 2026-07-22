@@ -31,7 +31,7 @@ export default async function GuestsPage({ params }: GuestsPageProps) {
   const manager = await loadGuestManager(projectId);
 
   return (
-    <WorkspacePage width="operations">
+    <WorkspacePage kind="guests" width="operations">
       <GuestManager
         initialGuests={manager.guests}
         prepareBatchAction={prepareMissingPersonalGuestLinksForDeliveryAction.bind(null, {
