@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 
 import { CanonicalGuestFollowUpCenter } from '@/components/projects/canonical-guest-follow-up-center';
+import { WorkspacePage } from '@/components/workspace/workspace-page';
 import { getOwnedProjectContextForRequest } from '@/modules/auth/dashboard-request-context';
 import { prepareGuestFollowUpHandoffAction } from '@/modules/follow-up/follow-up.actions';
 import { getGuestFollowUpCenterForVerifiedProject } from '@/modules/follow-up/follow-up.service';
@@ -32,22 +33,24 @@ export default async function GuestFollowUpPage({ params }: GuestFollowUpPagePro
   const center = await getFollowUpCenterOrNotFound(projectId);
 
   return (
-    <CanonicalGuestFollowUpCenter
-      isPublished={center.isPublished}
-      projectId={center.project.id}
-      rows={center.rows.map((row) => ({
-        ...row,
-        ...(row.eligibility.canPrepareEventReminder || row.eligibility.canPrepareRsvpReminder
-          ? {
-              handoffAction: prepareGuestFollowUpHandoffAction.bind(null, {
-                guestId: row.guestId,
-                projectId: center.project.id,
-              }),
-            }
-          : {}),
-      }))}
-      summary={center.summary}
-      timezone={center.project.default_timezone}
-    />
+    <WorkspacePage width="operations">
+      <CanonicalGuestFollowUpCenter
+        isPublished={center.isPublished}
+        projectId={center.project.id}
+        rows={center.rows.map((row) => ({
+          ...row,
+          ...(row.eligibility.canPrepareEventReminder || row.eligibility.canPrepareRsvpReminder
+            ? {
+                handoffAction: prepareGuestFollowUpHandoffAction.bind(null, {
+                  guestId: row.guestId,
+                  projectId: center.project.id,
+                }),
+              }
+            : {}),
+        }))}
+        summary={center.summary}
+        timezone={center.project.default_timezone}
+      />
+    </WorkspacePage>
   );
 }

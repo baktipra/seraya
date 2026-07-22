@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 
 import { InvitationEditor } from '@/components/projects/invitation-editor';
 import { InvitationStudioShell } from '@/components/projects/invitation-studio-shell';
+import { WorkspacePage } from '@/components/workspace/workspace-page';
 import { getOwnedProjectContextForRequest } from '@/modules/auth/dashboard-request-context';
 import {
   InvitationEditorDraftUnavailableError,
@@ -72,19 +73,21 @@ export default async function InvitationEditorPage({ params }: InvitationEditorP
   const screen = await getInvitationEditorScreenOrNotFound(projectId);
 
   return (
-    <InvitationStudioShell>
-      <InvitationEditor
-        draft={screen.editor.draft}
-        galleryImages={screen.galleryImages}
-        project={{
-          event_date_primary: screen.editor.project.event_date_primary,
-        }}
-        projectId={screen.editor.project.id}
-        readiness={{
-          identity: screen.readiness.identity,
-          invitation: screen.readiness.invitation,
-        }}
-      />
-    </InvitationStudioShell>
+    <WorkspacePage width="studio">
+      <InvitationStudioShell>
+        <InvitationEditor
+          draft={screen.editor.draft}
+          galleryImages={screen.galleryImages}
+          project={{
+            event_date_primary: screen.editor.project.event_date_primary,
+          }}
+          projectId={screen.editor.project.id}
+          readiness={{
+            identity: screen.readiness.identity,
+            invitation: screen.readiness.invitation,
+          }}
+        />
+      </InvitationStudioShell>
+    </WorkspacePage>
   );
 }

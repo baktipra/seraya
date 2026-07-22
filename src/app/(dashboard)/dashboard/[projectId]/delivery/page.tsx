@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 
 import { GuestDeliveryCenter } from '@/components/projects/guest-delivery-center';
+import { WorkspacePage } from '@/components/workspace/workspace-page';
 import { getOwnedProjectContextForRequest } from '@/modules/auth/dashboard-request-context';
 import {
   copySelectedDeliveryWhatsAppNumbersAction,
@@ -31,7 +32,7 @@ export const fetchCache = 'force-no-store';
 
 function DeliveryBlockedState({ projectId }: { projectId: string }) {
   return (
-    <section aria-labelledby="delivery-blocked-title" className="mx-auto max-w-3xl">
+    <section aria-labelledby="delivery-blocked-title" className="max-w-3xl">
       <div className="border-seraya-border-default bg-seraya-surface rounded-[var(--seraya-radius-lg)] border px-5 py-7 shadow-[var(--seraya-shadow-soft)] sm:px-7 sm:py-8">
         <p className="text-seraya-action-primary text-xs font-semibold tracking-[0.14em] uppercase">
           Bagikan
@@ -79,45 +80,51 @@ export default async function DeliveryCenterPage({ params }: DeliveryCenterPageP
   const screen = await getDeliveryScreenOrNotFound(projectId);
 
   if (screen.kind === 'blocked') {
-    return <DeliveryBlockedState projectId={projectId} />;
+    return (
+      <WorkspacePage width="operations">
+        <DeliveryBlockedState projectId={projectId} />
+      </WorkspacePage>
+    );
   }
 
   const { deliveryCenter } = screen;
 
   return (
-    <GuestDeliveryCenter
-      copyWhatsAppNumbersAction={copySelectedDeliveryWhatsAppNumbersAction.bind(null, {
-        projectId: deliveryCenter.project.id,
-      })}
-      projectId={deliveryCenter.project.id}
-      prepareBatchAction={prepareMissingPersonalGuestLinksForDeliveryAction.bind(null, {
-        projectId: deliveryCenter.project.id,
-      })}
-      rows={deliveryCenter.rows.map(({ guestId, ...row }, rowKey) => {
-        const readiness = deriveDeliveryReadiness(row);
-        return {
-          ...row,
-          ...(readiness.canPrepareNewLink
-            ? {
-                prepareAction: preparePersonalGuestLinkForDeliveryAction.bind(null, {
-                  guestId,
-                  projectId: deliveryCenter.project.id,
-                }),
-              }
-            : {}),
-          ...(readiness.isReadyToDistribute
-            ? {
-                reaccessAction: reaccessOrPrepareCanonicalInitialHandoffAction.bind(null, {
-                  guestId,
-                  projectId: deliveryCenter.project.id,
-                }),
-              }
-            : {}),
-          guestId,
-          rowKey,
-        };
-      })}
-      summary={deliveryCenter.summary}
-    />
+    <WorkspacePage width="operations">
+      <GuestDeliveryCenter
+        copyWhatsAppNumbersAction={copySelectedDeliveryWhatsAppNumbersAction.bind(null, {
+          projectId: deliveryCenter.project.id,
+        })}
+        projectId={deliveryCenter.project.id}
+        prepareBatchAction={prepareMissingPersonalGuestLinksForDeliveryAction.bind(null, {
+          projectId: deliveryCenter.project.id,
+        })}
+        rows={deliveryCenter.rows.map(({ guestId, ...row }, rowKey) => {
+          const readiness = deriveDeliveryReadiness(row);
+          return {
+            ...row,
+            ...(readiness.canPrepareNewLink
+              ? {
+                  prepareAction: preparePersonalGuestLinkForDeliveryAction.bind(null, {
+                    guestId,
+                    projectId: deliveryCenter.project.id,
+                  }),
+                }
+              : {}),
+            ...(readiness.isReadyToDistribute
+              ? {
+                  reaccessAction: reaccessOrPrepareCanonicalInitialHandoffAction.bind(null, {
+                    guestId,
+                    projectId: deliveryCenter.project.id,
+                  }),
+                }
+              : {}),
+            guestId,
+            rowKey,
+          };
+        })}
+        summary={deliveryCenter.summary}
+      />
+    </WorkspacePage>
   );
 }
