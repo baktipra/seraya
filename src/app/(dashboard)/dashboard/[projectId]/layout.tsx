@@ -40,6 +40,9 @@ function getWorkspaceStatusLabel(readiness: WeddingReadinessV1) {
 /**
  * Defense-in-depth project shell. The readiness read verifies the owner scope
  * before navigation renders; every direct route still owns its own authorization.
+ *
+ * Geometry is intentionally owned here: one 15rem project rail, one 2rem gap,
+ * and one minmax content slot shared by every project workspace.
  */
 export default async function ProjectDashboardLayout({ children, params }: ProjectLayoutProps) {
   const { projectId } = await params;
@@ -47,15 +50,18 @@ export default async function ProjectDashboardLayout({ children, params }: Proje
 
   return (
     <div
-      className="min-w-0 lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] lg:items-start lg:gap-8 xl:gap-10"
+      className="min-w-0 lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] lg:items-start lg:gap-8"
       data-dashboard-width="wide"
+      data-project-workspace-shell
     >
       <ProjectNavigation
         coupleLabel={readiness.identity.coupleLabel}
         projectId={projectId}
         statusLabel={getWorkspaceStatusLabel(readiness)}
       />
-      <div className="min-w-0">{children}</div>
+      <div className="min-w-0" data-project-workspace-main>
+        {children}
+      </div>
     </div>
   );
 }
