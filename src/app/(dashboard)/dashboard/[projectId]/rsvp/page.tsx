@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 
 import { GuestResponseWorkspace } from '@/components/projects/guest-response-workspace';
+import { WorkspacePage } from '@/components/workspace/workspace-page';
 import { getOwnedProjectContextForRequest } from '@/modules/auth/dashboard-request-context';
 import { getGuestbookInboxForVerifiedProject } from '@/modules/guestbook';
 import { getRsvpAnalyticsForVerifiedProject } from '@/modules/guests/rsvp-analytics.service';
@@ -49,12 +50,14 @@ export default async function RsvpAnalyticsPage({ params, searchParams }: RsvpAn
   const screen = await getResponseScreenOrNotFound(projectId);
 
   return (
-    <GuestResponseWorkspace
-      analytics={screen.rsvp.analytics}
-      entries={screen.guestbook.entries}
-      initialTab={tab === 'ucapan' ? 'guestbook' : 'responses'}
-      projectId={screen.rsvp.project.id}
-      timezone={screen.guestbook.project.defaultTimezone}
-    />
+    <WorkspacePage width="operations">
+      <GuestResponseWorkspace
+        analytics={screen.rsvp.analytics}
+        entries={screen.guestbook.entries}
+        initialTab={tab === 'ucapan' ? 'guestbook' : 'responses'}
+        projectId={screen.rsvp.project.id}
+        timezone={screen.guestbook.project.defaultTimezone}
+      />
+    </WorkspacePage>
   );
 }
