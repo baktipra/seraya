@@ -3,47 +3,22 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useActionState, useEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 
 import { siteConfig } from '@/config/site';
 import { Button, Dialog, useToast } from '@/design-system';
-import { type ProjectPublishEligibility } from '@/modules/payments/payment.types';
+import type { ProjectPublishEligibility } from '@/modules/payments/payment.types';
 import { initialPublishInvitationActionState } from '@/modules/publications/publication.action-state';
 import { publishInvitationAction } from '@/modules/publications/publication.actions';
 
-import authorityStyles from './invitation-editor-authority.module.css';
+import { useInvitationEditorUnsavedChanges } from './invitation-editor-contextual-actions';
 
 type PublishInvitationControlsProps = {
-  /**
-   * The default surface retains the original publication panel. The readiness
-   * surface intentionally renders only the one explicit manual publish control
-   * so project home does not become a second billing or link-management page.
-   */
   presentation?: 'default' | 'readiness';
-  /**
-   * Readiness knows whether the owner is creating the first snapshot or
-   * replacing an existing immutable snapshot without needing snapshot payload
-   * data in its DTO.
-   */
   intent?: 'initial' | 'republish';
   hasActiveDraft: boolean;
   projectId: string;
   publishedSlug: string | null;
   publishEligibility: ProjectPublishEligibility;
-};
-
-type InvitationEditorAuthorityBridge = {
-  actionTarget: HTMLElement | null;
-  hasUnsavedEditorChanges: boolean;
-  isResolved: boolean;
-  mobileStatusTarget: HTMLElement | null;
-};
-
-const initialEditorAuthorityBridge: InvitationEditorAuthorityBridge = {
-  actionTarget: null,
-  hasUnsavedEditorChanges: false,
-  isResolved: false,
-  mobileStatusTarget: null,
 };
 
 function getPublicInvitationUrl(slug: string) {
@@ -80,73 +55,10 @@ function getBlockedPublishCopy(
 }
 
 /**
- * Slice F keeps the server snapshot contract unchanged while consolidating the
- * editor's action authority. The bridge reads the editor's explicit save status,
- * moves publication controls into the existing sticky action dock, and blocks
- * publication whenever the browser is showing local changes that are not yet in
- * the server-backed draft.
+ * Explicit publication authority. Readiness presentation now renders exactly
+ * where it appears in JSX and subscribes to editor dirty state through React,
+ * without DOM discovery, text parsing, observers, or portals.
  */
-function useInvitationEditorAuthority(
-  presentation: PublishInvitationControlsProps['presentation'],
-): InvitationEditorAuthorityBridge {
-  const [bridge, setBridge] = useState(initialEditorAuthorityBridge);
-
-  useEffect(() => {
-    if (presentation !== 'readiness') {
-      return;
-    }
-
-    const editorRoot = document.querySelector<HTMLElement>(
-      '[aria-labelledby="invitation-editor-title"]',
-    );
-    const saveStatus = editorRoot?.querySelector<HTMLElement>(
-      '[data-testid="invitation-editor-save-status"]',
-    );
-    const actionTarget =
-      saveStatus?.nextElementSibling instanceof HTMLElement ? saveStatus.nextElementSibling : null;
-    const mobileNavigation = editorRoot?.querySelector<HTMLElement>(
-      '[data-invitation-editor-mobile-navigation]',
-    );
-    const mobileNavigationSummary = mobileNavigation?.firstElementChild?.firstElementChild;
-    const mobileStatusTarget =
-      mobileNavigationSummary instanceof HTMLElement ? mobileNavigationSummary : null;
-
-    const syncAuthorityState = () => {
-      const statusLabel = saveStatus?.querySelector('p')?.textContent?.trim() ?? '';
-      const hasUnsavedEditorChanges =
-        statusLabel === 'Belum disimpan' || statusLabel.startsWith('Menyimpan perubahan');
-
-      editorRoot?.setAttribute(
-        'data-editor-authority-state',
-        hasUnsavedEditorChanges ? 'dirty' : 'saved',
-      );
-      setBridge({
-        actionTarget,
-        hasUnsavedEditorChanges,
-        isResolved: true,
-        mobileStatusTarget,
-      });
-    };
-
-    syncAuthorityState();
-
-    const observer = new MutationObserver(syncAuthorityState);
-
-    if (saveStatus) {
-      observer.observe(saveStatus, { characterData: true, childList: true, subtree: true });
-    }
-
-    return () => {
-      observer.disconnect();
-      editorRoot?.removeAttribute('data-editor-authority-state');
-    };
-  }, [presentation]);
-
-  return presentation === 'readiness'
-    ? bridge
-    : { ...initialEditorAuthorityBridge, isResolved: true };
-}
-
 export function PublishInvitationControls({
   hasActiveDraft,
   intent,
@@ -164,26 +76,15 @@ export function PublishInvitationControls({
     action,
     initialPublishInvitationActionState,
   );
-  const editorAuthority = useInvitationEditorAuthority(presentation);
+  const hasUnsavedEditorChanges = useInvitationEditorUnsavedChanges();
   const effectivePublishedSlug = publishedSlug ?? state.publishedSlug ?? null;
   const publicUrl = effectivePublishedSlug ? getPublicInvitationUrl(effectivePublishedSlug) : null;
   const hasPublishedSnapshot = Boolean(publicUrl);
   const isRepublish = intent ? intent === 'republish' : hasPublishedSnapshot;
   const canPublish =
-    hasActiveDraft && publishEligibility.allowed && !editorAuthority.hasUnsavedEditorChanges;
-  const publishActionLabel =
-    presentation === 'readiness'
-      ? isRepublish
-        ? 'Terbitkan perubahan'
-        : 'Terbitkan undangan'
-      : isRepublish
-        ? 'Terbitkan perubahan'
-        : 'Publikasikan undangan';
-  const dialogTitle = isRepublish
-    ? 'Terbitkan perubahan?'
-    : presentation === 'readiness'
-      ? 'Terbitkan undangan?'
-      : 'Publikasikan undangan?';
+    hasActiveDraft && publishEligibility.allowed && !hasUnsavedEditorChanges && !isPending;
+  const publishActionLabel = isRepublish ? 'Terbitkan perubahan' : 'Terbitkan undangan';
+  const dialogTitle = isRepublish ? 'Terbitkan perubahan?' : 'Terbitkan undangan?';
   const dialogDescription = isRepublish
     ? 'Perubahan ini akan terlihat pada Link Publik dan semua Undangan Pribadi aktif. Tautan tamu tidak berubah.'
     : 'Setelah diterbitkan, Link Publik dapat dibuka oleh tamu. Undangan Pribadi dapat disiapkan dari halaman Bagikan.';
@@ -192,19 +93,14 @@ export function PublishInvitationControls({
     ? null
     : getBlockedPublishCopy(
         hasActiveDraft,
-        editorAuthority.hasUnsavedEditorChanges,
+        hasUnsavedEditorChanges,
         isRepublish,
         publishEligibility,
       );
 
   useEffect(() => {
-    if (state.status !== 'success' || !state.publishedSlug) {
-      return;
-    }
-
-    if (lastPublishedSlugRef.current === state.publishedSlug) {
-      return;
-    }
+    if (state.status !== 'success' || !state.publishedSlug) return;
+    if (lastPublishedSlugRef.current === state.publishedSlug) return;
 
     lastPublishedSlugRef.current = state.publishedSlug;
     setIsDialogOpen(false);
@@ -216,9 +112,7 @@ export function PublishInvitationControls({
   }, [isRepublish, router, state.publishedSlug, state.status, toast]);
 
   async function handleCopyLink() {
-    if (!publicUrl) {
-      return;
-    }
+    if (!publicUrl) return;
 
     try {
       if (!navigator.clipboard?.writeText) {
@@ -236,10 +130,14 @@ export function PublishInvitationControls({
     }
   }
 
-  const controls = (
+  return (
     <section
       aria-label="Kontrol penerbitan undangan"
-      className={`${authorityStyles.authority} space-y-4`}
+      className={
+        presentation === 'readiness'
+          ? 'min-w-0 space-y-2 sm:min-w-64'
+          : 'w-full space-y-4'
+      }
       data-editor-publication-authority={presentation === 'readiness' || undefined}
     >
       {presentation === 'default' ? (
@@ -281,12 +179,14 @@ export function PublishInvitationControls({
       ) : null}
 
       {!canPublish ? (
-        <div className="space-y-3">
-          <Button disabled size="lg" type="button">
+        <div className="space-y-2">
+          <Button className="w-full" disabled size="lg" type="button">
             {publishActionLabel}
           </Button>
-          <p className="text-seraya-text-muted text-sm leading-6">{blockedCopy}</p>
-          {hasActiveDraft && !editorAuthority.hasUnsavedEditorChanges ? (
+          <p className="text-seraya-text-muted text-xs leading-5 sm:text-sm sm:leading-6">
+            {blockedCopy}
+          </p>
+          {hasActiveDraft && !hasUnsavedEditorChanges ? (
             <Link
               className="text-seraya-action-primary focus-visible:outline-seraya-focus-ring inline-flex rounded-[var(--seraya-radius-sm)] text-sm font-semibold underline-offset-4 hover:underline focus-visible:outline-3 focus-visible:outline-offset-3"
               href={`/dashboard/${projectId}/billing`}
@@ -297,7 +197,7 @@ export function PublishInvitationControls({
         </div>
       ) : (
         <>
-          <Button onClick={() => setIsDialogOpen(true)} size="lg" type="button">
+          <Button className="w-full" onClick={() => setIsDialogOpen(true)} size="lg" type="button">
             {publishActionLabel}
           </Button>
           <Dialog
@@ -330,29 +230,5 @@ export function PublishInvitationControls({
         </>
       )}
     </section>
-  );
-
-  if (presentation !== 'readiness') {
-    return controls;
-  }
-
-  if (!editorAuthority.isResolved) {
-    return null;
-  }
-
-  return (
-    <>
-      {editorAuthority.actionTarget
-        ? createPortal(controls, editorAuthority.actionTarget)
-        : controls}
-      {editorAuthority.mobileStatusTarget
-        ? createPortal(
-            <p className={authorityStyles.mobileStatusContext}>
-              Status bagian mengikuti draf tersimpan.
-            </p>,
-            editorAuthority.mobileStatusTarget,
-          )
-        : null}
-    </>
   );
 }

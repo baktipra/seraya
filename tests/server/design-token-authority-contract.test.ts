@@ -38,21 +38,20 @@ describe('design token authority and legacy CSS consolidation', () => {
     expect(globals).not.toContain(':has(');
   });
 
-  it('keeps the remaining compatibility layer scoped to Ringkasan only', async () => {
+  it('keeps the remaining general compatibility layer scoped to Ringkasan only', async () => {
     const compatibility = await read('src/app/romantic-clarity-consistency.css');
-    const editor = await read('src/app/romantic-clarity-editor-consistency.css');
+    const layout = await read('src/app/layout.tsx');
 
-    for (const source of [compatibility, editor]) {
-      expect(source).not.toContain(':has(');
-      expect(source).not.toContain('#response-panel');
-      expect(source).not.toContain('Ringkasan tindak lanjut');
-      expect(source).not.toContain('guest-response-workspace-title');
-      expect(source).not.toContain('data-operational-legacy-bridge');
-    }
-
+    expect(compatibility).not.toContain(':has(');
+    expect(compatibility).not.toContain('#response-panel');
+    expect(compatibility).not.toContain('Ringkasan tindak lanjut');
+    expect(compatibility).not.toContain('guest-response-workspace-title');
+    expect(compatibility).not.toContain('data-operational-legacy-bridge');
     expect(compatibility).toContain("data-workspace-kind='compass'");
     expect(compatibility).not.toContain('guest-manager-title');
     expect(compatibility).not.toContain('delivery-center-title');
+    expect(layout).not.toContain('romantic-clarity-editor-consistency.css');
+    expect(layout).not.toContain('invitation-mobile-recovery.css');
   });
 
   it('keeps numeric workspace geometry outside route and component TSX', async () => {

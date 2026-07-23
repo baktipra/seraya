@@ -1,12 +1,10 @@
 import type { Metadata } from 'next';
 
-import { ToastProvider } from '@/design-system';
 import { siteConfig } from '@/config/site';
+import { ToastProvider } from '@/design-system';
 
 import './globals.css';
 import './romantic-clarity-consistency.css';
-import './romantic-clarity-editor-consistency.css';
-import './invitation-mobile-recovery.css';
 import './workspace-anatomy.css';
 import './workspace-responsive.css';
 

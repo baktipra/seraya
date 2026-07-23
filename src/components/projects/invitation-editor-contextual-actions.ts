@@ -1,77 +1,51 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useSyncExternalStore } from 'react';
 
-export type InvitationEditorContextualSaveActionState = 'clean' | 'dirty' | 'saving';
+let hasUnsavedChanges = false;
+const listeners = new Set<() => void>();
 
-export function getInvitationEditorContextualSaveActionState({
-  isDirty,
-  statusLabel,
-}: {
-  isDirty: boolean;
-  statusLabel: string;
-}): InvitationEditorContextualSaveActionState {
-  if (statusLabel.startsWith('Menyimpan perubahan')) {
-    return 'saving';
-  }
+function emit() {
+  for (const listener of listeners) listener();
+}
 
-  return isDirty ? 'dirty' : 'clean';
+function setUnsavedChanges(nextValue: boolean) {
+  if (hasUnsavedChanges === nextValue) return;
+  hasUnsavedChanges = nextValue;
+  emit();
+}
+
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+function getSnapshot() {
+  return hasUnsavedChanges;
+}
+
+function getServerSnapshot() {
+  return false;
 }
 
 /**
- * Slice G finalizes the editor action matrix without changing save or publish
- * authority. The local preview is always mounted and already receives the
- * canonical `isDirty` state, so it acts as a small state sentinel for the sticky
- * action dock across every readiness state, including states where publication
- * controls are intentionally absent.
+ * Publishes the editor's canonical local dirty state to sibling publication
+ * controls without reading or mutating rendered DOM. There is only one owner
+ * invitation editor mounted per project route.
  */
 export function useInvitationEditorContextualSaveAction(isDirty: boolean) {
   useEffect(() => {
-    const editorRoot = document.querySelector<HTMLElement>(
-      '[aria-labelledby="invitation-editor-title"]',
-    );
-    const saveStatus = editorRoot?.querySelector<HTMLElement>(
-      '[data-testid="invitation-editor-save-status"]',
-    );
-    const actionTarget =
-      saveStatus?.nextElementSibling instanceof HTMLElement ? saveStatus.nextElementSibling : null;
-    const saveButton = actionTarget?.querySelector<HTMLButtonElement>('button[type="submit"]');
-
-    if (!saveButton || !saveStatus) {
-      return;
-    }
-
-    const syncSaveAction = () => {
-      const statusLabel = saveStatus.querySelector('p')?.textContent?.trim() ?? '';
-      const actionState = getInvitationEditorContextualSaveActionState({
-        isDirty,
-        statusLabel,
-      });
-      const canSave = actionState === 'dirty';
-
-      saveButton.disabled = !canSave;
-      saveButton.setAttribute('data-editor-contextual-save-action', actionState);
-
-      if (canSave) {
-        saveButton.removeAttribute('title');
-      } else if (actionState === 'clean') {
-        saveButton.title = 'Tidak ada perubahan untuk disimpan.';
-      }
-    };
-
-    syncSaveAction();
-
-    const observer = new MutationObserver(syncSaveAction);
-    observer.observe(saveStatus, {
-      characterData: true,
-      childList: true,
-      subtree: true,
-    });
+    setUnsavedChanges(isDirty);
 
     return () => {
-      observer.disconnect();
-      saveButton.removeAttribute('data-editor-contextual-save-action');
-      saveButton.removeAttribute('title');
+      setUnsavedChanges(false);
     };
   }, [isDirty]);
+}
+
+/** React-level subscription used by the explicit publication surface. */
+export function useInvitationEditorUnsavedChanges() {
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
