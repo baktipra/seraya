@@ -1,38 +1,19 @@
-/*
- * Compatibility-only presentation for screens that have not completed native
- * primitive migration. Native Respons Tamu and Tindak Lanjut are intentionally
- * absent from this file. Invitation Studio has its own compatibility layer.
- */
+/* Compatibility-only presentation for Ringkasan until its native primitive migration. */
 
-:is(
-  [data-workspace-kind='compass'] section[aria-labelledby='owner-workspace-overview-title'],
-  [data-operational-legacy-bridge='guests'] section[aria-labelledby='guest-manager-title'],
-  [data-operational-legacy-bridge='delivery'] section[aria-labelledby='delivery-center-title']
-) {
+[data-workspace-kind='compass'] section[aria-labelledby='owner-workspace-overview-title'] {
   width: 100%;
   max-width: none !important;
   min-width: 0;
   margin-inline: 0;
 }
 
-:is(
-    [data-workspace-kind='compass'] section[aria-labelledby='owner-workspace-overview-title'],
-    [data-operational-legacy-bridge='guests'] section[aria-labelledby='guest-manager-title'],
-    [data-operational-legacy-bridge='delivery'] section[aria-labelledby='delivery-center-title']
-  )
-  > * {
+[data-workspace-kind='compass'] section[aria-labelledby='owner-workspace-overview-title'] > * {
   min-width: 0;
 }
 
-:is(
-  [data-workspace-kind='compass'] section[aria-labelledby='owner-workspace-overview-title'] > header,
-  [data-operational-legacy-bridge='guests']
-    section[aria-labelledby='guest-manager-title']
-    > :first-child,
-  [data-operational-legacy-bridge='delivery']
-    section[aria-labelledby='delivery-center-title']
-    > header
-) {
+[data-workspace-kind='compass']
+  section[aria-labelledby='owner-workspace-overview-title']
+  > header {
   border: 0 !important;
   border-bottom: 1px solid var(--seraya-surface-rule) !important;
   border-radius: 0 !important;
@@ -41,7 +22,7 @@
   box-shadow: none !important;
 }
 
-:is(#owner-workspace-overview-title, #guest-manager-title, #delivery-center-title) {
+#owner-workspace-overview-title {
   max-width: 44rem !important;
   font-size: var(--seraya-type-page-title) !important;
   font-weight: 500 !important;
@@ -49,22 +30,12 @@
   letter-spacing: -0.025em !important;
 }
 
-:is(
-  [data-workspace-kind='compass']
-    section[aria-labelledby='owner-workspace-overview-title']
-    > header
-    > div
-    > div
-    > p:first-child,
-  [data-operational-legacy-bridge='guests']
-    section[aria-labelledby='guest-manager-title']
-    > :first-child
-    > p:first-child,
-  [data-operational-legacy-bridge='delivery']
-    section[aria-labelledby='delivery-center-title']
-    > header
-    > p:first-child
-) {
+[data-workspace-kind='compass']
+  section[aria-labelledby='owner-workspace-overview-title']
+  > header
+  > div
+  > div
+  > p:first-child {
   color: var(--seraya-action-primary) !important;
   font-size: 0.6875rem !important;
   font-weight: 650 !important;
@@ -72,7 +43,7 @@
   text-transform: uppercase;
 }
 
-:is(#owner-workspace-overview-title, #guest-manager-title, #delivery-center-title) + p {
+#owner-workspace-overview-title + p {
   max-width: 45rem !important;
   margin-top: 0.875rem !important;
   color: var(--seraya-text-secondary) !important;
@@ -80,11 +51,7 @@
   line-height: 1.7 !important;
 }
 
-[data-workspace-kind='compass'] section[aria-labelledby='owner-workspace-overview-title'] dl,
-[data-operational-legacy-bridge='guests']
-  section[aria-labelledby='guest-manager-title']
-  dl[aria-label='Kualitas data tamu'],
-[data-operational-legacy-bridge='delivery'] section[aria-label='Ringkasan kesiapan pengiriman'] {
+[data-workspace-kind='compass'] section[aria-labelledby='owner-workspace-overview-title'] dl {
   gap: 0 !important;
   border-block: 1px solid var(--seraya-surface-rule) !important;
   border-inline: 0 !important;
@@ -92,13 +59,9 @@
   background: transparent !important;
 }
 
-[data-workspace-kind='compass'] section[aria-labelledby='owner-workspace-overview-title'] dl > div,
-[data-operational-legacy-bridge='guests']
-  section[aria-labelledby='guest-manager-title']
-  dl[aria-label='Kualitas data tamu']
-  > div,
-[data-operational-legacy-bridge='delivery']
-  section[aria-label='Ringkasan kesiapan pengiriman']
+[data-workspace-kind='compass']
+  section[aria-labelledby='owner-workspace-overview-title']
+  dl
   > div {
   min-width: 0;
   min-height: 6.25rem;
@@ -112,13 +75,6 @@
 [data-workspace-kind='compass']
   section[aria-labelledby='owner-workspace-overview-title']
   dl
-  > div:last-child,
-[data-operational-legacy-bridge='guests']
-  section[aria-labelledby='guest-manager-title']
-  dl[aria-label='Kualitas data tamu']
-  > div:last-child,
-[data-operational-legacy-bridge='delivery']
-  section[aria-label='Ringkasan kesiapan pengiriman']
   > div:last-child {
   border-right: 0 !important;
 }
@@ -131,7 +87,7 @@
 }
 
 @media (max-width: 767px) {
-  :is(#owner-workspace-overview-title, #guest-manager-title, #delivery-center-title) {
+  #owner-workspace-overview-title {
     font-size: var(--seraya-type-page-title-mobile) !important;
   }
 }

@@ -27,18 +27,18 @@ describe('design token authority and legacy CSS consolidation', () => {
     }
   });
 
-  it('limits global page compatibility imports to Tamu and Bagikan', async () => {
+  it('keeps global CSS free from page-specific Romantic Clarity imports', async () => {
     const globals = await read('src/app/globals.css');
 
     expect(globals).toContain("@import './design-tokens.css'");
-    expect(globals).toContain("@import './guest-manager-romantic-clarity.css'");
-    expect(globals).toContain("@import './delivery-center-romantic-clarity.css'");
+    expect(globals).not.toContain('guest-manager-romantic-clarity.css');
+    expect(globals).not.toContain('delivery-center-romantic-clarity.css');
     expect(globals).not.toContain('response-hub-romantic-clarity.css');
     expect(globals).not.toContain('follow-up-romantic-clarity.css');
     expect(globals).not.toContain(':has(');
   });
 
-  it('prevents legacy consistency layers from targeting native operational workspaces', async () => {
+  it('keeps the remaining compatibility layer scoped to Ringkasan only', async () => {
     const compatibility = await read('src/app/romantic-clarity-consistency.css');
     const editor = await read('src/app/romantic-clarity-editor-consistency.css');
 
@@ -47,10 +47,12 @@ describe('design token authority and legacy CSS consolidation', () => {
       expect(source).not.toContain('#response-panel');
       expect(source).not.toContain('Ringkasan tindak lanjut');
       expect(source).not.toContain('guest-response-workspace-title');
+      expect(source).not.toContain('data-operational-legacy-bridge');
     }
 
-    expect(compatibility).toContain("data-operational-legacy-bridge='guests'");
-    expect(compatibility).toContain("data-operational-legacy-bridge='delivery'");
+    expect(compatibility).toContain("data-workspace-kind='compass'");
+    expect(compatibility).not.toContain('guest-manager-title');
+    expect(compatibility).not.toContain('delivery-center-title');
   });
 
   it('keeps numeric workspace geometry outside route and component TSX', async () => {

@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation';
 
-import { GuestManager } from '@/components/projects/guest-manager';
-import { OperationalLegacyBridge } from '@/components/workspace/operational-primitives';
+import { NativeGuestManager } from '@/components/projects/native-guest-manager';
 import { WorkspacePage } from '@/components/workspace/workspace-page';
 import { getOwnedProjectContextForRequest } from '@/modules/auth/dashboard-request-context';
 import { prepareMissingPersonalGuestLinksForDeliveryAction } from '@/modules/delivery/delivery.actions';
@@ -33,15 +32,13 @@ export default async function GuestsPage({ params }: GuestsPageProps) {
 
   return (
     <WorkspacePage kind="guests" width="operations">
-      <OperationalLegacyBridge kind="guests">
-        <GuestManager
-          initialGuests={manager.guests}
-          prepareBatchAction={prepareMissingPersonalGuestLinksForDeliveryAction.bind(null, {
-            projectId: manager.project.id,
-          })}
-          projectId={manager.project.id}
-        />
-      </OperationalLegacyBridge>
+      <NativeGuestManager
+        initialGuests={manager.guests}
+        prepareBatchAction={prepareMissingPersonalGuestLinksForDeliveryAction.bind(null, {
+          projectId: manager.project.id,
+        })}
+        projectId={manager.project.id}
+      />
     </WorkspacePage>
   );
 }

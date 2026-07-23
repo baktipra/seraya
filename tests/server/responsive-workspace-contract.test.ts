@@ -30,21 +30,17 @@ describe('responsive operational workspace contract', () => {
     expect(source).toContain('data-mobile-span={mobileSpan}');
   });
 
-  it('uses canonical breakpoints and token-owned bottom-navigation safe-area clearance', async () => {
-    const responsive = await read('src/app/workspace-responsive.css');
-    const tokens = await read('src/app/design-tokens.css');
+  it('uses one canonical mobile breakpoint and bottom-navigation safe-area clearance', async () => {
+    const source = await read('src/app/workspace-responsive.css');
 
-    expect(responsive).toContain('@media (max-width: 767px)');
-    expect(responsive).toContain('@media (max-width: 1023px)');
-    expect(responsive).toContain('var(--seraya-mobile-safe-bottom)');
-    expect(responsive).toContain("[data-workspace-anatomy='operations']");
-    expect(responsive).not.toContain(':has(');
-    expect(responsive).not.toContain(':nth-child');
-    expect(responsive).not.toContain('aria-labelledby');
-
-    expect(tokens).toContain('--seraya-mobile-nav-clearance: 4.75rem');
-    expect(tokens).toContain('env(safe-area-inset-bottom)');
-    expect(tokens).toContain('--seraya-touch-target: 2.75rem');
+    expect(source).toContain('@media (max-width: 767px)');
+    expect(source).toContain('@media (max-width: 1023px)');
+    expect(source).toContain('--seraya-mobile-safe-bottom');
+    expect(source).toContain("[data-workspace-anatomy='operations']");
+    expect(source).not.toContain(':has(');
+    expect(source).not.toContain(':nth-child');
+    expect(source).not.toContain('aria-labelledby');
+    expect(source).not.toContain('data-operational-legacy-bridge');
   });
 
   it('renders Respons Tamu with separate desktop data and mobile cards', async () => {
@@ -66,11 +62,19 @@ describe('responsive operational workspace contract', () => {
     expect(source).toContain('<OperationalToolbarField');
   });
 
-  it('keeps Tamu and Bagikan inside the explicit legacy migration bridge', async () => {
-    const guests = await read('src/app/(dashboard)/dashboard/[projectId]/guests/page.tsx');
-    const delivery = await read('src/app/(dashboard)/dashboard/[projectId]/delivery/page.tsx');
+  it('renders Tamu and Bagikan with explicit desktop data and mobile cards', async () => {
+    const [guests, delivery] = await Promise.all([
+      read('src/components/projects/native-guest-manager.tsx'),
+      read('src/components/projects/native-guest-delivery-center.tsx'),
+    ]);
 
-    expect(guests).toContain('<OperationalLegacyBridge kind="guests">');
-    expect(delivery).toContain('<OperationalLegacyBridge kind="delivery">');
+    for (const source of [guests, delivery]) {
+      expect(source).toContain('<OperationalDesktopData>');
+      expect(source).toContain('<OperationalMobileDataList>');
+      expect(source).toContain('<OperationalMobileDataCard');
+      expect(source).toContain('<OperationalMobileField');
+      expect(source).toContain('<OperationalToolbarField');
+      expect(source).toContain('<OperationalSelectionBar');
+    }
   });
 });

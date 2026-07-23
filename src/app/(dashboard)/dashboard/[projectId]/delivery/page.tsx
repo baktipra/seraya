@@ -1,19 +1,25 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-import { GuestDeliveryCenter } from '@/components/projects/guest-delivery-center';
-import { OperationalLegacyBridge } from '@/components/workspace/operational-primitives';
+import { NativeGuestDeliveryCenter } from '@/components/projects/native-guest-delivery-center';
+import {
+  OperationalDataSurface,
+  OperationalEmptyState,
+  OperationalHeader,
+  OperationalWorkspace,
+} from '@/components/workspace/operational-primitives';
 import { WorkspacePage } from '@/components/workspace/workspace-page';
 import { getOwnedProjectContextForRequest } from '@/modules/auth/dashboard-request-context';
+import { reaccessOrPrepareCanonicalInitialHandoffAction } from '@/modules/delivery/canonical-initial-handoff.actions';
 import {
   copySelectedDeliveryWhatsAppNumbersAction,
   prepareMissingPersonalGuestLinksForDeliveryAction,
   preparePersonalGuestLinkForDeliveryAction,
 } from '@/modules/delivery/delivery.actions';
 import { deriveDeliveryReadiness } from '@/modules/delivery/delivery-readiness';
-import { reaccessOrPrepareCanonicalInitialHandoffAction } from '@/modules/delivery/canonical-initial-handoff.actions';
 import { getGuestDeliveryCenterForVerifiedProject } from '@/modules/delivery/delivery.service';
-import { getWeddingReadinessForRequest } from '@/modules/readiness';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
+import { getWeddingReadinessForRequest } from '@/modules/readiness';
 
 type DeliveryCenterPageProps = {
   params: Promise<{ projectId: string }>;
@@ -26,32 +32,34 @@ type DeliveryScreen =
       deliveryCenter: Awaited<ReturnType<typeof getGuestDeliveryCenterForVerifiedProject>>;
     };
 
-// Delivery readiness is private operational data and must always load fresh.
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 export const fetchCache = 'force-no-store';
 
 function DeliveryBlockedState({ projectId }: { projectId: string }) {
   return (
-    <section aria-labelledby="delivery-blocked-title" className="max-w-3xl">
-      <div className="border-seraya-border-default bg-seraya-surface rounded-[var(--seraya-radius-lg)] border px-5 py-7 shadow-[var(--seraya-shadow-soft)] sm:px-7 sm:py-8">
-        <p className="text-seraya-action-primary text-xs font-semibold tracking-[0.14em] uppercase">
-          Bagikan
-        </p>
-        <h1 className="seraya-display-md mt-3" id="delivery-blocked-title">
-          Bagikan tersedia setelah undangan diterbitkan
-        </h1>
-        <p className="text-seraya-text-secondary mt-3 max-w-xl text-base leading-7">
-          Terbitkan versi undangan yang sudah kalian setujui sebelum menyiapkan undangan pribadi.
-        </p>
-        <a
-          className="text-seraya-action-primary focus-visible:outline-seraya-focus-ring mt-5 inline-flex min-h-11 items-center rounded-[var(--seraya-radius-sm)] text-sm font-semibold underline-offset-4 hover:underline focus-visible:outline-3 focus-visible:outline-offset-3"
-          href={`/dashboard/${projectId}`}
-        >
-          Kembali ke ringkasan
-        </a>
-      </div>
-    </section>
+    <OperationalWorkspace labelledBy="delivery-blocked-title">
+      <OperationalHeader
+        description="Terbitkan versi undangan yang sudah kalian setujui sebelum menyiapkan Undangan Pribadi untuk tamu."
+        eyebrow="Bagikan"
+        title="Bagikan tersedia setelah undangan diterbitkan"
+        titleId="delivery-blocked-title"
+      />
+      <OperationalDataSurface>
+        <OperationalEmptyState
+          action={
+            <Link
+              className="text-seraya-action-primary focus-visible:outline-seraya-focus-ring inline-flex min-h-11 items-center rounded-[var(--seraya-radius-sm)] text-sm font-semibold underline-offset-4 hover:underline focus-visible:outline-3 focus-visible:outline-offset-3"
+              href={`/dashboard/${projectId}`}
+            >
+              Kembali ke Ringkasan
+            </Link>
+          }
+          description="Bagikan akan terbuka setelah versi publik pertama tersedia."
+          title="Undangan belum diterbitkan."
+        />
+      </OperationalDataSurface>
+    </OperationalWorkspace>
   );
 }
 
@@ -83,9 +91,7 @@ export default async function DeliveryCenterPage({ params }: DeliveryCenterPageP
   if (screen.kind === 'blocked') {
     return (
       <WorkspacePage kind="delivery" width="operations">
-        <OperationalLegacyBridge kind="delivery">
-          <DeliveryBlockedState projectId={projectId} />
-        </OperationalLegacyBridge>
+        <DeliveryBlockedState projectId={projectId} />
       </WorkspacePage>
     );
   }
@@ -94,42 +100,40 @@ export default async function DeliveryCenterPage({ params }: DeliveryCenterPageP
 
   return (
     <WorkspacePage kind="delivery" width="operations">
-      <OperationalLegacyBridge kind="delivery">
-        <GuestDeliveryCenter
-          copyWhatsAppNumbersAction={copySelectedDeliveryWhatsAppNumbersAction.bind(null, {
-            projectId: deliveryCenter.project.id,
-          })}
-          projectId={deliveryCenter.project.id}
-          prepareBatchAction={prepareMissingPersonalGuestLinksForDeliveryAction.bind(null, {
-            projectId: deliveryCenter.project.id,
-          })}
-          rows={deliveryCenter.rows.map(({ guestId, ...row }, rowKey) => {
-            const readiness = deriveDeliveryReadiness(row);
-            return {
-              ...row,
-              ...(readiness.canPrepareNewLink
-                ? {
-                    prepareAction: preparePersonalGuestLinkForDeliveryAction.bind(null, {
-                      guestId,
-                      projectId: deliveryCenter.project.id,
-                    }),
-                  }
-                : {}),
-              ...(readiness.isReadyToDistribute
-                ? {
-                    reaccessAction: reaccessOrPrepareCanonicalInitialHandoffAction.bind(null, {
-                      guestId,
-                      projectId: deliveryCenter.project.id,
-                    }),
-                  }
-                : {}),
-              guestId,
-              rowKey,
-            };
-          })}
-          summary={deliveryCenter.summary}
-        />
-      </OperationalLegacyBridge>
+      <NativeGuestDeliveryCenter
+        copyWhatsAppNumbersAction={copySelectedDeliveryWhatsAppNumbersAction.bind(null, {
+          projectId: deliveryCenter.project.id,
+        })}
+        projectId={deliveryCenter.project.id}
+        prepareBatchAction={prepareMissingPersonalGuestLinksForDeliveryAction.bind(null, {
+          projectId: deliveryCenter.project.id,
+        })}
+        rows={deliveryCenter.rows.map(({ guestId, ...row }, rowKey) => {
+          const readiness = deriveDeliveryReadiness(row);
+          return {
+            ...row,
+            ...(readiness.canPrepareNewLink
+              ? {
+                  prepareAction: preparePersonalGuestLinkForDeliveryAction.bind(null, {
+                    guestId,
+                    projectId: deliveryCenter.project.id,
+                  }),
+                }
+              : {}),
+            ...(readiness.isReadyToDistribute
+              ? {
+                  reaccessAction: reaccessOrPrepareCanonicalInitialHandoffAction.bind(null, {
+                    guestId,
+                    projectId: deliveryCenter.project.id,
+                  }),
+                }
+              : {}),
+            guestId,
+            rowKey,
+          };
+        })}
+        summary={deliveryCenter.summary}
+      />
     </WorkspacePage>
   );
 }

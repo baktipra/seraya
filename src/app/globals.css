@@ -2,13 +2,6 @@
 @import '@fontsource-variable/cormorant-garamond/wght.css';
 @import './design-tokens.css';
 
-/*
- * Compatibility-only presentation layers. Remove each import when its screen
- * completes native operational primitive migration.
- */
-@import './guest-manager-romantic-clarity.css';
-@import './delivery-center-romantic-clarity.css';
-
 @theme inline {
   --color-seraya-ink: var(--seraya-ink);
   --color-seraya-ivory: var(--seraya-ivory);

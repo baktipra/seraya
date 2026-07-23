@@ -334,20 +334,3 @@ export function OperationalSelectionBar({
     </div>
   );
 }
-
-export function OperationalLegacyBridge({
-  children,
-  kind,
-}: {
-  children: ReactNode;
-  kind: 'delivery' | 'guests';
-}) {
-  return (
-    <div
-      className="min-w-0 [&>*]:mx-0 [&>*]:w-full [&>*]:max-w-none"
-      data-operational-legacy-bridge={kind}
-    >
-      {children}
-    </div>
-  );
-}
