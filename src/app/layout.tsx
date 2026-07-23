@@ -8,6 +8,7 @@ import './romantic-clarity-consistency.css';
 import './romantic-clarity-editor-consistency.css';
 import './invitation-mobile-recovery.css';
 import './workspace-anatomy.css';
+import './workspace-responsive.css';
 
 export const metadata: Metadata = {
   title: {

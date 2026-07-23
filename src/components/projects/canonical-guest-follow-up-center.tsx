@@ -15,8 +15,11 @@ import {
   OperationalHeader,
   OperationalMetric,
   OperationalMetricStrip,
+  OperationalResponsiveList,
+  OperationalResponsiveRow,
   OperationalSection,
   OperationalToolbar,
+  OperationalToolbarField,
   OperationalWorkspace,
 } from '@/components/workspace/operational-primitives';
 import { Input } from '@/design-system';
@@ -144,7 +147,11 @@ export function CanonicalGuestFollowUpCenter({
         <OperationalMetric label="Perlu diperbaiki" value={summary.needsDataRepairCount} />
         <OperationalMetric label="Belum dibagikan" value={summary.noFollowUpRecordedCount} />
         <OperationalMetric label="Menunggu RSVP" value={summary.awaitingRsvpCount} />
-        <OperationalMetric label="RSVP selesai" value={summary.rsvpRespondedCount} />
+        <OperationalMetric
+          label="RSVP selesai"
+          mobileSpan="full"
+          value={summary.rsvpRespondedCount}
+        />
       </OperationalMetricStrip>
 
       <OperationalSection
@@ -154,10 +161,7 @@ export function CanonicalGuestFollowUpCenter({
       >
         <OperationalDataSurface>
           <OperationalToolbar>
-            <div>
-              <label className="sr-only" htmlFor="follow-up-search">
-                Cari tamu
-              </label>
+            <OperationalToolbarField htmlFor="follow-up-search" label="Cari tamu">
               <Input
                 id="follow-up-search"
                 onChange={(event) => setQuery(event.target.value)}
@@ -165,11 +169,8 @@ export function CanonicalGuestFollowUpCenter({
                 type="search"
                 value={query}
               />
-            </div>
-            <div>
-              <label className="sr-only" htmlFor="follow-up-filter">
-                Filter status
-              </label>
+            </OperationalToolbarField>
+            <OperationalToolbarField htmlFor="follow-up-filter" label="Filter status">
               <select
                 className="border-seraya-border-default bg-seraya-surface min-h-11 w-full rounded-[var(--seraya-radius-sm)] border px-3 text-sm"
                 id="follow-up-filter"
@@ -183,7 +184,7 @@ export function CanonicalGuestFollowUpCenter({
                   </option>
                 ))}
               </select>
-            </div>
+            </OperationalToolbarField>
           </OperationalToolbar>
 
           {rows.length === 0 ? (
@@ -205,42 +206,39 @@ export function CanonicalGuestFollowUpCenter({
               title="Tidak ada tamu yang sesuai."
             />
           ) : (
-            <ul className="divide-seraya-border-default divide-y">
+            <OperationalResponsiveList>
               {visibleRows.map((row) => (
-                <li
-                  className="grid gap-3 px-4 py-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center"
-                  key={row.guestId}
-                >
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-seraya-text-primary truncate font-semibold">
-                        {row.displayName}
-                      </p>
-                      <span className="border-seraya-border-default bg-seraya-soft inline-flex min-h-6 items-center rounded-full border px-2 py-0.5 text-[0.6875rem] font-semibold">
-                        {labels[row.followUpSegment]}
-                      </span>
-                    </div>
-                    <p className="text-seraya-text-muted mt-1 text-xs">
-                      RSVP:{' '}
-                      {row.rsvpStatus === 'pending'
-                        ? 'Belum merespons'
-                        : row.rsvpStatus === 'attending'
-                          ? 'Hadir'
-                          : 'Tidak hadir'}
-                      {row.lastFollowUpAt ? ' · Aktivitas terakhir tercatat' : ''}
-                    </p>
-                  </div>
-                  <div className="text-seraya-action-primary text-sm font-semibold">
+                <OperationalResponsiveRow
+                  action={
                     <RowAction
                       isPublished={isPublished}
                       onPrepared={setResult}
                       projectId={projectId}
                       row={row}
                     />
+                  }
+                  key={row.guestId}
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-seraya-text-primary truncate font-semibold">
+                      {row.displayName}
+                    </p>
+                    <span className="border-seraya-border-default bg-seraya-soft inline-flex min-h-6 items-center rounded-full border px-2 py-0.5 text-[0.6875rem] font-semibold">
+                      {labels[row.followUpSegment]}
+                    </span>
                   </div>
-                </li>
+                  <p className="text-seraya-text-muted mt-1 text-xs leading-5">
+                    RSVP:{' '}
+                    {row.rsvpStatus === 'pending'
+                      ? 'Belum merespons'
+                      : row.rsvpStatus === 'attending'
+                        ? 'Hadir'
+                        : 'Tidak hadir'}
+                    {row.lastFollowUpAt ? ' · Aktivitas terakhir tercatat' : ''}
+                  </p>
+                </OperationalResponsiveRow>
               ))}
-            </ul>
+            </OperationalResponsiveList>
           )}
         </OperationalDataSurface>
       </OperationalSection>

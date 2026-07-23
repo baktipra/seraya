@@ -1,0 +1,235 @@
+:root {
+  --seraya-mobile-nav-clearance: 4.75rem;
+  --seraya-mobile-safe-bottom: calc(
+    var(--seraya-mobile-nav-clearance) + env(safe-area-inset-bottom)
+  );
+  --seraya-mobile-touch-target: 2.75rem;
+}
+
+[data-operational-workspace] {
+  container-type: inline-size;
+}
+
+[data-operational-header-actions] > *,
+[data-operational-section-actions] > *,
+[data-operational-selection-actions] > * {
+  min-width: 0;
+}
+
+[data-operational-metric][data-mobile-span='full'] {
+  grid-column: 1 / -1;
+}
+
+[data-operational-toolbar-field] :where(input, select, button) {
+  width: 100%;
+  min-height: var(--seraya-mobile-touch-target);
+}
+
+[data-operational-desktop-data] {
+  scrollbar-gutter: stable;
+  overscroll-behavior-inline: contain;
+}
+
+[data-operational-mobile-card] {
+  min-width: 0;
+}
+
+[data-operational-mobile-card] > dl,
+[data-operational-mobile-card] [data-operational-mobile-fields] {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--seraya-border-default);
+}
+
+[data-operational-responsive-row] {
+  min-width: 0;
+}
+
+[data-operational-selection-bar] {
+  backdrop-filter: blur(14px);
+  background: color-mix(in srgb, var(--seraya-bg-surface) 95%, transparent);
+}
+
+[data-operational-legacy-bridge] {
+  min-width: 0;
+}
+
+[data-operational-legacy-bridge] :where(input, select, button) {
+  min-height: var(--seraya-mobile-touch-target);
+}
+
+[data-operational-legacy-bridge] :where(table) {
+  min-width: 46rem;
+}
+
+[data-operational-legacy-bridge] :where(.overflow-x-auto) {
+  overscroll-behavior-inline: contain;
+  scrollbar-gutter: stable;
+}
+
+@media (max-width: 1023px) {
+  [data-workspace-anatomy='operations'] {
+    padding-bottom: calc(var(--seraya-mobile-safe-bottom) + 1rem);
+  }
+
+  [data-operational-selection-bar],
+  [data-operational-legacy-bridge] :where(.sticky) {
+    bottom: var(--seraya-mobile-safe-bottom) !important;
+  }
+}
+
+@media (max-width: 767px) {
+  [data-operational-workspace] {
+    gap: 1.25rem;
+  }
+
+  [data-operational-header] {
+    gap: 1rem;
+    padding-bottom: 1.25rem;
+  }
+
+  [data-operational-header] h1 {
+    font-size: clamp(2.2rem, 12vw, 3.1rem);
+    line-height: 0.98;
+  }
+
+  [data-operational-header-actions] {
+    display: grid;
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  [data-operational-header-actions] > * {
+    width: 100%;
+  }
+
+  [data-operational-header-actions] :where(button, a) {
+    width: 100%;
+    justify-content: center;
+  }
+
+  [data-operational-metrics] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  [data-operational-metric] {
+    min-height: 5.5rem;
+  }
+
+  [data-operational-metric] dd {
+    overflow-wrap: anywhere;
+  }
+
+  [data-operational-section] {
+    gap: 0.875rem;
+  }
+
+  [data-operational-section-heading] {
+    gap: 0.875rem;
+    padding-bottom: 0.875rem;
+  }
+
+  [data-operational-section-actions] {
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+  }
+
+  [data-operational-section-actions]::-webkit-scrollbar {
+    display: none;
+  }
+
+  [data-operational-section-actions] > * {
+    flex: 0 0 auto;
+  }
+
+  [data-operational-toolbar] {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  [data-operational-data-surface] {
+    border-inline: 0;
+  }
+
+  [data-operational-empty-state] {
+    padding: 2.25rem 1rem;
+  }
+
+  [data-operational-mobile-card] {
+    padding-inline: 0.875rem;
+    padding-block: 0.875rem;
+  }
+
+  [data-operational-responsive-row] {
+    gap: 0.75rem;
+    padding: 0.875rem;
+  }
+
+  [data-operational-row-action] {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--seraya-border-default);
+  }
+
+  [data-operational-row-action] :where(a, button, form) {
+    width: 100%;
+  }
+
+  [data-operational-row-action] :where(a, button) {
+    display: flex;
+    min-height: var(--seraya-mobile-touch-target);
+    align-items: center;
+    justify-content: center;
+  }
+
+  [data-operational-selection-bar] {
+    gap: 0.75rem;
+    padding: 0.75rem 0.875rem calc(0.75rem + env(safe-area-inset-bottom));
+  }
+
+  [data-operational-selection-actions] {
+    display: grid;
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  [data-operational-selection-actions] > *,
+  [data-operational-selection-actions] :where(button, a, form) {
+    width: 100%;
+  }
+
+  [data-operational-selection-actions] :where(button, a) {
+    justify-content: center;
+  }
+
+  [data-operational-legacy-bridge] {
+    overflow: visible;
+  }
+
+  [data-operational-legacy-bridge] :where(table) {
+    min-width: 42rem;
+  }
+
+  [data-operational-legacy-bridge] :where(.sticky) {
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom)) !important;
+  }
+
+  [data-operational-legacy-bridge] :where(button, a) {
+    touch-action: manipulation;
+  }
+}
+
+@media (min-width: 768px) {
+  [data-operational-metric][data-mobile-span='full'] {
+    grid-column: auto;
+  }
+}

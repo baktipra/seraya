@@ -6,12 +6,17 @@ import { useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { GuestbookInboxPanel } from '@/components/projects/guestbook-dashboard';
 import {
   OperationalDataSurface,
+  OperationalDesktopData,
   OperationalEmptyState,
   OperationalHeader,
   OperationalMetric,
   OperationalMetricStrip,
+  OperationalMobileDataCard,
+  OperationalMobileDataList,
+  OperationalMobileField,
   OperationalSection,
   OperationalToolbar,
+  OperationalToolbarField,
   OperationalWorkspace,
 } from '@/components/workspace/operational-primitives';
 import { Button, Input } from '@/design-system';
@@ -255,10 +260,7 @@ export function GuestResponseWorkspace({
             ) : (
               <OperationalDataSurface>
                 <OperationalToolbar>
-                  <div>
-                    <label className="sr-only" htmlFor="response-search">
-                      Cari respons
-                    </label>
+                  <OperationalToolbarField htmlFor="response-search" label="Cari respons">
                     <Input
                       id="response-search"
                       onChange={(event) => setQuery(event.target.value)}
@@ -266,11 +268,8 @@ export function GuestResponseWorkspace({
                       type="search"
                       value={query}
                     />
-                  </div>
-                  <div>
-                    <label className="sr-only" htmlFor="response-filter">
-                      Filter respons
-                    </label>
+                  </OperationalToolbarField>
+                  <OperationalToolbarField htmlFor="response-filter" label="Filter respons">
                     <select
                       className="border-seraya-border-default bg-seraya-surface text-seraya-text-primary focus-visible:outline-seraya-focus-ring min-h-11 w-full rounded-[var(--seraya-radius-sm)] border px-3 text-sm focus-visible:outline-3 focus-visible:outline-offset-2"
                       id="response-filter"
@@ -282,7 +281,7 @@ export function GuestResponseWorkspace({
                       <option value="attending">Hadir</option>
                       <option value="declined">Tidak hadir</option>
                     </select>
-                  </div>
+                  </OperationalToolbarField>
                 </OperationalToolbar>
 
                 {filter === 'pending' ? (
@@ -307,7 +306,7 @@ export function GuestResponseWorkspace({
                   />
                 ) : (
                   <>
-                    <div className="hidden overflow-x-auto md:block">
+                    <OperationalDesktopData>
                       <table className="w-full min-w-[720px] border-collapse text-left text-sm">
                         <thead className="bg-seraya-brand-soft text-seraya-text-muted text-[0.625rem] font-semibold tracking-[0.12em] uppercase">
                           <tr>
@@ -346,43 +345,38 @@ export function GuestResponseWorkspace({
                           ))}
                         </tbody>
                       </table>
-                    </div>
+                    </OperationalDesktopData>
 
-                    <ul className="divide-seraya-border-default divide-y md:hidden">
+                    <OperationalMobileDataList>
                       {visibleRows.map((row) => (
-                        <li className="p-4" key={row.guestId}>
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
+                        <OperationalMobileDataCard
+                          identity={
+                            <>
                               <p className="text-seraya-text-primary truncate font-semibold">
                                 {row.displayName}
                               </p>
                               <p className="text-seraya-text-muted mt-0.5 text-xs">
                                 {row.groupLabel ?? 'Tanpa grup'}
                               </p>
-                            </div>
-                            <ResponseStatus status={row.rsvpStatus} />
-                          </div>
-                          <dl className="border-seraya-border-default mt-3 grid grid-cols-2 gap-3 border-t pt-3">
-                            <div>
-                              <dt className="text-seraya-text-muted text-[0.625rem] font-semibold tracking-[0.1em] uppercase">
-                                Rombongan
-                              </dt>
-                              <dd className="text-seraya-text-secondary mt-1 text-xs">
-                                {getAttendanceLabel(row)}
-                              </dd>
-                            </div>
-                            <div className="text-right">
-                              <dt className="text-seraya-text-muted text-[0.625rem] font-semibold tracking-[0.1em] uppercase">
-                                Diperbarui
-                              </dt>
-                              <dd className="text-seraya-text-secondary mt-1 text-xs">
-                                {formatTimestamp(row.updatedAt, timezone)}
-                              </dd>
-                            </div>
+                            </>
+                          }
+                          key={row.guestId}
+                          status={<ResponseStatus status={row.rsvpStatus} />}
+                        >
+                          <dl data-operational-mobile-fields>
+                            <OperationalMobileField
+                              label="Rombongan"
+                              value={getAttendanceLabel(row)}
+                            />
+                            <OperationalMobileField
+                              align="end"
+                              label="Diperbarui"
+                              value={formatTimestamp(row.updatedAt, timezone)}
+                            />
                           </dl>
-                        </li>
+                        </OperationalMobileDataCard>
                       ))}
-                    </ul>
+                    </OperationalMobileDataList>
                   </>
                 )}
               </OperationalDataSurface>
