@@ -6,6 +6,7 @@ import { ToastProvider } from '@/design-system';
 import './globals.css';
 import './workspace-anatomy.css';
 import './workspace-responsive.css';
+import './accessibility-release.css';
 
 export const metadata: Metadata = {
   title: {

@@ -1,0 +1,100 @@
+.seraya-skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 120;
+  display: inline-flex;
+  min-height: var(--seraya-touch-target);
+  align-items: center;
+  justify-content: center;
+  transform: translateY(calc(-100% - 1.5rem));
+  border: 1px solid var(--seraya-border-strong);
+  border-radius: var(--seraya-radius-sm);
+  background: var(--seraya-bg-surface);
+  color: var(--seraya-action-primary);
+  padding-inline: 1rem;
+  box-shadow: var(--seraya-shadow-float);
+  font-size: 0.875rem;
+  font-weight: 650;
+  transition: transform 160ms ease;
+}
+
+.seraya-skip-link:focus-visible {
+  transform: translateY(0);
+  outline: 3px solid var(--seraya-focus-ring);
+  outline-offset: 3px;
+}
+
+#project-workspace-content {
+  scroll-margin-top: 5.5rem;
+}
+
+#project-workspace-content:focus {
+  outline: none;
+}
+
+[data-operational-workspace] :where(a, button, input, select, textarea):focus-visible,
+[data-compass-workspace] :where(a, button, input, select, textarea):focus-visible,
+[data-invitation-studio] :where(a, button, input, select, textarea):focus-visible {
+  scroll-margin-block: 5.5rem var(--seraya-mobile-safe-bottom);
+}
+
+[data-operational-workspace] input[type='checkbox'] {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+[role='menu'] [role='menuitem'] {
+  min-height: var(--seraya-touch-target);
+}
+
+[data-toast-viewport] {
+  bottom: calc(var(--seraya-mobile-safe-bottom) + 1rem);
+}
+
+@media (min-width: 1024px) {
+  [data-toast-viewport] {
+    bottom: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+    scroll-behavior: auto;
+  }
+
+  [data-project-workspace-shell] *,
+  [data-project-workspace-shell] *::before,
+  [data-project-workspace-shell] *::after,
+  [data-dialog-surface] *,
+  [data-dialog-surface] *::before,
+  [data-dialog-surface] *::after,
+  [data-local-preview-overlay] *,
+  [data-local-preview-overlay] *::before,
+  [data-local-preview-overlay] *::after,
+  [data-toast-viewport] *,
+  [data-toast-viewport] *::before,
+  [data-toast-viewport] *::after {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    scroll-behavior: auto;
+    transition-delay: 0ms;
+    transition-duration: 0.01ms;
+  }
+}
+
+@media (forced-colors: active) {
+  .seraya-skip-link,
+  [data-dialog-surface],
+  [data-operational-data-surface],
+  [data-local-preview-device] {
+    border: 1px solid CanvasText;
+  }
+
+  [aria-current='page'],
+  [aria-current='step'],
+  [aria-selected='true'] {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+}

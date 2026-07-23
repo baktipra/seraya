@@ -15,8 +15,8 @@ export const buttonVariants = {
 } as const;
 
 export const buttonSizes = {
-  sm: 'min-h-9 gap-2 px-3 text-sm',
-  md: 'min-h-11 gap-2 px-4 text-sm',
+  sm: 'min-h-[var(--seraya-touch-target)] gap-2 px-3 text-sm',
+  md: 'min-h-[var(--seraya-touch-target)] gap-2 px-4 text-sm',
   lg: 'min-h-12 gap-2.5 px-5 text-base',
 } as const;
 
@@ -63,7 +63,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       {loading ? (
         <span
           aria-hidden="true"
-          className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+          className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent motion-reduce:animate-none"
         />
       ) : null}
       <span>{children}</span>

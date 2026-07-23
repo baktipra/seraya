@@ -52,8 +52,10 @@ export function OperationalHeader({
       </div>
       {actions ? (
         <div
+          aria-label="Aksi halaman"
           className="flex shrink-0 flex-wrap gap-2 sm:justify-end"
           data-operational-header-actions
+          role="group"
         >
           {actions}
         </div>
@@ -153,7 +155,12 @@ export function OperationalSection({
           ) : null}
         </div>
         {actions ? (
-          <div className="flex min-w-0 shrink-0 flex-wrap gap-2" data-operational-section-actions>
+          <div
+            aria-label="Aksi bagian"
+            className="flex min-w-0 shrink-0 flex-wrap gap-2"
+            data-operational-section-actions
+            role="group"
+          >
             {actions}
           </div>
         ) : null}
@@ -163,11 +170,19 @@ export function OperationalSection({
   );
 }
 
-export function OperationalToolbar({ children }: { children: ReactNode }) {
+export function OperationalToolbar({
+  children,
+  label = 'Cari dan filter data',
+}: {
+  children: ReactNode;
+  label?: string;
+}) {
   return (
     <div
+      aria-label={label}
       className="border-seraya-border-default bg-seraya-canvas grid gap-3 border-b p-3 sm:grid-cols-[minmax(0,1fr)_15rem] sm:p-4"
       data-operational-toolbar
+      role="search"
     >
       {children}
     </div>
@@ -207,17 +222,39 @@ export function OperationalDataSurface({ children }: { children: ReactNode }) {
   );
 }
 
-export function OperationalDesktopData({ children }: { children: ReactNode }) {
+export function OperationalDesktopData({
+  children,
+  label = 'Tabel data',
+}: {
+  children: ReactNode;
+  label?: string;
+}) {
   return (
-    <div className="hidden min-w-0 overflow-x-auto md:block" data-operational-desktop-data>
+    <div
+      aria-label={label}
+      className="focus-visible:outline-seraya-focus-ring hidden min-w-0 overflow-x-auto focus-visible:outline-3 focus-visible:outline-offset-[-3px] md:block"
+      data-operational-desktop-data
+      role="region"
+      tabIndex={0}
+    >
       {children}
     </div>
   );
 }
 
-export function OperationalMobileDataList({ children }: { children: ReactNode }) {
+export function OperationalMobileDataList({
+  children,
+  label = 'Daftar data',
+}: {
+  children: ReactNode;
+  label?: string;
+}) {
   return (
-    <ul className="divide-seraya-border-default divide-y md:hidden" data-operational-mobile-list>
+    <ul
+      aria-label={label}
+      className="divide-seraya-border-default divide-y md:hidden"
+      data-operational-mobile-list
+    >
       {children}
     </ul>
   );
@@ -262,9 +299,19 @@ export function OperationalMobileField({
   );
 }
 
-export function OperationalResponsiveList({ children }: { children: ReactNode }) {
+export function OperationalResponsiveList({
+  children,
+  label = 'Daftar data',
+}: {
+  children: ReactNode;
+  label?: string;
+}) {
   return (
-    <ul className="divide-seraya-border-default divide-y" data-operational-responsive-list>
+    <ul
+      aria-label={label}
+      className="divide-seraya-border-default divide-y"
+      data-operational-responsive-list
+    >
       {children}
     </ul>
   );
@@ -303,7 +350,13 @@ export function OperationalEmptyState({
   title: ReactNode;
 }) {
   return (
-    <div className="px-5 py-10 text-center" data-operational-empty-state>
+    <div
+      aria-atomic="true"
+      aria-live="polite"
+      className="px-5 py-10 text-center"
+      data-operational-empty-state
+      role="status"
+    >
       <p className="text-seraya-text-primary font-semibold">{title}</p>
       <div className="text-seraya-text-muted mx-auto mt-2 max-w-xl text-sm leading-6">
         {description}
@@ -315,20 +368,35 @@ export function OperationalEmptyState({
 
 export function OperationalSelectionBar({
   actions,
+  label = 'Aksi item terpilih',
   status,
 }: {
   actions: ReactNode;
+  label?: string;
   status: ReactNode;
 }) {
   return (
     <div
+      aria-label={label}
       className="border-seraya-border-default bg-seraya-canvas sticky bottom-0 z-20 flex flex-col gap-3 border-t px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
       data-operational-selection-bar
+      role="region"
     >
-      <div className="text-seraya-text-secondary text-sm" data-operational-selection-status>
+      <div
+        aria-atomic="true"
+        aria-live="polite"
+        className="text-seraya-text-secondary text-sm"
+        data-operational-selection-status
+        role="status"
+      >
         {status}
       </div>
-      <div className="flex flex-wrap gap-2" data-operational-selection-actions>
+      <div
+        aria-label="Tindakan pilihan"
+        className="flex flex-wrap gap-2"
+        data-operational-selection-actions
+        role="group"
+      >
         {actions}
       </div>
     </div>

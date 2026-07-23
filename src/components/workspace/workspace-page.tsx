@@ -43,7 +43,7 @@ export function WorkspacePage({
   return (
     <div
       className={[
-        'w-full min-w-0',
+        'w-full min-w-0 outline-none',
         align === 'center' ? 'mx-auto' : 'mr-auto',
         className,
       ]
@@ -54,6 +54,8 @@ export function WorkspacePage({
       data-workspace-kind={kind}
       data-workspace-page
       data-workspace-width={width}
+      id="project-workspace-content"
+      tabIndex={-1}
     >
       {children}
     </div>

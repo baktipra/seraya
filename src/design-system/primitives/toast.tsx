@@ -95,11 +95,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={value}>
       {children}
       <div
-        aria-live="polite"
         className="pointer-events-none fixed right-4 bottom-4 z-[60] flex w-[min(100%-2rem,24rem)] flex-col gap-3"
+        data-toast-viewport
       >
         {toasts.map((item) => (
           <div
+            aria-atomic="true"
             key={item.id}
             className={cn(
               'pointer-events-auto rounded-[var(--seraya-radius-lg)] border p-4 shadow-[var(--seraya-shadow-float)]',
@@ -120,11 +121,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               </div>
               <button
                 aria-label="Tutup notifikasi"
-                className="text-seraya-text-secondary hover:bg-seraya-surface/70 hover:text-seraya-text-primary focus-visible:outline-seraya-focus-ring inline-flex size-8 shrink-0 items-center justify-center rounded-full text-lg transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
+                className="text-seraya-text-secondary hover:bg-seraya-surface/70 hover:text-seraya-text-primary focus-visible:outline-seraya-focus-ring inline-flex size-11 shrink-0 items-center justify-center rounded-full text-lg transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
                 onClick={() => dismiss(item.id)}
                 type="button"
               >
-                ×
+                <span aria-hidden="true">×</span>
               </button>
             </div>
           </div>

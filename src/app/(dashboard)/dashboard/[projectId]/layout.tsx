@@ -1,9 +1,9 @@
 import { notFound } from 'next/navigation';
 
 import { ProjectNavigation } from '@/components/dashboard/project-navigation';
+import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 import { getWeddingReadinessForRequest } from '@/modules/readiness';
 import type { WeddingReadinessV1 } from '@/modules/readiness';
-import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 
 type ProjectLayoutProps = {
   children: React.ReactNode;
@@ -46,15 +46,20 @@ export default async function ProjectDashboardLayout({ children, params }: Proje
   const readiness = await getProjectReadinessOrNotFound(projectId);
 
   return (
-    <div className="min-w-0" data-dashboard-width="wide" data-project-workspace-shell>
-      <ProjectNavigation
-        coupleLabel={readiness.identity.coupleLabel}
-        projectId={projectId}
-        statusLabel={getWorkspaceStatusLabel(readiness)}
-      />
-      <div className="min-w-0" data-project-workspace-main>
-        {children}
+    <>
+      <a className="seraya-skip-link" href="#project-workspace-content">
+        Lewati navigasi proyek
+      </a>
+      <div className="min-w-0" data-dashboard-width="wide" data-project-workspace-shell>
+        <ProjectNavigation
+          coupleLabel={readiness.identity.coupleLabel}
+          projectId={projectId}
+          statusLabel={getWorkspaceStatusLabel(readiness)}
+        />
+        <div className="min-w-0" data-project-workspace-main>
+          {children}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

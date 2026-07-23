@@ -3,7 +3,7 @@
 import type { Route } from 'next';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import type { ComponentType, SVGProps } from 'react';
+import { useEffect, useRef, useState, type ComponentType, type SVGProps } from 'react';
 
 import {
   FollowUpIcon,
@@ -56,6 +56,28 @@ function isCurrentProjectRoute(pathname: string, item: ProjectNavigationItem, pr
   return item.href === projectRoot ? pathname === projectRoot : pathname.startsWith(item.href);
 }
 
+function getProjectRouteLabel(pathname: string, projectId: string) {
+  const projectRoot = `/dashboard/${projectId}`;
+  if (pathname === projectRoot) return 'Ringkasan';
+
+  const segment = pathname.slice(projectRoot.length + 1).split('/')[0] ?? '';
+  const labels: Record<string, string> = {
+    billing: 'Pembayaran',
+    delivery: 'Bagikan',
+    'follow-up': 'Tindak Lanjut',
+    gallery: 'Galeri',
+    guestbook: 'Ucapan',
+    guests: 'Tamu',
+    invitation: 'Undangan',
+    preview: 'Preview undangan',
+    rsvp: 'Respons Tamu',
+    settings: 'Pengaturan',
+    share: 'Bagikan',
+  };
+
+  return labels[segment] ?? 'Workspace proyek';
+}
+
 function ProjectNavigationLink({
   active,
   item,
@@ -66,6 +88,7 @@ function ProjectNavigationLink({
   mode: 'desktop' | 'mobile';
 }) {
   const Icon = item.icon;
+  const visualLabel = mode === 'mobile' ? (item.mobileLabel ?? item.label) : item.label;
 
   return (
     <Link
@@ -85,14 +108,26 @@ function ProjectNavigationLink({
       prefetch={false}
     >
       {mode === 'mobile' && active ? (
-        <span className="bg-seraya-action-primary absolute inset-x-3 top-0 h-0.5" />
+        <span aria-hidden="true" className="bg-seraya-action-primary absolute inset-x-3 top-0 h-0.5" />
       ) : null}
-      <Icon className={mode === 'desktop' ? 'size-4' : 'size-[1.05rem]'} strokeWidth={1.6} />
-      <span className={mode === 'mobile' ? 'max-w-full truncate' : undefined}>
-        {mode === 'mobile' ? (item.mobileLabel ?? item.label) : item.label}
-      </span>
+      <Icon
+        aria-hidden="true"
+        className={mode === 'desktop' ? 'size-4' : 'size-[1.05rem]'}
+        focusable="false"
+        strokeWidth={1.6}
+      />
+      {mode === 'mobile' ? (
+        <>
+          <span className="sr-only">{item.label}</span>
+          <span aria-hidden="true" className="max-w-full truncate">
+            {visualLabel}
+          </span>
+        </>
+      ) : (
+        <span>{visualLabel}</span>
+      )}
       {mode === 'desktop' && active ? (
-        <span className="bg-seraya-action-primary ml-auto size-1.5 rounded-full" />
+        <span aria-hidden="true" className="bg-seraya-action-primary ml-auto size-1.5 rounded-full" />
       ) : null}
     </Link>
   );
@@ -110,6 +145,22 @@ export function ProjectNavigation({
 }) {
   const pathname = usePathname();
   const items = getProjectNavigationItems(projectId);
+  const previousPathnameRef = useRef(pathname);
+  const [routeAnnouncement, setRouteAnnouncement] = useState('');
+
+  useEffect(() => {
+    if (previousPathnameRef.current === pathname) return undefined;
+
+    previousPathnameRef.current = pathname;
+    const focusFrame = window.requestAnimationFrame(() => {
+      document
+        .getElementById('project-workspace-content')
+        ?.focus({ preventScroll: true });
+      setRouteAnnouncement(`Halaman ${getProjectRouteLabel(pathname, projectId)} dibuka.`);
+    });
+
+    return () => window.cancelAnimationFrame(focusFrame);
+  }, [pathname, projectId]);
 
   return (
     <>
@@ -133,7 +184,7 @@ export function ProjectNavigation({
         </nav>
         <div className="border-seraya-border-default mt-auto flex min-h-20 items-center border-t px-2">
           <Link
-            className="text-seraya-text-muted hover:text-seraya-action-primary focus-visible:outline-seraya-focus-ring inline-flex min-h-10 items-center text-sm font-medium transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
+            className="text-seraya-text-muted hover:text-seraya-action-primary focus-visible:outline-seraya-focus-ring inline-flex min-h-11 items-center text-sm font-medium transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
             href="/dashboard"
             prefetch={false}
           >
@@ -155,6 +206,10 @@ export function ProjectNavigation({
           />
         ))}
       </nav>
+
+      <p aria-atomic="true" aria-live="polite" className="sr-only" role="status">
+        {routeAnnouncement}
+      </p>
     </>
   );
 }
