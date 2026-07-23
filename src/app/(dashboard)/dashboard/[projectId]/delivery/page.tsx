@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 
 import { GuestDeliveryCenter } from '@/components/projects/guest-delivery-center';
+import { OperationalLegacyBridge } from '@/components/workspace/operational-primitives';
 import { WorkspacePage } from '@/components/workspace/workspace-page';
 import { getOwnedProjectContextForRequest } from '@/modules/auth/dashboard-request-context';
 import {
@@ -82,7 +83,9 @@ export default async function DeliveryCenterPage({ params }: DeliveryCenterPageP
   if (screen.kind === 'blocked') {
     return (
       <WorkspacePage kind="delivery" width="operations">
-        <DeliveryBlockedState projectId={projectId} />
+        <OperationalLegacyBridge kind="delivery">
+          <DeliveryBlockedState projectId={projectId} />
+        </OperationalLegacyBridge>
       </WorkspacePage>
     );
   }
@@ -91,40 +94,42 @@ export default async function DeliveryCenterPage({ params }: DeliveryCenterPageP
 
   return (
     <WorkspacePage kind="delivery" width="operations">
-      <GuestDeliveryCenter
-        copyWhatsAppNumbersAction={copySelectedDeliveryWhatsAppNumbersAction.bind(null, {
-          projectId: deliveryCenter.project.id,
-        })}
-        projectId={deliveryCenter.project.id}
-        prepareBatchAction={prepareMissingPersonalGuestLinksForDeliveryAction.bind(null, {
-          projectId: deliveryCenter.project.id,
-        })}
-        rows={deliveryCenter.rows.map(({ guestId, ...row }, rowKey) => {
-          const readiness = deriveDeliveryReadiness(row);
-          return {
-            ...row,
-            ...(readiness.canPrepareNewLink
-              ? {
-                  prepareAction: preparePersonalGuestLinkForDeliveryAction.bind(null, {
-                    guestId,
-                    projectId: deliveryCenter.project.id,
-                  }),
-                }
-              : {}),
-            ...(readiness.isReadyToDistribute
-              ? {
-                  reaccessAction: reaccessOrPrepareCanonicalInitialHandoffAction.bind(null, {
-                    guestId,
-                    projectId: deliveryCenter.project.id,
-                  }),
-                }
-              : {}),
-            guestId,
-            rowKey,
-          };
-        })}
-        summary={deliveryCenter.summary}
-      />
+      <OperationalLegacyBridge kind="delivery">
+        <GuestDeliveryCenter
+          copyWhatsAppNumbersAction={copySelectedDeliveryWhatsAppNumbersAction.bind(null, {
+            projectId: deliveryCenter.project.id,
+          })}
+          projectId={deliveryCenter.project.id}
+          prepareBatchAction={prepareMissingPersonalGuestLinksForDeliveryAction.bind(null, {
+            projectId: deliveryCenter.project.id,
+          })}
+          rows={deliveryCenter.rows.map(({ guestId, ...row }, rowKey) => {
+            const readiness = deriveDeliveryReadiness(row);
+            return {
+              ...row,
+              ...(readiness.canPrepareNewLink
+                ? {
+                    prepareAction: preparePersonalGuestLinkForDeliveryAction.bind(null, {
+                      guestId,
+                      projectId: deliveryCenter.project.id,
+                    }),
+                  }
+                : {}),
+              ...(readiness.isReadyToDistribute
+                ? {
+                    reaccessAction: reaccessOrPrepareCanonicalInitialHandoffAction.bind(null, {
+                      guestId,
+                      projectId: deliveryCenter.project.id,
+                    }),
+                  }
+                : {}),
+              guestId,
+              rowKey,
+            };
+          })}
+          summary={deliveryCenter.summary}
+        />
+      </OperationalLegacyBridge>
     </WorkspacePage>
   );
 }

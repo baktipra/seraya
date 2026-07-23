@@ -4,6 +4,16 @@ import Link from 'next/link';
 import { useMemo, useRef, useState, type KeyboardEvent } from 'react';
 
 import { GuestbookInboxPanel } from '@/components/projects/guestbook-dashboard';
+import {
+  OperationalDataSurface,
+  OperationalEmptyState,
+  OperationalHeader,
+  OperationalMetric,
+  OperationalMetricStrip,
+  OperationalSection,
+  OperationalToolbar,
+  OperationalWorkspace,
+} from '@/components/workspace/operational-primitives';
 import { Button, Input } from '@/design-system';
 import type { OwnerGuestbookEntry } from '@/modules/guestbook/guestbook.types';
 import type {
@@ -31,8 +41,7 @@ const rsvpStatusLabels: Record<RsvpResponseRow['rsvpStatus'], string> = {
 const rsvpStatusClasses: Record<RsvpResponseRow['rsvpStatus'], string> = {
   attending:
     'border-[color-mix(in_srgb,var(--seraya-status-success)_28%,transparent)] bg-[color-mix(in_srgb,var(--seraya-status-success)_10%,transparent)] text-seraya-status-success',
-  declined:
-    'border-seraya-border-default bg-seraya-canvas text-seraya-text-secondary',
+  declined: 'border-seraya-border-default bg-seraya-canvas text-seraya-text-secondary',
   pending:
     'border-[color-mix(in_srgb,var(--seraya-status-warning)_28%,transparent)] bg-[color-mix(in_srgb,var(--seraya-status-warning)_10%,transparent)] text-seraya-status-warning',
 };
@@ -69,32 +78,6 @@ function formatTimestamp(value: string, timezone: string) {
   } catch {
     return 'Tidak tersedia';
   }
-}
-
-function Metric({
-  detail,
-  label,
-  value,
-}: {
-  detail?: string;
-  label: string;
-  value: number | string;
-}) {
-  return (
-    <div className="border-seraya-border-default min-w-0 border-b px-0 py-4 last:border-b-0 sm:px-5 md:border-r md:border-b-0 md:first:pl-0 md:last:border-r-0 md:last:pr-0">
-      <p className="text-seraya-text-muted text-[0.625rem] font-semibold tracking-[0.15em] uppercase">
-        {label}
-      </p>
-      <p className="text-seraya-text-primary mt-1.5 font-serif text-[clamp(1.6rem,2.5vw,2.15rem)] leading-none font-medium tracking-[-0.025em] tabular-nums">
-        {value}
-      </p>
-      {detail ? (
-        <p className="text-seraya-text-muted mt-1.5 max-w-[16rem] text-[0.6875rem] leading-4">
-          {detail}
-        </p>
-      ) : null}
-    </div>
-  );
 }
 
 function ResponseStatus({ status }: { status: RsvpResponseRow['rsvpStatus'] }) {
@@ -178,112 +161,100 @@ export function GuestResponseWorkspace({
     activateTab('guestbook', true);
   }
 
+  const tabActions = (
+    <div aria-label="Tampilan Respons Tamu" className="flex gap-6" role="tablist">
+      <button
+        aria-controls="response-content"
+        aria-selected={activeTab === 'responses'}
+        className={`focus-visible:outline-seraya-focus-ring min-h-10 border-b-2 px-0 pb-2 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-3 ${
+          activeTab === 'responses'
+            ? 'border-seraya-action-primary text-seraya-action-primary'
+            : 'text-seraya-text-muted border-transparent hover:text-seraya-text-primary'
+        }`}
+        id="response-tab"
+        onClick={() => activateTab('responses')}
+        onKeyDown={handleTabKeyDown}
+        ref={responsesTabRef}
+        role="tab"
+        tabIndex={activeTab === 'responses' ? 0 : -1}
+        type="button"
+      >
+        Respons
+      </button>
+      <button
+        aria-controls="guestbook-content"
+        aria-selected={activeTab === 'guestbook'}
+        className={`focus-visible:outline-seraya-focus-ring min-h-10 border-b-2 px-0 pb-2 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-3 ${
+          activeTab === 'guestbook'
+            ? 'border-seraya-action-primary text-seraya-action-primary'
+            : 'text-seraya-text-muted border-transparent hover:text-seraya-text-primary'
+        }`}
+        id="guestbook-tab-v2"
+        onClick={() => activateTab('guestbook')}
+        onKeyDown={handleTabKeyDown}
+        ref={guestbookTabRef}
+        role="tab"
+        tabIndex={activeTab === 'guestbook' ? 0 : -1}
+        type="button"
+      >
+        Ucapan
+      </button>
+    </div>
+  );
+
   return (
-    <section aria-labelledby="response-hub-title" className="mx-auto max-w-6xl">
-      <header className="border-seraya-border-default flex flex-col gap-5 border-b pb-6 sm:flex-row sm:items-end sm:justify-between sm:pb-7">
-        <div className="min-w-0">
-          <p className="text-seraya-action-primary text-[0.6875rem] font-semibold tracking-[0.17em] uppercase">
-            Respons tamu
-          </p>
-          <h1
-            className="text-seraya-text-primary mt-1.5 font-serif text-[clamp(2.7rem,5vw,4rem)] leading-[0.95] font-medium tracking-[-0.035em]"
-            id="response-hub-title"
+    <OperationalWorkspace labelledBy="response-hub-title">
+      <OperationalHeader
+        actions={
+          <Button
+            aria-label="Export respons tamu ke XLSX"
+            onClick={() => downloadRsvpExport(projectId)}
+            size="sm"
+            type="button"
+            variant="secondary"
           >
-            Respons &amp; ucapan
-          </h1>
-          <p className="text-seraya-text-secondary mt-3 max-w-2xl text-sm leading-6">
-            Pantau konfirmasi kehadiran, jumlah rombongan, dan ucapan tamu dalam satu tempat.
-          </p>
-        </div>
-        <Button
-          aria-label="Export respons tamu ke XLSX"
-          className="shrink-0"
-          onClick={() => downloadRsvpExport(projectId)}
-          size="sm"
-          type="button"
-          variant="secondary"
-        >
-          Export XLSX
-        </Button>
-      </header>
+            Export XLSX
+          </Button>
+        }
+        description="Pantau konfirmasi kehadiran, jumlah rombongan, dan ucapan tamu dalam satu tempat."
+        eyebrow="Respons tamu"
+        title="Respons & ucapan"
+        titleId="response-hub-title"
+      />
 
-      <section aria-label="Ringkasan status RSVP" className="border-seraya-border-default border-b py-5">
-        <div className="grid md:grid-cols-4">
-          <Metric label="Hadir" value={analytics.attendingGuestCount} />
-          <Metric label="Tidak hadir" value={analytics.declinedGuestCount} />
-          <Metric label="Belum merespons" value={analytics.pendingGuestCount} />
-          <Metric detail={attendanceDetail} label="Rombongan hadir" value={attendanceValue} />
-        </div>
-      </section>
+      <OperationalMetricStrip label="Ringkasan status RSVP">
+        <OperationalMetric label="Hadir" value={analytics.attendingGuestCount} />
+        <OperationalMetric label="Tidak hadir" value={analytics.declinedGuestCount} />
+        <OperationalMetric label="Belum merespons" value={analytics.pendingGuestCount} />
+        <OperationalMetric detail={attendanceDetail} label="Rombongan hadir" value={attendanceValue} />
+      </OperationalMetricStrip>
 
-      <section className="pt-6 sm:pt-7" aria-labelledby="response-monitor-title">
-        <div className="border-seraya-border-default flex flex-col gap-4 border-b sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h2 className="sr-only" id="response-monitor-title">
-              Pantauan respons dan ucapan
-            </h2>
-            <p className="text-seraya-text-muted pb-3 text-xs leading-5 sm:pb-4">
-              Cari respons RSVP atau baca ucapan terbaru dari tamu.
-            </p>
-          </div>
-          <div aria-label="Tampilan Respons Tamu" className="flex gap-6" role="tablist">
-            <button
-              aria-controls="response-content"
-              aria-selected={activeTab === 'responses'}
-              className={`focus-visible:outline-seraya-focus-ring min-h-10 border-b-2 px-0 pb-3 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-3 ${
-                activeTab === 'responses'
-                  ? 'border-seraya-action-primary text-seraya-action-primary'
-                  : 'text-seraya-text-muted border-transparent hover:text-seraya-text-primary'
-              }`}
-              id="response-tab"
-              onClick={() => activateTab('responses')}
-              onKeyDown={handleTabKeyDown}
-              ref={responsesTabRef}
-              role="tab"
-              tabIndex={activeTab === 'responses' ? 0 : -1}
-              type="button"
-            >
-              Respons
-            </button>
-            <button
-              aria-controls="guestbook-content"
-              aria-selected={activeTab === 'guestbook'}
-              className={`focus-visible:outline-seraya-focus-ring min-h-10 border-b-2 px-0 pb-3 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-3 ${
-                activeTab === 'guestbook'
-                  ? 'border-seraya-action-primary text-seraya-action-primary'
-                  : 'text-seraya-text-muted border-transparent hover:text-seraya-text-primary'
-              }`}
-              id="guestbook-tab-v2"
-              onClick={() => activateTab('guestbook')}
-              onKeyDown={handleTabKeyDown}
-              ref={guestbookTabRef}
-              role="tab"
-              tabIndex={activeTab === 'guestbook' ? 0 : -1}
-              type="button"
-            >
-              Ucapan
-            </button>
-          </div>
-        </div>
-
+      <OperationalSection
+        actions={tabActions}
+        description="Cari respons RSVP atau baca ucapan terbaru dari tamu."
+        title="Pantauan respons"
+        titleId="response-monitor-title"
+      >
         {activeTab === 'responses' ? (
-          <div aria-labelledby="response-tab" className="pt-4" id="response-content" role="tabpanel">
+          <div aria-labelledby="response-tab" id="response-content" role="tabpanel">
             {analytics.activeGuestCount === 0 ? (
-              <div className="border-seraya-border-default border-y px-5 py-10 text-center">
-                <p className="text-seraya-text-primary font-semibold">Belum ada tamu untuk dipantau.</p>
-                <p className="text-seraya-text-muted mt-2 text-sm leading-6">
-                  Tambahkan daftar tamu terlebih dahulu agar Anda dapat menerima RSVP.
-                </p>
-                <Link
-                  className="text-seraya-action-primary focus-visible:outline-seraya-focus-ring mt-4 inline-flex min-h-10 items-center text-sm font-semibold underline-offset-4 hover:underline focus-visible:outline-3 focus-visible:outline-offset-3"
-                  href={`/dashboard/${projectId}/guests`}
-                >
-                  Buka Tamu →
-                </Link>
-              </div>
+              <OperationalDataSurface>
+                <OperationalEmptyState
+                  action={
+                    <Link
+                      className="text-seraya-action-primary text-sm font-semibold underline-offset-4 hover:underline"
+                      href={`/dashboard/${projectId}/guests`}
+                    >
+                      Buka Tamu →
+                    </Link>
+                  }
+                  description="Tambahkan daftar tamu terlebih dahulu agar Anda dapat menerima RSVP."
+                  title="Belum ada tamu untuk dipantau."
+                />
+              </OperationalDataSurface>
             ) : (
-              <div className="border-seraya-border-default bg-seraya-surface border">
-                <div className="border-seraya-border-default bg-seraya-canvas grid gap-3 border-b p-3 sm:grid-cols-[minmax(0,1fr)_14rem] sm:p-4">
+              <OperationalDataSurface>
+                <OperationalToolbar>
                   <div>
                     <label className="sr-only" htmlFor="response-search">
                       Cari respons
@@ -312,7 +283,7 @@ export function GuestResponseWorkspace({
                       <option value="declined">Tidak hadir</option>
                     </select>
                   </div>
-                </div>
+                </OperationalToolbar>
 
                 {filter === 'pending' ? (
                   <p className="border-seraya-border-default text-seraya-text-muted border-b px-4 py-2.5 text-xs leading-5">
@@ -330,14 +301,10 @@ export function GuestResponseWorkspace({
                 ) : null}
 
                 {visibleRows.length === 0 ? (
-                  <div className="px-5 py-10 text-center">
-                    <p className="text-seraya-text-primary font-semibold">
-                      {getEmptyResponseMessage(filter)}
-                    </p>
-                    <p className="text-seraya-text-muted mt-2 text-sm leading-6">
-                      Ubah pencarian atau filter untuk melihat respons lain.
-                    </p>
-                  </div>
+                  <OperationalEmptyState
+                    description="Ubah pencarian atau filter untuk melihat respons lain."
+                    title={getEmptyResponseMessage(filter)}
+                  />
                 ) : (
                   <>
                     <div className="hidden overflow-x-auto md:block">
@@ -353,10 +320,7 @@ export function GuestResponseWorkspace({
                         </thead>
                         <tbody className="divide-seraya-border-default divide-y">
                           {visibleRows.map((row) => (
-                            <tr
-                              className="hover:bg-seraya-canvas transition-colors"
-                              key={row.guestId}
-                            >
+                            <tr className="hover:bg-seraya-canvas transition-colors" key={row.guestId}>
                               <td className="text-seraya-text-primary px-4 py-3 font-semibold">
                                 {row.displayName}
                               </td>
@@ -421,20 +385,17 @@ export function GuestResponseWorkspace({
                     </ul>
                   </>
                 )}
-              </div>
+              </OperationalDataSurface>
             )}
           </div>
         ) : (
-          <div
-            aria-labelledby="guestbook-tab-v2"
-            className="border-seraya-border-default border-b pt-4"
-            id="guestbook-content"
-            role="tabpanel"
-          >
-            <GuestbookInboxPanel entries={entries} timezone={timezone} />
+          <div aria-labelledby="guestbook-tab-v2" id="guestbook-content" role="tabpanel">
+            <OperationalDataSurface>
+              <GuestbookInboxPanel entries={entries} timezone={timezone} />
+            </OperationalDataSurface>
           </div>
         )}
-      </section>
-    </section>
+      </OperationalSection>
+    </OperationalWorkspace>
   );
 }

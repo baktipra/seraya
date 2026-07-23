@@ -9,7 +9,17 @@ import {
 } from '@/components/projects/guest-follow-up-center';
 import { GuestFollowUpHandoffControl } from '@/components/projects/guest-follow-up-handoff-control';
 import { GuestFollowUpResultDialog } from '@/components/projects/guest-follow-up-result-dialog';
-import { Card, CardContent, CardHeader, CardTitle, Input } from '@/design-system';
+import {
+  OperationalDataSurface,
+  OperationalEmptyState,
+  OperationalHeader,
+  OperationalMetric,
+  OperationalMetricStrip,
+  OperationalSection,
+  OperationalToolbar,
+  OperationalWorkspace,
+} from '@/components/workspace/operational-primitives';
+import { Input } from '@/design-system';
 import type {
   GuestFollowUpHandoffMessageKind,
   GuestFollowUpHandoffResult,
@@ -34,15 +44,6 @@ const labels: Record<GuestFollowUpSegment, string> = {
   no_personal_invitation: 'Belum punya Undangan Pribadi',
   rsvp_responded: 'RSVP sudah dijawab',
 };
-
-function Metric({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="border-seraya-border-default bg-seraya-surface rounded-[var(--seraya-radius-md)] border px-4 py-4">
-      <p className="text-seraya-text-muted text-xs font-semibold uppercase">{label}</p>
-      <p className="text-seraya-text-primary mt-2 text-2xl font-semibold tabular-nums">{value}</p>
-    </div>
-  );
-}
 
 function reminder(row: FollowUpGuestRowClient): {
   label: string;
@@ -111,85 +112,111 @@ export function CanonicalGuestFollowUpCenter({
   );
 
   return (
-    <section className="mx-auto max-w-7xl space-y-5 sm:space-y-7">
-      <header className="border-seraya-border-default bg-seraya-surface rounded-[var(--seraya-radius-lg)] border px-5 py-6 shadow-[var(--seraya-shadow-soft)] sm:px-7 sm:py-8">
-        <p className="text-seraya-action-primary text-xs font-semibold uppercase">Tindak lanjut</p>
-        <h1 className="seraya-display-md mt-3">Tindak lanjut tamu</h1>
-        <p className="text-seraya-text-secondary mt-3 max-w-3xl leading-7">
-          Siapkan pengingat manual setelah undangan awal dibagikan dari Bagikan. Seraya tidak
-          menganggap pesan sudah terkirim.
-        </p>
-      </header>
+    <OperationalWorkspace labelledBy="follow-up-title">
+      <OperationalHeader
+        description={
+          <>
+            Siapkan pengingat manual setelah undangan awal dibagikan dari Bagikan. Seraya tidak
+            menganggap pesan sudah terkirim.
+          </>
+        }
+        eyebrow="Tindak lanjut"
+        title="Tindak lanjut tamu"
+        titleId="follow-up-title"
+      />
 
       {!isPublished ? (
-        <Card>
-          <CardContent className="py-5">
-            <p className="font-semibold">Publikasikan undangan untuk mulai menyiapkan handoff</p>
-            <Link className="mt-3 inline-flex" href={`/dashboard/${projectId}/invitation`}>
-              Buka Undangan
-            </Link>
-          </CardContent>
-        </Card>
+        <div className="border-seraya-border-default bg-seraya-brand-soft border px-4 py-4 sm:px-5">
+          <p className="text-seraya-text-primary font-semibold">
+            Publikasikan undangan untuk mulai menyiapkan handoff.
+          </p>
+          <Link
+            className="text-seraya-action-primary mt-2 inline-flex text-sm font-semibold underline-offset-4 hover:underline"
+            href={`/dashboard/${projectId}/invitation`}
+          >
+            Buka Undangan →
+          </Link>
+        </div>
       ) : null}
 
-      <section
-        aria-label="Ringkasan tindak lanjut"
-        className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5"
-      >
-        <Metric label="Tamu aktif" value={summary.activeGuestCount} />
-        <Metric label="Perlu diperbaiki" value={summary.needsDataRepairCount} />
-        <Metric label="Belum dibagikan" value={summary.noFollowUpRecordedCount} />
-        <Metric label="Menunggu RSVP" value={summary.awaitingRsvpCount} />
-        <Metric label="RSVP selesai" value={summary.rsvpRespondedCount} />
-      </section>
+      <OperationalMetricStrip columns={5} label="Ringkasan tindak lanjut">
+        <OperationalMetric label="Tamu aktif" value={summary.activeGuestCount} />
+        <OperationalMetric label="Perlu diperbaiki" value={summary.needsDataRepairCount} />
+        <OperationalMetric label="Belum dibagikan" value={summary.noFollowUpRecordedCount} />
+        <OperationalMetric label="Menunggu RSVP" value={summary.awaitingRsvpCount} />
+        <OperationalMetric label="RSVP selesai" value={summary.rsvpRespondedCount} />
+      </OperationalMetricStrip>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="font-sans text-lg">Daftar tindak lanjut</CardTitle>
-          <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_17rem]">
-            <Input
-              aria-label="Cari tamu"
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Cari nama atau grup"
-              type="search"
-              value={query}
-            />
-            <select
-              aria-label="Filter status"
-              className="border-seraya-border-default bg-seraya-surface min-h-11 rounded-[var(--seraya-radius-md)] border px-3 text-sm"
-              onChange={(event) => setFilter(event.target.value as GuestFollowUpSegmentFilter)}
-              value={filter}
-            >
-              <option value="all">Semua status</option>
-              {Object.entries(labels).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-3 pt-5">
-          {rows.length === 0 ? (
-            <div className="py-8 text-center">
-              <p className="font-semibold">Belum ada tamu untuk ditindaklanjuti.</p>
-              <Link className="mt-3 inline-flex" href={`/dashboard/${projectId}/guests`}>
-                Buka Tamu
-              </Link>
+      <OperationalSection
+        description="Cari tamu berdasarkan nama atau kelompokkan daftar berdasarkan kebutuhan tindak lanjut."
+        title="Daftar tindak lanjut"
+        titleId="follow-up-list-title"
+      >
+        <OperationalDataSurface>
+          <OperationalToolbar>
+            <div>
+              <label className="sr-only" htmlFor="follow-up-search">
+                Cari tamu
+              </label>
+              <Input
+                id="follow-up-search"
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Cari nama atau grup"
+                type="search"
+                value={query}
+              />
             </div>
+            <div>
+              <label className="sr-only" htmlFor="follow-up-filter">
+                Filter status
+              </label>
+              <select
+                className="border-seraya-border-default bg-seraya-surface min-h-11 w-full rounded-[var(--seraya-radius-sm)] border px-3 text-sm"
+                id="follow-up-filter"
+                onChange={(event) => setFilter(event.target.value as GuestFollowUpSegmentFilter)}
+                value={filter}
+              >
+                <option value="all">Semua status</option>
+                {Object.entries(labels).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </OperationalToolbar>
+
+          {rows.length === 0 ? (
+            <OperationalEmptyState
+              action={
+                <Link
+                  className="text-seraya-action-primary text-sm font-semibold underline-offset-4 hover:underline"
+                  href={`/dashboard/${projectId}/guests`}
+                >
+                  Buka Tamu →
+                </Link>
+              }
+              description="Tambahkan daftar tamu terlebih dahulu sebelum menyiapkan tindak lanjut."
+              title="Belum ada tamu untuk ditindaklanjuti."
+            />
           ) : visibleRows.length === 0 ? (
-            <p className="py-8 text-center">Tidak ada tamu yang sesuai.</p>
+            <OperationalEmptyState
+              description="Ubah pencarian atau filter untuk melihat tamu lain."
+              title="Tidak ada tamu yang sesuai."
+            />
           ) : (
-            <ul className="space-y-3">
+            <ul className="divide-seraya-border-default divide-y">
               {visibleRows.map((row) => (
                 <li
-                  className="border-seraya-border-default grid gap-3 rounded-[var(--seraya-radius-md)] border p-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center"
+                  className="grid gap-3 px-4 py-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center"
                   key={row.guestId}
                 >
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="truncate font-semibold">{row.displayName}</p>
-                      <span className="bg-seraya-soft rounded-full px-2.5 py-1 text-xs font-semibold">
+                      <p className="text-seraya-text-primary truncate font-semibold">
+                        {row.displayName}
+                      </p>
+                      <span className="border-seraya-border-default bg-seraya-soft inline-flex min-h-6 items-center rounded-full border px-2 py-0.5 text-[0.6875rem] font-semibold">
                         {labels[row.followUpSegment]}
                       </span>
                     </div>
@@ -200,10 +227,10 @@ export function CanonicalGuestFollowUpCenter({
                         : row.rsvpStatus === 'attending'
                           ? 'Hadir'
                           : 'Tidak hadir'}
-                      {row.lastFollowUpAt ? ` · Aktivitas terakhir tercatat` : ''}
+                      {row.lastFollowUpAt ? ' · Aktivitas terakhir tercatat' : ''}
                     </p>
                   </div>
-                  <div className="text-seraya-action-primary font-semibold">
+                  <div className="text-seraya-action-primary text-sm font-semibold">
                     <RowAction
                       isPublished={isPublished}
                       onPrepared={setResult}
@@ -215,14 +242,14 @@ export function CanonicalGuestFollowUpCenter({
               ))}
             </ul>
           )}
-        </CardContent>
-      </Card>
+        </OperationalDataSurface>
+      </OperationalSection>
 
       <GuestFollowUpResultDialog
         onClose={() => setResult(null)}
         result={result}
         timezone={timezone}
       />
-    </section>
+    </OperationalWorkspace>
   );
 }
