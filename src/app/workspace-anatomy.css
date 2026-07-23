@@ -1,12 +1,12 @@
-:root {
-  --seraya-workspace-flow-gap: clamp(1.75rem, 2.2vw, 2.25rem);
-  --seraya-workspace-flow-gap-compact: clamp(1.35rem, 1.8vw, 1.75rem);
-  --seraya-workspace-section-gap: clamp(1rem, 1.4vw, 1.25rem);
-  --seraya-workspace-header-end-space: clamp(1.5rem, 2vw, 2rem);
+[data-project-workspace-shell],
+[data-project-workspace-main],
+[data-workspace-page] {
+  min-width: 0;
 }
 
 [data-workspace-page] {
-  min-width: 0;
+  width: 100%;
+  max-width: none;
 }
 
 [data-workspace-page] > * {
@@ -70,11 +70,27 @@
   scroll-margin-top: 5.5rem;
 }
 
-@media (max-width: 767px) {
-  :root {
-    --seraya-workspace-flow-gap: 1.75rem;
-    --seraya-workspace-flow-gap-compact: 1.4rem;
-    --seraya-workspace-section-gap: 1rem;
-    --seraya-workspace-header-end-space: 1.4rem;
+@media (min-width: 1024px) {
+  [data-project-workspace-shell] {
+    display: grid;
+    grid-template-columns: var(--seraya-project-rail-width) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--seraya-project-rail-gap);
+  }
+
+  [data-workspace-page][data-workspace-width='reading'] {
+    max-width: var(--seraya-workspace-width-reading);
+  }
+
+  [data-workspace-page][data-workspace-width='standard'] {
+    max-width: var(--seraya-workspace-width-standard);
+  }
+
+  [data-workspace-page][data-workspace-width='operations'] {
+    max-width: var(--seraya-workspace-width-operations);
+  }
+
+  [data-workspace-page][data-workspace-width='studio'] {
+    max-width: none;
   }
 }

@@ -30,17 +30,21 @@ describe('responsive operational workspace contract', () => {
     expect(source).toContain('data-mobile-span={mobileSpan}');
   });
 
-  it('uses one canonical mobile breakpoint and bottom-navigation safe-area clearance', async () => {
-    const source = await read('src/app/workspace-responsive.css');
+  it('uses canonical breakpoints and token-owned bottom-navigation safe-area clearance', async () => {
+    const responsive = await read('src/app/workspace-responsive.css');
+    const tokens = await read('src/app/design-tokens.css');
 
-    expect(source).toContain('@media (max-width: 767px)');
-    expect(source).toContain('@media (max-width: 1023px)');
-    expect(source).toContain('--seraya-mobile-nav-clearance');
-    expect(source).toContain('env(safe-area-inset-bottom)');
-    expect(source).toContain("[data-workspace-anatomy='operations']");
-    expect(source).not.toContain(':has(');
-    expect(source).not.toContain(':nth-child');
-    expect(source).not.toContain('aria-labelledby');
+    expect(responsive).toContain('@media (max-width: 767px)');
+    expect(responsive).toContain('@media (max-width: 1023px)');
+    expect(responsive).toContain('var(--seraya-mobile-safe-bottom)');
+    expect(responsive).toContain("[data-workspace-anatomy='operations']");
+    expect(responsive).not.toContain(':has(');
+    expect(responsive).not.toContain(':nth-child');
+    expect(responsive).not.toContain('aria-labelledby');
+
+    expect(tokens).toContain('--seraya-mobile-nav-clearance: 4.75rem');
+    expect(tokens).toContain('env(safe-area-inset-bottom)');
+    expect(tokens).toContain('--seraya-touch-target: 2.75rem');
   });
 
   it('renders Respons Tamu with separate desktop data and mobile cards', async () => {

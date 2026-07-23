@@ -1,0 +1,110 @@
+:root {
+  color-scheme: light;
+
+  /* Raw palette. Components should consume semantic roles below. */
+  --seraya-ink: #2b2523;
+  --seraya-ivory: #fcf8f3;
+  --seraya-paper: #ffffff;
+  --seraya-rosewood: #8e4b52;
+  --seraya-rosewood-soft: #f3e4e5;
+  --seraya-terracotta: #b96b56;
+  --seraya-sage: #849386;
+  --seraya-sand: #f1e7dc;
+  --seraya-muted: #776c65;
+  --seraya-border: #e8ddd2;
+  --seraya-success: #2f6d58;
+  --seraya-warning: #9a6426;
+  --seraya-error: #a24242;
+  --seraya-info: #3d657c;
+
+  /* Semantic color roles. */
+  --seraya-bg-canvas: var(--seraya-ivory);
+  --seraya-bg-surface: var(--seraya-paper);
+  --seraya-bg-soft: #f7f0e9;
+  --seraya-bg-brand-soft: var(--seraya-rosewood-soft);
+  --seraya-text-primary: var(--seraya-ink);
+  --seraya-text-secondary: #5f5550;
+  --seraya-text-muted: var(--seraya-muted);
+  --seraya-text-inverse: #fffdfb;
+  --seraya-action-primary: var(--seraya-rosewood);
+  --seraya-action-primary-hover: #733c43;
+  --seraya-action-secondary: var(--seraya-terracotta);
+  --seraya-border-default: var(--seraya-border);
+  --seraya-border-strong: #cdbfb2;
+  --seraya-focus-ring: #a55e67;
+  --seraya-status-success: var(--seraya-success);
+  --seraya-status-success-soft: #e8f3ed;
+  --seraya-status-warning: var(--seraya-warning);
+  --seraya-status-warning-soft: #fbf0df;
+  --seraya-status-error: var(--seraya-error);
+  --seraya-status-error-soft: #f9e8e8;
+  --seraya-status-info: var(--seraya-info);
+  --seraya-status-info-soft: #e9f2f6;
+
+  /* Typography roles. */
+  --font-ui: 'Aptos', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --font-editorial:
+    'Cormorant Garamond Variable', 'Cormorant Garamond', 'Iowan Old Style', 'Baskerville',
+    'Times New Roman', serif;
+  --seraya-type-display-xl: clamp(3rem, 7vw, 5.5rem);
+  --seraya-type-display-lg: clamp(2.5rem, 5vw, 4.25rem);
+  --seraya-type-display-md: clamp(2rem, 3vw, 3rem);
+  --seraya-type-display-sm: clamp(1.625rem, 2.5vw, 2.125rem);
+  --seraya-type-page-title: clamp(2.5rem, 4vw, 3.75rem);
+  --seraya-type-page-title-mobile: clamp(2.2rem, 12vw, 3.1rem);
+  --seraya-type-section-title: clamp(1.65rem, 3vw, 2.15rem);
+  --seraya-type-metric-value: clamp(1.45rem, 2.4vw, 2.05rem);
+
+  /* Quiet Romantic Clarity geometry. */
+  --seraya-radius-sm: 0.25rem;
+  --seraya-radius-md: 0.375rem;
+  --seraya-radius-lg: 0.5rem;
+  --seraya-radius-xl: 0.75rem;
+  --seraya-radius-pill: 999px;
+  --seraya-shadow-soft: 0 1px 0 rgb(43 37 35 / 0.025), 0 8px 24px rgb(43 37 35 / 0.04);
+  --seraya-shadow-float: 0 16px 42px rgb(43 37 35 / 0.1);
+  --seraya-shadow-modal: 0 24px 64px rgb(43 37 35 / 0.16);
+  --seraya-surface-rule: color-mix(in srgb, var(--seraya-border-default) 86%, transparent);
+  --seraya-surface-soft: color-mix(in srgb, var(--seraya-bg-soft) 64%, transparent);
+  --seraya-sticky-surface: color-mix(in srgb, var(--seraya-bg-surface) 95%, transparent);
+
+  /* Shared spacing and control scale. */
+  --seraya-space-1: 0.25rem;
+  --seraya-space-2: 0.5rem;
+  --seraya-space-3: 0.75rem;
+  --seraya-space-4: 1rem;
+  --seraya-space-5: 1.25rem;
+  --seraya-space-6: 1.5rem;
+  --seraya-space-7: 1.75rem;
+  --seraya-space-8: 2rem;
+  --seraya-touch-target: 2.75rem;
+
+  /* Canonical product shell and workspace geometry. */
+  --seraya-shell-max: 90rem;
+  --seraya-workspace-width-reading: 58rem;
+  --seraya-workspace-width-standard: 64rem;
+  --seraya-workspace-width-operations: 74rem;
+  --seraya-project-rail-width: 15rem;
+  --seraya-project-rail-gap: 2rem;
+
+  /* Canonical page anatomy. */
+  --seraya-workspace-flow-gap: clamp(1.75rem, 2.2vw, 2.25rem);
+  --seraya-workspace-flow-gap-compact: clamp(1.35rem, 1.8vw, 1.75rem);
+  --seraya-workspace-section-gap: clamp(1rem, 1.4vw, 1.25rem);
+  --seraya-workspace-header-end-space: clamp(1.5rem, 2vw, 2rem);
+
+  /* Mobile owner workspace behavior. */
+  --seraya-mobile-nav-clearance: 4.75rem;
+  --seraya-mobile-safe-bottom: calc(
+    var(--seraya-mobile-nav-clearance) + env(safe-area-inset-bottom)
+  );
+}
+
+@media (max-width: 767px) {
+  :root {
+    --seraya-workspace-flow-gap: 1.75rem;
+    --seraya-workspace-flow-gap-compact: 1.4rem;
+    --seraya-workspace-section-gap: 1rem;
+    --seraya-workspace-header-end-space: 1.4rem;
+  }
+}

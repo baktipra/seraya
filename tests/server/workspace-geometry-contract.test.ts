@@ -17,15 +17,23 @@ async function read(relativePath: string) {
 }
 
 describe('canonical workspace geometry and anatomy', () => {
-  it('defines exactly four intentional workspace width variants', async () => {
-    const source = await read('src/components/workspace/workspace-page.tsx');
+  it('defines exactly four semantic workspace width variants backed by design tokens', async () => {
+    const component = await read('src/components/workspace/workspace-page.tsx');
+    const tokens = await read('src/app/design-tokens.css');
+    const anatomy = await read('src/app/workspace-anatomy.css');
 
-    expect(source).toContain("'reading' | 'standard' | 'operations' | 'studio'");
-    expect(source).toContain("reading: 'max-w-none lg:max-w-[58rem]'");
-    expect(source).toContain("standard: 'max-w-none lg:max-w-[64rem]'");
-    expect(source).toContain("operations: 'max-w-none lg:max-w-[74rem]'");
-    expect(source).toContain("studio: 'max-w-none'");
-    expect(source).toContain('data-workspace-page');
+    expect(component).toContain("'reading' | 'standard' | 'operations' | 'studio'");
+    expect(component).toContain('data-workspace-width={width}');
+    expect(component).not.toContain('lg:max-w-[');
+
+    expect(tokens).toContain('--seraya-workspace-width-reading: 58rem');
+    expect(tokens).toContain('--seraya-workspace-width-standard: 64rem');
+    expect(tokens).toContain('--seraya-workspace-width-operations: 74rem');
+
+    expect(anatomy).toContain("[data-workspace-page][data-workspace-width='reading']");
+    expect(anatomy).toContain("[data-workspace-page][data-workspace-width='standard']");
+    expect(anatomy).toContain("[data-workspace-page][data-workspace-width='operations']");
+    expect(anatomy).toContain("[data-workspace-page][data-workspace-width='studio']");
   });
 
   it('defines explicit page kinds and maps them to canonical anatomies', async () => {
@@ -40,14 +48,20 @@ describe('canonical workspace geometry and anatomy', () => {
     expect(source).toContain('data-workspace-kind');
   });
 
-  it('keeps one project rail and one content-slot gap', async () => {
-    const source = await read('src/app/(dashboard)/dashboard/[projectId]/layout.tsx');
+  it('keeps one token-owned project rail and one content-slot gap', async () => {
+    const layout = await read('src/app/(dashboard)/dashboard/[projectId]/layout.tsx');
+    const tokens = await read('src/app/design-tokens.css');
+    const anatomy = await read('src/app/workspace-anatomy.css');
 
-    expect(source).toContain('lg:grid-cols-[15rem_minmax(0,1fr)]');
-    expect(source).toContain('lg:gap-8');
-    expect(source).not.toContain('xl:gap-10');
-    expect(source).toContain('data-project-workspace-shell');
-    expect(source).toContain('data-project-workspace-main');
+    expect(layout).toContain('data-project-workspace-shell');
+    expect(layout).toContain('data-project-workspace-main');
+    expect(layout).not.toContain('grid-cols-[15rem');
+    expect(layout).not.toContain('lg:gap-8');
+
+    expect(tokens).toContain('--seraya-project-rail-width: 15rem');
+    expect(tokens).toContain('--seraya-project-rail-gap: 2rem');
+    expect(anatomy).toContain('grid-template-columns: var(--seraya-project-rail-width)');
+    expect(anatomy).toContain('gap: var(--seraya-project-rail-gap)');
   });
 
   it('assigns explicit widths and anatomy kinds to every canonical project workspace', async () => {
@@ -71,7 +85,7 @@ describe('canonical workspace geometry and anatomy', () => {
     );
   });
 
-  it('keeps the new anatomy authority explicit and free from legacy selector recovery', async () => {
+  it('keeps anatomy authority explicit and free from legacy selector recovery', async () => {
     const source = await read('src/app/workspace-anatomy.css');
 
     expect(source).toContain("[data-workspace-page][data-workspace-anatomy='operations']");

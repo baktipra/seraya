@@ -11,13 +11,6 @@ export type WorkspaceKind =
   | 'follow-up'
   | 'studio';
 
-const widthClassNames: Record<WorkspaceWidth, string> = {
-  reading: 'max-w-none lg:max-w-[58rem]',
-  standard: 'max-w-none lg:max-w-[64rem]',
-  operations: 'max-w-none lg:max-w-[74rem]',
-  studio: 'max-w-none',
-};
-
 const anatomyByKind: Record<WorkspaceKind, WorkspaceAnatomy> = {
   onboarding: 'onboarding',
   compass: 'compass',
@@ -37,8 +30,8 @@ export interface WorkspacePageProps {
 }
 
 /**
- * Canonical owner-workspace canvas. Width, horizontal origin, page anatomy,
- * and vertical rhythm are selected explicitly by the route.
+ * Canonical owner-workspace canvas. Routes choose semantic width and anatomy;
+ * design tokens and workspace CSS own every numeric geometry value.
  */
 export function WorkspacePage({
   align = 'start',
@@ -51,7 +44,6 @@ export function WorkspacePage({
     <div
       className={[
         'w-full min-w-0',
-        widthClassNames[width],
         align === 'center' ? 'mx-auto' : 'mr-auto',
         className,
       ]

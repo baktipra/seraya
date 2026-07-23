@@ -1,73 +1,13 @@
 @import 'tailwindcss';
 @import '@fontsource-variable/cormorant-garamond/wght.css';
+@import './design-tokens.css';
+
+/*
+ * Compatibility-only presentation layers. Remove each import when its screen
+ * completes native operational primitive migration.
+ */
 @import './guest-manager-romantic-clarity.css';
 @import './delivery-center-romantic-clarity.css';
-@import './response-hub-romantic-clarity.css';
-@import './follow-up-romantic-clarity.css';
-
-:root {
-  color-scheme: light;
-
-  /* Raw Seraya palette: use semantic aliases in components whenever possible. */
-  --seraya-ink: #2b2523;
-  --seraya-ivory: #fcf8f3;
-  --seraya-paper: #ffffff;
-  --seraya-rosewood: #8e4b52;
-  --seraya-rosewood-soft: #f3e4e5;
-  --seraya-terracotta: #b96b56;
-  --seraya-sage: #849386;
-  --seraya-sand: #f1e7dc;
-  --seraya-muted: #776c65;
-  --seraya-border: #e8ddd2;
-  --seraya-success: #2f6d58;
-  --seraya-warning: #9a6426;
-  --seraya-error: #a24242;
-  --seraya-info: #3d657c;
-
-  /* Semantic color roles. */
-  --seraya-bg-canvas: var(--seraya-ivory);
-  --seraya-bg-surface: var(--seraya-paper);
-  --seraya-bg-soft: #f7f0e9;
-  --seraya-bg-brand-soft: var(--seraya-rosewood-soft);
-
-  --seraya-text-primary: var(--seraya-ink);
-  --seraya-text-secondary: #5f5550;
-  --seraya-text-muted: var(--seraya-muted);
-  --seraya-text-inverse: #fffdfb;
-
-  --seraya-action-primary: var(--seraya-rosewood);
-  --seraya-action-primary-hover: #733c43;
-  --seraya-action-secondary: var(--seraya-terracotta);
-
-  --seraya-border-default: var(--seraya-border);
-  --seraya-border-strong: #cdbfb2;
-  --seraya-focus-ring: #a55e67;
-
-  --seraya-status-success: var(--seraya-success);
-  --seraya-status-success-soft: #e8f3ed;
-  --seraya-status-warning: var(--seraya-warning);
-  --seraya-status-warning-soft: #fbf0df;
-  --seraya-status-error: var(--seraya-error);
-  --seraya-status-error-soft: #f9e8e8;
-  --seraya-status-info: var(--seraya-info);
-  --seraya-status-info-soft: #e9f2f6;
-
-  --font-ui: 'Aptos', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  --font-editorial:
-    'Cormorant Garamond Variable', 'Cormorant Garamond', 'Iowan Old Style', 'Baskerville',
-    'Times New Roman', serif;
-
-  /* Romantic Clarity uses quiet geometry rather than rounded SaaS surfaces. */
-  --seraya-radius-sm: 0.25rem;
-  --seraya-radius-md: 0.375rem;
-  --seraya-radius-lg: 0.5rem;
-  --seraya-radius-xl: 0.75rem;
-  --seraya-radius-pill: 999px;
-
-  --seraya-shadow-soft: 0 1px 0 rgb(43 37 35 / 0.025), 0 8px 24px rgb(43 37 35 / 0.04);
-  --seraya-shadow-float: 0 16px 42px rgb(43 37 35 / 0.1);
-  --seraya-shadow-modal: 0 24px 64px rgb(43 37 35 / 0.16);
-}
 
 @theme inline {
   --color-seraya-ink: var(--seraya-ink);
@@ -158,27 +98,27 @@ button:not(:disabled),
 .seraya-display-lg,
 .seraya-display-md,
 .seraya-display-sm {
-  font-family: var(--font-editorial);
   color: var(--seraya-text-primary);
+  font-family: var(--font-editorial);
   font-weight: 500;
   letter-spacing: -0.025em;
   line-height: 1;
 }
 
 .seraya-display-xl {
-  font-size: clamp(3rem, 7vw, 5.5rem);
+  font-size: var(--seraya-type-display-xl);
 }
 
 .seraya-display-lg {
-  font-size: clamp(2.5rem, 5vw, 4.25rem);
+  font-size: var(--seraya-type-display-lg);
 }
 
 .seraya-display-md {
-  font-size: clamp(2rem, 3vw, 3rem);
+  font-size: var(--seraya-type-display-md);
 }
 
 .seraya-display-sm {
-  font-size: clamp(1.625rem, 2.5vw, 2.125rem);
+  font-size: var(--seraya-type-display-sm);
 }
 
 .seraya-heading-xl,
@@ -237,8 +177,8 @@ button:not(:disabled),
 }
 
 .seraya-field-label {
-  color: var(--seraya-text-secondary);
   display: block;
+  color: var(--seraya-text-secondary);
   font-size: 0.75rem;
   font-weight: 650;
   letter-spacing: 0.075em;
@@ -249,23 +189,15 @@ button:not(:disabled),
 .seraya-page-title {
   color: var(--seraya-text-primary);
   font-family: var(--font-editorial);
-  font-size: clamp(2.25rem, 4vw, 3.5rem);
+  font-size: var(--seraya-type-page-title);
   font-weight: 500;
   letter-spacing: -0.025em;
   line-height: 1;
 }
 
-/*
- * Dashboard children opt into a wider canvas explicitly. This keeps regular
- * owner pages readable while giving composition workspaces room for their
- * navigation rail and active editor without coupling the shell to a route.
- */
+/* The shell owns the maximum canvas. WorkspacePage owns page-specific width. */
 .seraya-dashboard-content {
-  max-width: 70rem;
-}
-
-.seraya-dashboard-content:has([data-dashboard-width='wide']) {
-  max-width: 86rem;
+  max-width: var(--seraya-shell-max);
 }
 
 @media (prefers-reduced-motion: reduce) {
