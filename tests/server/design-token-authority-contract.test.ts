@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { access, readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
@@ -7,7 +7,11 @@ async function read(relativePath: string) {
   return readFile(path.resolve(process.cwd(), relativePath), 'utf8');
 }
 
-describe('design token authority and legacy CSS consolidation', () => {
+function absolute(relativePath: string) {
+  return path.resolve(process.cwd(), relativePath);
+}
+
+describe('design token authority and final legacy CSS removal', () => {
   it('keeps one canonical token source for palette, type, geometry, spacing, and mobile safety', async () => {
     const tokens = await read('src/app/design-tokens.css');
 
@@ -27,31 +31,32 @@ describe('design token authority and legacy CSS consolidation', () => {
     }
   });
 
-  it('keeps global CSS free from page-specific Romantic Clarity imports', async () => {
-    const globals = await read('src/app/globals.css');
+  it('keeps global and root CSS imports free from page-specific compatibility layers', async () => {
+    const [globals, layout] = await Promise.all([
+      read('src/app/globals.css'),
+      read('src/app/layout.tsx'),
+    ]);
 
     expect(globals).toContain("@import './design-tokens.css'");
-    expect(globals).not.toContain('guest-manager-romantic-clarity.css');
-    expect(globals).not.toContain('delivery-center-romantic-clarity.css');
-    expect(globals).not.toContain('response-hub-romantic-clarity.css');
-    expect(globals).not.toContain('follow-up-romantic-clarity.css');
+
+    for (const legacy of [
+      'guest-manager-romantic-clarity.css',
+      'delivery-center-romantic-clarity.css',
+      'response-hub-romantic-clarity.css',
+      'follow-up-romantic-clarity.css',
+      'romantic-clarity-consistency.css',
+      'romantic-clarity-editor-consistency.css',
+      'invitation-mobile-recovery.css',
+    ]) {
+      expect(globals).not.toContain(legacy);
+      expect(layout).not.toContain(legacy);
+    }
+
     expect(globals).not.toContain(':has(');
   });
 
-  it('keeps the remaining general compatibility layer scoped to Ringkasan only', async () => {
-    const compatibility = await read('src/app/romantic-clarity-consistency.css');
-    const layout = await read('src/app/layout.tsx');
-
-    expect(compatibility).not.toContain(':has(');
-    expect(compatibility).not.toContain('#response-panel');
-    expect(compatibility).not.toContain('Ringkasan tindak lanjut');
-    expect(compatibility).not.toContain('guest-response-workspace-title');
-    expect(compatibility).not.toContain('data-operational-legacy-bridge');
-    expect(compatibility).toContain("data-workspace-kind='compass'");
-    expect(compatibility).not.toContain('guest-manager-title');
-    expect(compatibility).not.toContain('delivery-center-title');
-    expect(layout).not.toContain('romantic-clarity-editor-consistency.css');
-    expect(layout).not.toContain('invitation-mobile-recovery.css');
+  it('removes the final Ringkasan compatibility stylesheet from the repository', async () => {
+    await expect(access(absolute('src/app/romantic-clarity-consistency.css'))).rejects.toThrow();
   });
 
   it('keeps numeric workspace geometry outside route and component TSX', async () => {

@@ -4,7 +4,6 @@ import { siteConfig } from '@/config/site';
 import { ToastProvider } from '@/design-system';
 
 import './globals.css';
-import './romantic-clarity-consistency.css';
 import './workspace-anatomy.css';
 import './workspace-responsive.css';
 
