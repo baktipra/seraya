@@ -20,7 +20,8 @@ export async function POST(request: Request, { params }: FixtureGuestbookRouteCo
 
   const formData = await request.formData();
   const message = String(formData.get('message') ?? '').trim();
-  const redirectUrl = new URL(`/${slug}/g/${guestToken}`, request.url);
+  const requestOrigin = request.headers.get('origin') ?? new URL(request.url).origin;
+  const redirectUrl = new URL(`/${slug}/g/${guestToken}`, requestOrigin);
   redirectUrl.hash = 'personal-guestbook-title';
 
   if (!message || message.length > 600 || message === forcedGuestbookErrorMessage) {
