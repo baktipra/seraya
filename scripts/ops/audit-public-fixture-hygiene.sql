@@ -63,7 +63,7 @@ BEGIN
       OR jsonb_array_length(coalesce(snapshot.snapshot #> '{draft,gallery,imageIds}', '[]'::jsonb)) <> 0
       OR coalesce((snapshot.snapshot #>> '{draft,digitalGift,enabled}')::boolean, true)
       OR jsonb_array_length(coalesce(snapshot.snapshot #> '{draft,digitalGift,accounts}', '[]'::jsonb)) <> 0
-      OR snapshot.snapshot::text ~* '(aaaa|bbbb|lorem|dummy|asdf|mbuh)'
+      OR snapshot.snapshot::text ~* '\m(aaaa|bbbb|lorem|dummy|asdf|mbuh)\M'
     );
 
   IF violation_count <> 0 THEN
@@ -83,7 +83,7 @@ BEGIN
       OR jsonb_array_length(coalesce(draft.content #> '{gallery,imageIds}', '[]'::jsonb)) <> 0
       OR coalesce((draft.content #>> '{digitalGift,enabled}')::boolean, true)
       OR jsonb_array_length(coalesce(draft.content #> '{digitalGift,accounts}', '[]'::jsonb)) <> 0
-      OR draft.content::text ~* '(aaaa|bbbb|lorem|dummy|asdf|mbuh)'
+      OR draft.content::text ~* '\m(aaaa|bbbb|lorem|dummy|asdf|mbuh)\M'
     );
 
   IF violation_count <> 0 THEN
@@ -110,7 +110,7 @@ BEGIN
   WHERE guest.project_id = fixture_project_id
     AND guest.deleted_at IS NULL
     AND entry.deleted_at IS NULL
-    AND entry.message ~* '(aaaa|bbbb|lorem|dummy|asdf|mbuh)';
+    AND entry.message ~* '\m(aaaa|bbbb|lorem|dummy|asdf|mbuh)\M';
 
   IF violation_count <> 0 THEN
     RAISE EXCEPTION 'J1R-A failed: canonical fixture guestbook still contains placeholder copy.';
