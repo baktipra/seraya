@@ -109,7 +109,10 @@ function WorkspacePreviewCanvas() {
             ['0 tamu', 'Siap ditambahkan'],
             ['Belum terbit', 'Draf tetap pribadi'],
           ].map(([value, label]) => (
-            <article className="border-seraya-border-default bg-seraya-surface border p-5" key={label}>
+            <article
+              className="border-seraya-border-default bg-seraya-surface border p-5"
+              key={label}
+            >
               <p className="text-seraya-text-primary font-serif text-2xl font-medium">{value}</p>
               <p className="text-seraya-text-muted mt-2 text-xs leading-5">{label}</p>
             </article>
@@ -130,12 +133,17 @@ export default function ReleaseAPreviewPage() {
       <header className="border-seraya-border-default bg-seraya-ink border-b text-white">
         <div className="mx-auto flex min-h-14 max-w-[94rem] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
           <p className="text-xs font-semibold tracking-[0.14em] uppercase">Release A showroom</p>
-          <p className="text-xs text-white/65">Data fiktif · preview-only · tidak tersedia di production</p>
+          <p className="text-xs text-white/65">
+            Data fiktif · preview-only · tidak tersedia di production
+          </p>
         </div>
       </header>
 
-      <main>
-        <section aria-labelledby="guided-entry-preview-title" className="px-4 py-10 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
+      <div>
+        <section
+          aria-labelledby="guided-entry-preview-title"
+          className="px-4 py-10 sm:px-6 sm:py-14 lg:px-8 lg:py-16"
+        >
           <div className="mx-auto mb-8 max-w-[88rem]">
             <p className="seraya-eyebrow text-seraya-action-primary">Experience 01</p>
             <h1
@@ -152,7 +160,10 @@ export default function ReleaseAPreviewPage() {
           <ProjectSetupForm />
         </section>
 
-        <section aria-labelledby="workspace-preview-title" className="border-seraya-border-default border-t">
+        <section
+          aria-labelledby="workspace-preview-title"
+          className="border-seraya-border-default border-t"
+        >
           <div className="mx-auto max-w-[94rem] px-4 pt-14 sm:px-6 sm:pt-18 lg:px-8 lg:pt-20">
             <p className="seraya-eyebrow text-seraya-action-primary">Experience 02</p>
             <h2
@@ -168,16 +179,12 @@ export default function ReleaseAPreviewPage() {
           </div>
 
           <div className="mt-8">
-            <DashboardShell
-              displayName="Mira"
-              email="preview@seraya.test"
-              hasActiveProject
-            >
+            <DashboardShell displayName="Mira" email="preview@seraya.test" hasActiveProject>
               <WorkspacePreviewCanvas />
             </DashboardShell>
           </div>
         </section>
-      </main>
+      </div>
     </div>
   );
 }
