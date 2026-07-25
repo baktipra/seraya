@@ -68,6 +68,7 @@ test('presents Roselle, Aruna, and Laras as distinct public collections', async 
 });
 
 test('shows the guided collection step and canonical five-item workspace in preview', async ({
+  isMobile,
   page,
 }) => {
   await page.goto('/release-a-preview');
@@ -84,15 +85,18 @@ test('shows the guided collection step and canonical five-item workspace in prev
   await expect(page.getByRole('radio', { name: /Aruna/ })).toBeEnabled();
   await expect(page.getByRole('radio', { name: /Laras/ })).toBeEnabled();
 
+  const navigationName = isMobile ? 'Navigasi workspace mobile' : 'Navigasi workspace';
   const workspaceNavigation = page.getByRole('navigation', {
     exact: true,
-    name: 'Navigasi workspace',
+    name: navigationName,
   });
+
+  await expect(workspaceNavigation).toBeVisible();
   await expect(workspaceNavigation.getByRole('link')).toHaveCount(5);
-  await expect(workspaceNavigation).toContainText('Ringkasan');
+  await expect(workspaceNavigation).toContainText(isMobile ? 'Ringkas' : 'Ringkasan');
   await expect(workspaceNavigation).toContainText('Undangan');
   await expect(workspaceNavigation).toContainText('Tamu');
   await expect(workspaceNavigation).toContainText('Bagikan');
-  await expect(workspaceNavigation).toContainText('Respons Tamu');
+  await expect(workspaceNavigation).toContainText(isMobile ? 'Respons' : 'Respons Tamu');
   await expect(workspaceNavigation).not.toContainText('Tindak Lanjut');
 });
