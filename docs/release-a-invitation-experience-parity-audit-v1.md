@@ -105,12 +105,6 @@ Implemented response:
 
 Roselle is split into chapter components. Aruna and Laras remain large single-file renderers.
 
-Impact:
-
-- visual iteration and parity review are slower for Aruna and Laras;
-- shared chapter behavior is harder to compare;
-- future maturation risks producing inconsistent one-off edits.
-
 Decision:
 
 - do not rewrite only for structural symmetry;
