@@ -2,7 +2,7 @@
 
 ## Status
 
-Slices 1 and 2 are delivered in draft. This audit belongs to the coordinated Release A program and is not a separately locked product milestone.
+Slices 1 and 2 are delivered in draft. This audit belongs to the coordinated Release A program and is not a separately locked product milestone. PR review, merge, acceptance, production promotion, and lock remain pending explicit owner direction.
 
 ## Audited baseline
 
