@@ -1,0 +1,87 @@
+name: Invitation experience browser regression
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/invitation-experience-e2e.yml'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'playwright.invitation-experience.config.ts'
+      - 'src/app/invitation-maturation-release.css'
+      - 'src/app/layout.tsx'
+      - 'src/modules/invitation-templates/**'
+      - 'tests/e2e/invitation-experience.spec.ts'
+      - 'tests/e2e/fixture-app/**'
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/invitation-experience-e2e.yml'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'playwright.invitation-experience.config.ts'
+      - 'src/app/invitation-maturation-release.css'
+      - 'src/app/layout.tsx'
+      - 'src/modules/invitation-templates/**'
+      - 'tests/e2e/invitation-experience.spec.ts'
+      - 'tests/e2e/fixture-app/**'
+
+permissions:
+  contents: read
+
+jobs:
+  invitation-experience:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check invitation experience formatting
+        run: |
+          npx prettier --check \
+            .github/workflows/invitation-experience-e2e.yml \
+            package.json \
+            playwright.invitation-experience.config.ts \
+            src/app/invitation-maturation-release.css \
+            src/app/layout.tsx \
+            tests/e2e/invitation-experience.spec.ts \
+            tests/e2e/fixture-app/lib/fixture-invitation.ts
+
+      - name: Lint invitation experience files
+        run: |
+          npx eslint \
+            playwright.invitation-experience.config.ts \
+            src/app/layout.tsx \
+            tests/e2e/invitation-experience.spec.ts \
+            tests/e2e/fixture-app/lib/fixture-invitation.ts
+
+      - name: Build production application
+        run: npm run build
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run cross-template invitation experience regression
+        run: npm run e2e:invitation-experience
+
+      - name: Upload Playwright evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: invitation-experience-playwright-report
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+          retention-days: 7
