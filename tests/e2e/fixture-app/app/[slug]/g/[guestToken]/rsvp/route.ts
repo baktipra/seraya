@@ -26,7 +26,8 @@ export async function POST(request: Request, { params }: FixtureRsvpRouteContext
   }
 
   const cookieNames = getFixtureCookieNames(slug);
-  const redirectUrl = new URL(`/${slug}/g/${guestToken}`, request.url);
+  const requestOrigin = request.headers.get('origin') ?? new URL(request.url).origin;
+  const redirectUrl = new URL(`/${slug}/g/${guestToken}`, requestOrigin);
   redirectUrl.searchParams.set('rsvp', 'success');
   redirectUrl.hash = 'personal-guest-rsvp-title';
 
