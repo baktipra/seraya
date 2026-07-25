@@ -9,8 +9,10 @@ on:
       - 'playwright.invitation-experience.config.ts'
       - 'src/app/invitation-maturation-release.css'
       - 'src/app/layout.tsx'
+      - 'src/app/release-a-invitation-preview/**'
       - 'src/modules/invitation-templates/**'
       - 'tests/e2e/invitation-experience.spec.ts'
+      - 'tests/e2e/release-a-invitation-showroom.spec.ts'
       - 'tests/e2e/fixture-app/**'
   push:
     branches:
@@ -22,8 +24,10 @@ on:
       - 'playwright.invitation-experience.config.ts'
       - 'src/app/invitation-maturation-release.css'
       - 'src/app/layout.tsx'
+      - 'src/app/release-a-invitation-preview/**'
       - 'src/modules/invitation-templates/**'
       - 'tests/e2e/invitation-experience.spec.ts'
+      - 'tests/e2e/release-a-invitation-showroom.spec.ts'
       - 'tests/e2e/fixture-app/**'
 
 permissions:
@@ -55,7 +59,9 @@ jobs:
             playwright.invitation-experience.config.ts \
             src/app/invitation-maturation-release.css \
             src/app/layout.tsx \
+            src/app/release-a-invitation-preview/page.tsx \
             tests/e2e/invitation-experience.spec.ts \
+            tests/e2e/release-a-invitation-showroom.spec.ts \
             tests/e2e/fixture-app/lib/fixture-invitation.ts
 
       - name: Lint invitation experience files
@@ -63,7 +69,9 @@ jobs:
           npx eslint \
             playwright.invitation-experience.config.ts \
             src/app/layout.tsx \
+            src/app/release-a-invitation-preview/page.tsx \
             tests/e2e/invitation-experience.spec.ts \
+            tests/e2e/release-a-invitation-showroom.spec.ts \
             tests/e2e/fixture-app/lib/fixture-invitation.ts
 
       - name: Build production application
