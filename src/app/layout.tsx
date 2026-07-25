@@ -7,6 +7,7 @@ import './globals.css';
 import './workspace-anatomy.css';
 import './workspace-responsive.css';
 import './accessibility-release.css';
+import './personal-response-release.css';
 
 export const metadata: Metadata = {
   title: {
