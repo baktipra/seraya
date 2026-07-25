@@ -5,6 +5,7 @@ import {
   type InvitationTemplateProps,
 } from '../invitation-template.types';
 
+import { createLarasMonogram } from './laras-monogram';
 import styles from './laras.module.css';
 
 function Person({
@@ -63,6 +64,10 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
       ? 'Mohon konfirmasikan kehadiran dan sampaikan ucapan terbaik Anda.'
       : 'Mohon konfirmasikan kehadiran Anda untuk membantu persiapan acara.'
     : 'Sampaikan doa dan ucapan terbaik Anda untuk kedua mempelai.';
+  const monogram = createLarasMonogram(
+    invitation.couple.personOne.displayName,
+    invitation.couple.personTwo.displayName,
+  );
 
   return (
     <article
@@ -74,8 +79,8 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
         <span className={styles.cornerTop} aria-hidden="true" />
         <span className={styles.cornerBottom} aria-hidden="true" />
         <p className={styles.eyebrow}>{invitation.hero.eyebrow ?? 'The Wedding Of'}</p>
-        <div className={styles.monogram} aria-hidden="true">
-          L
+        <div className={styles.monogram} aria-hidden="true" data-opening-monogram>
+          {monogram}
         </div>
         <h1 id="laras-invitation-title">{invitation.hero.title}</h1>
         {invitation.hero.subtitle ? (
