@@ -4,6 +4,7 @@ import { siteConfig } from '@/config/site';
 import { ToastProvider } from '@/design-system';
 
 import './globals.css';
+import './flagship-release-a.css';
 import './workspace-anatomy.css';
 import './workspace-responsive.css';
 import './accessibility-release.css';
@@ -11,7 +12,7 @@ import './personal-response-release.css';
 
 export const metadata: Metadata = {
   title: {
-    default: `${siteConfig.name} — Undangan Pernikahan yang Lebih Personal`,
+    default: `${siteConfig.name} — Pengalaman Tamu Pernikahan yang Personal`,
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
