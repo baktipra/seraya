@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": [
+    "playwright.config.ts",
+    "playwright.personal-response.config.ts",
+    "src/modules/invitation-templates/invitation-template-renderer.tsx",
+    "tests/e2e/personal-response.spec.ts",
+    "tests/e2e/fixture-app/**/*.ts",
+    "tests/e2e/fixture-app/**/*.tsx"
+  ],
+  "exclude": ["node_modules"]
+}
