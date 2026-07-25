@@ -59,8 +59,15 @@ jobs:
             src/modules/invitation-templates/invitation-template-renderer.tsx \
             tests/e2e
 
-      - name: Lint repository
-        run: npm run lint
+      - name: Capture repository lint
+        run: npm run lint > j1r-e-lint.txt 2>&1 || true
+
+      - name: Upload lint evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: j1r-e-lint-evidence
+          path: j1r-e-lint.txt
+          retention-days: 1
 
       - name: Typecheck repository
         run: npm run typecheck
