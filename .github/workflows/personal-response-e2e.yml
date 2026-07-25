@@ -49,6 +49,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Capture repository format check
+        run: npm run format:check > j1r-e-format-check.txt 2>&1 || true
+
       - name: Prepare canonical J1R-E sources
         run: |
           npx prettier --write \
@@ -71,6 +74,7 @@ jobs:
             playwright.personal-response.config.ts
             src/modules/invitation-templates/invitation-template-renderer.tsx
             tests/e2e
+            j1r-e-format-check.txt
             j1r-e-prettier-changed.txt
           retention-days: 1
 
