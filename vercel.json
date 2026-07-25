@@ -1,3 +1,0 @@
-{
-  "buildCommand": "npm run test -- src/modules/invitation-templates/__tests__/personal-response-contract.test.tsx && npm run build"
-}
