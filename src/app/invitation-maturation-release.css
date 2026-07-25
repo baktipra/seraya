@@ -190,8 +190,7 @@ article[data-template='roselle'] [data-template-personal-greeting='roselle'] {
   border-top: 1px solid var(--roselle-line);
   border-bottom: 1px solid var(--roselle-line);
   background:
-    linear-gradient(135deg, rgb(247 236 231 / 0.76), rgb(255 254 251 / 0.92)),
-    var(--roselle-paper);
+    linear-gradient(135deg, rgb(247 236 231 / 0.76), rgb(255 254 251 / 0.92)), var(--roselle-paper);
   text-align: center;
 }
 
@@ -290,9 +289,7 @@ article[data-template='roselle'] [data-template-response-slot] {
   border-left: 2px solid var(--roselle-rose);
 }
 
-article[data-template='roselle']
-  [data-template-response-slot]
-  + [data-template-response-slot] {
+article[data-template='roselle'] [data-template-response-slot] + [data-template-response-slot] {
   padding-top: clamp(2rem, 5vw, 2.8rem);
   border-top: 1px solid var(--roselle-line);
 }

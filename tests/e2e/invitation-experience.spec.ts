@@ -25,18 +25,25 @@ async function expectNoHorizontalOverflow(page: Page) {
 }
 
 async function expectAppearsBefore(first: Locator, second: Locator) {
-  const appearsBefore = await first.evaluate((firstElement, secondElement) => {
-    if (!(secondElement instanceof Element)) return false;
+  const appearsBefore = await first.evaluate(
+    (firstElement, secondElement) => {
+      if (!(secondElement instanceof Element)) return false;
 
-    return Boolean(firstElement.compareDocumentPosition(secondElement) & Node.DOCUMENT_POSITION_FOLLOWING);
-  }, await second.elementHandle());
+      return Boolean(
+        firstElement.compareDocumentPosition(secondElement) & Node.DOCUMENT_POSITION_FOLLOWING,
+      );
+    },
+    await second.elementHandle(),
+  );
 
   expect(appearsBefore).toBe(true);
 }
 
 for (const templateKey of templateKeys) {
   test.describe(`${templateKey} complete invitation experience`, () => {
-    test('renders the complete generic journey without guest-private UI or overflow', async ({ page }) => {
+    test('renders the complete generic journey without guest-private UI or overflow', async ({
+      page,
+    }) => {
       await page.goto(getGenericPath(templateKey));
 
       const invitation = page.locator(`article[data-template="${templateKey}"]`);

@@ -30,7 +30,8 @@ const galleryImages = [
 export function createFixtureInvitation(templateKey: InvitationTemplateKey) {
   const content = createDefaultInvitationDraftContent(project);
   content.templateKey = templateKey;
-  content.hero.subtitle = 'Dengan penuh syukur, kami mengundang Anda untuk menjadi bagian dari perjalanan baru kami.';
+  content.hero.subtitle =
+    'Dengan penuh syukur, kami mengundang Anda untuk menjadi bagian dari perjalanan baru kami.';
   content.couple.personOne.fullName = 'Raka Pradana';
   content.couple.personOne.parentLine = 'Putra dari Bapak Hendra & Ibu Ratna';
   content.couple.personTwo.fullName = 'Nadia Kirana';
