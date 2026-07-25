@@ -19,7 +19,15 @@ import styles from './roselle.module.css';
 export function RoselleTemplate({ invitation, renderContext }: InvitationTemplateProps) {
   const personalSlots = getPersonalInvitationPresentationSlots(renderContext);
   const hasPersonalResponse = Boolean(personalSlots?.rsvp || personalSlots?.guestbook);
-  const showGenericResponseNote = renderContext.surface !== 'personal' && Boolean(invitation.rsvp);
+  const showGenericResponseNote = renderContext.surface !== 'personal';
+  const genericResponseCopy = invitation.rsvp
+    ? 'Konfirmasi kehadiran dan ucapan dapat dikirim melalui undangan pribadi dari pasangan.'
+    : 'Ucapan dapat dikirim melalui undangan pribadi dari pasangan.';
+  const personalResponseLead = personalSlots?.rsvp
+    ? personalSlots.guestbook
+      ? 'Kehadiran dan doa Anda akan melengkapi hari bahagia kami.'
+      : 'Konfirmasikan kehadiran Anda untuk membantu pasangan mempersiapkan hari bahagia.'
+    : 'Titipkan doa dan ucapan terbaik Anda untuk pasangan.';
 
   return (
     <article
@@ -43,12 +51,13 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
         <RoselleDigitalGift digitalGift={invitation.digitalGift} />
         {hasPersonalResponse ? (
           <div className={styles.personalResponseJourney} data-template-response-journey="roselle">
-            <div className={styles.responseIntroduction}>
+            <div
+              className={styles.responseIntroduction}
+              data-template-response-introduction="roselle"
+            >
               <p className={styles.sectionEyebrow}>Untuk tamu terkasih</p>
               <h2 className={styles.responseTitle}>Kabar dari Anda</h2>
-              <p className={styles.responseLead}>
-                Kehadiran dan doa Anda akan melengkapi hari bahagia kami.
-              </p>
+              <p className={styles.responseLead}>{personalResponseLead}</p>
             </div>
             {personalSlots?.rsvp ? (
               <div className={styles.personalResponseSection} data-template-response-slot="rsvp">
@@ -67,7 +76,7 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
         ) : null}
         {showGenericResponseNote ? (
           <p className={styles.genericResponseNote} data-generic-response-note="roselle">
-            Konfirmasi kehadiran dan ucapan dapat dikirim melalui undangan pribadi dari pasangan.
+            {genericResponseCopy}
           </p>
         ) : null}
         <RoselleClosing closing={invitation.closing} />
