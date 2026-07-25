@@ -76,9 +76,12 @@ test('shows the guided collection step and canonical five-item workspace in prev
   await expect(page.getByRole('heading', { name: 'Guided project creation' })).toBeVisible();
 
   const guidedForm = page.locator('form[data-guided-project-setup="true"]');
+  const firstNameInput = page.getByLabel('Nama panggilan pertama');
+
+  await firstNameInput.click();
   await expect(guidedForm).toHaveAttribute('data-interactive', 'true');
 
-  await page.getByLabel('Nama panggilan pertama').fill('Mira');
+  await firstNameInput.fill('Mira');
   await page.getByLabel('Nama panggilan kedua').fill('Arga');
   await page.getByLabel('Tanggal acara utama').fill('2027-08-17');
   await page.getByLabel('Kota acara').fill('Jakarta');
