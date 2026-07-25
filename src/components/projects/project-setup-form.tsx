@@ -245,7 +245,9 @@ export function ProjectSetupForm() {
   const errors = state.fieldErrors ?? {};
 
   useEffect(() => {
-    if (state.status !== 'error') return;
+    if (state.status !== 'error') return undefined;
+
+    let recoveryStep: SetupStep | null = null;
 
     if (
       errors.personOneName ||
@@ -253,18 +255,20 @@ export function ProjectSetupForm() {
       errors.eventDatePrimary ||
       errors.eventCity
     ) {
-      setStep(1);
-      return;
+      recoveryStep = 1;
+    } else if (errors.templateKey) {
+      recoveryStep = 2;
+    } else if (errors.slug) {
+      recoveryStep = 3;
     }
 
-    if (errors.templateKey) {
-      setStep(2);
-      return;
-    }
+    if (!recoveryStep) return undefined;
 
-    if (errors.slug) {
-      setStep(3);
-    }
+    const recoveryFrame = window.requestAnimationFrame(() => {
+      setStep(recoveryStep);
+    });
+
+    return () => window.cancelAnimationFrame(recoveryFrame);
   }, [
     errors.eventCity,
     errors.eventDatePrimary,
