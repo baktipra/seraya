@@ -1,8 +1,9 @@
 import { notFound } from 'next/navigation';
 
 import { InvitationTemplateRenderer } from '@/modules/invitation-templates/invitation-template-renderer';
-import { createFixtureInvitation } from '@fixture/lib/fixture-invitation';
-import { getFixtureTemplateKey } from '@fixture/lib/fixture-state';
+
+import { createFixtureInvitation } from '../../lib/fixture-invitation';
+import { getFixtureTemplateKey } from '../../lib/fixture-state';
 
 type GenericFixturePageProps = {
   params: Promise<{ slug: string }>;
