@@ -1,0 +1,118 @@
+name: Release A flagship regression
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/release-a-regression.yml'
+      - 'src/app/(auth)/**'
+      - 'src/app/page.tsx'
+      - 'src/app/templates/**'
+      - 'src/app/flagship-release-a.css'
+      - 'src/components/auth/**'
+      - 'src/components/marketing/**'
+      - 'src/components/dashboard/**'
+      - 'src/components/projects/project-setup-form.tsx'
+      - 'src/modules/projects/create-project.schema.ts'
+      - 'src/modules/projects/create-project.service.ts'
+      - 'src/modules/projects/__tests__/create-project.schema.test.ts'
+      - 'src/modules/projects/__tests__/create-project.service.test.ts'
+      - 'tests/e2e/marketing-home.spec.ts'
+      - 'tests/server/release-a-guided-entry-workspace-contract.test.ts'
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/release-a-regression.yml'
+      - 'src/app/(auth)/**'
+      - 'src/app/page.tsx'
+      - 'src/app/templates/**'
+      - 'src/app/flagship-release-a.css'
+      - 'src/components/auth/**'
+      - 'src/components/marketing/**'
+      - 'src/components/dashboard/**'
+      - 'src/components/projects/project-setup-form.tsx'
+      - 'src/modules/projects/create-project.schema.ts'
+      - 'src/modules/projects/create-project.service.ts'
+      - 'src/modules/projects/__tests__/create-project.schema.test.ts'
+      - 'src/modules/projects/__tests__/create-project.service.test.ts'
+      - 'tests/e2e/marketing-home.spec.ts'
+      - 'tests/server/release-a-guided-entry-workspace-contract.test.ts'
+
+permissions:
+  contents: read
+
+jobs:
+  flagship-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check Release A formatting
+        run: |
+          npx prettier --check \
+            .github/workflows/release-a-regression.yml \
+            'src/app/(auth)/layout.tsx' \
+            src/app/page.tsx \
+            src/app/templates/page.tsx \
+            src/app/flagship-release-a.css \
+            src/components/auth/login-form.tsx \
+            src/components/marketing/flagship-marketing.tsx \
+            src/components/dashboard/dashboard-empty-state.tsx \
+            src/components/dashboard/dashboard-project-launcher.tsx \
+            src/components/dashboard/dashboard-shell.tsx \
+            src/components/dashboard/project-navigation.tsx \
+            src/components/projects/project-setup-form.tsx \
+            src/modules/projects/create-project.schema.ts \
+            src/modules/projects/create-project.service.ts \
+            src/modules/projects/__tests__/create-project.schema.test.ts \
+            src/modules/projects/__tests__/create-project.service.test.ts \
+            tests/e2e/marketing-home.spec.ts \
+            tests/server/release-a-guided-entry-workspace-contract.test.ts
+
+      - name: Lint Release A files
+        run: |
+          npx eslint \
+            'src/app/(auth)/layout.tsx' \
+            src/app/page.tsx \
+            src/app/templates/page.tsx \
+            src/components/auth/login-form.tsx \
+            src/components/marketing/flagship-marketing.tsx \
+            src/components/dashboard/dashboard-empty-state.tsx \
+            src/components/dashboard/dashboard-project-launcher.tsx \
+            src/components/dashboard/dashboard-shell.tsx \
+            src/components/dashboard/project-navigation.tsx \
+            src/components/projects/project-setup-form.tsx \
+            src/modules/projects/create-project.schema.ts \
+            src/modules/projects/create-project.service.ts \
+            src/modules/projects/__tests__/create-project.schema.test.ts \
+            src/modules/projects/__tests__/create-project.service.test.ts \
+            tests/e2e/marketing-home.spec.ts \
+            tests/server/release-a-guided-entry-workspace-contract.test.ts
+
+      - name: Run Release A focused contracts
+        run: |
+          npm test -- \
+            src/modules/projects/__tests__/create-project.schema.test.ts \
+            src/modules/projects/__tests__/create-project.service.test.ts \
+            tests/server/release-a-guided-entry-workspace-contract.test.ts
+
+      - name: Build production application
+        run: npm run build
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run public flagship browser contract
+        run: npx playwright test tests/e2e/marketing-home.spec.ts
