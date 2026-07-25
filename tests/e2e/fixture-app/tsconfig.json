@@ -1,0 +1,17 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "../../..",
+    "paths": {
+      "@/*": ["src/*"],
+      "@fixture/*": ["tests/e2e/fixture-app/*"]
+    }
+  },
+  "include": [
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "lib/**/*.ts",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ]
+}

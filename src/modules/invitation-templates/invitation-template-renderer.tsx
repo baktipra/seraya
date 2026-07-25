@@ -43,14 +43,18 @@ export function InvitationTemplateRenderer({
   templateKey,
 }: InvitationTemplateRendererProps) {
   const renderContext = createRenderContext({ personalSlots, surface });
+  const renderedTemplate =
+    templateKey === 'aruna' ? (
+      <ArunaTemplate invitation={invitation} renderContext={renderContext} />
+    ) : templateKey === 'laras' ? (
+      <LarasTemplate invitation={invitation} renderContext={renderContext} />
+    ) : (
+      <RoselleTemplate invitation={invitation} renderContext={renderContext} />
+    );
 
-  if (templateKey === 'aruna') {
-    return <ArunaTemplate invitation={invitation} renderContext={renderContext} />;
-  }
-
-  if (templateKey === 'laras') {
-    return <LarasTemplate invitation={invitation} renderContext={renderContext} />;
-  }
-
-  return <RoselleTemplate invitation={invitation} renderContext={renderContext} />;
+  return (
+    <div data-surface={surface} data-template={templateKey} style={{ display: 'contents' }}>
+      {renderedTemplate}
+    </div>
+  );
 }
