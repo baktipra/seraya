@@ -40,11 +40,7 @@ export async function POST(request: Request, { params }: FixtureRsvpRouteContext
   if (status === 'attending') {
     const attendeeCount = Number.parseInt(String(formData.get('attendeeCount') ?? ''), 10);
 
-    if (
-      !Number.isInteger(attendeeCount) ||
-      attendeeCount < 1 ||
-      attendeeCount > fixturePartySize
-    ) {
+    if (!Number.isInteger(attendeeCount) || attendeeCount < 1 || attendeeCount > fixturePartySize) {
       return new Response('Invalid attendee count', { status: 400 });
     }
 
