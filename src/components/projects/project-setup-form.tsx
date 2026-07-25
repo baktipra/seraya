@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect, useMemo, useState } from 'react';
+import { useActionState, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Button, Input } from '@/design-system';
 import { siteConfig } from '@/config/site';
@@ -242,7 +242,12 @@ export function ProjectSetupForm() {
   const [slug, setSlug] = useState('');
   const [slugEdited, setSlugEdited] = useState(false);
   const [templateKey, setTemplateKey] = useState<InvitationTemplateKey>('roselle');
+  const formRef = useRef<HTMLFormElement>(null);
   const errors = state.fieldErrors ?? {};
+
+  useEffect(() => {
+    formRef.current?.setAttribute('data-interactive', 'true');
+  }, []);
 
   useEffect(() => {
     if (state.status !== 'error') return undefined;
@@ -345,7 +350,14 @@ export function ProjectSetupForm() {
       <div className="flex min-w-0 flex-col px-6 py-8 sm:px-9 sm:py-10 lg:px-12 lg:py-12">
         <StepNavigation currentStep={step} />
 
-        <form action={formAction} className="mt-9 flex flex-1 flex-col" noValidate>
+        <form
+          ref={formRef}
+          action={formAction}
+          className="mt-9 flex flex-1 flex-col"
+          data-guided-project-setup="true"
+          data-interactive="false"
+          noValidate
+        >
           <section aria-labelledby="setup-step-one-title" hidden={step !== 1}>
             <p className="seraya-eyebrow text-seraya-action-primary">Langkah 1 dari 3</p>
             <h2
