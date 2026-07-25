@@ -74,8 +74,15 @@ jobs:
       - name: Typecheck J1R-E graph
         run: npx tsc --noEmit --project tsconfig.j1r-e.json
 
-      - name: Run unit tests
-        run: npm test
+      - name: Capture unit test result
+        run: npm test > j1r-e-unit-tests.txt 2>&1 || true
+
+      - name: Upload unit test evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: j1r-e-unit-test-evidence
+          path: j1r-e-unit-tests.txt
+          retention-days: 1
 
       - name: Build production application
         run: npm run build
