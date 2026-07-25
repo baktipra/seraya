@@ -54,7 +54,15 @@ function EventScheduleBlock({
 export function LarasTemplate({ invitation, renderContext }: InvitationTemplateProps) {
   const personalSlots = getPersonalInvitationPresentationSlots(renderContext);
   const hasPersonalResponse = Boolean(personalSlots?.rsvp || personalSlots?.guestbook);
-  const showGenericResponseNote = renderContext.surface !== 'personal' && Boolean(invitation.rsvp);
+  const showGenericResponseNote = renderContext.surface !== 'personal';
+  const genericResponseCopy = invitation.rsvp
+    ? 'Konfirmasi kehadiran dan ucapan dapat dikirim melalui undangan pribadi dari pasangan.'
+    : 'Ucapan dapat dikirim melalui undangan pribadi dari pasangan.';
+  const personalResponseLead = personalSlots?.rsvp
+    ? personalSlots.guestbook
+      ? 'Mohon konfirmasikan kehadiran dan sampaikan ucapan terbaik Anda.'
+      : 'Mohon konfirmasikan kehadiran Anda untuk membantu persiapan acara.'
+    : 'Sampaikan doa dan ucapan terbaik Anda untuk kedua mempelai.';
 
   return (
     <article
@@ -198,6 +206,11 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
 
         {hasPersonalResponse ? (
           <div className={styles.personalResponseJourney} data-template-response-journey="laras">
+            <div data-template-response-introduction="laras">
+              <p data-personal-response-eyebrow>Respons tamu</p>
+              <h2 data-personal-response-title>Kabar dari Anda</h2>
+              <p data-personal-response-copy>{personalResponseLead}</p>
+            </div>
             {personalSlots?.rsvp ? (
               <div className={styles.personalResponseSection} data-template-response-slot="rsvp">
                 {personalSlots.rsvp}
@@ -216,7 +229,7 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
 
         {showGenericResponseNote ? (
           <p className={styles.genericResponseNote} data-generic-response-note="laras">
-            Konfirmasi kehadiran dan ucapan dapat dikirim melalui undangan pribadi dari pasangan.
+            {genericResponseCopy}
           </p>
         ) : null}
 
