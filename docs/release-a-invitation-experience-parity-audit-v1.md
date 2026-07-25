@@ -2,7 +2,7 @@
 
 ## Status
 
-Delivered in draft. This audit belongs to the coordinated Release A program and is not a separately locked product milestone.
+Slices 1 and 2 are delivered in draft. This audit belongs to the coordinated Release A program and is not a separately locked product milestone.
 
 ## Audited baseline
 
@@ -27,7 +27,9 @@ Delivered in draft. This audit belongs to the coordinated Release A program and 
 
 | Capability | Roselle | Aruna | Laras |
 | --- | --- | --- | --- |
-| Opening identity and date | Present | Present | Present |
+| Distinct flagship opening identity | Romantic letter | Asymmetric editorial cover | Formal evening frame |
+| Immersive mobile first screen | Added and gated | Added and gated | Added and gated |
+| Couple-owned opening monogram | Not applicable | Not applicable | Derived from both display names |
 | Personal greeting near opening | Present | Present | Present |
 | Couple identity | Present | Present | Present |
 | Story | Present | Present | Present |
@@ -40,13 +42,13 @@ Delivered in draft. This audit belongs to the coordinated Release A program and 
 | Generic response note | Repaired presentation | Present | Present |
 | Closing | Repaired and gated | Present and styled | Present and styled |
 | Mobile single-column schedule and gallery | Repaired and gated | Present | Present |
-| Reduced-motion handling | Added | Added through maturation layer | Added through maturation layer |
+| Reduced-motion handling | Added | Added | Added |
 
 ## Audit findings
 
 ### P0 — Roselle lower-journey presentation gap
 
-Roselle renders Amplop Digital, personal response, the generic response note, and closing after the gallery. The Roselle module references presentation class names for those chapters, but the local CSS file ended after gallery hover behavior and did not define the referenced lower-journey selectors.
+Roselle renders Amplop Digital, personal response, the generic response note, and closing after the gallery. The Roselle module referenced presentation class names for those chapters, but its local CSS ended after gallery hover behavior and did not define the referenced lower-journey selectors.
 
 Impact:
 
@@ -69,36 +71,35 @@ Implemented response:
 
 - enriched the isolated fixture with realistic full invitation content;
 - added 12 browser cases: three templates × two surfaces × two viewports;
-- verifies full chapter presence, ordering, private/public boundaries, image geometry, touch targets, and horizontal overflow;
-- kept the existing 24 personal-response cases as a separate permanent gate.
+- verifies full chapter presence, ordering, private/public boundaries, opening geometry, image geometry, touch targets, and horizontal overflow;
+- kept the existing 24 personal-response cases as a separate permanent gate;
+- aligned the isolated fixture stylesheet graph with the production root layout so browser evidence exercises the actual maturation layers.
 
-### P1 — Laras monogram is hardcoded
+### P1 — Laras monogram was hardcoded
 
-The Laras opening currently renders the letter `L`, independent of the couple names.
+The Laras opening previously rendered the letter `L`, independent of the couple names. That made the monogram read as template branding rather than couple identity.
 
-Impact:
+Implemented response:
 
-- the monogram reads as template branding rather than couple identity;
-- personalisation quality is lower than the rest of the opening.
+- derives a safe two-initial monogram from both couple display names;
+- trims names, handles Unicode characters, and applies Indonesian locale-aware uppercase;
+- preserves `L` only as a stable fallback when neither name provides an initial;
+- adds source and browser contracts;
+- showroom couple Mira and Arga resolves to `MA`, while the browser fixture Raka and Nadia resolves to `RN`.
 
-Planned response:
+### P1 — Opening maturity and collection identity were inconsistent
 
-- derive a safe two-initial monogram from the couple display names;
-- preserve a stable fallback for missing or unusual names;
-- add a source and browser contract.
+The three templates had functional parity but did not present equivalent first-screen confidence. Roselle had the strongest romantic chapter language, while Aruna and Laras relied on simpler opening compositions.
 
-### P1 — Motion maturity is inconsistent
+Implemented response:
 
-Roselle has decorative elements and hover behavior, while Aruna and Laras have only limited local transitions. None of the three templates previously had one consistent lightweight chapter-reveal system.
-
-Implemented first response:
-
-- added CSS-only opening and view-timeline enhancement;
-- kept content visible without JavaScript;
-- disabled choreography under `prefers-reduced-motion`;
-- avoided a new motion dependency.
-
-Deeper template-specific opening maturation remains a following Release A slice.
+- Roselle now opens as a warm romantic letter with softer circular depth and fuller typographic presence;
+- Aruna now opens as an asymmetric editorial cover with stronger type direction and date composition;
+- Laras now opens as a formal evening frame with deeper ceremonial contrast and couple-owned monogram identity;
+- each template keeps a distinct composition rather than cloning Roselle;
+- mobile first screens use an immersive minimum height and template-specific responsive composition;
+- content remains visible without JavaScript and all opening choreography is disabled under `prefers-reduced-motion`;
+- no motion dependency was introduced.
 
 ### P1 — Implementation architecture is uneven
 
@@ -110,10 +111,10 @@ Impact:
 - shared chapter behavior is harder to compare;
 - future maturation risks producing inconsistent one-off edits.
 
-Planned response:
+Decision:
 
-- do not rewrite during the first audit pass;
-- split Aruna and Laras only when their flagship redesign requires chapter-level ownership;
+- do not rewrite only for structural symmetry;
+- split Aruna and Laras only when a later chapter-level redesign materially benefits from it;
 - preserve the renderer and view-model boundaries.
 
 ### P2 — Gallery delivery can be hardened
@@ -124,7 +125,7 @@ Planned response:
 
 - add async decoding where appropriate;
 - retain layout aspect ratios before image completion;
-- add performance and failed-image review in the release-confidence pass.
+- add responsive delivery, performance, and failed-image review in the release-confidence pass.
 
 ## Implementation slices inside Release A
 
@@ -141,30 +142,35 @@ Delivered in draft:
 
 ### Slice 2 — Flagship openings and collection identity
 
-Remaining:
+Delivered in draft:
 
-- Roselle opening maturation;
-- dynamic Laras monogram;
-- Aruna editorial opening refinement;
-- distinct but equivalent mobile first-screen quality.
+- deeper Roselle romantic opening;
+- Aruna asymmetric editorial opening;
+- Laras formal-evening opening;
+- dynamic Laras couple monogram;
+- distinct but equivalent mobile first-screen quality;
+- reduced-motion contract;
+- source contract and strengthened 12-case browser matrix.
 
 ### Slice 3 — Full journey parity and release confidence
 
 Remaining:
 
-- deeper story, schedule, maps, gallery, gift, response, and closing rhythm review;
-- media delivery and image stability;
-- generic/personal cross-device visual review using final photography;
-- production runtime and performance evidence.
+- media decoding, responsive delivery, and failed-image states;
+- image stability and performance evidence;
+- deeper story, schedule, maps, gallery, gift, response, and closing rhythm review where final photography exposes a real gap;
+- final generic/personal cross-device visual review;
+- final preview runtime and Release A integration confidence.
 
-## Acceptance evidence for this audit layer
+## Acceptance evidence for delivered audit layers
 
 - source audit document committed;
-- rich isolated fixture committed;
+- rich isolated fixture committed and aligned with production styles;
+- opening identity source contracts pass;
 - 12 complete-journey browser cases pass;
 - existing 24 personal-response cases remain green;
+- general end-to-end and Release A flagship browser workflows pass;
 - public review showroom switches all three templates and both surfaces;
 - production build passes;
 - no schema or migration change;
-- no generic/personal authority regression;
-- preview deployment is READY with no runtime error or fatal logs.
+- no generic/personal authority regression.
