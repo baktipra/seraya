@@ -14,6 +14,9 @@ import {
 const publicSnapshotSelect =
   'id, project_id, slug, revision, template_id, draft_schema_version, snapshot, is_current, published_at, created_at';
 const publicSlugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+// J1R-A retires a previously cached unsafe fixture slug. Version the persistent
+// data-cache namespace so stale records cannot survive the production cutover.
+const publicSnapshotCacheNamespace = 'published-invitation-v2';
 
 export class PublicInvitationRepositoryError extends Error {
   constructor() {
@@ -70,7 +73,7 @@ export async function getCachedCurrentPublishedInvitationBySlug(
 
   const getCached = unstable_cache(
     async () => getCurrentPublishedInvitationBySlugUncached(slug),
-    ['published-invitation', slug],
+    [publicSnapshotCacheNamespace, slug],
     {
       revalidate: 3600,
       tags: [getPublishedInvitationCacheTag(slug)],
