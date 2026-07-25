@@ -10,6 +10,8 @@ const rsvpLabels: Record<GuestRsvpStatus, string> = {
   pending: 'Belum merespons',
 };
 
+type SelectableRsvpStatus = Exclude<GuestRsvpStatus, 'pending'>;
+
 type PersonalGuestRsvpProps = {
   feedback?: 'success';
   guestToken: string;
@@ -18,6 +20,10 @@ type PersonalGuestRsvpProps = {
   rsvpStatus: GuestRsvpStatus;
   slug: string;
 };
+
+function getInitialSelectedStatus(rsvpStatus: GuestRsvpStatus): SelectableRsvpStatus | null {
+  return rsvpStatus === 'pending' ? null : rsvpStatus;
+}
 
 /**
  * Behavior-first anonymous capability form. The selected invitation template
@@ -31,12 +37,14 @@ export function PersonalGuestRsvp({
   rsvpStatus,
   slug,
 }: PersonalGuestRsvpProps) {
-  const [selectedStatus, setSelectedStatus] = useState<'attending' | 'declined'>(
-    rsvpStatus === 'declined' ? 'declined' : 'attending',
+  const [selectedStatus, setSelectedStatus] = useState<SelectableRsvpStatus | null>(() =>
+    getInitialSelectedStatus(rsvpStatus),
   );
   const attendeeCount = rsvpAttendeeCount ?? 1;
   const needsAttendanceCount = rsvpStatus === 'attending' && rsvpAttendeeCount === null;
   const attendeeOptions = Array.from({ length: partySize }, (_, index) => index + 1);
+  const selectionRequired = selectedStatus === null;
+  const selectionHelpId = 'personal-rsvp-selection-help';
 
   return (
     <section aria-labelledby="personal-guest-rsvp-title" data-personal-guest-rsvp>
@@ -49,9 +57,14 @@ export function PersonalGuestRsvp({
         <span data-personal-response-status>{rsvpLabels[rsvpStatus]}</span>
       </p>
       <p data-personal-response-copy>Undangan ini berlaku untuk maksimal {partySize} orang.</p>
-      {needsAttendanceCount ? (
+      {needsAttendanceCount && selectedStatus === 'attending' ? (
         <p data-personal-response-notice role="status">
           Kehadiran sudah tercatat, tetapi jumlah orang yang hadir masih perlu dikonfirmasi.
+        </p>
+      ) : null}
+      {selectionRequired ? (
+        <p data-personal-response-notice id={selectionHelpId} role="status">
+          Pilih status kehadiran sebelum menyimpan konfirmasi.
         </p>
       ) : null}
       {feedback === 'success' ? (
@@ -69,6 +82,7 @@ export function PersonalGuestRsvp({
               className="sr-only"
               name="status"
               onChange={() => setSelectedStatus('attending')}
+              required
               type="radio"
               value="attending"
             />
@@ -80,6 +94,7 @@ export function PersonalGuestRsvp({
               className="sr-only"
               name="status"
               onChange={() => setSelectedStatus('declined')}
+              required
               type="radio"
               value="declined"
             />
@@ -117,7 +132,12 @@ export function PersonalGuestRsvp({
           )
         ) : null}
 
-        <button data-personal-response-submit type="submit">
+        <button
+          aria-describedby={selectionRequired ? selectionHelpId : undefined}
+          data-personal-response-submit
+          disabled={selectionRequired}
+          type="submit"
+        >
           Simpan konfirmasi
         </button>
       </form>
