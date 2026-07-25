@@ -1,3 +1,0 @@
-{
-  "buildCommand": "bash scripts/ops/j1r-b-preview-check.sh"
-}
