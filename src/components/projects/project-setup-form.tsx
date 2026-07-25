@@ -6,7 +6,10 @@ import { Button, Input } from '@/design-system';
 import { siteConfig } from '@/config/site';
 import { normalizeSlug } from '@/lib/slug';
 import type { InvitationTemplateKey } from '@/modules/invitation-templates/invitation-template.keys';
-import { initialCreateProjectActionState } from '@/modules/projects/create-project.action-state';
+import {
+  initialCreateProjectActionState,
+  type CreateProjectActionState,
+} from '@/modules/projects/create-project.action-state';
 import { createProjectAction } from '@/modules/projects/create-project.actions';
 import { suggestProjectSlug } from '@/modules/projects/create-project.schema';
 
@@ -229,9 +232,19 @@ function StepNavigation({ currentStep }: { currentStep: SetupStep }) {
   );
 }
 
-export function ProjectSetupForm() {
+async function previewCreateProjectAction(
+  _previousState: CreateProjectActionState,
+  _formData: FormData,
+): Promise<CreateProjectActionState> {
+  return {
+    message: 'Showroom tidak membuat project atau menyimpan data.',
+    status: 'error',
+  };
+}
+
+export function ProjectSetupForm({ previewMode = false }: { previewMode?: boolean } = {}) {
   const [state, formAction, isPending] = useActionState(
-    createProjectAction,
+    previewMode ? previewCreateProjectAction : createProjectAction,
     initialCreateProjectActionState,
   );
   const [step, setStep] = useState<SetupStep>(1);

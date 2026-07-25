@@ -157,7 +157,7 @@ export default function ReleaseAPreviewPage() {
               Aruna, dan Laras. Hindari submit final karena showroom tidak menggunakan sesi owner.
             </p>
           </div>
-          <ProjectSetupForm />
+          <ProjectSetupForm previewMode />
         </section>
 
         <section
