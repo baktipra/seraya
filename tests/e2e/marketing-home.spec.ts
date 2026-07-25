@@ -66,3 +66,30 @@ test('presents Roselle, Aruna, and Laras as distinct public collections', async 
   await expect(page.getByText('Modern editorial').first()).toBeVisible();
   await expect(page.getByText('Formal evening').first()).toBeVisible();
 });
+
+test('shows the guided collection step and canonical five-item workspace in preview', async ({
+  page,
+}) => {
+  await page.goto('/release-a-preview');
+
+  await expect(page.getByRole('heading', { name: 'Guided project creation' })).toBeVisible();
+  await page.getByLabel('Nama panggilan pertama').fill('Mira');
+  await page.getByLabel('Nama panggilan kedua').fill('Arga');
+  await page.getByLabel('Tanggal acara utama').fill('2027-08-17');
+  await page.getByLabel('Kota acara').fill('Jakarta');
+  await page.getByRole('button', { name: 'Pilih pengalaman' }).click();
+
+  await expect(page.getByRole('heading', { name: 'Pilih rasa yang paling dekat.' })).toBeVisible();
+  await expect(page.getByRole('radio', { name: /Roselle/ })).toBeChecked();
+  await expect(page.getByRole('radio', { name: /Aruna/ })).toBeVisible();
+  await expect(page.getByRole('radio', { name: /Laras/ })).toBeVisible();
+
+  const workspaceNavigation = page.getByRole('navigation', { name: 'Navigasi workspace' });
+  await expect(workspaceNavigation.getByRole('link')).toHaveCount(5);
+  await expect(workspaceNavigation).toContainText('Ringkasan');
+  await expect(workspaceNavigation).toContainText('Undangan');
+  await expect(workspaceNavigation).toContainText('Tamu');
+  await expect(workspaceNavigation).toContainText('Bagikan');
+  await expect(workspaceNavigation).toContainText('Respons Tamu');
+  await expect(workspaceNavigation).not.toContainText('Tindak Lanjut');
+});
