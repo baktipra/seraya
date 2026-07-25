@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+npx prettier --check \
+  src/components/personal-invitation/personal-guest-rsvp.tsx \
+  src/modules/invitation-templates/__tests__/personal-response-contract.test.tsx \
+  src/modules/invitation-templates/aruna/aruna-template.tsx \
+  src/modules/invitation-templates/laras/laras-template.tsx \
+  src/modules/invitation-templates/roselle/roselle-template.tsx
+npm run lint
+npm run test
+npm run build
