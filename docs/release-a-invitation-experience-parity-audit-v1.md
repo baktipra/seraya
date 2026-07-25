@@ -172,5 +172,8 @@ Remaining:
 - general end-to-end and Release A flagship browser workflows pass;
 - public review showroom switches all three templates and both surfaces;
 - production build passes;
+- preview deployment `dpl_4fNH4nqzW8MCKSx3HMvSsgWavVHC` is READY in `sin1`;
+- Laras personal showroom returns HTTP 200, `noindex`, and the dynamic `MA` monogram;
+- preview runtime error/fatal logs are empty;
 - no schema or migration change;
 - no generic/personal authority regression.
