@@ -5,14 +5,15 @@ import { PersonalGuestGreeting } from '@/components/personal-invitation/personal
 import { PersonalGuestRsvp } from '@/components/personal-invitation/personal-guest-rsvp';
 import { PersonalGuestbook } from '@/components/personal-invitation/personal-guestbook';
 import { InvitationTemplateRenderer } from '@/modules/invitation-templates/invitation-template-renderer';
-import { createFixtureInvitation } from '@fixture/lib/fixture-invitation';
+
+import { createFixtureInvitation } from '../../../../lib/fixture-invitation';
 import {
   fixtureGuestToken,
   fixturePartySize,
   getFixtureCookieNames,
   getFixtureTemplateKey,
   getPersistedRsvpStatus,
-} from '@fixture/lib/fixture-state';
+} from '../../../../lib/fixture-state';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
