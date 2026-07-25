@@ -26,7 +26,7 @@ test('shows the guided collection step and canonical five-item workspace in prev
   await expect(page.getByRole('radio', { name: /Aruna/ })).toBeEnabled();
   await expect(page.getByRole('radio', { name: /Laras/ })).toBeEnabled();
 
-  await page.getByRole('radio', { name: /Aruna/ }).check();
+  await guidedForm.getByText('Aruna', { exact: true }).click();
   await expect(page.getByRole('radio', { name: /Aruna/ })).toBeChecked();
   await expect(page.locator('[data-template="aruna"]')).toBeVisible();
 
