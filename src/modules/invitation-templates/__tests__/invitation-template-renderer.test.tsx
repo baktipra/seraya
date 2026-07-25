@@ -88,7 +88,7 @@ describe('SRY-033 invitation template render surfaces', () => {
   );
 
   it.each(['roselle', 'aruna', 'laras'] as const)(
-    'omits the quiet generic response note when RSVP is not enabled for %s',
+    'keeps the quiet Ucapan handoff when RSVP is not enabled for %s',
     (templateKey) => {
       const html = renderToStaticMarkup(
         <InvitationTemplateRenderer
@@ -98,8 +98,11 @@ describe('SRY-033 invitation template render surfaces', () => {
         />,
       );
 
-      expect(html).not.toContain('data-generic-response-note');
-      expect(html).not.toContain('Konfirmasi kehadiran dan ucapan dapat dikirim');
+      expect(html).toContain(`data-generic-response-note="${templateKey}"`);
+      expect(html).toContain('Ucapan dapat dikirim melalui undangan pribadi dari pasangan.');
+      expect(html).not.toContain(
+        'Konfirmasi kehadiran dan ucapan dapat dikirim melalui undangan pribadi dari pasangan.',
+      );
     },
   );
 
@@ -117,13 +120,17 @@ describe('SRY-033 invitation template render surfaces', () => {
 
       const templateStart = html.indexOf(`data-template="${templateKey}"`);
       const greetingIndex = html.indexOf('data-template-personal-greeting');
+      const introductionIndex = html.indexOf(
+        `data-template-response-introduction="${templateKey}"`,
+      );
       const rsvpIndex = html.indexOf('data-template-response-slot="rsvp"');
       const guestbookIndex = html.indexOf('data-template-response-slot="guestbook"');
       const closingIndex = html.indexOf(`${templateKey}-closing-title`);
 
       expect(templateStart).toBeGreaterThanOrEqual(0);
       expect(greetingIndex).toBeGreaterThan(templateStart);
-      expect(rsvpIndex).toBeGreaterThan(greetingIndex);
+      expect(introductionIndex).toBeGreaterThan(greetingIndex);
+      expect(rsvpIndex).toBeGreaterThan(introductionIndex);
       expect(guestbookIndex).toBeGreaterThan(rsvpIndex);
       expect(closingIndex).toBeGreaterThan(guestbookIndex);
       expect(html).toContain(`data-template-response-journey="${templateKey}"`);
