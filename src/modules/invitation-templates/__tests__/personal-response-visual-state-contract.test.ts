@@ -7,7 +7,10 @@ const releaseStyles = readFileSync(
   join(process.cwd(), 'src/app/personal-response-release.css'),
   'utf8',
 );
-const rootLayout = readFileSync(join(process.cwd(), 'src/app/layout.tsx'), 'utf8');
+const rootLayout = readFileSync(
+  join(process.cwd(), 'src/app/layout.tsx'),
+  'utf8',
+);
 
 const templateKeys = ['roselle', 'aruna', 'laras'] as const;
 
@@ -20,21 +23,31 @@ describe('J1R-D personal response visual state contract', () => {
     expect(responseImport).toBeGreaterThan(accessibilityImport);
   });
 
-  it.each(templateKeys)('moves visible keyboard focus to the %s RSVP choice surface', (key) => {
-    expect(releaseStyles).toContain(`[data-template='${key}'][data-surface='personal']`);
-    expect(releaseStyles).toContain('[data-personal-rsvp-choice]:focus-within');
-    expect(releaseStyles).toContain('[data-personal-rsvp-choice]:has(input:focus-visible)');
-  });
+  it.each(templateKeys)(
+    'moves visible keyboard focus to the %s RSVP choice surface',
+    (key) => {
+      expect(releaseStyles).toContain(`[data-template='${key}'][data-surface='personal']`);
+      expect(releaseStyles).toContain('[data-personal-rsvp-choice]:focus-within');
+      expect(releaseStyles).toContain(
+        '[data-personal-rsvp-choice]:has(input:focus-visible)',
+      );
+    },
+  );
 
   it.each(templateKeys)('gives %s a truthful disabled submit state', (key) => {
     const scopedStart = releaseStyles.indexOf(
       `[data-template='${key}'][data-surface='personal']`,
     );
-    const disabledState = releaseStyles.indexOf('[data-personal-response-submit]:disabled', scopedStart);
+    const disabledState = releaseStyles.indexOf(
+      '[data-personal-response-submit]:disabled',
+      scopedStart,
+    );
 
     expect(scopedStart).toBeGreaterThan(-1);
     expect(disabledState).toBeGreaterThan(scopedStart);
-    expect(releaseStyles.slice(disabledState, disabledState + 500)).toContain('cursor: not-allowed');
+    expect(releaseStyles.slice(disabledState, disabledState + 500)).toContain(
+      'cursor: not-allowed',
+    );
   });
 
   it('separates Aruna and Laras chapter headings from capability headings', () => {
@@ -47,7 +60,9 @@ describe('J1R-D personal response visual state contract', () => {
 
   it('makes the required Aruna RSVP choice visibly control-like', () => {
     expect(releaseStyles).toContain('[data-personal-rsvp-choice]::before');
-    expect(releaseStyles).toContain("[data-personal-rsvp-choice][data-selected='true']::before");
+    expect(releaseStyles).toContain(
+      "[data-personal-rsvp-choice][data-selected='true']::before",
+    );
     expect(releaseStyles).toContain('border-radius: 0.35rem');
   });
 
