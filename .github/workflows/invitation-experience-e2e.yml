@@ -68,6 +68,7 @@ jobs:
             src/modules/invitation-templates/__tests__/invitation-opening-identity-contract.test.ts \
             tests/e2e/invitation-experience.spec.ts \
             tests/e2e/release-a-invitation-showroom.spec.ts \
+            tests/e2e/fixture-app/app/layout.tsx \
             tests/e2e/fixture-app/lib/fixture-invitation.ts
 
       - name: Lint invitation experience files
@@ -81,6 +82,7 @@ jobs:
             src/modules/invitation-templates/__tests__/invitation-opening-identity-contract.test.ts \
             tests/e2e/invitation-experience.spec.ts \
             tests/e2e/release-a-invitation-showroom.spec.ts \
+            tests/e2e/fixture-app/app/layout.tsx \
             tests/e2e/fixture-app/lib/fixture-invitation.ts
 
       - name: Run invitation opening identity contracts
