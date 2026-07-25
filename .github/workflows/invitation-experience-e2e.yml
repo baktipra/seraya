@@ -8,6 +8,7 @@ on:
       - 'package-lock.json'
       - 'playwright.invitation-experience.config.ts'
       - 'src/app/invitation-maturation-release.css'
+      - 'src/app/invitation-opening-maturation-release.css'
       - 'src/app/layout.tsx'
       - 'src/app/release-a-invitation-preview/**'
       - 'src/modules/invitation-templates/**'
@@ -23,6 +24,7 @@ on:
       - 'package-lock.json'
       - 'playwright.invitation-experience.config.ts'
       - 'src/app/invitation-maturation-release.css'
+      - 'src/app/invitation-opening-maturation-release.css'
       - 'src/app/layout.tsx'
       - 'src/app/release-a-invitation-preview/**'
       - 'src/modules/invitation-templates/**'
@@ -58,8 +60,12 @@ jobs:
             package.json \
             playwright.invitation-experience.config.ts \
             src/app/invitation-maturation-release.css \
+            src/app/invitation-opening-maturation-release.css \
             src/app/layout.tsx \
             src/app/release-a-invitation-preview/page.tsx \
+            src/modules/invitation-templates/laras/laras-monogram.ts \
+            src/modules/invitation-templates/laras/laras-template.tsx \
+            src/modules/invitation-templates/__tests__/invitation-opening-identity-contract.test.ts \
             tests/e2e/invitation-experience.spec.ts \
             tests/e2e/release-a-invitation-showroom.spec.ts \
             tests/e2e/fixture-app/lib/fixture-invitation.ts
@@ -70,9 +76,17 @@ jobs:
             playwright.invitation-experience.config.ts \
             src/app/layout.tsx \
             src/app/release-a-invitation-preview/page.tsx \
+            src/modules/invitation-templates/laras/laras-monogram.ts \
+            src/modules/invitation-templates/laras/laras-template.tsx \
+            src/modules/invitation-templates/__tests__/invitation-opening-identity-contract.test.ts \
             tests/e2e/invitation-experience.spec.ts \
             tests/e2e/release-a-invitation-showroom.spec.ts \
             tests/e2e/fixture-app/lib/fixture-invitation.ts
+
+      - name: Run invitation opening identity contracts
+        run: |
+          npm test -- \
+            src/modules/invitation-templates/__tests__/invitation-opening-identity-contract.test.ts
 
       - name: Build production application
         run: npm run build
