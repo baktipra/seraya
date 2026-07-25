@@ -1,0 +1,65 @@
+name: Personal response browser regression
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/personal-response-e2e.yml'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'playwright.personal-response.config.ts'
+      - 'src/app/accessibility-release.css'
+      - 'src/app/personal-response-release.css'
+      - 'src/components/personal-invitation/**'
+      - 'src/modules/invitation-templates/**'
+      - 'tests/e2e/**'
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/personal-response-e2e.yml'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'playwright.personal-response.config.ts'
+      - 'src/app/accessibility-release.css'
+      - 'src/app/personal-response-release.css'
+      - 'src/components/personal-invitation/**'
+      - 'src/modules/invitation-templates/**'
+      - 'tests/e2e/**'
+
+permissions:
+  contents: read
+
+jobs:
+  browser-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run personal response browser regression
+        run: npm run e2e:personal-response
+
+      - name: Upload Playwright evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: personal-response-playwright-report
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+          retention-days: 7
