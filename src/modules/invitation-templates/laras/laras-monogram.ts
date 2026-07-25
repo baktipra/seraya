@@ -10,9 +10,7 @@ function getInitial(value: string) {
  * rendered hero title or introducing invitation authority into presentation.
  */
 export function createLarasMonogram(personOneName: string, personTwoName: string) {
-  const monogram = [getInitial(personOneName), getInitial(personTwoName)]
-    .filter(Boolean)
-    .join('');
+  const monogram = [getInitial(personOneName), getInitial(personTwoName)].filter(Boolean).join('');
 
   return monogram || 'L';
 }
