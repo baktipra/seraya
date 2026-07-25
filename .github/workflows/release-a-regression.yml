@@ -7,6 +7,7 @@ on:
       - 'src/app/(auth)/**'
       - 'src/app/page.tsx'
       - 'src/app/templates/**'
+      - 'src/app/release-a-preview/**'
       - 'src/app/flagship-release-a.css'
       - 'src/components/auth/**'
       - 'src/components/marketing/**'
@@ -26,6 +27,7 @@ on:
       - 'src/app/(auth)/**'
       - 'src/app/page.tsx'
       - 'src/app/templates/**'
+      - 'src/app/release-a-preview/**'
       - 'src/app/flagship-release-a.css'
       - 'src/components/auth/**'
       - 'src/components/marketing/**'
@@ -66,6 +68,7 @@ jobs:
             'src/app/(auth)/layout.tsx' \
             src/app/page.tsx \
             src/app/templates/page.tsx \
+            src/app/release-a-preview/page.tsx \
             src/app/flagship-release-a.css \
             src/components/auth/login-form.tsx \
             src/components/marketing/flagship-marketing.tsx \
@@ -87,6 +90,7 @@ jobs:
             'src/app/(auth)/layout.tsx' \
             src/app/page.tsx \
             src/app/templates/page.tsx \
+            src/app/release-a-preview/page.tsx \
             src/components/auth/login-form.tsx \
             src/components/marketing/flagship-marketing.tsx \
             src/components/dashboard/dashboard-empty-state.tsx \
