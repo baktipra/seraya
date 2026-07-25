@@ -368,7 +368,6 @@ export function ProjectSetupForm({ previewMode = false }: { previewMode?: boolea
           action={formAction}
           className="mt-9 flex flex-1 flex-col"
           data-guided-project-setup="true"
-          data-interactive="false"
           noValidate
         >
           <section aria-labelledby="setup-step-one-title" hidden={step !== 1}>
