@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { INVITATION_TEMPLATE_KEYS } from '@/modules/invitation-templates/invitation-template.keys';
 import {
   RESERVED_SLUGS,
   SLUG_MAX_LENGTH,
@@ -60,6 +61,9 @@ export const createProjectSchema = z.object({
   personOneName: nameSchema('Gunakan nama panggilan untuk pasangan pertama.'),
   personTwoName: nameSchema('Gunakan nama panggilan untuk pasangan kedua.'),
   slug: slugSchema,
+  templateKey: z.enum(INVITATION_TEMPLATE_KEYS, {
+    message: 'Pilih salah satu pengalaman undangan.',
+  }),
 });
 
 export type CreateProjectInput = z.infer<typeof createProjectSchema>;
@@ -82,6 +86,7 @@ export function parseCreateProjectFormData(formData: FormData) {
     personOneName: getFormText(formData, 'personOneName'),
     personTwoName: getFormText(formData, 'personTwoName'),
     slug: getFormText(formData, 'slug'),
+    templateKey: getFormText(formData, 'templateKey'),
   });
 }
 
@@ -93,7 +98,14 @@ export function getCreateProjectFieldErrors(error: z.ZodError): CreateProjectFie
 
     if (
       typeof field === 'string' &&
-      ['personOneName', 'personTwoName', 'eventDatePrimary', 'eventCity', 'slug'].includes(field) &&
+      [
+        'personOneName',
+        'personTwoName',
+        'eventDatePrimary',
+        'eventCity',
+        'slug',
+        'templateKey',
+      ].includes(field) &&
       !fieldErrors[field as CreateProjectField]
     ) {
       fieldErrors[field as CreateProjectField] = issue.message;
