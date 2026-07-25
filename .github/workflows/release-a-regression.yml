@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - '.github/workflows/release-a-regression.yml'
+      - 'playwright.config.ts'
+      - 'playwright.release-a.config.ts'
       - 'src/app/(auth)/**'
       - 'src/app/page.tsx'
       - 'src/app/templates/**'
@@ -13,17 +15,21 @@ on:
       - 'src/components/marketing/**'
       - 'src/components/dashboard/**'
       - 'src/components/projects/project-setup-form.tsx'
+      - 'src/components/projects/project-setup-showroom.tsx'
       - 'src/modules/projects/create-project.schema.ts'
       - 'src/modules/projects/create-project.service.ts'
       - 'src/modules/projects/__tests__/create-project.schema.test.ts'
       - 'src/modules/projects/__tests__/create-project.service.test.ts'
       - 'tests/e2e/marketing-home.spec.ts'
+      - 'tests/e2e/release-a-showroom.spec.ts'
       - 'tests/server/release-a-guided-entry-workspace-contract.test.ts'
   push:
     branches:
       - main
     paths:
       - '.github/workflows/release-a-regression.yml'
+      - 'playwright.config.ts'
+      - 'playwright.release-a.config.ts'
       - 'src/app/(auth)/**'
       - 'src/app/page.tsx'
       - 'src/app/templates/**'
@@ -33,11 +39,13 @@ on:
       - 'src/components/marketing/**'
       - 'src/components/dashboard/**'
       - 'src/components/projects/project-setup-form.tsx'
+      - 'src/components/projects/project-setup-showroom.tsx'
       - 'src/modules/projects/create-project.schema.ts'
       - 'src/modules/projects/create-project.service.ts'
       - 'src/modules/projects/__tests__/create-project.schema.test.ts'
       - 'src/modules/projects/__tests__/create-project.service.test.ts'
       - 'tests/e2e/marketing-home.spec.ts'
+      - 'tests/e2e/release-a-showroom.spec.ts'
       - 'tests/server/release-a-guided-entry-workspace-contract.test.ts'
 
 permissions:
@@ -46,7 +54,7 @@ permissions:
 jobs:
   flagship-regression:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
 
     steps:
       - name: Check out repository
@@ -65,6 +73,8 @@ jobs:
         run: |
           npx prettier --check \
             .github/workflows/release-a-regression.yml \
+            playwright.config.ts \
+            playwright.release-a.config.ts \
             'src/app/(auth)/layout.tsx' \
             src/app/page.tsx \
             src/app/templates/page.tsx \
@@ -77,16 +87,20 @@ jobs:
             src/components/dashboard/dashboard-shell.tsx \
             src/components/dashboard/project-navigation.tsx \
             src/components/projects/project-setup-form.tsx \
+            src/components/projects/project-setup-showroom.tsx \
             src/modules/projects/create-project.schema.ts \
             src/modules/projects/create-project.service.ts \
             src/modules/projects/__tests__/create-project.schema.test.ts \
             src/modules/projects/__tests__/create-project.service.test.ts \
             tests/e2e/marketing-home.spec.ts \
+            tests/e2e/release-a-showroom.spec.ts \
             tests/server/release-a-guided-entry-workspace-contract.test.ts
 
       - name: Lint Release A files
         run: |
           npx eslint \
+            playwright.config.ts \
+            playwright.release-a.config.ts \
             'src/app/(auth)/layout.tsx' \
             src/app/page.tsx \
             src/app/templates/page.tsx \
@@ -98,11 +112,13 @@ jobs:
             src/components/dashboard/dashboard-shell.tsx \
             src/components/dashboard/project-navigation.tsx \
             src/components/projects/project-setup-form.tsx \
+            src/components/projects/project-setup-showroom.tsx \
             src/modules/projects/create-project.schema.ts \
             src/modules/projects/create-project.service.ts \
             src/modules/projects/__tests__/create-project.schema.test.ts \
             src/modules/projects/__tests__/create-project.service.test.ts \
             tests/e2e/marketing-home.spec.ts \
+            tests/e2e/release-a-showroom.spec.ts \
             tests/server/release-a-guided-entry-workspace-contract.test.ts
 
       - name: Run Release A focused contracts
@@ -120,3 +136,6 @@ jobs:
 
       - name: Run public flagship browser contract
         run: npx playwright test tests/e2e/marketing-home.spec.ts
+
+      - name: Run production showroom browser contract
+        run: npx playwright test --config=playwright.release-a.config.ts
