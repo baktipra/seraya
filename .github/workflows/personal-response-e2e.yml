@@ -6,6 +6,7 @@ on:
       - '.github/workflows/personal-response-e2e.yml'
       - 'package.json'
       - 'package-lock.json'
+      - 'playwright.config.ts'
       - 'playwright.personal-response.config.ts'
       - 'src/app/accessibility-release.css'
       - 'src/app/personal-response-release.css'
@@ -19,6 +20,7 @@ on:
       - '.github/workflows/personal-response-e2e.yml'
       - 'package.json'
       - 'package-lock.json'
+      - 'playwright.config.ts'
       - 'playwright.personal-response.config.ts'
       - 'src/app/accessibility-release.css'
       - 'src/app/personal-response-release.css'
@@ -46,6 +48,31 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Prepare canonical J1R-E sources
+        run: |
+          npx prettier --write \
+            .github/workflows/personal-response-e2e.yml \
+            package.json \
+            playwright.config.ts \
+            playwright.personal-response.config.ts \
+            src/modules/invitation-templates/invitation-template-renderer.tsx \
+            tests/e2e
+          git diff --name-only > j1r-e-prettier-changed.txt
+
+      - name: Upload canonical J1R-E sources
+        uses: actions/upload-artifact@v4
+        with:
+          name: j1r-e-canonical-sources
+          path: |
+            .github/workflows/personal-response-e2e.yml
+            package.json
+            playwright.config.ts
+            playwright.personal-response.config.ts
+            src/modules/invitation-templates/invitation-template-renderer.tsx
+            tests/e2e
+            j1r-e-prettier-changed.txt
+          retention-days: 1
 
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
