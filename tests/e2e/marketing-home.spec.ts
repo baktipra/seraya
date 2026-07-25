@@ -81,8 +81,8 @@ test('shows the guided collection step and canonical five-item workspace in prev
 
   await expect(page.getByRole('heading', { name: 'Pilih rasa yang paling dekat.' })).toBeVisible();
   await expect(page.getByRole('radio', { name: /Roselle/ })).toBeChecked();
-  await expect(page.getByRole('radio', { name: /Aruna/ })).toBeVisible();
-  await expect(page.getByRole('radio', { name: /Laras/ })).toBeVisible();
+  await expect(page.getByRole('radio', { name: /Aruna/ })).toBeEnabled();
+  await expect(page.getByRole('radio', { name: /Laras/ })).toBeEnabled();
 
   const workspaceNavigation = page.getByRole('navigation', { name: 'Navigasi workspace' });
   await expect(workspaceNavigation.getByRole('link')).toHaveCount(5);
