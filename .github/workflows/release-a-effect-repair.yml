@@ -33,62 +33,38 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
 
           path = Path('src/components/projects/project-setup-form.tsx')
           content = path.read_text()
-          old = """  useEffect(() => {
-    if (state.status !== 'error') return;
-
-    if (
-      errors.personOneName ||
-      errors.personTwoName ||
-      errors.eventDatePrimary ||
-      errors.eventCity
-    ) {
-      setStep(1);
-      return;
-    }
-
-    if (errors.templateKey) {
-      setStep(2);
-      return;
-    }
-
-    if (errors.slug) {
-      setStep(3);
-    }
-  }, [
-"""
-          new = """  useEffect(() => {
-    if (state.status !== 'error') return undefined;
-
-    let recoveryStep: SetupStep | null = null;
-
-    if (
-      errors.personOneName ||
-      errors.personTwoName ||
-      errors.eventDatePrimary ||
-      errors.eventCity
-    ) {
-      recoveryStep = 1;
-    } else if (errors.templateKey) {
-      recoveryStep = 2;
-    } else if (errors.slug) {
-      recoveryStep = 3;
-    }
-
-    if (!recoveryStep) return undefined;
-
-    const recoveryFrame = window.requestAnimationFrame(() => {
-      setStep(recoveryStep);
-    });
-
-    return () => window.cancelAnimationFrame(recoveryFrame);
-  }, [
-"""
-          if old not in content:
-              raise SystemExit('Expected guided-step effect block was not found.')
-          path.write_text(content.replace(old, new))
+          pattern = re.compile(r"  useEffect\(\(\) => \{\n.*?\n  \}, \[\n", re.DOTALL)
+          replacement = (
+              "  useEffect(() => {\n"
+              "    if (state.status !== 'error') return undefined;\n\n"
+              "    let recoveryStep: SetupStep | null = null;\n\n"
+              "    if (\n"
+              "      errors.personOneName ||\n"
+              "      errors.personTwoName ||\n"
+              "      errors.eventDatePrimary ||\n"
+              "      errors.eventCity\n"
+              "    ) {\n"
+              "      recoveryStep = 1;\n"
+              "    } else if (errors.templateKey) {\n"
+              "      recoveryStep = 2;\n"
+              "    } else if (errors.slug) {\n"
+              "      recoveryStep = 3;\n"
+              "    }\n\n"
+              "    if (!recoveryStep) return undefined;\n\n"
+              "    const recoveryFrame = window.requestAnimationFrame(() => {\n"
+              "      setStep(recoveryStep);\n"
+              "    });\n\n"
+              "    return () => window.cancelAnimationFrame(recoveryFrame);\n"
+              "  }, [\n"
+          )
+          updated, count = pattern.subn(replacement, content, count=1)
+          if count != 1:
+              raise SystemExit(f'Expected one guided-step effect block, found {count}.')
+          path.write_text(updated)
           PY
 
       - name: Format repaired file
@@ -96,6 +72,11 @@ jobs:
 
       - name: Commit repair
         run: |
+          if git diff --quiet; then
+            echo 'Guided-step effect already repaired.'
+            exit 0
+          fi
+
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add src/components/projects/project-setup-form.tsx
