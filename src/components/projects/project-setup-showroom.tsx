@@ -16,7 +16,9 @@ const ProjectSetupFormPreview = dynamic(
             aria-hidden="true"
             className="border-seraya-action-primary/25 border-t-seraya-action-primary mx-auto block size-9 animate-spin rounded-full border-2"
           />
-          <p className="text-seraya-text-secondary mt-4 text-sm">Menyiapkan guided project creation…</p>
+          <p className="text-seraya-text-secondary mt-4 text-sm">
+            Menyiapkan guided project creation…
+          </p>
         </div>
       </div>
     ),

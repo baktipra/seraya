@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 
 import { DashboardShell } from '@/components/dashboard/dashboard-shell';
 import { ProjectNavigation } from '@/components/dashboard/project-navigation';
-import { ProjectSetupForm } from '@/components/projects/project-setup-form';
+import { ProjectSetupShowroom } from '@/components/projects/project-setup-showroom';
 
 export const metadata: Metadata = {
   title: 'Release A preview',
@@ -157,7 +157,7 @@ export default function ReleaseAPreviewPage() {
               Aruna, dan Laras. Hindari submit final karena showroom tidak menggunakan sesi owner.
             </p>
           </div>
-          <ProjectSetupForm previewMode />
+          <ProjectSetupShowroom />
         </section>
 
         <section
