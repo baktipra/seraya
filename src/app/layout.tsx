@@ -10,6 +10,7 @@ import './workspace-responsive.css';
 import './accessibility-release.css';
 import './personal-response-release.css';
 import './invitation-maturation-release.css';
+import './invitation-opening-maturation-release.css';
 
 export const metadata: Metadata = {
   title: {
