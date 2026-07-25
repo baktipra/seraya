@@ -47,27 +47,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Prepare canonical J1R-E sources
-        run: |
-          npx prettier --write \
-            .github/workflows/personal-response-e2e.yml \
-            package.json \
-            playwright.personal-response.config.ts \
-            src/modules/invitation-templates/invitation-template-renderer.tsx \
-            tests/e2e
-
-      - name: Upload canonical J1R-E sources
-        uses: actions/upload-artifact@v4
-        with:
-          name: j1r-e-canonical-sources
-          path: |
-            .github/workflows/personal-response-e2e.yml
-            package.json
-            playwright.personal-response.config.ts
-            src/modules/invitation-templates/invitation-template-renderer.tsx
-            tests/e2e
-          retention-days: 1
-
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
