@@ -2,7 +2,7 @@
 
 ## Status
 
-In implementation. This audit belongs to the coordinated Release A program and is not a separately locked product milestone.
+Delivered in draft. This audit belongs to the coordinated Release A program and is not a separately locked product milestone.
 
 ## Audited baseline
 
@@ -34,48 +34,43 @@ In implementation. This audit belongs to the coordinated Release A program and i
 | Multi-event schedule | Present | Present | Present |
 | Event venue, address, and map | Present | Present | Present |
 | Gallery | Present | Present | Present |
-| Amplop Digital | Present in markup | Present and styled | Present and styled |
-| Personal RSVP | Present | Present | Present |
-| Personal Guestbook | Present | Present | Present |
-| Generic response note | Present | Present | Present |
-| Closing | Present in markup | Present and styled | Present and styled |
-| Mobile single-column schedule | Source risk | Present | Present |
-| Reduced-motion handling | Incomplete locally | Partial | Partial |
+| Amplop Digital | Repaired and gated | Present and styled | Present and styled |
+| Personal RSVP | Repaired presentation; behavior preserved | Present | Present |
+| Personal Guestbook | Repaired presentation; behavior preserved | Present | Present |
+| Generic response note | Repaired presentation | Present | Present |
+| Closing | Repaired and gated | Present and styled | Present and styled |
+| Mobile single-column schedule and gallery | Repaired and gated | Present | Present |
+| Reduced-motion handling | Added | Added through maturation layer | Added through maturation layer |
 
 ## Audit findings
 
 ### P0 — Roselle lower-journey presentation gap
 
-Roselle renders Amplop Digital, personal response, the generic response note, and closing after the gallery. The Roselle module references presentation class names for those chapters, but the local CSS file ends after gallery hover behavior and does not define the referenced lower-journey selectors.
+Roselle renders Amplop Digital, personal response, the generic response note, and closing after the gallery. The Roselle module references presentation class names for those chapters, but the local CSS file ended after gallery hover behavior and did not define the referenced lower-journey selectors.
 
 Impact:
 
-- the final third of Roselle can fall back to minimally styled markup;
-- generic and personal endings can feel less mature than the opening;
-- Amplop Digital and response controls can visually detach from the template;
-- mobile gallery and lower-section geometry lack a complete local contract.
+- the final third of Roselle could fall back to minimally styled markup;
+- generic and personal endings could feel less mature than the opening;
+- Amplop Digital and response controls could visually detach from the template;
+- mobile gallery and lower-section geometry lacked a complete local contract.
 
-Immediate response:
+Implemented response:
 
-- add a scoped maturation layer for Roselle gift, greeting, response, generic note, closing, gallery layouts, and mobile composition;
-- keep behavior and authority unchanged;
-- add reduced-motion-safe template choreography.
+- added a scoped maturation layer for Roselle gift, greeting, response, generic note, closing, gallery layouts, and mobile composition;
+- kept behavior and authority unchanged;
+- added reduced-motion-safe template choreography.
 
 ### P0 — No complete invitation browser matrix
 
-The existing permanent browser suite strongly covers generic/personal isolation, RSVP keyboard operation, state persistence, and Guestbook retry/persistence. It does not exercise the complete invitation with story, two events, gallery, Amplop Digital, and closing across all three templates.
+The existing permanent browser suite strongly covered generic/personal isolation, RSVP keyboard operation, state persistence, and Guestbook retry/persistence. It did not exercise the complete invitation with story, two events, gallery, Amplop Digital, and closing across all three templates.
 
-Impact:
+Implemented response:
 
-- a template can retain response behavior while losing a visual chapter;
-- mobile overflow or chapter-order regressions can pass unnoticed;
-- rich-content parity is not release-gated.
-
-Immediate response:
-
-- enrich the isolated fixture with realistic full invitation content;
-- add 12 browser cases: three templates × two surfaces × two viewports;
-- verify full chapter presence, ordering, private/public boundaries, image geometry, touch targets, and horizontal overflow.
+- enriched the isolated fixture with realistic full invitation content;
+- added 12 browser cases: three templates × two surfaces × two viewports;
+- verifies full chapter presence, ordering, private/public boundaries, image geometry, touch targets, and horizontal overflow;
+- kept the existing 24 personal-response cases as a separate permanent gate.
 
 ### P1 — Laras monogram is hardcoded
 
@@ -94,14 +89,16 @@ Planned response:
 
 ### P1 — Motion maturity is inconsistent
 
-Roselle has decorative elements and hover behavior, while Aruna and Laras have only limited local transitions. None of the three templates has one consistent lightweight chapter-reveal system.
+Roselle has decorative elements and hover behavior, while Aruna and Laras have only limited local transitions. None of the three templates previously had one consistent lightweight chapter-reveal system.
 
-Immediate response:
+Implemented first response:
 
-- add CSS-only opening and view-timeline enhancement;
-- keep content visible without JavaScript;
-- disable all choreography under `prefers-reduced-motion`;
-- avoid a new motion dependency.
+- added CSS-only opening and view-timeline enhancement;
+- kept content visible without JavaScript;
+- disabled choreography under `prefers-reduced-motion`;
+- avoided a new motion dependency.
+
+Deeper template-specific opening maturation remains a following Release A slice.
 
 ### P1 — Implementation architecture is uneven
 
@@ -133,13 +130,18 @@ Planned response:
 
 ### Slice 1 — Audit gate and P0 Roselle completion
 
+Delivered in draft:
+
 - full-content fixture;
 - cross-template browser matrix;
 - Roselle lower-journey styling;
 - mobile gallery and response composition;
-- reduced-motion-safe opening and chapter motion.
+- reduced-motion-safe opening and chapter motion;
+- preview-only six-combination invitation showroom.
 
 ### Slice 2 — Flagship openings and collection identity
+
+Remaining:
 
 - Roselle opening maturation;
 - dynamic Laras monogram;
@@ -148,9 +150,11 @@ Planned response:
 
 ### Slice 3 — Full journey parity and release confidence
 
-- story, schedule, maps, gallery, gift, response, and closing rhythm;
+Remaining:
+
+- deeper story, schedule, maps, gallery, gift, response, and closing rhythm review;
 - media delivery and image stability;
-- generic/personal cross-device visual review;
+- generic/personal cross-device visual review using final photography;
 - production runtime and performance evidence.
 
 ## Acceptance evidence for this audit layer
@@ -159,6 +163,7 @@ Planned response:
 - rich isolated fixture committed;
 - 12 complete-journey browser cases pass;
 - existing 24 personal-response cases remain green;
+- public review showroom switches all three templates and both surfaces;
 - production build passes;
 - no schema or migration change;
 - no generic/personal authority regression;
