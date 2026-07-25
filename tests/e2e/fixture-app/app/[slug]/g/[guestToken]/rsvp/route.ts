@@ -5,7 +5,7 @@ import {
   fixturePartySize,
   getFixtureCookieNames,
   getFixtureTemplateKey,
-} from '@fixture/lib/fixture-state';
+} from '../../../../../lib/fixture-state';
 
 type FixtureRsvpRouteContext = {
   params: Promise<{ guestToken: string; slug: string }>;
