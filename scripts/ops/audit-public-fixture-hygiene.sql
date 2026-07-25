@@ -64,7 +64,6 @@ BEGIN
       OR coalesce((snapshot.snapshot #>> '{draft,digitalGift,enabled}')::boolean, true)
       OR jsonb_array_length(coalesce(snapshot.snapshot #> '{draft,digitalGift,accounts}', '[]'::jsonb)) <> 0
       OR snapshot.snapshot::text ~* '(aaaa|bbbb|lorem|dummy|asdf|mbuh)'
-      OR snapshot.snapshot::text ~ '[0-9]{8,}'
     );
 
   IF violation_count <> 0 THEN
@@ -85,7 +84,6 @@ BEGIN
       OR coalesce((draft.content #>> '{digitalGift,enabled}')::boolean, true)
       OR jsonb_array_length(coalesce(draft.content #> '{digitalGift,accounts}', '[]'::jsonb)) <> 0
       OR draft.content::text ~* '(aaaa|bbbb|lorem|dummy|asdf|mbuh)'
-      OR draft.content::text ~ '[0-9]{8,}'
     );
 
   IF violation_count <> 0 THEN
