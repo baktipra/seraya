@@ -39,6 +39,27 @@ async function expectAppearsBefore(first: Locator, second: Locator) {
   expect(appearsBefore).toBe(true);
 }
 
+async function expectFlagshipOpening(page: Page, invitation: Locator, templateKey: TemplateKey) {
+  const opening = invitation.locator(':scope > header');
+  const title = opening.getByRole('heading', { name: 'Raka & Nadia' });
+
+  await expect(opening).toBeVisible();
+  await expect(title).toBeVisible();
+
+  const viewportHeight = page.viewportSize()?.height ?? 720;
+  const openingBox = await opening.boundingBox();
+  const titleBox = await title.boundingBox();
+
+  expect(openingBox?.height ?? 0).toBeGreaterThanOrEqual(Math.min(viewportHeight * 0.72, 620));
+  expect(titleBox?.y ?? viewportHeight).toBeLessThan(viewportHeight);
+
+  if (templateKey === 'laras') {
+    await expect(opening.locator('[data-opening-monogram]')).toHaveText('RN');
+  } else {
+    await expect(opening.locator('[data-opening-monogram]')).toHaveCount(0);
+  }
+}
+
 for (const templateKey of templateKeys) {
   test.describe(`${templateKey} complete invitation experience`, () => {
     test('renders the complete generic journey without guest-private UI or overflow', async ({
@@ -48,6 +69,7 @@ for (const templateKey of templateKeys) {
 
       const invitation = page.locator(`article[data-template="${templateKey}"]`);
       await expect(invitation).toBeVisible();
+      await expectFlagshipOpening(page, invitation, templateKey);
       await expect(invitation.getByRole('heading', { name: 'Raka & Nadia' })).toBeVisible();
       await expect(
         invitation.getByRole('heading', { name: 'Cerita yang membawa kami ke sini' }),
@@ -90,6 +112,7 @@ for (const templateKey of templateKeys) {
       const digitalGiftSection = digitalGiftHeading.locator('xpath=ancestor::section[1]');
       const closingSection = invitation.locator('section').last();
 
+      await expectFlagshipOpening(page, invitation, templateKey);
       await expect(greeting).toBeVisible();
       await expect(greeting).toContainText('Tamu Browser');
       await expect(responseJourney).toBeVisible();
