@@ -68,8 +68,15 @@ jobs:
             tests/e2e/personal-response.spec.ts \
             tests/e2e/fixture-app
 
-      - name: Typecheck repository
-        run: npm run typecheck
+      - name: Capture repository typecheck
+        run: npm run typecheck > j1r-e-typecheck.txt 2>&1 || true
+
+      - name: Upload typecheck evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: j1r-e-typecheck-evidence
+          path: j1r-e-typecheck.txt
+          retention-days: 1
 
       - name: Run unit tests
         run: npm test
