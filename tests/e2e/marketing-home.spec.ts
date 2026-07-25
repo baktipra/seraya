@@ -59,7 +59,9 @@ test('keeps the desktop flagship conversion actions above the fold', async ({ pa
 test('presents Roselle, Aruna, and Laras as distinct public collections', async ({ page }) => {
   await page.goto('/templates');
 
-  await expect(page.getByRole('heading', { name: /Pilih rasa, bukan sekadar tema\./i })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: /Pilih rasa, bukan sekadar tema\./i }),
+  ).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Roselle' }).first()).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Aruna' }).first()).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Laras' }).first()).toBeVisible();
