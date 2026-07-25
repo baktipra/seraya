@@ -98,12 +98,15 @@ describe('SRY-013 personal guest invitation route', () => {
     expect(html).toContain('Hadir');
     expect(html).toContain('Tidak hadir');
     expect(html).toContain('Undangan ini berlaku untuk maksimal 4 orang.');
-    expect(html).toContain('Jumlah orang yang hadir');
+    expect(html).toContain('Pilih status kehadiran sebelum menyimpan konfirmasi.');
+    expect(html).toContain('disabled=""');
+    expect(html).not.toContain('Jumlah orang yang hadir');
     expect(html).toContain('Raka &amp; Nadia');
     expect(html).toContain('Ucapan &amp; Doa');
     expect(html).toContain('Kirim ucapan');
     expect(html).toContain('data-template-personal-greeting="roselle"');
     expect(html).toContain('data-template-response-journey="roselle"');
+    expect(html).toContain('data-template-response-introduction="roselle"');
     expect(html).toContain('data-template-response-slot="rsvp"');
     expect(html).toContain('data-template-response-slot="guestbook"');
     expect(html).not.toContain('data-generic-response-note');
