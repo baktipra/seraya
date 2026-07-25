@@ -5,7 +5,7 @@ import {
   forcedGuestbookErrorMessage,
   getFixtureCookieNames,
   getFixtureTemplateKey,
-} from '@fixture/lib/fixture-state';
+} from '../../../../../lib/fixture-state';
 
 type FixtureGuestbookRouteContext = {
   params: Promise<{ guestToken: string; slug: string }>;
