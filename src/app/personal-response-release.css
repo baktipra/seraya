@@ -1,0 +1,233 @@
+/* J1R-D — cross-template personal response visual state and keyboard repair. */
+
+[data-template-response-journey] [data-personal-rsvp-choice],
+[data-template-response-journey] [data-personal-response-submit] {
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease,
+    opacity 160ms ease,
+    box-shadow 160ms ease;
+}
+
+/* The native radios remain visually hidden; move the visible keyboard ring to their labels. */
+[data-template='roselle'][data-surface='personal']
+  [data-template-response-journey='roselle']
+  [data-personal-rsvp-choice]:focus-within,
+[data-template='roselle'][data-surface='personal']
+  [data-template-response-journey='roselle']
+  [data-personal-rsvp-choice]:has(input:focus-visible) {
+  outline: 3px solid rgb(151 99 109 / 0.48);
+  outline-offset: 3px;
+}
+
+[data-template='aruna'][data-surface='personal']
+  [data-template-response-journey='aruna']
+  [data-personal-rsvp-choice]:focus-within,
+[data-template='aruna'][data-surface='personal']
+  [data-template-response-journey='aruna']
+  [data-personal-rsvp-choice]:has(input:focus-visible) {
+  outline: 3px solid rgb(185 95 72 / 0.46);
+  outline-offset: 3px;
+}
+
+[data-template='laras'][data-surface='personal']
+  [data-template-response-journey='laras']
+  [data-personal-rsvp-choice]:focus-within,
+[data-template='laras'][data-surface='personal']
+  [data-template-response-journey='laras']
+  [data-personal-rsvp-choice]:has(input:focus-visible) {
+  outline: 3px solid rgb(223 197 142 / 0.76);
+  outline-offset: 3px;
+}
+
+/* Disabled actions must look disabled, not merely reject clicks. */
+[data-template='roselle'][data-surface='personal']
+  [data-template-response-journey='roselle']
+  [data-personal-response-submit]:disabled {
+  border-color: rgb(151 99 109 / 0.38);
+  background: rgb(151 99 109 / 0.36);
+  color: rgb(255 254 251 / 0.9);
+  cursor: not-allowed;
+  opacity: 0.68;
+}
+
+[data-template='roselle'][data-surface='personal']
+  [data-template-response-journey='roselle']
+  [data-personal-response-submit]:disabled:hover {
+  background: rgb(151 99 109 / 0.36);
+}
+
+[data-template='aruna'][data-surface='personal']
+  [data-template-response-journey='aruna']
+  [data-personal-response-submit]:disabled {
+  border-bottom-color: rgb(185 95 72 / 0.38);
+  color: rgb(116 93 84 / 0.56);
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+[data-template='aruna'][data-surface='personal']
+  [data-template-response-journey='aruna']
+  [data-personal-response-submit]:disabled:hover {
+  color: rgb(116 93 84 / 0.56);
+}
+
+[data-template='laras'][data-surface='personal']
+  [data-template-response-journey='laras']
+  [data-personal-response-submit]:disabled {
+  border-color: rgb(223 197 142 / 0.34);
+  background: transparent;
+  color: rgb(216 205 210 / 0.5);
+  cursor: not-allowed;
+  opacity: 0.76;
+}
+
+[data-template='laras'][data-surface='personal']
+  [data-template-response-journey='laras']
+  [data-personal-response-submit]:disabled:hover {
+  background: transparent;
+  color: rgb(216 205 210 / 0.5);
+}
+
+/* Aruna: chapter introduction outranks the two response capabilities. */
+[data-template='aruna'][data-surface='personal']
+  [data-template-response-introduction='aruna']
+  > [data-personal-response-title] {
+  max-width: 13ch;
+  font-size: clamp(2.65rem, 8vw, 4.2rem);
+  line-height: 0.92;
+}
+
+[data-template='aruna'][data-surface='personal']
+  [data-template-response-slot]
+  [data-personal-response-title] {
+  max-width: 18ch;
+  font-size: clamp(1.75rem, 5.2vw, 2.6rem);
+  line-height: 1.02;
+}
+
+/* Aruna: keep the editorial tone while making the required binary choice unmistakable. */
+[data-template='aruna'][data-surface='personal']
+  [data-template-response-journey='aruna']
+  [data-personal-rsvp-choice] {
+  position: relative;
+  min-height: 3.25rem;
+  justify-content: flex-start;
+  gap: 0.7rem;
+  padding: 0.72rem 0.9rem;
+  border: 1px solid var(--aruna-sand);
+  border-radius: 0.35rem;
+  background: rgb(255 252 247 / 0.44);
+}
+
+[data-template='aruna'][data-surface='personal']
+  [data-template-response-journey='aruna']
+  [data-personal-rsvp-choice]::before {
+  width: 0.72rem;
+  height: 0.72rem;
+  flex: 0 0 auto;
+  border: 1px solid var(--aruna-clay);
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 0.18rem var(--aruna-paper);
+  content: '';
+}
+
+[data-template='aruna'][data-surface='personal']
+  [data-template-response-journey='aruna']
+  [data-personal-rsvp-choice][data-selected='true'] {
+  border-color: var(--aruna-clay);
+  background: rgb(185 95 72 / 0.09);
+  color: var(--aruna-clay-deep);
+}
+
+[data-template='aruna'][data-surface='personal']
+  [data-template-response-journey='aruna']
+  [data-personal-rsvp-choice][data-selected='true']::before {
+  background: var(--aruna-clay);
+}
+
+/* Laras: preserve the centered formal introduction, then optimize the forms for scanning. */
+[data-template='laras'][data-surface='personal']
+  [data-template-response-journey='laras'] {
+  gap: clamp(1.8rem, 5vw, 2.7rem);
+}
+
+[data-template='laras'][data-surface='personal']
+  [data-template-response-introduction='laras'] {
+  text-align: center;
+}
+
+[data-template='laras'][data-surface='personal']
+  [data-template-response-introduction='laras']
+  > [data-personal-response-title] {
+  max-width: 14ch;
+  font-size: clamp(2.5rem, 7.6vw, 3.9rem);
+  line-height: 0.94;
+}
+
+[data-template='laras'][data-surface='personal']
+  [data-template-response-slot]
+  [data-personal-response-title] {
+  max-width: 19ch;
+  margin-right: 0;
+  margin-left: 0;
+  font-size: clamp(1.7rem, 5vw, 2.45rem);
+  line-height: 1.04;
+}
+
+[data-template='laras'][data-surface='personal']
+  [data-template-response-journey='laras']
+  [data-personal-guest-rsvp],
+[data-template='laras'][data-surface='personal']
+  [data-template-response-journey='laras']
+  [data-personal-guestbook] {
+  text-align: left;
+}
+
+[data-template='laras'][data-surface='personal']
+  [data-template-response-journey='laras']
+  [data-personal-response-copy],
+[data-template='laras'][data-surface='personal']
+  [data-template-response-journey='laras']
+  [data-personal-guestbook-help],
+[data-template='laras'][data-surface='personal']
+  [data-template-response-journey='laras']
+  [data-personal-rsvp-attendance-copy] {
+  margin-right: 0;
+  margin-left: 0;
+  text-align: left;
+}
+
+[data-template='laras'][data-surface='personal']
+  [data-template-response-journey='laras']
+  [data-personal-response-submit] {
+  justify-self: start;
+}
+
+[data-template='laras'][data-surface='personal']
+  [data-template-response-journey='laras']
+  [data-template-response-slot]
+  + [data-template-response-slot] {
+  padding-top: clamp(2rem, 5vw, 2.8rem);
+}
+
+@media (max-width: 36rem) {
+  [data-template='laras'][data-surface='personal'] [data-template-response-journey='laras'] {
+    gap: 1.9rem;
+    padding: 1.5rem 1rem 1.75rem;
+  }
+
+  [data-template='laras'][data-surface='personal']
+    [data-template-response-introduction='laras']
+    > [data-personal-response-copy] {
+    text-align: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-template-response-journey] [data-personal-rsvp-choice],
+  [data-template-response-journey] [data-personal-response-submit] {
+    transition: none;
+  }
+}
