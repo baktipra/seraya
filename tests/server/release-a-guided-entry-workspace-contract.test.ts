@@ -34,7 +34,7 @@ describe('Release A guided entry and workspace contract', () => {
     }
 
     expect(navigationSource).not.toContain("label: 'Tindak Lanjut'");
-    expect(navigationSource).toContain("aliases: [`${base}/follow-up`, `${base}/share`]");
+    expect(navigationSource).toContain('aliases: [`${base}/follow-up`, `${base}/share`]');
     expect(shellSource).not.toContain("[aria-label^='Project ']");
     expect(shellSource).not.toContain('<style>');
   });
