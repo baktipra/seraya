@@ -148,13 +148,11 @@
 }
 
 /* Laras: preserve the centered formal introduction, then optimize the forms for scanning. */
-[data-template='laras'][data-surface='personal']
-  [data-template-response-journey='laras'] {
+[data-template='laras'][data-surface='personal'] [data-template-response-journey='laras'] {
   gap: clamp(1.8rem, 5vw, 2.7rem);
 }
 
-[data-template='laras'][data-surface='personal']
-  [data-template-response-introduction='laras'] {
+[data-template='laras'][data-surface='personal'] [data-template-response-introduction='laras'] {
   text-align: center;
 }
 
