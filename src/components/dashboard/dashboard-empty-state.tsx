@@ -21,7 +21,8 @@ export function DashboardEmptyState() {
           Mulai dari pengalaman yang terasa paling dekat.
         </h2>
         <p className="text-seraya-text-secondary mt-5 max-w-xl text-base leading-7">
-          Isi identitas awal, pilih Roselle, Aruna, atau Laras, lalu Seraya menyiapkan draf pribadi yang dapat kalian lanjutkan bertahap.
+          Isi identitas awal, pilih Roselle, Aruna, atau Laras, lalu Seraya menyiapkan draf pribadi
+          yang dapat kalian lanjutkan bertahap.
         </p>
         <form action="/dashboard/new" className="mt-8" method="get">
           <Button size="lg" type="submit">
@@ -39,7 +40,11 @@ export function DashboardEmptyState() {
           {collections.map((collection, index) => (
             <div
               className={`${collection.className} flex aspect-[4/5] w-[5.25rem] rotate-[-4deg] items-center justify-center rounded-[1rem] border font-serif text-lg shadow-[0_18px_38px_rgb(59_41_35_/_0.12)] sm:w-[6.5rem] ${
-                index === 1 ? 'relative z-10 -translate-y-5 rotate-0' : index === 2 ? 'rotate-[4deg]' : ''
+                index === 1
+                  ? 'relative z-10 -translate-y-5 rotate-0'
+                  : index === 2
+                    ? 'rotate-[4deg]'
+                    : ''
               }`}
               key={collection.name}
             >

@@ -13,7 +13,7 @@ export function DashboardProjectLauncher({ projects }: { projects: ProjectLaunch
         {projects.map((project) => (
           <article
             aria-label={`Project ${project.coupleLabel}`}
-            className="border-seraya-border-default bg-seraya-surface group relative grid min-w-0 overflow-hidden border transition-[border-color,transform,box-shadow] hover:-translate-y-0.5 hover:border-seraya-border-strong hover:shadow-[0_20px_50px_rgb(59_42_36_/_0.07)] md:grid-cols-[minmax(0,1fr)_12rem]"
+            className="border-seraya-border-default bg-seraya-surface group hover:border-seraya-border-strong relative grid min-w-0 overflow-hidden border transition-[border-color,transform,box-shadow] hover:-translate-y-0.5 hover:shadow-[0_20px_50px_rgb(59_42_36_/_0.07)] md:grid-cols-[minmax(0,1fr)_12rem]"
             key={project.id}
           >
             <span
@@ -47,7 +47,10 @@ export function DashboardProjectLauncher({ projects }: { projects: ProjectLaunch
                   type="submit"
                 >
                   Buka undangan
-                  <span aria-hidden="true" className="transition-transform group-hover:translate-x-1">
+                  <span
+                    aria-hidden="true"
+                    className="transition-transform group-hover:translate-x-1"
+                  >
                     →
                   </span>
                 </button>

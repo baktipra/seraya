@@ -49,7 +49,10 @@ export function DashboardShell({
             >
               {siteConfig.name}
             </Link>
-            <span aria-hidden="true" className="bg-seraya-border-default hidden h-5 w-px sm:block" />
+            <span
+              aria-hidden="true"
+              className="bg-seraya-border-default hidden h-5 w-px sm:block"
+            />
             <p className="text-seraya-text-muted hidden truncate text-[0.65rem] font-semibold tracking-[0.14em] uppercase lg:block">
               {contextLabel}
             </p>
@@ -76,7 +79,8 @@ export function DashboardShell({
                     Selamat datang kembali{greetingName ? `, ${greetingName}` : ''}.
                   </h1>
                   <p className="text-seraya-text-secondary mt-5 max-w-xl text-base leading-7">
-                    Lanjutkan undangan yang sedang berjalan atau mulai pengalaman baru dari koleksi Seraya.
+                    Lanjutkan undangan yang sedang berjalan atau mulai pengalaman baru dari koleksi
+                    Seraya.
                   </p>
                 </div>
                 <form action="/dashboard/new" method="get">

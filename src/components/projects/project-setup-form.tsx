@@ -109,10 +109,15 @@ function InvitationSetupPreview({
   slug: string;
   templateKey: InvitationTemplateKey;
 }) {
-  const collection = collectionOptions.find((item) => item.key === templateKey) ?? collectionOptions[0];
+  const collection =
+    collectionOptions.find((item) => item.key === templateKey) ?? collectionOptions[0]!;
 
   return (
-    <div aria-live="polite" className="relative mx-auto w-full max-w-[23rem]" data-template={templateKey}>
+    <div
+      aria-live="polite"
+      className="relative mx-auto w-full max-w-[23rem]"
+      data-template={templateKey}
+    >
       <div
         aria-hidden="true"
         className="border-seraya-action-primary/18 absolute top-[9%] -left-[8%] h-[74%] w-[72%] -rotate-6 rounded-[2rem] border"
@@ -121,7 +126,9 @@ function InvitationSetupPreview({
         aria-hidden="true"
         className="bg-seraya-ink/7 absolute right-[-5%] bottom-[4%] h-[78%] w-[70%] rotate-6 rounded-[2rem]"
       />
-      <div className={`${collection.canvas} relative rounded-[2rem] p-4 shadow-[0_30px_80px_rgb(53_37_32_/_0.16)] sm:p-5`}>
+      <div
+        className={`${collection.canvas} relative rounded-[2rem] p-4 shadow-[0_30px_80px_rgb(53_37_32_/_0.16)] sm:p-5`}
+      >
         <div
           className={`${collection.frame} ${collection.text} relative flex aspect-[9/16] flex-col overflow-hidden rounded-[1.45rem] border px-7 py-8 text-center shadow-[0_16px_45px_rgb(36_29_27_/_0.13)]`}
         >
@@ -129,7 +136,9 @@ function InvitationSetupPreview({
             aria-hidden="true"
             className="absolute -top-12 -right-12 size-36 rounded-full border border-current opacity-10"
           />
-          <p className={`${collection.accent} text-[0.58rem] font-semibold tracking-[0.24em] uppercase`}>
+          <p
+            className={`${collection.accent} text-[0.58rem] font-semibold tracking-[0.24em] uppercase`}
+          >
             The wedding of
           </p>
 
@@ -209,7 +218,9 @@ function StepNavigation({ currentStep }: { currentStep: SetupStep }) {
               <span className="block text-[0.65rem] font-semibold tracking-[0.14em] uppercase">
                 0{item.step}
               </span>
-              <span className="mt-1 hidden truncate text-xs font-semibold sm:block">{item.label}</span>
+              <span className="mt-1 hidden truncate text-xs font-semibold sm:block">
+                {item.label}
+              </span>
             </div>
           </li>
         );
@@ -236,7 +247,12 @@ export function ProjectSetupForm() {
   useEffect(() => {
     if (state.status !== 'error') return;
 
-    if (errors.personOneName || errors.personTwoName || errors.eventDatePrimary || errors.eventCity) {
+    if (
+      errors.personOneName ||
+      errors.personTwoName ||
+      errors.eventDatePrimary ||
+      errors.eventCity
+    ) {
       setStep(1);
       return;
     }
@@ -305,7 +321,8 @@ export function ProjectSetupForm() {
             Mulai dari kabar bahagianya.
           </h1>
           <p className="text-seraya-text-secondary mt-5 max-w-md text-base leading-7">
-            Isi detail awal, pilih pengalaman yang paling dekat, lalu Seraya menyiapkan draf pribadi kalian.
+            Isi detail awal, pilih pengalaman yang paling dekat, lalu Seraya menyiapkan draf pribadi
+            kalian.
           </p>
         </div>
 
@@ -340,7 +357,10 @@ export function ProjectSetupForm() {
             <div className="mt-8 space-y-5">
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="text-seraya-text-primary text-sm font-semibold" htmlFor="person-one-name">
+                  <label
+                    className="text-seraya-text-primary text-sm font-semibold"
+                    htmlFor="person-one-name"
+                  >
                     Nama panggilan pertama
                   </label>
                   <Input
@@ -364,7 +384,10 @@ export function ProjectSetupForm() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-seraya-text-primary text-sm font-semibold" htmlFor="person-two-name">
+                  <label
+                    className="text-seraya-text-primary text-sm font-semibold"
+                    htmlFor="person-two-name"
+                  >
                     Nama panggilan kedua
                   </label>
                   <Input
@@ -390,11 +413,16 @@ export function ProjectSetupForm() {
 
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="text-seraya-text-primary text-sm font-semibold" htmlFor="event-date-primary">
+                  <label
+                    className="text-seraya-text-primary text-sm font-semibold"
+                    htmlFor="event-date-primary"
+                  >
                     Tanggal acara utama
                   </label>
                   <Input
-                    aria-describedby={errors.eventDatePrimary ? 'event-date-primary-error' : undefined}
+                    aria-describedby={
+                      errors.eventDatePrimary ? 'event-date-primary-error' : undefined
+                    }
                     hasError={Boolean(errors.eventDatePrimary)}
                     id="event-date-primary"
                     name="eventDatePrimary"
@@ -407,7 +435,10 @@ export function ProjectSetupForm() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-seraya-text-primary text-sm font-semibold" htmlFor="event-city">
+                  <label
+                    className="text-seraya-text-primary text-sm font-semibold"
+                    htmlFor="event-city"
+                  >
                     Kota acara
                   </label>
                   <Input
@@ -453,7 +484,8 @@ export function ProjectSetupForm() {
               Pilih rasa yang paling dekat.
             </h2>
             <p className="text-seraya-text-secondary mt-4 max-w-xl text-sm leading-6">
-              Ini menentukan arah tipografi, ritme, komposisi, dan motion awal. Koleksi masih dapat diganti dari editor.
+              Ini menentukan arah tipografi, ritme, komposisi, dan motion awal. Koleksi masih dapat
+              diganti dari editor.
             </p>
 
             <fieldset className="mt-8">
@@ -479,8 +511,12 @@ export function ProjectSetupForm() {
                         type="radio"
                         value={collection.key}
                       />
-                      <span className={`${collection.canvas} flex aspect-[4/5] items-center justify-center rounded-[0.85rem] p-2`}>
-                        <span className={`${collection.frame} ${collection.text} flex size-full items-center justify-center rounded-[0.55rem] border font-serif text-xl`}>
+                      <span
+                        className={`${collection.canvas} flex aspect-[4/5] items-center justify-center rounded-[0.85rem] p-2`}
+                      >
+                        <span
+                          className={`${collection.frame} ${collection.text} flex size-full items-center justify-center rounded-[0.55rem] border font-serif text-xl`}
+                        >
                           {collection.name.slice(0, 1)}
                         </span>
                       </span>
@@ -536,7 +572,10 @@ export function ProjectSetupForm() {
 
             <div className="mt-8 space-y-2">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <label className="text-seraya-text-primary text-sm font-semibold" htmlFor="project-slug">
+                <label
+                  className="text-seraya-text-primary text-sm font-semibold"
+                  htmlFor="project-slug"
+                >
                   Link undangan
                 </label>
                 <span className="text-seraya-text-muted text-xs">Terbentuk otomatis dari nama</span>
@@ -565,7 +604,8 @@ export function ProjectSetupForm() {
                 />
               </div>
               <p className="text-seraya-text-muted text-xs leading-5" id="project-slug-hint">
-                Gunakan huruf kecil, angka, dan tanda hubung. Link masih dapat diubah sebelum diterbitkan.
+                Gunakan huruf kecil, angka, dan tanda hubung. Link masih dapat diubah sebelum
+                diterbitkan.
               </p>
               <ErrorMessage id="project-slug-error" message={errors.slug} />
             </div>
@@ -583,7 +623,9 @@ export function ProjectSetupForm() {
                 <p className="text-seraya-text-muted text-[0.65rem] font-semibold tracking-[0.13em] uppercase">
                   Hari utama
                 </p>
-                <p className="text-seraya-text-primary mt-2 text-sm font-semibold">{preview.date}</p>
+                <p className="text-seraya-text-primary mt-2 text-sm font-semibold">
+                  {preview.date}
+                </p>
               </div>
               <div>
                 <p className="text-seraya-text-muted text-[0.65rem] font-semibold tracking-[0.13em] uppercase">

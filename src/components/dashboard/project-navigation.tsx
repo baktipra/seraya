@@ -5,13 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState, type ComponentType, type SVGProps } from 'react';
 
-import {
-  GuestsIcon,
-  HelpIcon,
-  InvitationIcon,
-  OverviewIcon,
-  ShareIcon,
-} from './dashboard-icons';
+import { GuestsIcon, HelpIcon, InvitationIcon, OverviewIcon, ShareIcon } from './dashboard-icons';
 
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
@@ -113,14 +107,17 @@ function ProjectNavigationLink({
       prefetch={false}
     >
       {mode === 'mobile' && active ? (
-        <span aria-hidden="true" className="bg-seraya-action-primary absolute inset-x-4 top-0 h-0.5 rounded-full" />
+        <span
+          aria-hidden="true"
+          className="bg-seraya-action-primary absolute inset-x-4 top-0 h-0.5 rounded-full"
+        />
       ) : null}
       <span
         aria-hidden="true"
         className={
           mode === 'desktop'
             ? `grid size-8 place-items-center rounded-[0.7rem] transition-colors ${
-                active ? 'bg-seraya-surface' : 'bg-transparent group-hover:bg-seraya-surface'
+                active ? 'bg-seraya-surface' : 'group-hover:bg-seraya-surface bg-transparent'
               }`
             : undefined
         }
@@ -142,7 +139,10 @@ function ProjectNavigationLink({
         <span>{visualLabel}</span>
       )}
       {mode === 'desktop' && active ? (
-        <span aria-hidden="true" className="bg-seraya-action-primary ml-auto size-1.5 rounded-full" />
+        <span
+          aria-hidden="true"
+          className="bg-seraya-action-primary ml-auto size-1.5 rounded-full"
+        />
       ) : null}
     </Link>
   );
