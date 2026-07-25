@@ -107,7 +107,8 @@ const previewInvitation: InvitationViewModel = {
   hero: {
     eyebrow: 'The Wedding Of',
     primaryDateLabel: 'Selasa, 17 Agustus 2027',
-    subtitle: 'Dengan penuh syukur, kami mengundang Anda untuk menjadi bagian dari perjalanan baru kami.',
+    subtitle:
+      'Dengan penuh syukur, kami mengundang Anda untuk menjadi bagian dari perjalanan baru kami.',
     title: 'Mira & Arga',
   },
   location: null,
@@ -144,7 +145,8 @@ function PreviewRsvp() {
         Konfirmasi Kehadiran
       </h2>
       <p data-personal-response-copy>
-        Apakah Anda dapat hadir? Status saat ini: <span data-personal-response-status>Belum merespons</span>
+        Apakah Anda dapat hadir? Status saat ini:{' '}
+        <span data-personal-response-status>Belum merespons</span>
       </p>
       <p data-personal-response-copy>Undangan ini berlaku untuk maksimal 4 orang.</p>
       <p data-personal-response-notice role="status">
@@ -183,7 +185,10 @@ function PreviewGuestbook() {
       <div data-personal-response-form>
         <label data-personal-guestbook-field>
           <span>Ucapan &amp; doa</span>
-          <textarea defaultValue="Semoga perjalanan kalian selalu hangat dan penuh kebahagiaan." readOnly />
+          <textarea
+            defaultValue="Semoga perjalanan kalian selalu hangat dan penuh kebahagiaan."
+            readOnly
+          />
         </label>
         <button data-personal-response-submit type="button">
           Kirim ucapan
