@@ -95,7 +95,10 @@ export function FlagshipHeader() {
           <Link className="seraya-marketing-nav-link px-2" href="/login">
             Masuk
           </Link>
-          <Link className="seraya-button-primary min-h-11 px-4 text-sm sm:px-5" href="/dashboard/new">
+          <Link
+            className="seraya-button-primary min-h-11 px-4 text-sm sm:px-5"
+            href="/dashboard/new"
+          >
             Mulai
             <span aria-hidden="true">→</span>
           </Link>
@@ -117,7 +120,10 @@ export function FlagshipFooter() {
             Platform pengalaman tamu pernikahan Indonesia yang personal, indah, dan mudah dikelola.
           </p>
         </div>
-        <nav aria-label="Navigasi footer" className="flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold">
+        <nav
+          aria-label="Navigasi footer"
+          className="flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold"
+        >
           <Link className="text-white/70 transition-colors hover:text-white" href="/templates">
             Koleksi
           </Link>
@@ -141,7 +147,12 @@ export function InvitationCover({
   compact?: boolean;
 }) {
   const style = collectionStyles[collection];
-  const names = collection === 'aruna' ? ['Nadia', 'Raka'] : collection === 'laras' ? ['Alya', 'Dimas'] : ['Mira', 'Arga'];
+  const names =
+    collection === 'aruna'
+      ? ['Nadia', 'Raka']
+      : collection === 'laras'
+        ? ['Alya', 'Dimas']
+        : ['Mira', 'Arga'];
 
   return (
     <div
@@ -165,10 +176,16 @@ export function InvitationCover({
         <div className="my-auto">
           {collection === 'aruna' ? (
             <div className="text-left">
-              <p className="text-[0.65rem] font-semibold tracking-[0.18em] uppercase opacity-60">Saturday</p>
-              <p className="mt-4 font-serif text-[3.7rem] leading-[0.74] tracking-[-0.07em]">{names[0]}</p>
+              <p className="text-[0.65rem] font-semibold tracking-[0.18em] uppercase opacity-60">
+                Saturday
+              </p>
+              <p className="mt-4 font-serif text-[3.7rem] leading-[0.74] tracking-[-0.07em]">
+                {names[0]}
+              </p>
               <p className={`${style.accent} my-3 text-2xl italic`}>&amp;</p>
-              <p className="ml-10 font-serif text-[3.7rem] leading-[0.74] tracking-[-0.07em]">{names[1]}</p>
+              <p className="ml-10 font-serif text-[3.7rem] leading-[0.74] tracking-[-0.07em]">
+                {names[1]}
+              </p>
             </div>
           ) : (
             <>

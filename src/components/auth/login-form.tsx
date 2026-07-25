@@ -102,7 +102,7 @@ export function LoginForm({ initialNotice = null, nextPath }: LoginFormProps) {
           Lanjutkan undangan, persiapan tamu, dan respons dalam satu workspace yang tenang.
         </CardDescription>
       </CardHeader>
-      <CardContent className="px-0 pb-0 pt-8">
+      <CardContent className="px-0 pt-8 pb-0">
         <form className="space-y-4" noValidate onSubmit={handleMagicLink}>
           <div className="space-y-2">
             <label className="text-seraya-text-primary text-sm font-semibold" htmlFor="login-email">

@@ -30,7 +30,8 @@ export default function AuthLayout({ children }: Readonly<{ children: React.Reac
                 Lanjutkan undangan kalian dengan tenang.
               </h1>
               <p className="mt-6 max-w-md text-base leading-7 text-white/68">
-                Draf, data tamu, tautan personal, RSVP, dan ucapan tetap berada dalam satu workspace yang terkontrol.
+                Draf, data tamu, tautan personal, RSVP, dan ucapan tetap berada dalam satu workspace
+                yang terkontrol.
               </p>
             </div>
             <div className="rotate-[3deg]">
@@ -60,7 +61,8 @@ export default function AuthLayout({ children }: Readonly<{ children: React.Reac
             </div>
             {children}
             <p className="text-seraya-text-muted mt-7 text-center text-xs leading-5">
-              Dengan melanjutkan, kalian masuk ke ruang pribadi untuk mengelola undangan dan data tamu.
+              Dengan melanjutkan, kalian masuk ke ruang pribadi untuk mengelola undangan dan data
+              tamu.
             </p>
           </div>
         </section>

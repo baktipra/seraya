@@ -22,7 +22,12 @@ const comparison = [
   ['Suasana', 'Hangat dan romantis', 'Modern dan editorial', 'Formal dan seremonial'],
   ['Komposisi', 'Lembut dan mengalir', 'Asimetris dan tegas', 'Terpusat dan elegan'],
   ['Motion', 'Botanical drift', 'Mask dan directional reveal', 'Slow formal reveal'],
-  ['Cocok untuk', 'Perayaan intim dan hangat', 'Pasangan modern dan ekspresif', 'Perayaan formal dan malam hari'],
+  [
+    'Cocok untuk',
+    'Perayaan intim dan hangat',
+    'Pasangan modern dan ekspresif',
+    'Perayaan formal dan malam hari',
+  ],
 ] as const;
 
 export default function TemplatesPage() {
@@ -42,7 +47,8 @@ export default function TemplatesPage() {
             </div>
             <div className="max-w-xl lg:justify-self-end">
               <p className="text-seraya-text-secondary text-base leading-7 sm:text-lg sm:leading-8">
-                Setiap koleksi memiliki tipografi, ritme, komposisi, dan motion sendiri. Fungsi utama tetap lengkap—pengalaman presentasinya yang berbeda.
+                Setiap koleksi memiliki tipografi, ritme, komposisi, dan motion sendiri. Fungsi
+                utama tetap lengkap—pengalaman presentasinya yang berbeda.
               </p>
               <Link className="seraya-button-primary mt-7 min-h-12 px-6" href="/dashboard/new">
                 Mulai buat undangan
@@ -52,17 +58,24 @@ export default function TemplatesPage() {
           </div>
         </section>
 
-        <section aria-label="Pratinjau tiga koleksi" className="mx-auto w-full max-w-[90rem] px-5 py-16 sm:px-8 sm:py-20 lg:px-10 lg:py-24">
+        <section
+          aria-label="Pratinjau tiga koleksi"
+          className="mx-auto w-full max-w-[90rem] px-5 py-16 sm:px-8 sm:py-20 lg:px-10 lg:py-24"
+        >
           <div className="grid gap-6 md:grid-cols-3">
             {flagshipCollections.map((collection) => (
               <article className="min-w-0" key={collection.key}>
                 <InvitationCover collection={collection.key} compact />
                 <div className="pt-6">
-                  <p className="seraya-eyebrow text-seraya-action-primary">{collection.personality}</p>
+                  <p className="seraya-eyebrow text-seraya-action-primary">
+                    {collection.personality}
+                  </p>
                   <h2 className="text-seraya-text-primary mt-2 font-serif text-4xl leading-none font-medium tracking-[-0.04em]">
                     {collection.name}
                   </h2>
-                  <p className="text-seraya-text-secondary mt-3 text-sm leading-6">{collection.description}</p>
+                  <p className="text-seraya-text-secondary mt-3 text-sm leading-6">
+                    {collection.description}
+                  </p>
                 </div>
               </article>
             ))}
@@ -79,7 +92,11 @@ export default function TemplatesPage() {
             </div>
             <div className="mt-14 space-y-16 lg:mt-20 lg:space-y-24">
               {flagshipCollections.map((collection, index) => (
-                <CollectionCard collection={collection} key={collection.key} priority={index % 2 === 1} />
+                <CollectionCard
+                  collection={collection}
+                  key={collection.key}
+                  priority={index % 2 === 1}
+                />
               ))}
             </div>
           </div>
@@ -95,20 +112,29 @@ export default function TemplatesPage() {
             </div>
 
             <div className="border-seraya-border-default mt-10 overflow-hidden rounded-[1.5rem] border sm:mt-14">
-              <div className="hidden grid-cols-[0.7fr_repeat(3,1fr)] bg-seraya-ink text-white md:grid">
+              <div className="bg-seraya-ink hidden grid-cols-[0.7fr_repeat(3,1fr)] text-white md:grid">
                 <div className="p-5" />
                 {flagshipCollections.map((collection) => (
-                  <div className="border-l border-white/12 p-5 font-serif text-2xl" key={collection.key}>
+                  <div
+                    className="border-l border-white/12 p-5 font-serif text-2xl"
+                    key={collection.key}
+                  >
                     {collection.name}
                   </div>
                 ))}
               </div>
               <div className="divide-seraya-border-default divide-y">
                 {comparison.map(([label, roselle, aruna, laras]) => (
-                  <div className="grid bg-seraya-surface md:grid-cols-[0.7fr_repeat(3,1fr)]" key={label}>
+                  <div
+                    className="bg-seraya-surface grid md:grid-cols-[0.7fr_repeat(3,1fr)]"
+                    key={label}
+                  >
                     <div className="bg-seraya-soft p-5 text-sm font-semibold">{label}</div>
                     {[roselle, aruna, laras].map((value, index) => (
-                      <div className="border-seraya-border-default border-t p-5 text-sm leading-6 md:border-t-0 md:border-l" key={`${label}-${index}`}>
+                      <div
+                        className="border-seraya-border-default border-t p-5 text-sm leading-6 md:border-t-0 md:border-l"
+                        key={`${label}-${index}`}
+                      >
                         <span className="text-seraya-text-muted mb-1 block text-xs font-semibold uppercase md:hidden">
                           {flagshipCollections[index]?.name}
                         </span>
@@ -122,13 +148,24 @@ export default function TemplatesPage() {
           </div>
         </section>
 
-        <section className="px-5 pb-20 sm:px-8 sm:pb-24 lg:px-10 lg:pb-32" aria-labelledby="templates-final-title">
+        <section
+          className="px-5 pb-20 sm:px-8 sm:pb-24 lg:px-10 lg:pb-32"
+          aria-labelledby="templates-final-title"
+        >
           <div className="bg-seraya-ink mx-auto max-w-[90rem] rounded-[2rem] px-6 py-16 text-center text-white sm:px-12 sm:py-20">
-            <p className="text-seraya-sand text-xs font-semibold tracking-[0.18em] uppercase">Tidak harus langsung sempurna</p>
-            <h2 id="templates-final-title" className="mx-auto mt-5 max-w-3xl font-serif text-[clamp(3rem,6vw,5.5rem)] leading-[0.86] font-medium tracking-[-0.055em]">
+            <p className="text-seraya-sand text-xs font-semibold tracking-[0.18em] uppercase">
+              Tidak harus langsung sempurna
+            </p>
+            <h2
+              id="templates-final-title"
+              className="mx-auto mt-5 max-w-3xl font-serif text-[clamp(3rem,6vw,5.5rem)] leading-[0.86] font-medium tracking-[-0.055em]"
+            >
               Pilih arah awalnya. Seluruh detail masih dapat kalian lanjutkan.
             </h2>
-            <Link className="mt-8 inline-flex min-h-13 items-center justify-center gap-2 rounded-[var(--seraya-radius-pill)] bg-white px-6 font-semibold text-[var(--seraya-ink)] transition-transform hover:-translate-y-0.5" href="/dashboard/new">
+            <Link
+              className="mt-8 inline-flex min-h-13 items-center justify-center gap-2 rounded-[var(--seraya-radius-pill)] bg-white px-6 font-semibold text-[var(--seraya-ink)] transition-transform hover:-translate-y-0.5"
+              href="/dashboard/new"
+            >
               Buat draf pribadi
               <span aria-hidden="true">→</span>
             </Link>
