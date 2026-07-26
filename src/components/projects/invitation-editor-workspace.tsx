@@ -1,23 +1,27 @@
 import type { ReactNode } from 'react';
 
+import {
+  getInvitationEditorChapterForField,
+  getInvitationEditorChapterStatuses,
+  getInvitationEditorErrorChapters,
+  invitationEditorChapters,
+  type InvitationEditorChapterId,
+  type InvitationEditorChapterStatus,
+} from '@/modules/invitation-editor/editor-chapter-registry';
 import type { InvitationEditorFieldErrors } from '@/modules/invitations/invitation-editor.schema';
+import type { InvitationDraftContent } from '@/modules/invitations/invitation-draft.schema';
 import type { InvitationDraft } from '@/modules/invitations/invitation-draft.types';
 
-export const invitationEditorSections = [
-  { key: 'style', label: 'Gaya undangan', number: '01' },
-  { key: 'opening', label: 'Pembuka', number: '02' },
-  { key: 'couple', label: 'Mempelai', number: '03' },
-  { key: 'story', label: 'Cerita', number: '04' },
-  { key: 'schedule', label: 'Rangkaian acara', number: '05' },
-  { key: 'gallery', label: 'Galeri', number: '06' },
-  { key: 'rsvp', label: 'Konfirmasi tamu', number: '07' },
-  { key: 'gift', label: 'Amplop Digital', number: '08' },
-  { key: 'closing', label: 'Penutup', number: '09' },
-] as const;
+export const invitationEditorSections = invitationEditorChapters.map((chapter) => ({
+  key: chapter.id,
+  label: chapter.label,
+  number: chapter.number,
+  optional: chapter.optional,
+  previewTarget: chapter.previewTarget,
+}));
 
-export type InvitationEditorSectionKey = (typeof invitationEditorSections)[number]['key'];
-export type InvitationEditorSectionStatus = 'complete' | 'error' | 'incomplete' | 'optional_off';
-
+export type InvitationEditorSectionKey = InvitationEditorChapterId;
+export type InvitationEditorSectionStatus = InvitationEditorChapterStatus;
 export type InvitationEditorSectionStatuses = Record<
   InvitationEditorSectionKey,
   InvitationEditorSectionStatus
@@ -27,111 +31,29 @@ const sectionStatusCopy: Record<
   InvitationEditorSectionStatus | 'current',
   { label: string; symbol: string }
 > = {
-  complete: { label: 'Lengkap', symbol: '✓' },
+  complete: { label: 'Sudah cukup', symbol: '✓' },
   current: { label: 'Sedang dibuka', symbol: '•' },
   error: { label: 'Perlu diperbaiki', symbol: '!' },
-  incomplete: { label: 'Belum lengkap', symbol: '○' },
-  optional_off: { label: 'Tidak ditampilkan', symbol: '–' },
+  incomplete: { label: 'Belum diisi', symbol: '○' },
+  optional_off: { label: 'Opsional', symbol: '–' },
 };
-
-function hasText(value: string | null | undefined) {
-  return Boolean(value?.trim());
-}
 
 export function getInvitationEditorSectionForField(
   fieldName: string,
 ): InvitationEditorSectionKey | null {
-  if (fieldName === 'templateKey') return 'style';
-  if (fieldName.startsWith('hero.')) return 'opening';
-  if (fieldName.startsWith('couple.')) return 'couple';
-  if (fieldName.startsWith('story.')) return 'story';
-  if (fieldName.startsWith('eventSchedule.')) return 'schedule';
-  if (fieldName.startsWith('rsvp.')) return 'rsvp';
-  if (fieldName.startsWith('digitalGift.')) return 'gift';
-  if (fieldName.startsWith('closing.')) return 'closing';
-
-  return null;
-}
-
-function getSectionsWithErrors(errors?: InvitationEditorFieldErrors) {
-  const sections = new Set<InvitationEditorSectionKey>();
-
-  for (const fieldName of Object.keys(errors ?? {})) {
-    const section = getInvitationEditorSectionForField(fieldName);
-
-    if (section) {
-      sections.add(section);
-    }
-  }
-
-  return sections;
+  return getInvitationEditorChapterForField(fieldName);
 }
 
 export function getInvitationEditorErrorSections(errors?: InvitationEditorFieldErrors) {
-  const sectionsWithErrors = getSectionsWithErrors(errors);
-
-  return invitationEditorSections
-    .map((section) => section.key)
-    .filter((section) => sectionsWithErrors.has(section));
+  return getInvitationEditorErrorChapters(errors);
 }
 
 export function getInvitationEditorSectionStatuses(
-  draft: InvitationDraft,
+  source: InvitationDraft | InvitationDraftContent,
   errors?: InvitationEditorFieldErrors,
 ): InvitationEditorSectionStatuses {
-  const content = draft.content;
-  const errorSections = getSectionsWithErrors(errors);
-  const firstEvent = content.eventSchedule.events[0];
-
-  const statuses: InvitationEditorSectionStatuses = {
-    style: content.templateKey ? 'complete' : 'incomplete',
-    opening: hasText(content.hero.title) ? 'complete' : 'incomplete',
-    couple:
-      hasText(content.couple.personOne.displayName) && hasText(content.couple.personTwo.displayName)
-        ? 'complete'
-        : 'incomplete',
-    story: !content.story.enabled
-      ? 'optional_off'
-      : hasText(content.story.heading) || hasText(content.story.body)
-        ? 'complete'
-        : 'incomplete',
-    schedule:
-      firstEvent &&
-      content.eventSchedule.events.every(
-        (event) => hasText(event.title) && hasText(event.date) && hasText(event.startTime),
-      )
-        ? 'complete'
-        : 'incomplete',
-    gallery:
-      content.gallery.enabled && content.gallery.imageIds.length > 0 ? 'complete' : 'optional_off',
-    rsvp: !content.rsvp.enabled
-      ? 'optional_off'
-      : hasText(content.rsvp.heading) || hasText(content.rsvp.lead)
-        ? 'complete'
-        : 'incomplete',
-    gift: !content.digitalGift.enabled
-      ? 'optional_off'
-      : content.digitalGift.accounts.length > 0 &&
-          content.digitalGift.accounts.every(
-            (account) =>
-              hasText(account.providerName) &&
-              hasText(account.accountHolder) &&
-              hasText(account.accountNumber),
-          )
-        ? 'complete'
-        : 'incomplete',
-    closing: !content.closing.enabled
-      ? 'optional_off'
-      : hasText(content.closing.message) || hasText(content.closing.signature)
-        ? 'complete'
-        : 'incomplete',
-  };
-
-  for (const section of errorSections) {
-    statuses[section] = 'error';
-  }
-
-  return statuses;
+  const content = 'content' in source ? source.content : source;
+  return getInvitationEditorChapterStatuses(content, errors);
 }
 
 function SectionState({
@@ -184,6 +106,8 @@ function SectionButton({
           ? 'bg-seraya-brand-soft text-seraya-action-primary font-semibold'
           : 'bg-seraya-surface text-seraya-text-secondary hover:bg-seraya-canvas hover:text-seraya-text-primary',
       ].join(' ')}
+      data-editor-chapter={section.key}
+      data-editor-preview-target={section.previewTarget}
       onClick={() => onSelect(section.key)}
       type="button"
     >
@@ -288,7 +212,9 @@ export function InvitationWorkspaceNavigation({
           <p className="text-seraya-text-muted text-[0.68rem] font-bold tracking-[0.08em] uppercase">
             Susunan undangan
           </p>
-          <p className="text-seraya-text-muted mt-1 text-xs leading-5">Status draft tersimpan</p>
+          <p className="text-seraya-text-muted mt-1 text-xs leading-5">
+            Status mengikuti perubahan yang sedang diedit.
+          </p>
         </div>
         <ol className="space-y-0.5">
           {invitationEditorSections.map((section) => {
@@ -305,6 +231,8 @@ export function InvitationWorkspaceNavigation({
                       ? 'bg-seraya-brand-soft text-seraya-action-primary font-semibold'
                       : 'text-seraya-text-secondary hover:bg-seraya-canvas hover:text-seraya-text-primary',
                   ].join(' ')}
+                  data-editor-chapter={section.key}
+                  data-editor-preview-target={section.previewTarget}
                   onClick={() => onSelect(section.key)}
                   type="button"
                 >
