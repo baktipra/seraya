@@ -47,7 +47,9 @@ describe('Release A invitation media delivery contract', () => {
   });
 
   it('owns explicit loading, ready, and failed media states without changing figure geometry', () => {
-    expect(galleryComponent).toContain("type InvitationMediaState = 'loading' | 'ready' | 'failed';");
+    expect(galleryComponent).toContain(
+      "type InvitationMediaState = 'loading' | 'ready' | 'failed';",
+    );
     expect(galleryComponent).toContain("setMediaState('ready')");
     expect(galleryComponent).toContain("setMediaState('failed')");
     expect(galleryComponent).toContain('Foto belum dapat ditampilkan');
@@ -57,10 +59,15 @@ describe('Release A invitation media delivery contract', () => {
     expect(mediaStyles).toContain('@media (prefers-reduced-motion: reduce)');
   });
 
-  it.each(templateSources)('routes each collection gallery through the shared component', (source) => {
-    expect(source).toContain("import { InvitationGalleryImage } from '../invitation-gallery-image';");
-    expect(source).toContain('<InvitationGalleryImage');
-    expect(source).toContain('data-invitation-gallery');
-    expect(source).not.toMatch(/<img\s/);
-  });
+  it.each(templateSources)(
+    'routes each collection gallery through the shared component',
+    (source) => {
+      expect(source).toContain(
+        "import { InvitationGalleryImage } from '../invitation-gallery-image';",
+      );
+      expect(source).toContain('<InvitationGalleryImage');
+      expect(source).toContain('data-invitation-gallery');
+      expect(source).not.toMatch(/<img\s/);
+    },
+  );
 });
