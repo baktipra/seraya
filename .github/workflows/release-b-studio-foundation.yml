@@ -6,6 +6,7 @@ on:
       - agent/release-a-flagship-experience
     paths:
       - '.github/workflows/release-b-studio-foundation.yml'
+      - 'src/app/release-b-studio-preview/page.tsx'
       - 'src/components/personal-invitation/**'
       - 'src/components/projects/invitation-editor.tsx'
       - 'src/components/projects/invitation-editor-live-preview.tsx'
@@ -19,6 +20,7 @@ on:
       - main
     paths:
       - '.github/workflows/release-b-studio-foundation.yml'
+      - 'src/app/release-b-studio-preview/page.tsx'
       - 'src/components/personal-invitation/**'
       - 'src/components/projects/invitation-editor.tsx'
       - 'src/components/projects/invitation-editor-live-preview.tsx'
@@ -52,6 +54,7 @@ jobs:
         run: |
           npx prettier --check \
             .github/workflows/release-b-studio-foundation.yml \
+            src/app/release-b-studio-preview/page.tsx \
             src/components/personal-invitation/personal-guest-rsvp.tsx \
             src/components/personal-invitation/personal-guestbook.tsx \
             src/components/projects/invitation-editor.tsx \
@@ -67,6 +70,7 @@ jobs:
       - name: Lint Release B files
         run: |
           npx eslint \
+            src/app/release-b-studio-preview/page.tsx \
             src/components/personal-invitation/personal-guest-rsvp.tsx \
             src/components/personal-invitation/personal-guestbook.tsx \
             src/components/projects/invitation-editor.tsx \
