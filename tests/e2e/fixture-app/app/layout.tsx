@@ -3,6 +3,7 @@ import '../../../../src/app/accessibility-release.css';
 import '../../../../src/app/personal-response-release.css';
 import '../../../../src/app/invitation-maturation-release.css';
 import '../../../../src/app/invitation-opening-maturation-release.css';
+import '../../../../src/app/invitation-media-release.css';
 
 export default function FixtureRootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
