@@ -26,7 +26,7 @@ export function InvitationEditorStatusHeader({
   workspaceTitle,
 }: {
   coupleLabel: string;
-  onReview: () => void;
+  onReview?: () => void;
   projectId: string;
   templateLabel: string;
   truth: InvitationEditorTruthState;
@@ -65,9 +65,11 @@ export function InvitationEditorStatusHeader({
             >
               Pratinjau draf tersimpan
             </Link>
-            <Button onClick={onReview} type="button">
-              Periksa kesiapan
-            </Button>
+            {onReview ? (
+              <Button onClick={onReview} type="button">
+                Periksa kesiapan
+              </Button>
+            ) : null}
           </div>
         </div>
       </div>
