@@ -4,6 +4,7 @@ type PersonalGuestbookProps = {
   entry: PersonalGuestbookEntry | null;
   feedback?: 'error' | 'success';
   guestToken: string;
+  previewOnly?: boolean;
   slug: string;
 };
 
@@ -11,16 +12,31 @@ type PersonalGuestbookProps = {
  * Behavior-first capability form. The personal route supplies authorized data;
  * selected invitation templates own wrapper, rhythm, and visual presentation.
  */
-export function PersonalGuestbook({ entry, feedback, guestToken, slug }: PersonalGuestbookProps) {
+export function PersonalGuestbook({
+  entry,
+  feedback,
+  guestToken,
+  previewOnly = false,
+  slug,
+}: PersonalGuestbookProps) {
   const hasEntry = Boolean(entry);
 
   return (
-    <section aria-labelledby="personal-guestbook-title" data-personal-guestbook>
+    <section
+      aria-labelledby="personal-guestbook-title"
+      data-personal-guestbook
+      data-preview-only={previewOnly || undefined}
+    >
       <p data-personal-response-eyebrow>Ucapan &amp; Doa</p>
       <h2 data-personal-response-title id="personal-guestbook-title">
         Kirim ucapan untuk mempelai
       </h2>
       <p data-personal-response-copy>Tulis ucapan dan doa terbaik untuk mempelai.</p>
+      {previewOnly ? (
+        <p data-personal-response-notice role="status">
+          Mode pratinjau. Ucapan ini tidak akan dikirim atau disimpan.
+        </p>
+      ) : null}
 
       {feedback === 'success' ? (
         <p aria-live="polite" data-personal-response-success role="status">
@@ -33,7 +49,11 @@ export function PersonalGuestbook({ entry, feedback, guestToken, slug }: Persona
         </p>
       ) : null}
 
-      <form action={`/${slug}/g/${guestToken}/guestbook`} data-personal-response-form method="post">
+      <form
+        action={previewOnly ? undefined : `/${slug}/g/${guestToken}/guestbook`}
+        data-personal-response-form
+        method="post"
+      >
         <label data-personal-guestbook-field htmlFor="personal-guestbook-message">
           <span>Ucapan &amp; doa</span>
           <textarea
@@ -42,14 +62,15 @@ export function PersonalGuestbook({ entry, feedback, guestToken, slug }: Persona
             id="personal-guestbook-message"
             maxLength={600}
             name="message"
+            readOnly={previewOnly}
             required
           />
         </label>
         <p data-personal-guestbook-help id="personal-guestbook-help">
           Maksimal 600 karakter. Ucapan dapat diperbarui selama tautan pribadi masih aktif.
         </p>
-        <button data-personal-response-submit type="submit">
-          {hasEntry ? 'Perbarui ucapan' : 'Kirim ucapan'}
+        <button data-personal-response-submit disabled={previewOnly} type="submit">
+          {previewOnly ? 'Pratinjau saja' : hasEntry ? 'Perbarui ucapan' : 'Kirim ucapan'}
         </button>
       </form>
     </section>
