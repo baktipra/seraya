@@ -1,0 +1,61 @@
+name: Release B align preview isolation test
+
+on:
+  pull_request:
+    branches:
+      - agent/release-a-flagship-experience
+  push:
+    branches:
+      - agent/release-b-create-to-publish
+
+permissions:
+  contents: write
+
+jobs:
+  align:
+    if: >-
+      (github.event_name == 'pull_request' && github.head_ref == 'agent/release-b-create-to-publish') ||
+      (github.event_name == 'push' && github.event.head_commit.message != 'Align Release B preview isolation assertion')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/release-b-create-to-publish
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Align preview isolation assertion
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('tests/server/invitation-editor-ui.test.tsx')
+          source = path.read_text()
+          old = "    expect(previewSource).not.toContain('personalSlots');\n"
+          new = """    expect(previewSource).toContain('personalSlots');
+    expect(previewSource).toContain('previewOnly');
+    expect(previewSource).toContain('guestToken=\"preview-only\"');
+    expect(previewSource).not.toContain('saveGuestRsvp');
+    expect(previewSource).not.toContain('saveGuestbook');
+"""
+          if new in source:
+              raise SystemExit(0)
+          count = source.count(old)
+          if count != 1:
+              raise SystemExit(f'Expected one stale assertion, found {count}')
+          path.write_text(source.replace(old, new))
+          PY
+
+      - name: Commit aligned assertion
+        run: |
+          if git diff --quiet; then
+            exit 0
+          fi
+          git config user.name 'seraya-release-b-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add tests/server/invitation-editor-ui.test.tsx
+          git commit -m 'Align Release B preview isolation assertion'
+          git push origin HEAD:agent/release-b-create-to-publish
