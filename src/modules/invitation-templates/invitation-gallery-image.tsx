@@ -8,7 +8,7 @@ const DEFAULT_GALLERY_SIZES =
 
 export type InvitationGalleryImageProps = {
   alt: string;
-  className: string;
+  className?: string;
   sizes?: string;
   src: string;
 };
