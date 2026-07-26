@@ -1,0 +1,73 @@
+name: Release B studio foundation
+
+on:
+  pull_request:
+    branches:
+      - agent/release-a-flagship-experience
+    paths:
+      - '.github/workflows/release-b-studio-foundation.yml'
+      - 'src/components/projects/invitation-editor.tsx'
+      - 'src/components/projects/invitation-editor-status-header.tsx'
+      - 'src/components/projects/invitation-editor-workspace.tsx'
+      - 'src/modules/invitation-editor/**'
+      - 'tests/server/invitation-editor-ui.test.tsx'
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/release-b-studio-foundation.yml'
+      - 'src/components/projects/invitation-editor.tsx'
+      - 'src/components/projects/invitation-editor-status-header.tsx'
+      - 'src/components/projects/invitation-editor-workspace.tsx'
+      - 'src/modules/invitation-editor/**'
+      - 'tests/server/invitation-editor-ui.test.tsx'
+
+permissions:
+  contents: read
+
+jobs:
+  studio-foundation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check Release B formatting
+        run: |
+          npx prettier --check \
+            .github/workflows/release-b-studio-foundation.yml \
+            src/components/projects/invitation-editor.tsx \
+            src/components/projects/invitation-editor-status-header.tsx \
+            src/components/projects/invitation-editor-workspace.tsx \
+            src/modules/invitation-editor/editor-chapter-registry.ts \
+            src/modules/invitation-editor/editor-truth-state.ts \
+            src/modules/invitation-editor/__tests__/editor-foundation.test.ts
+
+      - name: Lint Release B files
+        run: |
+          npx eslint \
+            src/components/projects/invitation-editor.tsx \
+            src/components/projects/invitation-editor-status-header.tsx \
+            src/components/projects/invitation-editor-workspace.tsx \
+            src/modules/invitation-editor/editor-chapter-registry.ts \
+            src/modules/invitation-editor/editor-truth-state.ts \
+            src/modules/invitation-editor/__tests__/editor-foundation.test.ts
+
+      - name: Run focused studio contracts
+        run: |
+          npm test -- \
+            src/modules/invitation-editor/__tests__/editor-foundation.test.ts \
+            tests/server/invitation-editor-ui.test.tsx
+
+      - name: Build production application
+        run: npm run build
