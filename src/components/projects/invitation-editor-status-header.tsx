@@ -6,7 +6,7 @@ import type { InvitationEditorTruthState } from '@/modules/invitation-editor/edi
 const truthStateTone = {
   clean: 'brand',
   dirty: 'warning',
-  error: 'error',
+  error: 'danger',
   live: 'success',
   not_published: 'neutral',
   not_saved: 'warning',
