@@ -6,7 +6,10 @@ on:
       - agent/release-a-flagship-experience
     paths:
       - '.github/workflows/release-b-studio-foundation.yml'
+      - 'src/components/personal-invitation/**'
       - 'src/components/projects/invitation-editor.tsx'
+      - 'src/components/projects/invitation-editor-live-preview.tsx'
+      - 'src/components/projects/invitation-editor-live-preview.module.css'
       - 'src/components/projects/invitation-editor-status-header.tsx'
       - 'src/components/projects/invitation-editor-workspace.tsx'
       - 'src/modules/invitation-editor/**'
@@ -16,7 +19,10 @@ on:
       - main
     paths:
       - '.github/workflows/release-b-studio-foundation.yml'
+      - 'src/components/personal-invitation/**'
       - 'src/components/projects/invitation-editor.tsx'
+      - 'src/components/projects/invitation-editor-live-preview.tsx'
+      - 'src/components/projects/invitation-editor-live-preview.module.css'
       - 'src/components/projects/invitation-editor-status-header.tsx'
       - 'src/components/projects/invitation-editor-workspace.tsx'
       - 'src/modules/invitation-editor/**'
@@ -46,27 +52,37 @@ jobs:
         run: |
           npx prettier --check \
             .github/workflows/release-b-studio-foundation.yml \
+            src/components/personal-invitation/personal-guest-rsvp.tsx \
+            src/components/personal-invitation/personal-guestbook.tsx \
             src/components/projects/invitation-editor.tsx \
+            src/components/projects/invitation-editor-live-preview.tsx \
+            src/components/projects/invitation-editor-live-preview.module.css \
             src/components/projects/invitation-editor-status-header.tsx \
             src/components/projects/invitation-editor-workspace.tsx \
             src/modules/invitation-editor/editor-chapter-registry.ts \
             src/modules/invitation-editor/editor-truth-state.ts \
-            src/modules/invitation-editor/__tests__/editor-foundation.test.ts
+            src/modules/invitation-editor/__tests__/editor-foundation.test.ts \
+            src/modules/invitation-editor/__tests__/editor-preview-modes.test.tsx
 
       - name: Lint Release B files
         run: |
           npx eslint \
+            src/components/personal-invitation/personal-guest-rsvp.tsx \
+            src/components/personal-invitation/personal-guestbook.tsx \
             src/components/projects/invitation-editor.tsx \
+            src/components/projects/invitation-editor-live-preview.tsx \
             src/components/projects/invitation-editor-status-header.tsx \
             src/components/projects/invitation-editor-workspace.tsx \
             src/modules/invitation-editor/editor-chapter-registry.ts \
             src/modules/invitation-editor/editor-truth-state.ts \
-            src/modules/invitation-editor/__tests__/editor-foundation.test.ts
+            src/modules/invitation-editor/__tests__/editor-foundation.test.ts \
+            src/modules/invitation-editor/__tests__/editor-preview-modes.test.tsx
 
       - name: Run focused studio contracts
         run: |
           npm test -- \
             src/modules/invitation-editor/__tests__/editor-foundation.test.ts \
+            src/modules/invitation-editor/__tests__/editor-preview-modes.test.tsx \
             tests/server/invitation-editor-ui.test.tsx
 
       - name: Build production application
