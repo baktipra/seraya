@@ -38,10 +38,7 @@ export function InvitationEditorStatusHeader({
   ] as const;
 
   return (
-    <header
-      className="border-seraya-border-default bg-seraya-surface overflow-hidden rounded-[var(--seraya-radius-lg)] border"
-      data-editor-truth-header
-    >
+    <header className="bg-seraya-surface overflow-hidden" data-editor-truth-header>
       <div className="bg-seraya-brand-soft px-5 py-7 sm:px-8 sm:py-8">
         <p className="text-seraya-text-secondary text-sm font-semibold">{coupleLabel}</p>
         <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -49,7 +46,10 @@ export function InvitationEditorStatusHeader({
             <p className="text-seraya-action-primary text-xs font-bold tracking-[0.1em] uppercase">
               Studio undangan · {templateLabel}
             </p>
-            <h1 className="seraya-display-md mt-2 text-[clamp(2rem,4vw,3.35rem)]" id="invitation-editor-title">
+            <h1
+              className="seraya-display-md mt-2 text-[clamp(2rem,4vw,3.35rem)]"
+              id="invitation-editor-title"
+            >
               {workspaceTitle}
             </h1>
             <p className="text-seraya-text-secondary mt-3 max-w-2xl text-base leading-7">
@@ -65,7 +65,7 @@ export function InvitationEditorStatusHeader({
         </div>
       </div>
 
-      <dl className="grid divide-y divide-[var(--seraya-color-border-default)] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+      <dl className="grid divide-y divide-[var(--seraya-color-border-default)] border-b border-[var(--seraya-color-border-default)] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
         {truths.map((item) => (
           <div className="px-5 py-4 sm:px-6" data-editor-truth={item.key} key={item.key}>
             <dt className="text-seraya-text-muted text-xs font-bold tracking-[0.08em] uppercase">
