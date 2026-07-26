@@ -2,7 +2,7 @@
 
 ## Status
 
-Slices 1 and 2 are delivered in draft. This audit belongs to the coordinated Release A program and is not a separately locked product milestone. PR review, merge, acceptance, production promotion, and lock remain pending explicit owner direction.
+Slices 1, 2, and 3 are delivered in draft. The coordinated Release A engineering candidate is production-ready for owner visual smoke, but PR review, merge, acceptance, production promotion, and lock remain pending explicit owner direction. This audit is not a separately locked product milestone.
 
 ## Audited baseline
 
@@ -21,7 +21,7 @@ Slices 1 and 2 are delivered in draft. This audit belongs to the coordinated Rel
 - Personal greeting stays near the opening.
 - RSVP and Guestbook remain template-native near the closing journey.
 - Existing RSVP, Guestbook, party-size, guest-link, publication, and persistence semantics are unchanged.
-- No schema or migration change is introduced by this audit layer.
+- No schema or migration change is introduced by Release A.
 
 ## Functional parity map
 
@@ -35,7 +35,9 @@ Slices 1 and 2 are delivered in draft. This audit belongs to the coordinated Rel
 | Story | Present | Present | Present |
 | Multi-event schedule | Present | Present | Present |
 | Event venue, address, and map | Present | Present | Present |
-| Gallery | Present | Present | Present |
+| Stable gallery media frame | Shared contract | Shared contract | Shared contract |
+| Lazy and asynchronous gallery delivery | Gated | Gated | Gated |
+| Failed-image presentation | Geometry-preserving fallback | Geometry-preserving fallback | Geometry-preserving fallback |
 | Amplop Digital | Repaired and gated | Present and styled | Present and styled |
 | Personal RSVP | Repaired presentation; behavior preserved | Present | Present |
 | Personal Guestbook | Repaired presentation; behavior preserved | Present | Present |
@@ -71,9 +73,9 @@ Implemented response:
 
 - enriched the isolated fixture with realistic full invitation content;
 - added 12 browser cases: three templates × two surfaces × two viewports;
-- verifies full chapter presence, ordering, private/public boundaries, opening geometry, image geometry, touch targets, and horizontal overflow;
+- verifies full chapter presence, ordering, private/public boundaries, opening geometry, media geometry, touch targets, horizontal overflow, and layout-shift budget;
 - kept the existing 24 personal-response cases as a separate permanent gate;
-- aligned the isolated fixture stylesheet graph with the production root layout so browser evidence exercises the actual maturation layers.
+- aligned the isolated fixture stylesheet graph with the production root layout so browser evidence exercises the actual release layers.
 
 ### P1 — Laras monogram was hardcoded
 
@@ -101,6 +103,30 @@ Implemented response:
 - content remains visible without JavaScript and all opening choreography is disabled under `prefers-reduced-motion`;
 - no motion dependency was introduced.
 
+### P1 — Gallery delivery and failure stability were inconsistent
+
+The three templates previously rendered separate raw gallery `<img>` elements. They were lazy-loaded, but they did not share one decoding, responsive-size, intrinsic-dimension, loading-state, or failed-image contract.
+
+Impact:
+
+- browser delivery intent was incomplete and inconsistent;
+- a failed image could produce an unhelpful broken-image presentation;
+- loading and failure behavior could visually detach from each template;
+- release confidence did not include measured layout-shift or failure-geometry evidence.
+
+Implemented response:
+
+- introduced one shared `InvitationGalleryImage` component while preserving template-owned figures, crops, and chapter rhythm;
+- uses `loading="lazy"`, `decoding="async"`, `fetchPriority="low"`, responsive `sizes`, and intrinsic `900 × 1125` dimensions;
+- exposes explicit loading, ready, and failed states;
+- shows a truthful `Foto belum dapat ditampilkan` fallback without collapsing or resizing the gallery frame;
+- provides a reduced-motion-safe shimmer and state transition layer;
+- routes Roselle, Aruna, and Laras through the same media contract;
+- adds source contracts and browser assertions for every media attribute and state;
+- programmatically exercises load and error states in every generic and personal browser case;
+- verifies failure changes media-frame width and height by less than one pixel;
+- enforces a cumulative layout-shift test budget of at most `0.05` across the 12-case matrix.
+
 ### P1 — Implementation architecture is uneven
 
 Roselle is split into chapter components. Aruna and Laras remain large single-file renderers.
@@ -110,16 +136,6 @@ Decision:
 - do not rewrite only for structural symmetry;
 - split Aruna and Laras only when a later chapter-level redesign materially benefits from it;
 - preserve the renderer and view-model boundaries.
-
-### P2 — Gallery delivery can be hardened
-
-All templates use lazy-loaded gallery images. They do not yet share one explicit decoding, responsive-size, or failure-presentation contract.
-
-Planned response:
-
-- add async decoding where appropriate;
-- retain layout aspect ratios before image completion;
-- add responsive delivery, performance, and failed-image review in the release-confidence pass.
 
 ## Implementation slices inside Release A
 
@@ -146,28 +162,41 @@ Delivered in draft:
 - reduced-motion contract;
 - source contract and strengthened 12-case browser matrix.
 
-### Slice 3 — Full journey parity and release confidence
+### Slice 3 — Media delivery, image stability, and final release confidence
 
-Remaining:
+Delivered in draft:
 
-- media decoding, responsive delivery, and failed-image states;
-- image stability and performance evidence;
-- deeper story, schedule, maps, gallery, gift, response, and closing rhythm review where final photography exposes a real gap;
-- final generic/personal cross-device visual review;
-- final preview runtime and Release A integration confidence.
+- shared gallery-media component across all collections;
+- asynchronous, lazy, low-priority delivery intent with responsive sizing and intrinsic dimensions;
+- loading, ready, and failed media states;
+- geometry-preserving failed-image fallback;
+- reduced-motion-safe loading presentation;
+- source contract for the shared media boundary;
+- 12-case browser evidence for media attributes, load/error behavior, overflow, and `≤ 0.05` layout-shift budget;
+- production build, Release A flagship regression, general end-to-end regression, and existing 24-case personal-response regression;
+- READY preview deployment and clean runtime error/fatal scan.
 
-## Acceptance evidence for delivered audit layers
+## Owner visual-smoke boundary
 
-- source audit document committed;
+The engineering fixture and review showroom use fictitious images. Automated evidence proves delivery attributes, state behavior, responsive geometry, privacy composition, and layout stability; it cannot judge whether a future couple's final photography crop, pose, lighting, or visual balance feels ideal inside every template.
+
+That content-specific judgment remains an owner visual-smoke step. It is not evidence of a missing schema, renderer, media-delivery, RSVP, Guestbook, or route-authority implementation.
+
+## Acceptance evidence for Release A engineering candidate
+
+- source audit document committed and synchronized through Slice 3;
 - rich isolated fixture committed and aligned with production styles;
-- opening identity source contracts pass;
-- 12 complete-journey browser cases pass;
+- opening identity and media-delivery source contracts pass;
+- 12 complete-journey browser cases pass across three templates, two surfaces, and two viewports;
+- gallery load and failure states preserve frame geometry within one pixel;
+- browser layout-shift score remains within the `0.05` test budget;
 - existing 24 personal-response cases remain green;
 - general end-to-end and Release A flagship browser workflows pass;
-- public review showroom switches all three templates and both surfaces;
-- production build passes;
-- preview deployment `dpl_4fNH4nqzW8MCKSx3HMvSsgWavVHC` is READY in `sin1`;
-- Laras personal showroom returns HTTP 200, `noindex`, and the dynamic `MA` monogram;
+- production Next.js build passes;
+- preview deployment `dpl_DDb95gS8YeX9djBLYNZpZFJGojTu` is READY;
+- Laras personal showroom returns HTTP 200 and `noindex`, with dynamic `MA` monogram and the shared media-delivery markup;
+- all six generic-surface browser cases retain exactly one generic response note and no private response journey;
 - preview runtime error/fatal logs are empty;
 - no schema or migration change;
-- no generic/personal authority regression.
+- no generic/personal authority regression;
+- no RSVP, Guestbook, payment, publish, or guest-link lifecycle semantic change.
