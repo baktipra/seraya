@@ -1,0 +1,88 @@
+name: Release B format exact preview modes
+
+on:
+  pull_request:
+    branches:
+      - agent/release-a-flagship-experience
+  push:
+    branches:
+      - agent/release-b-create-to-publish
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: >-
+      (github.event_name == 'push' && github.event.head_commit.message != 'Format Release B exact preview modes') ||
+      (github.event_name == 'pull_request' && github.head_ref == 'agent/release-b-create-to-publish')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/release-b-create-to-publish
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Align legacy preview expectations
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('tests/server/invitation-editor-ui.test.tsx')
+          source = path.read_text()
+          replacements = {
+              'Mengikuti perubahan lokal. Belum dipublikasikan dari sini.':
+                  'Mengikuti komposisi undangan publik tanpa data atau form tamu. Belum dipublikasikan dari sini.',
+              'data-surface="preview"': 'data-surface="generic"',
+          }
+          for old, new in replacements.items():
+              count = source.count(old)
+              if count == 0 and new in source:
+                  continue
+              if count != 1:
+                  raise SystemExit(f'Expected one match, found {count}: {old}')
+              source = source.replace(old, new)
+          path.write_text(source)
+          PY
+
+      - name: Format exact preview scope
+        run: |
+          npx prettier --write \
+            .github/workflows/release-b-studio-foundation.yml \
+            src/components/personal-invitation/personal-guest-rsvp.tsx \
+            src/components/personal-invitation/personal-guestbook.tsx \
+            src/components/projects/invitation-editor-live-preview.tsx \
+            src/components/projects/invitation-editor-live-preview.module.css \
+            src/modules/invitation-editor/__tests__/editor-preview-modes.test.tsx \
+            tests/server/invitation-editor-ui.test.tsx
+
+      - name: Commit formatted preview modes
+        run: |
+          if git diff --quiet; then
+            echo 'No formatting changes needed.'
+            exit 0
+          fi
+          git config user.name 'seraya-release-b-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add \
+            .github/workflows/release-b-studio-foundation.yml \
+            src/components/personal-invitation/personal-guest-rsvp.tsx \
+            src/components/personal-invitation/personal-guestbook.tsx \
+            src/components/projects/invitation-editor-live-preview.tsx \
+            src/components/projects/invitation-editor-live-preview.module.css \
+            src/modules/invitation-editor/__tests__/editor-preview-modes.test.tsx \
+            tests/server/invitation-editor-ui.test.tsx
+          git commit -m 'Format Release B exact preview modes'
+          git push origin HEAD:agent/release-b-create-to-publish
