@@ -16,6 +16,7 @@ type PersonalGuestRsvpProps = {
   feedback?: 'success';
   guestToken: string;
   partySize: number;
+  previewOnly?: boolean;
   rsvpAttendeeCount: number | null;
   rsvpStatus: GuestRsvpStatus;
   slug: string;
@@ -33,6 +34,7 @@ export function PersonalGuestRsvp({
   feedback,
   guestToken,
   partySize,
+  previewOnly = false,
   rsvpAttendeeCount,
   rsvpStatus,
   slug,
@@ -47,7 +49,11 @@ export function PersonalGuestRsvp({
   const selectionHelpId = 'personal-rsvp-selection-help';
 
   return (
-    <section aria-labelledby="personal-guest-rsvp-title" data-personal-guest-rsvp>
+    <section
+      aria-labelledby="personal-guest-rsvp-title"
+      data-personal-guest-rsvp
+      data-preview-only={previewOnly || undefined}
+    >
       <p data-personal-response-eyebrow>Konfirmasi kehadiran</p>
       <h2 data-personal-response-title id="personal-guest-rsvp-title">
         Konfirmasi Kehadiran
@@ -57,6 +63,11 @@ export function PersonalGuestRsvp({
         <span data-personal-response-status>{rsvpLabels[rsvpStatus]}</span>
       </p>
       <p data-personal-response-copy>Undangan ini berlaku untuk maksimal {partySize} orang.</p>
+      {previewOnly ? (
+        <p data-personal-response-notice role="status">
+          Mode pratinjau. Pilihan ini tidak akan menyimpan respons tamu.
+        </p>
+      ) : null}
       {needsAttendanceCount && selectedStatus === 'attending' ? (
         <p data-personal-response-notice role="status">
           Kehadiran sudah tercatat, tetapi jumlah orang yang hadir masih perlu dikonfirmasi.
@@ -73,7 +84,11 @@ export function PersonalGuestRsvp({
         </p>
       ) : null}
 
-      <form action={`/${slug}/g/${guestToken}/rsvp`} data-personal-response-form method="post">
+      <form
+        action={previewOnly ? undefined : `/${slug}/g/${guestToken}/rsvp`}
+        data-personal-response-form
+        method="post"
+      >
         <fieldset data-personal-rsvp-choices>
           <legend className="sr-only">Pilih status kehadiran</legend>
           <label data-personal-rsvp-choice data-selected={selectedStatus === 'attending'}>
@@ -135,10 +150,10 @@ export function PersonalGuestRsvp({
         <button
           aria-describedby={selectionRequired ? selectionHelpId : undefined}
           data-personal-response-submit
-          disabled={selectionRequired}
+          disabled={selectionRequired || previewOnly}
           type="submit"
         >
-          Simpan konfirmasi
+          {previewOnly ? 'Pratinjau saja' : 'Simpan konfirmasi'}
         </button>
       </form>
     </section>
