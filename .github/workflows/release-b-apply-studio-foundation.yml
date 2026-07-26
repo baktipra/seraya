@@ -27,6 +27,14 @@ jobs:
         with:
           python-version: '3.12'
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Apply exact editor integration
         run: |
           python - <<'PY'
@@ -36,6 +44,10 @@ jobs:
           source = path.read_text()
 
           replacements = [
+              (
+                  "  Badge,\n",
+                  "",
+              ),
               (
                   "import type { ProjectPublishEligibility } from '@/modules/payments/payment.types';\n",
                   "import { getInvitationEditorTruthState } from '@/modules/invitation-editor/editor-truth-state';\nimport type { ProjectPublishEligibility } from '@/modules/payments/payment.types';\n",
