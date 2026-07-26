@@ -1,5 +1,5 @@
-/* eslint-disable @next/next/no-img-element -- Laras receives only Seraya media proxy URLs. */
 import { DigitalGiftCopyButton } from '../digital-gift-copy-button';
+import { InvitationGalleryImage } from '../invitation-gallery-image';
 import {
   getPersonalInvitationPresentationSlots,
   type InvitationTemplateProps,
@@ -164,16 +164,20 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
         ) : null}
 
         {invitation.gallery ? (
-          <section aria-labelledby="laras-gallery-title" className={styles.gallerySection}>
+          <section
+            aria-labelledby="laras-gallery-title"
+            className={styles.gallerySection}
+            data-gallery-count={invitation.gallery.images.length}
+            data-invitation-gallery
+          >
             <p className={styles.sectionLabel}>Galeri</p>
             <h2 id="laras-gallery-title">Momen yang kami pilih</h2>
             <div className={styles.galleryGrid}>
               {invitation.gallery.images.map((image) => (
                 <figure className={styles.galleryFigure} key={image.id}>
-                  <img
+                  <InvitationGalleryImage
                     alt={image.alt}
                     className={styles.galleryImage}
-                    loading="lazy"
                     src={image.src}
                   />
                 </figure>
