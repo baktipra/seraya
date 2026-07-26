@@ -1,9 +1,6 @@
-name: Release B apply review and publish integration
+name: Release B apply review integration
 
 on:
-  pull_request:
-    branches:
-      - agent/release-a-flagship-experience
   push:
     branches:
       - agent/release-b-create-to-publish
@@ -13,9 +10,7 @@ permissions:
 
 jobs:
   apply:
-    if: >-
-      (github.event_name == 'push' && github.event.head_commit.message != 'Apply Release B readiness review and publish journey') ||
-      (github.event_name == 'pull_request' && github.head_ref == 'agent/release-b-create-to-publish')
+    if: github.event.head_commit.message != 'Mount Release B readiness review'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -35,7 +30,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Integrate focused review and canonical chapter order
+      - name: Mount review panel in production editor
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -43,18 +38,10 @@ jobs:
           path = Path('src/components/projects/invitation-editor.tsx')
           source = path.read_text()
 
-          replacements = [
+          exact = [
               (
                   "import { InvitationEditorLivePreview } from './invitation-editor-live-preview';\n",
                   "import { InvitationEditorLivePreview } from './invitation-editor-live-preview';\nimport { InvitationEditorReviewPanel } from './invitation-editor-review-panel';\n",
-              ),
-              (
-                  "import { PublishInvitationControls } from './publish-invitation-controls';\n",
-                  "",
-              ),
-              (
-                  "  const shouldShowPublishControl =\n    workspaceReadiness.invitation.state === 'ready_to_publish' ||\n    workspaceReadiness.invitation.state === 'published_with_unpublished_changes';\n",
-                  "",
               ),
               (
                   "  const [isLocalPreviewOpen, setIsLocalPreviewOpen] = useState(false);\n",
@@ -66,33 +53,15 @@ jobs:
               ),
           ]
 
-          for old, new in replacements:
-              count = source.count(old)
-              if count == 0 and new in source:
+          for old, new in exact:
+              if new in source:
                   continue
+              count = source.count(old)
               if count != 1:
                   raise SystemExit(f'Expected one exact match, found {count}: {old[:100]!r}')
               source = source.replace(old, new)
 
-          actions_start = source.index('            <div className="flex shrink-0 flex-col gap-2 sm:items-start">')
-          actions_end = source.index('            </div>\n          </div>\n\n          <ol', actions_start)
-          source = source[:actions_start] + source[actions_end + len('            </div>\n') :]
-
-          rsvp_marker = '              <InvitationWorkspacePanel active={activeSection === \'rsvp\'} section="rsvp">'
-          gift_marker = '              <InvitationWorkspacePanel active={activeSection === \'gift\'} section="gift">'
-          closing_marker = '              <InvitationWorkspacePanel active={activeSection === \'closing\'} section="closing">'
-          rsvp_start = source.index(rsvp_marker)
-          gift_start = source.index(gift_marker)
-          closing_start = source.index(closing_marker)
-          if not (rsvp_start < gift_start < closing_start):
-              raise SystemExit('Unexpected RSVP / gift / closing order.')
-          rsvp_block = source[rsvp_start:gift_start].replace('number="07"', 'number="08"', 1)
-          gift_block = source[gift_start:closing_start].replace('number="08"', 'number="07"', 1)
-          source = source[:rsvp_start] + gift_block + rsvp_block + source[closing_start:]
-
-          final_marker = "      </Card>\n    </div>\n"
-          review_mount = """      </Card>
-      <InvitationEditorReviewPanel
+          mount = """      <InvitationEditorReviewPanel
         coupleLabel={workspaceReadiness.identity.coupleLabel}
         galleryCount={content.gallery.imageIds.length}
         isDirty={isDirty}
@@ -106,39 +75,28 @@ jobs:
         truth={truthState}
         workspaceReadiness={workspaceReadiness}
       />
-    </div>
 """
-          count = source.count(final_marker)
-          if count != 1:
-              raise SystemExit(f'Expected one editor closing marker, found {count}')
-          source = source.replace(final_marker, review_mount)
-          path.write_text(source)
+          if mount not in source:
+              marker = "      </Card>\n    </div>\n"
+              count = source.count(marker)
+              if count != 1:
+                  raise SystemExit(f'Expected one editor close marker, found {count}')
+              source = source.replace(marker, "      </Card>\n" + mount + "    </div>\n")
 
-          test_path = Path('tests/server/invitation-editor-ui.test.tsx')
-          test_source = test_path.read_text()
-          old_order = "  'Konfirmasi kehadiran',\n  'Amplop Digital',\n"
-          new_order = "  'Amplop Digital',\n  'Konfirmasi kehadiran',\n"
-          count = test_source.count(old_order)
-          if count == 0 and new_order in test_source:
-              count = 1
-          elif count == 1:
-              test_source = test_source.replace(old_order, new_order)
-          else:
-              raise SystemExit(f'Expected one polished section order, found {count}')
-          test_path.write_text(test_source)
+          path.write_text(source)
           PY
 
-      - name: Format review and publish scope
+      - name: Format mounted review
         run: |
           npx prettier --write \
             src/components/projects/invitation-editor.tsx \
             src/components/projects/invitation-editor-review-panel.tsx \
-            src/components/projects/invitation-editor-status-header.tsx \
-            tests/server/invitation-editor-ui.test.tsx
+            src/components/projects/invitation-editor-status-header.tsx
 
-      - name: Commit integrated review journey
+      - name: Commit mounted review
         run: |
           if git diff --quiet; then
+            echo 'Review already mounted.'
             exit 0
           fi
           git config user.name 'seraya-release-b-bot'
@@ -146,7 +104,6 @@ jobs:
           git add \
             src/components/projects/invitation-editor.tsx \
             src/components/projects/invitation-editor-review-panel.tsx \
-            src/components/projects/invitation-editor-status-header.tsx \
-            tests/server/invitation-editor-ui.test.tsx
-          git commit -m 'Apply Release B readiness review and publish journey'
+            src/components/projects/invitation-editor-status-header.tsx
+          git commit -m 'Mount Release B readiness review'
           git push origin HEAD:agent/release-b-create-to-publish
