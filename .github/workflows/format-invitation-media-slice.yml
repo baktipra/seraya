@@ -1,0 +1,67 @@
+name: Format invitation media slice
+
+on:
+  push:
+    branches:
+      - agent/release-a-flagship-experience
+
+permissions:
+  contents: write
+
+jobs:
+  format-invitation-media:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/release-a-flagship-experience
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Format invitation media slice
+        run: |
+          npx prettier --write \
+            .github/workflows/invitation-experience-e2e.yml \
+            src/app/invitation-media-release.css \
+            src/app/layout.tsx \
+            src/modules/invitation-templates/invitation-gallery-image.tsx \
+            src/modules/invitation-templates/roselle/roselle-sections.tsx \
+            src/modules/invitation-templates/aruna/aruna-template.tsx \
+            src/modules/invitation-templates/laras/laras-template.tsx \
+            src/modules/invitation-templates/__tests__/invitation-media-delivery-contract.test.ts \
+            tests/e2e/invitation-experience.spec.ts \
+            tests/e2e/fixture-app/app/layout.tsx
+
+      - name: Commit formatted files
+        run: |
+          if git diff --quiet; then
+            echo 'Invitation media slice is already formatted.'
+            exit 0
+          fi
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add \
+            .github/workflows/invitation-experience-e2e.yml \
+            src/app/invitation-media-release.css \
+            src/app/layout.tsx \
+            src/modules/invitation-templates/invitation-gallery-image.tsx \
+            src/modules/invitation-templates/roselle/roselle-sections.tsx \
+            src/modules/invitation-templates/aruna/aruna-template.tsx \
+            src/modules/invitation-templates/laras/laras-template.tsx \
+            src/modules/invitation-templates/__tests__/invitation-media-delivery-contract.test.ts \
+            tests/e2e/invitation-experience.spec.ts \
+            tests/e2e/fixture-app/app/layout.tsx
+          git commit -m 'Format invitation media release slice'
+          git push origin HEAD:agent/release-a-flagship-experience
