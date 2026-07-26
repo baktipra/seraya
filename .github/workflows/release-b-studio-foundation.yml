@@ -70,4 +70,15 @@ jobs:
             tests/server/invitation-editor-ui.test.tsx
 
       - name: Build production application
-        run: npm run build
+        run: |
+          set -o pipefail
+          npm run build 2>&1 | tee release-b-build.log
+
+      - name: Upload production build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-b-build-log
+          path: release-b-build.log
+          if-no-files-found: error
+          retention-days: 3
