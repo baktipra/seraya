@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import { Badge } from '@/design-system';
+import { Badge, Button } from '@/design-system';
 import type { InvitationEditorTruthState } from '@/modules/invitation-editor/editor-truth-state';
 
 const truthStateTone = {
@@ -18,6 +18,7 @@ const truthStateTone = {
 
 export function InvitationEditorStatusHeader({
   coupleLabel,
+  onReview,
   projectId,
   templateLabel,
   truth,
@@ -25,6 +26,7 @@ export function InvitationEditorStatusHeader({
   workspaceTitle,
 }: {
   coupleLabel: string;
+  onReview: () => void;
   projectId: string;
   templateLabel: string;
   truth: InvitationEditorTruthState;
@@ -56,12 +58,17 @@ export function InvitationEditorStatusHeader({
               {workspaceDescription}
             </p>
           </div>
-          <Link
-            className="border-seraya-border-default bg-seraya-surface text-seraya-text-primary hover:border-seraya-border-strong hover:bg-seraya-canvas focus-visible:outline-seraya-focus-ring inline-flex min-h-11 shrink-0 items-center justify-center rounded-[var(--seraya-radius-md)] border px-4 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
-            href={`/dashboard/${projectId}/preview`}
-          >
-            Pratinjau draf tersimpan
-          </Link>
+          <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+            <Link
+              className="border-seraya-border-default bg-seraya-surface text-seraya-text-primary hover:border-seraya-border-strong hover:bg-seraya-canvas focus-visible:outline-seraya-focus-ring inline-flex min-h-11 items-center justify-center rounded-[var(--seraya-radius-md)] border px-4 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
+              href={`/dashboard/${projectId}/preview`}
+            >
+              Pratinjau draf tersimpan
+            </Link>
+            <Button onClick={onReview} type="button">
+              Periksa kesiapan
+            </Button>
+          </div>
         </div>
       </div>
 
