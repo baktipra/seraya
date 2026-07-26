@@ -349,7 +349,7 @@ describe('SRY-030 invitation editor multi-event owner UI', () => {
     expect(source).toContain('safe-area-inset-bottom');
     expect(source).toContain('data-local-preview-trigger');
     expect(source).toContain('InvitationEditorLivePreview');
-    expect(previewSource).toContain('surface="preview"');
+    expect(previewSource).toContain("surface={previewSurface === 'personal' ? 'personal' : 'generic'}");
     expect(previewSource).not.toContain('fetch(');
     expect(previewSource).not.toContain('/g/');
     expect(previewSource).not.toContain('personalSlots');
