@@ -1,5 +1,5 @@
-/* eslint-disable @next/next/no-img-element -- Roselle receives only local Seraya media proxy URLs; image optimization/CDN work is out of scope. */
 import { DigitalGiftCopyButton } from '../digital-gift-copy-button';
+import { InvitationGalleryImage } from '../invitation-gallery-image';
 import type { InvitationViewModel } from '../invitation-view-model';
 
 import { RoselleDivider, RosellePetalDecoration } from './roselle-decoration';
@@ -197,6 +197,7 @@ export function RoselleGallery({ gallery }: Pick<InvitationViewModel, 'gallery'>
       aria-labelledby="roselle-gallery-title"
       className={styles.gallerySection}
       data-gallery-count={gallery.images.length}
+      data-invitation-gallery
       data-roselle-chapter="gallery"
     >
       <p className={styles.sectionEyebrow}>Galeri</p>
@@ -206,7 +207,11 @@ export function RoselleGallery({ gallery }: Pick<InvitationViewModel, 'gallery'>
       <div className={styles.galleryGrid} data-gallery-layout={galleryLayout}>
         {gallery.images.map((image, index) => (
           <figure className={styles.galleryFigure} data-gallery-index={index} key={image.id}>
-            <img alt={image.alt} className={styles.galleryImage} loading="lazy" src={image.src} />
+            <InvitationGalleryImage
+              alt={image.alt}
+              className={styles.galleryImage}
+              src={image.src}
+            />
           </figure>
         ))}
       </div>
