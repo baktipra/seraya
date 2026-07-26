@@ -2,6 +2,7 @@ import { expect, type Locator, type Page, test } from '@playwright/test';
 
 const templateKeys = ['roselle', 'aruna', 'laras'] as const;
 const guestToken = 'browser-fixture';
+const layoutShiftScoreKey = '__serayaInvitationLayoutShiftScore';
 
 type TemplateKey = (typeof templateKeys)[number];
 
@@ -11,6 +12,46 @@ function getGenericPath(templateKey: TemplateKey) {
 
 function getPersonalPath(templateKey: TemplateKey) {
   return `${getGenericPath(templateKey)}/g/${guestToken}`;
+}
+
+async function startLayoutShiftObservation(page: Page) {
+  await page.addInitScript((scoreKey) => {
+    Reflect.set(window, scoreKey, 0);
+
+    if (typeof PerformanceObserver === 'undefined') {
+      return;
+    }
+
+    try {
+      const observer = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          const layoutShift = entry as PerformanceEntry & {
+            hadRecentInput?: boolean;
+            value?: number;
+          };
+
+          if (!layoutShift.hadRecentInput && typeof layoutShift.value === 'number') {
+            const currentScore = Number(Reflect.get(window, scoreKey)) || 0;
+            Reflect.set(window, scoreKey, currentScore + layoutShift.value);
+          }
+        }
+      });
+
+      observer.observe({ buffered: true, type: 'layout-shift' });
+    } catch {
+      Reflect.set(window, scoreKey, 0);
+    }
+  }, layoutShiftScoreKey);
+}
+
+async function expectLayoutShiftBudget(page: Page) {
+  await page.waitForTimeout(120);
+  const layoutShiftScore = await page.evaluate(
+    (scoreKey) => Number(Reflect.get(window, scoreKey)) || 0,
+    layoutShiftScoreKey,
+  );
+
+  expect(layoutShiftScore).toBeLessThanOrEqual(0.05);
 }
 
 async function expectNoHorizontalOverflow(page: Page) {
@@ -60,11 +101,60 @@ async function expectFlagshipOpening(page: Page, invitation: Locator, templateKe
   }
 }
 
+async function expectStableGalleryMedia(invitation: Locator) {
+  const gallery = invitation.locator('[data-invitation-gallery]');
+  const mediaFrames = gallery.locator('[data-invitation-media-frame]');
+  const galleryImages = gallery.locator('[data-invitation-media-image]');
+
+  await expect(gallery).toBeVisible();
+  await expect(mediaFrames).toHaveCount(4);
+  await expect(galleryImages).toHaveCount(4);
+
+  for (let index = 0; index < 4; index += 1) {
+    const image = galleryImages.nth(index);
+
+    await expect(image).toHaveAttribute('loading', 'lazy');
+    await expect(image).toHaveAttribute('decoding', 'async');
+    await expect(image).toHaveAttribute('fetchpriority', 'low');
+    await expect(image).toHaveAttribute('width', '900');
+    await expect(image).toHaveAttribute('height', '1125');
+    await expect(image).toHaveAttribute('sizes', /100vw/);
+
+    const box = await image.boundingBox();
+    expect(box?.width ?? 0).toBeGreaterThan(120);
+    expect(box?.height ?? 0).toBeGreaterThan(120);
+  }
+
+  const firstFrame = mediaFrames.first();
+  const firstImage = galleryImages.first();
+  const frameBeforeFailure = await firstFrame.boundingBox();
+
+  await firstImage.evaluate((element) => {
+    element.dispatchEvent(new Event('load', { bubbles: true }));
+  });
+  await expect(firstFrame).toHaveAttribute('data-media-state', 'ready');
+
+  await firstImage.evaluate((element) => {
+    element.dispatchEvent(new Event('error', { bubbles: true }));
+  });
+  await expect(firstFrame).toHaveAttribute('data-media-state', 'failed');
+  await expect(firstFrame.locator('[data-invitation-media-fallback]')).toBeVisible();
+
+  const frameAfterFailure = await firstFrame.boundingBox();
+  expect(Math.abs((frameAfterFailure?.width ?? 0) - (frameBeforeFailure?.width ?? 0))).toBeLessThan(
+    1,
+  );
+  expect(
+    Math.abs((frameAfterFailure?.height ?? 0) - (frameBeforeFailure?.height ?? 0)),
+  ).toBeLessThan(1);
+}
+
 for (const templateKey of templateKeys) {
   test.describe(`${templateKey} complete invitation experience`, () => {
     test('renders the complete generic journey without guest-private UI or overflow', async ({
       page,
     }) => {
+      await startLayoutShiftObservation(page);
       await page.goto(getGenericPath(templateKey));
 
       const invitation = page.locator(`article[data-template="${templateKey}"]`);
@@ -80,15 +170,7 @@ for (const templateKey of templateKeys) {
         invitation.getByRole('heading', { name: 'Tanda kasih untuk perjalanan baru' }),
       ).toBeVisible();
       await expect(invitation.getByText('Raka & Nadia', { exact: true }).last()).toBeVisible();
-
-      const galleryImages = invitation.locator('img');
-      await expect(galleryImages).toHaveCount(4);
-      for (let index = 0; index < 4; index += 1) {
-        await expect(galleryImages.nth(index)).toHaveAttribute('loading', 'lazy');
-        const box = await galleryImages.nth(index).boundingBox();
-        expect(box?.width ?? 0).toBeGreaterThan(120);
-        expect(box?.height ?? 0).toBeGreaterThan(120);
-      }
+      await expectStableGalleryMedia(invitation);
 
       await expect(invitation.locator('[data-generic-response-note]')).toHaveCount(1);
       await expect(invitation.locator('[data-template-personal-greeting]')).toHaveCount(0);
@@ -98,9 +180,11 @@ for (const templateKey of templateKeys) {
       const closingSection = invitation.locator('section').last();
       await expectAppearsBefore(genericNote, closingSection);
       await expectNoHorizontalOverflow(page);
+      await expectLayoutShiftBudget(page);
     });
 
     test('composes greeting and response as one personal closing journey', async ({ page }) => {
+      await startLayoutShiftObservation(page);
       await page.goto(getPersonalPath(templateKey));
 
       const invitation = page.locator(`article[data-template="${templateKey}"]`);
@@ -119,6 +203,7 @@ for (const templateKey of templateKeys) {
       await expect(invitation.locator('[data-generic-response-note]')).toHaveCount(0);
       await expect(invitation.locator('[data-personal-guest-rsvp]')).toBeVisible();
       await expect(invitation.locator('[data-personal-guestbook]')).toBeVisible();
+      await expectStableGalleryMedia(invitation);
 
       await expectAppearsBefore(greeting, responseJourney);
       await expectAppearsBefore(digitalGiftSection, responseJourney);
@@ -132,6 +217,7 @@ for (const templateKey of templateKeys) {
       }
 
       await expectNoHorizontalOverflow(page);
+      await expectLayoutShiftBudget(page);
     });
   });
 }
