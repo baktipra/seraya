@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useActionState, useCallback, useEffect, useReducer, useRef, useState } from 'react';
 
 import {
-  Badge,
   Button,
   Card,
   CardContent,
@@ -26,6 +25,7 @@ import {
 import type { InvitationRendererProjectMetadata } from '@/modules/invitation-templates/invitation-view-model';
 import type { InvitationDraft } from '@/modules/invitations/invitation-draft.types';
 import type { InvitationGalleryImage } from '@/modules/media/media.types';
+import { getInvitationEditorTruthState } from '@/modules/invitation-editor/editor-truth-state';
 import type { ProjectPublishEligibility } from '@/modules/payments/payment.types';
 import {
   getInvitationConfidenceChecklist,
@@ -46,6 +46,7 @@ import {
   InvitationTemplatePicker,
 } from './invitation-editor-fields';
 import { InvitationEditorLivePreview } from './invitation-editor-live-preview';
+import { InvitationEditorStatusHeader } from './invitation-editor-status-header';
 import { PublishInvitationControls } from './publish-invitation-controls';
 import {
   getInvitationEditorErrorSections,
@@ -217,13 +218,20 @@ export function InvitationEditor({
   const lastSyncedDraftUpdatedAt = useRef(draft.updated_at);
   const errorSummaryRef = useRef<HTMLDivElement | null>(null);
   const workspaceStartRef = useRef<HTMLDivElement | null>(null);
-  const sectionStatuses = getInvitationEditorSectionStatuses(draft, state.fieldErrors);
+  const sectionStatuses = getInvitationEditorSectionStatuses(content, state.fieldErrors);
   const errorSections = getInvitationEditorErrorSections(state.fieldErrors);
   const saveStatus = getInvitationEditorSaveStatus({
     actionStatus: state.status,
     hasSaved,
     isDirty,
     isPending,
+  });
+  const truthState = getInvitationEditorTruthState({
+    actionStatus: state.status,
+    hasSaved,
+    isDirty,
+    isPending,
+    readiness: workspaceReadiness,
   });
 
   const updateLocalContent = useCallback((action: InvitationEditorLocalAction) => {
@@ -347,23 +355,14 @@ export function InvitationEditor({
   return (
     <div data-dashboard-width="wide">
       <Card aria-labelledby="invitation-editor-title" className="w-full overflow-visible">
-        <div className="bg-seraya-brand-soft rounded-t-[var(--seraya-radius-lg)] px-5 py-8 sm:px-8 sm:py-10">
-          <Badge variant={workspaceReadiness.invitation.hasPublishedSnapshot ? 'success' : 'brand'}>
-            {confidenceStatus.badge}
-          </Badge>
-          <p className="text-seraya-text-secondary mt-5 text-sm font-semibold">
-            {workspaceReadiness.identity.coupleLabel}
-          </p>
-          <h1
-            className="seraya-display-md mt-3 max-w-2xl text-[clamp(2.25rem,5vw,3.5rem)]"
-            id="invitation-editor-title"
-          >
-            {confidenceStatus.title}
-          </h1>
-          <p className="text-seraya-text-secondary mt-4 max-w-2xl text-base leading-7">
-            {confidenceStatus.description}
-          </p>
-        </div>
+        <InvitationEditorStatusHeader
+          coupleLabel={workspaceReadiness.identity.coupleLabel}
+          projectId={projectId}
+          templateLabel={content.templateKey}
+          truth={truthState}
+          workspaceDescription={confidenceStatus.description}
+          workspaceTitle={confidenceStatus.title}
+        />
 
         <CardHeader className="border-seraya-border-default gap-5 border-b pb-5 sm:pb-6">
           <section

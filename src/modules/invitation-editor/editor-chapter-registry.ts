@@ -14,11 +14,7 @@ export const invitationEditorChapterIds = [
 ] as const;
 
 export type InvitationEditorChapterId = (typeof invitationEditorChapterIds)[number];
-export type InvitationEditorChapterStatus =
-  | 'complete'
-  | 'error'
-  | 'incomplete'
-  | 'optional_off';
+export type InvitationEditorChapterStatus = 'complete' | 'error' | 'incomplete' | 'optional_off';
 
 export type InvitationEditorPreviewTarget =
   | 'opening'
