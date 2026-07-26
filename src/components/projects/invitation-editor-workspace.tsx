@@ -134,7 +134,7 @@ export function InvitationWorkspaceNavigation({
   const activeIndex = invitationEditorSections.findIndex(
     (section) => section.key === activeSection,
   );
-  const active = invitationEditorSections[activeIndex] ?? invitationEditorSections[0];
+  const active = invitationEditorSections[activeIndex] ?? invitationEditorSections[0]!;
 
   return (
     <>
