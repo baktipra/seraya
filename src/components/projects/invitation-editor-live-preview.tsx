@@ -56,12 +56,7 @@ export function InvitationEditorLivePreview({
     () => ({
       greeting: <PersonalGuestGreeting displayName="Tamu Contoh" />,
       guestbook: (
-        <PersonalGuestbook
-          entry={null}
-          guestToken="preview-only"
-          previewOnly
-          slug="preview"
-        />
+        <PersonalGuestbook entry={null} guestToken="preview-only" previewOnly slug="preview" />
       ),
       rsvp: (
         <PersonalGuestRsvp
@@ -86,7 +81,8 @@ export function InvitationEditorLivePreview({
   useEffect(() => {
     if (!isOpen) return undefined;
 
-    openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    openerRef.current =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
     scrollPositionRef.current = window.scrollY;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -193,7 +189,11 @@ export function InvitationEditorLivePreview({
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <div aria-label="Jenis pratinjau" className="flex rounded-[var(--seraya-radius-md)] border border-[var(--seraya-color-border-default)] p-1" role="group">
+            <div
+              aria-label="Jenis pratinjau"
+              className="flex rounded-[var(--seraya-radius-md)] border border-[var(--seraya-color-border-default)] p-1"
+              role="group"
+            >
               {(['public', 'personal'] as const).map((surface) => (
                 <button
                   aria-pressed={previewSurface === surface}
@@ -211,7 +211,11 @@ export function InvitationEditorLivePreview({
                 </button>
               ))}
             </div>
-            <div aria-label="Ukuran pratinjau" className="flex rounded-[var(--seraya-radius-md)] border border-[var(--seraya-color-border-default)] p-1" role="group">
+            <div
+              aria-label="Ukuran pratinjau"
+              className="flex rounded-[var(--seraya-radius-md)] border border-[var(--seraya-color-border-default)] p-1"
+              role="group"
+            >
               {(['mobile', 'desktop'] as const).map((viewport) => (
                 <button
                   aria-pressed={previewViewport === viewport}

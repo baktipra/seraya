@@ -55,7 +55,9 @@ describe('Release B exact editor preview modes', () => {
       ),
     ]);
 
-    expect(previewSource).toContain("surface={previewSurface === 'personal' ? 'personal' : 'generic'}");
+    expect(previewSource).toContain(
+      "surface={previewSurface === 'personal' ? 'personal' : 'generic'}",
+    );
     expect(previewSource).toContain('previewOnly');
     expect(previewSource).toContain('displayName="Tamu Contoh"');
     expect(previewSource).toContain('guestToken="preview-only"');

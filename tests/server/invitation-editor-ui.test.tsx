@@ -235,8 +235,10 @@ describe('SRY-030 invitation editor multi-event owner UI', () => {
     expect(html).toContain('Belum ada perubahan');
     expect(html).not.toContain('>Tersimpan</p>');
     expect(html).toContain('Preview tersimpan tetap mengikuti draft dari server.');
-    expect(html).toContain('Mengikuti perubahan lokal. Belum dipublikasikan dari sini.');
-    expect(html).toContain('data-surface="preview"');
+    expect(html).toContain(
+      'Mengikuti komposisi undangan publik tanpa data atau form tamu. Belum dipublikasikan dari sini.',
+    );
+    expect(html).toContain('data-surface="generic"');
     expect(html).toContain(`href="/dashboard/${project.id}/preview"`);
   });
 

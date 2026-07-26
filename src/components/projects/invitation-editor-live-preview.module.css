@@ -95,12 +95,16 @@
   border-radius: 0.45rem;
 }
 
-.deviceShellMobile .deviceScreen :global([data-template='roselle'] [data-roselle-chapter='opening']) {
+.deviceShellMobile
+  .deviceScreen
+  :global([data-template='roselle'] [data-roselle-chapter='opening']) {
   min-height: min(82svh, 44rem);
   padding: 4.5rem 1.35rem 5.25rem;
 }
 
-.deviceShellMobile .deviceScreen :global([data-template='roselle'] [data-roselle-chapter='opening'] h1) {
+.deviceShellMobile
+  .deviceScreen
+  :global([data-template='roselle'] [data-roselle-chapter='opening'] h1) {
   font-size: clamp(3.4rem, 18cqw, 4.75rem);
 }
 
@@ -113,14 +117,18 @@
   font-size: clamp(2.35rem, 11cqw, 3.15rem);
 }
 
-.deviceShellMobile .deviceScreen :global([data-template='roselle'] [data-roselle-chapter='couple'] > div),
+.deviceShellMobile
+  .deviceScreen
+  :global([data-template='roselle'] [data-roselle-chapter='couple'] > div),
 .deviceShellMobile .deviceScreen :global([data-template='roselle'] [data-event-layout='pair']),
 .deviceShellMobile .deviceScreen :global([data-template='roselle'] [data-event-layout='timeline']) {
   grid-template-columns: 1fr;
 }
 
 .deviceShellMobile .deviceScreen :global([data-template='roselle'] [data-gallery-layout='diptych']),
-.deviceShellMobile .deviceScreen :global([data-template='roselle'] [data-gallery-layout='triptych']) {
+.deviceShellMobile
+  .deviceScreen
+  :global([data-template='roselle'] [data-gallery-layout='triptych']) {
   gap: 0.55rem;
 }
 
