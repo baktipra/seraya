@@ -9,6 +9,7 @@ on:
       - 'playwright.invitation-experience.config.ts'
       - 'src/app/invitation-maturation-release.css'
       - 'src/app/invitation-opening-maturation-release.css'
+      - 'src/app/invitation-media-release.css'
       - 'src/app/layout.tsx'
       - 'src/app/release-a-invitation-preview/**'
       - 'src/modules/invitation-templates/**'
@@ -25,6 +26,7 @@ on:
       - 'playwright.invitation-experience.config.ts'
       - 'src/app/invitation-maturation-release.css'
       - 'src/app/invitation-opening-maturation-release.css'
+      - 'src/app/invitation-media-release.css'
       - 'src/app/layout.tsx'
       - 'src/app/release-a-invitation-preview/**'
       - 'src/modules/invitation-templates/**'
@@ -61,11 +63,16 @@ jobs:
             playwright.invitation-experience.config.ts \
             src/app/invitation-maturation-release.css \
             src/app/invitation-opening-maturation-release.css \
+            src/app/invitation-media-release.css \
             src/app/layout.tsx \
             src/app/release-a-invitation-preview/page.tsx \
+            src/modules/invitation-templates/invitation-gallery-image.tsx \
+            src/modules/invitation-templates/roselle/roselle-sections.tsx \
+            src/modules/invitation-templates/aruna/aruna-template.tsx \
             src/modules/invitation-templates/laras/laras-monogram.ts \
             src/modules/invitation-templates/laras/laras-template.tsx \
             src/modules/invitation-templates/__tests__/invitation-opening-identity-contract.test.ts \
+            src/modules/invitation-templates/__tests__/invitation-media-delivery-contract.test.ts \
             tests/e2e/invitation-experience.spec.ts \
             tests/e2e/release-a-invitation-showroom.spec.ts \
             tests/e2e/fixture-app/app/layout.tsx \
@@ -77,18 +84,23 @@ jobs:
             playwright.invitation-experience.config.ts \
             src/app/layout.tsx \
             src/app/release-a-invitation-preview/page.tsx \
+            src/modules/invitation-templates/invitation-gallery-image.tsx \
+            src/modules/invitation-templates/roselle/roselle-sections.tsx \
+            src/modules/invitation-templates/aruna/aruna-template.tsx \
             src/modules/invitation-templates/laras/laras-monogram.ts \
             src/modules/invitation-templates/laras/laras-template.tsx \
             src/modules/invitation-templates/__tests__/invitation-opening-identity-contract.test.ts \
+            src/modules/invitation-templates/__tests__/invitation-media-delivery-contract.test.ts \
             tests/e2e/invitation-experience.spec.ts \
             tests/e2e/release-a-invitation-showroom.spec.ts \
             tests/e2e/fixture-app/app/layout.tsx \
             tests/e2e/fixture-app/lib/fixture-invitation.ts
 
-      - name: Run invitation opening identity contracts
+      - name: Run invitation experience source contracts
         run: |
           npm test -- \
-            src/modules/invitation-templates/__tests__/invitation-opening-identity-contract.test.ts
+            src/modules/invitation-templates/__tests__/invitation-opening-identity-contract.test.ts \
+            src/modules/invitation-templates/__tests__/invitation-media-delivery-contract.test.ts
 
       - name: Build production application
         run: npm run build
