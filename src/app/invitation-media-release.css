@@ -1,0 +1,107 @@
+/* Release A — Invitation media delivery and stability.
+ * Templates keep their own crop and composition; this layer owns delivery state,
+ * intrinsic stability, and a truthful failure presentation.
+ */
+
+[data-invitation-gallery] {
+  contain: layout paint;
+}
+
+[data-invitation-media-frame] {
+  position: relative;
+  isolation: isolate;
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, rgb(255 255 255 / 0.32), transparent 55%),
+    rgb(118 88 96 / 0.09);
+}
+
+[data-invitation-media-image] {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 180ms ease;
+}
+
+[data-invitation-media-shimmer] {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 20%,
+    rgb(255 255 255 / 0.4) 42%,
+    transparent 64%
+  );
+  pointer-events: none;
+  transform: translateX(-100%);
+  animation: seraya-invitation-media-loading 1.6s ease-in-out infinite;
+  transition: opacity 180ms ease;
+}
+
+[data-invitation-media-frame][data-media-state='ready'] [data-invitation-media-shimmer],
+[data-invitation-media-frame][data-media-state='failed'] [data-invitation-media-shimmer] {
+  opacity: 0;
+  animation: none;
+}
+
+[data-invitation-media-frame][data-media-state='failed'] [data-invitation-media-image] {
+  opacity: 0;
+}
+
+[data-invitation-media-fallback] {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.55rem;
+  padding: 1rem;
+  color: currentColor;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+  text-align: center;
+}
+
+[data-invitation-media-fallback][hidden] {
+  display: none;
+}
+
+[data-invitation-media-fallback] > span {
+  font-size: 1rem;
+  opacity: 0.72;
+}
+
+@keyframes seraya-invitation-media-loading {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  55%,
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-invitation-media-image],
+  [data-invitation-media-shimmer] {
+    transition: none;
+  }
+
+  [data-invitation-media-shimmer] {
+    animation: none;
+    opacity: 0.45;
+    transform: none;
+  }
+}
