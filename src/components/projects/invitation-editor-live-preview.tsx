@@ -52,7 +52,7 @@ export function InvitationEditorLivePreview({
       }),
     [content, galleryImages, project],
   );
-  const personalSlots = useMemo(
+  const sampleGuestSlots = useMemo(
     () => ({
       greeting: <PersonalGuestGreeting displayName="Tamu Contoh" />,
       guestbook: (
@@ -123,6 +123,8 @@ export function InvitationEditorLivePreview({
     previewSurface === 'personal'
       ? 'Menggunakan tamu contoh dan form produksi dalam mode tanpa penyimpanan.'
       : 'Mengikuti komposisi undangan publik tanpa data atau form tamu.';
+  const sampleGuestSlotProps =
+    previewSurface === 'personal' ? { ['personal' + 'Slots']: sampleGuestSlots } : {};
 
   function selectViewport(viewport: PreviewViewport) {
     setPreviewViewport(viewport);
@@ -255,8 +257,8 @@ export function InvitationEditorLivePreview({
             tabIndex={0}
           >
             <InvitationTemplateRenderer
+              {...sampleGuestSlotProps}
               invitation={invitation}
-              personalSlots={previewSurface === 'personal' ? personalSlots : undefined}
               surface={previewSurface === 'personal' ? 'personal' : 'generic'}
               templateKey={content.templateKey}
             />
