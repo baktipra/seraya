@@ -7,13 +7,24 @@
   flex-direction: column;
   overflow: hidden;
   border: 0.4rem solid #302b28;
-  border-radius: 2.15rem;
   outline: 1px solid rgb(255 255 255 / 0.16);
   background: #302b28;
   padding: 0.18rem;
   box-shadow:
     0 22px 48px rgb(55 41 34 / 0.16),
     0 4px 12px rgb(55 41 34 / 0.1);
+}
+
+.deviceShellMobile {
+  border-radius: 2.15rem;
+}
+
+.deviceShellDesktop {
+  width: 100%;
+  height: min(100%, 46rem);
+  margin: auto;
+  border-width: 0.35rem;
+  border-radius: 1rem;
 }
 
 .deviceSpeaker {
@@ -56,6 +67,10 @@
   -ms-overflow-style: none;
 }
 
+.deviceShellDesktop .deviceScreen {
+  border-radius: 0.58rem;
+}
+
 .deviceScreen::-webkit-scrollbar {
   display: none;
   width: 0;
@@ -74,37 +89,43 @@
   box-shadow: none;
 }
 
-.deviceScreen :global([data-template='roselle'] [data-roselle-chapter='opening']) {
+.deviceShellDesktop .deviceScreen :global([data-template='roselle']),
+.deviceShellDesktop .deviceScreen :global([data-template='aruna']),
+.deviceShellDesktop .deviceScreen :global([data-template='laras']) {
+  border-radius: 0.45rem;
+}
+
+.deviceShellMobile .deviceScreen :global([data-template='roselle'] [data-roselle-chapter='opening']) {
   min-height: min(82svh, 44rem);
   padding: 4.5rem 1.35rem 5.25rem;
 }
 
-.deviceScreen :global([data-template='roselle'] [data-roselle-chapter='opening'] h1) {
+.deviceShellMobile .deviceScreen :global([data-template='roselle'] [data-roselle-chapter='opening'] h1) {
   font-size: clamp(3.4rem, 18cqw, 4.75rem);
 }
 
-.deviceScreen :global([data-template='roselle'] [data-roselle-chapter]) {
+.deviceShellMobile .deviceScreen :global([data-template='roselle'] [data-roselle-chapter]) {
   padding-right: 1.35rem;
   padding-left: 1.35rem;
 }
 
-.deviceScreen :global([data-template='roselle'] [data-roselle-chapter] h2) {
+.deviceShellMobile .deviceScreen :global([data-template='roselle'] [data-roselle-chapter] h2) {
   font-size: clamp(2.35rem, 11cqw, 3.15rem);
 }
 
-.deviceScreen :global([data-template='roselle'] [data-roselle-chapter='couple'] > div),
-.deviceScreen :global([data-template='roselle'] [data-event-layout='pair']),
-.deviceScreen :global([data-template='roselle'] [data-event-layout='timeline']) {
+.deviceShellMobile .deviceScreen :global([data-template='roselle'] [data-roselle-chapter='couple'] > div),
+.deviceShellMobile .deviceScreen :global([data-template='roselle'] [data-event-layout='pair']),
+.deviceShellMobile .deviceScreen :global([data-template='roselle'] [data-event-layout='timeline']) {
   grid-template-columns: 1fr;
 }
 
-.deviceScreen :global([data-template='roselle'] [data-gallery-layout='diptych']),
-.deviceScreen :global([data-template='roselle'] [data-gallery-layout='triptych']) {
+.deviceShellMobile .deviceScreen :global([data-template='roselle'] [data-gallery-layout='diptych']),
+.deviceShellMobile .deviceScreen :global([data-template='roselle'] [data-gallery-layout='triptych']) {
   gap: 0.55rem;
 }
 
 @media (min-width: 1536px) {
-  .deviceShell {
+  .deviceShellMobile {
     width: min(100%, 16.25rem);
     height: min(calc(100% - 3.5rem), 34rem);
     min-height: 28rem;
@@ -120,19 +141,19 @@
       0 3px 8px rgb(55 41 34 / 0.09);
   }
 
-  .deviceScreen {
+  .deviceShellMobile .deviceScreen {
     border-radius: 1.34rem;
   }
 }
 
 @media (min-width: 1640px) {
-  .deviceShell {
+  .deviceShellMobile {
     width: min(100%, 16.75rem);
   }
 }
 
 @media (max-width: 1535px) {
-  :global([data-local-preview-overlay]) .deviceShell {
+  :global([data-local-preview-overlay]) .deviceShellMobile {
     width: min(100%, 24rem);
     height: 100%;
     margin: 0 auto;
@@ -140,13 +161,17 @@
 }
 
 @media (max-width: 639px) {
-  .deviceShell {
+  .deviceShellMobile {
     border-width: 0.3rem;
     border-radius: 1.65rem;
   }
 
-  .deviceScreen {
+  .deviceShellMobile .deviceScreen {
     border-radius: 1.25rem;
+  }
+
+  .deviceShellDesktop {
+    min-width: 52rem;
   }
 }
 
