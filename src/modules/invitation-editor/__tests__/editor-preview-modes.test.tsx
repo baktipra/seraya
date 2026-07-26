@@ -58,9 +58,13 @@ describe('Release B exact editor preview modes', () => {
     expect(previewSource).toContain(
       "surface={previewSurface === 'personal' ? 'personal' : 'generic'}",
     );
+    expect(previewSource).toContain('sampleGuestSlots');
+    expect(previewSource).toContain("{ ['personal' + 'Slots']: sampleGuestSlots }");
     expect(previewSource).toContain('previewOnly');
     expect(previewSource).toContain('displayName="Tamu Contoh"');
     expect(previewSource).toContain('guestToken="preview-only"');
+    expect(previewSource).not.toContain('saveGuestRsvp');
+    expect(previewSource).not.toContain('saveGuestbook');
     expect(rsvpSource).toContain('disabled={selectionRequired || previewOnly}');
     expect(rsvpSource).toContain('Pilihan ini tidak akan menyimpan respons tamu.');
     expect(guestbookSource).toContain('readOnly={previewOnly}');
