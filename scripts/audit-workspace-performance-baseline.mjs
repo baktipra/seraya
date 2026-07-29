@@ -26,9 +26,7 @@ const routes = routeFiles.map((path) => {
 });
 
 const readinessQueryCount = (readinessRepository.match(/\.from\(/g) ?? []).length;
-const canonicalDestinationCount = (
-  navigation.match(/performanceWorkspace: '[^']+'/g) ?? []
-).length;
+const canonicalDestinationCount = (navigation.match(/performanceWorkspace: '[^']+'/g) ?? []).length;
 
 const baseline = {
   baseline: 'P0-A1 Workspace Performance Instrumentation & Baseline V1',
@@ -40,15 +38,14 @@ const baseline = {
   },
   readinessAggregate: {
     parallelQueryCount: readinessQueryCount,
-    serverTimingInstrumented: readinessRepository.includes(
-      "operation: 'aggregate-query-batch'",
-    ),
+    serverTimingInstrumented: readinessRepository.includes("operation: 'aggregate-query-batch'"),
   },
   routes,
 };
 
 const failures = [];
-if (canonicalDestinationCount !== 5) failures.push('Expected five canonical workspace destinations.');
+if (canonicalDestinationCount !== 5)
+  failures.push('Expected five canonical workspace destinations.');
 if (!baseline.clientInstrumentation.navigationStart)
   failures.push('Workspace navigation start instrumentation is missing.');
 if (!baseline.clientInstrumentation.workspaceReadyProbe)
