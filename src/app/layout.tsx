@@ -12,6 +12,7 @@ import './personal-response-release.css';
 import './invitation-maturation-release.css';
 import './invitation-opening-maturation-release.css';
 import './invitation-media-release.css';
+import './roselle-flagship-maturation-release.css';
 
 export const metadata: Metadata = {
   title: {

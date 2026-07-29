@@ -8,6 +8,7 @@ export default defineConfig({
     'invitation-experience.spec.ts',
     'personal-response.spec.ts',
     'release-a-showroom.spec.ts',
+    'roselle-flagship-guest-experience.spec.ts',
   ],
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
