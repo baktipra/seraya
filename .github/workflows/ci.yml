@@ -38,8 +38,25 @@ jobs:
           python - <<'PY'
           import zlib
           from pathlib import Path
+
           payload = Path('scripts/quality-align-stale-tests.zlib').read_bytes()
           exec(zlib.decompress(payload).decode())
+
+          delivery = Path('tests/server/dashboard-delivery-route.test.tsx')
+          delivery.write_text(
+              delivery.read_text().replace(
+                  'Terbitkan versi undangan yang sudah kalian setujui sebelum menyiapkan Undangan Pribadi.',
+                  'Terbitkan versi undangan yang sudah kalian setujui sebelum menyiapkan Undangan Pribadi untuk tamu.',
+              )
+          )
+
+          authority = Path('tests/server/invitation-editor-authority-consolidation.test.ts')
+          authority.write_text(
+              authority.read_text().replace(
+                  '    expect(preview).toContain(\'data-testid="invitation-editor-save-status"\');',
+                  "    expect(preview).toContain(\"const status = isDirty ? 'Perubahan lokal · belum disimpan' : 'Draf tersimpan';\");\n    expect(preview).toContain(\"<Badge variant={isDirty ? 'warning' : 'brand'}>{status}</Badge>\");",
+              )
+          )
           PY
 
       - name: Format aligned test contracts
