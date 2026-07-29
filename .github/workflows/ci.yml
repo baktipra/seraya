@@ -81,7 +81,7 @@ jobs:
             tests/server/respons-tamu-hub-ui.test.tsx \
             tests/server/server-action-boundary.test.ts \
             src/modules/publications/__tests__/public-invitation.repository.test.ts \
-            --maxWorkers=2 --minWorkers=1
+            --maxWorkers=2
 
       - name: Restore canonical workflow and commit aligned tests
         run: |
