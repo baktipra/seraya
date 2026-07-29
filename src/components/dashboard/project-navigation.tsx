@@ -5,18 +5,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState, type ComponentType, type SVGProps } from 'react';
 
-import {
-  FollowUpIcon,
-  GuestsIcon,
-  HelpIcon,
-  InvitationIcon,
-  OverviewIcon,
-  ShareIcon,
-} from './dashboard-icons';
+import { GuestsIcon, HelpIcon, InvitationIcon, OverviewIcon, ShareIcon } from './dashboard-icons';
 
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
 type ProjectNavigationItem = {
+  aliases?: string[];
   href: Route;
   icon: IconComponent;
   label: string;
@@ -24,35 +18,40 @@ type ProjectNavigationItem = {
 };
 
 /**
- * The owner workspace follows one stable journey. Individual pages still own
- * their access/unavailable states; keeping the path visible prevents the
- * workspace from feeling like a collection of conditionally hidden tools.
+ * The owner workspace follows one stable five-destination journey. Individual
+ * pages still own authorization and unavailable states; the rail owns only
+ * navigation, project identity, and current-location clarity.
  */
 function getProjectNavigationItems(projectId: string): ProjectNavigationItem[] {
   const base = `/dashboard/${projectId}`;
 
   return [
-    { href: base as Route, icon: OverviewIcon, label: 'Ringkasan' },
+    { href: base as Route, icon: OverviewIcon, label: 'Ringkasan', mobileLabel: 'Ringkas' },
     { href: `${base}/invitation` as Route, icon: InvitationIcon, label: 'Undangan' },
     { href: `${base}/guests` as Route, icon: GuestsIcon, label: 'Tamu' },
-    { href: `${base}/delivery` as Route, icon: ShareIcon, label: 'Bagikan' },
     {
+      aliases: [`${base}/follow-up`, `${base}/share`],
+      href: `${base}/delivery` as Route,
+      icon: ShareIcon,
+      label: 'Bagikan',
+    },
+    {
+      aliases: [`${base}/guestbook`],
       href: `${base}/rsvp` as Route,
       icon: HelpIcon,
       label: 'Respons Tamu',
       mobileLabel: 'Respons',
-    },
-    {
-      href: `${base}/follow-up` as Route,
-      icon: FollowUpIcon,
-      label: 'Tindak Lanjut',
-      mobileLabel: 'Lanjut',
     },
   ];
 }
 
 function isCurrentProjectRoute(pathname: string, item: ProjectNavigationItem, projectId: string) {
   const projectRoot = `/dashboard/${projectId}`;
+
+  if (item.aliases?.some((alias) => pathname.startsWith(alias))) {
+    return true;
+  }
+
   return item.href === projectRoot ? pathname === projectRoot : pathname.startsWith(item.href);
 }
 
@@ -64,9 +63,9 @@ function getProjectRouteLabel(pathname: string, projectId: string) {
   const labels: Record<string, string> = {
     billing: 'Pembayaran',
     delivery: 'Bagikan',
-    'follow-up': 'Tindak Lanjut',
+    'follow-up': 'Bagikan',
     gallery: 'Galeri',
-    guestbook: 'Ucapan',
+    guestbook: 'Respons Tamu',
     guests: 'Tamu',
     invitation: 'Undangan',
     preview: 'Preview undangan',
@@ -95,12 +94,12 @@ function ProjectNavigationLink({
       aria-current={active ? 'page' : undefined}
       className={
         mode === 'desktop'
-          ? `focus-visible:outline-seraya-focus-ring flex min-h-11 items-center gap-3 rounded-[var(--seraya-radius-sm)] px-3 text-sm font-medium transition-colors focus-visible:outline-3 focus-visible:outline-offset-2 ${
+          ? `focus-visible:outline-seraya-focus-ring group relative flex min-h-12 items-center gap-3 rounded-[0.9rem] px-3.5 text-sm font-semibold transition-[background-color,color,transform] focus-visible:outline-3 focus-visible:outline-offset-2 ${
               active
-                ? 'bg-seraya-soft text-seraya-action-primary'
-                : 'text-seraya-text-secondary hover:bg-seraya-soft/70 hover:text-seraya-text-primary'
+                ? 'bg-seraya-brand-soft text-seraya-action-primary'
+                : 'text-seraya-text-secondary hover:bg-seraya-soft hover:text-seraya-text-primary'
             }`
-          : `focus-visible:outline-seraya-focus-ring relative flex min-h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 px-1 text-[0.625rem] font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-2 ${
+          : `focus-visible:outline-seraya-focus-ring relative flex min-h-[4.25rem] min-w-0 flex-1 flex-col items-center justify-center gap-1 px-1 text-[0.625rem] font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-2 ${
               active ? 'text-seraya-action-primary' : 'text-seraya-text-muted'
             }`
       }
@@ -108,14 +107,27 @@ function ProjectNavigationLink({
       prefetch={false}
     >
       {mode === 'mobile' && active ? (
-        <span aria-hidden="true" className="bg-seraya-action-primary absolute inset-x-3 top-0 h-0.5" />
+        <span
+          aria-hidden="true"
+          className="bg-seraya-action-primary absolute inset-x-4 top-0 h-0.5 rounded-full"
+        />
       ) : null}
-      <Icon
+      <span
         aria-hidden="true"
-        className={mode === 'desktop' ? 'size-4' : 'size-[1.05rem]'}
-        focusable="false"
-        strokeWidth={1.6}
-      />
+        className={
+          mode === 'desktop'
+            ? `grid size-8 place-items-center rounded-[0.7rem] transition-colors ${
+                active ? 'bg-seraya-surface' : 'group-hover:bg-seraya-surface bg-transparent'
+              }`
+            : undefined
+        }
+      >
+        <Icon
+          className={mode === 'desktop' ? 'size-[1.05rem]' : 'size-[1.1rem]'}
+          focusable="false"
+          strokeWidth={1.65}
+        />
+      </span>
       {mode === 'mobile' ? (
         <>
           <span className="sr-only">{item.label}</span>
@@ -127,7 +139,10 @@ function ProjectNavigationLink({
         <span>{visualLabel}</span>
       )}
       {mode === 'desktop' && active ? (
-        <span aria-hidden="true" className="bg-seraya-action-primary ml-auto size-1.5 rounded-full" />
+        <span
+          aria-hidden="true"
+          className="bg-seraya-action-primary ml-auto size-1.5 rounded-full"
+        />
       ) : null}
     </Link>
   );
@@ -153,9 +168,7 @@ export function ProjectNavigation({
 
     previousPathnameRef.current = pathname;
     const focusFrame = window.requestAnimationFrame(() => {
-      document
-        .getElementById('project-workspace-content')
-        ?.focus({ preventScroll: true });
+      document.getElementById('project-workspace-content')?.focus({ preventScroll: true });
       setRouteAnnouncement(`Halaman ${getProjectRouteLabel(pathname, projectId)} dibuka.`);
     });
 
@@ -165,14 +178,20 @@ export function ProjectNavigation({
   return (
     <>
       <aside className="border-seraya-border-default hidden min-w-0 border-r pr-6 lg:sticky lg:top-24 lg:flex lg:h-[calc(100svh-7.25rem)] lg:w-60 lg:flex-col">
-        <div className="px-2 pt-1">
-          <p className="seraya-eyebrow">Proyek</p>
-          <p className="text-seraya-text-primary mt-2 font-serif text-xl leading-tight font-medium tracking-[-0.015em]">
+        <div className="bg-seraya-soft/70 rounded-[1.1rem] px-4 py-4">
+          <p className="text-seraya-text-muted text-[0.65rem] font-semibold tracking-[0.14em] uppercase">
+            Undangan aktif
+          </p>
+          <p className="text-seraya-text-primary mt-2 font-serif text-[1.45rem] leading-[1.02] font-medium tracking-[-0.025em]">
             {coupleLabel}
           </p>
-          <p className="text-seraya-text-muted mt-1.5 text-xs leading-5">{statusLabel}</p>
+          <div className="mt-3 flex items-center gap-2">
+            <span aria-hidden="true" className="bg-seraya-action-primary size-1.5 rounded-full" />
+            <p className="text-seraya-text-muted text-xs leading-5">{statusLabel}</p>
+          </div>
         </div>
-        <nav aria-label="Navigasi workspace" className="mt-7 space-y-1">
+
+        <nav aria-label="Navigasi workspace" className="mt-6 space-y-1.5">
           {items.map((item) => (
             <ProjectNavigationLink
               active={isCurrentProjectRoute(pathname, item, projectId)}
@@ -182,20 +201,22 @@ export function ProjectNavigation({
             />
           ))}
         </nav>
-        <div className="border-seraya-border-default mt-auto flex min-h-20 items-center border-t px-2">
+
+        <div className="border-seraya-border-default mt-auto border-t pt-5">
           <Link
-            className="text-seraya-text-muted hover:text-seraya-action-primary focus-visible:outline-seraya-focus-ring inline-flex min-h-11 items-center text-sm font-medium transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
+            className="text-seraya-text-muted hover:text-seraya-action-primary focus-visible:outline-seraya-focus-ring inline-flex min-h-11 items-center gap-2 rounded-[var(--seraya-radius-sm)] px-2 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
             href="/dashboard"
             prefetch={false}
           >
-            ← Semua undangan
+            <span aria-hidden="true">←</span>
+            Semua undangan
           </Link>
         </div>
       </aside>
 
       <nav
         aria-label="Navigasi workspace mobile"
-        className="border-seraya-border-default bg-seraya-canvas/95 fixed inset-x-0 bottom-0 z-30 flex min-h-[4.5rem] items-stretch border-t px-1 pt-1 pb-[max(0.25rem,env(safe-area-inset-bottom))] backdrop-blur-md lg:hidden"
+        className="border-seraya-border-default bg-seraya-canvas/96 fixed inset-x-0 bottom-0 z-30 flex min-h-[4.65rem] items-stretch border-t px-1 pt-1 pb-[max(0.3rem,env(safe-area-inset-bottom))] shadow-[0_-12px_35px_rgb(56_39_33_/_0.07)] backdrop-blur-xl lg:hidden"
       >
         {items.map((item) => (
           <ProjectNavigationLink

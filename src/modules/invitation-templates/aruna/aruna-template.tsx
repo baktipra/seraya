@@ -1,5 +1,5 @@
-/* eslint-disable @next/next/no-img-element -- Aruna receives only Seraya media proxy URLs. */
 import { DigitalGiftCopyButton } from '../digital-gift-copy-button';
+import { InvitationGalleryImage } from '../invitation-gallery-image';
 import {
   getPersonalInvitationPresentationSlots,
   type InvitationTemplateProps,
@@ -164,7 +164,12 @@ export function ArunaTemplate({ invitation, renderContext }: InvitationTemplateP
         ) : null}
 
         {invitation.gallery ? (
-          <section aria-labelledby="aruna-gallery-title" className={styles.gallerySection}>
+          <section
+            aria-labelledby="aruna-gallery-title"
+            className={styles.gallerySection}
+            data-gallery-count={invitation.gallery.images.length}
+            data-invitation-gallery
+          >
             <div className={styles.sectionHeading}>
               <p>Galeri</p>
               <h2 id="aruna-gallery-title">Fragmen yang kami simpan</h2>
@@ -172,10 +177,9 @@ export function ArunaTemplate({ invitation, renderContext }: InvitationTemplateP
             <div className={styles.galleryGrid}>
               {invitation.gallery.images.map((image, index) => (
                 <figure className={styles.galleryFigure} key={image.id}>
-                  <img
+                  <InvitationGalleryImage
                     alt={image.alt}
                     className={styles.galleryImage}
-                    loading="lazy"
                     src={image.src}
                   />
                   <figcaption aria-hidden="true">{String(index + 1).padStart(2, '0')}</figcaption>

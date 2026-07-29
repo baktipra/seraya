@@ -46,7 +46,7 @@ export function LoginForm({ initialNotice = null, nextPath }: LoginFormProps) {
 
       if (result.status === 'sent') {
         setStatus('sent');
-        setMessage('Link masuk sudah dikirim. Periksa email kamu untuk melanjutkan.');
+        setMessage('Link masuk sudah dikirim. Periksa email kalian untuk melanjutkan.');
         return;
       }
 
@@ -86,19 +86,23 @@ export function LoginForm({ initialNotice = null, nextPath }: LoginFormProps) {
   const isSending = status === 'sending';
 
   return (
-    <Card aria-labelledby="login-title" className="w-full max-w-md">
-      <CardHeader className="gap-3">
-        <p className="text-seraya-action-primary text-xs font-semibold tracking-[0.14em] uppercase">
-          Ruang pasangan
-        </p>
-        <CardTitle id="login-title" className="text-3xl sm:text-[2rem]">
+    <Card
+      aria-labelledby="login-title"
+      className="w-full max-w-md border-0 bg-transparent shadow-none"
+    >
+      <CardHeader className="gap-3 px-0 pt-0">
+        <p className="seraya-eyebrow text-seraya-action-primary">Ruang pribadi pasangan</p>
+        <CardTitle
+          id="login-title"
+          className="text-seraya-text-primary font-serif text-[clamp(2.8rem,8vw,4.5rem)] leading-[0.88] font-medium tracking-[-0.055em]"
+        >
           Masuk ke Seraya
         </CardTitle>
-        <CardDescription className="text-base">
-          Kelola undangan dan tamu dalam satu tempat.
+        <CardDescription className="text-seraya-text-secondary max-w-sm text-base leading-7">
+          Lanjutkan undangan, persiapan tamu, dan respons dalam satu workspace yang tenang.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-0 pt-8 pb-0">
         <form className="space-y-4" noValidate onSubmit={handleMagicLink}>
           <div className="space-y-2">
             <label className="text-seraya-text-primary text-sm font-semibold" htmlFor="login-email">
@@ -115,6 +119,9 @@ export function LoginForm({ initialNotice = null, nextPath }: LoginFormProps) {
               type="email"
               value={email}
             />
+            <p className="text-seraya-text-muted text-xs leading-5">
+              Kami akan mengirim link masuk aman ke alamat ini. Tidak perlu mengingat password.
+            </p>
           </div>
 
           {message ? (
@@ -123,7 +130,7 @@ export function LoginForm({ initialNotice = null, nextPath }: LoginFormProps) {
               className={
                 status === 'error'
                   ? 'text-seraya-status-error text-sm leading-6'
-                  : 'text-seraya-text-secondary text-sm leading-6'
+                  : 'text-seraya-text-secondary bg-seraya-soft rounded-[var(--seraya-radius-md)] px-4 py-3 text-sm leading-6'
               }
               role={status === 'error' ? 'alert' : 'status'}
             >
@@ -131,12 +138,13 @@ export function LoginForm({ initialNotice = null, nextPath }: LoginFormProps) {
             </p>
           ) : null}
 
-          <Button fullWidth loading={isSending} type="submit">
+          <Button fullWidth loading={isSending} size="lg" type="submit">
             Kirim link masuk
+            <span aria-hidden="true">→</span>
           </Button>
         </form>
 
-        <div className="my-5 flex items-center gap-3" aria-hidden="true">
+        <div className="my-6 flex items-center gap-3" aria-hidden="true">
           <div className="bg-seraya-border-default h-px flex-1" />
           <span className="text-seraya-text-muted text-xs">atau</span>
           <div className="bg-seraya-border-default h-px flex-1" />
@@ -146,12 +154,18 @@ export function LoginForm({ initialNotice = null, nextPath }: LoginFormProps) {
           disabled={isSending || status === 'sent'}
           fullWidth
           onClick={handleGoogleSignIn}
+          size="lg"
           type="button"
           variant="secondary"
         >
           <GoogleMark />
           Lanjutkan dengan Google
         </Button>
+
+        <div className="border-seraya-border-default mt-8 grid gap-3 border-t pt-6 text-xs leading-5 sm:grid-cols-2">
+          <p className="text-seraya-text-muted">Draf tetap pribadi sampai kalian menerbitkannya.</p>
+          <p className="text-seraya-text-muted">Data tamu tidak tampil pada undangan publik.</p>
+        </div>
       </CardContent>
     </Card>
   );

@@ -1,0 +1,155 @@
+:root {
+  --seraya-motion-instant: 100ms;
+  --seraya-motion-fast: 160ms;
+  --seraya-motion-standard: 240ms;
+  --seraya-motion-slow: 420ms;
+  --seraya-motion-hero: 720ms;
+  --seraya-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --seraya-ease-emphasized: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --seraya-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+}
+
+.seraya-marketing-nav-link {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  color: var(--seraya-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 650;
+  text-decoration: none;
+  transition: color var(--seraya-motion-fast) var(--seraya-ease-standard);
+}
+
+.seraya-marketing-nav-link:hover {
+  color: var(--seraya-text-primary);
+}
+
+.seraya-button-primary,
+.seraya-button-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  border-radius: var(--seraya-radius-pill);
+  font-size: 0.9375rem;
+  font-weight: 650;
+  line-height: 1;
+  text-align: center;
+  text-decoration: none;
+  transition:
+    transform var(--seraya-motion-fast) var(--seraya-ease-emphasized),
+    border-color var(--seraya-motion-fast) var(--seraya-ease-standard),
+    background-color var(--seraya-motion-fast) var(--seraya-ease-standard),
+    color var(--seraya-motion-fast) var(--seraya-ease-standard),
+    box-shadow var(--seraya-motion-fast) var(--seraya-ease-standard);
+}
+
+.seraya-button-primary {
+  background: var(--seraya-action-primary);
+  color: var(--seraya-text-inverse);
+  box-shadow: 0 12px 28px rgb(142 75 82 / 0.18);
+}
+
+.seraya-button-primary:hover {
+  transform: translateY(-1px);
+  background: var(--seraya-action-primary-hover);
+  box-shadow: 0 16px 34px rgb(142 75 82 / 0.22);
+}
+
+.seraya-button-secondary {
+  border: 1px solid var(--seraya-border-strong);
+  background: color-mix(in srgb, var(--seraya-bg-surface) 82%, transparent);
+  color: var(--seraya-text-primary);
+  backdrop-filter: blur(10px);
+}
+
+.seraya-button-secondary:hover {
+  transform: translateY(-1px);
+  border-color: var(--seraya-action-primary);
+  color: var(--seraya-action-primary);
+}
+
+.seraya-button-primary:active,
+.seraya-button-secondary:active {
+  transform: translateY(0);
+}
+
+.seraya-reveal-up,
+.seraya-reveal-scale {
+  animation-duration: var(--seraya-motion-hero);
+  animation-fill-mode: both;
+  animation-timing-function: var(--seraya-ease-emphasized);
+}
+
+.seraya-reveal-up {
+  animation-name: seraya-reveal-up;
+}
+
+.seraya-reveal-scale {
+  animation-name: seraya-reveal-scale;
+}
+
+.seraya-ambient-orb {
+  animation: seraya-ambient-orb 12s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes seraya-reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(1.1rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes seraya-reveal-scale {
+  from {
+    opacity: 0;
+    transform: translateY(1rem) scale(0.975);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes seraya-ambient-orb {
+  from {
+    transform: translate3d(-0.75rem, -0.4rem, 0) scale(0.98);
+  }
+
+  to {
+    transform: translate3d(0.85rem, 0.7rem, 0) scale(1.025);
+  }
+}
+
+@media (max-width: 639px) {
+  .seraya-button-primary,
+  .seraya-button-secondary {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seraya-reveal-up,
+  .seraya-reveal-scale,
+  .seraya-ambient-orb {
+    animation: none !important;
+  }
+
+  .seraya-button-primary,
+  .seraya-button-secondary {
+    transition: none;
+  }
+
+  .seraya-button-primary:hover,
+  .seraya-button-secondary:hover {
+    transform: none;
+  }
+}

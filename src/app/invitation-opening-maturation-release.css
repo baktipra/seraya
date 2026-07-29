@@ -1,0 +1,277 @@
+/* Release A — Flagship opening and collection-identity maturation.
+ * Presentation-only. Invitation authority, route semantics, and response
+ * persistence remain owned by the existing renderer and server boundaries.
+ */
+
+article[data-template] > header {
+  position: relative;
+}
+
+article[data-template] > header h1 {
+  text-wrap: balance;
+}
+
+article[data-template] > header h1,
+article[data-template] > header > div,
+article[data-template='laras'] > header [data-opening-monogram] {
+  animation: seraya-opening-content-enter 780ms cubic-bezier(0.2, 0.75, 0.2, 1) both;
+}
+
+@keyframes seraya-opening-content-enter {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Roselle — a warm romantic letter with softer depth and a fuller first screen. */
+article[data-template='roselle'] [data-roselle-chapter='opening'] {
+  min-height: clamp(40rem, 92svh, 58rem);
+  background:
+    radial-gradient(circle at 50% 42%, rgb(255 254 251 / 0.96), transparent 23rem),
+    radial-gradient(circle at 6% 7%, rgb(189 125 131 / 0.18), transparent 22rem),
+    radial-gradient(circle at 94% 88%, rgb(113 131 115 / 0.15), transparent 24rem),
+    linear-gradient(145deg, #fffdf9, var(--roselle-ivory));
+}
+
+article[data-template='roselle'] [data-roselle-chapter='opening']::before {
+  position: absolute;
+  z-index: -1;
+  width: min(78vw, 33rem);
+  aspect-ratio: 1;
+  border: 1px solid rgb(151 99 109 / 0.13);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 1.4rem rgb(255 254 251 / 0.36),
+    0 0 0 2.8rem rgb(151 99 109 / 0.035);
+  content: '';
+}
+
+article[data-template='roselle'] [data-roselle-chapter='opening'] > div {
+  width: min(100%, 40rem);
+  padding: clamp(2rem, 6vw, 3.25rem) clamp(0.5rem, 4vw, 2rem);
+}
+
+article[data-template='roselle'] [data-roselle-chapter='opening'] h1 {
+  max-width: 9.5ch;
+  font-size: clamp(4.2rem, 15vw, 8rem);
+  letter-spacing: -0.055em;
+  line-height: 0.78;
+  text-shadow: 0 0.12em 0.45em rgb(64 43 53 / 0.08);
+}
+
+article[data-template='roselle'] [data-roselle-chapter='opening'] h1 + p {
+  max-width: 30rem;
+  font-size: clamp(0.98rem, 2.3vw, 1.08rem);
+}
+
+article[data-template='roselle'] [data-roselle-chapter='opening'] > p:last-child {
+  bottom: clamp(1.35rem, 4vw, 2.2rem);
+}
+
+/* Aruna — an asymmetric editorial cover with strong typographic direction. */
+article[data-template='aruna'] > header {
+  isolation: isolate;
+  min-height: clamp(40rem, 88svh, 56rem);
+  grid-template-columns: minmax(0, 1fr) minmax(8rem, 11rem);
+  align-content: end;
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, rgb(255 253 248 / 0.98) 0 67%, rgb(249 237 225 / 0.94) 67%),
+    repeating-linear-gradient(90deg, transparent 0 4.25rem, rgb(185 95 72 / 0.045) 4.25rem 4.31rem);
+}
+
+article[data-template='aruna'] > header::before {
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  right: -0.08em;
+  color: rgb(185 95 72 / 0.075);
+  content: 'A';
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: clamp(22rem, 55vw, 38rem);
+  font-weight: 400;
+  line-height: 0.7;
+  transform: translateY(-48%);
+}
+
+article[data-template='aruna'] > header > div:first-child {
+  height: 2px;
+  background: linear-gradient(90deg, var(--aruna-clay) 0 72%, transparent 72%);
+  opacity: 1;
+}
+
+article[data-template='aruna'] > header > div:nth-child(2) {
+  position: relative;
+  z-index: 1;
+  max-width: 36rem;
+  padding-bottom: clamp(0.5rem, 2vw, 1rem);
+}
+
+article[data-template='aruna'] > header h1 {
+  max-width: 8ch;
+  margin-top: 1.1rem;
+  font-size: clamp(4.5rem, 12vw, 8rem);
+  letter-spacing: -0.065em;
+  line-height: 0.78;
+}
+
+article[data-template='aruna'] > header h1 + p {
+  max-width: 28rem;
+  margin-top: 1.6rem;
+  font-size: clamp(0.98rem, 2.2vw, 1.06rem);
+}
+
+article[data-template='aruna'] > header > div:last-child {
+  position: relative;
+  z-index: 1;
+  align-self: end;
+  margin-bottom: 0.4rem;
+  padding: 1.15rem 0 0 1.1rem;
+  border-left-width: 2px;
+}
+
+article[data-template='aruna'] > header > div:last-child span:last-child {
+  max-width: 9ch;
+  font-size: clamp(1.4rem, 4vw, 1.9rem);
+}
+
+/* Laras — a formal evening frame with couple-owned monogram identity. */
+article[data-template='laras'] > header {
+  isolation: isolate;
+  min-height: clamp(40rem, 92svh, 58rem);
+  padding-top: clamp(4.5rem, 12vw, 7rem);
+  padding-bottom: clamp(4.5rem, 12vw, 7rem);
+  background:
+    radial-gradient(circle at 50% 34%, rgb(200 161 110 / 0.13), transparent 19rem),
+    radial-gradient(circle at 85% 12%, rgb(189 124 138 / 0.2), transparent 24rem),
+    linear-gradient(155deg, #33283d, #17131f 72%);
+}
+
+article[data-template='laras'] > header::before {
+  position: absolute;
+  z-index: -1;
+  inset: clamp(0.85rem, 3vw, 1.45rem);
+  border: 1px solid rgb(200 161 110 / 0.34);
+  box-shadow: inset 0 0 0 clamp(0.35rem, 1.2vw, 0.65rem) rgb(255 248 237 / 0.015);
+  content: '';
+  pointer-events: none;
+}
+
+article[data-template='laras'] > header::after {
+  position: absolute;
+  z-index: -2;
+  width: min(68vw, 30rem);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(200 161 110 / 0.09), transparent 68%);
+  content: '';
+  filter: blur(0.2rem);
+}
+
+article[data-template='laras'] > header > span {
+  width: clamp(4.5rem, 13vw, 7.5rem);
+  height: clamp(4.5rem, 13vw, 7.5rem);
+  opacity: 0.82;
+}
+
+article[data-template='laras'] > header [data-opening-monogram] {
+  width: clamp(5rem, 13vw, 6.2rem);
+  height: clamp(5rem, 13vw, 6.2rem);
+  margin: clamp(1.6rem, 4vw, 2.2rem) 0;
+  border-color: rgb(223 197 142 / 0.78);
+  box-shadow:
+    0 0 0 0.45rem rgb(200 161 110 / 0.06),
+    0 1.2rem 3rem rgb(0 0 0 / 0.18);
+  font-size: clamp(1.75rem, 5vw, 2.4rem);
+  letter-spacing: 0.08em;
+}
+
+article[data-template='laras'] > header h1 {
+  max-width: 9ch;
+  font-size: clamp(4.25rem, 12vw, 7.7rem);
+  letter-spacing: -0.055em;
+  line-height: 0.8;
+  text-shadow: 0 0.18em 0.65em rgb(0 0 0 / 0.28);
+}
+
+article[data-template='laras'] > header h1 + p {
+  max-width: 30rem;
+  font-size: clamp(0.98rem, 2.2vw, 1.06rem);
+}
+
+article[data-template='laras'] > header > p:not(:first-of-type):last-of-type {
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid rgb(200 161 110 / 0.48);
+}
+
+@media (max-width: 36rem) {
+  article[data-template='roselle'] [data-roselle-chapter='opening'],
+  article[data-template='aruna'] > header,
+  article[data-template='laras'] > header {
+    min-height: 88svh;
+  }
+
+  article[data-template='roselle'] [data-roselle-chapter='opening'] > div {
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  article[data-template='roselle'] [data-roselle-chapter='opening'] h1 {
+    max-width: 8.5ch;
+    font-size: clamp(4rem, 19vw, 6rem);
+  }
+
+  article[data-template='aruna'] > header {
+    grid-template-columns: 1fr;
+    align-content: end;
+    padding-top: 5rem;
+    background:
+      linear-gradient(180deg, rgb(255 253 248 / 0.98) 0 72%, rgb(249 237 225 / 0.96) 72%),
+      repeating-linear-gradient(90deg, transparent 0 3rem, rgb(185 95 72 / 0.045) 3rem 3.06rem);
+  }
+
+  article[data-template='aruna'] > header::before {
+    top: 44%;
+    right: -0.16em;
+    font-size: clamp(18rem, 92vw, 25rem);
+  }
+
+  article[data-template='aruna'] > header h1 {
+    max-width: 7ch;
+    font-size: clamp(4.4rem, 21vw, 6.3rem);
+  }
+
+  article[data-template='aruna'] > header > div:last-child {
+    width: 100%;
+    margin-top: 2rem;
+    padding: 1rem 0 0;
+    border-top: 2px solid var(--aruna-clay);
+    border-left: 0;
+  }
+
+  article[data-template='laras'] > header {
+    padding-right: clamp(1.6rem, 8vw, 2.2rem);
+    padding-left: clamp(1.6rem, 8vw, 2.2rem);
+  }
+
+  article[data-template='laras'] > header h1 {
+    max-width: 8.5ch;
+    font-size: clamp(4rem, 19vw, 6rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  article[data-template] > header h1,
+  article[data-template] > header > div,
+  article[data-template='laras'] > header [data-opening-monogram] {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+}

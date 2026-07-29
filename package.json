@@ -28,6 +28,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "playwright test",
+    "e2e:invitation-experience": "playwright test --config=playwright.invitation-experience.config.ts",
     "e2e:personal-response": "playwright test --config=playwright.personal-response.config.ts",
     "e2e:ui": "playwright test --ui",
     "test:ci": "npm run lint && npm run typecheck && npm run test && npm run build",

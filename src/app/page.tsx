@@ -1,371 +1,480 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+import {
+  CollectionCard,
+  FlagshipFooter,
+  FlagshipHeader,
+  InvitationCover,
+  flagshipCollections,
+} from '@/components/marketing/flagship-marketing';
+
 export const dynamic = 'force-static';
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Seraya — Undangan pernikahan digital yang terasa personal',
+    absolute: 'Seraya — Pengalaman tamu pernikahan yang personal',
   },
   description:
-    'Buat undangan pernikahan digital, kelola tamu, bagikan tautan pribadi, dan kumpulkan RSVP dalam satu tempat.',
+    'Susun undangan, bagikan tautan personal, dan kelola perjalanan tamu pernikahan Indonesia dalam satu pengalaman yang indah dan mudah digunakan.',
 };
 
-const capabilities = [
+const ownerJourney = [
   {
-    description: 'Lengkapi detail undangan dan lihat hasilnya di preview pribadi.',
     number: '01',
-    title: 'Susun undangan dengan tenang',
+    title: 'Pilih pengalaman',
+    description:
+      'Mulai dari Roselle, Aruna, atau Laras—tiga koleksi dengan karakter yang benar-benar berbeda.',
   },
   {
-    description: 'Buat tautan untuk tiap tamu dan siapkan pesan untuk dibagikan lewat WhatsApp.',
     number: '02',
-    title: 'Bagikan tautan pribadi',
+    title: 'Susun dengan tenang',
+    description:
+      'Lengkapi cerita, acara, lokasi, galeri, dan detail penting sambil melihat arah hasilnya.',
   },
   {
-    description: 'Tamu dapat memilih hadir atau tidak hadir melalui tautan pribadinya.',
     number: '03',
-    title: 'Kumpulkan konfirmasi kehadiran',
+    title: 'Terbitkan saat siap',
+    description:
+      'Seraya membantu menunjukkan bagian yang belum lengkap sebelum undangan dibagikan.',
+  },
+  {
+    number: '04',
+    title: 'Bagikan secara personal',
+    description:
+      'Siapkan tautan untuk tiap tamu, bagikan melalui WhatsApp, lalu terima RSVP dan ucapan.',
   },
 ] as const;
 
-const steps = [
+const indonesiaProof = [
   {
-    description: 'Mulai dengan detail dasar acara kalian.',
-    title: 'Buat undangan',
+    title: 'WhatsApp-first',
+    description:
+      'Tautan dan pesan personal disiapkan untuk cara pasangan Indonesia benar-benar mengundang tamu.',
   },
   {
-    description: 'Atur pembuka, mempelai, acara, lokasi, dan pesan penutup.',
-    title: 'Lengkapi isi undangan',
+    title: 'Keluarga dan rombongan',
+    description:
+      'Konfirmasi kehadiran memahami jumlah rombongan, bukan hanya satu respons individual.',
   },
   {
-    description: 'Undangan publik tetap memakai versi yang kalian terbitkan.',
-    title: 'Aktifkan dan terbitkan saat siap',
+    title: 'Banyak rangkaian acara',
+    description:
+      'Akad, resepsi, pemberkatan, ngunduh mantu, sangjit, dan acara lain dapat hidup dalam satu undangan.',
   },
   {
-    description: 'Bagikan tautan pribadi ke tamu dan lihat konfirmasi mereka di dashboard.',
-    title: 'Bagikan dan terima RSVP',
+    title: 'Dibuka nyaman dari HP',
+    description:
+      'Pengalaman tamu dirancang mobile-first untuk dibuka langsung dari percakapan WhatsApp.',
+  },
+  {
+    title: 'Persiapan tamu dengan Excel',
+    description:
+      'Import dan export mengikuti format kerja yang sudah akrab bagi pasangan, keluarga, dan panitia.',
+  },
+  {
+    title: 'Amplop Digital',
+    description:
+      'Informasi hadiah dapat disusun secara sopan di dalam perjalanan undangan, bukan terasa seperti transaksi.',
   },
 ] as const;
 
-const trustStatements = [
-  'Draft tetap pribadi sebelum diterbitkan.',
-  'Tautan pribadi dibuat untuk tiap tamu.',
-  'Perubahan undangan publik dilakukan saat kalian menerbitkan ulang.',
+const faqs = [
+  {
+    question: 'Apakah setiap tamu bisa mendapat undangan yang berbeda?',
+    answer:
+      'Ya. Seraya menyiapkan tautan personal untuk tiap tamu, lengkap dengan sapaan dan akses respons yang sesuai.',
+  },
+  {
+    question: 'Apakah undangan bisa diubah setelah dibuat?',
+    answer:
+      'Bisa. Perubahan tersimpan di draf pribadi dan baru mengubah undangan publik setelah kalian menerbitkannya.',
+  },
+  {
+    question: 'Apakah Seraya mendukung beberapa acara?',
+    answer:
+      'Ya. Kalian dapat menyusun beberapa rangkaian acara beserta waktu, lokasi, dan petunjuknya.',
+  },
+  {
+    question: 'Bagaimana tamu memberikan konfirmasi kehadiran?',
+    answer:
+      'Tamu membuka tautan personal, memilih hadir atau tidak, lalu mengisi jumlah rombongan yang dikonfirmasi.',
+  },
 ] as const;
-
-const primaryLinkClassName =
-  'inline-flex min-h-12 items-center justify-center rounded-[var(--seraya-radius-md)] bg-seraya-action-primary px-5 text-center text-base font-semibold text-seraya-text-inverse shadow-[0_8px_18px_rgb(142_75_82_/_0.16)] transition-colors hover:bg-seraya-action-primary-hover focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-seraya-focus-ring';
-
-const secondaryLinkClassName =
-  'inline-flex min-h-12 items-center justify-center rounded-[var(--seraya-radius-md)] border border-seraya-border-default bg-seraya-surface px-5 text-center text-base font-semibold text-seraya-text-primary transition-colors hover:border-seraya-border-strong hover:bg-seraya-canvas focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-seraya-focus-ring';
-
-function ProductPreviewComposition() {
-  return (
-    <figure
-      aria-labelledby="product-preview-caption"
-      className="border-seraya-border-default bg-seraya-surface relative mx-auto w-full max-w-xl overflow-hidden rounded-[var(--seraya-radius-xl)] border p-4 shadow-[var(--seraya-shadow-float)] sm:p-6"
-    >
-      <div
-        aria-hidden="true"
-        className="bg-seraya-sand/70 absolute -top-16 -right-16 size-44 rounded-full"
-      />
-      <div
-        aria-hidden="true"
-        className="bg-seraya-rosewood-soft absolute -bottom-20 -left-16 size-48 rounded-full"
-      />
-
-      <div className="relative">
-        <div className="mb-5 flex items-center justify-between gap-3">
-          <span className="text-seraya-text-muted text-xs font-semibold tracking-[0.12em] uppercase">
-            Contoh alur Seraya
-          </span>
-          <span className="bg-seraya-brand-soft text-seraya-action-primary rounded-full px-3 py-1 text-xs font-semibold">
-            Draft pribadi
-          </span>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_10rem]">
-          <section className="border-seraya-border-default bg-seraya-canvas rounded-[calc(var(--seraya-radius-xl)-0.25rem)] border p-5 sm:p-6">
-            <p className="text-seraya-action-primary text-xs font-semibold tracking-[0.13em] uppercase">
-              Preview undangan
-            </p>
-            <div className="mt-6 space-y-3">
-              <span className="bg-seraya-rosewood-soft block h-2.5 w-16 rounded-full" />
-              <span className="bg-seraya-ink/85 block h-7 w-4/5 rounded-full" />
-              <span className="bg-seraya-ink/85 block h-7 w-3/5 rounded-full" />
-              <span className="bg-seraya-sand mt-6 block h-px w-full" />
-              <span className="bg-seraya-ink/70 block h-2.5 w-2/3 rounded-full" />
-              <span className="bg-seraya-ink/50 block h-2.5 w-full rounded-full" />
-              <span className="bg-seraya-ink/50 block h-2.5 w-5/6 rounded-full" />
-            </div>
-            <p className="text-seraya-text-secondary mt-7 text-sm leading-6">
-              Susun detail, simpan draft, lalu lihat hasilnya sebelum diterbitkan.
-            </p>
-          </section>
-
-          <div className="flex flex-col gap-4">
-            <section className="border-seraya-border-default bg-seraya-paper rounded-[var(--seraya-radius-lg)] border p-4 shadow-[var(--seraya-shadow-soft)]">
-              <span className="bg-seraya-sage/20 text-seraya-text-primary inline-flex rounded-full px-2.5 py-1 text-xs font-semibold">
-                Tamu
-              </span>
-              <p className="text-seraya-text-primary mt-4 font-serif text-xl leading-tight tracking-[-0.02em]">
-                Tautan pribadi
-              </p>
-              <span className="bg-seraya-sand mt-4 block h-2 w-full rounded-full" />
-              <span className="bg-seraya-sand mt-2 block h-2 w-3/4 rounded-full" />
-            </section>
-
-            <section className="bg-seraya-brand-soft rounded-[var(--seraya-radius-lg)] p-4">
-              <span className="text-seraya-action-primary text-xs font-semibold tracking-[0.1em] uppercase">
-                RSVP
-              </span>
-              <p className="text-seraya-text-primary mt-3 text-sm leading-5 font-semibold">
-                Konfirmasi hadir melalui tautan pribadi.
-              </p>
-              <div aria-hidden="true" className="mt-4 flex gap-2">
-                <span className="bg-seraya-surface h-7 flex-1 rounded-[var(--seraya-radius-sm)]" />
-                <span className="bg-seraya-action-primary h-7 flex-1 rounded-[var(--seraya-radius-sm)]" />
-              </div>
-            </section>
-          </div>
-        </div>
-      </div>
-
-      <figcaption
-        id="product-preview-caption"
-        className="text-seraya-text-muted relative mt-4 text-xs leading-5"
-      >
-        Ilustrasi alur kerja Seraya, bukan undangan atau data pasangan yang sedang tayang.
-      </figcaption>
-    </figure>
-  );
-}
 
 export default function Home() {
   return (
-    <main className="bg-seraya-canvas min-h-screen overflow-x-hidden">
-      <header className="border-seraya-border-default/80 border-b">
-        <nav
-          aria-label="Navigasi utama"
-          className="mx-auto flex min-h-18 w-full max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8 lg:px-10"
-        >
-          <Link
-            aria-label="Seraya, kembali ke beranda"
-            className="text-seraya-text-primary focus-visible:outline-seraya-focus-ring font-serif text-2xl tracking-[-0.03em] focus-visible:outline-3 focus-visible:outline-offset-4"
-            href="/"
-          >
-            Seraya
-          </Link>
+    <div className="bg-seraya-canvas min-h-screen overflow-x-hidden">
+      <FlagshipHeader />
 
-          <div className="flex items-center gap-2.5 sm:gap-4">
-            <Link
-              className="text-seraya-text-secondary hover:text-seraya-text-primary focus-visible:outline-seraya-focus-ring inline-flex min-h-11 items-center justify-center px-2 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
-              href="/login"
-            >
-              Masuk
-            </Link>
-            <Link className={`${primaryLinkClassName} hidden sm:inline-flex`} href="/dashboard/new">
-              Mulai buat undangan
-            </Link>
-            <Link
-              aria-label="Mulai buat undangan"
-              className="bg-seraya-action-primary text-seraya-text-inverse hover:bg-seraya-action-primary-hover focus-visible:outline-seraya-focus-ring inline-flex min-h-11 items-center justify-center rounded-[var(--seraya-radius-md)] px-3.5 text-sm font-semibold shadow-[0_8px_18px_rgb(142_75_82_/_0.16)] transition-colors focus-visible:outline-3 focus-visible:outline-offset-2 sm:hidden"
-              href="/dashboard/new"
-            >
-              Mulai buat undangan
-            </Link>
+      <main>
+        <section className="relative isolate overflow-hidden">
+          <div
+            aria-hidden="true"
+            className="seraya-ambient-orb bg-seraya-rosewood-soft/80 absolute top-2 right-[-9rem] -z-10 size-[30rem] rounded-full blur-3xl"
+          />
+          <div
+            aria-hidden="true"
+            className="seraya-ambient-orb bg-seraya-sand/75 absolute bottom-[-14rem] left-[-12rem] -z-10 size-[34rem] rounded-full blur-3xl [animation-delay:-4s]"
+          />
+
+          <div className="mx-auto grid w-full max-w-[90rem] gap-12 px-5 py-14 sm:px-8 sm:py-18 lg:grid-cols-[minmax(0,1.02fr)_minmax(24rem,0.98fr)] lg:items-center lg:gap-16 lg:px-10 lg:py-16 xl:py-20">
+            <div className="max-w-[46rem]">
+              <p className="seraya-eyebrow text-seraya-action-primary seraya-reveal-up">
+                Undangan personal untuk pernikahan Indonesia
+              </p>
+              <h1 className="text-seraya-text-primary seraya-reveal-up mt-5 font-serif text-[clamp(3.45rem,7.2vw,7rem)] leading-[0.83] font-medium tracking-[-0.065em] [animation-delay:80ms]">
+                Satu undangan yang indah.
+                <span className="text-seraya-action-primary mt-2 block italic">
+                  Personal untuk setiap tamu.
+                </span>
+              </h1>
+              <p className="text-seraya-text-secondary seraya-reveal-up mt-7 max-w-2xl text-base leading-7 [animation-delay:160ms] sm:text-lg sm:leading-8">
+                Susun undangan, bagikan tautan personal, dan kelola respons tamu dalam satu
+                pengalaman yang tenang—dari kabar pertama sampai hari pernikahan.
+              </p>
+              <div className="seraya-reveal-up mt-8 flex flex-col gap-3 [animation-delay:240ms] sm:flex-row sm:flex-wrap">
+                <Link className="seraya-button-primary min-h-13 px-6" href="/dashboard/new">
+                  Mulai buat undangan
+                  <span aria-hidden="true">→</span>
+                </Link>
+                <Link className="seraya-button-secondary min-h-13 px-6" href="/templates">
+                  Lihat koleksi desain
+                </Link>
+              </div>
+              <div className="text-seraya-text-muted seraya-reveal-up mt-7 flex flex-wrap gap-x-6 gap-y-2 text-xs font-semibold [animation-delay:320ms]">
+                <span>Dirancang mobile-first</span>
+                <span>Tautan personal</span>
+                <span>RSVP keluarga</span>
+              </div>
+            </div>
+
+            <figure className="seraya-reveal-scale relative mx-auto w-full max-w-[31rem] [animation-delay:120ms]">
+              <div
+                aria-hidden="true"
+                className="border-seraya-action-primary/25 absolute top-[8%] -left-[8%] h-[70%] w-[72%] rotate-[-7deg] rounded-[2rem] border"
+              />
+              <div
+                aria-hidden="true"
+                className="bg-seraya-ink absolute right-[-4%] bottom-[5%] h-[78%] w-[72%] rotate-[6deg] rounded-[2rem] opacity-[0.07]"
+              />
+              <div className="relative mx-auto w-[78%] min-w-[17rem]">
+                <InvitationCover collection="roselle" />
+              </div>
+              <figcaption className="text-seraya-text-muted mt-4 text-center text-xs leading-5">
+                Roselle — pengalaman romantis yang hangat, ringan, dan personal.
+              </figcaption>
+            </figure>
           </div>
-        </nav>
-      </header>
+        </section>
 
-      <section className="relative">
-        <div
-          aria-hidden="true"
-          className="bg-seraya-sand/65 absolute top-12 right-[-8rem] size-72 rounded-full blur-3xl"
-        />
-        <div
-          aria-hidden="true"
-          className="bg-seraya-rosewood-soft/70 absolute bottom-4 left-[-10rem] size-80 rounded-full blur-3xl"
-        />
+        <section className="border-seraya-border-default bg-seraya-surface border-y">
+          <div className="mx-auto grid w-full max-w-[90rem] gap-6 px-5 py-7 text-center sm:grid-cols-3 sm:px-8 lg:px-10">
+            <p className="text-seraya-text-secondary text-sm leading-6">
+              <strong className="text-seraya-text-primary block font-serif text-2xl font-medium">
+                Draf pribadi
+              </strong>
+              Tidak terlihat oleh tamu sebelum diterbitkan.
+            </p>
+            <p className="text-seraya-text-secondary border-seraya-border-default text-sm leading-6 sm:border-x sm:px-6">
+              <strong className="text-seraya-text-primary block font-serif text-2xl font-medium">
+                Tautan personal
+              </strong>
+              Sapaan dan respons terpisah untuk setiap tamu.
+            </p>
+            <p className="text-seraya-text-secondary text-sm leading-6">
+              <strong className="text-seraya-text-primary block font-serif text-2xl font-medium">
+                Satu workspace
+              </strong>
+              Undangan, tamu, pembagian, RSVP, dan ucapan.
+            </p>
+          </div>
+        </section>
 
-        <div className="relative mx-auto grid w-full max-w-7xl gap-12 px-5 py-16 sm:px-8 sm:py-22 lg:grid-cols-[minmax(0,1.05fr)_minmax(24rem,0.95fr)] lg:items-center lg:gap-14 lg:px-10 lg:py-20">
-          <div className="max-w-2xl">
-            <p className="text-seraya-action-primary text-sm font-semibold tracking-[0.13em] uppercase">
-              Undangan pernikahan digital yang terasa personal
-            </p>
-            <h1 className="seraya-display-xl mt-5 max-w-2xl lg:!text-[clamp(3.5rem,4.5vw,4rem)] lg:!leading-[0.96]">
-              Buat undangan yang rapi,
-              <br className="hidden sm:block" /> lalu bagikan dengan cara yang lebih personal.
-            </h1>
-            <p className="seraya-body-lg text-seraya-text-secondary mt-7 max-w-xl lg:mt-6">
-              Susun undangan, kelola tamu, dan kumpulkan konfirmasi kehadiran dalam satu tempat yang
-              tenang dan mudah dipakai.
-            </p>
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap lg:mt-7">
-              <Link className={primaryLinkClassName} href="/dashboard/new">
-                Mulai buat undangan
-              </Link>
-              <Link className={secondaryLinkClassName} href="#cara-kerja">
-                Lihat cara kerjanya
+        <section id="koleksi" aria-labelledby="collection-title">
+          <div className="mx-auto w-full max-w-[90rem] px-5 py-20 sm:px-8 sm:py-24 lg:px-10 lg:py-32">
+            <div className="grid gap-7 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-end">
+              <div>
+                <p className="seraya-eyebrow text-seraya-action-primary">Koleksi flagship</p>
+                <h2 id="collection-title" className="seraya-display-lg mt-4 max-w-3xl">
+                  Bukan sekadar ganti warna. Tiga pengalaman dengan karakter berbeda.
+                </h2>
+              </div>
+              <p className="text-seraya-text-secondary max-w-xl text-base leading-7 lg:justify-self-end">
+                Roselle, Aruna, dan Laras memiliki ritme, tipografi, komposisi, dan motion
+                sendiri—tanpa mengorbankan fungsi penting undangan personal.
+              </p>
+            </div>
+
+            <div className="mt-14 space-y-16 lg:mt-20 lg:space-y-24">
+              {flagshipCollections.map((collection, index) => (
+                <CollectionCard
+                  collection={collection}
+                  key={collection.key}
+                  priority={index % 2 === 1}
+                />
+              ))}
+            </div>
+
+            <div className="mt-14 text-center lg:mt-20">
+              <Link className="seraya-button-secondary min-h-12 px-6" href="/templates">
+                Bandingkan seluruh koleksi
+                <span aria-hidden="true">→</span>
               </Link>
             </div>
           </div>
+        </section>
 
-          <ProductPreviewComposition />
-        </div>
-      </section>
-
-      <section
-        aria-labelledby="capability-title"
-        className="border-seraya-border-default/80 bg-seraya-surface border-y"
-      >
-        <div className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 sm:py-20 lg:px-10">
-          <div className="max-w-2xl">
-            <p className="text-seraya-action-primary text-sm font-semibold tracking-[0.13em] uppercase">
-              Untuk momen yang lebih tertata
-            </p>
-            <h2 id="capability-title" className="seraya-display-md mt-4">
-              Semua yang dibutuhkan untuk membagikan undangan dengan lebih personal.
-            </h2>
-          </div>
-
-          <div className="mt-10 grid gap-4 md:grid-cols-3">
-            {capabilities.map((capability) => (
-              <article
-                key={capability.number}
-                className="border-seraya-border-default bg-seraya-canvas rounded-[var(--seraya-radius-lg)] border p-6"
+        <section className="bg-seraya-ink text-white" aria-labelledby="personal-journey-title">
+          <div className="mx-auto grid w-full max-w-[90rem] gap-12 px-5 py-20 sm:px-8 sm:py-24 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-center lg:gap-18 lg:px-10 lg:py-32">
+            <div>
+              <p className="text-seraya-sand text-xs font-semibold tracking-[0.18em] uppercase">
+                Dibuat untuk tamu, bukan hanya dilihat owner
+              </p>
+              <h2
+                id="personal-journey-title"
+                className="mt-5 max-w-2xl font-serif text-[clamp(3rem,6vw,5.8rem)] leading-[0.88] font-medium tracking-[-0.055em]"
               >
-                <span className="text-seraya-action-primary text-xs font-semibold tracking-[0.12em] uppercase">
-                  {capability.number}
-                </span>
-                <h3 className="text-seraya-text-primary mt-6 font-serif text-2xl leading-tight tracking-[-0.025em]">
-                  {capability.title}
-                </h3>
-                <p className="text-seraya-text-secondary mt-3 text-sm leading-6">
-                  {capability.description}
-                </p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
+                Setiap tamu menerima perjalanan yang terasa ditujukan untuk mereka.
+              </h2>
+              <p className="mt-7 max-w-xl text-base leading-7 text-white/70 sm:text-lg sm:leading-8">
+                Dari pesan WhatsApp sampai sapaan pembuka, informasi acara, RSVP, dan
+                ucapan—semuanya tersusun sebagai satu pengalaman personal.
+              </p>
+            </div>
 
-      <section id="cara-kerja" aria-labelledby="how-it-works-title" className="scroll-mt-6">
-        <div className="mx-auto grid w-full max-w-7xl gap-10 px-5 py-16 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16 lg:px-10 lg:py-28">
-          <div className="max-w-xl">
-            <p className="text-seraya-action-primary text-sm font-semibold tracking-[0.13em] uppercase">
-              Cara kerja
-            </p>
-            <h2 id="how-it-works-title" className="seraya-display-md mt-4">
-              Dari detail pertama sampai undangan siap dibagikan.
-            </h2>
-            <p className="text-seraya-text-secondary mt-5 max-w-md text-base leading-7">
-              Seraya menjaga alurnya tetap jelas: kalian mengatur draft pribadi terlebih dahulu,
-              lalu menerbitkan versi publik saat benar-benar siap.
-            </p>
+            <ol className="divide-y divide-white/14 border-y border-white/14">
+              {[
+                'Menerima pesan personal di WhatsApp',
+                'Membuka undangan dengan sapaan namanya',
+                'Memahami acara, lokasi, dan informasi penting',
+                'Memberikan konfirmasi kehadiran',
+                'Mengirim ucapan tanpa keluar dari perjalanan',
+              ].map((item, index) => (
+                <li className="grid grid-cols-[2.8rem_minmax(0,1fr)] gap-4 py-5 sm:py-6" key={item}>
+                  <span className="text-seraya-sand text-xs font-semibold tracking-[0.14em]">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <p className="text-base leading-7 text-white/84 sm:text-lg">{item}</p>
+                </li>
+              ))}
+            </ol>
           </div>
+        </section>
 
-          <ol className="border-seraya-border-default divide-seraya-border-default bg-seraya-surface divide-y overflow-hidden rounded-[var(--seraya-radius-xl)] border shadow-[var(--seraya-shadow-soft)]">
-            {steps.map((step, index) => (
-              <li
-                key={step.title}
-                className="grid gap-4 p-5 sm:grid-cols-[2.5rem_minmax(0,1fr)] sm:gap-5 sm:p-6"
-              >
-                <span className="bg-seraya-brand-soft text-seraya-action-primary inline-flex size-10 items-center justify-center rounded-full text-sm font-semibold">
-                  {String(index + 1).padStart(2, '0')}
-                </span>
-                <div>
-                  <h3 className="text-seraya-text-primary text-lg font-semibold tracking-[-0.02em]">
+        <section id="cara-kerja" aria-labelledby="owner-journey-title" className="scroll-mt-24">
+          <div className="mx-auto w-full max-w-[90rem] px-5 py-20 sm:px-8 sm:py-24 lg:px-10 lg:py-32">
+            <div className="max-w-3xl">
+              <p className="seraya-eyebrow text-seraya-action-primary">
+                Dari ide sampai siap dibagikan
+              </p>
+              <h2 id="owner-journey-title" className="seraya-display-lg mt-4">
+                Alur yang jelas, tanpa memaksa kalian memahami sistem teknis.
+              </h2>
+            </div>
+
+            <ol className="mt-12 grid gap-px overflow-hidden rounded-[1.5rem] border border-[var(--seraya-border-default)] bg-[var(--seraya-border-default)] md:grid-cols-2 lg:mt-16 lg:grid-cols-4">
+              {ownerJourney.map((step) => (
+                <li className="bg-seraya-surface min-h-[18rem] p-6 sm:p-8" key={step.number}>
+                  <span className="text-seraya-action-primary text-xs font-semibold tracking-[0.16em] uppercase">
+                    {step.number}
+                  </span>
+                  <h3 className="text-seraya-text-primary mt-16 font-serif text-3xl leading-[0.95] font-medium tracking-[-0.035em]">
                     {step.title}
                   </h3>
-                  <p className="text-seraya-text-secondary mt-1.5 text-sm leading-6">
+                  <p className="text-seraya-text-secondary mt-4 text-sm leading-6">
                     {step.description}
                   </p>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
 
-      <section aria-label="Kejelasan privasi dan penerbitan" className="bg-seraya-soft">
-        <div className="mx-auto grid w-full max-w-7xl gap-px px-5 py-5 sm:grid-cols-3 sm:px-8 lg:px-10">
-          {trustStatements.map((statement) => (
-            <p
-              key={statement}
-              className="text-seraya-text-secondary border-seraya-border-default/80 border-b py-4 text-sm leading-6 last:border-b-0 sm:border-r sm:border-b-0 sm:px-6 sm:first:pl-0 sm:last:border-r-0 sm:last:pr-0"
-            >
-              {statement}
-            </p>
-          ))}
-        </div>
-      </section>
+        <section
+          id="untuk-indonesia"
+          aria-labelledby="indonesia-title"
+          className="bg-seraya-soft scroll-mt-24"
+        >
+          <div className="mx-auto grid w-full max-w-[90rem] gap-12 px-5 py-20 sm:px-8 sm:py-24 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:gap-18 lg:px-10 lg:py-32">
+            <div className="max-w-xl">
+              <p className="seraya-eyebrow text-seraya-action-primary">Indonesia-first</p>
+              <h2 id="indonesia-title" className="seraya-display-lg mt-4">
+                Mengikuti cara keluarga Indonesia benar-benar menyiapkan tamu.
+              </h2>
+              <p className="text-seraya-text-secondary mt-6 text-base leading-7">
+                Seraya tidak hanya menerjemahkan produk luar. Alur, bahasa, dan operasionalnya
+                dibangun untuk WhatsApp, keluarga besar, rombongan, banyak acara, dan kerja bersama
+                panitia.
+              </p>
+            </div>
 
-      <section aria-labelledby="final-cta-title">
-        <div className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 sm:py-20 lg:px-10 lg:py-28">
-          <div className="bg-seraya-ink relative overflow-hidden rounded-[var(--seraya-radius-xl)] px-6 py-12 text-center sm:px-12 sm:py-16">
+            <div className="grid gap-x-10 gap-y-8 sm:grid-cols-2">
+              {indonesiaProof.map((item) => (
+                <article className="border-seraya-border-strong border-t pt-5" key={item.title}>
+                  <h3 className="text-seraya-text-primary text-base font-semibold">{item.title}</h3>
+                  <p className="text-seraya-text-secondary mt-2 text-sm leading-6">
+                    {item.description}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section aria-labelledby="privacy-title">
+          <div className="mx-auto grid w-full max-w-[90rem] gap-10 px-5 py-20 sm:px-8 sm:py-24 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-18 lg:px-10 lg:py-32">
+            <div className="bg-seraya-brand-soft relative overflow-hidden rounded-[2rem] p-7 sm:p-10 lg:p-12">
+              <div
+                aria-hidden="true"
+                className="border-seraya-action-primary/20 absolute -top-16 -right-12 size-52 rounded-full border"
+              />
+              <p className="seraya-eyebrow text-seraya-action-primary">
+                Kontrol tetap di tangan kalian
+              </p>
+              <div className="mt-10 space-y-6">
+                {[
+                  ['Draf pribadi', 'Isi yang sedang dikerjakan belum terlihat oleh tamu.'],
+                  ['Undangan publik', 'Hanya versi yang diterbitkan yang tampil pada alamat umum.'],
+                  [
+                    'Undangan personal',
+                    'Sapaan dan respons tamu tetap berada di tautan privatnya.',
+                  ],
+                ].map(([title, description]) => (
+                  <div className="border-seraya-action-primary/18 border-t pt-5" key={title}>
+                    <p className="text-seraya-text-primary font-semibold">{title}</p>
+                    <p className="text-seraya-text-secondary mt-2 text-sm leading-6">
+                      {description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="seraya-eyebrow text-seraya-action-primary">
+                Privasi yang dapat dipahami
+              </p>
+              <h2 id="privacy-title" className="seraya-display-lg mt-4">
+                Personal tanpa membuat data tamu menjadi konsumsi publik.
+              </h2>
+              <p className="text-seraya-text-secondary mt-6 max-w-xl text-base leading-7 sm:text-lg sm:leading-8">
+                Seraya memisahkan undangan publik dan pengalaman personal. Tamu hanya melihat
+                informasi yang memang ditujukan untuk mereka, sementara owner tetap memiliki kendali
+                penerbitan.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section
+          aria-labelledby="pricing-title"
+          className="border-seraya-border-default bg-seraya-surface border-y"
+        >
+          <div className="mx-auto grid w-full max-w-[90rem] gap-10 px-5 py-20 sm:px-8 sm:py-24 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)] lg:items-center lg:gap-18 lg:px-10 lg:py-28">
+            <div>
+              <p className="seraya-eyebrow text-seraya-action-primary">Harga yang mudah dipahami</p>
+              <h2 id="pricing-title" className="seraya-display-md mt-4">
+                Mulai dari satu pengalaman lengkap, bukan daftar add-on yang membingungkan.
+              </h2>
+            </div>
+            <div className="border-seraya-border-default bg-seraya-canvas rounded-[1.5rem] border p-6 sm:p-8">
+              <p className="text-seraya-text-muted text-xs font-semibold tracking-[0.14em] uppercase">
+                Paket Seraya
+              </p>
+              <p className="text-seraya-text-primary mt-5 font-serif text-4xl leading-none font-medium">
+                Harga segera diumumkan
+              </p>
+              <p className="text-seraya-text-secondary mt-4 max-w-xl text-sm leading-6">
+                Struktur paket final akan mengikuti kemampuan produk yang benar-benar tersedia.
+                Tidak ada janji fitur atau batas paket yang belum didukung sistem.
+              </p>
+              <Link className="seraya-button-primary mt-7 min-h-12 px-5" href="/dashboard/new">
+                Buat draf pribadi
+                <span aria-hidden="true">→</span>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <section aria-labelledby="faq-title">
+          <div className="mx-auto grid w-full max-w-[90rem] gap-10 px-5 py-20 sm:px-8 sm:py-24 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] lg:gap-18 lg:px-10 lg:py-32">
+            <div>
+              <p className="seraya-eyebrow text-seraya-action-primary">Pertanyaan umum</p>
+              <h2 id="faq-title" className="seraya-display-md mt-4">
+                Hal penting sebelum mulai.
+              </h2>
+            </div>
+            <div className="divide-seraya-border-default border-seraya-border-default divide-y border-y">
+              {faqs.map((faq) => (
+                <details className="group py-5 sm:py-6" key={faq.question}>
+                  <summary className="text-seraya-text-primary flex min-h-11 cursor-pointer list-none items-center justify-between gap-5 text-base font-semibold marker:hidden">
+                    {faq.question}
+                    <span
+                      aria-hidden="true"
+                      className="text-seraya-action-primary text-xl transition-transform group-open:rotate-45"
+                    >
+                      +
+                    </span>
+                  </summary>
+                  <p className="text-seraya-text-secondary max-w-2xl pt-3 pr-10 text-sm leading-6">
+                    {faq.answer}
+                  </p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section
+          aria-labelledby="final-cta-title"
+          className="px-5 pb-20 sm:px-8 sm:pb-24 lg:px-10 lg:pb-32"
+        >
+          <div className="bg-seraya-ink relative mx-auto max-w-[90rem] overflow-hidden rounded-[2rem] px-6 py-16 text-center text-white sm:px-12 sm:py-20 lg:py-24">
             <div
               aria-hidden="true"
-              className="bg-seraya-rosewood/50 absolute top-[-7rem] right-[-6rem] size-60 rounded-full blur-3xl"
+              className="bg-seraya-rosewood/50 absolute -top-36 -right-28 size-80 rounded-full blur-3xl"
             />
             <div
               aria-hidden="true"
-              className="bg-seraya-sage/35 absolute bottom-[-8rem] left-[-5rem] size-64 rounded-full blur-3xl"
+              className="bg-seraya-sage/35 absolute -bottom-44 -left-28 size-96 rounded-full blur-3xl"
             />
-            <div className="relative mx-auto max-w-2xl">
-              <p className="text-seraya-sand text-sm font-semibold tracking-[0.13em] uppercase">
-                Mulai dengan tenang
+            <div className="relative mx-auto max-w-3xl">
+              <p className="text-seraya-sand text-xs font-semibold tracking-[0.18em] uppercase">
+                Mulai dari kabar bahagianya
               </p>
               <h2
                 id="final-cta-title"
-                className="mt-4 font-serif text-4xl leading-[1.02] tracking-[-0.04em] text-white sm:text-5xl"
+                className="mt-5 font-serif text-[clamp(3rem,6vw,6rem)] leading-[0.86] font-medium tracking-[-0.055em]"
               >
-                Siap mulai menyusun undangan kalian?
+                Buat pengalaman yang akan diingat tamu kalian.
               </h2>
-              <p className="mt-5 text-base leading-7 text-white/75 sm:text-lg">
-                Buat draft pribadi, lengkapi detailnya, lalu terbitkan saat undangan kalian siap
-                dibagikan.
+              <p className="mx-auto mt-6 max-w-xl text-base leading-7 text-white/70">
+                Buat draf pribadi terlebih dahulu. Seluruh detail masih dapat kalian lanjutkan dan
+                periksa sebelum diterbitkan.
               </p>
-              <Link
-                className="text-seraya-ink hover:bg-seraya-sand mt-8 inline-flex min-h-12 items-center justify-center rounded-[var(--seraya-radius-md)] bg-white px-5 text-base font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-white"
-                href="/dashboard/new"
-              >
-                Mulai buat undangan
-              </Link>
+              <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <Link
+                  className="inline-flex min-h-13 items-center justify-center gap-2 rounded-[var(--seraya-radius-pill)] bg-white px-6 font-semibold text-[var(--seraya-ink)] transition-transform hover:-translate-y-0.5"
+                  href="/dashboard/new"
+                >
+                  Mulai buat undangan
+                  <span aria-hidden="true">→</span>
+                </Link>
+                <Link
+                  className="inline-flex min-h-13 items-center justify-center rounded-[var(--seraya-radius-pill)] border border-white/25 px-6 font-semibold text-white transition-colors hover:bg-white/10"
+                  href="/templates"
+                >
+                  Lihat koleksi
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
 
-      <footer className="border-seraya-border-default border-t">
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-5 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-10">
-          <Link
-            className="text-seraya-text-primary focus-visible:outline-seraya-focus-ring font-serif text-xl tracking-[-0.03em] focus-visible:outline-3 focus-visible:outline-offset-3"
-            href="/"
-          >
-            Seraya
-          </Link>
-          <nav
-            aria-label="Navigasi footer"
-            className="flex flex-wrap gap-x-5 gap-y-3 text-sm font-semibold"
-          >
-            <Link
-              className="text-seraya-text-secondary hover:text-seraya-text-primary focus-visible:outline-seraya-focus-ring transition-colors focus-visible:outline-3 focus-visible:outline-offset-3"
-              href="/login"
-            >
-              Masuk
-            </Link>
-            <Link
-              className="text-seraya-text-secondary hover:text-seraya-text-primary focus-visible:outline-seraya-focus-ring transition-colors focus-visible:outline-3 focus-visible:outline-offset-3"
-              href="/dashboard/new"
-            >
-              Mulai buat undangan
-            </Link>
-          </nav>
-        </div>
-      </footer>
-    </main>
+      <FlagshipFooter />
+    </div>
   );
 }
