@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 
 import { ProjectNavigation } from '@/components/dashboard/project-navigation';
+import { measureWorkspaceServerLoad } from '@/lib/performance/workspace-performance.server';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 import { getWeddingReadinessForRequest } from '@/modules/readiness';
 import type { WeddingReadinessV1 } from '@/modules/readiness';
@@ -12,7 +13,13 @@ type ProjectLayoutProps = {
 
 async function getProjectReadinessOrNotFound(projectId: string): Promise<WeddingReadinessV1> {
   try {
-    return await getWeddingReadinessForRequest(projectId);
+    return await measureWorkspaceServerLoad(
+      {
+        operation: 'project-shell-readiness',
+        workspace: 'project-shell',
+      },
+      () => getWeddingReadinessForRequest(projectId),
+    );
   } catch (error) {
     if (error instanceof ProjectAccessDeniedError) {
       notFound();
