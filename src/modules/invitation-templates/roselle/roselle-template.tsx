@@ -28,6 +28,12 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
       ? 'Kehadiran dan doa Anda akan melengkapi hari bahagia kami.'
       : 'Konfirmasikan kehadiran Anda untuk membantu pasangan mempersiapkan hari bahagia.'
     : 'Titipkan doa dan ucapan terbaik Anda untuk pasangan.';
+  const responseStepCount = Number(Boolean(personalSlots?.rsvp)) + Number(Boolean(personalSlots?.guestbook));
+  const rsvpStepNumber = personalSlots?.rsvp ? 1 : null;
+  const guestbookStepNumber = personalSlots?.guestbook ? (personalSlots.rsvp ? 2 : 1) : null;
+  const openingTargetId = personalSlots?.greeting
+    ? 'roselle-personal-greeting'
+    : 'roselle-couple-title';
 
   return (
     <article
@@ -37,8 +43,19 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
       data-template="roselle"
     >
       <RoselleHero hero={invitation.hero} />
+      <a data-roselle-opening-action href={`#${openingTargetId}`}>
+        <span>Buka undangan</span>
+        <i aria-hidden="true" />
+      </a>
       {personalSlots?.greeting ? (
-        <div className={styles.personalGreeting} data-template-personal-greeting="roselle">
+        <div
+          aria-label="Sapaan untuk tamu"
+          className={styles.personalGreeting}
+          data-roselle-addressed-letter
+          data-template-personal-greeting="roselle"
+          id="roselle-personal-greeting"
+          role="region"
+        >
           {personalSlots.greeting}
         </div>
       ) : null}
@@ -61,6 +78,9 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
             </div>
             {personalSlots?.rsvp ? (
               <div className={styles.personalResponseSection} data-template-response-slot="rsvp">
+                <p aria-hidden="true" data-roselle-response-step>
+                  Langkah {rsvpStepNumber} dari {responseStepCount}
+                </p>
                 {personalSlots.rsvp}
               </div>
             ) : null}
@@ -69,6 +89,9 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
                 className={styles.personalResponseSection}
                 data-template-response-slot="guestbook"
               >
+                <p aria-hidden="true" data-roselle-response-step>
+                  Langkah {guestbookStepNumber} dari {responseStepCount}
+                </p>
                 {personalSlots.guestbook}
               </div>
             ) : null}
@@ -81,6 +104,10 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
         ) : null}
         <RoselleClosing closing={invitation.closing} />
       </div>
+      <a data-roselle-return-to-opening href="#roselle-invitation-title">
+        <span aria-hidden="true">↑</span>
+        Kembali ke awal
+      </a>
     </article>
   );
 }
