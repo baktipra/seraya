@@ -33,6 +33,13 @@ describe('P0-A1 workspace performance instrumentation contract', () => {
     expect(clientMetrics).toContain('total_ms');
   });
 
+  it('keeps client metrics free of project identifiers', () => {
+    expect(clientMetrics).toContain('normalizeWorkspacePath');
+    expect(clientMetrics).toContain("'/dashboard/:projectId'");
+    expect(clientMetrics).toContain('from: normalizeWorkspacePath');
+    expect(clientMetrics).toContain('to: normalizeWorkspacePath');
+  });
+
   it('keeps A1 observational and preserves the known prefetch-off baseline', () => {
     expect(navigation).toContain('prefetch={false}');
     expect(navigation).not.toContain('router.prefetch');
