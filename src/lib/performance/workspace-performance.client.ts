@@ -29,6 +29,10 @@ function createNavigationId() {
   );
 }
 
+function normalizeWorkspacePath(pathname: string) {
+  return pathname.replace(/^\/dashboard\/[^/]+/, '/dashboard/:projectId');
+}
+
 function writePendingTransition(pending: PendingWorkspaceTransition) {
   try {
     window.sessionStorage.setItem(pendingTransitionKey, JSON.stringify(pending));
@@ -110,9 +114,9 @@ export function beginWorkspaceTransition(input: WorkspaceTransitionInput) {
 
   logMetric({
     event: 'workspace_transition_started',
-    from: input.from,
+    from: normalizeWorkspacePath(input.from),
     navigation_id: pending.navigationId,
-    to: input.to,
+    to: normalizeWorkspacePath(input.to),
     workspace: input.workspace,
   });
 }
@@ -140,13 +144,13 @@ export function completeWorkspaceTransition(input: WorkspaceReadyInput) {
 
     const metric = {
       event: 'workspace_transition_ready',
-      from: pending.from,
+      from: normalizeWorkspacePath(pending.from),
       navigation_id: pending.navigationId,
       navigation_mode: sameDocument ? 'client' : 'document',
       rsc_duration_ms: Math.round(rscDurationMs),
       rsc_request_count: resources.length,
       rsc_transfer_bytes: rscTransferBytes,
-      to: pending.to,
+      to: normalizeWorkspacePath(pending.to),
       total_ms: Math.round(totalMs),
       workspace: input.workspace,
     };
