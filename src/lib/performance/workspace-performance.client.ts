@@ -24,7 +24,18 @@ type WorkspaceReadyInput = {
 };
 
 function createNavigationId() {
-  return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  return (
+    globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`
+  );
+}
+
+function writePendingTransition(pending: PendingWorkspaceTransition) {
+  try {
+    window.sessionStorage.setItem(pendingTransitionKey, JSON.stringify(pending));
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function readPendingTransition(): PendingWorkspaceTransition | null {
@@ -48,17 +59,27 @@ function readPendingTransition(): PendingWorkspaceTransition | null {
 
     return parsed as PendingWorkspaceTransition;
   } catch {
-    window.sessionStorage.removeItem(pendingTransitionKey);
+    try {
+      window.sessionStorage.removeItem(pendingTransitionKey);
+    } catch {
+      // Metrics must never interfere with workspace navigation.
+    }
     return null;
   }
 }
 
+function clearPendingTransition() {
+  try {
+    window.sessionStorage.removeItem(pendingTransitionKey);
+  } catch {
+    // Metrics must never interfere with workspace navigation.
+  }
+}
+
 function getRscResources(startedAt: number) {
-  return performance
-    .getEntriesByType('resource')
-    .filter((entry): entry is PerformanceResourceTiming => entry instanceof PerformanceResourceTiming)
+  return (performance.getEntriesByType('resource') as PerformanceResourceTiming[])
     .filter((entry) => entry.startTime >= Math.max(0, startedAt - 2))
-    .filter((entry) => entry.name.includes('_rsc=') || entry.initiatorType === 'fetch');
+    .filter((entry) => entry.name.includes('_rsc='));
 }
 
 function logMetric(payload: Record<string, unknown>) {
@@ -82,7 +103,8 @@ export function beginWorkspaceTransition(input: WorkspaceTransitionInput) {
     timeOrigin: performance.timeOrigin,
   };
 
-  window.sessionStorage.setItem(pendingTransitionKey, JSON.stringify(pending));
+  if (!writePendingTransition(pending)) return;
+
   performance.clearMarks('seraya:workspace-transition:start');
   performance.mark('seraya:workspace-transition:start');
 
@@ -131,6 +153,6 @@ export function completeWorkspaceTransition(input: WorkspaceReadyInput) {
 
     logMetric(metric);
     window.dispatchEvent(new CustomEvent('seraya:workspace-performance', { detail: metric }));
-    window.sessionStorage.removeItem(pendingTransitionKey);
+    clearPendingTransition();
   });
 }
