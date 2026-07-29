@@ -67,7 +67,10 @@ async function verifyGeneric(fixture) {
   const url = `${baseUrl}/${fixture.slug}`;
   const { body, response } = await fetchPage(url);
 
-  assertEvidence(response.status === 200, `${fixture.templateKey} generic: HTTP ${response.status}`);
+  assertEvidence(
+    response.status === 200,
+    `${fixture.templateKey} generic: HTTP ${response.status}`,
+  );
   assertTemplateSurface(body, fixture, 'generic');
   assertEvidence(
     body.includes('data-generic-response-note'),
@@ -99,7 +102,10 @@ async function verifyPersonal(fixture, token) {
   const url = `${baseUrl}/${fixture.slug}/g/${encodeURIComponent(token)}`;
   const { body, response } = await fetchPage(url);
 
-  assertEvidence(response.status === 200, `${fixture.templateKey} personal: HTTP ${response.status}`);
+  assertEvidence(
+    response.status === 200,
+    `${fixture.templateKey} personal: HTTP ${response.status}`,
+  );
   assertTemplateSurface(body, fixture, 'personal');
   assertEvidence(
     body.includes(fixture.guestName),
@@ -128,7 +134,10 @@ async function verifyPersonal(fixture, token) {
   const referrerPolicy = response.headers.get('referrer-policy') ?? '';
   const contentTypeOptions = response.headers.get('x-content-type-options') ?? '';
 
-  assertEvidence(cacheControl.includes('no-store'), `${fixture.templateKey} personal: no-store missing`);
+  assertEvidence(
+    cacheControl.includes('no-store'),
+    `${fixture.templateKey} personal: no-store missing`,
+  );
   assertEvidence(robotsTag.includes('noindex'), `${fixture.templateKey} personal: noindex missing`);
   assertEvidence(
     referrerPolicy.toLowerCase() === 'no-referrer',

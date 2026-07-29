@@ -11,11 +11,11 @@ Provide controlled, repeatable production evidence that every canonical invitati
 
 ## Fixture matrix
 
-| Template | Generic slug | Couple | Personal guest | Generic | Personal |
-| --- | --- | --- | --- | --- | --- |
-| Roselle | `seraya-evidence-roselle` | Mira & Arga | Tamu Audit Roselle | PASS | PASS |
-| Aruna | `seraya-evidence-aruna` | Nadia & Raka | Tamu Audit Aruna | PASS | PASS |
-| Laras | `seraya-evidence-laras` | Alya & Dimas | Tamu Audit Laras | PASS | PASS |
+| Template | Generic slug              | Couple       | Personal guest     | Generic | Personal |
+| -------- | ------------------------- | ------------ | ------------------ | ------- | -------- |
+| Roselle  | `seraya-evidence-roselle` | Mira & Arga  | Tamu Audit Roselle | PASS    | PASS     |
+| Aruna    | `seraya-evidence-aruna`   | Nadia & Raka | Tamu Audit Aruna   | PASS    | PASS     |
+| Laras    | `seraya-evidence-laras`   | Alya & Dimas | Tamu Audit Laras   | PASS    | PASS     |
 
 All fixture content is fictitious and exists only for controlled production verification.
 
