@@ -1,6 +1,6 @@
 # J3 — Roselle Flagship Guest Experience Maturation V1
 
-Status: Implemented / validation pending  
+Status: Implemented / validation complete / pending owner review  
 Baseline: `1eca9a8e67f5c4be0c4cf298709f5aae41f1c6b7`
 
 ## Objective
@@ -37,9 +37,25 @@ Mature Roselle from a visually complete invitation into a clearer end-to-end gue
 ## Regression evidence
 
 - Source contract verifies release-layer ordering, surface-aware opening targets, addressed-letter semantics, dynamic response numbering, focus treatment, mobile behavior, and reduced-motion handling.
-- Invitation browser configuration now includes a dedicated Roselle flagship regression on desktop Chromium and Pixel 7.
+- Invitation browser configuration includes a dedicated Roselle flagship regression on desktop Chromium and Pixel 7.
 - Browser coverage verifies generic and personal targets, keyboard focus, guest-name preservation, response-step ordering, and return-to-opening behavior.
 - The existing complete cross-template invitation matrix continues to protect chapter ordering, privacy isolation, overflow, gallery stability, touch targets, and layout-shift budget.
+- The dedicated Roselle fixture regression is isolated from the general application E2E configuration, so it runs only with the invitation fixture that owns its data contract.
+
+## Final validation
+
+- repository-wide formatting: PASS;
+- lint: PASS;
+- TypeScript: PASS;
+- full unit suite: PASS;
+- production build: PASS;
+- general end-to-end checks: PASS;
+- Release A flagship regression: PASS;
+- invitation-experience desktop and mobile regression: PASS;
+- personal-response browser regression: PASS;
+- Vercel preview deployment: READY;
+- production-backed Roselle generic preview smoke: PASS;
+- preview error, warning, and fatal runtime scan: clear.
 
 ## Preserved boundaries
 
