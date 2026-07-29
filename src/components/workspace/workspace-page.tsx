@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 
+import { WorkspacePerformanceProbe } from '@/components/performance/workspace-performance-probe';
+
 export type WorkspaceWidth = 'reading' | 'standard' | 'operations' | 'studio';
 export type WorkspaceAnatomy = 'onboarding' | 'compass' | 'operations' | 'studio';
 export type WorkspaceKind =
@@ -57,6 +59,7 @@ export function WorkspacePage({
       id="project-workspace-content"
       tabIndex={-1}
     >
+      <WorkspacePerformanceProbe workspace={kind} />
       {children}
     </div>
   );
