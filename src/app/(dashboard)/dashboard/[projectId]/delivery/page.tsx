@@ -9,6 +9,7 @@ import {
   OperationalWorkspace,
 } from '@/components/workspace/operational-primitives';
 import { WorkspacePage } from '@/components/workspace/workspace-page';
+import { measureWorkspaceServerLoad } from '@/lib/performance/workspace-performance.server';
 import { getOwnedProjectContextForRequest } from '@/modules/auth/dashboard-request-context';
 import { reaccessOrPrepareCanonicalInitialHandoffAction } from '@/modules/delivery/canonical-initial-handoff.actions';
 import {
@@ -64,24 +65,32 @@ function DeliveryBlockedState({ projectId }: { projectId: string }) {
 }
 
 async function getDeliveryScreenOrNotFound(projectId: string): Promise<DeliveryScreen> {
-  try {
-    const readiness = await getWeddingReadinessForRequest(projectId);
+  return measureWorkspaceServerLoad(
+    {
+      operation: 'delivery-center-screen',
+      workspace: 'delivery',
+    },
+    async () => {
+      try {
+        const readiness = await getWeddingReadinessForRequest(projectId);
 
-    if (!readiness.invitation.hasPublishedSnapshot) {
-      return { kind: 'blocked' };
-    }
+        if (!readiness.invitation.hasPublishedSnapshot) {
+          return { kind: 'blocked' };
+        }
 
-    const project = await getOwnedProjectContextForRequest(projectId);
-    const deliveryCenter = await getGuestDeliveryCenterForVerifiedProject(project);
+        const project = await getOwnedProjectContextForRequest(projectId);
+        const deliveryCenter = await getGuestDeliveryCenterForVerifiedProject(project);
 
-    return { deliveryCenter, kind: 'delivery' };
-  } catch (error) {
-    if (error instanceof ProjectAccessDeniedError) {
-      notFound();
-    }
+        return { deliveryCenter, kind: 'delivery' };
+      } catch (error) {
+        if (error instanceof ProjectAccessDeniedError) {
+          notFound();
+        }
 
-    throw error;
-  }
+        throw error;
+      }
+    },
+  );
 }
 
 export default async function DeliveryCenterPage({ params }: DeliveryCenterPageProps) {
