@@ -28,13 +28,13 @@ This slice is observational. It does not claim a performance improvement.
 
 The canonical owner pages remain dynamic private-data surfaces:
 
-| Workspace | `force-dynamic` | `revalidate = 0` | `force-no-store` |
-| --- | --- | --- | --- |
-| Ringkasan | Yes | Yes | Yes |
-| Undangan | Yes | Yes | Yes |
-| Tamu | Yes | No explicit value | No explicit value |
-| Bagikan | Yes | Yes | Yes |
-| Respons Tamu | Yes | Yes | Yes |
+| Workspace    | `force-dynamic` | `revalidate = 0`  | `force-no-store`  |
+| ------------ | --------------- | ----------------- | ----------------- |
+| Ringkasan    | Yes             | Yes               | Yes               |
+| Undangan     | Yes             | Yes               | Yes               |
+| Tamu         | Yes             | No explicit value | No explicit value |
+| Bagikan      | Yes             | Yes               | Yes               |
+| Respons Tamu | Yes             | Yes               | Yes               |
 
 These policies are not changed by A1.
 
