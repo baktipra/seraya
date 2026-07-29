@@ -4,8 +4,8 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 describe('Slice G contextual primary action', () => {
-  it('publishes and clears the canonical local dirty state through the React subscription', async () => {
-    const contextualActionSource = await readFile(
+  it('publishes and clears canonical local dirty state through the React subscription', async () => {
+    const source = await readFile(
       path.resolve(
         process.cwd(),
         'src/components/projects/invitation-editor-contextual-actions.ts',
@@ -13,27 +13,26 @@ describe('Slice G contextual primary action', () => {
       'utf8',
     );
 
-    expect(contextualActionSource).toContain('setUnsavedChanges(isDirty)');
-    expect(contextualActionSource).toContain('setUnsavedChanges(false)');
-    expect(contextualActionSource).toContain(
-      'useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)',
-    );
+    expect(source).toContain('setUnsavedChanges(isDirty)');
+    expect(source).toContain('setUnsavedChanges(false)');
+    expect(source).toContain('useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)');
   });
 
-  it('mounts the contextual guard for every editor readiness state', async () => {
-    const previewSource = await readFile(
-      path.resolve(process.cwd(), 'src/components/projects/invitation-editor-live-preview.tsx'),
-      'utf8',
-    );
-    const authorityCss = await readFile(
-      path.resolve(process.cwd(), 'src/components/projects/invitation-editor-authority.module.css'),
-      'utf8',
-    );
+  it('mounts the contextual guard and consumes it in publication controls', async () => {
+    const [preview, publication] = await Promise.all([
+      readFile(
+        path.resolve(process.cwd(), 'src/components/projects/invitation-editor-live-preview.tsx'),
+        'utf8',
+      ),
+      readFile(
+        path.resolve(process.cwd(), 'src/components/projects/publish-invitation-controls.tsx'),
+        'utf8',
+      ),
+    ]);
 
-    expect(previewSource).toContain('useInvitationEditorContextualSaveAction(isDirty)');
-    expect(authorityCss).toContain(
-      'Slice G: Save is primary only while there are local changes to commit.',
-    );
-    expect(authorityCss).toContain("button[data-editor-contextual-save-action='clean']");
+    expect(preview).toContain('useInvitationEditorContextualSaveAction(isDirty)');
+    expect(publication).toContain('useInvitationEditorUnsavedChanges()');
+    expect(publication).toContain('!hasUnsavedEditorChanges');
+    expect(publication).toContain('Simpan perubahan sebelum menerbitkan versi ini.');
   });
 });

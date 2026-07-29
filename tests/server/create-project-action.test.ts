@@ -26,6 +26,7 @@ function validProjectFormData() {
   formData.set('personTwoName', 'Nadia');
   formData.set('eventDatePrimary', '2027-08-17');
   formData.set('eventCity', 'Jakarta');
+  formData.set('templateKey', 'roselle');
   formData.set('slug', 'raka-nadia');
   return formData;
 }

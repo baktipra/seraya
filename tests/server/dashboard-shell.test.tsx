@@ -42,7 +42,7 @@ describe('SRY-039 owner workspace navigation', () => {
     expect(html).toContain('Buat undangan');
   });
 
-  it('keeps the project journey stable through Respons Tamu and Tindak Lanjut', () => {
+  it('keeps exactly the five canonical project workspaces', () => {
     const html = renderToStaticMarkup(
       <ProjectNavigation
         coupleLabel="Ayu & Bima"
@@ -50,25 +50,19 @@ describe('SRY-039 owner workspace navigation', () => {
         statusLabel="Draft sedang disusun"
       />,
     );
-    for (const label of [
-      'Ringkasan',
-      'Undangan',
-      'Tamu',
-      'Bagikan',
-      'Respons Tamu',
-      'Tindak Lanjut',
-    ]) {
+    for (const label of ['Ringkasan', 'Undangan', 'Tamu', 'Bagikan', 'Respons Tamu']) {
       expect(html).toContain(label);
     }
     expect(html).toContain(`href="/dashboard/${projectId}/delivery"`);
     expect(html).toContain(`href="/dashboard/${projectId}/rsvp"`);
-    expect(html).toContain(`href="/dashboard/${projectId}/follow-up"`);
+    expect(html).not.toContain('Tindak Lanjut');
+    expect(html).not.toContain(`/dashboard/${projectId}/follow-up`);
     expect(html).toContain('aria-current="page"');
     expect(html).not.toContain('coming-soon');
   });
 
   it('renders the dashboard empty state for an authenticated account without a project', () => {
     const html = renderToStaticMarkup(<DashboardEmptyState />);
-    expect(html).toContain('Belum ada undangan');
+    expect(html).toContain('Mulai dari pengalaman yang terasa paling dekat.');
   });
 });

@@ -15,8 +15,8 @@ const { getDeliveryCenterMock, getOwnedProjectContextMock, getReadinessMock, not
   }));
 
 vi.mock('next/navigation', () => ({ notFound: notFoundMock }));
-vi.mock('@/components/projects/guest-delivery-center', () => ({
-  GuestDeliveryCenter: ({ projectId, rows }: { projectId: string; rows: unknown[] }) => (
+vi.mock('@/components/projects/native-guest-delivery-center', () => ({
+  NativeGuestDeliveryCenter: ({ projectId, rows }: { projectId: string; rows: unknown[] }) => (
     <div data-delivery-project-id={projectId}>{rows.length} rows</div>
   ),
 }));
@@ -109,7 +109,7 @@ describe('SRY-031 private Delivery Center route', () => {
 
     expect(html).toContain('Bagikan tersedia setelah undangan diterbitkan');
     expect(html).toContain(
-      'Terbitkan versi undangan yang sudah kalian setujui sebelum menyiapkan undangan pribadi.',
+      'Terbitkan versi undangan yang sudah kalian setujui sebelum menyiapkan Undangan Pribadi untuk tamu.',
     );
     expect(getOwnedProjectContextMock).not.toHaveBeenCalled();
     expect(getDeliveryCenterMock).not.toHaveBeenCalled();

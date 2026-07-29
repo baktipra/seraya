@@ -98,10 +98,10 @@ describe('SRY-039 owner workspace IA reset', () => {
     expect(html).toContain('Respons Tamu');
     expect(html).toContain('Hadir');
     expect(html).toContain('Belum merespons');
-    expect(html).toContain('Total rombongan hadir');
+    expect(html).toContain('Rombongan hadir');
     expect(html).toContain('Filter respons');
     expect(html).toContain('Ucapan');
-    expect(html).toContain('Export RSVP');
+    expect(html).toContain('Export XLSX');
     expect(html).toContain('aria-selected="false"');
     expect(html).not.toContain('Siapkan Undangan Pribadi');
     expect(html).not.toContain('Copy tautan');
