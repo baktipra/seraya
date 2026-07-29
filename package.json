@@ -11,6 +11,7 @@
   "scripts": {
     "dev": "next dev",
     "audit:j2:live-evidence": "node scripts/audit-live-cross-template-evidence.mjs",
+    "audit:p0-a1:workspace-performance": "node scripts/audit-workspace-performance-baseline.mjs",
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
     "supabase:status": "supabase status",
