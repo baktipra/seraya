@@ -26,7 +26,9 @@ const routes = routeFiles.map((path) => {
 });
 
 const readinessQueryCount = (readinessRepository.match(/\.from\(/g) ?? []).length;
-const canonicalDestinationCount = (navigation.match(/performanceWorkspace: '[^']+'/g) ?? []).length;
+const canonicalDestinationCount = (
+  navigation.match(/performanceWorkspace: '(?:compass|studio|guests|delivery|responses)',/g) ?? []
+).length;
 
 const baseline = {
   baseline: 'P0-A1 Workspace Performance Instrumentation & Baseline V1',
