@@ -1,0 +1,68 @@
+name: One-shot quality baseline formatter
+
+on:
+  push:
+    branches:
+      - chore/quality-baseline-prettier
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Format known baseline debt
+        run: |
+          npx prettier --write \
+            docs/release-a-invitation-experience-parity-audit-v1.md \
+            src/components/projects/guest-response-workspace.tsx \
+            src/components/projects/invitation-editor-live-preview.tsx \
+            src/components/projects/invitation-editor-romantic-clarity.module.css \
+            src/components/projects/invitation-studio-shell.module.css \
+            src/components/projects/native-guest-delivery-center.tsx \
+            src/components/projects/native-guest-manager.tsx \
+            src/components/projects/publish-invitation-controls.tsx \
+            src/components/workspace/compass-primitives.tsx \
+            src/modules/invitation-templates/__tests__/personal-response-visual-state-contract.test.ts \
+            tests/server/invitation-studio-structure-contract.test.ts \
+            tests/server/workspace-geometry-contract.test.ts
+
+      - name: Remove one-shot workflow
+        run: rm .github/workflows/quality-baseline-format-once.yml
+
+      - name: Commit normalized files
+        run: |
+          git diff --check
+          git config user.name "seraya-quality-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add \
+            docs/release-a-invitation-experience-parity-audit-v1.md \
+            src/components/projects/guest-response-workspace.tsx \
+            src/components/projects/invitation-editor-live-preview.tsx \
+            src/components/projects/invitation-editor-romantic-clarity.module.css \
+            src/components/projects/invitation-studio-shell.module.css \
+            src/components/projects/native-guest-delivery-center.tsx \
+            src/components/projects/native-guest-manager.tsx \
+            src/components/projects/publish-invitation-controls.tsx \
+            src/components/workspace/compass-primitives.tsx \
+            src/modules/invitation-templates/__tests__/personal-response-visual-state-contract.test.ts \
+            tests/server/invitation-studio-structure-contract.test.ts \
+            tests/server/workspace-geometry-contract.test.ts \
+            .github/workflows/quality-baseline-format-once.yml
+          git commit -m "chore: normalize quality baseline formatting"
+          git push origin HEAD:${GITHUB_REF_NAME}
