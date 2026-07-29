@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -15,10 +16,7 @@ const packageJson = read('package.json');
 const routeContracts = [
   ['src/app/(dashboard)/dashboard/[projectId]/layout.tsx', 'project-shell-readiness'],
   ['src/app/(dashboard)/dashboard/[projectId]/page.tsx', 'overview-readiness'],
-  [
-    'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx',
-    'invitation-editor-screen',
-  ],
+  ['src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx', 'invitation-editor-screen'],
   ['src/app/(dashboard)/dashboard/[projectId]/guests/page.tsx', 'guest-manager-screen'],
   ['src/app/(dashboard)/dashboard/[projectId]/delivery/page.tsx', 'delivery-center-screen'],
   ['src/app/(dashboard)/dashboard/[projectId]/rsvp/page.tsx', 'guest-response-screen'],
@@ -59,10 +57,25 @@ describe('P0-A1 workspace performance instrumentation contract', () => {
     expect(readinessRepository).toContain('Promise.all([');
   });
 
-  it('exposes a repeatable repository baseline audit', () => {
+  it('executes the repeatable repository baseline audit', () => {
     expect(packageJson).toContain('audit:p0-a1:workspace-performance');
-    expect(read('scripts/audit-workspace-performance-baseline.mjs')).toContain(
-      "baseline: 'P0-A1 Workspace Performance Instrumentation & Baseline V1'",
+
+    const output = execFileSync(
+      process.execPath,
+      ['scripts/audit-workspace-performance-baseline.mjs'],
+      {
+        cwd: process.cwd(),
+        encoding: 'utf8',
+      },
     );
+    const result = JSON.parse(output) as {
+      canonicalDestinationCount: number;
+      status: string;
+    };
+
+    expect(result).toMatchObject({
+      canonicalDestinationCount: 5,
+      status: 'pass',
+    });
   });
 });
