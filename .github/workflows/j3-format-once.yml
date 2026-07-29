@@ -1,0 +1,44 @@
+name: J3 format once
+
+on:
+  push:
+    branches:
+      - agent/j3-roselle-flagship-guest-experience
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/j3-roselle-flagship-guest-experience
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Format J3 files
+        run: >-
+          npx prettier --write
+          playwright.invitation-experience.config.ts
+          src/app/roselle-flagship-maturation-release.css
+          src/modules/invitation-templates/__tests__/roselle-flagship-guest-experience-contract.test.ts
+          src/modules/invitation-templates/roselle/roselle-template.tsx
+      - name: Commit formatted files
+        run: |
+          if git diff --quiet; then
+            exit 0
+          fi
+          git config user.name "seraya-j3-format-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add \
+            playwright.invitation-experience.config.ts \
+            src/app/roselle-flagship-maturation-release.css \
+            src/modules/invitation-templates/__tests__/roselle-flagship-guest-experience-contract.test.ts \
+            src/modules/invitation-templates/roselle/roselle-template.tsx
+          git commit -m "style: normalize J3 Roselle files"
+          git push origin HEAD:agent/j3-roselle-flagship-guest-experience
