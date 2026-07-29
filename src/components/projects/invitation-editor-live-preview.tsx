@@ -54,7 +54,8 @@ export function InvitationEditorLivePreview({
   useEffect(() => {
     if (!isOpen) return undefined;
 
-    openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    openerRef.current =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
     scrollPositionRef.current = window.scrollY;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';

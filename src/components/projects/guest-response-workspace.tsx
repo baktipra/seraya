@@ -174,7 +174,7 @@ export function GuestResponseWorkspace({
         className={`focus-visible:outline-seraya-focus-ring min-h-10 border-b-2 px-0 pb-2 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-3 ${
           activeTab === 'responses'
             ? 'border-seraya-action-primary text-seraya-action-primary'
-            : 'text-seraya-text-muted border-transparent hover:text-seraya-text-primary'
+            : 'text-seraya-text-muted hover:text-seraya-text-primary border-transparent'
         }`}
         id="response-tab"
         onClick={() => activateTab('responses')}
@@ -192,7 +192,7 @@ export function GuestResponseWorkspace({
         className={`focus-visible:outline-seraya-focus-ring min-h-10 border-b-2 px-0 pb-2 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-3 ${
           activeTab === 'guestbook'
             ? 'border-seraya-action-primary text-seraya-action-primary'
-            : 'text-seraya-text-muted border-transparent hover:text-seraya-text-primary'
+            : 'text-seraya-text-muted hover:text-seraya-text-primary border-transparent'
         }`}
         id="guestbook-tab-v2"
         onClick={() => activateTab('guestbook')}
@@ -231,7 +231,11 @@ export function GuestResponseWorkspace({
         <OperationalMetric label="Hadir" value={analytics.attendingGuestCount} />
         <OperationalMetric label="Tidak hadir" value={analytics.declinedGuestCount} />
         <OperationalMetric label="Belum merespons" value={analytics.pendingGuestCount} />
-        <OperationalMetric detail={attendanceDetail} label="Rombongan hadir" value={attendanceValue} />
+        <OperationalMetric
+          detail={attendanceDetail}
+          label="Rombongan hadir"
+          value={attendanceValue}
+        />
       </OperationalMetricStrip>
 
       <OperationalSection
@@ -286,13 +290,16 @@ export function GuestResponseWorkspace({
 
                 {filter === 'pending' ? (
                   <p className="border-seraya-border-default text-seraya-text-muted border-b px-4 py-2.5 text-xs leading-5">
-                    Daftar ini membantu Anda melihat tamu yang mungkin perlu ditindaklanjuti secara manual.
+                    Daftar ini membantu Anda melihat tamu yang mungkin perlu ditindaklanjuti secara
+                    manual.
                   </p>
                 ) : null}
 
                 {hasNoRecordedResponses ? (
                   <div className="border-seraya-border-default border-b px-4 py-3">
-                    <p className="text-seraya-text-primary text-sm font-semibold">Belum ada respons masuk.</p>
+                    <p className="text-seraya-text-primary text-sm font-semibold">
+                      Belum ada respons masuk.
+                    </p>
                     <p className="text-seraya-text-secondary mt-1 text-xs leading-5">
                       Respons akan muncul ketika tamu mengisi kehadiran melalui Undangan Pribadi.
                     </p>
@@ -319,7 +326,10 @@ export function GuestResponseWorkspace({
                         </thead>
                         <tbody className="divide-seraya-border-default divide-y">
                           {visibleRows.map((row) => (
-                            <tr className="hover:bg-seraya-canvas transition-colors" key={row.guestId}>
+                            <tr
+                              className="hover:bg-seraya-canvas transition-colors"
+                              key={row.guestId}
+                            >
                               <td className="text-seraya-text-primary px-4 py-3 font-semibold">
                                 {row.displayName}
                               </td>

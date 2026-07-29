@@ -80,9 +80,7 @@ describe('canonical workspace geometry and anatomy', () => {
   it('keeps the standalone new-invitation onboarding centered', async () => {
     const source = await read('src/app/(dashboard)/dashboard/new/page.tsx');
 
-    expect(source).toContain(
-      '<WorkspacePage align="center" kind="onboarding" width="standard">',
-    );
+    expect(source).toContain('<WorkspacePage align="center" kind="onboarding" width="standard">');
   });
 
   it('keeps anatomy authority explicit and free from legacy selector recovery', async () => {

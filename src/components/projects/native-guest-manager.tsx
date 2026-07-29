@@ -125,7 +125,10 @@ function GuestFields({
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <label className="text-seraya-text-primary text-sm font-semibold" htmlFor="guest-display-name">
+        <label
+          className="text-seraya-text-primary text-sm font-semibold"
+          htmlFor="guest-display-name"
+        >
           Nama tamu
         </label>
         <Input
@@ -144,7 +147,10 @@ function GuestFields({
       </div>
 
       <div className="space-y-2">
-        <label className="text-seraya-text-primary text-sm font-semibold" htmlFor="guest-group-label">
+        <label
+          className="text-seraya-text-primary text-sm font-semibold"
+          htmlFor="guest-group-label"
+        >
           Kelompok tamu <span className="text-seraya-text-muted font-normal">(opsional)</span>
         </label>
         <Input
@@ -194,7 +200,10 @@ function GuestFields({
       </div>
 
       <div className="space-y-2">
-        <label className="text-seraya-text-primary text-sm font-semibold" htmlFor="guest-party-size">
+        <label
+          className="text-seraya-text-primary text-sm font-semibold"
+          htmlFor="guest-party-size"
+        >
           Jumlah undangan
         </label>
         <Input
@@ -451,7 +460,8 @@ export function NativeGuestManager({
   const guestQualitySummary = {
     active: initialGuests.length,
     missingWhatsApp: initialGuests.filter((guest) => !guest.whatsapp_phone_e164).length,
-    missingPersonalInvitation: initialGuests.filter((guest) => guest.link_state !== 'active').length,
+    missingPersonalInvitation: initialGuests.filter((guest) => guest.link_state !== 'active')
+      .length,
     needsLinkUpdate: initialGuests.filter((guest) => guest.link_state === 'revoked').length,
   };
 
@@ -605,12 +615,18 @@ export function NativeGuestManager({
 
         <OperationalMetricStrip columns={4} label="Kualitas data tamu">
           <OperationalMetric label="Tamu aktif" value={guestQualitySummary.active} />
-          <OperationalMetric label="Belum punya WhatsApp" value={guestQualitySummary.missingWhatsApp} />
+          <OperationalMetric
+            label="Belum punya WhatsApp"
+            value={guestQualitySummary.missingWhatsApp}
+          />
           <OperationalMetric
             label="Belum punya Undangan Pribadi"
             value={guestQualitySummary.missingPersonalInvitation}
           />
-          <OperationalMetric label="Tautan perlu diperbarui" value={guestQualitySummary.needsLinkUpdate} />
+          <OperationalMetric
+            label="Tautan perlu diperbarui"
+            value={guestQualitySummary.needsLinkUpdate}
+          />
         </OperationalMetricStrip>
 
         <OperationalSection
@@ -698,7 +714,9 @@ export function NativeGuestManager({
                             />
                           </td>
                           <td className="px-3 py-3 align-top">
-                            <p className="text-seraya-text-primary font-semibold">{guest.display_name}</p>
+                            <p className="text-seraya-text-primary font-semibold">
+                              {guest.display_name}
+                            </p>
                             {guest.group_label ? (
                               <p className="text-seraya-text-muted mt-0.5 text-xs leading-5">
                                 {guest.group_label}
@@ -739,7 +757,7 @@ export function NativeGuestManager({
                             type="checkbox"
                           />
                           <div className="min-w-0">
-                            <p className="text-seraya-text-primary font-semibold leading-5">
+                            <p className="text-seraya-text-primary leading-5 font-semibold">
                               {guest.display_name}
                             </p>
                             {guest.group_label ? (
@@ -759,7 +777,10 @@ export function NativeGuestManager({
                       }
                     >
                       <dl data-operational-mobile-fields>
-                        <OperationalMobileField label="Rombongan" value={`${guest.party_size} orang`} />
+                        <OperationalMobileField
+                          label="Rombongan"
+                          value={`${guest.party_size} orang`}
+                        />
                         <OperationalMobileField
                           align="end"
                           label="WhatsApp"
@@ -867,8 +888,9 @@ export function NativeGuestManager({
               <div className="border-seraya-border-default bg-seraya-canvas rounded-[var(--seraya-radius-sm)] border px-4 py-4 text-sm leading-6">
                 <p className="text-seraya-text-primary font-semibold">Mulai dari template Excel</p>
                 <p className="text-seraya-text-secondary mt-1">
-                  Unduh template Excel, isi daftar tamu, lalu upload kembali. Nomor WhatsApp bersifat
-                  opsional dan digunakan untuk mempermudah pembagian Undangan Pribadi secara manual.
+                  Unduh template Excel, isi daftar tamu, lalu upload kembali. Nomor WhatsApp
+                  bersifat opsional dan digunakan untuk mempermudah pembagian Undangan Pribadi
+                  secara manual.
                 </p>
                 <a
                   className="text-seraya-action-primary focus-visible:outline-seraya-focus-ring mt-3 inline-flex min-h-11 items-center rounded-[var(--seraya-radius-sm)] text-sm font-semibold underline-offset-4 hover:underline focus-visible:outline-3 focus-visible:outline-offset-3"
@@ -878,7 +900,10 @@ export function NativeGuestManager({
                 </a>
               </div>
               <div className="space-y-2">
-                <label className="text-seraya-text-primary text-sm font-semibold" htmlFor="guest-xlsx-file">
+                <label
+                  className="text-seraya-text-primary text-sm font-semibold"
+                  htmlFor="guest-xlsx-file"
+                >
                   File Excel (.xlsx)
                 </label>
                 <Input
@@ -910,7 +935,9 @@ export function NativeGuestManager({
                   className="border-seraya-border-default bg-seraya-brand-soft rounded-[var(--seraya-radius-sm)] border px-4 py-4 text-sm leading-6"
                   role="status"
                 >
-                  <p className="text-seraya-text-primary font-semibold">Tamu berhasil ditambahkan.</p>
+                  <p className="text-seraya-text-primary font-semibold">
+                    Tamu berhasil ditambahkan.
+                  </p>
                   <p className="text-seraya-text-secondary mt-1">{xlsxImportState.message}</p>
                   <Link
                     className="text-seraya-action-primary focus-visible:outline-seraya-focus-ring mt-3 inline-flex min-h-11 items-center rounded-[var(--seraya-radius-sm)] text-sm font-semibold underline-offset-4 hover:underline focus-visible:outline-3 focus-visible:outline-offset-3"
@@ -935,10 +962,19 @@ export function NativeGuestManager({
             <form action={csvImportAction} className="space-y-5" noValidate>
               <input name="projectId" type="hidden" value={projectId} />
               <div className="space-y-2">
-                <label className="text-seraya-text-primary text-sm font-semibold" htmlFor="guest-csv-file">
+                <label
+                  className="text-seraya-text-primary text-sm font-semibold"
+                  htmlFor="guest-csv-file"
+                >
                   File CSV
                 </label>
-                <Input accept=".csv,text/csv" id="guest-csv-file" name="file" required type="file" />
+                <Input
+                  accept=".csv,text/csv"
+                  id="guest-csv-file"
+                  name="file"
+                  required
+                  type="file"
+                />
               </div>
               <div className="border-seraya-border-default bg-seraya-canvas rounded-[var(--seraya-radius-sm)] border px-4 py-3 text-sm leading-6">
                 <p className="text-seraya-text-primary font-semibold">Format CSV yang diperlukan</p>
@@ -1033,7 +1069,9 @@ export function NativeGuestManager({
         }
         onOpenChange={(open) => !open && setLinkGuest(null)}
         open={Boolean(linkGuest)}
-        title={linkGuest?.link_state === 'active' ? 'Buat ulang tautan pribadi' : 'Buat tautan pribadi'}
+        title={
+          linkGuest?.link_state === 'active' ? 'Buat ulang tautan pribadi' : 'Buat tautan pribadi'
+        }
       >
         {linkGuest ? (
           <form action={linkAction} className="space-y-5">
