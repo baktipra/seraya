@@ -7,6 +7,8 @@ const fixtures = [
   {
     coupleNames: ['Mira', 'Arga'],
     guestName: 'Tamu Audit Roselle',
+    partySize: 2,
+    rsvpStatusLabel: 'Belum merespons',
     slug: 'seraya-evidence-roselle',
     templateKey: 'roselle',
     tokenEnv: 'J2_ROSELLE_GUEST_TOKEN',
@@ -14,6 +16,8 @@ const fixtures = [
   {
     coupleNames: ['Nadia', 'Raka'],
     guestName: 'Tamu Audit Aruna',
+    partySize: 2,
+    rsvpStatusLabel: 'Belum merespons',
     slug: 'seraya-evidence-aruna',
     templateKey: 'aruna',
     tokenEnv: 'J2_ARUNA_GUEST_TOKEN',
@@ -21,6 +25,8 @@ const fixtures = [
   {
     coupleNames: ['Alya', 'Dimas'],
     guestName: 'Tamu Audit Laras',
+    partySize: 2,
+    rsvpStatusLabel: 'Belum merespons',
     slug: 'seraya-evidence-laras',
     templateKey: 'laras',
     tokenEnv: 'J2_LARAS_GUEST_TOKEN',
@@ -125,6 +131,14 @@ async function verifyPersonal(fixture, token) {
   }
 
   assertEvidence(
+    body.includes(`Undangan ini berlaku untuk maksimal ${fixture.partySize} orang.`),
+    `${fixture.templateKey} personal: expected party size ${fixture.partySize}`,
+  );
+  assertEvidence(
+    body.includes(fixture.rsvpStatusLabel),
+    `${fixture.templateKey} personal: expected RSVP status ${fixture.rsvpStatusLabel}`,
+  );
+  assertEvidence(
     !body.includes('data-generic-response-note'),
     `${fixture.templateKey} personal: generic response note must be absent`,
   );
@@ -150,8 +164,10 @@ async function verifyPersonal(fixture, token) {
 
   return {
     cacheControl,
+    partySize: fixture.partySize,
     referrerPolicy,
     robotsTag,
+    rsvpStatus: fixture.rsvpStatusLabel,
     status: 'PASS',
     statusCode: response.status,
     surface: 'personal',
