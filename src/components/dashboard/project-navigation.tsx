@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState, type ComponentType, type SVGProps } from 'react';
 
+import { beginWorkspaceTransition } from '@/lib/performance/workspace-performance.client';
+
 import { GuestsIcon, HelpIcon, InvitationIcon, OverviewIcon, ShareIcon } from './dashboard-icons';
 
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
@@ -15,6 +17,7 @@ type ProjectNavigationItem = {
   icon: IconComponent;
   label: string;
   mobileLabel?: string;
+  performanceWorkspace: 'compass' | 'delivery' | 'guests' | 'responses' | 'studio';
 };
 
 /**
@@ -26,14 +29,31 @@ function getProjectNavigationItems(projectId: string): ProjectNavigationItem[] {
   const base = `/dashboard/${projectId}`;
 
   return [
-    { href: base as Route, icon: OverviewIcon, label: 'Ringkasan', mobileLabel: 'Ringkas' },
-    { href: `${base}/invitation` as Route, icon: InvitationIcon, label: 'Undangan' },
-    { href: `${base}/guests` as Route, icon: GuestsIcon, label: 'Tamu' },
+    {
+      href: base as Route,
+      icon: OverviewIcon,
+      label: 'Ringkasan',
+      mobileLabel: 'Ringkas',
+      performanceWorkspace: 'compass',
+    },
+    {
+      href: `${base}/invitation` as Route,
+      icon: InvitationIcon,
+      label: 'Undangan',
+      performanceWorkspace: 'studio',
+    },
+    {
+      href: `${base}/guests` as Route,
+      icon: GuestsIcon,
+      label: 'Tamu',
+      performanceWorkspace: 'guests',
+    },
     {
       aliases: [`${base}/follow-up`, `${base}/share`],
       href: `${base}/delivery` as Route,
       icon: ShareIcon,
       label: 'Bagikan',
+      performanceWorkspace: 'delivery',
     },
     {
       aliases: [`${base}/guestbook`],
@@ -41,6 +61,7 @@ function getProjectNavigationItems(projectId: string): ProjectNavigationItem[] {
       icon: HelpIcon,
       label: 'Respons Tamu',
       mobileLabel: 'Respons',
+      performanceWorkspace: 'responses',
     },
   ];
 }
@@ -79,10 +100,12 @@ function getProjectRouteLabel(pathname: string, projectId: string) {
 
 function ProjectNavigationLink({
   active,
+  currentPathname,
   item,
   mode,
 }: {
   active: boolean;
+  currentPathname: string;
   item: ProjectNavigationItem;
   mode: 'desktop' | 'mobile';
 }) {
@@ -104,6 +127,25 @@ function ProjectNavigationLink({
             }`
       }
       href={item.href}
+      onClick={(event) => {
+        if (
+          active ||
+          event.defaultPrevented ||
+          event.button !== 0 ||
+          event.altKey ||
+          event.ctrlKey ||
+          event.metaKey ||
+          event.shiftKey
+        ) {
+          return;
+        }
+
+        beginWorkspaceTransition({
+          from: currentPathname,
+          to: String(item.href),
+          workspace: item.performanceWorkspace,
+        });
+      }}
       prefetch={false}
     >
       {mode === 'mobile' && active ? (
@@ -195,6 +237,7 @@ export function ProjectNavigation({
           {items.map((item) => (
             <ProjectNavigationLink
               active={isCurrentProjectRoute(pathname, item, projectId)}
+              currentPathname={pathname}
               item={item}
               key={item.label}
               mode="desktop"
@@ -221,6 +264,7 @@ export function ProjectNavigation({
         {items.map((item) => (
           <ProjectNavigationLink
             active={isCurrentProjectRoute(pathname, item, projectId)}
+            currentPathname={pathname}
             item={item}
             key={item.label}
             mode="mobile"
