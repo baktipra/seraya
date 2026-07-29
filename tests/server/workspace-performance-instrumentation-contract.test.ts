@@ -25,7 +25,9 @@ const routeContracts = [
 describe('P0-A1 workspace performance instrumentation contract', () => {
   it('measures a canonical navigation from click through rendered workspace readiness', () => {
     expect(navigation).toContain('beginWorkspaceTransition');
-    expect(navigation.match(/performanceWorkspace: '[^']+'/g)).toHaveLength(5);
+    expect(
+      navigation.match(/performanceWorkspace: '(?:compass|studio|guests|delivery|responses)',/g),
+    ).toHaveLength(5);
     expect(workspacePage).toContain('WorkspacePerformanceProbe');
     expect(clientMetrics).toContain("event: 'workspace_transition_started'");
     expect(clientMetrics).toContain("event: 'workspace_transition_ready'");
