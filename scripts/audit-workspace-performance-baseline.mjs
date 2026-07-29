@@ -6,9 +6,7 @@ const read = (path) => readFileSync(join(root, path), 'utf8');
 
 const navigation = read('src/components/dashboard/project-navigation.tsx');
 const workspacePage = read('src/components/workspace/workspace-page.tsx');
-const readinessRepository = read(
-  'src/modules/readiness/wedding-readiness.repository.ts',
-);
+const readinessRepository = read('src/modules/readiness/wedding-readiness.repository.ts');
 const routeFiles = [
   'src/app/(dashboard)/dashboard/[projectId]/page.tsx',
   'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx',
@@ -29,7 +27,7 @@ const routes = routeFiles.map((path) => {
 
 const readinessQueryCount = (readinessRepository.match(/\.from\(/g) ?? []).length;
 const canonicalDestinationCount = (
-  navigation.match(/performanceWorkspace:/g) ?? []
+  navigation.match(/performanceWorkspace: '[^']+'/g) ?? []
 ).length;
 
 const baseline = {
@@ -60,6 +58,8 @@ if (readinessQueryCount !== 9)
 if (!baseline.readinessAggregate.serverTimingInstrumented)
   failures.push('Readiness query-batch timing is missing.');
 
-console.log(JSON.stringify({ ...baseline, failures, status: failures.length ? 'failed' : 'pass' }, null, 2));
+console.log(
+  JSON.stringify({ ...baseline, failures, status: failures.length ? 'failed' : 'pass' }, null, 2),
+);
 
 if (failures.length) process.exitCode = 1;
