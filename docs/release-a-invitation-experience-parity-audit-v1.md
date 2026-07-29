@@ -25,26 +25,26 @@ Slices 1, 2, and 3 are delivered in draft. The coordinated Release A engineering
 
 ## Functional parity map
 
-| Capability | Roselle | Aruna | Laras |
-| --- | --- | --- | --- |
-| Distinct flagship opening identity | Romantic letter | Asymmetric editorial cover | Formal evening frame |
-| Immersive mobile first screen | Added and gated | Added and gated | Added and gated |
-| Couple-owned opening monogram | Not applicable | Not applicable | Derived from both display names |
-| Personal greeting near opening | Present | Present | Present |
-| Couple identity | Present | Present | Present |
-| Story | Present | Present | Present |
-| Multi-event schedule | Present | Present | Present |
-| Event venue, address, and map | Present | Present | Present |
-| Stable gallery media frame | Shared contract | Shared contract | Shared contract |
-| Lazy and asynchronous gallery delivery | Gated | Gated | Gated |
-| Failed-image presentation | Geometry-preserving fallback | Geometry-preserving fallback | Geometry-preserving fallback |
-| Amplop Digital | Repaired and gated | Present and styled | Present and styled |
-| Personal RSVP | Repaired presentation; behavior preserved | Present | Present |
-| Personal Guestbook | Repaired presentation; behavior preserved | Present | Present |
-| Generic response note | Repaired presentation | Present | Present |
-| Closing | Repaired and gated | Present and styled | Present and styled |
-| Mobile single-column schedule and gallery | Repaired and gated | Present | Present |
-| Reduced-motion handling | Added | Added | Added |
+| Capability                                | Roselle                                   | Aruna                        | Laras                           |
+| ----------------------------------------- | ----------------------------------------- | ---------------------------- | ------------------------------- |
+| Distinct flagship opening identity        | Romantic letter                           | Asymmetric editorial cover   | Formal evening frame            |
+| Immersive mobile first screen             | Added and gated                           | Added and gated              | Added and gated                 |
+| Couple-owned opening monogram             | Not applicable                            | Not applicable               | Derived from both display names |
+| Personal greeting near opening            | Present                                   | Present                      | Present                         |
+| Couple identity                           | Present                                   | Present                      | Present                         |
+| Story                                     | Present                                   | Present                      | Present                         |
+| Multi-event schedule                      | Present                                   | Present                      | Present                         |
+| Event venue, address, and map             | Present                                   | Present                      | Present                         |
+| Stable gallery media frame                | Shared contract                           | Shared contract              | Shared contract                 |
+| Lazy and asynchronous gallery delivery    | Gated                                     | Gated                        | Gated                           |
+| Failed-image presentation                 | Geometry-preserving fallback              | Geometry-preserving fallback | Geometry-preserving fallback    |
+| Amplop Digital                            | Repaired and gated                        | Present and styled           | Present and styled              |
+| Personal RSVP                             | Repaired presentation; behavior preserved | Present                      | Present                         |
+| Personal Guestbook                        | Repaired presentation; behavior preserved | Present                      | Present                         |
+| Generic response note                     | Repaired presentation                     | Present                      | Present                         |
+| Closing                                   | Repaired and gated                        | Present and styled           | Present and styled              |
+| Mobile single-column schedule and gallery | Repaired and gated                        | Present                      | Present                         |
+| Reduced-motion handling                   | Added                                     | Added                        | Added                           |
 
 ## Audit findings
 

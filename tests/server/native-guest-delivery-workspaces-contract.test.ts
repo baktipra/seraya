@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { access, readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
@@ -28,7 +28,7 @@ describe('native Tamu and Bagikan operational workspace migration', () => {
     }
   });
 
-  it('preserves Bagikan readiness and manual handoff authority in native composition', async () => {
+  it('preserves Bagikan readiness and truthful manual handoff authority', async () => {
     const source = await read('src/components/projects/native-guest-delivery-center.tsx');
 
     for (const contract of [
@@ -45,23 +45,26 @@ describe('native Tamu and Bagikan operational workspace migration', () => {
       expect(source).toContain(contract);
     }
 
-    expect(source).toContain('Pembagian WhatsApp tetap dilakukan manual per tamu.');
+    expect(source).toContain('Pembagian WhatsApp');
+    expect(source).toContain('tetap dilakukan manual per tamu.');
     expect(source).not.toContain('sudah terkirim');
     expect(source).not.toContain('sudah diterima');
   });
 
-  it('removes the final operational compatibility bridge and page CSS authority', async () => {
-    const [globals, compatibility, responsive, primitives, guestsRoute, deliveryRoute] =
-      await Promise.all([
-        read('src/app/globals.css'),
-        read('src/app/romantic-clarity-consistency.css'),
-        read('src/app/workspace-responsive.css'),
-        read('src/components/workspace/operational-primitives.tsx'),
-        read('src/app/(dashboard)/dashboard/[projectId]/guests/page.tsx'),
-        read('src/app/(dashboard)/dashboard/[projectId]/delivery/page.tsx'),
-      ]);
+  it('keeps deleted compatibility CSS absent and routes on native components', async () => {
+    const [globals, responsive, primitives, guestsRoute, deliveryRoute] = await Promise.all([
+      read('src/app/globals.css'),
+      read('src/app/workspace-responsive.css'),
+      read('src/components/workspace/operational-primitives.tsx'),
+      read('src/app/(dashboard)/dashboard/[projectId]/guests/page.tsx'),
+      read('src/app/(dashboard)/dashboard/[projectId]/delivery/page.tsx'),
+    ]);
 
-    for (const source of [compatibility, responsive, primitives, guestsRoute, deliveryRoute]) {
+    await expect(
+      access(path.resolve(process.cwd(), 'src/app/romantic-clarity-consistency.css')),
+    ).rejects.toThrow();
+
+    for (const source of [responsive, primitives, guestsRoute, deliveryRoute]) {
       expect(source).not.toContain('OperationalLegacyBridge');
       expect(source).not.toContain('data-operational-legacy-bridge');
     }

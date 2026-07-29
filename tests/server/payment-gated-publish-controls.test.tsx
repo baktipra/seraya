@@ -77,7 +77,7 @@ describe('payment-gated publish controls', () => {
       />,
     );
 
-    expect(html).toContain('Publikasikan undangan');
+    expect(html).toContain('Terbitkan undangan');
     expect(html).not.toContain(
       'Selesaikan pembayaran terverifikasi untuk mempublikasikan undangan.',
     );

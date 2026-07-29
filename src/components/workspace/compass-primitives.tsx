@@ -186,7 +186,11 @@ export function CompassAttentionList({
 }) {
   return (
     <section aria-labelledby={titleId} className="min-w-0" data-compass-attention>
-      <CompassSectionHeader eyebrow="Perlu dibereskan" title="Butuh perhatian Anda" titleId={titleId} />
+      <CompassSectionHeader
+        eyebrow="Perlu dibereskan"
+        title="Butuh perhatian Anda"
+        titleId={titleId}
+      />
       <ul className="border-seraya-border-default mt-4 min-w-0 divide-y border-y">{children}</ul>
     </section>
   );

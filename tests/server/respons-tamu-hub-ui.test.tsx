@@ -76,31 +76,23 @@ describe('SRY-040 Respons Tamu hub UI', () => {
       />,
     );
 
+    expect(html).toContain('id="response-hub-title">Respons &amp; ucapan</h1>');
     expect(html).toContain(
-      '<h1 class="seraya-display-md" id="guest-response-workspace-title">Respons Tamu</h1>',
+      'Pantau konfirmasi kehadiran, jumlah rombongan, dan ucapan tamu dalam satu tempat.',
     );
-    expect(html).toContain('Pantau RSVP, jumlah rombongan hadir, dan ucapan dari tamu Anda.');
-    expect(html).toContain(
-      'Ringkasan ini mencakup seluruh tamu aktif dan tidak berubah saat daftar difilter.',
-    );
-    for (const label of ['Hadir', 'Tidak hadir', 'Belum merespons', 'Total rombongan hadir']) {
+    expect(html).toContain('aria-label="Ringkasan status RSVP"');
+    for (const label of ['Hadir', 'Tidak hadir', 'Belum merespons', 'Rombongan hadir']) {
       expect(html).toContain(label);
     }
     for (const filter of ['Semua respons', 'Belum merespons', 'Hadir', 'Tidak hadir']) {
       expect(html).toContain(filter);
     }
-    for (const header of [
-      'Tamu',
-      'Grup',
-      'Status RSVP',
-      'Rombongan Hadir',
-      'Terakhir diperbarui',
-    ]) {
+    for (const header of ['Tamu', 'Grup', 'Status RSVP', 'Rombongan', 'Diperbarui']) {
       expect(html).toContain(header);
     }
     expect(html).toContain('role="tablist"');
     expect(html).toContain('aria-selected="true"');
-    expect(html).toContain('Export RSVP');
+    expect(html).toContain('Export XLSX');
     for (const forbidden of [
       'Copy',
       'WhatsApp',
@@ -129,9 +121,9 @@ describe('SRY-040 Respons Tamu hub UI', () => {
       />,
     );
 
-    expect(html).toContain('Total rombongan hadir');
+    expect(html).toContain('Rombongan hadir');
     expect(html).toContain('Belum lengkap');
-    expect(html).toContain('2 orang sudah terkonfirmasi; 1 RSVP hadir belum mencantumkan jumlah.');
+    expect(html).toContain('2 orang terkonfirmasi; 1 RSVP hadir belum mencantumkan jumlah.');
     expect(html).not.toContain('6 orang');
   });
 

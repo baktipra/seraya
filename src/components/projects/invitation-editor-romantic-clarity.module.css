@@ -66,8 +66,7 @@
   line-height: 1.1 !important;
 }
 
-:global([data-dashboard-width='wide']):has(.workspace)
-  :global(#invitation-editor-title) {
+:global([data-dashboard-width='wide']):has(.workspace) :global(#invitation-editor-title) {
   margin-top: 0.45rem !important;
   max-width: 48rem !important;
   font-family: var(--font-editorial) !important;
@@ -77,9 +76,7 @@
   letter-spacing: -0.025em !important;
 }
 
-:global([data-dashboard-width='wide']):has(.workspace)
-  :global(#invitation-editor-title)
-  + p {
+:global([data-dashboard-width='wide']):has(.workspace) :global(#invitation-editor-title) + p {
   margin-top: 0.55rem !important;
   max-width: 48rem !important;
   color: var(--seraya-text-secondary) !important;
@@ -182,8 +179,7 @@
   display: none !important;
 }
 
-:global([data-dashboard-width='wide']):has(.workspace)
-  :global([data-invitation-editor-panel] h2),
+:global([data-dashboard-width='wide']):has(.workspace) :global([data-invitation-editor-panel] h2),
 :global([data-dashboard-width='wide']):has(.workspace)
   :global([data-invitation-editor-panel='style'] legend) {
   font-family: var(--font-editorial) !important;
@@ -228,14 +224,28 @@
 }
 
 :global([data-dashboard-width='wide']):has(.workspace)
-  :global([data-invitation-editor-panel='style'] > fieldset > div:nth-child(2) > label span span:first-child) {
+  :global(
+    [data-invitation-editor-panel='style']
+      > fieldset
+      > div:nth-child(2)
+      > label
+      span
+      span:first-child
+  ) {
   font-family: var(--font-editorial);
   font-size: 1.15rem !important;
   font-weight: 500 !important;
 }
 
 :global([data-dashboard-width='wide']):has(.workspace)
-  :global([data-invitation-editor-panel='style'] > fieldset > div:nth-child(2) > label span span:nth-child(2)) {
+  :global(
+    [data-invitation-editor-panel='style']
+      > fieldset
+      > div:nth-child(2)
+      > label
+      span
+      span:nth-child(2)
+  ) {
   font-size: 0.75rem !important;
   line-height: 1.15rem !important;
 }
@@ -281,7 +291,9 @@
 }
 
 :global([data-dashboard-width='wide']):has(.workspace)
-  :global(form > div:has([data-testid='invitation-editor-save-status']) > div > div:last-child > p) {
+  :global(
+    form > div:has([data-testid='invitation-editor-save-status']) > div > div:last-child > p
+  ) {
   display: none !important;
 }
 
@@ -352,14 +364,22 @@
   padding: 0 0 0.9rem !important;
 }
 
-.workspace:not([data-local-preview-overlay]) > div > div:first-child > div:first-child > p:first-child {
+.workspace:not([data-local-preview-overlay])
+  > div
+  > div:first-child
+  > div:first-child
+  > p:first-child {
   font-size: 0.68rem !important;
   font-weight: 700 !important;
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
-.workspace:not([data-local-preview-overlay]) > div > div:first-child > div:first-child > p:last-child {
+.workspace:not([data-local-preview-overlay])
+  > div
+  > div:first-child
+  > div:first-child
+  > p:last-child {
   margin-top: 0.2rem !important;
   font-size: 0.72rem !important;
   line-height: 1.15rem !important;
@@ -472,8 +492,7 @@
     padding-bottom: 1rem !important;
   }
 
-  :global([data-dashboard-width='wide']):has(.workspace)
-    :global(#invitation-editor-title) {
+  :global([data-dashboard-width='wide']):has(.workspace) :global(#invitation-editor-title) {
     font-size: clamp(2rem, 9vw, 2.65rem) !important;
   }
 
@@ -495,8 +514,7 @@
 }
 
 @media (max-width: 639px) {
-  :global([data-dashboard-width='wide']):has(.workspace)
-    :global([data-invitation-editor-panel] h2),
+  :global([data-dashboard-width='wide']):has(.workspace) :global([data-invitation-editor-panel] h2),
   :global([data-dashboard-width='wide']):has(.workspace)
     :global([data-invitation-editor-panel='style'] legend) {
     font-size: 2rem !important;

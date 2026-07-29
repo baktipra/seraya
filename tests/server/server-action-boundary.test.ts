@@ -93,9 +93,8 @@ describe('Server Action runtime export boundary', () => {
     expect(setupForm).toContain(
       "import { createProjectAction } from '@/modules/projects/create-project.actions';",
     );
-    expect(setupForm).toContain(
-      "import { initialCreateProjectActionState } from '@/modules/projects/create-project.action-state';",
-    );
+    expect(setupForm).toContain('initialCreateProjectActionState');
+    expect(setupForm).toContain("from '@/modules/projects/create-project.action-state';");
     expect(publishControls).toContain(
       "import { publishInvitationAction } from '@/modules/publications/publication.actions';",
     );

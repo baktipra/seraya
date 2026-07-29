@@ -134,9 +134,7 @@ export function PublishInvitationControls({
     <section
       aria-label="Kontrol penerbitan undangan"
       className={
-        presentation === 'readiness'
-          ? 'min-w-0 space-y-2 sm:min-w-64'
-          : 'w-full space-y-4'
+        presentation === 'readiness' ? 'min-w-0 space-y-2 sm:min-w-64' : 'w-full space-y-4'
       }
       data-editor-publication-authority={presentation === 'readiness' || undefined}
     >

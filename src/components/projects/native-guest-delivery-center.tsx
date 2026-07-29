@@ -340,7 +340,8 @@ function DeliveryBatchPreparationDialog({
             </p>
             {actionState.skippedActiveLinkCount ? (
               <p className="text-seraya-text-secondary mt-1">
-                {actionState.skippedActiveLinkCount} tamu sudah memiliki tautan aktif dan tidak diubah.
+                {actionState.skippedActiveLinkCount} tamu sudah memiliki tautan aktif dan tidak
+                diubah.
               </p>
             ) : null}
             {actionState.skippedInactiveGuestCount ? (
@@ -350,14 +351,14 @@ function DeliveryBatchPreparationDialog({
             ) : null}
             {actionState.skippedInvalidProjectCount ? (
               <p className="text-seraya-text-secondary mt-1">
-                {actionState.skippedInvalidProjectCount} pilihan tidak tersedia untuk project ini dan
-                dilewati.
+                {actionState.skippedInvalidProjectCount} pilihan tidak tersedia untuk project ini
+                dan dilewati.
               </p>
             ) : null}
             {actionState.whatsappMissingCreatedCount ? (
               <p className="text-seraya-text-secondary mt-1">
-                {actionState.whatsappMissingCreatedCount} tamu yang baru disiapkan belum memiliki Nomor
-                WhatsApp.
+                {actionState.whatsappMissingCreatedCount} tamu yang baru disiapkan belum memiliki
+                Nomor WhatsApp.
               </p>
             ) : null}
             {actionState.failedCount ? (
@@ -423,7 +424,12 @@ function DeliveryWhatsAppCopyControl({
   return (
     <form action={copyAction}>
       <input name="selectedGuestIds" type="hidden" value={JSON.stringify(guestIds)} />
-      <Button disabled={pending || guestIds.length === 0} size="sm" type="submit" variant="secondary">
+      <Button
+        disabled={pending || guestIds.length === 0}
+        size="sm"
+        type="submit"
+        variant="secondary"
+      >
         Copy nomor WhatsApp
       </Button>
     </form>
@@ -463,7 +469,9 @@ export function NativeGuestDeliveryCenter({
 
   const visibleIds = filteredRows.map((row) => row.guestId);
   const selectedVisibleIds = selectedIds.filter((id) => visibleIds.includes(id));
-  const selectedVisibleRows = filteredRows.filter((row) => selectedVisibleIds.includes(row.guestId));
+  const selectedVisibleRows = filteredRows.filter((row) =>
+    selectedVisibleIds.includes(row.guestId),
+  );
   const selectedPreparationIds = selectedVisibleRows
     .filter((row) => deriveDeliveryReadiness(row).canPrepareNewLink)
     .map((row) => row.guestId);
@@ -722,7 +730,9 @@ export function NativeGuestDeliveryCenter({
                               />
                             </td>
                             <td className="px-3 py-3 align-top">
-                              <p className="text-seraya-text-primary font-semibold">{row.displayName}</p>
+                              <p className="text-seraya-text-primary font-semibold">
+                                {row.displayName}
+                              </p>
                               {row.groupLabel ? (
                                 <p className="text-seraya-text-muted mt-0.5 text-xs leading-5">
                                   {row.groupLabel}
@@ -773,7 +783,7 @@ export function NativeGuestDeliveryCenter({
                               type="checkbox"
                             />
                             <div className="min-w-0">
-                              <p className="text-seraya-text-primary font-semibold leading-5">
+                              <p className="text-seraya-text-primary leading-5 font-semibold">
                                 {row.displayName}
                               </p>
                               {row.groupLabel ? (

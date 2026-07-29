@@ -14,8 +14,8 @@ describe('invitation studio structural reconstruction', () => {
 
     expect(shell).toContain('data-invitation-studio');
     expect(shell).not.toContain('<style>');
-    expect(shellCss).toContain("[data-invitation-editor-desktop-navigation] + form");
-    expect(shellCss).toContain("aside[data-local-preview-desktop]");
+    expect(shellCss).toContain('[data-invitation-editor-desktop-navigation] + form');
+    expect(shellCss).toContain('aside[data-local-preview-desktop]');
     expect(shellCss).not.toContain(':has(');
     expect(shellCss).not.toContain('display: contents');
   });

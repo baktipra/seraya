@@ -4,39 +4,41 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 describe('Slice F editor save-preview-publish authority', () => {
-  it('blocks publication while the editor is showing local unsaved changes', async () => {
+  it('blocks publication from canonical React dirty state without DOM discovery', async () => {
     const source = await readFile(
       path.resolve(process.cwd(), 'src/components/projects/publish-invitation-controls.tsx'),
       'utf8',
     );
 
-    expect(source).toContain('useInvitationEditorAuthority');
-    expect(source).toContain('[data-testid="invitation-editor-save-status"]');
-    expect(source).toContain('new MutationObserver(syncAuthorityState)');
-    expect(source).toContain('!editorAuthority.hasUnsavedEditorChanges');
-    expect(source).toContain('Simpan perubahan sebelum menerbitkan versi ini.');
-    expect(source).toContain('createPortal(controls, editorAuthority.actionTarget)');
-    expect(source).toContain('Status bagian mengikuti draf tersimpan.');
-    expect(source).toContain("return presentation === 'readiness'");
-    expect(source).not.toContain(
-      'setBridge({ ...initialEditorAuthorityBridge, isResolved: true });',
+    expect(source).toContain('useInvitationEditorUnsavedChanges');
+    expect(source).toContain(
+      'hasActiveDraft && publishEligibility.allowed && !hasUnsavedEditorChanges && !isPending',
     );
+    expect(source).toContain('Simpan perubahan sebelum menerbitkan versi ini.');
+    expect(source).toContain('data-editor-publication-authority');
+    expect(source).not.toContain('MutationObserver');
+    expect(source).not.toContain('createPortal');
   });
 
-  it('keeps one saved-preview authority and hides it while local changes are dirty', async () => {
-    const source = await readFile(
-      path.resolve(process.cwd(), 'src/components/projects/invitation-editor-authority.module.css'),
-      'utf8',
-    );
+  it('keeps one saved-preview and publication authority in explicit JSX', async () => {
+    const [preview, publication] = await Promise.all([
+      readFile(
+        path.resolve(process.cwd(), 'src/components/projects/invitation-editor-live-preview.tsx'),
+        'utf8',
+      ),
+      readFile(
+        path.resolve(process.cwd(), 'src/components/projects/publish-invitation-controls.tsx'),
+        'utf8',
+      ),
+    ]);
 
-    expect(source).toContain(
-      'Slice F: the sticky dock is the single authority for save, preview, and publish.',
+    expect(preview).toContain('useInvitationEditorContextualSaveAction(isDirty)');
+    expect(preview).toContain(
+      "const status = isDirty ? 'Perubahan lokal · belum disimpan' : 'Draf tersimpan';",
     );
-    expect(source).toContain("section[aria-label='Ringkasan undangan']");
-    expect(source).toContain("[data-editor-authority-state='dirty']");
-    expect(source).toContain(':not([data-editor-authority-state])');
-    expect(source).toContain("content: 'Status bagian mengikuti draf tersimpan.';");
-    expect(source).toContain("a[href$='/preview']");
-    expect(source).toContain('[data-editor-publication-authority]');
+    expect(preview).toContain("<Badge variant={isDirty ? 'warning' : 'brand'}>{status}</Badge>");
+    expect(publication).toContain("presentation === 'readiness'");
+    expect(publication).toContain('data-editor-publication-authority');
+    expect(publication).toContain('href={`/dashboard/${projectId}/billing`}');
   });
 });

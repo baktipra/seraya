@@ -8,61 +8,52 @@ import { describe, expect, it } from 'vitest';
 import Home, { dynamic, metadata, revalidate } from '@/app/page';
 
 const requiredSteps = [
-  'Buat undangan',
-  'Lengkapi isi undangan',
-  'Aktifkan dan terbitkan saat siap',
-  'Bagikan dan terima RSVP',
+  'Pilih pengalaman',
+  'Susun dengan tenang',
+  'Terbitkan saat siap',
+  'Bagikan secara personal',
 ] as const;
 
-describe('SRY-019 public landing page conversion layer', () => {
-  it('renders a public static homepage with the required metadata', () => {
+describe('Release A public flagship landing page', () => {
+  it('renders a public static homepage with canonical metadata', () => {
     expect(dynamic).toBe('force-static');
     expect(revalidate).toBe(3600);
     expect(metadata).toMatchObject({
       description:
-        'Buat undangan pernikahan digital, kelola tamu, bagikan tautan pribadi, dan kumpulkan RSVP dalam satu tempat.',
+        'Susun undangan, bagikan tautan personal, dan kelola perjalanan tamu pernikahan Indonesia dalam satu pengalaman yang indah dan mudah digunakan.',
       title: {
-        absolute: 'Seraya — Undangan pernikahan digital yang terasa personal',
+        absolute: 'Seraya — Pengalaman tamu pernikahan yang personal',
       },
     });
   });
 
-  it('renders the factual hero, navigation, and conversion actions without authentication', () => {
+  it('renders the flagship hero, collection navigation, and conversion actions', () => {
     const html = renderToStaticMarkup(<Home />);
 
-    expect(html).toContain('Undangan pernikahan digital yang terasa personal');
-    expect(html).toContain('Buat undangan yang rapi,');
-    expect(html).toContain('lalu bagikan dengan cara yang lebih personal.');
-    expect(html).toContain(
-      'Susun undangan, kelola tamu, dan kumpulkan konfirmasi kehadiran dalam satu tempat yang tenang dan mudah dipakai.',
-    );
+    expect(html).toContain('Undangan personal untuk pernikahan Indonesia');
+    expect(html).toContain('Satu undangan yang indah.');
+    expect(html).toContain('Personal untuk setiap tamu.');
     expect(html).toContain('href="/login"');
     expect(html).toContain('href="/dashboard/new"');
-    expect(html).toContain('href="#cara-kerja"');
+    expect(html).toContain('href="/templates"');
     expect(html).toContain('Mulai buat undangan');
-    expect(html).toContain('Lihat cara kerjanya');
-    expect(html).toContain(
-      'Ilustrasi alur kerja Seraya, bukan undangan atau data pasangan yang sedang tayang.',
-    );
+    expect(html).toContain('Lihat koleksi desain');
   });
 
-  it('renders exactly the three supported capability explanations', () => {
+  it('presents the three distinct supported collections', () => {
     const html = renderToStaticMarkup(<Home />);
 
-    expect(html).toContain('Susun undangan dengan tenang');
-    expect(html).toContain('Lengkapi detail undangan dan lihat hasilnya di preview pribadi.');
-    expect(html).toContain('Bagikan tautan pribadi');
-    expect(html).toContain(
-      'Buat tautan untuk tiap tamu dan siapkan pesan untuk dibagikan lewat WhatsApp.',
-    );
-    expect(html).toContain('Kumpulkan konfirmasi kehadiran');
-    expect(html).toContain('Tamu dapat memilih hadir atau tidak hadir melalui tautan pribadinya.');
-    expect((html.match(/<article/g) ?? []).length).toBe(3);
+    for (const collection of ['Roselle', 'Aruna', 'Laras']) {
+      expect(html).toContain(collection);
+    }
+    expect(html).toContain('Romantic warmth');
+    expect(html).toContain('Modern editorial');
+    expect(html).toContain('Formal evening');
+    expect(html).toContain('Bukan sekadar ganti warna.');
   });
 
-  it('renders the four how-it-works steps in the required order', () => {
+  it('renders the four owner-journey steps in order', () => {
     const html = renderToStaticMarkup(<Home />);
-
     expect(html).toContain('id="cara-kerja"');
 
     const positions = requiredSteps.map((step) => html.indexOf(step));
@@ -70,16 +61,14 @@ describe('SRY-019 public landing page conversion layer', () => {
     expect(positions).toEqual([...positions].sort((left, right) => left - right));
   });
 
-  it('keeps the trust layer and final CTA factual', () => {
+  it('keeps the privacy and final CTA language factual', () => {
     const html = renderToStaticMarkup(<Home />);
 
-    expect(html).toContain('Draft tetap pribadi sebelum diterbitkan.');
-    expect(html).toContain('Tautan pribadi dibuat untuk tiap tamu.');
-    expect(html).toContain('Perubahan undangan publik dilakukan saat kalian menerbitkan ulang.');
-    expect(html).toContain('Siap mulai menyusun undangan kalian?');
-    expect(html).toContain(
-      'Buat draft pribadi, lengkapi detailnya, lalu terbitkan saat undangan kalian siap dibagikan.',
-    );
+    expect(html).toContain('Draf pribadi');
+    expect(html).toContain('Tautan personal');
+    expect(html).toContain('Satu workspace');
+    expect(html).toContain('Personal tanpa membuat data tamu menjadi konsumsi publik.');
+    expect(html).toContain('Buat pengalaman yang akan diingat tamu kalian.');
   });
 
   it('does not introduce unsupported free, automated, social-proof, or tracking claims', () => {
@@ -88,9 +77,7 @@ describe('SRY-019 public landing page conversion layer', () => {
     for (const unsupportedClaim of [
       'gratis',
       'tanpa biaya',
-      'otomatis',
       'automated',
-      'pengingat',
       'ribuan pasangan',
       'dipercaya ribuan',
       'testimoni',
@@ -103,7 +90,7 @@ describe('SRY-019 public landing page conversion layer', () => {
     }
   });
 
-  it('keeps the root route static and free of Supabase, auth, request, and private-data dependencies', async () => {
+  it('keeps the root route static and free of private-data dependencies', async () => {
     const testDirectory = path.dirname(fileURLToPath(import.meta.url));
     const routeSource = await readFile(
       path.resolve(testDirectory, '../../src/app/page.tsx'),

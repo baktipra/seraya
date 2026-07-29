@@ -84,8 +84,7 @@
   gap: 0.8rem;
 }
 
-.studio
-  :global([data-invitation-editor-panel='style'] > fieldset > div:nth-child(2) > label) {
+.studio :global([data-invitation-editor-panel='style'] > fieldset > div:nth-child(2) > label) {
   position: relative;
   min-width: 0;
   overflow: hidden;

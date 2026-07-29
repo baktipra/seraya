@@ -83,10 +83,7 @@ export function RowOverflowMenu({
   }, [open]);
 
   useEffect(() => {
-    if (!open) {
-      setPosition(null);
-      return undefined;
-    }
+    if (!open) return undefined;
 
     const closeOnOutsidePointer = (event: PointerEvent) => {
       const target = event.target as Node;

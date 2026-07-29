@@ -41,7 +41,7 @@ function readiness(overrides: Partial<WeddingReadinessV1> = {}): WeddingReadines
 
 describe('SRY-039 Project Compass surfaces', () => {
   it('keeps dashboard creation surfaces intact', () => {
-    expect(renderToStaticMarkup(<DashboardEmptyState />)).toContain('Buat undangan baru');
+    expect(renderToStaticMarkup(<DashboardEmptyState />)).toContain('Mulai buat undangan');
     expect(renderToStaticMarkup(<ProjectSetupForm />)).toContain('Link undangan');
     expect(
       renderToStaticMarkup(
@@ -66,7 +66,7 @@ describe('SRY-039 Project Compass surfaces', () => {
     const html = renderToStaticMarkup(
       <ProjectOverviewBootstrap projectId={projectId} readiness={readiness()} />,
     );
-    expect(html).toContain('Undangan belum dipublikasikan.');
+    expect(html).toContain('Draft belum dipublikasikan');
     expect(html).toContain('Fokus berikutnya');
     expect(html).toContain('Lengkapi undangan');
     expect(html).toContain('Progress singkat');

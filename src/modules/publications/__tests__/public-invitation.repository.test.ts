@@ -61,7 +61,7 @@ describe('public invitation cache compatibility boundary', () => {
     expect(createPublicSupabaseClientMock).not.toHaveBeenCalled();
     expect(unstableCacheMock).toHaveBeenCalledWith(
       expect.any(Function),
-      ['published-invitation', 'raka-nadia'],
+      ['published-invitation-v2', 'raka-nadia'],
       {
         revalidate: 3600,
         tags: ['published-invitation:raka-nadia'],

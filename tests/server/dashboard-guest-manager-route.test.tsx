@@ -10,8 +10,14 @@ const { getGuestManagerMock, getOwnedProjectContextMock, notFoundMock } = vi.hoi
 }));
 
 vi.mock('next/navigation', () => ({ notFound: notFoundMock }));
-vi.mock('@/components/projects/guest-manager', () => ({
-  GuestManager: ({ initialGuests, projectId }: { initialGuests: unknown[]; projectId: string }) => (
+vi.mock('@/components/projects/native-guest-manager', () => ({
+  NativeGuestManager: ({
+    initialGuests,
+    projectId,
+  }: {
+    initialGuests: unknown[];
+    projectId: string;
+  }) => (
     <div data-guest-count={initialGuests.length} data-project-id={projectId}>
       Daftar tamu
     </div>
