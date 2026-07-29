@@ -100,9 +100,8 @@ jobs:
             src/modules/publications/__tests__/public-invitation.repository.test.ts \
             --maxWorkers=2
 
-      - name: Restore canonical workflow and commit aligned tests
+      - name: Commit aligned tests
         run: |
-          git checkout HEAD^ -- .github/workflows/ci.yml
           rm -f scripts/quality-align-stale-tests.zlib
           git diff --check
           git config user.name "seraya-quality-bot"
