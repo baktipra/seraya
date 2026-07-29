@@ -1,16 +1,13 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 
 import { completeWorkspaceTransition } from '@/lib/performance/workspace-performance.client';
 
 export function WorkspacePerformanceProbe({ workspace }: { workspace: string }) {
-  const pathname = usePathname();
-
   useEffect(() => {
-    completeWorkspaceTransition({ pathname, workspace });
-  }, [pathname, workspace]);
+    completeWorkspaceTransition({ pathname: window.location.pathname, workspace });
+  }, [workspace]);
 
   return (
     <span
