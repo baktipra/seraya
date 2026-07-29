@@ -31,11 +31,7 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
   const responseStepCount =
     Number(Boolean(personalSlots?.rsvp)) + Number(Boolean(personalSlots?.guestbook));
   const rsvpStepNumber = personalSlots?.rsvp ? 1 : null;
-  const guestbookStepNumber = personalSlots?.guestbook
-    ? personalSlots.rsvp
-      ? 2
-      : 1
-    : null;
+  const guestbookStepNumber = personalSlots?.guestbook ? (personalSlots.rsvp ? 2 : 1) : null;
   const openingTargetId = personalSlots?.greeting
     ? 'roselle-personal-greeting'
     : 'roselle-couple-title';
@@ -72,10 +68,7 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
         <RoselleGallery gallery={invitation.gallery} />
         <RoselleDigitalGift digitalGift={invitation.digitalGift} />
         {hasPersonalResponse ? (
-          <div
-            className={styles.personalResponseJourney}
-            data-template-response-journey="roselle"
-          >
+          <div className={styles.personalResponseJourney} data-template-response-journey="roselle">
             <div
               className={styles.responseIntroduction}
               data-template-response-introduction="roselle"
@@ -85,10 +78,7 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
               <p className={styles.responseLead}>{personalResponseLead}</p>
             </div>
             {personalSlots?.rsvp ? (
-              <div
-                className={styles.personalResponseSection}
-                data-template-response-slot="rsvp"
-              >
+              <div className={styles.personalResponseSection} data-template-response-slot="rsvp">
                 <p aria-hidden="true" data-roselle-response-step>
                   Langkah {rsvpStepNumber} dari {responseStepCount}
                 </p>

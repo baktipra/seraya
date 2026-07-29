@@ -23,7 +23,7 @@ describe('J3 Roselle flagship guest experience contract', () => {
   });
 
   it('routes the opening action to the addressed greeting on personal invitations', () => {
-    expect(roselleTemplate).toContain("personalSlots?.greeting");
+    expect(roselleTemplate).toContain('personalSlots?.greeting');
     expect(roselleTemplate).toContain("'roselle-personal-greeting'");
     expect(roselleTemplate).toContain("'roselle-couple-title'");
     expect(roselleTemplate).toContain('data-roselle-opening-action');

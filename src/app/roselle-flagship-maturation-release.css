@@ -93,7 +93,8 @@ article[data-template='roselle'] [data-template-response-journey='roselle'] {
   gap: 1rem;
 }
 
-article[data-template='roselle'] [data-template-response-journey='roselle']
+article[data-template='roselle']
+  [data-template-response-journey='roselle']
   [data-template-response-slot] {
   position: relative;
   margin-top: 0;
@@ -150,7 +151,8 @@ article[data-template='roselle'] > [data-roselle-return-to-opening]:hover {
     padding: 1.55rem;
   }
 
-  article[data-template='roselle'] [data-template-response-journey='roselle']
+  article[data-template='roselle']
+    [data-template-response-journey='roselle']
     [data-template-response-slot] {
     padding: 1.35rem;
   }
