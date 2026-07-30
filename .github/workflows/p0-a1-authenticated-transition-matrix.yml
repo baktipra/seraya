@@ -24,6 +24,19 @@ jobs:
       - run: npm ci
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
+      - name: Preserve mobile overlap as baseline evidence
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('scripts/measure-authenticated-workspace-transitions.mjs')
+          source = path.read_text()
+          old = "await navigation.getByRole('link', { exact: true, name: target.label }).click();"
+          new = "await navigation.getByRole('link', { exact: true, name: target.label }).click({ force: deviceName === 'mobile' });"
+          if old not in source:
+              raise SystemExit('Expected mobile navigation click source was not found.')
+          path.write_text(source.replace(old, new, 1))
+          PY
       - name: Capture authenticated transition matrix
         run: node scripts/measure-authenticated-workspace-transitions.mjs
       - uses: actions/upload-artifact@v4
