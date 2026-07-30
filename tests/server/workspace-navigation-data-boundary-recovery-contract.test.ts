@@ -10,6 +10,9 @@ const loading = read('src/app/(dashboard)/dashboard/[projectId]/loading.tsx');
 const invitation = read('src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx');
 const delivery = read('src/app/(dashboard)/dashboard/[projectId]/delivery/page.tsx');
 const navigation = read('src/components/dashboard/project-navigation.tsx');
+const invitationEditor = read('src/components/projects/invitation-editor.tsx');
+const invitationFields = read('src/components/projects/invitation-editor-fields.tsx');
+const invitationWorkspace = read('src/components/projects/invitation-editor-workspace.tsx');
 const responsiveCss = read('src/app/workspace-responsive.css');
 const shellService = read('src/modules/projects/project-shell.service.ts');
 
@@ -49,6 +52,21 @@ describe('P0-A2/A3 navigation and data-boundary recovery contract', () => {
       '[data-project-mobile-navigation] {\n  position: fixed;\n  z-index: 100;\n  pointer-events: auto;',
     );
     expect(responsiveCss).toContain('padding-bottom: calc(var(--seraya-mobile-safe-bottom)');
+  });
+
+  it('contains the invitation editor within the mobile inline size', () => {
+    expect(invitationEditor).toContain(
+      'className="grid max-w-full min-w-0 scroll-mt-24 gap-4',
+    );
+    expect(invitationEditor).toContain('max-w-full min-w-0 overflow-x-clip');
+    expect(invitationWorkspace).toContain(
+      'w-auto max-w-full min-w-0 overflow-x-hidden',
+    );
+    expect(invitationWorkspace).toContain('className="max-w-full min-w-0"');
+    expect(invitationFields).toContain(
+      'bg-seraya-canvas max-w-full min-w-0 rounded-[var(--seraya-radius-lg)]',
+    );
+    expect(invitationFields).toContain('grid max-w-full min-w-0 gap-4');
   });
 
   it('reuses verified project context in the invitation readiness composition', () => {
