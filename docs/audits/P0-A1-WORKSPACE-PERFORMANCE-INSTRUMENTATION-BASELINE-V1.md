@@ -1,6 +1,6 @@
 # P0-A1 — Workspace Performance Instrumentation & Baseline V1
 
-Status: Implemented / validation pending  
+Status: Implemented / validated / baseline captured  
 Program: Issue #37 — P0 Workspace Performance & Invitation Layout Recovery  
 Base: `41dfe86872c0346792583fe68802a48b632cf8aa`
 
@@ -13,28 +13,28 @@ This slice is observational. It does not claim a performance improvement.
 ## Infrastructure finding
 
 - Supabase project region: Singapore (`ap-southeast-1`).
-- Vercel production region: Singapore.
-- The initial bottleneck hypothesis is therefore application request and render architecture, not long-distance database placement.
+- Vercel production and preview functions use Singapore (`sin1`).
+- The primary bottleneck is therefore application request and render architecture, not long-distance database placement.
 
 ## Static baseline
 
 ### Navigation
 
 - Five canonical destinations remain Ringkasan, Undangan, Tamu, Bagikan, and Respons Tamu.
-- Their shared `Link` component still explicitly uses `prefetch={false}`.
-- P0-A1 preserves that condition so the baseline is not mixed with the P0-A2 navigation repair.
+- Their shared `Link` component explicitly uses `prefetch={false}`.
+- P0-A1 preserves that condition so the baseline is not mixed with P0-A2 navigation repair.
 
 ### Route caching policy
 
 The canonical owner pages remain dynamic private-data surfaces:
 
-| Workspace    | `force-dynamic` | `revalidate = 0`  | `force-no-store`  |
-| ------------ | --------------- | ----------------- | ----------------- |
-| Ringkasan    | Yes             | Yes               | Yes               |
-| Undangan     | Yes             | Yes               | Yes               |
-| Tamu         | Yes             | No explicit value | No explicit value |
-| Bagikan      | Yes             | Yes               | Yes               |
-| Respons Tamu | Yes             | Yes               | Yes               |
+| Workspace | `force-dynamic` | `revalidate = 0` | `force-no-store` |
+| --- | --- | --- | --- |
+| Ringkasan | Yes | Yes | Yes |
+| Undangan | Yes | Yes | Yes |
+| Tamu | Yes | No explicit value | No explicit value |
+| Bagikan | Yes | Yes | Yes |
+| Respons Tamu | Yes | Yes | Yes |
 
 These policies are not changed by A1.
 
@@ -56,15 +56,15 @@ The shared project layout requests full readiness for project identity and statu
 
 ## Client instrumentation
 
-A canonical menu click now records a private, session-scoped transition marker containing only:
+A canonical menu activation records a private, session-scoped transition marker containing only:
 
-- source pathname;
-- destination pathname;
+- normalized source pathname;
+- normalized destination pathname;
 - destination workspace kind;
 - generated navigation ID;
 - monotonic and epoch start timestamps.
 
-When the destination `WorkspacePage` commits and reaches the next animation frame, the probe emits a structured browser-console event:
+When the destination `WorkspacePage` commits and reaches the next animation frame, the probe emits:
 
 ```json
 {
@@ -80,15 +80,15 @@ When the destination `WorkspacePage` commits and reaches the next animation fram
 }
 ```
 
-The values above are field examples, not measured results.
+The values above illustrate the metric shape, not a measured result.
 
-The same payload is dispatched as the browser event `seraya:workspace-performance`, allowing Playwright or a temporary manual collector to capture it without scraping console text.
+The same payload is dispatched through `seraya:workspace-performance`, allowing browser automation to capture it without scraping console text.
 
-No account ID, project ID, guest ID, token, invitation content, or personal data is logged.
+Dynamic project paths are normalized to `/dashboard/:projectId/...`. No account ID, project ID, guest ID, token, invitation content, or personal response data is logged. Metric-storage failure cannot block navigation.
 
 ## Server instrumentation
 
-Structured server events now time:
+Structured server events time:
 
 - shared project-shell readiness;
 - Ringkasan readiness;
@@ -131,38 +131,65 @@ The audit verifies:
 - the preserved prefetch-off baseline;
 - nine readiness repository queries;
 - server timing around that query batch;
-- dynamic/cache policy inventory for the five destination routes.
+- dynamic/cache-policy inventory for the five destination routes.
 
-## Measurement matrix
+The audit is also executed by the focused unit contract.
 
-After deployment, collect at least three warm transitions in each direction on desktop and mobile for:
+## Authenticated transition matrix
 
-- Ringkasan → Undangan;
-- Undangan → Tamu;
-- Tamu → Bagikan;
-- Bagikan → Respons Tamu;
-- Respons Tamu → Ringkasan.
+The first matrix was captured from frozen preview application SHA `58433f37b53625f280af2991002625fd978592d2` using Desktop Chrome and Pixel 7 profiles.
 
-For each transition record:
+Method:
 
-- client total milliseconds;
-- RSC request count;
-- RSC transfer bytes;
-- RSC request duration;
-- project-shell server duration;
-- destination loader server duration;
-- shared-readiness batch count and duration.
+- one unrecorded complete warm-up cycle per device;
+- three recorded warm client-navigation cycles for all five transitions;
+- 30 recorded measurements total;
+- route and project identifiers redacted.
 
-Use median and p75 values. First-load authentication and a deliberate hard refresh must be recorded separately from warm client navigation.
+Overall results:
+
+| Device | Median | P75 | Minimum | Maximum |
+| --- | ---: | ---: | ---: | ---: |
+| Desktop | 953 ms | 1049.5 ms | 616 ms | 1164 ms |
+| Mobile | 938 ms | 1052 ms | 740 ms | 1505 ms |
+
+The slowest path is `Tamu → Bagikan`:
+
+- desktop median 1134 ms and p75 1149 ms;
+- mobile median 1305 ms and p75 1405 ms.
+
+Every transition used one small RSC response—approximately 1.7–2.9 KB—but RSC duration consumed nearly the complete client-observed time. The evidence therefore points to server loader and data-boundary cost rather than transfer size.
+
+The Pixel 7 run also proved that workspace content can intercept pointer events above the fixed bottom navigation. The final timing collection used a forced click only inside the temporary measurement workflow so the defect remained visible as evidence rather than being silently changed in A1.
+
+The complete per-transition table and methodology are recorded in:
+
+`docs/audits/P0-A1-AUTHENTICATED-WORKSPACE-TRANSITION-MATRIX-V1.md`
+
+## Validation
+
+- repository formatting: PASS;
+- lint: PASS;
+- TypeScript: PASS;
+- full unit suite: PASS;
+- repeatable P0-A1 audit: PASS;
+- production build: PASS;
+- general E2E: PASS;
+- Release A flagship regression: PASS;
+- invitation-experience regression: PASS;
+- personal-response regression: PASS;
+- authenticated desktop/mobile matrix: PASS;
+- frozen Vercel preview deployment: READY;
+- preview runtime error/warning/fatal scan: clear.
 
 ## A1 exit criteria
 
-- instrumentation is present on all five destinations;
-- structured events contain no sensitive identifiers;
-- the baseline audit passes;
-- formatting, lint, TypeScript, unit tests, build, and existing browser regression remain green;
-- preview runtime logs show the expected metric shape without new application errors;
-- the first authenticated transition matrix is documented before P0-A2 changes navigation behavior.
+- instrumentation is present on all five destinations: PASS;
+- structured events contain no sensitive identifiers: PASS;
+- baseline audit passes: PASS;
+- existing automated gates remain green: PASS;
+- authenticated transition matrix is recorded: PASS;
+- baseline exposes actionable A2/A3 priorities: PASS.
 
 ## Preserved boundaries
 
@@ -176,4 +203,4 @@ Use median and p75 values. First-load authentication and a deliberate hard refre
 
 ## Recommended next slice
 
-P0-A2/A3 should use the captured evidence to restore intentional prefetch and replace full readiness in the shared layout with a lightweight project-shell data boundary. It must not begin until the initial transition matrix has been captured from this baseline.
+P0-A2/A3 should restore intentional prefetch, provide immediate pending feedback, repair mobile bottom-navigation stacking, replace full readiness in the shared layout with a lightweight project-shell data boundary, and reuse already verified project context inside destination loaders.
