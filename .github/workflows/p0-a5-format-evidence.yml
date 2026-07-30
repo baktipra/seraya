@@ -1,0 +1,36 @@
+name: P0-A5 format evidence document
+
+on:
+  push:
+    branches:
+      - agent/p0-a5-editor-runtime-recovery
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/p0-a5-editor-runtime-recovery
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Format and commit clean evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx prettier --write docs/performance/p0-a5-editor-runtime-recovery-v1.md
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/p0-a5-format-evidence.yml
+          git add docs/performance/p0-a5-editor-runtime-recovery-v1.md
+          git diff --cached --check
+          git commit -m 'P0-A5 format runtime evidence document'
+          git push origin HEAD:agent/p0-a5-editor-runtime-recovery
