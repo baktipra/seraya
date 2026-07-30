@@ -1,13 +1,12 @@
 name: P0 B1 B2 format once
 
 on:
-  pull_request:
   push:
     branches:
       - agent/p0-b1-b2-invitation-layout-recovery
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   format:
@@ -15,6 +14,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: agent/p0-b1-b2-invitation-layout-recovery
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -33,14 +34,18 @@ jobs:
             src/modules/invitation-templates/roselle/roselle-template.tsx \
             tests/e2e/invitation-experience.spec.ts
 
-      - name: Upload formatted files
-        uses: actions/upload-artifact@v4
-        with:
-          name: p0-b1-b2-formatted-files
-          path: |
-            src/app/invitation-layout-recovery.css
-            src/modules/invitation-templates/__tests__/shared-invitation-layout-journey-recovery-contract.test.ts
-            src/modules/invitation-templates/roselle/roselle-template.tsx
+      - name: Commit formatted output
+        run: |
+          if git diff --quiet; then
+            echo "No formatting changes remain."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            src/app/invitation-layout-recovery.css \
+            src/modules/invitation-templates/__tests__/shared-invitation-layout-journey-recovery-contract.test.ts \
+            src/modules/invitation-templates/roselle/roselle-template.tsx \
             tests/e2e/invitation-experience.spec.ts
-          if-no-files-found: error
-          retention-days: 1
+          git commit -m "P0-B1/B2: format invitation recovery scope"
+          git push origin HEAD:agent/p0-b1-b2-invitation-layout-recovery
