@@ -1,0 +1,33 @@
+name: P0-A2-A3 format
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Format recovery files
+        run: >-
+          npx prettier --write
+          'src/app/(dashboard)/dashboard/[projectId]/loading.tsx'
+          src/components/dashboard/project-navigation.tsx
+          tests/server/dashboard-delivery-route.test.tsx
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p0-a2-a3-formatted
+          path: |
+            src/app/(dashboard)/dashboard/[projectId]/loading.tsx
+            src/components/dashboard/project-navigation.tsx
+            tests/server/dashboard-delivery-route.test.tsx
+          retention-days: 1
