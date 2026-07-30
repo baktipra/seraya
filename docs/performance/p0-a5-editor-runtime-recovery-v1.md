@@ -33,7 +33,7 @@ The A4 revision and A5 revision were built and served in production mode on the 
 
 This evidence isolates editor hydration, React rendering, DOM, bundle delivery, chapter switching, and preview deferral. It intentionally excludes Vercel, Supabase, authentication, and network latency, so it must not be represented as an end-to-end workspace latency result.
 
-| Revision  | Device  | Shell median | Chapter-ready median / p75 | Mounted panels | Editor DOM nodes | Initial JS    | Mobile preview deferred |
+| Revision  | Device  | Shell median | Chapter-ready median / p75 | Mounted panels | Editor DOM nodes |    Initial JS | Mobile preview deferred |
 | --------- | ------- | -----------: | -------------------------: | -------------: | ---------------: | ------------: | ----------------------- |
 | A4 before | Desktop |       152 ms |               235 / 302 ms |              9 |              519 | 166,508 bytes | n/a                     |
 | A4 before | Pixel 7 |       151 ms |               220 / 226 ms |              9 |              519 | 166,508 bytes | No                      |
