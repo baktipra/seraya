@@ -120,10 +120,18 @@ jobs:
 
           editor = Path('src/components/projects/invitation-editor.tsx')
           source = editor.read_text()
-          old_timer = 'timeoutHandle = window.setTimeout('
-          if old_timer not in source:
-            raise SystemExit('preview timer marker missing')
-          editor.write_text(source.replace(old_timer, 'timeoutHandle = globalThis.setTimeout(', 1))
+          replacements = {
+            'let timeoutHandle: number | null = null;':
+              'let timeoutHandle: ReturnType<typeof setTimeout> | null = null;',
+            'window.clearTimeout(timeoutHandle);': 'globalThis.clearTimeout(timeoutHandle);',
+            'timeoutHandle = window.setTimeout(':
+              'timeoutHandle = globalThis.setTimeout(',
+          }
+          for old, new in replacements.items():
+            if old not in source:
+              raise SystemExit(f'preview timer marker missing: {old}')
+            source = source.replace(old, new, 1)
+          editor.write_text(source)
           PY
       - name: Install dependencies
         run: npm ci
