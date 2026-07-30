@@ -1,3 +1,18 @@
+[data-project-workspace-shell] {
+  isolation: isolate;
+}
+
+[data-project-workspace-main] {
+  position: relative;
+  z-index: 0;
+}
+
+[data-project-mobile-navigation] {
+  position: fixed;
+  z-index: 100;
+  pointer-events: auto;
+}
+
 [data-operational-workspace] {
   container-type: inline-size;
 }
@@ -44,13 +59,7 @@
 
 @media (max-width: 1023px) {
   [data-project-workspace-main] {
-    position: relative;
-    z-index: 0;
     padding-bottom: calc(var(--seraya-mobile-safe-bottom) + var(--seraya-space-4));
-  }
-
-  [data-project-mobile-navigation] {
-    isolation: isolate;
   }
 
   [data-operational-selection-bar] {
