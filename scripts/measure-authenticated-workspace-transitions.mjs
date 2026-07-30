@@ -202,7 +202,9 @@ async function openAuthenticatedProject(browser, profile) {
   await page.waitForURL((url) => url.pathname === '/dashboard', { timeout: 120_000 });
   await page.getByRole('button', { name: 'Buka undangan' }).first().click();
   await page.waitForURL(/\/dashboard\/[0-9a-f-]{36}$/i, { timeout: 120_000 });
-  await page.locator('[data-project-workspace-shell]').waitFor({ state: 'visible', timeout: 60_000 });
+  await page
+    .locator('[data-project-workspace-shell]')
+    .waitFor({ state: 'visible', timeout: 60_000 });
 
   return {
     context,
