@@ -45,7 +45,7 @@ vi.mock('@/modules/auth/dashboard-request-context', () => ({
   getOwnedProjectContextForRequest: getOwnedProjectContextMock,
 }));
 vi.mock('@/modules/readiness', () => ({
-  getWeddingReadinessForRequest: getReadinessMock,
+  getWeddingReadinessForVerifiedProject: getReadinessMock,
 }));
 vi.mock('@/modules/invitations/invitation-editor.service', () => ({
   InvitationEditorDraftUnavailableError: class InvitationEditorDraftUnavailableError extends Error {},
@@ -123,7 +123,7 @@ describe('SRY-016 private invitation editor route', () => {
     expect(fetchCache).toBe('force-no-store');
     expect(getOwnedProjectContextMock).toHaveBeenCalledWith(project.id);
     expect(getEditorMock).toHaveBeenCalledWith(project);
-    expect(getReadinessMock).toHaveBeenCalledWith(project.id);
+    expect(getReadinessMock).toHaveBeenCalledWith(project);
     expect(getPrivateGalleryMock).toHaveBeenCalledWith({
       draftImageIds: draft.content.gallery.imageIds,
       project,
@@ -152,7 +152,7 @@ describe('SRY-016 private invitation editor route', () => {
     ).rejects.toThrow('NEXT_NOT_FOUND');
   });
 
-  it('uses the request-local verified project context without public snapshot, cookie, or Host dependencies', async () => {
+  it('reuses the request-local verified project for editor and readiness composition', async () => {
     const source = await readFile(
       path.resolve(process.cwd(), 'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx'),
       'utf8',
@@ -160,12 +160,12 @@ describe('SRY-016 private invitation editor route', () => {
 
     expect(source).toContain('getOwnedProjectContextForRequest');
     expect(source).toContain('getInvitationEditorForVerifiedProject');
-    expect(source).toContain('getWeddingReadinessForRequest');
+    expect(source).toContain('getWeddingReadinessForVerifiedProject(project)');
     expect(source).toContain('getPrivateGalleryImagesForVerifiedProject');
+    expect(source).not.toContain('getWeddingReadinessForRequest');
     expect(source).not.toContain('getInvitationEditorForCurrentUser');
     expect(source).not.toContain('createServerSupabaseClient');
     expect(source).not.toContain('cookies(');
-    expect(source).not.toContain('publications');
     expect(source).not.toContain('headers(');
   });
 });
