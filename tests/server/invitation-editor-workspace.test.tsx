@@ -77,7 +77,7 @@ describe('Slice A invitation editor workspace foundation', () => {
     });
   });
 
-  it('renders an accessible desktop rail, mobile selector, and keeps inactive panels mounted', () => {
+  it('renders an accessible desktop rail and mobile selector while unmounting inactive panels', () => {
     const statuses = getInvitationEditorSectionStatuses(draft);
     const navigation = renderToStaticMarkup(
       <InvitationWorkspaceNavigation
@@ -96,7 +96,7 @@ describe('Slice A invitation editor workspace foundation', () => {
     expect(navigation).toContain('Bagian 2 dari 9');
     expect(navigation).toContain('aria-current="step"');
     expect(navigation).toContain('Status draft tersimpan');
-    expect(inactivePanel).toContain('hidden=""');
-    expect(inactivePanel).toContain('name="closing.signature"');
+    expect(inactivePanel).toBe('');
+    expect(inactivePanel).not.toContain('name="closing.signature"');
   });
 });
