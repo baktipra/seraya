@@ -82,23 +82,23 @@ jobs:
           if marker not in source:
             raise SystemExit('schema marker missing')
           source = source.replace(marker, normalization, 1)
+          old_parse = 'content: JSON.parse(payload) as unknown,'
+          if old_parse not in source:
+            raise SystemExit('payload parse marker missing')
           source = source.replace(
-            'content: JSON.parse(payload) as unknown,',
+            old_parse,
             'content: normalizeRuntimePayloadValue(JSON.parse(payload) as unknown),',
             1,
           )
-          old_error = """    if (!fieldErrors[key as keyof InvitationEditorFieldErrors]) {
-              fieldErrors[key as keyof InvitationEditorFieldErrors] = issue.message;
-            }
-          """
-          new_error = """    if (!fieldErrors[key as keyof InvitationEditorFieldErrors]) {
-              fieldErrors[key as keyof InvitationEditorFieldErrors] =
-                issue.code === 'unrecognized_keys' ? 'Form undangan tidak valid.' : issue.message;
-            }
-          """
-          if old_error not in source:
-            raise SystemExit('field error marker missing')
-          schema.write_text(source.replace(old_error, new_error, 1))
+          old_assignment = 'fieldErrors[key as keyof InvitationEditorFieldErrors] = issue.message;'
+          if old_assignment not in source:
+            raise SystemExit('field error assignment missing')
+          source = source.replace(
+            old_assignment,
+            "fieldErrors[key as keyof InvitationEditorFieldErrors] =\n        issue.code === 'unrecognized_keys' ? 'Form undangan tidak valid.' : issue.message;",
+            1,
+          )
+          schema.write_text(source)
 
           route_test = Path('tests/server/dashboard-invitation-editor-route.test.tsx')
           source = route_test.read_text()
@@ -106,12 +106,16 @@ jobs:
               'getInvitationReadinessForVerifiedProject(project, { draft: editor.draft })',
             );
           """
-          new_assertion = """    expect(source).toContain('getInvitationReadinessForVerifiedProject(project, {');
-            expect(source).toContain('draft: editor.draft');
-          """
           if old_assertion not in source:
             raise SystemExit('route assertion marker missing')
-          route_test.write_text(source.replace(old_assertion, new_assertion, 1))
+          source = source.replace(
+            old_assertion,
+            """    expect(source).toContain('getInvitationReadinessForVerifiedProject(project, {');
+            expect(source).toContain('draft: editor.draft');
+          """,
+            1,
+          )
+          route_test.write_text(source)
           PY
       - name: Install dependencies
         run: npm ci
