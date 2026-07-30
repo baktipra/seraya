@@ -1,6 +1,9 @@
 name: P0-A5 source snapshot
 
 on:
+  pull_request:
+    branches:
+      - main
   push:
     branches:
       - agent/p0-a5-editor-runtime-recovery
@@ -10,6 +13,7 @@ permissions:
 
 jobs:
   snapshot:
+    if: github.head_ref == 'agent/p0-a5-editor-runtime-recovery' || github.ref_name == 'agent/p0-a5-editor-runtime-recovery'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
