@@ -30,13 +30,15 @@ describe('responsive operational workspace contract', () => {
     expect(source).toContain('data-mobile-span={mobileSpan}');
   });
 
-  it('uses one canonical mobile breakpoint and bottom-navigation safe-area clearance', async () => {
+  it('uses canonical breakpoints and reserves bottom-navigation clearance for every workspace', async () => {
     const source = await read('src/app/workspace-responsive.css');
 
     expect(source).toContain('@media (max-width: 767px)');
     expect(source).toContain('@media (max-width: 1023px)');
     expect(source).toContain('--seraya-mobile-safe-bottom');
-    expect(source).toContain("[data-workspace-anatomy='operations']");
+    expect(source).toContain('[data-project-workspace-main]');
+    expect(source).toContain('[data-project-mobile-navigation]');
+    expect(source).toContain('padding-bottom: calc(var(--seraya-mobile-safe-bottom)');
     expect(source).not.toContain(':has(');
     expect(source).not.toContain(':nth-child');
     expect(source).not.toContain('aria-labelledby');
