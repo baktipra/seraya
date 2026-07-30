@@ -17,7 +17,9 @@ function percentile(values, fraction) {
 }
 
 async function clickVisibleOpeningButton(page) {
-  const buttons = page.getByRole('button', { exact: true, name: 'Pembuka' });
+  const buttons = page.locator(
+    'button[aria-controls="invitation-editor-panel-opening"]',
+  );
   for (let index = 0; index < (await buttons.count()); index += 1) {
     const button = buttons.nth(index);
     if (await button.isVisible()) {
