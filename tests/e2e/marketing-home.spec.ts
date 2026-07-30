@@ -57,7 +57,7 @@ test('presents Roselle, Aruna, and Laras as distinct public collections', async 
   await page.goto('/templates');
 
   await expect(
-    page.getByRole('heading', { name: /Pilih rasa, bukan sekadar tema\./i }),
+    page.getByRole('heading', { name: /Pilih rasa, lihat hasil nyatanya\./i }),
   ).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Roselle' }).first()).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Aruna' }).first()).toBeVisible();
