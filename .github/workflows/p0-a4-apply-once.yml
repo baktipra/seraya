@@ -28,13 +28,16 @@ jobs:
           import glob
           from pathlib import Path
 
-          decoded = bytearray()
-          for path in sorted(glob.glob('.p0-a4/patch.b64.*')):
-              raw = ''.join(Path(path).read_text().split())
-              try:
-                  decoded.extend(base64.b64decode(raw, validate=True))
-              except Exception as error:
-                  raise SystemExit(f'Invalid Base64 staging chunk {path}: {error}')
+          alphabet = set('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=')
+          raw = ''.join(Path(path).read_text() for path in sorted(glob.glob('.p0-a4/patch.b64.*')))
+          cleaned = ''.join(character for character in raw if character in alphabet)
+          removed = len(raw) - len(cleaned)
+          if removed:
+              print(f'Removed {removed} non-Base64 staging character(s).')
+          try:
+              decoded = base64.b64decode(cleaned, validate=True)
+          except Exception as error:
+              raise SystemExit(f'Invalid consolidated Base64 staging stream: {error}')
           Path('/tmp/p0-a4.patch').write_bytes(decoded)
           PY
           git apply --check /tmp/p0-a4.patch
