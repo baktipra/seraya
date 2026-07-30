@@ -3,6 +3,7 @@ import 'server-only';
 import { NextResponse, type NextRequest } from 'next/server';
 
 import { createAdminSupabaseClient } from '@/server/supabase/admin';
+import { createServerSupabaseClient } from '@/server/supabase/server';
 
 const repository = 'baktipra/seraya';
 const expectedBranch = 'agent/p0-a1-workspace-performance-baseline';
@@ -60,9 +61,7 @@ async function isDeploymentAncestorOfRunHead({
     status?: unknown;
   };
 
-  return (
-    comparison.status === 'ahead' && comparison.merge_base_commit?.sha === targetSha
-  );
+  return comparison.status === 'ahead' && comparison.merge_base_commit?.sha === targetSha;
 }
 
 export async function POST(request: NextRequest) {
@@ -145,22 +144,28 @@ export async function POST(request: NextRequest) {
     return jsonError(503, 'measurement_owner_unavailable');
   }
 
-  const callbackUrl = new URL('/auth/callback', request.url);
-  callbackUrl.searchParams.set('next', '/dashboard');
-
   const { data: linkResult, error: linkError } = await admin.auth.admin.generateLink({
     email,
-    options: { redirectTo: callbackUrl.toString() },
     type: 'magiclink',
   });
-  const actionLink = linkResult.properties?.action_link;
+  const tokenHash = linkResult.properties?.hashed_token;
 
-  if (linkError || !actionLink) {
+  if (linkError || !tokenHash) {
     return jsonError(503, 'measurement_link_unavailable');
   }
 
+  const sessionSupabase = await createServerSupabaseClient();
+  const { error: verifyError } = await sessionSupabase.auth.verifyOtp({
+    token_hash: tokenHash,
+    type: 'magiclink',
+  });
+
+  if (verifyError) {
+    return jsonError(503, 'measurement_session_unavailable');
+  }
+
   return NextResponse.json(
-    { actionLink },
+    { dashboardPath: '/dashboard' },
     {
       headers: { 'Cache-Control': 'private, no-store' },
       status: 200,
