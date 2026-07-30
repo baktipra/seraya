@@ -18,9 +18,9 @@ describe('P0-A4 readiness aggregation recovery contract', () => {
     expect(readinessRepository).toContain(
       ".select('id, whatsapp_phone_e164, rsvp_status, rsvp_attendee_count')",
     );
-    expect(readinessRepository.match(/\.range\(from, from \+ readinessPageSize - 1\)/g)).toHaveLength(
-      2,
-    );
+    expect(
+      readinessRepository.match(/\.range\(from, from \+ readinessPageSize - 1\)/g),
+    ).toHaveLength(2);
     expect(readinessRepository).toContain(".from('guest_links')");
     expect(readinessRepository).toContain(".from('guestbook_entries')");
     expect(readinessRepository).not.toContain('token_hash');
@@ -37,7 +37,9 @@ describe('P0-A4 readiness aggregation recovery contract', () => {
 
   it('keeps full project readiness composed from separated boundaries', () => {
     expect(readinessService).toContain('getInvitationReadinessForVerifiedProject(project)');
-    expect(readinessService).toContain('getWeddingReadinessAggregateCountsForVerifiedProject(project)');
+    expect(readinessService).toContain(
+      'getWeddingReadinessAggregateCountsForVerifiedProject(project)',
+    );
     expect(readinessService).toContain('const [invitationReadiness, totals] = await Promise.all([');
   });
 

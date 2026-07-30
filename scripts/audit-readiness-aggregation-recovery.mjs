@@ -26,8 +26,8 @@ const result = {
   },
   repository: {
     minimumProjectionCount: repository.includes('minimumQueryCount: 3'),
-    paginatesGuestAndLinkRows: (repository.match(/\.range\(from, from \+ readinessPageSize - 1\)/g) ?? [])
-      .length === 2,
+    paginatesGuestAndLinkRows:
+      (repository.match(/\.range\(from, from \+ readinessPageSize - 1\)/g) ?? []).length === 2,
     projectionCount: repositoryProjectionCount,
     scalarGuestProjection: repository.includes(
       ".select('id, whatsapp_phone_e164, rsvp_status, rsvp_attendee_count')",
@@ -55,7 +55,9 @@ if (!result.invitationBoundary.reusesEditorDraft) {
   failures.push('The invitation route does not reuse its already-loaded active draft.');
 }
 if (!result.fullReadiness.composesBoundariesInParallel) {
-  failures.push('Full readiness does not compose invitation and operational boundaries in parallel.');
+  failures.push(
+    'Full readiness does not compose invitation and operational boundaries in parallel.',
+  );
 }
 
 console.log(

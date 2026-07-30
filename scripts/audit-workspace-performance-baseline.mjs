@@ -52,8 +52,8 @@ if (!baseline.clientInstrumentation.navigationStart)
   failures.push('Workspace navigation start instrumentation is missing.');
 if (!baseline.clientInstrumentation.workspaceReadyProbe)
   failures.push('Workspace ready instrumentation is missing.');
-if (readinessQueryCount !== 9)
-  failures.push(`Expected nine readiness queries, found ${readinessQueryCount}.`);
+if (readinessQueryCount !== 3)
+  failures.push(`Expected three readiness projections after P0-A4, found ${readinessQueryCount}.`);
 if (!baseline.readinessAggregate.serverTimingInstrumented)
   failures.push('Readiness query-batch timing is missing.');
 

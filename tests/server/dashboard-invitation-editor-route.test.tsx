@@ -45,7 +45,7 @@ vi.mock('@/modules/auth/dashboard-request-context', () => ({
   getOwnedProjectContextForRequest: getOwnedProjectContextMock,
 }));
 vi.mock('@/modules/readiness', () => ({
-  getWeddingReadinessForVerifiedProject: getReadinessMock,
+  getInvitationReadinessForVerifiedProject: getReadinessMock,
 }));
 vi.mock('@/modules/invitations/invitation-editor.service', () => ({
   InvitationEditorDraftUnavailableError: class InvitationEditorDraftUnavailableError extends Error {},
@@ -123,7 +123,7 @@ describe('SRY-016 private invitation editor route', () => {
     expect(fetchCache).toBe('force-no-store');
     expect(getOwnedProjectContextMock).toHaveBeenCalledWith(project.id);
     expect(getEditorMock).toHaveBeenCalledWith(project);
-    expect(getReadinessMock).toHaveBeenCalledWith(project);
+    expect(getReadinessMock).toHaveBeenCalledWith(project, { draft });
     expect(getPrivateGalleryMock).toHaveBeenCalledWith({
       draftImageIds: draft.content.gallery.imageIds,
       project,
@@ -160,9 +160,12 @@ describe('SRY-016 private invitation editor route', () => {
 
     expect(source).toContain('getOwnedProjectContextForRequest');
     expect(source).toContain('getInvitationEditorForVerifiedProject');
-    expect(source).toContain('getWeddingReadinessForVerifiedProject(project)');
+    expect(source).toContain(
+      'getInvitationReadinessForVerifiedProject(project, { draft: editor.draft })',
+    );
     expect(source).toContain('getPrivateGalleryImagesForVerifiedProject');
     expect(source).not.toContain('getWeddingReadinessForRequest');
+    expect(source).not.toContain('getWeddingReadinessForVerifiedProject');
     expect(source).not.toContain('getInvitationEditorForCurrentUser');
     expect(source).not.toContain('createServerSupabaseClient');
     expect(source).not.toContain('cookies(');

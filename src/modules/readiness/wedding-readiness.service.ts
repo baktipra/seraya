@@ -18,6 +18,7 @@ import type { OwnedProject } from '@/modules/projects/project.repository';
 import { getWeddingReadinessAggregateCountsForVerifiedProject } from './wedding-readiness.repository';
 import type {
   InvitationReadinessState,
+  InvitationReadinessV1,
   WeddingReadinessAggregateCounts,
   WeddingReadinessPrimaryActionKey,
   WeddingReadinessV1,
@@ -155,18 +156,26 @@ function getPrimaryAction(input: {
   return action('view_guest_responses', '/rsvp');
 }
 
+type InvitationReadinessOptions = {
+  draft?: InvitationDraft | null;
+};
+
 /**
- * Server-only composition after ownership is already verified. The DTO remains
- * aggregate-only and excludes all source payloads used to derive it.
+ * Invitation-only readiness excludes every guest, RSVP, Guestbook, and
+ * delivery aggregate. A caller that already loaded the active draft can pass
+ * it explicitly so the same private draft is not queried twice in one screen.
  */
-export async function getWeddingReadinessForVerifiedProject(
+export async function getInvitationReadinessForVerifiedProject(
   project: OwnedProject,
-): Promise<WeddingReadinessV1> {
-  const [draft, publication, hasVerifiedActivation, totals] = await Promise.all([
-    getActiveInvitationDraftForVerifiedProject(project),
+  options: InvitationReadinessOptions = {},
+): Promise<InvitationReadinessV1> {
+  const draftPromise = Object.prototype.hasOwnProperty.call(options, 'draft')
+    ? Promise.resolve(options.draft ?? null)
+    : getActiveInvitationDraftForVerifiedProject(project);
+  const [draft, publication, hasVerifiedActivation] = await Promise.all([
+    draftPromise,
     getCurrentPublishedInvitationForVerifiedProject(project),
     hasVerifiedActivationPaymentForVerifiedProject(project),
-    getWeddingReadinessAggregateCountsForVerifiedProject(project),
   ]);
   const isDraftReady = isSavedInvitationDraftReadyForReview(draft);
   const hasUnpublishedChanges = hasDeterministicSavedDraftChanges({ draft, publication });
@@ -176,10 +185,6 @@ export async function getWeddingReadinessForVerifiedProject(
     hasVerifiedActivation,
     isDraftReady,
   });
-  const activePersonalLinkGuestCount = Math.min(
-    totals.activeGuestCount,
-    totals.activePersonalLinkGuestCount,
-  );
 
   return {
     identity: {
@@ -193,6 +198,28 @@ export async function getWeddingReadinessForVerifiedProject(
       publishedSlug: publication?.slug ?? null,
       state,
     },
+  };
+}
+
+/**
+ * Full project-compass readiness composes invitation truth and operational
+ * aggregates in parallel after ownership is already verified. The DTO remains
+ * aggregate-only and excludes all source payloads used to derive it.
+ */
+export async function getWeddingReadinessForVerifiedProject(
+  project: OwnedProject,
+): Promise<WeddingReadinessV1> {
+  const [invitationReadiness, totals] = await Promise.all([
+    getInvitationReadinessForVerifiedProject(project),
+    getWeddingReadinessAggregateCountsForVerifiedProject(project),
+  ]);
+  const activePersonalLinkGuestCount = Math.min(
+    totals.activeGuestCount,
+    totals.activePersonalLinkGuestCount,
+  );
+
+  return {
+    ...invitationReadiness,
     guests: {
       activeGuestCount: totals.activeGuestCount,
       activePersonalLinkGuestCount,
@@ -210,7 +237,11 @@ export async function getWeddingReadinessForVerifiedProject(
       needsLinkUpdateCount: totals.needsLinkUpdateCount,
       needsWhatsAppCount: totals.needsWhatsAppCount,
     },
-    primaryAction: getPrimaryAction({ invitationState: state, projectId: project.id, totals }),
+    primaryAction: getPrimaryAction({
+      invitationState: invitationReadiness.invitation.state,
+      projectId: project.id,
+      totals,
+    }),
     responses: {
       activeGuestbookCount: totals.activeGuestbookCount,
       attendingCount: totals.attendingCount,

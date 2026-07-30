@@ -36,6 +36,7 @@ vi.mock('@/modules/readiness/wedding-readiness.repository', () => ({
 }));
 
 import {
+  getInvitationReadinessForVerifiedProject,
   getWeddingReadinessForVerifiedProject,
   hasDeterministicSavedDraftChanges,
 } from '@/modules/readiness/wedding-readiness.service';
@@ -110,6 +111,34 @@ describe('SRY-031 wedding readiness composition', () => {
     getPublishedMock.mockReset().mockResolvedValue(null);
     hasVerifiedActivationMock.mockReset().mockResolvedValue(false);
     ownedProjectContextMock.mockReset().mockResolvedValue(project);
+  });
+
+  it('builds invitation-only readiness without loading operational aggregates', async () => {
+    const readiness = await getInvitationReadinessForVerifiedProject(project);
+
+    expect(readiness).toEqual({
+      identity: { coupleLabel: 'Raka & Nadia', templateKey: 'roselle' },
+      invitation: {
+        hasPublishedSnapshot: false,
+        hasUnpublishedChanges: false,
+        hasVerifiedActivation: false,
+        publishedSlug: null,
+        state: 'draft_ready_unactivated',
+      },
+    });
+    expect(getAggregateMock).not.toHaveBeenCalled();
+  });
+
+  it('reuses a caller-provided active draft instead of querying it again', async () => {
+    const draft = createDraft();
+
+    const readiness = await getInvitationReadinessForVerifiedProject(project, { draft });
+
+    expect(readiness.identity.templateKey).toBe(draft.content.templateKey);
+    expect(getDraftMock).not.toHaveBeenCalled();
+    expect(getPublishedMock).toHaveBeenCalledWith(project);
+    expect(hasVerifiedActivationMock).toHaveBeenCalledWith(project);
+    expect(getAggregateMock).not.toHaveBeenCalled();
   });
 
   it('derives a preview-first draft-ready state from normalized saved draft plus unverified activation', async () => {
@@ -235,10 +264,14 @@ describe('SRY-031 wedding readiness composition', () => {
       'utf8',
     );
 
-    expect(source).toContain("select('id', { count: 'exact', head: true })");
-    expect(source).toContain("select('rsvp_attendee_count')");
+    expect(source).toContain(
+      ".select('id, whatsapp_phone_e164, rsvp_status, rsvp_attendee_count')",
+    );
+    expect(source).toContain(".from('guest_links')");
+    expect(source).toContain(".from('guestbook_entries')");
+    expect(source.match(/\.from\(/g)).toHaveLength(3);
+    expect(source).toContain('.range(from, from + readinessPageSize - 1)');
     expect(source).not.toContain(['rsvp_attendee_count', '.sum()'].join(''));
-    expect(source).toContain(".eq('status', 'active')");
     expect(source).not.toMatch(
       /listActiveGuestsForVerifiedProject|listLatestGuestLinkStates|listGuestbookEntries/,
     );

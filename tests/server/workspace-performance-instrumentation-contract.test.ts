@@ -62,9 +62,9 @@ describe('P0 workspace performance instrumentation contract', () => {
     }
   });
 
-  it('retains the current nine-query readiness measurement for later A4 comparison', () => {
-    expect(readinessRepository.match(/\.from\(/g)).toHaveLength(9);
-    expect(readinessRepository).toContain('minimumQueryCount: 9');
+  it('records the recovered three-projection readiness measurement after A4', () => {
+    expect(readinessRepository.match(/\.from\(/g)).toHaveLength(3);
+    expect(readinessRepository).toContain('minimumQueryCount: 3');
     expect(readinessRepository).toContain("operation: 'aggregate-query-batch'");
     expect(readinessRepository).toContain('Promise.all([');
   });
