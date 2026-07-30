@@ -1,0 +1,31 @@
+name: P0-A1 final document format
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Format final A1 documents
+        run: >-
+          npx prettier --write
+          docs/audits/P0-A1-AUTHENTICATED-WORKSPACE-TRANSITION-MATRIX-V1.md
+          docs/audits/P0-A1-WORKSPACE-PERFORMANCE-INSTRUMENTATION-BASELINE-V1.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p0-a1-final-documents
+          path: |
+            docs/audits/P0-A1-AUTHENTICATED-WORKSPACE-TRANSITION-MATRIX-V1.md
+            docs/audits/P0-A1-WORKSPACE-PERFORMANCE-INSTRUMENTATION-BASELINE-V1.md
+          retention-days: 1
