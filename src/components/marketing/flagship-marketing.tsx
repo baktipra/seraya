@@ -1,3 +1,4 @@
+import type { Route } from 'next';
 import Link from 'next/link';
 
 import { siteConfig } from '@/config/site';
@@ -56,8 +57,11 @@ const collectionStyles: Record<
   },
 };
 
-function getShowroomHref(collection: FlagshipCollectionKey, surface: 'generic' | 'personal') {
-  return `/templates/${collection}/demo/${surface}`;
+export function getShowroomHref(
+  collection: FlagshipCollectionKey,
+  surface: 'generic' | 'personal',
+): Route {
+  return `/templates/${collection}/demo/${surface}` as Route;
 }
 
 export function FlagshipHeader() {
