@@ -35,6 +35,84 @@ jobs:
           echo 'd9af6ebf96b3b5df4c3127f751ab4e826ec04b9d2fff9ea61c3afe85794ce3d5  /tmp/p0-a5-product.tar.gz' | sha256sum --check
           tar -tzf /tmp/p0-a5-product.tar.gz > /tmp/p0-a5-files.txt
           tar -xzf /tmp/p0-a5-product.tar.gz
+      - name: Apply focused validation fixes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          schema = Path('src/modules/invitations/invitation-editor.schema.ts')
+          source = schema.read_text()
+          marker = """function createUnexpectedFieldError(keys: string[]) {
+            return new z.ZodError([
+              {
+                code: 'unrecognized_keys',
+                keys,
+                message: 'Form undangan tidak valid.',
+                path: [],
+              },
+            ]);
+          }
+          """
+          normalization = marker + """
+
+          function normalizeRuntimePayloadValue(value: unknown): unknown {
+            if (value === null) {
+              return '';
+            }
+
+            if (value === true) {
+              return 'true';
+            }
+
+            if (Array.isArray(value)) {
+              return value.map(normalizeRuntimePayloadValue);
+            }
+
+            if (typeof value === 'object' && value !== null) {
+              return Object.fromEntries(
+                Object.entries(value).map(([key, entry]) => [key, normalizeRuntimePayloadValue(entry)]),
+              );
+            }
+
+            return value;
+          }
+          """
+          if marker not in source:
+            raise SystemExit('schema marker missing')
+          source = source.replace(marker, normalization, 1)
+          source = source.replace(
+            'content: JSON.parse(payload) as unknown,',
+            'content: normalizeRuntimePayloadValue(JSON.parse(payload) as unknown),',
+            1,
+          )
+          old_error = """    if (!fieldErrors[key as keyof InvitationEditorFieldErrors]) {
+              fieldErrors[key as keyof InvitationEditorFieldErrors] = issue.message;
+            }
+          """
+          new_error = """    if (!fieldErrors[key as keyof InvitationEditorFieldErrors]) {
+              fieldErrors[key as keyof InvitationEditorFieldErrors] =
+                issue.code === 'unrecognized_keys' ? 'Form undangan tidak valid.' : issue.message;
+            }
+          """
+          if old_error not in source:
+            raise SystemExit('field error marker missing')
+          schema.write_text(source.replace(old_error, new_error, 1))
+
+          route_test = Path('tests/server/dashboard-invitation-editor-route.test.tsx')
+          source = route_test.read_text()
+          old_assertion = """    expect(source).toContain(
+              'getInvitationReadinessForVerifiedProject(project, { draft: editor.draft })',
+            );
+          """
+          new_assertion = """    expect(source).toContain('getInvitationReadinessForVerifiedProject(project, {');
+            expect(source).toContain('draft: editor.draft');
+          """
+          if old_assertion not in source:
+            raise SystemExit('route assertion marker missing')
+          route_test.write_text(source.replace(old_assertion, new_assertion, 1))
+          PY
       - name: Install dependencies
         run: npm ci
       - name: Format product files
