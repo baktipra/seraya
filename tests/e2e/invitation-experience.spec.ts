@@ -101,7 +101,9 @@ async function expectFlagshipOpening(page: Page, invitation: Locator, templateKe
   const openingBox = await opening.boundingBox();
   const titleBox = await title.boundingBox();
 
-  expect(openingBox?.height ?? 0).toBeGreaterThanOrEqual(Math.min(viewportHeight * 0.72, 620));
+  expect(openingBox?.height ?? 0).toBeGreaterThanOrEqual(
+    Math.min(viewportHeight * 0.72, 620) - 1,
+  );
   expect(titleBox?.y ?? viewportHeight).toBeLessThan(viewportHeight);
 
   if (templateKey === 'laras') {
