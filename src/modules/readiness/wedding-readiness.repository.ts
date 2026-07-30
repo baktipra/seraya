@@ -1,7 +1,8 @@
 import 'server-only';
 
-import type { OwnedProject } from '@/modules/projects/project.repository';
 import { isCanonicalGuestWhatsAppPhoneE164 } from '@/modules/guests/whatsapp-phone';
+import { measureWorkspaceServerLoad } from '@/lib/performance/workspace-performance.server';
+import type { OwnedProject } from '@/modules/projects/project.repository';
 import { createAdminSupabaseClient } from '@/server/supabase/admin';
 import { createServerSupabaseClient } from '@/server/supabase/server';
 
@@ -146,67 +147,75 @@ export async function getWeddingReadinessAggregateCountsForVerifiedProject(
     activePersonalLinksResult,
     activeGuestbookResult,
     deliveryReadinessRowsResult,
-  ] = await Promise.all([
-    ownerSupabase
-      .from('guests')
-      .select('id', { count: 'exact', head: true })
-      .eq('project_id', project.id)
-      .is('deleted_at', null),
-    ownerSupabase
-      .from('guests')
-      .select('id', { count: 'exact', head: true })
-      .eq('project_id', project.id)
-      .is('deleted_at', null)
-      .not('whatsapp_phone_e164', 'is', null),
-    ownerSupabase
-      .from('guests')
-      .select('id', { count: 'exact', head: true })
-      .eq('project_id', project.id)
-      .is('deleted_at', null)
-      .neq('rsvp_status', 'pending'),
-    ownerSupabase
-      .from('guests')
-      .select('id', { count: 'exact', head: true })
-      .eq('project_id', project.id)
-      .is('deleted_at', null)
-      .eq('rsvp_status', 'attending'),
-    ownerSupabase
-      .from('guests')
-      .select('id', { count: 'exact', head: true })
-      .eq('project_id', project.id)
-      .is('deleted_at', null)
-      .eq('rsvp_status', 'declined'),
-    ownerSupabase
-      .from('guests')
-      .select('rsvp_attendee_count')
-      .eq('project_id', project.id)
-      .is('deleted_at', null)
-      .eq('rsvp_status', 'attending')
-      .not('rsvp_attendee_count', 'is', null),
-    // M0013 enforces one active row per guest. Counting active links joined to
-    // active project guests therefore represents the current projection and
-    // excludes all revoked/expired history without loading it.
-    adminSupabase
-      .from('guest_links')
-      .select('guest_id, guests!inner(project_id, deleted_at)', { count: 'exact', head: true })
-      .eq('status', 'active')
-      .eq('guests.project_id', project.id)
-      .is('guests.deleted_at', null),
-    adminSupabase
-      .from('guestbook_entries')
-      .select('id, guests!inner(project_id, deleted_at)', { count: 'exact', head: true })
-      .eq('guests.project_id', project.id)
-      .is('deleted_at', null)
-      .is('guests.deleted_at', null),
-    adminSupabase
-      .from('guest_links')
-      .select(
-        'guest_id, status, token_key_version, created_at, guests!inner(project_id, deleted_at, whatsapp_phone_e164)',
-      )
-      .eq('guests.project_id', project.id)
-      .is('guests.deleted_at', null)
-      .order('created_at', { ascending: false }),
-  ]);
+  ] = await measureWorkspaceServerLoad(
+    {
+      minimumQueryCount: 9,
+      operation: 'aggregate-query-batch',
+      workspace: 'shared-readiness',
+    },
+    () =>
+      Promise.all([
+        ownerSupabase
+          .from('guests')
+          .select('id', { count: 'exact', head: true })
+          .eq('project_id', project.id)
+          .is('deleted_at', null),
+        ownerSupabase
+          .from('guests')
+          .select('id', { count: 'exact', head: true })
+          .eq('project_id', project.id)
+          .is('deleted_at', null)
+          .not('whatsapp_phone_e164', 'is', null),
+        ownerSupabase
+          .from('guests')
+          .select('id', { count: 'exact', head: true })
+          .eq('project_id', project.id)
+          .is('deleted_at', null)
+          .neq('rsvp_status', 'pending'),
+        ownerSupabase
+          .from('guests')
+          .select('id', { count: 'exact', head: true })
+          .eq('project_id', project.id)
+          .is('deleted_at', null)
+          .eq('rsvp_status', 'attending'),
+        ownerSupabase
+          .from('guests')
+          .select('id', { count: 'exact', head: true })
+          .eq('project_id', project.id)
+          .is('deleted_at', null)
+          .eq('rsvp_status', 'declined'),
+        ownerSupabase
+          .from('guests')
+          .select('rsvp_attendee_count')
+          .eq('project_id', project.id)
+          .is('deleted_at', null)
+          .eq('rsvp_status', 'attending')
+          .not('rsvp_attendee_count', 'is', null),
+        // M0013 enforces one active row per guest. Counting active links joined to
+        // active project guests therefore represents the current projection and
+        // excludes all revoked/expired history without loading it.
+        adminSupabase
+          .from('guest_links')
+          .select('guest_id, guests!inner(project_id, deleted_at)', { count: 'exact', head: true })
+          .eq('status', 'active')
+          .eq('guests.project_id', project.id)
+          .is('guests.deleted_at', null),
+        adminSupabase
+          .from('guestbook_entries')
+          .select('id, guests!inner(project_id, deleted_at)', { count: 'exact', head: true })
+          .eq('guests.project_id', project.id)
+          .is('deleted_at', null)
+          .is('guests.deleted_at', null),
+        adminSupabase
+          .from('guest_links')
+          .select(
+            'guest_id, status, token_key_version, created_at, guests!inner(project_id, deleted_at, whatsapp_phone_e164)',
+          )
+          .eq('guests.project_id', project.id)
+          .is('guests.deleted_at', null)
+          .order('created_at', { ascending: false }),
+      ]),
+  );
 
   throwForReadinessQueryFailures([
     ['active_guest_count', activeGuestsResult],

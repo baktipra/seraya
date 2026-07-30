@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { InvitationEditor } from '@/components/projects/invitation-editor';
 import { InvitationStudioShell } from '@/components/projects/invitation-studio-shell';
 import { WorkspacePage } from '@/components/workspace/workspace-page';
+import { measureWorkspaceServerLoad } from '@/lib/performance/workspace-performance.server';
 import { getOwnedProjectContextForRequest } from '@/modules/auth/dashboard-request-context';
 import {
   InvitationEditorDraftUnavailableError,
@@ -32,40 +33,48 @@ export const fetchCache = 'force-no-store';
 async function getInvitationEditorScreenOrNotFound(
   projectId: string,
 ): Promise<InvitationEditorScreen> {
-  try {
-    const project = await getOwnedProjectContextForRequest(projectId);
-    const [editor, readiness] = await Promise.all([
-      getInvitationEditorForVerifiedProject(project),
-      getWeddingReadinessForRequest(projectId),
-    ]);
+  return measureWorkspaceServerLoad(
+    {
+      operation: 'invitation-editor-screen',
+      workspace: 'studio',
+    },
+    async () => {
+      try {
+        const project = await getOwnedProjectContextForRequest(projectId);
+        const [editor, readiness] = await Promise.all([
+          getInvitationEditorForVerifiedProject(project),
+          getWeddingReadinessForRequest(projectId),
+        ]);
 
-    let galleryImages: InvitationGalleryImage[] = [];
+        let galleryImages: InvitationGalleryImage[] = [];
 
-    try {
-      galleryImages = await getPrivateGalleryImagesForVerifiedProject({
-        draftImageIds: editor.draft.content.gallery.imageIds,
-        project: editor.project,
-      });
-    } catch (error) {
-      // Media stays optional in the local preview. Resolver failures omit the
-      // gallery instead of exposing Storage details or weakening owner scope.
-      console.error('Seraya editor live preview gallery resolution failed.', {
-        errorName: error instanceof Error ? error.name : 'UnknownError',
-        projectId,
-      });
-    }
+        try {
+          galleryImages = await getPrivateGalleryImagesForVerifiedProject({
+            draftImageIds: editor.draft.content.gallery.imageIds,
+            project: editor.project,
+          });
+        } catch (error) {
+          // Media stays optional in the local preview. Resolver failures omit the
+          // gallery instead of exposing Storage details or weakening owner scope.
+          console.error('Seraya editor live preview gallery resolution failed.', {
+            errorName: error instanceof Error ? error.name : 'UnknownError',
+            projectId,
+          });
+        }
 
-    return { editor, galleryImages, readiness };
-  } catch (error) {
-    if (
-      error instanceof ProjectAccessDeniedError ||
-      error instanceof InvitationEditorDraftUnavailableError
-    ) {
-      notFound();
-    }
+        return { editor, galleryImages, readiness };
+      } catch (error) {
+        if (
+          error instanceof ProjectAccessDeniedError ||
+          error instanceof InvitationEditorDraftUnavailableError
+        ) {
+          notFound();
+        }
 
-    throw error;
-  }
+        throw error;
+      }
+    },
+  );
 }
 
 export default async function InvitationEditorPage({ params }: InvitationEditorPageProps) {

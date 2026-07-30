@@ -2,9 +2,10 @@ import { notFound } from 'next/navigation';
 
 import { ProjectOverviewBootstrap } from '@/components/projects/project-overview-bootstrap';
 import { WorkspacePage } from '@/components/workspace/workspace-page';
+import { measureWorkspaceServerLoad } from '@/lib/performance/workspace-performance.server';
+import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 import { getWeddingReadinessForRequest } from '@/modules/readiness';
 import type { WeddingReadinessV1 } from '@/modules/readiness';
-import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 
 type ProjectDashboardPageProps = {
   params: Promise<{ projectId: string }>;
@@ -12,7 +13,13 @@ type ProjectDashboardPageProps = {
 
 async function getProjectReadinessOrNotFound(projectId: string): Promise<WeddingReadinessV1> {
   try {
-    return await getWeddingReadinessForRequest(projectId);
+    return await measureWorkspaceServerLoad(
+      {
+        operation: 'overview-readiness',
+        workspace: 'compass',
+      },
+      () => getWeddingReadinessForRequest(projectId),
+    );
   } catch (error) {
     if (error instanceof ProjectAccessDeniedError) {
       notFound();

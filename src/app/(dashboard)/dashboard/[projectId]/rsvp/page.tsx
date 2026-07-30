@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 
 import { GuestResponseWorkspace } from '@/components/projects/guest-response-workspace';
 import { WorkspacePage } from '@/components/workspace/workspace-page';
+import { measureWorkspaceServerLoad } from '@/lib/performance/workspace-performance.server';
 import { getOwnedProjectContextForRequest } from '@/modules/auth/dashboard-request-context';
 import { getGuestbookInboxForVerifiedProject } from '@/modules/guestbook';
 import { getRsvpAnalyticsForVerifiedProject } from '@/modules/guests/rsvp-analytics.service';
@@ -27,21 +28,29 @@ export const fetchCache = 'force-no-store';
  * is prepared so the truthful no-guest and no-response states can be monitored.
  */
 async function getResponseScreenOrNotFound(projectId: string): Promise<ResponseScreen> {
-  try {
-    const project = await getOwnedProjectContextForRequest(projectId);
-    const [rsvp, guestbook] = await Promise.all([
-      getRsvpAnalyticsForVerifiedProject(project),
-      getGuestbookInboxForVerifiedProject(project),
-    ]);
+  return measureWorkspaceServerLoad(
+    {
+      operation: 'guest-response-screen',
+      workspace: 'responses',
+    },
+    async () => {
+      try {
+        const project = await getOwnedProjectContextForRequest(projectId);
+        const [rsvp, guestbook] = await Promise.all([
+          getRsvpAnalyticsForVerifiedProject(project),
+          getGuestbookInboxForVerifiedProject(project),
+        ]);
 
-    return { guestbook, rsvp };
-  } catch (error) {
-    if (error instanceof ProjectAccessDeniedError) {
-      notFound();
-    }
+        return { guestbook, rsvp };
+      } catch (error) {
+        if (error instanceof ProjectAccessDeniedError) {
+          notFound();
+        }
 
-    throw error;
-  }
+        throw error;
+      }
+    },
+  );
 }
 
 export default async function RsvpAnalyticsPage({ params, searchParams }: RsvpAnalyticsPageProps) {

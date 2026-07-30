@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 
 import { NativeGuestManager } from '@/components/projects/native-guest-manager';
 import { WorkspacePage } from '@/components/workspace/workspace-page';
+import { measureWorkspaceServerLoad } from '@/lib/performance/workspace-performance.server';
 import { getOwnedProjectContextForRequest } from '@/modules/auth/dashboard-request-context';
 import { prepareMissingPersonalGuestLinksForDeliveryAction } from '@/modules/delivery/delivery.actions';
 import { getGuestManagerForVerifiedProject } from '@/modules/guests/guest.service';
@@ -14,16 +15,24 @@ type GuestsPageProps = {
 export const dynamic = 'force-dynamic';
 
 async function loadGuestManager(projectId: string) {
-  try {
-    const project = await getOwnedProjectContextForRequest(projectId);
-    return await getGuestManagerForVerifiedProject(project);
-  } catch (error) {
-    if (error instanceof ProjectAccessDeniedError) {
-      notFound();
-    }
+  return measureWorkspaceServerLoad(
+    {
+      operation: 'guest-manager-screen',
+      workspace: 'guests',
+    },
+    async () => {
+      try {
+        const project = await getOwnedProjectContextForRequest(projectId);
+        return await getGuestManagerForVerifiedProject(project);
+      } catch (error) {
+        if (error instanceof ProjectAccessDeniedError) {
+          notFound();
+        }
 
-    throw error;
-  }
+        throw error;
+      }
+    },
+  );
 }
 
 export default async function GuestsPage({ params }: GuestsPageProps) {
