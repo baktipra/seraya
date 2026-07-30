@@ -24,25 +24,25 @@ The matrix uses a real owner session against a frozen preview deployment. It con
 
 ## Authenticated warm-transition matrix
 
-| Device | Transition | Total-ms samples | Median | P75 | Median RSC requests | Median RSC bytes | Median RSC duration |
-| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
-| Desktop | Ringkasan → Undangan | 1014 / 1062 / 936 | 1014 ms | 1038 ms | 1 | 2542 B | 1000 ms |
-| Desktop | Undangan → Tamu | 953 / 815 / 616 | 815 ms | 884 ms | 1 | 1679 B | 803 ms |
-| Desktop | Tamu → Bagikan | 1037 / 1134 / 1164 | 1134 ms | 1149 ms | 1 | 1824 B | 1110 ms |
-| Desktop | Bagikan → Respons Tamu | 913 / 912 / 746 | 912 ms | 912.5 ms | 1 | 1727 B | 896 ms |
-| Desktop | Respons Tamu → Ringkasan | 1078 / 1012 / 834 | 1012 ms | 1045 ms | 1 | 2935 B | 993 ms |
-| Mobile | Ringkasan → Undangan | 813 / 1044 / 891 | 891 ms | 967.5 ms | 1 | 2560 B | 867 ms |
-| Mobile | Undangan → Tamu | 909 / 944 / 810 | 909 ms | 926.5 ms | 1 | 1680 B | 897 ms |
-| Mobile | Tamu → Bagikan | 1077 / 1505 / 1305 | 1305 ms | 1405 ms | 1 | 1824 B | 1295 ms |
-| Mobile | Bagikan → Respons Tamu | 740 / 938 / 743 | 743 ms | 840.5 ms | 1 | 1729 B | 730 ms |
-| Mobile | Respons Tamu → Ringkasan | 1060 / 908 / 1026 | 1026 ms | 1043 ms | 1 | 2935 B | 1018 ms |
+| Device  | Transition               | Total-ms samples   |  Median |      P75 | Median RSC requests | Median RSC bytes | Median RSC duration |
+| ------- | ------------------------ | ------------------ | ------: | -------: | ------------------: | ---------------: | ------------------: |
+| Desktop | Ringkasan → Undangan     | 1014 / 1062 / 936  | 1014 ms |  1038 ms |                   1 |           2542 B |             1000 ms |
+| Desktop | Undangan → Tamu          | 953 / 815 / 616    |  815 ms |   884 ms |                   1 |           1679 B |              803 ms |
+| Desktop | Tamu → Bagikan           | 1037 / 1134 / 1164 | 1134 ms |  1149 ms |                   1 |           1824 B |             1110 ms |
+| Desktop | Bagikan → Respons Tamu   | 913 / 912 / 746    |  912 ms | 912.5 ms |                   1 |           1727 B |              896 ms |
+| Desktop | Respons Tamu → Ringkasan | 1078 / 1012 / 834  | 1012 ms |  1045 ms |                   1 |           2935 B |              993 ms |
+| Mobile  | Ringkasan → Undangan     | 813 / 1044 / 891   |  891 ms | 967.5 ms |                   1 |           2560 B |              867 ms |
+| Mobile  | Undangan → Tamu          | 909 / 944 / 810    |  909 ms | 926.5 ms |                   1 |           1680 B |              897 ms |
+| Mobile  | Tamu → Bagikan           | 1077 / 1505 / 1305 | 1305 ms |  1405 ms |                   1 |           1824 B |             1295 ms |
+| Mobile  | Bagikan → Respons Tamu   | 740 / 938 / 743    |  743 ms | 840.5 ms |                   1 |           1729 B |              730 ms |
+| Mobile  | Respons Tamu → Ringkasan | 1060 / 908 / 1026  | 1026 ms |  1043 ms |                   1 |           2935 B |             1018 ms |
 
 Across all 15 recorded transitions per profile:
 
-| Device | Overall median | Overall P75 | Minimum | Maximum |
-| --- | ---: | ---: | ---: | ---: |
-| Desktop | 953 ms | 1049.5 ms | 616 ms | 1164 ms |
-| Mobile | 938 ms | 1052 ms | 740 ms | 1505 ms |
+| Device  | Overall median | Overall P75 | Minimum | Maximum |
+| ------- | -------------: | ----------: | ------: | ------: |
+| Desktop |         953 ms |   1049.5 ms |  616 ms | 1164 ms |
+| Mobile  |         938 ms |     1052 ms |  740 ms | 1505 ms |
 
 ## Findings
 
