@@ -1,4 +1,5 @@
 export {
+  getInvitationReadinessForVerifiedProject,
   getWeddingReadinessForRequest,
   getWeddingReadinessForVerifiedProject,
   hasDeterministicSavedDraftChanges,
@@ -6,6 +7,7 @@ export {
 } from './wedding-readiness.service';
 export type {
   InvitationReadinessState,
+  InvitationReadinessV1,
   WeddingReadinessAggregateCounts,
   WeddingReadinessPrimaryActionKey,
   WeddingReadinessV1,

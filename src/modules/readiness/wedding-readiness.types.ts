@@ -63,6 +63,8 @@ export type WeddingReadinessV1 = {
   };
 };
 
+export type InvitationReadinessV1 = Pick<WeddingReadinessV1, 'identity' | 'invitation'>;
+
 export type WeddingReadinessAggregateCounts = {
   activeGuestCount: number;
   activeGuestbookCount: number;
