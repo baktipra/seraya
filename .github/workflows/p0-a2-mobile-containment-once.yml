@@ -1,0 +1,98 @@
+name: P0-A2 mobile containment once
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Apply invitation mobile containment
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+
+          function replaceExact(path, before, after) {
+            const source = fs.readFileSync(path, 'utf8');
+            if (!source.includes(before)) {
+              throw new Error(`Expected source not found in ${path}: ${before}`);
+            }
+            fs.writeFileSync(path, source.replace(before, after));
+          }
+
+          replaceExact(
+            'src/components/projects/invitation-editor.tsx',
+            '<CardContent className="pt-5 sm:pt-6">',
+            '<CardContent className="min-w-0 max-w-full overflow-x-clip pt-5 sm:pt-6">',
+          );
+          replaceExact(
+            'src/components/projects/invitation-editor.tsx',
+            'className="grid scroll-mt-24 gap-4 lg:grid-cols-[14.5rem_minmax(0,1fr)] lg:items-start xl:gap-6 2xl:grid-cols-[14.5rem_minmax(26rem,1fr)_minmax(21rem,24.5rem)]"',
+            'className="grid min-w-0 max-w-full scroll-mt-24 gap-4 lg:grid-cols-[14.5rem_minmax(0,1fr)] lg:items-start xl:gap-6 2xl:grid-cols-[14.5rem_minmax(26rem,1fr)_minmax(21rem,24.5rem)]"',
+          );
+          replaceExact(
+            'src/components/projects/invitation-editor.tsx',
+            'className="min-w-0 space-y-5 pb-28 sm:pb-0"',
+            'className="min-w-0 max-w-full space-y-5 pb-28 sm:pb-0"',
+          );
+
+          replaceExact(
+            'src/components/projects/invitation-editor-workspace.tsx',
+            'className="border-seraya-border-default bg-seraya-surface/95 sticky top-16 z-20 -mx-5 border-y px-5 py-3 shadow-[0_8px_18px_rgb(62_42_34_/_0.06)] backdrop-blur sm:mx-0 sm:rounded-[var(--seraya-radius-lg)] sm:border sm:px-4 lg:hidden"',
+            'className="border-seraya-border-default bg-seraya-surface/95 sticky top-16 z-20 -mx-5 w-auto min-w-0 max-w-full overflow-x-hidden border-y px-5 py-3 shadow-[0_8px_18px_rgb(62_42_34_/_0.06)] backdrop-blur sm:mx-0 sm:w-full sm:rounded-[var(--seraya-radius-lg)] sm:border sm:px-4 lg:hidden"',
+          );
+          replaceExact(
+            'src/components/projects/invitation-editor-workspace.tsx',
+            '<div\n      data-invitation-editor-panel={section}',
+            '<div\n      className="min-w-0 max-w-full"\n      data-invitation-editor-panel={section}',
+          );
+
+          replaceExact(
+            'src/components/projects/invitation-editor-fields.tsx',
+            'className="border-seraya-border-default bg-seraya-surface rounded-[var(--seraya-radius-md)] border p-4 sm:p-5"',
+            'className="border-seraya-border-default bg-seraya-surface min-w-0 max-w-full rounded-[var(--seraya-radius-md)] border p-4 sm:p-5"',
+          );
+          replaceExact(
+            'src/components/projects/invitation-editor-fields.tsx',
+            'className="border-seraya-border-default bg-seraya-canvas rounded-[var(--seraya-radius-lg)] border p-4 shadow-[var(--seraya-shadow-soft)] sm:p-6"',
+            'className="border-seraya-border-default bg-seraya-canvas min-w-0 max-w-full overflow-hidden rounded-[var(--seraya-radius-lg)] border p-4 shadow-[var(--seraya-shadow-soft)] sm:p-6"',
+          );
+          replaceExact(
+            'src/components/projects/invitation-editor-fields.tsx',
+            '<div className="mt-5 grid gap-4 lg:grid-cols-3">',
+            '<div className="mt-5 grid min-w-0 max-w-full gap-4 lg:grid-cols-3">',
+          );
+          replaceExact(
+            'src/components/projects/invitation-editor-fields.tsx',
+            'className="border-seraya-border-default bg-seraya-canvas rounded-[var(--seraya-radius-lg)] border p-4 shadow-[var(--seraya-shadow-soft)] sm:p-6"',
+            'className="border-seraya-border-default bg-seraya-canvas min-w-0 max-w-full rounded-[var(--seraya-radius-lg)] border p-4 shadow-[var(--seraya-shadow-soft)] sm:p-6"',
+          );
+          NODE
+          npx prettier --write \
+            src/components/projects/invitation-editor.tsx \
+            src/components/projects/invitation-editor-workspace.tsx \
+            src/components/projects/invitation-editor-fields.tsx
+      - name: Commit containment repair
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            src/components/projects/invitation-editor.tsx \
+            src/components/projects/invitation-editor-workspace.tsx \
+            src/components/projects/invitation-editor-fields.tsx
+          git diff --cached --quiet && exit 0
+          git commit -m "P0-A2 contain invitation studio on mobile"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
