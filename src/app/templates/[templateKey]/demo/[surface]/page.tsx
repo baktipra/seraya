@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Route } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -33,6 +33,10 @@ function isShowroomSurface(value: unknown): value is ShowroomSurface {
 
 function getTemplateLabel(templateKey: InvitationTemplateKey) {
   return templateKey.charAt(0).toUpperCase() + templateKey.slice(1);
+}
+
+function getDemoHref(templateKey: InvitationTemplateKey, surface: ShowroomSurface): Route {
+  return `/templates/${templateKey}/demo/${surface}` as Route;
 }
 
 export function generateStaticParams() {
@@ -94,7 +98,7 @@ export default async function CanonicalShowroomDemoPage({ params }: ShowroomPage
                   ? 'bg-seraya-ink text-white'
                   : 'border-seraya-border-default bg-seraya-surface text-seraya-text-primary border'
               }`}
-              href={`/templates/${templateKey}/demo/generic`}
+              href={getDemoHref(templateKey, 'generic')}
             >
               Undangan umum
             </Link>
@@ -105,7 +109,7 @@ export default async function CanonicalShowroomDemoPage({ params }: ShowroomPage
                   ? 'bg-seraya-ink text-white'
                   : 'border-seraya-border-default bg-seraya-surface text-seraya-text-primary border'
               }`}
-              href={`/templates/${templateKey}/demo/personal`}
+              href={getDemoHref(templateKey, 'personal')}
             >
               Undangan personal
             </Link>
