@@ -12,9 +12,7 @@ export default function ProjectWorkspaceLoading() {
           aria-hidden="true"
           className="border-seraya-action-primary/25 border-t-seraya-action-primary mx-auto block size-7 animate-spin rounded-full border-[3px]"
         />
-        <p className="text-seraya-text-primary mt-4 text-sm font-semibold">
-          Menyiapkan workspace…
-        </p>
+        <p className="text-seraya-text-primary mt-4 text-sm font-semibold">Menyiapkan workspace…</p>
         <p className="text-seraya-text-muted mt-1 text-xs">Navigasi proyek tetap tersedia.</p>
       </div>
     </div>

@@ -297,7 +297,7 @@ export function ProjectNavigation({
       <nav
         aria-busy={Boolean(pendingHref)}
         aria-label="Navigasi workspace mobile"
-        className="border-seraya-border-default bg-seraya-canvas/96 pointer-events-auto fixed inset-x-0 bottom-0 z-[80] isolate flex min-h-[4.65rem] items-stretch border-t px-1 pt-1 pb-[max(0.3rem,env(safe-area-inset-bottom))] shadow-[0_-12px_35px_rgb(56_39_33_/_0.07)] backdrop-blur-xl lg:hidden"
+        className="border-seraya-border-default bg-seraya-canvas/96 pointer-events-auto fixed inset-x-0 bottom-0 isolate z-[80] flex min-h-[4.65rem] items-stretch border-t px-1 pt-1 pb-[max(0.3rem,env(safe-area-inset-bottom))] shadow-[0_-12px_35px_rgb(56_39_33_/_0.07)] backdrop-blur-xl lg:hidden"
         data-project-mobile-navigation
         data-project-navigation-pending={Boolean(pendingHref) || undefined}
       >

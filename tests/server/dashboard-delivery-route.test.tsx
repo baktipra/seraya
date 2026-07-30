@@ -6,17 +6,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 
-const {
-  getDeliveryCenterMock,
-  getOwnedProjectContextMock,
-  getPublicationMock,
-  notFoundMock,
-} = vi.hoisted(() => ({
-  getDeliveryCenterMock: vi.fn(),
-  getOwnedProjectContextMock: vi.fn(),
-  getPublicationMock: vi.fn(),
-  notFoundMock: vi.fn(),
-}));
+const { getDeliveryCenterMock, getOwnedProjectContextMock, getPublicationMock, notFoundMock } =
+  vi.hoisted(() => ({
+    getDeliveryCenterMock: vi.fn(),
+    getOwnedProjectContextMock: vi.fn(),
+    getPublicationMock: vi.fn(),
+    notFoundMock: vi.fn(),
+  }));
 
 vi.mock('next/navigation', () => ({ notFound: notFoundMock }));
 vi.mock('@/components/projects/native-guest-delivery-center', () => ({
