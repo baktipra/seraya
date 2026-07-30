@@ -117,6 +117,13 @@ jobs:
             1,
           )
           route_test.write_text(source)
+
+          editor = Path('src/components/projects/invitation-editor.tsx')
+          source = editor.read_text()
+          old_timer = 'timeoutHandle = window.setTimeout('
+          if old_timer not in source:
+            raise SystemExit('preview timer marker missing')
+          editor.write_text(source.replace(old_timer, 'timeoutHandle = globalThis.setTimeout(', 1))
           PY
       - name: Install dependencies
         run: npm ci
