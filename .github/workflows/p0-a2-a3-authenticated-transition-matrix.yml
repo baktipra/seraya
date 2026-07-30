@@ -1,0 +1,35 @@
+name: P0-A2-A3 authenticated transition matrix
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+      P0_A2_A3_BASE_URL: https://seraya-lluc5ph3k-bakti-s-projects.vercel.app/?_vercel_share=lAkrfC4loyALe3W54MgMofOoiWwiVdz4
+      P0_A2_A3_MEASURED_SHA: 10ecb907e48993e49f3547cc3d24cff0a82c3c1b
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Capture authenticated transition matrix
+        run: node scripts/measure-a2-a3-workspace-transitions.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p0-a2-a3-authenticated-transition-matrix
+          path: p0-a2-a3-matrix
+          if-no-files-found: warn
+          retention-days: 1
