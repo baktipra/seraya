@@ -1,0 +1,43 @@
+name: P0 B1 B2 final format once
+
+on:
+  pull_request:
+  push:
+    branches:
+      - agent/p0-b1-b2-invitation-layout-recovery
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/p0-b1-b2-invitation-layout-recovery
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Format final browser matrix
+        run: npx prettier --write tests/e2e/invitation-experience.spec.ts
+
+      - name: Commit formatted output
+        run: |
+          if git diff --quiet; then
+            echo "No formatting changes remain."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests/e2e/invitation-experience.spec.ts
+          git commit -m "P0-B1/B2: format final browser matrix"
+          git push origin HEAD:agent/p0-b1-b2-invitation-layout-recovery
