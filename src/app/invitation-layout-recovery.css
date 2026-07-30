@@ -1,0 +1,254 @@
+/* SERAYA — P0-B1/B2 Shared Invitation Layout & Journey Recovery V1
+ * Canonical mobile-first geometry underneath three template-owned identities.
+ * This layer changes presentation only; invitation authority and behavior remain unchanged.
+ */
+
+article[data-template] {
+  --seraya-invitation-readable-measure: 38rem;
+  --seraya-invitation-form-measure: 40rem;
+  --seraya-invitation-media-measure: 48rem;
+  --seraya-invitation-inline-inset: clamp(1.5rem, 6vw, 4.5rem);
+  --seraya-invitation-chapter-space: clamp(4rem, 9vw, 6rem);
+  --seraya-invitation-compact-space: clamp(3rem, 7vw, 4.5rem);
+}
+
+article[data-template] :where(h1, h2, h3, p, a, button, label) {
+  overflow-wrap: anywhere;
+}
+
+article[data-template] :where(h1, h2, h3) {
+  text-wrap: balance;
+}
+
+article[data-template] :where(
+    [data-template-personal-greeting],
+    [data-template-response-journey],
+    [data-generic-response-note],
+    [data-invitation-schedule-journey]
+  ) {
+  scroll-margin-top: 2rem;
+}
+
+article[data-template] [data-template-personal-greeting] {
+  box-sizing: border-box;
+  width: 100%;
+  padding-inline: var(--seraya-invitation-inline-inset);
+}
+
+article[data-template] [data-template-personal-greeting] [data-personal-guest-greeting] {
+  width: 100%;
+  max-width: var(--seraya-invitation-readable-measure);
+  margin-inline: auto;
+}
+
+article[data-template] [data-template-response-journey] {
+  box-sizing: border-box;
+  width: 100%;
+}
+
+article[data-template] [data-template-response-journey] > * {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: var(--seraya-invitation-form-measure);
+  margin-inline: auto;
+}
+
+article[data-template] [data-template-response-journey] :where(
+    [data-personal-rsvp-choice],
+    [data-personal-response-submit],
+    select
+  ) {
+  min-height: 3rem;
+}
+
+article[data-template] [data-template-response-journey] textarea {
+  min-height: 8rem;
+}
+
+article[data-template] a[target='_blank'] {
+  min-height: 2.75rem;
+  align-items: center;
+}
+
+article[data-template] [data-invitation-opening-action],
+article[data-template] [data-invitation-return-action] {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  min-height: 3rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  padding: 0.8rem var(--seraya-invitation-inline-inset);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  line-height: 1.4;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+article[data-template] [data-invitation-opening-action]:focus-visible,
+article[data-template] [data-invitation-return-action]:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: -5px;
+}
+
+article[data-template='roselle'] [data-invitation-opening-action],
+article[data-template='roselle'] [data-invitation-return-action] {
+  border-top: 1px solid var(--roselle-line);
+  border-bottom: 1px solid var(--roselle-line);
+  background: var(--roselle-paper);
+  color: var(--roselle-mauve);
+}
+
+article[data-template='aruna'] [data-invitation-opening-action],
+article[data-template='aruna'] [data-invitation-return-action] {
+  border-top: 1px solid var(--aruna-sand);
+  border-bottom: 1px solid var(--aruna-sand);
+  background: var(--aruna-paper);
+  color: var(--aruna-clay-deep);
+}
+
+article[data-template='laras'] [data-invitation-opening-action],
+article[data-template='laras'] [data-invitation-return-action] {
+  border-top: 1px solid rgb(200 161 110 / 0.45);
+  border-bottom: 1px solid rgb(200 161 110 / 0.45);
+  background: rgb(255 248 237 / 0.035);
+  color: var(--laras-gold);
+}
+
+article[data-template] [data-invitation-schedule-journey] {
+  display: grid;
+  width: 100%;
+}
+
+article[data-template] [data-invitation-schedule-journey] > section {
+  min-width: 0;
+}
+
+article[data-template] [data-invitation-schedule-journey] > section + section {
+  padding-top: 0;
+  border-top: 0;
+}
+
+article[data-template='roselle'] [data-invitation-schedule-journey] > section + section {
+  padding-bottom: var(--seraya-invitation-chapter-space);
+}
+
+article[data-template='aruna'] [data-invitation-schedule-journey],
+article[data-template='laras'] [data-invitation-schedule-journey] {
+  border-top: 1px solid;
+}
+
+article[data-template='aruna'] [data-invitation-schedule-journey] {
+  border-color: var(--aruna-sand);
+}
+
+article[data-template='laras'] [data-invitation-schedule-journey] {
+  border-color: var(--laras-line);
+}
+
+article[data-template='aruna'] [data-invitation-schedule-journey] > section:first-child,
+article[data-template='laras'] [data-invitation-schedule-journey] > section:first-child {
+  border-top: 0;
+}
+
+article[data-template='aruna'] [data-invitation-chapter='story'],
+article[data-template='aruna'] [data-invitation-chapter='gallery'] {
+  position: relative;
+  isolation: isolate;
+}
+
+article[data-template='aruna'] [data-invitation-chapter='story']::before,
+article[data-template='aruna'] [data-invitation-chapter='gallery']::before {
+  position: absolute;
+  z-index: -1;
+  inset: 1rem calc(var(--seraya-invitation-inline-inset) * -0.38);
+  background: rgb(249 237 225 / 0.55);
+  content: '';
+}
+
+article[data-template='laras'] [data-invitation-chapter='story'],
+article[data-template='laras'] [data-invitation-chapter='gallery'] {
+  position: relative;
+  isolation: isolate;
+}
+
+article[data-template='laras'] [data-invitation-chapter='story']::before,
+article[data-template='laras'] [data-invitation-chapter='gallery']::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0 calc(var(--seraya-invitation-inline-inset) * -0.35);
+  border-block: 1px solid rgb(200 161 110 / 0.16);
+  background: rgb(255 248 237 / 0.025);
+  content: '';
+}
+
+article[data-template='aruna'] > [data-template-personal-greeting='aruna'] {
+  padding-block: var(--seraya-invitation-compact-space);
+  border-bottom: 1px solid var(--aruna-sand);
+  background: var(--aruna-paper);
+}
+
+article[data-template='laras'] > [data-template-personal-greeting='laras'] {
+  margin: 0;
+  padding-block: var(--seraya-invitation-compact-space);
+  border-top: 0;
+  border-bottom: 1px solid rgb(200 161 110 / 0.34);
+  background: rgb(255 248 237 / 0.035);
+}
+
+article[data-template='laras'] > [data-template-personal-greeting='laras'] [data-personal-guest-greeting] {
+  max-width: var(--seraya-invitation-readable-measure);
+}
+
+article[data-template] [data-generic-response-note] {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: var(--seraya-invitation-readable-measure);
+  margin-inline: auto;
+}
+
+@media (max-width: 36rem) {
+  article[data-template] {
+    --seraya-invitation-inline-inset: 1.5rem;
+    --seraya-invitation-chapter-space: 4rem;
+    --seraya-invitation-compact-space: 3rem;
+  }
+
+  article[data-template='roselle'] [data-roselle-chapter='opening'] {
+    min-height: min(72svh, 42rem);
+    padding-block: 4.5rem 5.25rem;
+  }
+
+  article[data-template='roselle'] [data-roselle-chapter='closing'] {
+    min-height: auto;
+    padding-block: 4.5rem;
+  }
+
+  article[data-template='aruna'] [data-invitation-gallery] > div > figure:nth-child(3n) {
+    aspect-ratio: 16 / 10;
+  }
+
+  article[data-template='laras'] [data-invitation-gallery] > div {
+    grid-template-columns: 1fr;
+  }
+
+  article[data-template='laras'] [data-invitation-gallery] > div > figure {
+    aspect-ratio: 4 / 5;
+    transform: none;
+  }
+
+  article[data-template='laras'] [data-invitation-gallery] > div > figure:nth-child(n + 2) {
+    aspect-ratio: 4 / 3;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  article[data-template] [data-invitation-opening-action],
+  article[data-template] [data-invitation-return-action] {
+    scroll-behavior: auto;
+  }
+}
