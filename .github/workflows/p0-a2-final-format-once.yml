@@ -1,0 +1,37 @@
+name: P0-A2 final format once
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Format final recovery evidence
+        run: >-
+          npx prettier --write
+          docs/audits/P0-A2-A3-NAVIGATION-DATA-BOUNDARY-RECOVERY-V1.md
+          tests/server/workspace-navigation-data-boundary-recovery-contract.test.ts
+      - name: Commit formatted files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            docs/audits/P0-A2-A3-NAVIGATION-DATA-BOUNDARY-RECOVERY-V1.md \
+            tests/server/workspace-navigation-data-boundary-recovery-contract.test.ts
+          git diff --cached --quiet && exit 0
+          git commit -m "chore: format P0-A2/A3 final evidence"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
