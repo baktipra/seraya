@@ -13,8 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ github.token }}
-      P0_A2_A3_BASE_URL: https://seraya-orcnj26u6-bakti-s-projects.vercel.app/?_vercel_share=45R7uChxUVK7v5fasL4C70ewRw22jqXk
-      P0_A2_A3_MEASURED_SHA: 046c89a0b0a4db379c388ed55e5cc367592e7546
+      P0_A2_A3_BASE_URL: https://seraya-elxa2x6n6-bakti-s-projects.vercel.app/?_vercel_share=coXqVXZ6kRuZ8iA5tUuSxmbV9Rim0Hf7
+      P0_A2_A3_MEASURED_SHA: ef9dc30720cc69ac4a53387fce2f8ed95440d30a
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -24,87 +24,6 @@ jobs:
       - run: npm ci
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
-      - name: Instrument invitation overflow diagnostic
-        run: |
-          node <<'NODE'
-          const fs = require('node:fs');
-          const path = 'scripts/measure-a2-a3-workspace-transitions.mjs';
-          const source = fs.readFileSync(path, 'utf8');
-          const needle = "  await navigation.getByRole('link', { exact: true, name: target.label }).click();";
-          const replacement = `  const link = navigation.getByRole('link', { exact: true, name: target.label });
-          if (profileName === 'mobile' && target.label === 'Tamu') {
-            const diagnostic = await page.evaluate(() => {
-              const clientWidth = document.documentElement.clientWidth;
-              const candidates = Array.from(document.querySelectorAll('*'))
-                .map((element) => {
-                  const rect = element.getBoundingClientRect();
-                  const style = window.getComputedStyle(element);
-                  const overflow = Math.max(
-                    0,
-                    rect.right - clientWidth,
-                    element.scrollWidth - element.clientWidth,
-                    rect.width - clientWidth,
-                  );
-                  return {
-                    tag: element.tagName,
-                    id: element.id || null,
-                    className: element.getAttribute('class'),
-                    data: Object.fromEntries(
-                      Array.from(element.attributes)
-                        .filter((attribute) => attribute.name.startsWith('data-'))
-                        .map((attribute) => [attribute.name, attribute.value]),
-                    ),
-                    rect: {
-                      left: Math.round(rect.left * 100) / 100,
-                      right: Math.round(rect.right * 100) / 100,
-                      width: Math.round(rect.width * 100) / 100,
-                      top: Math.round(rect.top * 100) / 100,
-                      bottom: Math.round(rect.bottom * 100) / 100,
-                    },
-                    dimensions: {
-                      clientWidth: element.clientWidth,
-                      scrollWidth: element.scrollWidth,
-                      clientHeight: element.clientHeight,
-                      scrollHeight: element.scrollHeight,
-                    },
-                    style: {
-                      display: style.display,
-                      position: style.position,
-                      width: style.width,
-                      minWidth: style.minWidth,
-                      maxWidth: style.maxWidth,
-                      gridTemplateColumns: style.gridTemplateColumns,
-                      overflowX: style.overflowX,
-                      whiteSpace: style.whiteSpace,
-                      flexShrink: style.flexShrink,
-                      contain: style.contain,
-                      transform: style.transform,
-                    },
-                    overflow: Math.round(overflow * 100) / 100,
-                  };
-                })
-                .filter((item) => item.overflow > 1)
-                .sort((left, right) => right.overflow - left.overflow)
-                .slice(0, 30);
-
-              return {
-                document: {
-                  clientWidth,
-                  innerWidth: window.innerWidth,
-                  bodyClientWidth: document.body.clientWidth,
-                  bodyScrollWidth: document.body.scrollWidth,
-                  documentScrollWidth: document.documentElement.scrollWidth,
-                  visualWidth: window.visualViewport?.width ?? null,
-                },
-                candidates,
-              };
-            });
-            console.log('INVITATION_OVERFLOW_DIAGNOSTIC', JSON.stringify(diagnostic));
-          }
-          await link.click();`;
-          if (!source.includes(needle)) throw new Error('Diagnostic patch target not found.');
-          fs.writeFileSync(path, source.replace(needle, replacement));
-          NODE
       - name: Capture authenticated transition matrix
         run: node scripts/measure-a2-a3-workspace-transitions.mjs
       - uses: actions/upload-artifact@v4
