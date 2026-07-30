@@ -1,0 +1,35 @@
+name: P0-A1 authenticated transition matrix
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+      P0_A1_BASE_URL: https://seraya-git-agent-p0-a1-workspace-perfor-e3a403-bakti-s-projects.vercel.app/?_vercel_share=sU1ZszQJuGJOL6aL7urFH2Ce9ZlZBbJn
+      P0_A1_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Capture authenticated transition matrix
+        run: node scripts/measure-authenticated-workspace-transitions.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p0-a1-authenticated-transition-matrix
+          path: p0-a1-matrix
+          if-no-files-found: warn
+          retention-days: 1
