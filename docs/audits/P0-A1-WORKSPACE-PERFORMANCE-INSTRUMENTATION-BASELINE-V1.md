@@ -28,13 +28,13 @@ This slice is observational. It does not claim a performance improvement.
 
 The canonical owner pages remain dynamic private-data surfaces:
 
-| Workspace | `force-dynamic` | `revalidate = 0` | `force-no-store` |
-| --- | --- | --- | --- |
-| Ringkasan | Yes | Yes | Yes |
-| Undangan | Yes | Yes | Yes |
-| Tamu | Yes | No explicit value | No explicit value |
-| Bagikan | Yes | Yes | Yes |
-| Respons Tamu | Yes | Yes | Yes |
+| Workspace    | `force-dynamic` | `revalidate = 0`  | `force-no-store`  |
+| ------------ | --------------- | ----------------- | ----------------- |
+| Ringkasan    | Yes             | Yes               | Yes               |
+| Undangan     | Yes             | Yes               | Yes               |
+| Tamu         | Yes             | No explicit value | No explicit value |
+| Bagikan      | Yes             | Yes               | Yes               |
+| Respons Tamu | Yes             | Yes               | Yes               |
 
 These policies are not changed by A1.
 
@@ -148,10 +148,10 @@ Method:
 
 Overall results:
 
-| Device | Median | P75 | Minimum | Maximum |
-| --- | ---: | ---: | ---: | ---: |
-| Desktop | 953 ms | 1049.5 ms | 616 ms | 1164 ms |
-| Mobile | 938 ms | 1052 ms | 740 ms | 1505 ms |
+| Device  | Median |       P75 | Minimum | Maximum |
+| ------- | -----: | --------: | ------: | ------: |
+| Desktop | 953 ms | 1049.5 ms |  616 ms | 1164 ms |
+| Mobile  | 938 ms |   1052 ms |  740 ms | 1505 ms |
 
 The slowest path is `Tamu → Bagikan`:
 
