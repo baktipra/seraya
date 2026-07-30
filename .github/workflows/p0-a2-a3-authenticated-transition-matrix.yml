@@ -22,12 +22,9 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Audit viewport scaling sources
-        run: |
-          grep -RInE "zoom|documentElement|visualViewport|meta.*viewport|transform:.*scale|scale\(" src/app src/components src/modules | head -400 || true
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
-      - name: Instrument mobile stacking diagnostic
+      - name: Instrument invitation overflow diagnostic
         run: |
           node <<'NODE'
           const fs = require('node:fs');
@@ -35,85 +32,74 @@ jobs:
           const source = fs.readFileSync(path, 'utf8');
           const needle = "  await navigation.getByRole('link', { exact: true, name: target.label }).click();";
           const replacement = `  const link = navigation.getByRole('link', { exact: true, name: target.label });
-          if (profileName === 'mobile') {
-            const diagnostic = await link.evaluate((element) => {
-              const describe = (node) => {
-                if (!(node instanceof Element)) return null;
-                const style = window.getComputedStyle(node);
-                const rect = node.getBoundingClientRect();
-                return {
-                  tag: node.tagName,
-                  id: node.id || null,
-                  className: node.getAttribute('class'),
-                  attributes: Object.fromEntries(
-                    Array.from(node.attributes)
-                      .filter((attribute) => attribute.name.startsWith('data-'))
-                      .map((attribute) => [attribute.name, attribute.value]),
-                  ),
-                  rect: {
-                    top: rect.top,
-                    right: rect.right,
-                    bottom: rect.bottom,
-                    left: rect.left,
-                    width: rect.width,
-                    height: rect.height,
-                  },
-                  style: {
-                    position: style.position,
-                    zIndex: style.zIndex,
-                    isolation: style.isolation,
-                    pointerEvents: style.pointerEvents,
-                    display: style.display,
-                    visibility: style.visibility,
-                    opacity: style.opacity,
-                    transform: style.transform,
-                    zoom: style.zoom,
-                    contain: style.contain,
-                    overflow: style.overflow,
-                  },
-                };
-              };
-              const ancestors = (node) => {
-                const result = [];
-                let current = node;
-                while (current instanceof Element && result.length < 10) {
-                  result.push(describe(current));
-                  current = current.parentElement;
-                }
-                return result;
-              };
-              const rect = element.getBoundingClientRect();
-              const centerX = rect.left + rect.width / 2;
-              const centerY = rect.top + rect.height / 2;
-              const hit = document.elementFromPoint(centerX, centerY);
-              const viewportMeta = document.querySelector('meta[name="viewport"]');
+          if (profileName === 'mobile' && target.label === 'Tamu') {
+            const diagnostic = await page.evaluate(() => {
+              const clientWidth = document.documentElement.clientWidth;
+              const candidates = Array.from(document.querySelectorAll('*'))
+                .map((element) => {
+                  const rect = element.getBoundingClientRect();
+                  const style = window.getComputedStyle(element);
+                  const overflow = Math.max(
+                    0,
+                    rect.right - clientWidth,
+                    element.scrollWidth - element.clientWidth,
+                    rect.width - clientWidth,
+                  );
+                  return {
+                    tag: element.tagName,
+                    id: element.id || null,
+                    className: element.getAttribute('class'),
+                    data: Object.fromEntries(
+                      Array.from(element.attributes)
+                        .filter((attribute) => attribute.name.startsWith('data-'))
+                        .map((attribute) => [attribute.name, attribute.value]),
+                    ),
+                    rect: {
+                      left: Math.round(rect.left * 100) / 100,
+                      right: Math.round(rect.right * 100) / 100,
+                      width: Math.round(rect.width * 100) / 100,
+                      top: Math.round(rect.top * 100) / 100,
+                      bottom: Math.round(rect.bottom * 100) / 100,
+                    },
+                    dimensions: {
+                      clientWidth: element.clientWidth,
+                      scrollWidth: element.scrollWidth,
+                      clientHeight: element.clientHeight,
+                      scrollHeight: element.scrollHeight,
+                    },
+                    style: {
+                      display: style.display,
+                      position: style.position,
+                      width: style.width,
+                      minWidth: style.minWidth,
+                      maxWidth: style.maxWidth,
+                      gridTemplateColumns: style.gridTemplateColumns,
+                      overflowX: style.overflowX,
+                      whiteSpace: style.whiteSpace,
+                      flexShrink: style.flexShrink,
+                      contain: style.contain,
+                      transform: style.transform,
+                    },
+                    overflow: Math.round(overflow * 100) / 100,
+                  };
+                })
+                .filter((item) => item.overflow > 1)
+                .sort((left, right) => right.overflow - left.overflow)
+                .slice(0, 30);
+
               return {
-                viewport: {
+                document: {
+                  clientWidth,
                   innerWidth: window.innerWidth,
-                  innerHeight: window.innerHeight,
-                  devicePixelRatio: window.devicePixelRatio,
-                  documentClientWidth: document.documentElement.clientWidth,
-                  documentClientHeight: document.documentElement.clientHeight,
-                  screenWidth: window.screen.width,
-                  screenHeight: window.screen.height,
+                  bodyClientWidth: document.body.clientWidth,
+                  bodyScrollWidth: document.body.scrollWidth,
+                  documentScrollWidth: document.documentElement.scrollWidth,
                   visualWidth: window.visualViewport?.width ?? null,
-                  visualHeight: window.visualViewport?.height ?? null,
-                  visualScale: window.visualViewport?.scale ?? null,
-                  meta: viewportMeta?.getAttribute('content') ?? null,
                 },
-                center: { x: centerX, y: centerY },
-                html: describe(document.documentElement),
-                body: describe(document.body),
-                link: describe(element),
-                navigation: describe(element.closest('[data-project-mobile-navigation]')),
-                main: describe(document.querySelector('[data-project-workspace-main]')),
-                shell: describe(document.querySelector('[data-project-workspace-shell]')),
-                hit: describe(hit),
-                hitAncestors: ancestors(hit),
-                navigationAncestors: ancestors(element.closest('[data-project-mobile-navigation]')),
+                candidates,
               };
             });
-            console.log('MOBILE_VIEWPORT_DIAGNOSTIC', target.label, JSON.stringify(diagnostic));
+            console.log('INVITATION_OVERFLOW_DIAGNOSTIC', JSON.stringify(diagnostic));
           }
           await link.click();`;
           if (!source.includes(needle)) throw new Error('Diagnostic patch target not found.');
