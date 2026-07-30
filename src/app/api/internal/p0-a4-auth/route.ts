@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
 
   const { data: verified, error: verifyError } = await admin.auth.verifyOtp({
     token_hash: tokenHash,
-    type: 'magiclink',
+    type: 'email',
   });
 
   if (verifyError || !verified.session) return reject(500, 'magic_link_verify');
