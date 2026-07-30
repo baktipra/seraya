@@ -159,6 +159,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git rm .p0-a5-product.tar.gz .p0-a5-product.b64.* .github/workflows/p0-a5-source-snapshot.yml
+          sed -i 's/[[:space:]]\+$//' docs/performance/p0-a5-editor-runtime-recovery-v1.md
           git add -A
           git diff --cached --check
           git commit -m 'SERAYA — P0-A5 editor runtime recovery V1'
