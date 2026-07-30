@@ -216,7 +216,7 @@ export function InvitationWorkspaceNavigation({
     <>
       <nav
         aria-label="Bagian undangan"
-        className="border-seraya-border-default bg-seraya-surface/95 sticky top-16 z-20 -mx-5 border-y px-5 py-3 shadow-[0_8px_18px_rgb(62_42_34_/_0.06)] backdrop-blur sm:mx-0 sm:rounded-[var(--seraya-radius-lg)] sm:border sm:px-4 lg:hidden"
+        className="border-seraya-border-default bg-seraya-surface/95 sticky top-16 z-20 -mx-5 w-auto max-w-full min-w-0 overflow-x-hidden border-y px-5 py-3 shadow-[0_8px_18px_rgb(62_42_34_/_0.06)] backdrop-blur sm:mx-0 sm:w-full sm:rounded-[var(--seraya-radius-lg)] sm:border sm:px-4 lg:hidden"
         data-invitation-editor-mobile-navigation
       >
         <div className="flex items-center justify-between gap-4">
@@ -334,6 +334,7 @@ export function InvitationWorkspacePanel({
 }) {
   return (
     <div
+      className="max-w-full min-w-0"
       data-invitation-editor-panel={section}
       data-invitation-editor-panel-active={active ? 'true' : 'false'}
       hidden={!active}

@@ -474,9 +474,9 @@ export function InvitationEditor({
           </ol>
         </CardHeader>
 
-        <CardContent className="pt-5 sm:pt-6">
+        <CardContent className="max-w-full min-w-0 overflow-x-clip pt-5 sm:pt-6">
           <div
-            className="grid scroll-mt-24 gap-4 lg:grid-cols-[14.5rem_minmax(0,1fr)] lg:items-start xl:gap-6 2xl:grid-cols-[14.5rem_minmax(26rem,1fr)_minmax(21rem,24.5rem)]"
+            className="grid max-w-full min-w-0 scroll-mt-24 gap-4 lg:grid-cols-[14.5rem_minmax(0,1fr)] lg:items-start xl:gap-6 2xl:grid-cols-[14.5rem_minmax(26rem,1fr)_minmax(21rem,24.5rem)]"
             ref={workspaceStartRef}
           >
             <InvitationWorkspaceNavigation
@@ -484,7 +484,7 @@ export function InvitationEditor({
               onSelect={handleSectionSelect}
               statuses={sectionStatuses}
             />
-            <form action={formAction} className="min-w-0 space-y-5 pb-28 sm:pb-0">
+            <form action={formAction} className="max-w-full min-w-0 space-y-5 pb-28 sm:pb-0">
               <input name="projectId" type="hidden" value={projectId} />
 
               {state.status === 'error' && state.message ? (
