@@ -25,7 +25,7 @@ export const flagshipCollections = [
   {
     key: 'laras',
     name: 'Laras',
-    personality: 'Refined Indonesian elegance',
+    personality: 'Formal evening',
     description:
       'Formal, tenang, dan berakar pada keramahan Indonesia. Komposisi malam yang halus untuk perayaan elegan.',
     mood: 'Evening ceremony · antique gold · restrained heritage geometry',
