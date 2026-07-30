@@ -13,8 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ github.token }}
-      P0_A1_BASE_URL: https://seraya-1wjyai9tq-bakti-s-projects.vercel.app/?_vercel_share=He7vsXXgf5nbe8F8OK1AZcyyCbcqAXOT
-      P0_A1_HEAD_SHA: 9f727530318abab9aeed1e79dcf65777108c35ff
+      P0_A1_BASE_URL: https://seraya-5gu6qgbtp-bakti-s-projects.vercel.app/?_vercel_share=vNzXKxrg9lwIIgktpvefquKcnZLfKdJ9
+      P0_A1_HEAD_SHA: 58433f37b53625f280af2991002625fd978592d2
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
