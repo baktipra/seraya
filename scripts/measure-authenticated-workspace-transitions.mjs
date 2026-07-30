@@ -98,7 +98,7 @@ function buildMarkdown(metadata, summary) {
   ].join('\n');
 }
 
-async function requestAuthenticatedLink(page, sharedUrl) {
+async function requestAuthenticatedDashboardPath(page, sharedUrl) {
   const endpoint = new URL('/api/internal/p0-a1-auth', sharedUrl.origin);
   const shareToken = sharedUrl.searchParams.get('_vercel_share');
   if (shareToken) endpoint.searchParams.set('_vercel_share', shareToken);
@@ -138,10 +138,10 @@ async function requestAuthenticatedLink(page, sharedUrl) {
       }
 
       const payload = JSON.parse(result.body);
-      if (typeof payload.actionLink !== 'string' || payload.actionLink.length === 0) {
-        throw new Error('Preview auth bridge returned an invalid action link.');
+      if (typeof payload.dashboardPath !== 'string' || payload.dashboardPath.length === 0) {
+        throw new Error('Preview auth bridge returned an invalid dashboard path.');
       }
-      return payload.actionLink;
+      return payload.dashboardPath;
     }
 
     if ([404, 409, 503].includes(result.status) && attempt < 60) {
@@ -224,8 +224,15 @@ async function openAuthenticatedProject(browser, profile) {
   const sharedUrl = new URL(baseUrl);
 
   await page.goto(sharedUrl.toString(), { waitUntil: 'domcontentloaded', timeout: 120_000 });
-  const actionLink = await requestAuthenticatedLink(page, sharedUrl);
-  await page.goto(actionLink, { waitUntil: 'domcontentloaded', timeout: 120_000 });
+  const dashboardPath = await requestAuthenticatedDashboardPath(page, sharedUrl);
+  const dashboardUrl = new URL(dashboardPath, sharedUrl.origin);
+  const shareToken = sharedUrl.searchParams.get('_vercel_share');
+  if (shareToken) dashboardUrl.searchParams.set('_vercel_share', shareToken);
+
+  await page.goto(dashboardUrl.toString(), {
+    waitUntil: 'domcontentloaded',
+    timeout: 120_000,
+  });
   await page.waitForURL((url) => url.pathname === '/dashboard', { timeout: 120_000 });
   await page.getByRole('button', { name: 'Buka undangan' }).first().click();
   await page.waitForURL(/\/dashboard\/[0-9a-f-]{36}$/i, { timeout: 120_000 });
