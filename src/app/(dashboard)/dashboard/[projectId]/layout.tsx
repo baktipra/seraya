@@ -3,22 +3,24 @@ import { notFound } from 'next/navigation';
 import { ProjectNavigation } from '@/components/dashboard/project-navigation';
 import { measureWorkspaceServerLoad } from '@/lib/performance/workspace-performance.server';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
-import { getWeddingReadinessForRequest } from '@/modules/readiness';
-import type { WeddingReadinessV1 } from '@/modules/readiness';
+import {
+  getProjectShellForRequest,
+  type ProjectShellV1,
+} from '@/modules/projects/project-shell.service';
 
 type ProjectLayoutProps = {
   children: React.ReactNode;
   params: Promise<{ projectId: string }>;
 };
 
-async function getProjectReadinessOrNotFound(projectId: string): Promise<WeddingReadinessV1> {
+async function getProjectShellOrNotFound(projectId: string): Promise<ProjectShellV1> {
   try {
     return await measureWorkspaceServerLoad(
       {
-        operation: 'project-shell-readiness',
+        operation: 'project-shell-identity',
         workspace: 'project-shell',
       },
-      () => getWeddingReadinessForRequest(projectId),
+      () => getProjectShellForRequest(projectId),
     );
   } catch (error) {
     if (error instanceof ProjectAccessDeniedError) {
@@ -29,28 +31,13 @@ async function getProjectReadinessOrNotFound(projectId: string): Promise<Wedding
   }
 }
 
-function getWorkspaceStatusLabel(readiness: WeddingReadinessV1) {
-  switch (readiness.invitation.state) {
-    case 'published':
-      return 'Sudah dipublikasikan';
-    case 'published_with_unpublished_changes':
-      return 'Perubahan belum diterbitkan';
-    case 'ready_to_publish':
-      return 'Siap diterbitkan';
-    case 'draft_ready_unactivated':
-      return 'Draft siap ditinjau';
-    case 'draft_incomplete':
-      return 'Draft sedang disusun';
-  }
-}
-
 /**
  * Defense-in-depth project shell. Authorization stays route-owned; canonical
  * rail width and gap are owned by design tokens and workspace-anatomy.css.
  */
 export default async function ProjectDashboardLayout({ children, params }: ProjectLayoutProps) {
   const { projectId } = await params;
-  const readiness = await getProjectReadinessOrNotFound(projectId);
+  const shell = await getProjectShellOrNotFound(projectId);
 
   return (
     <>
@@ -59,9 +46,9 @@ export default async function ProjectDashboardLayout({ children, params }: Proje
       </a>
       <div className="min-w-0" data-dashboard-width="wide" data-project-workspace-shell>
         <ProjectNavigation
-          coupleLabel={readiness.identity.coupleLabel}
+          coupleLabel={shell.coupleLabel}
           projectId={projectId}
-          statusLabel={getWorkspaceStatusLabel(readiness)}
+          statusLabel={shell.statusLabel}
         />
         <div className="min-w-0" data-project-workspace-main>
           {children}
