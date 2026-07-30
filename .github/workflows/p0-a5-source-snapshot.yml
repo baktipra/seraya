@@ -1,0 +1,26 @@
+name: P0-A5 source snapshot
+
+on:
+  push:
+    branches:
+      - agent/p0-a5-editor-runtime-recovery
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p0-a5-source-snapshot
+          path: |
+            .
+            !node_modules
+            !.next
+            !playwright-report
+            !test-results
+          include-hidden-files: true
+          retention-days: 1
