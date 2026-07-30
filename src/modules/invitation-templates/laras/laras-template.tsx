@@ -39,12 +39,13 @@ function EventScheduleBlock({
       {event.address ? <p className={styles.eventAddress}>{event.address}</p> : null}
       {event.mapsHref ? (
         <a
+          aria-label={`Buka peta${event.title ? ` ${event.title}` : ' acara'} di tab baru`}
           className={styles.mapsLink}
           href={event.mapsHref}
           rel="noopener noreferrer"
           target="_blank"
         >
-          Buka peta acara (tab baru)
+          Buka peta
         </a>
       ) : null}
     </article>
@@ -68,14 +69,19 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
     invitation.couple.personOne.displayName,
     invitation.couple.personTwo.displayName,
   );
+  const openingTargetId = personalSlots?.greeting
+    ? 'laras-personal-greeting'
+    : 'laras-couple-title';
+  const hasScheduleJourney = Boolean(invitation.events || invitation.location);
 
   return (
     <article
       aria-labelledby="laras-invitation-title"
       className={styles.invitation}
+      data-surface={renderContext.surface}
       data-template="laras"
     >
-      <header className={styles.hero}>
+      <header className={styles.hero} data-invitation-chapter="opening">
         <span className={styles.cornerTop} aria-hidden="true" />
         <span className={styles.cornerBottom} aria-hidden="true" />
         <p className={styles.eyebrow}>{invitation.hero.eyebrow ?? 'The Wedding Of'}</p>
@@ -89,15 +95,31 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
         {invitation.hero.primaryDateLabel ? (
           <p className={styles.heroDate}>{invitation.hero.primaryDateLabel}</p>
         ) : null}
-        {personalSlots?.greeting ? (
-          <div className={styles.personalGreeting} data-template-personal-greeting="laras">
-            {personalSlots.greeting}
-          </div>
-        ) : null}
       </header>
 
+      <a data-invitation-opening-action href={`#${openingTargetId}`}>
+        <span>Buka undangan</span>
+        <span aria-hidden="true">↓</span>
+      </a>
+
+      {personalSlots?.greeting ? (
+        <div
+          aria-label="Sapaan untuk tamu"
+          className={styles.personalGreeting}
+          data-template-personal-greeting="laras"
+          id="laras-personal-greeting"
+          role="region"
+        >
+          {personalSlots.greeting}
+        </div>
+      ) : null}
+
       <div className={styles.content}>
-        <section aria-labelledby="laras-couple-title" className={styles.coupleSection}>
+        <section
+          aria-labelledby="laras-couple-title"
+          className={styles.coupleSection}
+          data-invitation-chapter="couple"
+        >
           <p className={styles.sectionLabel}>Kami yang berbahagia</p>
           <h2 id="laras-couple-title">Merayakan awal yang baru</h2>
           <div className={styles.coupleGrid}>
@@ -110,57 +132,78 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
         </section>
 
         {invitation.story ? (
-          <section aria-labelledby="laras-story-title" className={styles.storySection}>
+          <section
+            aria-labelledby="laras-story-title"
+            className={styles.storySection}
+            data-invitation-chapter="story"
+          >
             <p className={styles.sectionLabel}>Catatan kecil</p>
             <h2 id="laras-story-title">{invitation.story.heading ?? 'Cerita kami'}</h2>
             {invitation.story.body ? <p className={styles.prose}>{invitation.story.body}</p> : null}
           </section>
         ) : null}
 
-        {invitation.events ? (
-          <section aria-labelledby="laras-events-title" className={styles.eventsSection}>
-            <div className={styles.eventsHeading}>
-              <p className={styles.sectionLabel}>Rangkaian acara</p>
-              <h2 id="laras-events-title">Malam yang kami nantikan</h2>
-              {invitation.events.primaryDateLabel ? (
-                <p className={styles.primaryDate}>{invitation.events.primaryDateLabel}</p>
-              ) : null}
-            </div>
-            {invitation.events.items.length > 0 ? (
-              <div className={styles.eventsGrid}>
-                {invitation.events.items.map((event, index) => (
-                  <EventScheduleBlock
-                    event={event}
-                    key={`${event.title ?? 'acara'}-${index}`}
-                    sequence={index + 1}
-                  />
-                ))}
-              </div>
-            ) : null}
-          </section>
-        ) : null}
-
-        {invitation.location ? (
-          <section aria-labelledby="laras-location-title" className={styles.locationSection}>
-            <p className={styles.sectionLabel}>Lokasi</p>
-            <h2 id="laras-location-title">Tempat perayaan kami</h2>
-            {invitation.location.venueName ? (
-              <p className={styles.locationVenue}>{invitation.location.venueName}</p>
-            ) : null}
-            {invitation.location.address ? (
-              <p className={styles.prose}>{invitation.location.address}</p>
-            ) : null}
-            {invitation.location.mapsHref ? (
-              <a
-                className={styles.mapsLink}
-                href={invitation.location.mapsHref}
-                rel="noopener noreferrer"
-                target="_blank"
+        {hasScheduleJourney ? (
+          <div
+            aria-label="Jadwal dan lokasi perayaan"
+            data-invitation-schedule-journey="laras"
+            role="group"
+          >
+            {invitation.events ? (
+              <section
+                aria-labelledby="laras-events-title"
+                className={styles.eventsSection}
+                data-invitation-chapter="schedule"
               >
-                Buka peta lokasi (tab baru)
-              </a>
+                <div className={styles.eventsHeading}>
+                  <p className={styles.sectionLabel}>Rangkaian acara</p>
+                  <h2 id="laras-events-title">Malam yang kami nantikan</h2>
+                  {invitation.events.primaryDateLabel ? (
+                    <p className={styles.primaryDate}>{invitation.events.primaryDateLabel}</p>
+                  ) : null}
+                </div>
+                {invitation.events.items.length > 0 ? (
+                  <div className={styles.eventsGrid}>
+                    {invitation.events.items.map((event, index) => (
+                      <EventScheduleBlock
+                        event={event}
+                        key={`${event.title ?? 'acara'}-${index}`}
+                        sequence={index + 1}
+                      />
+                    ))}
+                  </div>
+                ) : null}
+              </section>
             ) : null}
-          </section>
+
+            {invitation.location ? (
+              <section
+                aria-labelledby="laras-location-title"
+                className={styles.locationSection}
+                data-invitation-chapter="location"
+              >
+                <p className={styles.sectionLabel}>Lokasi utama</p>
+                <h2 id="laras-location-title">Tempat perayaan kami</h2>
+                {invitation.location.venueName ? (
+                  <p className={styles.locationVenue}>{invitation.location.venueName}</p>
+                ) : null}
+                {invitation.location.address ? (
+                  <p className={styles.prose}>{invitation.location.address}</p>
+                ) : null}
+                {invitation.location.mapsHref ? (
+                  <a
+                    aria-label="Buka peta lokasi di tab baru"
+                    className={styles.mapsLink}
+                    href={invitation.location.mapsHref}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    Buka peta
+                  </a>
+                ) : null}
+              </section>
+            ) : null}
+          </div>
         ) : null}
 
         {invitation.gallery ? (
@@ -168,6 +211,7 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
             aria-labelledby="laras-gallery-title"
             className={styles.gallerySection}
             data-gallery-count={invitation.gallery.images.length}
+            data-invitation-chapter="gallery"
             data-invitation-gallery
           >
             <p className={styles.sectionLabel}>Galeri</p>
@@ -187,7 +231,11 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
         ) : null}
 
         {invitation.digitalGift ? (
-          <section aria-labelledby="laras-digital-gift-title" className={styles.digitalGiftSection}>
+          <section
+            aria-labelledby="laras-digital-gift-title"
+            className={styles.digitalGiftSection}
+            data-invitation-chapter="gift"
+          >
             <div className={styles.digitalGiftHeading}>
               <p className={styles.sectionLabel}>Amplop Digital</p>
               <h2 id="laras-digital-gift-title">{invitation.digitalGift.heading}</h2>
@@ -243,7 +291,11 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
         ) : null}
 
         {invitation.closing ? (
-          <section aria-labelledby="laras-closing-title" className={styles.closingSection}>
+          <section
+            aria-labelledby="laras-closing-title"
+            className={styles.closingSection}
+            data-invitation-chapter="closing"
+          >
             <span className={styles.closingMark} aria-hidden="true">
               ✦
             </span>
@@ -257,6 +309,11 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
           </section>
         ) : null}
       </div>
+
+      <a data-invitation-return-action href="#laras-invitation-title">
+        <span aria-hidden="true">↑</span>
+        Kembali ke awal
+      </a>
     </article>
   );
 }
