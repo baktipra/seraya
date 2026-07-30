@@ -40,7 +40,6 @@ jobs:
         run: |
           set -euo pipefail
           python - <<'PY'
-          import re
           from pathlib import Path
 
           schema = Path('src/modules/invitations/invitation-editor.schema.ts')
@@ -103,14 +102,20 @@ jobs:
 
           route_test = Path('tests/server/dashboard-invitation-editor-route.test.tsx')
           source = route_test.read_text()
-          source, replacements = re.subn(
-            r"\s*expect\(source\)\.toContain\(\s*'getInvitationReadinessForVerifiedProject\(project, \{ draft: editor\.draft \}\)'\s*\);",
-            "\n    expect(source).toContain('getInvitationReadinessForVerifiedProject(project, {');\n    expect(source).toContain('draft: editor.draft');",
-            source,
-            count=1,
-          )
-          if replacements != 1:
+          old_literal = "'getInvitationReadinessForVerifiedProject(project, { draft: editor.draft })'"
+          anchor = "    expect(source).toContain('getDeferredGalleryImages');"
+          if old_literal not in source or anchor not in source:
             raise SystemExit('route assertion marker missing')
+          source = source.replace(
+            old_literal,
+            "'getInvitationReadinessForVerifiedProject(project, {'",
+            1,
+          )
+          source = source.replace(
+            anchor,
+            "    expect(source).toContain('draft: editor.draft');\n" + anchor,
+            1,
+          )
           route_test.write_text(source)
           PY
       - name: Install dependencies
