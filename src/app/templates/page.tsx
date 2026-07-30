@@ -60,13 +60,15 @@ export default function TemplatesPage() {
               <p className="seraya-eyebrow text-seraya-action-primary">Showroom Seraya</p>
               <h1 className="text-seraya-text-primary mt-5 font-serif text-[clamp(4rem,8vw,8rem)] leading-[0.8] font-medium tracking-[-0.07em]">
                 Pilih rasa,
-                <span className="text-seraya-action-primary block italic">lihat hasil nyatanya.</span>
+                <span className="text-seraya-action-primary block italic">
+                  lihat hasil nyatanya.
+                </span>
               </h1>
             </div>
             <div className="max-w-xl lg:justify-self-end">
               <p className="text-seraya-text-secondary text-base leading-7 sm:text-lg sm:leading-8">
-                Roselle, Aruna, dan Laras kini dibandingkan memakai undangan Kirana &amp; Arga
-                yang sama. Fungsi dan isi tetap setara—karakter presentasinya yang berbeda.
+                Roselle, Aruna, dan Laras kini dibandingkan memakai undangan Kirana &amp; Arga yang
+                sama. Fungsi dan isi tetap setara—karakter presentasinya yang berbeda.
               </p>
               <Link className="seraya-button-primary mt-7 min-h-12 px-6" href="/dashboard/new">
                 Mulai buat undangan
@@ -82,9 +84,7 @@ export default function TemplatesPage() {
         >
           <div className="mb-10 max-w-3xl sm:mb-14">
             <p className="seraya-eyebrow text-seraya-action-primary">Kirana &amp; Arga</p>
-            <h2 className="seraya-display-md mt-4">
-              Satu isi undangan. Tiga cara menyambut tamu.
-            </h2>
+            <h2 className="seraya-display-md mt-4">Satu isi undangan. Tiga cara menyambut tamu.</h2>
             <p className="text-seraya-text-secondary mt-5 max-w-2xl text-base leading-7">
               Bingkai di bawah memuat pembuka dari renderer produksi. Buka demo lengkap untuk
               menelusuri acara, galeri, Amplop Digital, serta simulasi perjalanan personal.

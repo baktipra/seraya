@@ -219,8 +219,8 @@ export function createCanonicalShowroomPersonalSlots(): PersonalInvitationPresen
         <p className="text-xs font-semibold tracking-[0.16em] uppercase opacity-65">Kepada Yth.</p>
         <p className="mt-3 font-serif text-3xl leading-tight">Bapak Andi Pratama &amp; Keluarga</p>
         <p className="mt-4 text-sm leading-7 opacity-75">
-          Dengan penuh rasa bahagia, kami mengundang Anda dan keluarga untuk hadir serta
-          menyertai hari pernikahan kami.
+          Dengan penuh rasa bahagia, kami mengundang Anda dan keluarga untuk hadir serta menyertai
+          hari pernikahan kami.
         </p>
       </div>
     ),
@@ -234,10 +234,18 @@ export function createCanonicalShowroomPersonalSlots(): PersonalInvitationPresen
           Form ini hanya contoh tampilan dan tidak menyimpan respons.
         </p>
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
-          <button className="min-h-12 rounded-full border border-current px-5" disabled type="button">
+          <button
+            className="min-h-12 rounded-full border border-current px-5"
+            disabled
+            type="button"
+          >
             Hadir
           </button>
-          <button className="min-h-12 rounded-full border border-current px-5" disabled type="button">
+          <button
+            className="min-h-12 rounded-full border border-current px-5"
+            disabled
+            type="button"
+          >
             Tidak hadir
           </button>
         </div>
@@ -255,7 +263,11 @@ export function createCanonicalShowroomPersonalSlots(): PersonalInvitationPresen
           disabled
           placeholder="Doa dan ucapan untuk Kirana & Arga"
         />
-        <button className="mt-3 min-h-12 rounded-full border border-current px-5" disabled type="button">
+        <button
+          className="mt-3 min-h-12 rounded-full border border-current px-5"
+          disabled
+          type="button"
+        >
           Kirim ucapan
         </button>
       </section>

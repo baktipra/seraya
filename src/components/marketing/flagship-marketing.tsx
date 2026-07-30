@@ -216,16 +216,13 @@ export function CollectionCard({
             <span aria-hidden="true">→</span>
           </Link>
           <Link
-            className="text-seraya-text-secondary inline-flex min-h-11 items-center gap-2 transition-colors hover:text-seraya-text-primary"
+            className="text-seraya-text-secondary hover:text-seraya-text-primary inline-flex min-h-11 items-center gap-2 transition-colors"
             href={getShowroomHref(collection.key, 'personal')}
           >
             Simulasi personal
           </Link>
         </div>
-        <Link
-          className="seraya-button-secondary mt-5 min-h-11 px-5 text-sm"
-          href="/dashboard/new"
-        >
+        <Link className="seraya-button-secondary mt-5 min-h-11 px-5 text-sm" href="/dashboard/new">
           Mulai dengan {collection.name}
           <span aria-hidden="true">→</span>
         </Link>

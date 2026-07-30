@@ -70,7 +70,9 @@ describe('P0-B4 canonical invitation showroom contract', () => {
 
   it('renders generic and personal showroom surfaces through the production template renderer', () => {
     expect(showroomRouteSource).toContain('InvitationTemplateRenderer');
-    expect(showroomRouteSource).toContain("const SHOWROOM_SURFACES = ['generic', 'personal'] as const");
+    expect(showroomRouteSource).toContain(
+      "const SHOWROOM_SURFACES = ['generic', 'personal'] as const",
+    );
     expect(showroomRouteSource).toContain('generateStaticParams');
     expect(showroomRouteSource).toContain(
       'robots: { follow: false, index: false, noarchive: true }',
