@@ -23,7 +23,20 @@ jobs:
       - run: npm ci
       - name: Apply A4 patch
         run: |
-          cat .p0-a4/patch.b64.* | base64 -d > /tmp/p0-a4.patch
+          python <<'PY'
+          import base64
+          import glob
+          from pathlib import Path
+
+          decoded = bytearray()
+          for path in sorted(glob.glob('.p0-a4/patch.b64.*')):
+              raw = ''.join(Path(path).read_text().split())
+              try:
+                  decoded.extend(base64.b64decode(raw, validate=True))
+              except Exception as error:
+                  raise SystemExit(f'Invalid Base64 staging chunk {path}: {error}')
+          Path('/tmp/p0-a4.patch').write_bytes(decoded)
+          PY
           git apply --check /tmp/p0-a4.patch
           git apply /tmp/p0-a4.patch
           rm -rf .p0-a4
