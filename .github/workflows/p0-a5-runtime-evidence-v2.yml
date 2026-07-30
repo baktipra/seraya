@@ -30,9 +30,12 @@ jobs:
         run: |
           set -euo pipefail
           git worktree add /tmp/seraya-before "$BEFORE_SHA"
-          ln -s "$GITHUB_WORKSPACE/node_modules" /tmp/seraya-before/node_modules
           rm -rf /tmp/seraya-before/tests/e2e/editor-runtime-fixture
           cp -R tests/e2e/editor-runtime-fixture /tmp/seraya-before/tests/e2e/editor-runtime-fixture
+          (
+            cd /tmp/seraya-before
+            npm ci
+          )
 
       - name: Build both fixture apps in production mode
         shell: bash
@@ -41,7 +44,7 @@ jobs:
           npx next build tests/e2e/editor-runtime-fixture
           (
             cd /tmp/seraya-before
-            "$GITHUB_WORKSPACE/node_modules/.bin/next" build tests/e2e/editor-runtime-fixture
+            npx next build tests/e2e/editor-runtime-fixture
           )
 
       - name: Start both production fixture apps
@@ -51,7 +54,7 @@ jobs:
           nohup npx next start tests/e2e/editor-runtime-fixture -p 3102 > /tmp/a5-after.log 2>&1 &
           (
             cd /tmp/seraya-before
-            nohup "$GITHUB_WORKSPACE/node_modules/.bin/next" start tests/e2e/editor-runtime-fixture -p 3101 > /tmp/a5-before.log 2>&1 &
+            nohup npx next start tests/e2e/editor-runtime-fixture -p 3101 > /tmp/a5-before.log 2>&1 &
           )
           for port in 3101 3102; do
             for attempt in $(seq 1 60); do
