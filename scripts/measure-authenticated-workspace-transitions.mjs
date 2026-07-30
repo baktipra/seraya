@@ -98,11 +98,13 @@ function buildMarkdown(metadata, summary) {
   ].join('\n');
 }
 
-async function requestAuthenticatedLink(context, origin) {
-  const endpoint = `${origin}/api/internal/p0-a1-auth`;
+async function requestAuthenticatedLink(context, sharedUrl) {
+  const endpoint = new URL('/api/internal/p0-a1-auth', sharedUrl.origin);
+  const shareToken = sharedUrl.searchParams.get('_vercel_share');
+  if (shareToken) endpoint.searchParams.set('_vercel_share', shareToken);
 
   for (let attempt = 1; attempt <= 60; attempt += 1) {
-    const response = await context.request.post(endpoint, {
+    const response = await context.request.post(endpoint.toString(), {
       headers: {
         Authorization: `Bearer ${githubToken}`,
         'x-github-run-id': githubRunId,
@@ -111,6 +113,14 @@ async function requestAuthenticatedLink(context, origin) {
     });
 
     if (response.ok()) {
+      const contentType = response.headers()['content-type'] ?? '';
+      if (!contentType.includes('application/json')) {
+        const body = await response.text();
+        throw new Error(
+          `Preview auth bridge returned ${contentType || 'unknown content type'}: ${body.slice(0, 120)}`,
+        );
+      }
+
       const payload = await response.json();
       if (typeof payload.actionLink !== 'string' || payload.actionLink.length === 0) {
         throw new Error('Preview auth bridge returned an invalid action link.');
@@ -197,7 +207,7 @@ async function openAuthenticatedProject(browser, profile) {
   const sharedUrl = new URL(baseUrl);
 
   await page.goto(sharedUrl.toString(), { waitUntil: 'domcontentloaded', timeout: 120_000 });
-  const actionLink = await requestAuthenticatedLink(context, sharedUrl.origin);
+  const actionLink = await requestAuthenticatedLink(context, sharedUrl);
   await page.goto(actionLink, { waitUntil: 'domcontentloaded', timeout: 120_000 });
   await page.waitForURL((url) => url.pathname === '/dashboard', { timeout: 120_000 });
   await page.getByRole('button', { name: 'Buka undangan' }).first().click();
