@@ -34,23 +34,23 @@ The authenticated P0-A1 matrix recorded an overall p75 near 1.05 seconds on desk
 
 Method: one unrecorded warm-up cycle, then three ordinary-click client-navigation cycles for each of five transitions on Desktop Chrome and Pixel 7. Mobile clicks used normal Playwright pointer interaction; no force option was used.
 
-| Device | Overall median | Overall p75 | Range | Result |
-| --- | ---: | ---: | ---: | --- |
-| Desktop Chrome | 29 ms | 29 ms | 27–34 ms | PASS |
-| Pixel 7 | 30 ms | 30 ms | 30–31 ms | PASS |
+| Device         | Overall median | Overall p75 |    Range | Result |
+| -------------- | -------------: | ----------: | -------: | ------ |
+| Desktop Chrome |          29 ms |       29 ms | 27–34 ms | PASS   |
+| Pixel 7        |          30 ms |       30 ms | 30–31 ms | PASS   |
 
-| Device | Transition | Median | P75 |
-| --- | --- | ---: | ---: |
-| Desktop | Ringkasan → Undangan | 29 ms | 29 ms |
-| Desktop | Undangan → Tamu | 28 ms | 28.5 ms |
-| Desktop | Tamu → Bagikan | 29 ms | 31.5 ms |
-| Desktop | Bagikan → Respons Tamu | 29 ms | 29 ms |
-| Desktop | Respons Tamu → Ringkasan | 29 ms | 29 ms |
-| Mobile | Ringkasan → Undangan | 30 ms | 30.5 ms |
-| Mobile | Undangan → Tamu | 30 ms | 30 ms |
-| Mobile | Tamu → Bagikan | 30 ms | 30.5 ms |
-| Mobile | Bagikan → Respons Tamu | 30 ms | 30 ms |
-| Mobile | Respons Tamu → Ringkasan | 30 ms | 30 ms |
+| Device  | Transition               | Median |     P75 |
+| ------- | ------------------------ | -----: | ------: |
+| Desktop | Ringkasan → Undangan     |  29 ms |   29 ms |
+| Desktop | Undangan → Tamu          |  28 ms | 28.5 ms |
+| Desktop | Tamu → Bagikan           |  29 ms | 31.5 ms |
+| Desktop | Bagikan → Respons Tamu   |  29 ms |   29 ms |
+| Desktop | Respons Tamu → Ringkasan |  29 ms |   29 ms |
+| Mobile  | Ringkasan → Undangan     |  30 ms | 30.5 ms |
+| Mobile  | Undangan → Tamu          |  30 ms |   30 ms |
+| Mobile  | Tamu → Bagikan           |  30 ms | 30.5 ms |
+| Mobile  | Bagikan → Respons Tamu   |  30 ms |   30 ms |
+| Mobile  | Respons Tamu → Ringkasan |  30 ms |   30 ms |
 
 All recorded clicks were served from the warmed prefetched route cache, so the click-time samples contained zero new RSC requests. This is the intended warm-navigation result; server-side route authorization and destination loading remain covered by the existing direct-route, unit, integration, build, and browser regression suites.
 

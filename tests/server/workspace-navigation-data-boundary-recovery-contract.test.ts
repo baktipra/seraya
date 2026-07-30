@@ -55,13 +55,9 @@ describe('P0-A2/A3 navigation and data-boundary recovery contract', () => {
   });
 
   it('contains the invitation editor within the mobile inline size', () => {
-    expect(invitationEditor).toContain(
-      'className="grid max-w-full min-w-0 scroll-mt-24 gap-4',
-    );
+    expect(invitationEditor).toContain('className="grid max-w-full min-w-0 scroll-mt-24 gap-4');
     expect(invitationEditor).toContain('max-w-full min-w-0 overflow-x-clip');
-    expect(invitationWorkspace).toContain(
-      'w-auto max-w-full min-w-0 overflow-x-hidden',
-    );
+    expect(invitationWorkspace).toContain('w-auto max-w-full min-w-0 overflow-x-hidden');
     expect(invitationWorkspace).toContain('className="max-w-full min-w-0"');
     expect(invitationFields).toContain(
       'bg-seraya-canvas max-w-full min-w-0 rounded-[var(--seraya-radius-lg)]',
