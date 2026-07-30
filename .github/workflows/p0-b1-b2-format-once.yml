@@ -1,0 +1,45 @@
+name: P0 B1 B2 format once
+
+on:
+  push:
+    branches:
+      - agent/p0-b1-b2-invitation-layout-recovery
+
+permissions:
+  contents: read
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Format scoped files
+        run: |
+          npx prettier --write \
+            src/app/invitation-layout-recovery.css \
+            src/modules/invitation-templates/__tests__/shared-invitation-layout-journey-recovery-contract.test.ts \
+            src/modules/invitation-templates/roselle/roselle-template.tsx \
+            tests/e2e/invitation-experience.spec.ts
+
+      - name: Upload formatted files
+        uses: actions/upload-artifact@v4
+        with:
+          name: p0-b1-b2-formatted-files
+          path: |
+            src/app/invitation-layout-recovery.css
+            src/modules/invitation-templates/__tests__/shared-invitation-layout-journey-recovery-contract.test.ts
+            src/modules/invitation-templates/roselle/roselle-template.tsx
+            tests/e2e/invitation-experience.spec.ts
+          if-no-files-found: error
+          retention-days: 1
