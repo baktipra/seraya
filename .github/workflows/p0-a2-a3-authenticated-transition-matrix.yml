@@ -24,6 +24,82 @@ jobs:
       - run: npm ci
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
+      - name: Instrument mobile stacking diagnostic
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = 'scripts/measure-a2-a3-workspace-transitions.mjs';
+          const source = fs.readFileSync(path, 'utf8');
+          const needle = "  await navigation.getByRole('link', { exact: true, name: target.label }).click();";
+          const replacement = `  const link = navigation.getByRole('link', { exact: true, name: target.label });
+          if (profileName === 'mobile') {
+            const diagnostic = await link.evaluate((element) => {
+              const describe = (node) => {
+                if (!(node instanceof Element)) return null;
+                const style = window.getComputedStyle(node);
+                const rect = node.getBoundingClientRect();
+                return {
+                  tag: node.tagName,
+                  id: node.id || null,
+                  className: node.getAttribute('class'),
+                  attributes: Object.fromEntries(
+                    Array.from(node.attributes)
+                      .filter((attribute) => attribute.name.startsWith('data-'))
+                      .map((attribute) => [attribute.name, attribute.value]),
+                  ),
+                  rect: {
+                    top: rect.top,
+                    right: rect.right,
+                    bottom: rect.bottom,
+                    left: rect.left,
+                    width: rect.width,
+                    height: rect.height,
+                  },
+                  style: {
+                    position: style.position,
+                    zIndex: style.zIndex,
+                    isolation: style.isolation,
+                    pointerEvents: style.pointerEvents,
+                    display: style.display,
+                    visibility: style.visibility,
+                    opacity: style.opacity,
+                    transform: style.transform,
+                    contain: style.contain,
+                    overflow: style.overflow,
+                  },
+                };
+              };
+              const ancestors = (node) => {
+                const result = [];
+                let current = node;
+                while (current instanceof Element && result.length < 10) {
+                  result.push(describe(current));
+                  current = current.parentElement;
+                }
+                return result;
+              };
+              const rect = element.getBoundingClientRect();
+              const centerX = rect.left + rect.width / 2;
+              const centerY = rect.top + rect.height / 2;
+              const hit = document.elementFromPoint(centerX, centerY);
+              return {
+                viewport: { width: window.innerWidth, height: window.innerHeight },
+                center: { x: centerX, y: centerY },
+                link: describe(element),
+                navigation: describe(element.closest('[data-project-mobile-navigation]')),
+                main: describe(document.querySelector('[data-project-workspace-main]')),
+                shell: describe(document.querySelector('[data-project-workspace-shell]')),
+                hit: describe(hit),
+                hitAncestors: ancestors(hit),
+                navigationAncestors: ancestors(element.closest('[data-project-mobile-navigation]')),
+              };
+            });
+            console.log('MOBILE_STACKING_DIAGNOSTIC', target.label, JSON.stringify(diagnostic));
+          }
+          await link.click();`;
+          if (!source.includes(needle)) throw new Error('Diagnostic patch target not found.');
+          fs.writeFileSync(path, source.replace(needle, replacement));
+          NODE
       - name: Capture authenticated transition matrix
         run: node scripts/measure-a2-a3-workspace-transitions.mjs
       - uses: actions/upload-artifact@v4
