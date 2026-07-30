@@ -22,6 +22,9 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Audit viewport scaling sources
+        run: |
+          grep -RInE "zoom|documentElement|visualViewport|meta.*viewport|transform:.*scale|scale\(" src/app src/components src/modules | head -400 || true
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Instrument mobile stacking diagnostic
@@ -64,6 +67,7 @@ jobs:
                     visibility: style.visibility,
                     opacity: style.opacity,
                     transform: style.transform,
+                    zoom: style.zoom,
                     contain: style.contain,
                     overflow: style.overflow,
                   },
@@ -82,9 +86,24 @@ jobs:
               const centerX = rect.left + rect.width / 2;
               const centerY = rect.top + rect.height / 2;
               const hit = document.elementFromPoint(centerX, centerY);
+              const viewportMeta = document.querySelector('meta[name="viewport"]');
               return {
-                viewport: { width: window.innerWidth, height: window.innerHeight },
+                viewport: {
+                  innerWidth: window.innerWidth,
+                  innerHeight: window.innerHeight,
+                  devicePixelRatio: window.devicePixelRatio,
+                  documentClientWidth: document.documentElement.clientWidth,
+                  documentClientHeight: document.documentElement.clientHeight,
+                  screenWidth: window.screen.width,
+                  screenHeight: window.screen.height,
+                  visualWidth: window.visualViewport?.width ?? null,
+                  visualHeight: window.visualViewport?.height ?? null,
+                  visualScale: window.visualViewport?.scale ?? null,
+                  meta: viewportMeta?.getAttribute('content') ?? null,
+                },
                 center: { x: centerX, y: centerY },
+                html: describe(document.documentElement),
+                body: describe(document.body),
                 link: describe(element),
                 navigation: describe(element.closest('[data-project-mobile-navigation]')),
                 main: describe(document.querySelector('[data-project-workspace-main]')),
@@ -94,7 +113,7 @@ jobs:
                 navigationAncestors: ancestors(element.closest('[data-project-mobile-navigation]')),
               };
             });
-            console.log('MOBILE_STACKING_DIAGNOSTIC', target.label, JSON.stringify(diagnostic));
+            console.log('MOBILE_VIEWPORT_DIAGNOSTIC', target.label, JSON.stringify(diagnostic));
           }
           await link.click();`;
           if (!source.includes(needle)) throw new Error('Diagnostic patch target not found.');
