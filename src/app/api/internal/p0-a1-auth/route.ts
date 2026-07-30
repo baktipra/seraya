@@ -1,0 +1,123 @@
+import 'server-only';
+
+import { NextResponse, type NextRequest } from 'next/server';
+
+import { createAdminSupabaseClient } from '@/server/supabase/admin';
+
+const repository = 'baktipra/seraya';
+const expectedBranch = 'agent/p0-a1-workspace-performance-baseline';
+const expectedWorkflow = 'P0-A1 authenticated transition matrix';
+const shaPattern = /^[0-9a-f]{40}$/i;
+const runIdPattern = /^\d{1,20}$/;
+
+function jsonError(status: number, code: string) {
+  return NextResponse.json(
+    { code },
+    {
+      headers: { 'Cache-Control': 'private, no-store' },
+      status,
+    },
+  );
+}
+
+function getBearerToken(request: NextRequest) {
+  const authorization = request.headers.get('authorization');
+  return authorization?.startsWith('Bearer ') ? authorization.slice('Bearer '.length).trim() : '';
+}
+
+export async function POST(request: NextRequest) {
+  if (process.env.VERCEL_ENV !== 'preview') {
+    return jsonError(404, 'not_found');
+  }
+
+  const githubToken = getBearerToken(request);
+  const githubRunId = request.headers.get('x-github-run-id')?.trim() ?? '';
+  const githubSha = request.headers.get('x-github-sha')?.trim() ?? '';
+
+  if (!githubToken || !runIdPattern.test(githubRunId) || !shaPattern.test(githubSha)) {
+    return jsonError(401, 'invalid_credentials');
+  }
+
+  if (process.env.VERCEL_GIT_COMMIT_SHA !== githubSha) {
+    return jsonError(409, 'preview_not_current');
+  }
+
+  const runResponse = await fetch(
+    `https://api.github.com/repos/${repository}/actions/runs/${githubRunId}`,
+    {
+      cache: 'no-store',
+      headers: {
+        Accept: 'application/vnd.github+json',
+        Authorization: `Bearer ${githubToken}`,
+        'User-Agent': 'seraya-p0-a1-performance-audit',
+        'X-GitHub-Api-Version': '2022-11-28',
+      },
+    },
+  );
+
+  if (!runResponse.ok) {
+    return jsonError(401, 'github_run_unverified');
+  }
+
+  const run = (await runResponse.json()) as {
+    event?: unknown;
+    head_branch?: unknown;
+    head_sha?: unknown;
+    name?: unknown;
+    repository?: { full_name?: unknown };
+  };
+
+  if (
+    run.event !== 'pull_request' ||
+    run.head_branch !== expectedBranch ||
+    run.head_sha !== githubSha ||
+    run.name !== expectedWorkflow ||
+    run.repository?.full_name !== repository
+  ) {
+    return jsonError(403, 'github_run_scope_rejected');
+  }
+
+  const admin = createAdminSupabaseClient();
+  const { data: project, error: projectError } = await admin
+    .from('wedding_projects')
+    .select('account_id')
+    .is('deleted_at', null)
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle<{ account_id: string }>();
+
+  if (projectError || !project?.account_id) {
+    return jsonError(503, 'measurement_project_unavailable');
+  }
+
+  const { data: userResult, error: userError } = await admin.auth.admin.getUserById(
+    project.account_id,
+  );
+  const email = userResult.user?.email;
+
+  if (userError || !email) {
+    return jsonError(503, 'measurement_owner_unavailable');
+  }
+
+  const callbackUrl = new URL('/auth/callback', request.url);
+  callbackUrl.searchParams.set('next', '/dashboard');
+
+  const { data: linkResult, error: linkError } = await admin.auth.admin.generateLink({
+    email,
+    options: { redirectTo: callbackUrl.toString() },
+    type: 'magiclink',
+  });
+  const actionLink = linkResult.properties?.action_link;
+
+  if (linkError || !actionLink) {
+    return jsonError(503, 'measurement_link_unavailable');
+  }
+
+  return NextResponse.json(
+    { actionLink },
+    {
+      headers: { 'Cache-Control': 'private, no-store' },
+      status: 200,
+    },
+  );
+}
