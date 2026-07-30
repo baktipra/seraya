@@ -136,12 +136,11 @@ async function expectStableGalleryMedia(invitation: Locator, templateKey: Templa
   }
 
   if (templateKey === 'laras' && (page.viewportSize()?.width ?? 1024) <= 576) {
-    const galleryColumns = await gallery.locator(':scope > div').evaluate((element) =>
-      window
-        .getComputedStyle(element)
-        .gridTemplateColumns.split(' ')
-        .filter(Boolean),
-    );
+    const galleryColumns = await gallery
+      .locator(':scope > div')
+      .evaluate((element) =>
+        window.getComputedStyle(element).gridTemplateColumns.split(' ').filter(Boolean),
+      );
     expect(galleryColumns).toHaveLength(1);
   }
 
@@ -180,7 +179,12 @@ for (const templateKey of templateKeys) {
       const invitation = page.locator(`article[data-template="${templateKey}"]`);
       const openingAction = invitation.locator(':scope > [data-invitation-opening-action]');
       const coupleSection = invitation.getByRole('heading', {
-        name: templateKey === 'roselle' ? 'Dua cerita, satu perjalanan' : templateKey === 'aruna' ? 'Dengan sukacita kami mengundang Anda' : 'Merayakan awal yang baru',
+        name:
+          templateKey === 'roselle'
+            ? 'Dua cerita, satu perjalanan'
+            : templateKey === 'aruna'
+              ? 'Dengan sukacita kami mengundang Anda'
+              : 'Merayakan awal yang baru',
       });
       const scheduleJourney = invitation.locator('[data-invitation-schedule-journey]');
       const genericNote = invitation.locator('[data-generic-response-note]');

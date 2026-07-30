@@ -20,7 +20,8 @@ article[data-template] :where(h1, h2, h3) {
   text-wrap: balance;
 }
 
-article[data-template] :where(
+article[data-template]
+  :where(
     [data-template-personal-greeting],
     [data-template-response-journey],
     [data-generic-response-note],
@@ -53,11 +54,9 @@ article[data-template] [data-template-response-journey] > * {
   margin-inline: auto;
 }
 
-article[data-template] [data-template-response-journey] :where(
-    [data-personal-rsvp-choice],
-    [data-personal-response-submit],
-    select
-  ) {
+article[data-template]
+  [data-template-response-journey]
+  :where([data-personal-rsvp-choice], [data-personal-response-submit], select) {
   min-height: 3rem;
 }
 
@@ -200,7 +199,9 @@ article[data-template='laras'] > [data-template-personal-greeting='laras'] {
   background: rgb(255 248 237 / 0.035);
 }
 
-article[data-template='laras'] > [data-template-personal-greeting='laras'] [data-personal-guest-greeting] {
+article[data-template='laras']
+  > [data-template-personal-greeting='laras']
+  [data-personal-guest-greeting] {
   max-width: var(--seraya-invitation-readable-measure);
 }
 

@@ -68,7 +68,9 @@ describe('P0-B1/B2 shared invitation layout and journey recovery contract', () =
   });
 
   it('repairs the Laras narrow-mobile gallery without flattening desktop identity', () => {
-    expect(recoveryStyles).toContain("article[data-template='laras'] [data-invitation-gallery] > div");
+    expect(recoveryStyles).toContain(
+      "article[data-template='laras'] [data-invitation-gallery] > div",
+    );
     expect(recoveryStyles).toContain('grid-template-columns: 1fr');
     expect(recoveryStyles).toContain('aspect-ratio: 4 / 5');
     expect(recoveryStyles).toContain('aspect-ratio: 4 / 3');

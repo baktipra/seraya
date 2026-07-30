@@ -45,11 +45,7 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
       data-template="roselle"
     >
       <RoselleHero hero={invitation.hero} />
-      <a
-        data-invitation-opening-action
-        data-roselle-opening-action
-        href={`#${openingTargetId}`}
-      >
+      <a data-invitation-opening-action data-roselle-opening-action href={`#${openingTargetId}`}>
         <span>Buka undangan</span>
         <i aria-hidden="true" />
       </a>
