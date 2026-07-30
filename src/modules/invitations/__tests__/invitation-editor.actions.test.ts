@@ -25,6 +25,7 @@ import { initialInvitationEditorActionState } from '../invitation-editor.action-
 import { saveInvitationEditorAction } from '../invitation-editor.actions';
 import {
   createValidInvitationEditorFormData,
+  createValidInvitationEditorPayloadFormData,
   invitationEditorTestProjectId as projectId,
 } from './invitation-editor.test-helpers';
 
@@ -52,6 +53,22 @@ describe('SRY-016 invitation editor server action', () => {
     expect(revalidatePathMock).toHaveBeenCalledWith(`/dashboard/${projectId}/invitation`);
     expect(revalidatePathMock).toHaveBeenCalledWith(`/dashboard/${projectId}/preview`);
     expect(revalidatePathMock).toHaveBeenCalledTimes(3);
+  });
+
+  it('accepts the active-chapter runtime payload without trusting gallery or metadata fields', async () => {
+    saveDraftMock.mockResolvedValue(undefined);
+
+    await expect(
+      saveInvitationEditorAction(
+        initialInvitationEditorActionState,
+        createValidInvitationEditorPayloadFormData(),
+      ),
+    ).resolves.toEqual({ message: 'Perubahan undangan sudah disimpan.', status: 'success' });
+
+    const submitted = saveDraftMock.mock.calls[0]?.[0];
+    expect(submitted.content.gallery).toBeUndefined();
+    expect(submitted.content.meta).toBeUndefined();
+    expect(submitted.content.eventSchedule.events).toHaveLength(1);
   });
 
   it('returns safe validation feedback without calling the service for injected form fields', async () => {

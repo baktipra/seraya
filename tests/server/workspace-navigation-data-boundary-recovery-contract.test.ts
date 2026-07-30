@@ -67,9 +67,8 @@ describe('P0-A2/A3 navigation and data-boundary recovery contract', () => {
 
   it('reuses verified project context in the invitation readiness composition', () => {
     expect(invitation).toContain('getOwnedProjectContextForRequest');
-    expect(invitation).toContain(
-      'getInvitationReadinessForVerifiedProject(project, { draft: editor.draft })',
-    );
+    expect(invitation).toContain('getInvitationReadinessForVerifiedProject(project, {');
+    expect(invitation).toContain('draft: editor.draft');
     expect(invitation).not.toContain('getWeddingReadinessForRequest');
     expect(invitation).not.toContain('getWeddingReadinessForVerifiedProject');
   });

@@ -1,4 +1,6 @@
 import { createDefaultInvitationDraftContent } from '../invitation-draft.defaults';
+import { createInvitationEditorSubmissionPayload } from '../invitation-editor-local-state';
+import { invitationEditorPayloadFieldName } from '../invitation-editor.schema';
 
 export const invitationEditorTestProjectId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 
@@ -56,6 +58,27 @@ export function createValidInvitationEditorFormData() {
   checked('closing.enabled', content.closing.enabled);
   text('closing.message', content.closing.message);
   text('closing.signature', content.closing.signature);
+
+  return formData;
+}
+
+export function createValidInvitationEditorPayloadFormData() {
+  const content = createDefaultInvitationDraftContent({
+    default_timezone: 'Asia/Jakarta',
+    event_date_primary: '2027-08-17',
+    person_one_name: 'Raka',
+    person_two_name: 'Nadia',
+  });
+  const formData = new FormData();
+
+  formData.set('projectId', invitationEditorTestProjectId);
+  formData.set(
+    invitationEditorPayloadFieldName,
+    JSON.stringify(createInvitationEditorSubmissionPayload(content)),
+  );
+  // The runtime form keeps only the active chapter mounted. Known visible
+  // fields may still accompany the strict payload and are intentionally ignored.
+  formData.set('templateKey', content.templateKey);
 
   return formData;
 }

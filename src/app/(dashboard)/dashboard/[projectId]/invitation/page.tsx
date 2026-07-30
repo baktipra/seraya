@@ -10,9 +10,7 @@ import {
   getInvitationEditorForVerifiedProject,
   type OwnedInvitationEditor,
 } from '@/modules/invitations/invitation-editor.service';
-import { getPrivateGalleryImagesForVerifiedProject } from '@/modules/media/media.service';
 import type { InvitationGalleryImage } from '@/modules/media/media.types';
-import type { OwnedProject } from '@/modules/projects/project.repository';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 import { getInvitationReadinessForVerifiedProject } from '@/modules/readiness';
 
@@ -32,25 +30,12 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 export const fetchCache = 'force-no-store';
 
-async function getOptionalGalleryImages(input: {
-  editor: OwnedInvitationEditor;
-  project: OwnedProject;
-  projectId: string;
-}): Promise<InvitationGalleryImage[]> {
-  try {
-    return await getPrivateGalleryImagesForVerifiedProject({
-      draftImageIds: input.editor.draft.content.gallery.imageIds,
-      project: input.project,
-    });
-  } catch (error) {
-    // Media stays optional in the local preview. Resolver failures omit the
-    // gallery instead of exposing Storage details or weakening owner scope.
-    console.error('Seraya editor live preview gallery resolution failed.', {
-      errorName: error instanceof Error ? error.name : 'UnknownError',
-      projectId: input.projectId,
-    });
-    return [];
-  }
+function getDeferredGalleryImages(editor: OwnedInvitationEditor): InvitationGalleryImage[] {
+  return editor.draft.content.gallery.imageIds.map((id, index) => ({
+    alt: `Foto pasangan ${index + 1}`,
+    id,
+    src: `/dashboard/media/${id}`,
+  }));
 }
 
 async function getInvitationEditorScreenOrNotFound(
@@ -65,12 +50,15 @@ async function getInvitationEditorScreenOrNotFound(
       try {
         const project = await getOwnedProjectContextForRequest(projectId);
         const editor = await getInvitationEditorForVerifiedProject(project);
-        const [readiness, galleryImages] = await Promise.all([
-          getInvitationReadinessForVerifiedProject(project, { draft: editor.draft }),
-          getOptionalGalleryImages({ editor, project, projectId }),
-        ]);
+        const readiness = await getInvitationReadinessForVerifiedProject(project, {
+          draft: editor.draft,
+        });
 
-        return { editor, galleryImages, readiness };
+        return {
+          editor,
+          galleryImages: getDeferredGalleryImages(editor),
+          readiness,
+        };
       } catch (error) {
         if (
           error instanceof ProjectAccessDeniedError ||

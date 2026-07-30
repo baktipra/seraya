@@ -20,9 +20,9 @@ const result = {
     excludesOperationalAggregate: !invitationRoute.includes(
       'getWeddingReadinessForVerifiedProject',
     ),
-    reusesEditorDraft: invitationRoute.includes(
-      'getInvitationReadinessForVerifiedProject(project, { draft: editor.draft })',
-    ),
+    reusesEditorDraft:
+      invitationRoute.includes('getInvitationReadinessForVerifiedProject(project, {') &&
+      invitationRoute.includes('draft: editor.draft'),
   },
   repository: {
     minimumProjectionCount: repository.includes('minimumQueryCount: 3'),

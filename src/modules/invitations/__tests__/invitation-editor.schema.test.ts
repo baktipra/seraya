@@ -6,6 +6,7 @@ import {
 } from '../invitation-editor.schema';
 import {
   createValidInvitationEditorFormData,
+  createValidInvitationEditorPayloadFormData,
   invitationEditorTestProjectId,
 } from './invitation-editor.test-helpers';
 
@@ -21,6 +22,42 @@ describe('SRY-016 invitation editor form boundary', () => {
       expect(parsed.data.content.eventSchedule.events).toHaveLength(1);
       expect(parsed.data.content.eventSchedule.events[0]?.title).toBe('Akad Nikah');
       expect(parsed.data.content.story.enabled).toBe(false);
+    }
+  });
+
+  it('accepts the strict runtime payload while only the active chapter fields are mounted', () => {
+    const formData = createValidInvitationEditorPayloadFormData();
+    const parsed = parseInvitationEditorFormData(formData);
+
+    expect(parsed.success).toBe(true);
+
+    if (parsed.success) {
+      expect(parsed.data.projectId).toBe(invitationEditorTestProjectId);
+      expect(parsed.data.content.templateKey).toBe('roselle');
+      expect(parsed.data.content.eventSchedule.events).toHaveLength(1);
+      expect(parsed.data.content.couple.personOne.displayName).toBe('Raka');
+    }
+  });
+
+  it('rejects malformed, duplicated, or authority-expanding runtime payloads', () => {
+    const malformed = createValidInvitationEditorPayloadFormData();
+    malformed.set('editorPayload', '{not-json');
+    expect(parseInvitationEditorFormData(malformed).success).toBe(false);
+
+    const duplicated = createValidInvitationEditorPayloadFormData();
+    duplicated.append('editorPayload', '{}');
+    expect(parseInvitationEditorFormData(duplicated).success).toBe(false);
+
+    const injected = createValidInvitationEditorPayloadFormData();
+    const payload = JSON.parse(String(injected.get('editorPayload'))) as Record<string, unknown>;
+    payload.gallery = { imageIds: ['attacker-controlled'] };
+    injected.set('editorPayload', JSON.stringify(payload));
+
+    const parsed = parseInvitationEditorFormData(injected);
+    expect(parsed.success).toBe(false);
+
+    if (!parsed.success) {
+      expect(getInvitationEditorFieldErrors(parsed.error).form).toBe('Form undangan tidak valid.');
     }
   });
 

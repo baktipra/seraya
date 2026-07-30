@@ -7,19 +7,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createDefaultInvitationDraftContent } from '@/modules/invitations/invitation-draft.defaults';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 
-const {
-  getEditorMock,
-  getOwnedProjectContextMock,
-  getPrivateGalleryMock,
-  getReadinessMock,
-  notFoundMock,
-} = vi.hoisted(() => ({
-  getEditorMock: vi.fn(),
-  getOwnedProjectContextMock: vi.fn(),
-  getPrivateGalleryMock: vi.fn(),
-  getReadinessMock: vi.fn(),
-  notFoundMock: vi.fn(),
-}));
+const { getEditorMock, getOwnedProjectContextMock, getReadinessMock, notFoundMock } = vi.hoisted(
+  () => ({
+    getEditorMock: vi.fn(),
+    getOwnedProjectContextMock: vi.fn(),
+    getReadinessMock: vi.fn(),
+    notFoundMock: vi.fn(),
+  }),
+);
 
 vi.mock('next/navigation', () => ({ notFound: notFoundMock }));
 vi.mock('@/components/projects/invitation-editor', () => ({
@@ -51,10 +46,6 @@ vi.mock('@/modules/invitations/invitation-editor.service', () => ({
   InvitationEditorDraftUnavailableError: class InvitationEditorDraftUnavailableError extends Error {},
   getInvitationEditorForVerifiedProject: getEditorMock,
 }));
-vi.mock('@/modules/media/media.service', () => ({
-  getPrivateGalleryImagesForVerifiedProject: getPrivateGalleryMock,
-}));
-
 import InvitationEditorPage, {
   dynamic,
   fetchCache,
@@ -75,8 +66,13 @@ const project = {
   status: 'draft',
 };
 
+const galleryAssetId = '11111111-1111-4111-8111-111111111111';
+
 const draft = {
-  content: createDefaultInvitationDraftContent(project),
+  content: {
+    ...createDefaultInvitationDraftContent(project),
+    gallery: { enabled: true, imageIds: [galleryAssetId] },
+  },
   created_at: '2026-06-20T00:00:00.000Z',
   deleted_at: null,
   id: 'draft-private-id',
@@ -99,13 +95,6 @@ describe('SRY-016 private invitation editor route', () => {
       },
     });
     getOwnedProjectContextMock.mockReset().mockResolvedValue(project);
-    getPrivateGalleryMock.mockReset().mockResolvedValue([
-      {
-        alt: 'Foto pasangan 1',
-        id: '11111111-1111-4111-8111-111111111111',
-        src: '/dashboard/media/11111111-1111-4111-8111-111111111111',
-      },
-    ]);
     notFoundMock.mockReset();
     notFoundMock.mockImplementation(() => {
       throw new Error('NEXT_NOT_FOUND');
@@ -124,10 +113,6 @@ describe('SRY-016 private invitation editor route', () => {
     expect(getOwnedProjectContextMock).toHaveBeenCalledWith(project.id);
     expect(getEditorMock).toHaveBeenCalledWith(project);
     expect(getReadinessMock).toHaveBeenCalledWith(project, { draft });
-    expect(getPrivateGalleryMock).toHaveBeenCalledWith({
-      draftImageIds: draft.content.gallery.imageIds,
-      project,
-    });
     expect(html).toContain('Edit undangan');
     expect(html).toContain(`data-editor-project-id="${project.id}"`);
     expect(html).toContain('data-editor-gallery-count="1"');
@@ -160,10 +145,11 @@ describe('SRY-016 private invitation editor route', () => {
 
     expect(source).toContain('getOwnedProjectContextForRequest');
     expect(source).toContain('getInvitationEditorForVerifiedProject');
-    expect(source).toContain(
-      'getInvitationReadinessForVerifiedProject(project, { draft: editor.draft })',
-    );
-    expect(source).toContain('getPrivateGalleryImagesForVerifiedProject');
+    expect(source).toContain('getInvitationReadinessForVerifiedProject(project, {');
+    expect(source).toContain('draft: editor.draft');
+    expect(source).toContain('getDeferredGalleryImages');
+    expect(source).toContain('src: `/dashboard/media/${id}`');
+    expect(source).not.toContain('getPrivateGalleryImagesForVerifiedProject');
     expect(source).not.toContain('getWeddingReadinessForRequest');
     expect(source).not.toContain('getWeddingReadinessForVerifiedProject');
     expect(source).not.toContain('getInvitationEditorForCurrentUser');
