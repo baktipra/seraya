@@ -98,43 +98,60 @@ function buildMarkdown(metadata, summary) {
   ].join('\n');
 }
 
-async function requestAuthenticatedLink(context, sharedUrl) {
+async function requestAuthenticatedLink(page, sharedUrl) {
   const endpoint = new URL('/api/internal/p0-a1-auth', sharedUrl.origin);
   const shareToken = sharedUrl.searchParams.get('_vercel_share');
   if (shareToken) endpoint.searchParams.set('_vercel_share', shareToken);
 
   for (let attempt = 1; attempt <= 60; attempt += 1) {
-    const response = await context.request.post(endpoint.toString(), {
-      headers: {
-        Authorization: `Bearer ${githubToken}`,
-        'x-github-run-id': githubRunId,
-        'x-github-sha': githubHeadSha,
-      },
-    });
+    const result = await page.evaluate(
+      async ({ endpointUrl, headSha, runId, token }) => {
+        const response = await window.fetch(endpointUrl, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'x-github-run-id': runId,
+            'x-github-sha': headSha,
+          },
+          method: 'POST',
+        });
 
-    if (response.ok()) {
-      const contentType = response.headers()['content-type'] ?? '';
-      if (!contentType.includes('application/json')) {
-        const body = await response.text();
+        return {
+          body: await response.text(),
+          contentType: response.headers.get('content-type') ?? '',
+          ok: response.ok,
+          status: response.status,
+        };
+      },
+      {
+        endpointUrl: endpoint.toString(),
+        headSha: githubHeadSha,
+        runId: githubRunId,
+        token: githubToken,
+      },
+    );
+
+    if (result.ok) {
+      if (!result.contentType.includes('application/json')) {
         throw new Error(
-          `Preview auth bridge returned ${contentType || 'unknown content type'}: ${body.slice(0, 120)}`,
+          `Preview auth bridge returned ${result.contentType || 'unknown content type'}: ${result.body.slice(0, 120)}`,
         );
       }
 
-      const payload = await response.json();
+      const payload = JSON.parse(result.body);
       if (typeof payload.actionLink !== 'string' || payload.actionLink.length === 0) {
         throw new Error('Preview auth bridge returned an invalid action link.');
       }
       return payload.actionLink;
     }
 
-    if ([404, 409, 503].includes(response.status()) && attempt < 60) {
+    if ([404, 409, 503].includes(result.status) && attempt < 60) {
       await sleep(5_000);
       continue;
     }
 
-    const body = await response.text();
-    throw new Error(`Preview auth bridge failed with ${response.status()}: ${body.slice(0, 200)}`);
+    throw new Error(
+      `Preview auth bridge failed with ${result.status}: ${result.body.slice(0, 200)}`,
+    );
   }
 
   throw new Error('Preview deployment did not become current before the measurement timeout.');
@@ -207,7 +224,7 @@ async function openAuthenticatedProject(browser, profile) {
   const sharedUrl = new URL(baseUrl);
 
   await page.goto(sharedUrl.toString(), { waitUntil: 'domcontentloaded', timeout: 120_000 });
-  const actionLink = await requestAuthenticatedLink(context, sharedUrl);
+  const actionLink = await requestAuthenticatedLink(page, sharedUrl);
   await page.goto(actionLink, { waitUntil: 'domcontentloaded', timeout: 120_000 });
   await page.waitForURL((url) => url.pathname === '/dashboard', { timeout: 120_000 });
   await page.getByRole('button', { name: 'Buka undangan' }).first().click();
