@@ -66,10 +66,16 @@ async function authorize(page) {
         method: 'POST',
       });
       const contentType = response.headers.get('content-type') ?? '';
-      if (!response.ok || !contentType.includes('application/json')) {
-        throw new Error(`Benchmark authorization failed with ${response.status}.`);
+      const payload = contentType.includes('application/json') ? await response.json() : null;
+      if (!response.ok) {
+        throw new Error(
+          `Benchmark authorization failed with ${response.status} at ${payload?.stage ?? 'unknown'}.`,
+        );
       }
-      return response.json();
+      if (!payload) {
+        throw new Error('Benchmark authorization returned a non-JSON response.');
+      }
+      return payload;
     },
     { githubRunId, githubToken, measuredSha },
   );
@@ -78,6 +84,34 @@ async function authorize(page) {
     throw new Error('Benchmark authorization returned an incomplete fixture.');
   }
   return result;
+}
+
+async function cleanup(page, fixture) {
+  const result = await page.evaluate(
+    async ({ fixture: cleanupFixture, githubRunId: runId, githubToken: token, measuredSha: sha }) => {
+      const response = await fetch('/api/internal/p0-a4-auth', {
+        body: JSON.stringify(cleanupFixture),
+        cache: 'no-store',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'x-github-run-id': runId,
+          'x-seraya-measured-sha': sha,
+        },
+        method: 'DELETE',
+      });
+      const contentType = response.headers.get('content-type') ?? '';
+      const payload = contentType.includes('application/json') ? await response.json() : null;
+      return { ok: response.ok, stage: payload?.stage ?? null, status: response.status };
+    },
+    { fixture, githubRunId, githubToken, measuredSha },
+  );
+
+  if (!result.ok) {
+    throw new Error(
+      `Benchmark cleanup failed with ${result.status} at ${result.stage ?? 'unknown'}.`,
+    );
+  }
 }
 
 async function measureDocumentLoad(page, target, workspace, sample) {
@@ -143,12 +177,15 @@ async function measureDocumentLoad(page, target, workspace, sample) {
 }
 
 const browser = await chromium.launch();
-let fixture;
 const rows = [];
+let authorizationContext;
+let authorizationPage;
+let fixture;
+let primaryError;
 
 try {
-  const authorizationContext = await browser.newContext();
-  const authorizationPage = await authorizationContext.newPage();
+  authorizationContext = await browser.newContext();
+  authorizationPage = await authorizationContext.newPage();
   fixture = await authorize(authorizationPage);
   const authenticatedCookies = await authorizationContext.cookies();
 
@@ -167,31 +204,29 @@ try {
 
     await context.close();
   }
-
-  const cleanupResponse = await authorizationPage.evaluate(
-    async ({ fixture: cleanupFixture, githubRunId: runId, githubToken: token, measuredSha: sha }) => {
-      const response = await fetch('/api/internal/p0-a4-auth', {
-        body: JSON.stringify(cleanupFixture),
-        cache: 'no-store',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'x-github-run-id': runId,
-          'x-seraya-measured-sha': sha,
-        },
-        method: 'DELETE',
-      });
-      return { ok: response.ok, status: response.status };
-    },
-    { fixture, githubRunId, githubToken, measuredSha },
-  );
-  if (!cleanupResponse.ok) {
-    throw new Error(`Benchmark cleanup failed with ${cleanupResponse.status}.`);
+} catch (error) {
+  primaryError = error;
+} finally {
+  if (fixture && authorizationPage) {
+    try {
+      await cleanup(authorizationPage, fixture);
+    } catch (cleanupError) {
+      if (!primaryError) {
+        primaryError = cleanupError;
+      } else {
+        console.error('P0-A4 benchmark cleanup also failed.', {
+          errorName: cleanupError instanceof Error ? cleanupError.name : 'UnknownError',
+        });
+      }
+    }
   }
 
-  await authorizationContext.close();
-} finally {
+  await authorizationContext?.close();
   await browser.close();
+}
+
+if (primaryError) {
+  throw primaryError;
 }
 
 await mkdir(outputDirectory, { recursive: true });
