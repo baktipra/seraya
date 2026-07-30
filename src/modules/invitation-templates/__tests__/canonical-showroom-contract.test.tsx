@@ -65,7 +65,7 @@ describe('P0-B4 canonical invitation showroom contract', () => {
       'venue-wide',
     ]);
     expect(showroomFixtureSource).not.toMatch(
-      /https?:\/\/(?!(?:maps\.google\.com|www\.w3\.org\/2000\/svg))/, 
+      /https?:\/\/(?!(?:maps\.google\.com|www\.w3\.org\/2000\/svg))/,
     );
     expect(showroomFixtureSource).toContain('data:image/svg+xml');
   });
