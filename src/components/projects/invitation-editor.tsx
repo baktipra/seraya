@@ -1,8 +1,17 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useActionState, useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import {
+  useActionState,
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from 'react';
 
 import {
   Badge,
@@ -20,11 +29,13 @@ import {
 } from '@/modules/invitations/invitation-editor.action-state';
 import { saveInvitationEditorAction } from '@/modules/invitations/invitation-editor.actions';
 import {
+  createInvitationEditorSubmissionPayload,
   invitationEditorLocalContentReducer,
   type InvitationEditorLocalAction,
 } from '@/modules/invitations/invitation-editor-local-state';
 import type { InvitationRendererProjectMetadata } from '@/modules/invitation-templates/invitation-view-model';
 import type { InvitationDraft } from '@/modules/invitations/invitation-draft.types';
+import type { InvitationEditorFieldErrors } from '@/modules/invitations/invitation-editor.schema';
 import type { InvitationGalleryImage } from '@/modules/media/media.types';
 import type { ProjectPublishEligibility } from '@/modules/payments/payment.types';
 import {
@@ -45,7 +56,6 @@ import {
   getError,
   InvitationTemplatePicker,
 } from './invitation-editor-fields';
-import { InvitationEditorLivePreview } from './invitation-editor-live-preview';
 import { PublishInvitationControls } from './publish-invitation-controls';
 import {
   getInvitationEditorErrorSections,
@@ -55,6 +65,72 @@ import {
   InvitationWorkspacePanel,
   type InvitationEditorSectionKey,
 } from './invitation-editor-workspace';
+
+const fallbackProjectMetadata: InvitationRendererProjectMetadata = {
+  event_date_primary: null,
+};
+
+function InvitationEditorPreviewLoading() {
+  return (
+    <>
+      <aside
+        aria-label="Pratinjau langsung sedang disiapkan"
+        className="bg-seraya-canvas fixed inset-0 z-[60] flex min-h-0 flex-col px-3 py-3 outline-none sm:px-5 sm:py-5 2xl:hidden"
+        data-local-preview-loading
+      >
+        <div className="border-seraya-border-default bg-seraya-surface mx-auto flex h-full w-full max-w-[30rem] items-center justify-center rounded-[var(--seraya-radius-lg)] border px-6 text-center shadow-[var(--seraya-shadow-float)]">
+          <div>
+            <p className="text-seraya-text-primary text-sm font-semibold">
+              Menyiapkan preview lokal…
+            </p>
+            <p className="text-seraya-text-muted mt-2 text-sm leading-6">
+              Editor tetap aman. Preview akan tampil setelah komponennya selesai dimuat.
+            </p>
+          </div>
+        </div>
+      </aside>
+      <aside
+        aria-label="Pratinjau langsung sedang disiapkan"
+        className="border-seraya-border-default bg-seraya-surface sticky top-24 hidden min-h-64 min-w-0 self-start rounded-[var(--seraya-radius-lg)] border p-5 shadow-[var(--seraya-shadow-soft)] 2xl:block"
+        data-local-preview-desktop
+        data-local-preview-loading
+      >
+        <p className="text-seraya-text-primary text-sm font-semibold">Menyiapkan preview lokal…</p>
+        <p className="text-seraya-text-muted mt-2 text-sm leading-6">
+          Preview dimuat setelah editor utama siap digunakan.
+        </p>
+      </aside>
+    </>
+  );
+}
+
+function InvitationEditorDesktopPreviewPlaceholder() {
+  return (
+    <aside
+      aria-label="Pratinjau langsung belum dimuat"
+      className="border-seraya-border-default bg-seraya-surface sticky top-24 hidden min-h-64 min-w-0 self-start rounded-[var(--seraya-radius-lg)] border p-5 shadow-[var(--seraya-shadow-soft)] 2xl:block"
+      data-local-preview-deferred
+      data-local-preview-desktop
+    >
+      <p className="text-seraya-text-primary text-sm font-semibold">
+        Preview lokal akan segera siap
+      </p>
+      <p className="text-seraya-text-muted mt-2 text-sm leading-6">
+        Editor utama diprioritaskan terlebih dahulu agar kalian dapat langsung mulai mengubah
+        undangan.
+      </p>
+    </aside>
+  );
+}
+
+const DeferredInvitationEditorLivePreview = dynamic(
+  () =>
+    import('./invitation-editor-live-preview').then((module) => module.InvitationEditorLivePreview),
+  {
+    loading: InvitationEditorPreviewLoading,
+    ssr: false,
+  },
+);
 
 export type InvitationEditorProps = {
   draft: InvitationDraft;
@@ -186,10 +262,618 @@ export function shouldConfirmInvitationEditorNavigation(currentHref: string, nex
   return !isSameDocumentHash;
 }
 
+export type InvitationEditorActivePanelProps = {
+  activeSection: InvitationEditorSectionKey;
+  content: InvitationDraft['content'];
+  fieldErrors?: InvitationEditorFieldErrors;
+  projectId: string;
+  updateLocalContent: (action: InvitationEditorLocalAction) => void;
+};
+
+export function InvitationEditorActivePanel({
+  activeSection,
+  content,
+  fieldErrors,
+  projectId,
+  updateLocalContent,
+}: InvitationEditorActivePanelProps) {
+  switch (activeSection) {
+    case 'style':
+      return (
+        <InvitationWorkspacePanel active section="style">
+          <InvitationTemplatePicker
+            error={getError(fieldErrors, 'templateKey')}
+            onSelect={(templateKey) => {
+              updateLocalContent({ templateKey, type: 'template' });
+            }}
+            selectedTemplateKey={content.templateKey}
+          />
+        </InvitationWorkspacePanel>
+      );
+    case 'opening':
+      return (
+        <InvitationWorkspacePanel active section="opening">
+          <EditorSection
+            description="Sapaan dan judul pertama yang menyambut tamu."
+            number="02"
+            title="Pembuka"
+          >
+            <div className="grid gap-5 sm:grid-cols-2">
+              <EditorTextField
+                error={getError(fieldErrors, 'hero.eyebrow')}
+                label="Sapaan kecil"
+                name="hero.eyebrow"
+                onValueChange={(value) =>
+                  updateLocalContent({ field: 'eyebrow', type: 'hero', value })
+                }
+                value={content.hero.eyebrow}
+              />
+              <EditorTextField
+                error={getError(fieldErrors, 'hero.title')}
+                label="Judul utama undangan"
+                name="hero.title"
+                onValueChange={(value) =>
+                  updateLocalContent({ field: 'title', type: 'hero', value })
+                }
+                value={content.hero.title}
+              />
+              <div className="sm:col-span-2">
+                <EditorTextField
+                  error={getError(fieldErrors, 'hero.subtitle')}
+                  label="Kalimat pendamping"
+                  name="hero.subtitle"
+                  onValueChange={(value) =>
+                    updateLocalContent({ field: 'subtitle', type: 'hero', value })
+                  }
+                  value={content.hero.subtitle}
+                />
+              </div>
+            </div>
+          </EditorSection>
+        </InvitationWorkspacePanel>
+      );
+    case 'couple':
+      return (
+        <InvitationWorkspacePanel active section="couple">
+          <EditorSection
+            description="Nama yang ingin kalian tampilkan di undangan."
+            number="03"
+            title="Mempelai"
+          >
+            <div className="grid gap-6 lg:grid-cols-2 lg:gap-7">
+              <fieldset className="space-y-4">
+                <legend className="text-seraya-text-primary text-base font-semibold">
+                  Mempelai pertama
+                </legend>
+                <EditorTextField
+                  error={getError(fieldErrors, 'couple.personOne.displayName')}
+                  label="Nama yang tampil di undangan"
+                  name="couple.personOne.displayName"
+                  onValueChange={(value) =>
+                    updateLocalContent({
+                      field: 'displayName',
+                      person: 'personOne',
+                      type: 'person',
+                      value,
+                    })
+                  }
+                  required
+                  value={content.couple.personOne.displayName}
+                />
+                <EditorTextField
+                  error={getError(fieldErrors, 'couple.personOne.fullName')}
+                  label="Nama lengkap (opsional)"
+                  name="couple.personOne.fullName"
+                  onValueChange={(value) =>
+                    updateLocalContent({
+                      field: 'fullName',
+                      person: 'personOne',
+                      type: 'person',
+                      value,
+                    })
+                  }
+                  value={content.couple.personOne.fullName}
+                />
+                <EditorTextField
+                  error={getError(fieldErrors, 'couple.personOne.parentLine')}
+                  label="Orang tua atau keluarga (opsional)"
+                  name="couple.personOne.parentLine"
+                  onValueChange={(value) =>
+                    updateLocalContent({
+                      field: 'parentLine',
+                      person: 'personOne',
+                      type: 'person',
+                      value,
+                    })
+                  }
+                  value={content.couple.personOne.parentLine}
+                />
+              </fieldset>
+              <fieldset className="border-seraya-border-default space-y-4 border-t pt-6 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-7">
+                <legend className="text-seraya-text-primary text-base font-semibold">
+                  Mempelai kedua
+                </legend>
+                <EditorTextField
+                  error={getError(fieldErrors, 'couple.personTwo.displayName')}
+                  label="Nama yang tampil di undangan"
+                  name="couple.personTwo.displayName"
+                  onValueChange={(value) =>
+                    updateLocalContent({
+                      field: 'displayName',
+                      person: 'personTwo',
+                      type: 'person',
+                      value,
+                    })
+                  }
+                  required
+                  value={content.couple.personTwo.displayName}
+                />
+                <EditorTextField
+                  error={getError(fieldErrors, 'couple.personTwo.fullName')}
+                  label="Nama lengkap (opsional)"
+                  name="couple.personTwo.fullName"
+                  onValueChange={(value) =>
+                    updateLocalContent({
+                      field: 'fullName',
+                      person: 'personTwo',
+                      type: 'person',
+                      value,
+                    })
+                  }
+                  value={content.couple.personTwo.fullName}
+                />
+                <EditorTextField
+                  error={getError(fieldErrors, 'couple.personTwo.parentLine')}
+                  label="Orang tua atau keluarga (opsional)"
+                  name="couple.personTwo.parentLine"
+                  onValueChange={(value) =>
+                    updateLocalContent({
+                      field: 'parentLine',
+                      person: 'personTwo',
+                      type: 'person',
+                      value,
+                    })
+                  }
+                  value={content.couple.personTwo.parentLine}
+                />
+              </fieldset>
+            </div>
+          </EditorSection>
+        </InvitationWorkspacePanel>
+      );
+    case 'story':
+      return (
+        <InvitationWorkspacePanel active section="story">
+          <EditorSection
+            description="Bagian opsional untuk membagikan sedikit cerita."
+            number="04"
+            title="Cerita kalian"
+          >
+            <div className="space-y-5">
+              <EditorToggle
+                checked={content.story.enabled}
+                error={getError(fieldErrors, 'story.enabled')}
+                help="Tampilkan bagian ini pada undangan setelah diterbitkan. Isi tetap tersimpan meskipun bagian ini belum ditampilkan."
+                label="Tampilkan cerita kalian"
+                name="story.enabled"
+                onToggle={(value) => updateLocalContent({ field: 'enabled', type: 'story', value })}
+              />
+              <div className="space-y-5" hidden={!content.story.enabled}>
+                <EditorTextField
+                  error={getError(fieldErrors, 'story.heading')}
+                  label="Judul cerita"
+                  name="story.heading"
+                  onValueChange={(value) =>
+                    updateLocalContent({ field: 'heading', type: 'story', value })
+                  }
+                  value={content.story.heading}
+                />
+                <EditorTextAreaField
+                  error={getError(fieldErrors, 'story.body')}
+                  label="Cerita kalian"
+                  name="story.body"
+                  onValueChange={(value) =>
+                    updateLocalContent({ field: 'body', type: 'story', value })
+                  }
+                  value={content.story.body}
+                />
+              </div>
+            </div>
+          </EditorSection>
+        </InvitationWorkspacePanel>
+      );
+    case 'schedule':
+      return (
+        <InvitationWorkspacePanel active section="schedule">
+          <EditorSection
+            description="Tambahkan akad, resepsi, atau acara lain dalam satu undangan."
+            number="05"
+            title="Rangkaian Acara"
+          >
+            <div className="space-y-5">
+              <div className="border-seraya-border-default bg-seraya-brand-soft/45 flex flex-col gap-4 rounded-[var(--seraya-radius-md)] border px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                <div>
+                  <p className="text-seraya-text-primary text-sm font-semibold">
+                    Susun acara kalian
+                  </p>
+                  <p className="text-seraya-text-muted mt-1 text-sm leading-6">
+                    Acara pertama menjadi acara utama yang digunakan pada ringkasan undangan.
+                  </p>
+                </div>
+                <Button
+                  disabled={content.eventSchedule.events.length >= 4}
+                  onClick={() => {
+                    updateLocalContent({
+                      events: [...content.eventSchedule.events, createEventScheduleItem()],
+                      type: 'schedule',
+                    });
+                  }}
+                  size="sm"
+                  type="button"
+                  variant="secondary"
+                >
+                  Tambah acara
+                </Button>
+              </div>
+
+              <div className="space-y-4">
+                {content.eventSchedule.events.map((event, index) => (
+                  <EditorScheduleEventCard
+                    errors={fieldErrors}
+                    event={event}
+                    index={index}
+                    key={event.id}
+                    onChange={(nextEvent) => {
+                      updateLocalContent({
+                        events: content.eventSchedule.events.map((candidate) =>
+                          candidate.id === nextEvent.id ? nextEvent : candidate,
+                        ),
+                        type: 'schedule',
+                      });
+                    }}
+                    onMoveDown={() => {
+                      if (index === content.eventSchedule.events.length - 1) {
+                        return;
+                      }
+
+                      const events = [...content.eventSchedule.events];
+                      [events[index], events[index + 1]] = [events[index + 1]!, events[index]!];
+                      updateLocalContent({ events, type: 'schedule' });
+                    }}
+                    onMoveUp={() => {
+                      if (index === 0) {
+                        return;
+                      }
+
+                      const events = [...content.eventSchedule.events];
+                      [events[index - 1], events[index]] = [events[index]!, events[index - 1]!];
+                      updateLocalContent({ events, type: 'schedule' });
+                    }}
+                    onRemove={() => {
+                      if (content.eventSchedule.events.length === 1) {
+                        return;
+                      }
+
+                      updateLocalContent({
+                        events: content.eventSchedule.events.filter((item) => item.id !== event.id),
+                        type: 'schedule',
+                      });
+                    }}
+                    removable={content.eventSchedule.events.length > 1}
+                    total={content.eventSchedule.events.length}
+                  />
+                ))}
+              </div>
+              <FieldError
+                message={getError(fieldErrors, 'eventSchedule.events')}
+                name="eventSchedule.events"
+              />
+            </div>
+          </EditorSection>
+        </InvitationWorkspacePanel>
+      );
+    case 'gallery':
+      return (
+        <InvitationWorkspacePanel active section="gallery">
+          <EditorSection
+            description="Foto undangan dikelola di ruang galeri agar urutan dan proses upload tetap aman."
+            number="06"
+            title="Galeri"
+          >
+            <div className="border-seraya-border-default bg-seraya-surface rounded-[var(--seraya-radius-md)] border p-4 sm:p-5">
+              <p className="text-seraya-text-primary font-semibold">
+                {content.gallery.imageIds.length > 0
+                  ? `${content.gallery.imageIds.length} foto tersimpan`
+                  : 'Belum ada foto tersimpan'}
+              </p>
+              <p className="text-seraya-text-muted mt-1.5 max-w-xl text-sm leading-6">
+                Tambah, hapus, dan atur foto dari pengelola galeri. Kalian akan kembali ke bagian
+                ini tanpa mengubah draft undangan.
+              </p>
+              <Link
+                className="border-seraya-border-default bg-seraya-canvas text-seraya-text-primary hover:border-seraya-border-strong focus-visible:outline-seraya-focus-ring mt-4 inline-flex min-h-11 items-center justify-center rounded-[var(--seraya-radius-md)] border px-4 text-sm font-semibold focus-visible:outline-3 focus-visible:outline-offset-2"
+                href={`/dashboard/${projectId}/gallery`}
+              >
+                Kelola galeri
+              </Link>
+            </div>
+          </EditorSection>
+        </InvitationWorkspacePanel>
+      );
+    case 'rsvp':
+      return (
+        <InvitationWorkspacePanel active section="rsvp">
+          <EditorSection
+            description="Atur teks RSVP yang akan dilihat tamu."
+            number="07"
+            title="Konfirmasi kehadiran"
+          >
+            <div className="space-y-5">
+              <EditorToggle
+                checked={content.rsvp.enabled}
+                error={getError(fieldErrors, 'rsvp.enabled')}
+                help="Tampilkan bagian ini pada undangan setelah diterbitkan. Isi tetap tersimpan meskipun bagian ini belum ditampilkan."
+                label="Tampilkan konfirmasi kehadiran"
+                name="rsvp.enabled"
+                onToggle={(value) => updateLocalContent({ field: 'enabled', type: 'rsvp', value })}
+              />
+              <div className="space-y-5" hidden={!content.rsvp.enabled}>
+                <EditorTextField
+                  error={getError(fieldErrors, 'rsvp.heading')}
+                  label="Judul bagian RSVP"
+                  name="rsvp.heading"
+                  onValueChange={(value) =>
+                    updateLocalContent({ field: 'heading', type: 'rsvp', value })
+                  }
+                  value={content.rsvp.heading}
+                />
+                <EditorTextAreaField
+                  error={getError(fieldErrors, 'rsvp.lead')}
+                  label="Pesan untuk tamu"
+                  name="rsvp.lead"
+                  onValueChange={(value) =>
+                    updateLocalContent({ field: 'lead', type: 'rsvp', value })
+                  }
+                  value={content.rsvp.lead}
+                />
+              </div>
+            </div>
+          </EditorSection>
+        </InvitationWorkspacePanel>
+      );
+    case 'gift':
+      return (
+        <InvitationWorkspacePanel active section="gift">
+          <EditorSection
+            description="Bagikan informasi rekening atau e-wallet untuk hadiah pernikahan. Informasi ini akan tampil pada undangan setelah dipublikasikan."
+            number="08"
+            title="Amplop Digital"
+          >
+            <div className="space-y-5">
+              <EditorToggle
+                checked={content.digitalGift.enabled}
+                error={getError(fieldErrors, 'digitalGift.enabled')}
+                help="Tampilkan informasi transfer ini pada undangan setelah diterbitkan."
+                label="Tampilkan Amplop Digital"
+                name="digitalGift.enabled"
+                onToggle={(value) =>
+                  updateLocalContent({ field: 'enabled', type: 'digital-gift', value })
+                }
+              />
+              <div className="space-y-5" hidden={!content.digitalGift.enabled}>
+                <EditorTextField
+                  error={getError(fieldErrors, 'digitalGift.heading')}
+                  label="Judul Amplop Digital (opsional)"
+                  name="digitalGift.heading"
+                  onValueChange={(value) =>
+                    updateLocalContent({ field: 'heading', type: 'digital-gift', value })
+                  }
+                  value={content.digitalGift.heading}
+                />
+                <EditorTextAreaField
+                  error={getError(fieldErrors, 'digitalGift.lead')}
+                  label="Pesan pengantar (opsional)"
+                  name="digitalGift.lead"
+                  onValueChange={(value) =>
+                    updateLocalContent({ field: 'lead', type: 'digital-gift', value })
+                  }
+                  value={content.digitalGift.lead}
+                />
+
+                <div className="border-seraya-border-default bg-seraya-surface rounded-[var(--seraya-radius-md)] border p-4 sm:p-5">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <h3 className="text-seraya-text-primary text-base font-semibold">
+                        Rekening atau e-wallet
+                      </h3>
+                      <p className="text-seraya-text-muted mt-1 max-w-xl text-sm leading-6">
+                        Nomor hanya akan ditampilkan setelah undangan dipublikasikan.
+                      </p>
+                    </div>
+                    <Button
+                      disabled={content.digitalGift.accounts.length >= 3}
+                      onClick={() => {
+                        updateLocalContent({
+                          accounts: [
+                            ...content.digitalGift.accounts,
+                            {
+                              accountHolder: '',
+                              accountNumber: '',
+                              id: createDigitalGiftAccountId(),
+                              providerName: '',
+                            },
+                          ],
+                          type: 'digital-gift-accounts',
+                        });
+                      }}
+                      size="sm"
+                      type="button"
+                      variant="secondary"
+                    >
+                      Tambah rekening
+                    </Button>
+                  </div>
+
+                  {content.digitalGift.accounts.length === 0 ? (
+                    <p className="text-seraya-text-muted bg-seraya-canvas mt-5 rounded-[var(--seraya-radius-sm)] px-3.5 py-3 text-sm leading-6">
+                      Tambahkan setidaknya satu rekening atau e-wallet sebelum menampilkan Amplop
+                      Digital.
+                    </p>
+                  ) : (
+                    <div className="mt-5 space-y-4">
+                      {content.digitalGift.accounts.map((account, index) => {
+                        const accountPrefix = `digitalGift.accounts.${index}`;
+
+                        return (
+                          <fieldset
+                            className="border-seraya-border-default rounded-[var(--seraya-radius-md)] border p-4 sm:p-5"
+                            key={account.id}
+                          >
+                            <legend className="text-seraya-text-primary px-1 text-base font-semibold">
+                              Rekening {index + 1}
+                            </legend>
+                            <div className="mt-2 flex justify-end">
+                              <Button
+                                onClick={() => {
+                                  updateLocalContent({
+                                    accounts: content.digitalGift.accounts.filter(
+                                      (item) => item.id !== account.id,
+                                    ),
+                                    type: 'digital-gift-accounts',
+                                  });
+                                }}
+                                size="sm"
+                                type="button"
+                                variant="text"
+                              >
+                                Hapus rekening
+                              </Button>
+                            </div>
+                            <input name={`${accountPrefix}.id`} type="hidden" value={account.id} />
+                            <div className="mt-4 grid gap-4">
+                              <EditorTextField
+                                error={getError(fieldErrors, `${accountPrefix}.providerName`)}
+                                label="Penyedia / Bank / E-wallet"
+                                name={`${accountPrefix}.providerName`}
+                                onValueChange={(value) =>
+                                  updateLocalContent({
+                                    accounts: content.digitalGift.accounts.map((candidate) =>
+                                      candidate.id === account.id
+                                        ? { ...candidate, providerName: value }
+                                        : candidate,
+                                    ),
+                                    type: 'digital-gift-accounts',
+                                  })
+                                }
+                                required
+                                value={account.providerName}
+                              />
+                              <EditorTextField
+                                autoComplete="name"
+                                error={getError(fieldErrors, `${accountPrefix}.accountHolder`)}
+                                label="Nama pemilik rekening"
+                                name={`${accountPrefix}.accountHolder`}
+                                onValueChange={(value) =>
+                                  updateLocalContent({
+                                    accounts: content.digitalGift.accounts.map((candidate) =>
+                                      candidate.id === account.id
+                                        ? { ...candidate, accountHolder: value }
+                                        : candidate,
+                                    ),
+                                    type: 'digital-gift-accounts',
+                                  })
+                                }
+                                required
+                                value={account.accountHolder}
+                              />
+                              <EditorTextField
+                                autoComplete="off"
+                                error={getError(fieldErrors, `${accountPrefix}.accountNumber`)}
+                                help="Nomor hanya akan ditampilkan setelah undangan dipublikasikan."
+                                inputMode="numeric"
+                                label="Nomor rekening / nomor e-wallet"
+                                name={`${accountPrefix}.accountNumber`}
+                                onValueChange={(value) =>
+                                  updateLocalContent({
+                                    accounts: content.digitalGift.accounts.map((candidate) =>
+                                      candidate.id === account.id
+                                        ? { ...candidate, accountNumber: value }
+                                        : candidate,
+                                    ),
+                                    type: 'digital-gift-accounts',
+                                  })
+                                }
+                                required
+                                value={account.accountNumber}
+                              />
+                            </div>
+                          </fieldset>
+                        );
+                      })}
+                    </div>
+                  )}
+                  <FieldError
+                    message={getError(fieldErrors, 'digitalGift.accounts')}
+                    name="digitalGift.accounts"
+                  />
+                </div>
+              </div>
+            </div>
+          </EditorSection>
+        </InvitationWorkspacePanel>
+      );
+    case 'closing':
+      return (
+        <InvitationWorkspacePanel active section="closing">
+          <EditorSection
+            description="Pesan terakhir yang tampil di akhir undangan."
+            number="09"
+            title="Penutup"
+          >
+            <div className="space-y-5">
+              <EditorToggle
+                checked={content.closing.enabled}
+                error={getError(fieldErrors, 'closing.enabled')}
+                help="Tampilkan bagian ini pada undangan setelah diterbitkan. Isi tetap tersimpan meskipun bagian ini belum ditampilkan."
+                label="Tampilkan penutup"
+                name="closing.enabled"
+                onToggle={(value) =>
+                  updateLocalContent({ field: 'enabled', type: 'closing', value })
+                }
+              />
+              <div className="space-y-5" hidden={!content.closing.enabled}>
+                <EditorTextAreaField
+                  error={getError(fieldErrors, 'closing.message')}
+                  label="Pesan penutup"
+                  name="closing.message"
+                  onValueChange={(value) =>
+                    updateLocalContent({ field: 'message', type: 'closing', value })
+                  }
+                  value={content.closing.message}
+                />
+                <EditorTextField
+                  error={getError(fieldErrors, 'closing.signature')}
+                  label="Nama penutup"
+                  name="closing.signature"
+                  onValueChange={(value) =>
+                    updateLocalContent({ field: 'signature', type: 'closing', value })
+                  }
+                  value={content.closing.signature}
+                />
+              </div>
+            </div>
+          </EditorSection>
+        </InvitationWorkspacePanel>
+      );
+    default:
+      return null;
+  }
+}
+
 export function InvitationEditor({
   draft,
   galleryImages = [],
-  project = { event_date_primary: null },
+  project = fallbackProjectMetadata,
   projectId,
   readiness,
 }: InvitationEditorProps) {
@@ -205,31 +889,55 @@ export function InvitationEditor({
   );
   const workspaceReadiness = readiness ?? fallbackWorkspaceReadiness;
   const confidenceStatus = getInvitationConfidenceStatus(workspaceReadiness.invitation.state);
-  const confidenceChecklist = getInvitationConfidenceChecklist(draft);
+  const confidenceChecklist = useMemo(() => getInvitationConfidenceChecklist(draft), [draft]);
   const shouldShowPublishControl =
     workspaceReadiness.invitation.state === 'ready_to_publish' ||
     workspaceReadiness.invitation.state === 'published_with_unpublished_changes';
   const [isDirty, setIsDirty] = useState(false);
   const [hasSaved, setHasSaved] = useState(false);
   const [isLocalPreviewOpen, setIsLocalPreviewOpen] = useState(false);
+  const [shouldMountDesktopPreview, setShouldMountDesktopPreview] = useState(false);
+  const [previewContent, setPreviewContent] = useState(draft.content);
+  const [isEditorInteractive, setIsEditorInteractive] = useState(false);
   const [activeSection, setActiveSection] = useState<InvitationEditorSectionKey>('style');
   const lastHandledSuccessState = useRef<InvitationEditorActionState | null>(null);
   const lastSyncedDraftUpdatedAt = useRef(draft.updated_at);
+  const editorRootRef = useRef<HTMLDivElement | null>(null);
   const errorSummaryRef = useRef<HTMLDivElement | null>(null);
   const workspaceStartRef = useRef<HTMLDivElement | null>(null);
-  const sectionStatuses = getInvitationEditorSectionStatuses(draft, state.fieldErrors);
-  const errorSections = getInvitationEditorErrorSections(state.fieldErrors);
-  const saveStatus = getInvitationEditorSaveStatus({
-    actionStatus: state.status,
-    hasSaved,
-    isDirty,
-    isPending,
-  });
+  const sectionStatuses = useMemo(
+    () => getInvitationEditorSectionStatuses(draft, state.fieldErrors),
+    [draft, state.fieldErrors],
+  );
+  const errorSections = useMemo(
+    () => getInvitationEditorErrorSections(state.fieldErrors),
+    [state.fieldErrors],
+  );
+  const saveStatus = useMemo(
+    () =>
+      getInvitationEditorSaveStatus({
+        actionStatus: state.status,
+        hasSaved,
+        isDirty,
+        isPending,
+      }),
+    [hasSaved, isDirty, isPending, state.status],
+  );
+  const submissionPayload = useMemo(
+    () => JSON.stringify(createInvitationEditorSubmissionPayload(content)),
+    [content],
+  );
+  const shouldMountPreview = isLocalPreviewOpen || shouldMountDesktopPreview;
 
   const updateLocalContent = useCallback((action: InvitationEditorLocalAction) => {
     dispatchLocalContent(action);
     setIsDirty(true);
   }, []);
+
+  const handleOpenLocalPreview = useCallback(() => {
+    setPreviewContent(content);
+    setIsLocalPreviewOpen(true);
+  }, [content]);
 
   const handleSectionSelect = useCallback((section: InvitationEditorSectionKey) => {
     setActiveSection(section);
@@ -257,6 +965,114 @@ export function InvitationEditor({
       return () => window.cancelAnimationFrame(frame);
     }
   }, []);
+
+  useEffect(() => {
+    const root = editorRootRef.current;
+    const shellMetric = {
+      dom_node_count: root?.querySelectorAll('*').length ?? 0,
+      event: 'invitation_editor_shell_ready',
+      mounted_panel_count: root?.querySelectorAll('[data-invitation-editor-panel]').length ?? 0,
+      total_ms: Math.round(performance.now()),
+    };
+
+    console.info(
+      JSON.stringify({
+        level: 'info',
+        source: 'invitation-editor-performance',
+        ...shellMetric,
+      }),
+    );
+    window.dispatchEvent(
+      new CustomEvent('seraya:invitation-editor-performance', { detail: shellMetric }),
+    );
+
+    let secondFrame = 0;
+    const firstFrame = window.requestAnimationFrame(() => {
+      secondFrame = window.requestAnimationFrame(() => {
+        setIsEditorInteractive(true);
+        const interactiveMetric = {
+          dom_node_count: root?.querySelectorAll('*').length ?? 0,
+          event: 'invitation_editor_interactive_ready',
+          mounted_panel_count: root?.querySelectorAll('[data-invitation-editor-panel]').length ?? 0,
+          total_ms: Math.round(performance.now()),
+        };
+
+        performance.mark('seraya:invitation-editor:interactive-ready');
+        console.info(
+          JSON.stringify({
+            level: 'info',
+            source: 'invitation-editor-performance',
+            ...interactiveMetric,
+          }),
+        );
+        window.dispatchEvent(
+          new CustomEvent('seraya:invitation-editor-performance', {
+            detail: interactiveMetric,
+          }),
+        );
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(firstFrame);
+      window.cancelAnimationFrame(secondFrame);
+    };
+  }, []);
+
+  useEffect(() => {
+    const desktopPreview = window.matchMedia('(min-width: 96rem)');
+    let idleHandle: number | null = null;
+    let timeoutHandle: ReturnType<typeof setTimeout> | null = null;
+
+    const cancelScheduledMount = () => {
+      if (idleHandle !== null && 'cancelIdleCallback' in window) {
+        window.cancelIdleCallback(idleHandle);
+      }
+      if (timeoutHandle !== null) {
+        globalThis.clearTimeout(timeoutHandle);
+      }
+      idleHandle = null;
+      timeoutHandle = null;
+    };
+
+    const scheduleMount = () => {
+      cancelScheduledMount();
+
+      if (!desktopPreview.matches) {
+        setShouldMountDesktopPreview(false);
+        return;
+      }
+
+      if ('requestIdleCallback' in window) {
+        idleHandle = window.requestIdleCallback(() => setShouldMountDesktopPreview(true), {
+          timeout: 1_200,
+        });
+      } else {
+        timeoutHandle = globalThis.setTimeout(() => setShouldMountDesktopPreview(true), 450);
+      }
+    };
+
+    scheduleMount();
+    desktopPreview.addEventListener('change', scheduleMount);
+
+    return () => {
+      cancelScheduledMount();
+      desktopPreview.removeEventListener('change', scheduleMount);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!shouldMountPreview) {
+      return;
+    }
+
+    const timeout = window.setTimeout(
+      () => setPreviewContent(content),
+      isLocalPreviewOpen ? 80 : 180,
+    );
+
+    return () => window.clearTimeout(timeout);
+  }, [content, isLocalPreviewOpen, shouldMountPreview]);
 
   useEffect(() => {
     if (draft.updated_at === lastSyncedDraftUpdatedAt.current || isDirty) {
@@ -345,7 +1161,11 @@ export function InvitationEditor({
   }, [state]);
 
   return (
-    <div data-dashboard-width="wide">
+    <div
+      data-dashboard-width="wide"
+      data-invitation-editor-runtime-ready={isEditorInteractive ? 'true' : 'false'}
+      ref={editorRootRef}
+    >
       <Card aria-labelledby="invitation-editor-title" className="w-full overflow-visible">
         <div className="bg-seraya-brand-soft rounded-t-[var(--seraya-radius-lg)] px-5 py-8 sm:px-8 sm:py-10">
           <Badge variant={workspaceReadiness.invitation.hasPublishedSnapshot ? 'success' : 'brand'}>
@@ -486,6 +1306,7 @@ export function InvitationEditor({
             />
             <form action={formAction} className="max-w-full min-w-0 space-y-5 pb-28 sm:pb-0">
               <input name="projectId" type="hidden" value={projectId} />
+              <input name="editorPayload" type="hidden" value={submissionPayload} />
 
               {state.status === 'error' && state.message ? (
                 <div
@@ -518,599 +1339,13 @@ export function InvitationEditor({
                 </div>
               ) : null}
 
-              <InvitationWorkspacePanel active={activeSection === 'style'} section="style">
-                <InvitationTemplatePicker
-                  error={getError(state.fieldErrors, 'templateKey')}
-                  onSelect={(templateKey) => {
-                    updateLocalContent({ templateKey, type: 'template' });
-                  }}
-                  selectedTemplateKey={content.templateKey}
-                />
-              </InvitationWorkspacePanel>
-
-              <InvitationWorkspacePanel active={activeSection === 'opening'} section="opening">
-                <EditorSection
-                  description="Sapaan dan judul pertama yang menyambut tamu."
-                  number="02"
-                  title="Pembuka"
-                >
-                  <div className="grid gap-5 sm:grid-cols-2">
-                    <EditorTextField
-                      error={getError(state.fieldErrors, 'hero.eyebrow')}
-                      label="Sapaan kecil"
-                      name="hero.eyebrow"
-                      onValueChange={(value) =>
-                        updateLocalContent({ field: 'eyebrow', type: 'hero', value })
-                      }
-                      value={content.hero.eyebrow}
-                    />
-                    <EditorTextField
-                      error={getError(state.fieldErrors, 'hero.title')}
-                      label="Judul utama undangan"
-                      name="hero.title"
-                      onValueChange={(value) =>
-                        updateLocalContent({ field: 'title', type: 'hero', value })
-                      }
-                      value={content.hero.title}
-                    />
-                    <div className="sm:col-span-2">
-                      <EditorTextField
-                        error={getError(state.fieldErrors, 'hero.subtitle')}
-                        label="Kalimat pendamping"
-                        name="hero.subtitle"
-                        onValueChange={(value) =>
-                          updateLocalContent({ field: 'subtitle', type: 'hero', value })
-                        }
-                        value={content.hero.subtitle}
-                      />
-                    </div>
-                  </div>
-                </EditorSection>
-              </InvitationWorkspacePanel>
-
-              <InvitationWorkspacePanel active={activeSection === 'couple'} section="couple">
-                <EditorSection
-                  description="Nama yang ingin kalian tampilkan di undangan."
-                  number="03"
-                  title="Mempelai"
-                >
-                  <div className="grid gap-6 lg:grid-cols-2 lg:gap-7">
-                    <fieldset className="space-y-4">
-                      <legend className="text-seraya-text-primary text-base font-semibold">
-                        Mempelai pertama
-                      </legend>
-                      <EditorTextField
-                        error={getError(state.fieldErrors, 'couple.personOne.displayName')}
-                        label="Nama yang tampil di undangan"
-                        name="couple.personOne.displayName"
-                        onValueChange={(value) =>
-                          updateLocalContent({
-                            field: 'displayName',
-                            person: 'personOne',
-                            type: 'person',
-                            value,
-                          })
-                        }
-                        required
-                        value={content.couple.personOne.displayName}
-                      />
-                      <EditorTextField
-                        error={getError(state.fieldErrors, 'couple.personOne.fullName')}
-                        label="Nama lengkap (opsional)"
-                        name="couple.personOne.fullName"
-                        onValueChange={(value) =>
-                          updateLocalContent({
-                            field: 'fullName',
-                            person: 'personOne',
-                            type: 'person',
-                            value,
-                          })
-                        }
-                        value={content.couple.personOne.fullName}
-                      />
-                      <EditorTextField
-                        error={getError(state.fieldErrors, 'couple.personOne.parentLine')}
-                        label="Orang tua atau keluarga (opsional)"
-                        name="couple.personOne.parentLine"
-                        onValueChange={(value) =>
-                          updateLocalContent({
-                            field: 'parentLine',
-                            person: 'personOne',
-                            type: 'person',
-                            value,
-                          })
-                        }
-                        value={content.couple.personOne.parentLine}
-                      />
-                    </fieldset>
-                    <fieldset className="border-seraya-border-default space-y-4 border-t pt-6 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-7">
-                      <legend className="text-seraya-text-primary text-base font-semibold">
-                        Mempelai kedua
-                      </legend>
-                      <EditorTextField
-                        error={getError(state.fieldErrors, 'couple.personTwo.displayName')}
-                        label="Nama yang tampil di undangan"
-                        name="couple.personTwo.displayName"
-                        onValueChange={(value) =>
-                          updateLocalContent({
-                            field: 'displayName',
-                            person: 'personTwo',
-                            type: 'person',
-                            value,
-                          })
-                        }
-                        required
-                        value={content.couple.personTwo.displayName}
-                      />
-                      <EditorTextField
-                        error={getError(state.fieldErrors, 'couple.personTwo.fullName')}
-                        label="Nama lengkap (opsional)"
-                        name="couple.personTwo.fullName"
-                        onValueChange={(value) =>
-                          updateLocalContent({
-                            field: 'fullName',
-                            person: 'personTwo',
-                            type: 'person',
-                            value,
-                          })
-                        }
-                        value={content.couple.personTwo.fullName}
-                      />
-                      <EditorTextField
-                        error={getError(state.fieldErrors, 'couple.personTwo.parentLine')}
-                        label="Orang tua atau keluarga (opsional)"
-                        name="couple.personTwo.parentLine"
-                        onValueChange={(value) =>
-                          updateLocalContent({
-                            field: 'parentLine',
-                            person: 'personTwo',
-                            type: 'person',
-                            value,
-                          })
-                        }
-                        value={content.couple.personTwo.parentLine}
-                      />
-                    </fieldset>
-                  </div>
-                </EditorSection>
-              </InvitationWorkspacePanel>
-
-              <InvitationWorkspacePanel active={activeSection === 'story'} section="story">
-                <EditorSection
-                  description="Bagian opsional untuk membagikan sedikit cerita."
-                  number="04"
-                  title="Cerita kalian"
-                >
-                  <div className="space-y-5">
-                    <EditorToggle
-                      checked={content.story.enabled}
-                      error={getError(state.fieldErrors, 'story.enabled')}
-                      help="Tampilkan bagian ini pada undangan setelah diterbitkan. Isi tetap tersimpan meskipun bagian ini belum ditampilkan."
-                      label="Tampilkan cerita kalian"
-                      name="story.enabled"
-                      onToggle={(value) =>
-                        updateLocalContent({ field: 'enabled', type: 'story', value })
-                      }
-                    />
-                    <div className="space-y-5" hidden={!content.story.enabled}>
-                      <EditorTextField
-                        error={getError(state.fieldErrors, 'story.heading')}
-                        label="Judul cerita"
-                        name="story.heading"
-                        onValueChange={(value) =>
-                          updateLocalContent({ field: 'heading', type: 'story', value })
-                        }
-                        value={content.story.heading}
-                      />
-                      <EditorTextAreaField
-                        error={getError(state.fieldErrors, 'story.body')}
-                        label="Cerita kalian"
-                        name="story.body"
-                        onValueChange={(value) =>
-                          updateLocalContent({ field: 'body', type: 'story', value })
-                        }
-                        value={content.story.body}
-                      />
-                    </div>
-                  </div>
-                </EditorSection>
-              </InvitationWorkspacePanel>
-
-              <InvitationWorkspacePanel active={activeSection === 'schedule'} section="schedule">
-                <EditorSection
-                  description="Tambahkan akad, resepsi, atau acara lain dalam satu undangan."
-                  number="05"
-                  title="Rangkaian Acara"
-                >
-                  <div className="space-y-5">
-                    <div className="border-seraya-border-default bg-seraya-brand-soft/45 flex flex-col gap-4 rounded-[var(--seraya-radius-md)] border px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-                      <div>
-                        <p className="text-seraya-text-primary text-sm font-semibold">
-                          Susun acara kalian
-                        </p>
-                        <p className="text-seraya-text-muted mt-1 text-sm leading-6">
-                          Acara pertama menjadi acara utama yang digunakan pada ringkasan undangan.
-                        </p>
-                      </div>
-                      <Button
-                        disabled={content.eventSchedule.events.length >= 4}
-                        onClick={() => {
-                          updateLocalContent({
-                            events: [...content.eventSchedule.events, createEventScheduleItem()],
-                            type: 'schedule',
-                          });
-                        }}
-                        size="sm"
-                        type="button"
-                        variant="secondary"
-                      >
-                        Tambah acara
-                      </Button>
-                    </div>
-
-                    <div className="space-y-4">
-                      {content.eventSchedule.events.map((event, index) => (
-                        <EditorScheduleEventCard
-                          errors={state.fieldErrors}
-                          event={event}
-                          index={index}
-                          key={event.id}
-                          onChange={(nextEvent) => {
-                            updateLocalContent({
-                              events: content.eventSchedule.events.map((candidate) =>
-                                candidate.id === nextEvent.id ? nextEvent : candidate,
-                              ),
-                              type: 'schedule',
-                            });
-                          }}
-                          onMoveDown={() => {
-                            if (index === content.eventSchedule.events.length - 1) {
-                              return;
-                            }
-
-                            const events = [...content.eventSchedule.events];
-                            [events[index], events[index + 1]] = [
-                              events[index + 1]!,
-                              events[index]!,
-                            ];
-                            updateLocalContent({ events, type: 'schedule' });
-                          }}
-                          onMoveUp={() => {
-                            if (index === 0) {
-                              return;
-                            }
-
-                            const events = [...content.eventSchedule.events];
-                            [events[index - 1], events[index]] = [
-                              events[index]!,
-                              events[index - 1]!,
-                            ];
-                            updateLocalContent({ events, type: 'schedule' });
-                          }}
-                          onRemove={() => {
-                            if (content.eventSchedule.events.length === 1) {
-                              return;
-                            }
-
-                            updateLocalContent({
-                              events: content.eventSchedule.events.filter(
-                                (item) => item.id !== event.id,
-                              ),
-                              type: 'schedule',
-                            });
-                          }}
-                          removable={content.eventSchedule.events.length > 1}
-                          total={content.eventSchedule.events.length}
-                        />
-                      ))}
-                    </div>
-                    <FieldError
-                      message={getError(state.fieldErrors, 'eventSchedule.events')}
-                      name="eventSchedule.events"
-                    />
-                  </div>
-                </EditorSection>
-              </InvitationWorkspacePanel>
-
-              <InvitationWorkspacePanel active={activeSection === 'gallery'} section="gallery">
-                <EditorSection
-                  description="Foto undangan dikelola di ruang galeri agar urutan dan proses upload tetap aman."
-                  number="06"
-                  title="Galeri"
-                >
-                  <div className="border-seraya-border-default bg-seraya-surface rounded-[var(--seraya-radius-md)] border p-4 sm:p-5">
-                    <p className="text-seraya-text-primary font-semibold">
-                      {content.gallery.imageIds.length > 0
-                        ? `${content.gallery.imageIds.length} foto tersimpan`
-                        : 'Belum ada foto tersimpan'}
-                    </p>
-                    <p className="text-seraya-text-muted mt-1.5 max-w-xl text-sm leading-6">
-                      Tambah, hapus, dan atur foto dari pengelola galeri. Kalian akan kembali ke
-                      bagian ini tanpa mengubah draft undangan.
-                    </p>
-                    <Link
-                      className="border-seraya-border-default bg-seraya-canvas text-seraya-text-primary hover:border-seraya-border-strong focus-visible:outline-seraya-focus-ring mt-4 inline-flex min-h-11 items-center justify-center rounded-[var(--seraya-radius-md)] border px-4 text-sm font-semibold focus-visible:outline-3 focus-visible:outline-offset-2"
-                      href={`/dashboard/${projectId}/gallery`}
-                    >
-                      Kelola galeri
-                    </Link>
-                  </div>
-                </EditorSection>
-              </InvitationWorkspacePanel>
-
-              <InvitationWorkspacePanel active={activeSection === 'rsvp'} section="rsvp">
-                <EditorSection
-                  description="Atur teks RSVP yang akan dilihat tamu."
-                  number="07"
-                  title="Konfirmasi kehadiran"
-                >
-                  <div className="space-y-5">
-                    <EditorToggle
-                      checked={content.rsvp.enabled}
-                      error={getError(state.fieldErrors, 'rsvp.enabled')}
-                      help="Tampilkan bagian ini pada undangan setelah diterbitkan. Isi tetap tersimpan meskipun bagian ini belum ditampilkan."
-                      label="Tampilkan konfirmasi kehadiran"
-                      name="rsvp.enabled"
-                      onToggle={(value) =>
-                        updateLocalContent({ field: 'enabled', type: 'rsvp', value })
-                      }
-                    />
-                    <div className="space-y-5" hidden={!content.rsvp.enabled}>
-                      <EditorTextField
-                        error={getError(state.fieldErrors, 'rsvp.heading')}
-                        label="Judul bagian RSVP"
-                        name="rsvp.heading"
-                        onValueChange={(value) =>
-                          updateLocalContent({ field: 'heading', type: 'rsvp', value })
-                        }
-                        value={content.rsvp.heading}
-                      />
-                      <EditorTextAreaField
-                        error={getError(state.fieldErrors, 'rsvp.lead')}
-                        label="Pesan untuk tamu"
-                        name="rsvp.lead"
-                        onValueChange={(value) =>
-                          updateLocalContent({ field: 'lead', type: 'rsvp', value })
-                        }
-                        value={content.rsvp.lead}
-                      />
-                    </div>
-                  </div>
-                </EditorSection>
-              </InvitationWorkspacePanel>
-
-              <InvitationWorkspacePanel active={activeSection === 'gift'} section="gift">
-                <EditorSection
-                  description="Bagikan informasi rekening atau e-wallet untuk hadiah pernikahan. Informasi ini akan tampil pada undangan setelah dipublikasikan."
-                  number="08"
-                  title="Amplop Digital"
-                >
-                  <div className="space-y-5">
-                    <EditorToggle
-                      checked={content.digitalGift.enabled}
-                      error={getError(state.fieldErrors, 'digitalGift.enabled')}
-                      help="Tampilkan informasi transfer ini pada undangan setelah diterbitkan."
-                      label="Tampilkan Amplop Digital"
-                      name="digitalGift.enabled"
-                      onToggle={(value) =>
-                        updateLocalContent({ field: 'enabled', type: 'digital-gift', value })
-                      }
-                    />
-                    <div className="space-y-5" hidden={!content.digitalGift.enabled}>
-                      <EditorTextField
-                        error={getError(state.fieldErrors, 'digitalGift.heading')}
-                        label="Judul Amplop Digital (opsional)"
-                        name="digitalGift.heading"
-                        onValueChange={(value) =>
-                          updateLocalContent({ field: 'heading', type: 'digital-gift', value })
-                        }
-                        value={content.digitalGift.heading}
-                      />
-                      <EditorTextAreaField
-                        error={getError(state.fieldErrors, 'digitalGift.lead')}
-                        label="Pesan pengantar (opsional)"
-                        name="digitalGift.lead"
-                        onValueChange={(value) =>
-                          updateLocalContent({ field: 'lead', type: 'digital-gift', value })
-                        }
-                        value={content.digitalGift.lead}
-                      />
-
-                      <div className="border-seraya-border-default bg-seraya-surface rounded-[var(--seraya-radius-md)] border p-4 sm:p-5">
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                          <div>
-                            <h3 className="text-seraya-text-primary text-base font-semibold">
-                              Rekening atau e-wallet
-                            </h3>
-                            <p className="text-seraya-text-muted mt-1 max-w-xl text-sm leading-6">
-                              Nomor hanya akan ditampilkan setelah undangan dipublikasikan.
-                            </p>
-                          </div>
-                          <Button
-                            disabled={content.digitalGift.accounts.length >= 3}
-                            onClick={() => {
-                              updateLocalContent({
-                                accounts: [
-                                  ...content.digitalGift.accounts,
-                                  {
-                                    accountHolder: '',
-                                    accountNumber: '',
-                                    id: createDigitalGiftAccountId(),
-                                    providerName: '',
-                                  },
-                                ],
-                                type: 'digital-gift-accounts',
-                              });
-                            }}
-                            size="sm"
-                            type="button"
-                            variant="secondary"
-                          >
-                            Tambah rekening
-                          </Button>
-                        </div>
-
-                        {content.digitalGift.accounts.length === 0 ? (
-                          <p className="text-seraya-text-muted bg-seraya-canvas mt-5 rounded-[var(--seraya-radius-sm)] px-3.5 py-3 text-sm leading-6">
-                            Tambahkan setidaknya satu rekening atau e-wallet sebelum menampilkan
-                            Amplop Digital.
-                          </p>
-                        ) : (
-                          <div className="mt-5 space-y-4">
-                            {content.digitalGift.accounts.map((account, index) => {
-                              const accountPrefix = `digitalGift.accounts.${index}`;
-
-                              return (
-                                <fieldset
-                                  className="border-seraya-border-default rounded-[var(--seraya-radius-md)] border p-4 sm:p-5"
-                                  key={account.id}
-                                >
-                                  <legend className="text-seraya-text-primary px-1 text-base font-semibold">
-                                    Rekening {index + 1}
-                                  </legend>
-                                  <div className="mt-2 flex justify-end">
-                                    <Button
-                                      onClick={() => {
-                                        updateLocalContent({
-                                          accounts: content.digitalGift.accounts.filter(
-                                            (item) => item.id !== account.id,
-                                          ),
-                                          type: 'digital-gift-accounts',
-                                        });
-                                      }}
-                                      size="sm"
-                                      type="button"
-                                      variant="text"
-                                    >
-                                      Hapus rekening
-                                    </Button>
-                                  </div>
-                                  <input
-                                    name={`${accountPrefix}.id`}
-                                    type="hidden"
-                                    value={account.id}
-                                  />
-                                  <div className="mt-4 grid gap-4">
-                                    <EditorTextField
-                                      error={getError(
-                                        state.fieldErrors,
-                                        `${accountPrefix}.providerName`,
-                                      )}
-                                      label="Penyedia / Bank / E-wallet"
-                                      name={`${accountPrefix}.providerName`}
-                                      onValueChange={(value) =>
-                                        updateLocalContent({
-                                          accounts: content.digitalGift.accounts.map((candidate) =>
-                                            candidate.id === account.id
-                                              ? { ...candidate, providerName: value }
-                                              : candidate,
-                                          ),
-                                          type: 'digital-gift-accounts',
-                                        })
-                                      }
-                                      required
-                                      value={account.providerName}
-                                    />
-                                    <EditorTextField
-                                      autoComplete="name"
-                                      error={getError(
-                                        state.fieldErrors,
-                                        `${accountPrefix}.accountHolder`,
-                                      )}
-                                      label="Nama pemilik rekening"
-                                      name={`${accountPrefix}.accountHolder`}
-                                      onValueChange={(value) =>
-                                        updateLocalContent({
-                                          accounts: content.digitalGift.accounts.map((candidate) =>
-                                            candidate.id === account.id
-                                              ? { ...candidate, accountHolder: value }
-                                              : candidate,
-                                          ),
-                                          type: 'digital-gift-accounts',
-                                        })
-                                      }
-                                      required
-                                      value={account.accountHolder}
-                                    />
-                                    <EditorTextField
-                                      autoComplete="off"
-                                      error={getError(
-                                        state.fieldErrors,
-                                        `${accountPrefix}.accountNumber`,
-                                      )}
-                                      help="Nomor hanya akan ditampilkan setelah undangan dipublikasikan."
-                                      inputMode="numeric"
-                                      label="Nomor rekening / nomor e-wallet"
-                                      name={`${accountPrefix}.accountNumber`}
-                                      onValueChange={(value) =>
-                                        updateLocalContent({
-                                          accounts: content.digitalGift.accounts.map((candidate) =>
-                                            candidate.id === account.id
-                                              ? { ...candidate, accountNumber: value }
-                                              : candidate,
-                                          ),
-                                          type: 'digital-gift-accounts',
-                                        })
-                                      }
-                                      required
-                                      value={account.accountNumber}
-                                    />
-                                  </div>
-                                </fieldset>
-                              );
-                            })}
-                          </div>
-                        )}
-                        <FieldError
-                          message={getError(state.fieldErrors, 'digitalGift.accounts')}
-                          name="digitalGift.accounts"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </EditorSection>
-              </InvitationWorkspacePanel>
-
-              <InvitationWorkspacePanel active={activeSection === 'closing'} section="closing">
-                <EditorSection
-                  description="Pesan terakhir yang tampil di akhir undangan."
-                  number="09"
-                  title="Penutup"
-                >
-                  <div className="space-y-5">
-                    <EditorToggle
-                      checked={content.closing.enabled}
-                      error={getError(state.fieldErrors, 'closing.enabled')}
-                      help="Tampilkan bagian ini pada undangan setelah diterbitkan. Isi tetap tersimpan meskipun bagian ini belum ditampilkan."
-                      label="Tampilkan penutup"
-                      name="closing.enabled"
-                      onToggle={(value) =>
-                        updateLocalContent({ field: 'enabled', type: 'closing', value })
-                      }
-                    />
-                    <div className="space-y-5" hidden={!content.closing.enabled}>
-                      <EditorTextAreaField
-                        error={getError(state.fieldErrors, 'closing.message')}
-                        label="Pesan penutup"
-                        name="closing.message"
-                        onValueChange={(value) =>
-                          updateLocalContent({ field: 'message', type: 'closing', value })
-                        }
-                        value={content.closing.message}
-                      />
-                      <EditorTextField
-                        error={getError(state.fieldErrors, 'closing.signature')}
-                        label="Nama penutup"
-                        name="closing.signature"
-                        onValueChange={(value) =>
-                          updateLocalContent({ field: 'signature', type: 'closing', value })
-                        }
-                        value={content.closing.signature}
-                      />
-                    </div>
-                  </div>
-                </EditorSection>
-              </InvitationWorkspacePanel>
+              <InvitationEditorActivePanel
+                activeSection={activeSection}
+                content={content}
+                fieldErrors={state.fieldErrors}
+                projectId={projectId}
+                updateLocalContent={updateLocalContent}
+              />
 
               <div className="border-seraya-border-default bg-seraya-surface sticky bottom-0 z-10 -mx-5 border-t px-5 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_-10px_20px_rgb(62_42_34_/_0.08)] sm:bottom-4 sm:mx-0 sm:rounded-[var(--seraya-radius-md)] sm:border sm:p-4 sm:shadow-[var(--seraya-shadow-float)]">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -1133,7 +1368,7 @@ export function InvitationEditor({
                         aria-haspopup="dialog"
                         className="2xl:hidden"
                         data-local-preview-trigger
-                        onClick={() => setIsLocalPreviewOpen(true)}
+                        onClick={handleOpenLocalPreview}
                         size="lg"
                         type="button"
                         variant="secondary"
@@ -1157,14 +1392,18 @@ export function InvitationEditor({
                 </div>
               </div>
             </form>
-            <InvitationEditorLivePreview
-              content={content}
-              galleryImages={galleryImages}
-              isDirty={isDirty}
-              isOpen={isLocalPreviewOpen}
-              onOpenChange={setIsLocalPreviewOpen}
-              project={project}
-            />
+            {shouldMountPreview ? (
+              <DeferredInvitationEditorLivePreview
+                content={previewContent}
+                galleryImages={galleryImages}
+                isDirty={isDirty}
+                isOpen={isLocalPreviewOpen}
+                onOpenChange={setIsLocalPreviewOpen}
+                project={project}
+              />
+            ) : (
+              <InvitationEditorDesktopPreviewPlaceholder />
+            )}
           </div>
         </CardContent>
       </Card>

@@ -27,6 +27,7 @@ vi.mock('@/design-system', async () => {
 import {
   getInvitationEditorSaveStatus,
   InvitationEditor,
+  InvitationEditorActivePanel,
   invitationEditorDirtyNavigationMessage,
   shouldConfirmInvitationEditorNavigation,
 } from '@/components/projects/invitation-editor';
@@ -87,26 +88,44 @@ const editableFieldNames = [
   'closing.signature',
 ] as const;
 
-const polishedSections = [
-  'Pembuka',
-  'Mempelai',
-  'Cerita kalian',
-  'Rangkaian Acara',
-  'Konfirmasi kehadiran',
-  'Amplop Digital',
-  'Penutup',
+const panelKeys = [
+  'style',
+  'opening',
+  'couple',
+  'story',
+  'schedule',
+  'gallery',
+  'rsvp',
+  'gift',
+  'closing',
 ] as const;
 
+function renderPanel(activeSection: (typeof panelKeys)[number], content = draft.content) {
+  return renderToStaticMarkup(
+    <InvitationEditorActivePanel
+      activeSection={activeSection}
+      content={content}
+      projectId={project.id}
+      updateLocalContent={() => undefined}
+    />,
+  );
+}
+
 describe('SRY-030 invitation editor multi-event owner UI', () => {
-  it('renders the seven guided editing chapters in the required order with owner-friendly copy', () => {
+  it('renders the guided chapter navigation while mounting only the active chapter', () => {
     const html = renderToStaticMarkup(<InvitationEditor draft={draft} projectId={project.id} />);
+    const chapterPairs = [
+      ['opening', 'Pembuka'],
+      ['couple', 'Mempelai'],
+      ['story', 'Cerita kalian'],
+      ['schedule', 'Rangkaian Acara'],
+      ['rsvp', 'Konfirmasi kehadiran'],
+      ['gift', 'Amplop Digital'],
+      ['closing', 'Penutup'],
+    ] as const;
 
-    let previousIndex = -1;
-
-    for (const section of polishedSections) {
-      const sectionIndex = html.indexOf(`>${section}</h2>`);
-      expect(sectionIndex).toBeGreaterThan(previousIndex);
-      previousIndex = sectionIndex;
+    for (const [section, heading] of chapterPairs) {
+      expect(renderPanel(section)).toContain(`>${heading}</h2>`);
     }
 
     expect(html).toContain(
@@ -128,60 +147,61 @@ describe('SRY-030 invitation editor multi-event owner UI', () => {
     expect(html).toContain('Preview lokal');
     expect(html).toContain('data-local-preview-trigger="true"');
     expect(html).toContain('data-local-preview-desktop="true"');
-    expect(html).toContain('Pratinjau langsung');
-    expect(html).toContain('Draf tersimpan');
-    expect(html).not.toContain('Sudah dipublikasikan</span>');
-    expect(html).toContain('Sapaan kecil');
-    expect(html).toContain('Nama yang tampil di undangan');
-    expect(html).toContain('Tampilkan konfirmasi kehadiran');
-    expect(html).toContain(
-      'Bagikan informasi rekening atau e-wallet untuk hadiah pernikahan. Informasi ini akan tampil pada undangan setelah dipublikasikan.',
-    );
-    expect(html).toContain('Tampilkan Amplop Digital');
-    expect(html).toContain('Nomor hanya akan ditampilkan setelah undangan dipublikasikan.');
-    expect(html).toContain('Nama penutup');
-    expect(html).not.toContain('Isi undangan Roselle');
+    expect(html).toContain('data-local-preview-deferred="true"');
+    expect(html).toContain('Preview lokal akan segera siap');
+    expect(html).toContain('name="editorPayload"');
+    expect(html.match(/data-invitation-editor-panel=/g)).toHaveLength(1);
+    expect(html).not.toContain('data-surface="preview"');
     expect(html).not.toContain('draft object');
     expect(html).not.toContain('schema field');
     expect(html).not.toContain('JSON payload');
   });
 
-  it('preserves every locked editable form name and keeps optional-section inputs rendered', () => {
-    const html = renderToStaticMarkup(<InvitationEditor draft={draft} projectId={project.id} />);
+  it('preserves every locked editable form name across lazy-mounted chapters', () => {
+    const initialHtml = renderToStaticMarkup(
+      <InvitationEditor draft={draft} projectId={project.id} />,
+    );
+    const allPanelsHtml = panelKeys.map((section) => renderPanel(section)).join('');
 
     for (const name of editableFieldNames) {
-      expect(html).toContain(`name="${name}"`);
+      expect(allPanelsHtml).toContain(`name="${name}"`);
     }
 
-    expect(html).toContain(`type="hidden" name="projectId" value="${project.id}"`);
-    expect(html).toContain(
+    expect(initialHtml).toContain(`type="hidden" name="projectId" value="${project.id}"`);
+    expect(initialHtml).toContain('name="editorPayload"');
+    expect(initialHtml).not.toContain('name="hero.title"');
+    expect(allPanelsHtml).toContain(
       'Tampilkan bagian ini pada undangan setelah diterbitkan. Isi tetap tersimpan meskipun bagian ini belum ditampilkan.',
     );
-    expect(html).toContain('name="templateKey"');
-    expect(html).toContain('value="roselle"');
-    expect(html).toContain('value="aruna"');
-    expect(html).toContain('value="laras"');
-    expect(html).toContain('>Terpilih</span>');
-    expect(html).toContain('name="story.body"');
-    expect(html).toContain('Rangkaian Acara');
-    expect(html).toContain('Tambahkan akad, resepsi, atau acara lain dalam satu undangan.');
-    expect(html).toContain('Acara utama');
-    expect(html).toContain(
+    expect(allPanelsHtml).toContain('name="templateKey"');
+    expect(allPanelsHtml).toContain('value="roselle"');
+    expect(allPanelsHtml).toContain('value="aruna"');
+    expect(allPanelsHtml).toContain('value="laras"');
+    expect(allPanelsHtml).toContain('>Terpilih</span>');
+    expect(allPanelsHtml).toContain('name="story.body"');
+    expect(allPanelsHtml).toContain('Rangkaian Acara');
+    expect(allPanelsHtml).toContain(
+      'Tambahkan akad, resepsi, atau acara lain dalam satu undangan.',
+    );
+    expect(allPanelsHtml).toContain('Acara utama');
+    expect(allPanelsHtml).toContain(
       'Acara pertama menjadi acara utama yang digunakan pada ringkasan undangan.',
     );
-    expect(html).toContain('Tambah acara');
-    expect(html).toContain('placeholder="Contoh: Akad Nikah, Resepsi, atau Ngunduh Mantu"');
-    expect(html).toContain('aria-label="Pindahkan acara 1 ke bawah"');
-    expect(html).toContain('aria-label="Hapus acara 1"');
-    expect(html).toContain('name="eventSchedule.events.0.mapsUrl"');
-    expect(html).toContain('name="closing.message"');
-    expect(html).not.toContain('name="gallery.imageIds"');
-    expect(html).not.toContain('Upload foto');
-    expect(html).not.toContain('draft-private-id');
+    expect(allPanelsHtml).toContain('Tambah acara');
+    expect(allPanelsHtml).toContain(
+      'placeholder="Contoh: Akad Nikah, Resepsi, atau Ngunduh Mantu"',
+    );
+    expect(allPanelsHtml).toContain('aria-label="Pindahkan acara 1 ke bawah"');
+    expect(allPanelsHtml).toContain('aria-label="Hapus acara 1"');
+    expect(allPanelsHtml).toContain('name="eventSchedule.events.0.mapsUrl"');
+    expect(allPanelsHtml).toContain('name="closing.message"');
+    expect(allPanelsHtml).not.toContain('name="gallery.imageIds"');
+    expect(allPanelsHtml).not.toContain('Upload foto');
+    expect(initialHtml).not.toContain('draft-private-id');
   });
 
   it('keeps at least one schedule event in the editor by disabling the final remove control', () => {
-    const html = renderToStaticMarkup(<InvitationEditor draft={draft} projectId={project.id} />);
+    const html = renderPanel('schedule');
 
     expect(html).toContain('aria-label="Hapus acara 1"');
     expect(html).toMatch(
@@ -212,9 +232,7 @@ describe('SRY-030 invitation editor multi-event owner UI', () => {
       },
     };
 
-    const html = renderToStaticMarkup(
-      <InvitationEditor draft={giftDraft} projectId={project.id} />,
-    );
+    const html = renderPanel('gift', giftDraft.content);
 
     expect(html).toContain('Penyedia / Bank / E-wallet');
     expect(html).toContain('Nama pemilik rekening');
@@ -228,15 +246,22 @@ describe('SRY-030 invitation editor multi-event owner UI', () => {
     expect(html).toContain('value="TEST-ACCOUNT-0001"');
   });
 
-  it('distinguishes the immediate local preview from the authoritative saved preview', () => {
+  it('defers the local preview while keeping the authoritative saved preview distinct', async () => {
     const html = renderToStaticMarkup(<InvitationEditor draft={draft} projectId={project.id} />);
+    const previewSource = await readFile(
+      path.resolve(process.cwd(), 'src/components/projects/invitation-editor-live-preview.tsx'),
+      'utf8',
+    );
 
     expect(html).toContain('data-testid="invitation-editor-save-status"');
     expect(html).toContain('Belum ada perubahan');
     expect(html).not.toContain('>Tersimpan</p>');
     expect(html).toContain('Preview tersimpan tetap mengikuti draft dari server.');
-    expect(html).toContain('Mengikuti perubahan lokal. Belum dipublikasikan dari sini.');
-    expect(html).toContain('data-surface="preview"');
+    expect(html).toContain('Preview lokal akan segera siap');
+    expect(html).not.toContain('data-surface="preview"');
+    expect(previewSource).toContain('Mengikuti perubahan lokal. Belum dipublikasikan dari sini.');
+    expect(previewSource).toContain('surface="preview"');
+    expect(previewSource).toContain('memo(function InvitationEditorLivePreview');
     expect(html).toContain(`href="/dashboard/${project.id}/preview"`);
   });
 
@@ -346,8 +371,14 @@ describe('SRY-030 invitation editor multi-event owner UI', () => {
     expect(source).toContain('sticky bottom-0');
     expect(source).toContain('safe-area-inset-bottom');
     expect(source).toContain('data-local-preview-trigger');
-    expect(source).toContain('InvitationEditorLivePreview');
+    expect(source).toContain('DeferredInvitationEditorLivePreview');
+    expect(source).toContain('dynamic(');
+    expect(source).toContain('ssr: false');
+    expect(source).toContain('name="editorPayload"');
+    expect(source).toContain('requestIdleCallback');
+    expect(source).toContain('invitation_editor_interactive_ready');
     expect(previewSource).toContain('surface="preview"');
+    expect(previewSource).toContain('memo(function InvitationEditorLivePreview');
     expect(previewSource).not.toContain('fetch(');
     expect(previewSource).not.toContain('/g/');
     expect(previewSource).not.toContain('personalSlots');

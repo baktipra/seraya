@@ -5,6 +5,8 @@ import { INVITATION_TEMPLATE_KEYS } from '@/modules/invitation-templates/invitat
 const databaseUuidShape = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const digitalGiftAccountMaximum = 3 as const;
 const eventScheduleMaximum = 4 as const;
+export const invitationEditorPayloadFieldName = 'editorPayload' as const;
+const invitationEditorPayloadMaximumCharacters = 65_536 as const;
 const digitalGiftAccountInputKeys = [
   'id',
   'providerName',
@@ -196,6 +198,28 @@ function createUnexpectedFieldError(keys: string[]) {
   ]);
 }
 
+function normalizeRuntimePayloadValue(value: unknown): unknown {
+  if (value === null) {
+    return '';
+  }
+
+  if (value === true) {
+    return 'true';
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(normalizeRuntimePayloadValue);
+  }
+
+  if (typeof value === 'object' && value !== null) {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entry]) => [key, normalizeRuntimePayloadValue(entry)]),
+    );
+  }
+
+  return value;
+}
+
 function getDigitalGiftAccountFieldMatch(name: string) {
   return digitalGiftAccountFieldPattern.exec(name);
 }
@@ -210,6 +234,10 @@ function isKnownEditorFormFieldName(name: string): name is EditorFormFieldName {
     getDigitalGiftAccountFieldMatch(name) !== null ||
     getEventScheduleEventFieldMatch(name) !== null
   );
+}
+
+function isAllowedSubmittedFieldName(name: string) {
+  return name === invitationEditorPayloadFieldName || isKnownEditorFormFieldName(name);
 }
 
 function isEditorFieldErrorName(name: string): name is EditorFieldErrorName {
@@ -275,31 +303,58 @@ function getEventScheduleEventsFromFormData(formData: FormData) {
 }
 
 /**
- * Browser field names are deliberately enumerated. The submitted document is
- * reconstructed server-side from these known editable fields only; gallery,
- * metadata, legacy event/location mirrors, schema version, snapshots, and any
- * injected field cannot cross this boundary. Amplop Digital accounts use three
- * exact slots and schedule events use four exact slots.
+ * Browser field names are deliberately enumerated. The runtime editor submits
+ * one strict JSON payload so non-visible chapters can stay unmounted; legacy
+ * field-by-field submissions remain supported for the existing no-ambiguity
+ * boundary. Gallery, metadata, compatibility mirrors, snapshots, and injected
+ * fields cannot cross either path. Amplop Digital accounts use three exact
+ * slots and schedule events use four exact slots.
  */
 export function parseInvitationEditorFormData(formData: FormData) {
   const submittedFields = [...new Set(Array.from(formData.keys()))];
-  const unexpectedFields = submittedFields.filter((name) => !isKnownEditorFormFieldName(name));
+  const unexpectedFields = submittedFields.filter((name) => !isAllowedSubmittedFieldName(name));
   const duplicateFields = submittedFields.filter(
-    (name) => isKnownEditorFormFieldName(name) && formData.getAll(name).length > 1,
+    (name) => isAllowedSubmittedFieldName(name) && formData.getAll(name).length > 1,
   );
+  const payload = formData.get(invitationEditorPayloadFieldName);
+
+  if (unexpectedFields.length > 0 || duplicateFields.length > 0) {
+    return {
+      error: createUnexpectedFieldError([...unexpectedFields, ...duplicateFields]),
+      success: false as const,
+    };
+  }
+
+  if (payload !== null) {
+    if (
+      typeof payload !== 'string' ||
+      payload.length === 0 ||
+      payload.length > invitationEditorPayloadMaximumCharacters
+    ) {
+      return {
+        error: createUnexpectedFieldError([invitationEditorPayloadFieldName]),
+        success: false as const,
+      };
+    }
+
+    try {
+      return invitationEditorFormSchema.safeParse({
+        content: normalizeRuntimePayloadValue(JSON.parse(payload) as unknown),
+        projectId: getFormValue(formData, 'projectId'),
+      });
+    } catch {
+      return {
+        error: createUnexpectedFieldError([invitationEditorPayloadFieldName]),
+        success: false as const,
+      };
+    }
+  }
+
   const eventIndexes = getEventScheduleEventIndexes(formData);
 
-  if (
-    unexpectedFields.length > 0 ||
-    duplicateFields.length > 0 ||
-    !hasContiguousIndexes(eventIndexes)
-  ) {
+  if (!hasContiguousIndexes(eventIndexes)) {
     return {
-      error: createUnexpectedFieldError([
-        ...unexpectedFields,
-        ...duplicateFields,
-        ...(hasContiguousIndexes(eventIndexes) ? [] : ['eventSchedule.events']),
-      ]),
+      error: createUnexpectedFieldError(['eventSchedule.events']),
       success: false as const,
     };
   }
@@ -380,7 +435,8 @@ export function getInvitationEditorFieldErrors(error: z.ZodError): InvitationEdi
     const key = field === 'projectId' || isEditorFieldErrorName(field) ? field : 'form';
 
     if (!fieldErrors[key as keyof InvitationEditorFieldErrors]) {
-      fieldErrors[key as keyof InvitationEditorFieldErrors] = issue.message;
+      fieldErrors[key as keyof InvitationEditorFieldErrors] =
+        issue.code === 'unrecognized_keys' ? 'Form undangan tidak valid.' : issue.message;
     }
   }
 

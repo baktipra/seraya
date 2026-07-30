@@ -117,6 +117,72 @@ export function invitationEditorLocalContentReducer(
 }
 
 /**
+ * Creates the strict browser submission payload used when only the active
+ * editor chapter is mounted. Gallery membership, compatibility mirrors, and
+ * metadata are deliberately excluded and remain server-owned.
+ */
+export function createInvitationEditorSubmissionPayload(content: InvitationDraftContent) {
+  return {
+    closing: {
+      enabled: content.closing.enabled,
+      message: content.closing.message,
+      signature: content.closing.signature,
+    },
+    couple: {
+      personOne: {
+        displayName: content.couple.personOne.displayName,
+        fullName: content.couple.personOne.fullName,
+        parentLine: content.couple.personOne.parentLine,
+      },
+      personTwo: {
+        displayName: content.couple.personTwo.displayName,
+        fullName: content.couple.personTwo.fullName,
+        parentLine: content.couple.personTwo.parentLine,
+      },
+    },
+    digitalGift: {
+      accounts: content.digitalGift.accounts.map((account) => ({
+        accountHolder: account.accountHolder,
+        accountNumber: account.accountNumber,
+        id: account.id,
+        providerName: account.providerName,
+      })),
+      enabled: content.digitalGift.enabled,
+      heading: content.digitalGift.heading,
+      lead: content.digitalGift.lead,
+    },
+    eventSchedule: {
+      events: content.eventSchedule.events.map((event) => ({
+        date: event.date,
+        endTime: event.endTime,
+        id: event.id,
+        mapsUrl: event.mapsUrl,
+        startTime: event.startTime,
+        title: event.title,
+        venueAddress: event.venueAddress,
+        venueName: event.venueName,
+      })),
+    },
+    hero: {
+      eyebrow: content.hero.eyebrow,
+      subtitle: content.hero.subtitle,
+      title: content.hero.title,
+    },
+    rsvp: {
+      enabled: content.rsvp.enabled,
+      heading: content.rsvp.heading,
+      lead: content.rsvp.lead,
+    },
+    story: {
+      body: content.story.body,
+      enabled: content.story.enabled,
+      heading: content.story.heading,
+    },
+    templateKey: content.templateKey,
+  };
+}
+
+/**
  * Client-safe bridge into the shared template view model. The only media it
  * can expose are render-safe URLs supplied by the owner-authorized server load.
  */

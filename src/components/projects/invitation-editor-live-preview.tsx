@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
 
 import { Badge } from '@/design-system';
 import { focusFirstDescendant, trapFocusWithin } from '@/lib/focus-management';
@@ -22,7 +22,7 @@ export type InvitationEditorLivePreviewProps = {
   project: InvitationRendererProjectMetadata;
 };
 
-export function InvitationEditorLivePreview({
+export const InvitationEditorLivePreview = memo(function InvitationEditorLivePreview({
   content,
   galleryImages,
   isDirty,
@@ -166,4 +166,4 @@ export function InvitationEditorLivePreview({
       </div>
     </aside>
   );
-}
+});

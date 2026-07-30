@@ -13,6 +13,7 @@
     "audit:j2:live-evidence": "node scripts/audit-live-cross-template-evidence.mjs",
     "audit:p0-a1:workspace-performance": "node scripts/audit-workspace-performance-baseline.mjs",
     "audit:p0-a4:readiness": "node scripts/audit-readiness-aggregation-recovery.mjs",
+    "audit:p0-a5:editor-runtime": "node scripts/audit-editor-runtime-recovery.mjs",
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
     "supabase:status": "supabase status",

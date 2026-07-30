@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { memo, type ReactNode } from 'react';
 
 import type { InvitationEditorFieldErrors } from '@/modules/invitations/invitation-editor.schema';
 import type { InvitationDraft } from '@/modules/invitations/invitation-draft.types';
@@ -198,7 +198,7 @@ function SectionButton({
   );
 }
 
-export function InvitationWorkspaceNavigation({
+export const InvitationWorkspaceNavigation = memo(function InvitationWorkspaceNavigation({
   activeSection,
   onSelect,
   statuses,
@@ -321,7 +321,7 @@ export function InvitationWorkspaceNavigation({
       </nav>
     </>
   );
-}
+});
 
 export function InvitationWorkspacePanel({
   active,
@@ -332,6 +332,10 @@ export function InvitationWorkspacePanel({
   children: ReactNode;
   section: InvitationEditorSectionKey;
 }) {
+  if (!active) {
+    return null;
+  }
+
   return (
     <div
       className="max-w-full min-w-0"
