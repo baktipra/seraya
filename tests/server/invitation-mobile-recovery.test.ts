@@ -18,8 +18,9 @@ describe('P0 mobile invitation workspace recovery', () => {
     ]);
 
     expect(layout).toContain("import './workspace-responsive.css';");
-    expect(responsive).toContain("[data-workspace-anatomy='operations']");
+    expect(responsive).toContain('[data-project-workspace-main]');
     expect(responsive).toContain('padding-bottom: calc(var(--seraya-mobile-safe-bottom)');
+    expect(responsive).toContain('[data-project-mobile-navigation]');
     expect(responsive).toContain('[data-operational-selection-bar]');
     expect(studio).toContain('[data-invitation-editor-mobile-navigation]');
     expect(studio).toContain("[data-testid='invitation-editor-save-status']");
