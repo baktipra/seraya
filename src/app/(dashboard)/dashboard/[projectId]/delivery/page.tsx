@@ -20,7 +20,7 @@ import {
 import { deriveDeliveryReadiness } from '@/modules/delivery/delivery-readiness';
 import { getGuestDeliveryCenterForVerifiedProject } from '@/modules/delivery/delivery.service';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
-import { getWeddingReadinessForRequest } from '@/modules/readiness';
+import { getCurrentPublishedInvitationForVerifiedProject } from '@/modules/publications/publication.service';
 
 type DeliveryCenterPageProps = {
   params: Promise<{ projectId: string }>;
@@ -72,13 +72,13 @@ async function getDeliveryScreenOrNotFound(projectId: string): Promise<DeliveryS
     },
     async () => {
       try {
-        const readiness = await getWeddingReadinessForRequest(projectId);
+        const project = await getOwnedProjectContextForRequest(projectId);
+        const publication = await getCurrentPublishedInvitationForVerifiedProject(project);
 
-        if (!readiness.invitation.hasPublishedSnapshot) {
+        if (!publication) {
           return { kind: 'blocked' };
         }
 
-        const project = await getOwnedProjectContextForRequest(projectId);
         const deliveryCenter = await getGuestDeliveryCenterForVerifiedProject(project);
 
         return { deliveryCenter, kind: 'delivery' };

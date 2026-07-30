@@ -103,29 +103,38 @@ function ProjectNavigationLink({
   currentPathname,
   item,
   mode,
+  onTransitionStart,
+  pending,
 }: {
   active: boolean;
   currentPathname: string;
   item: ProjectNavigationItem;
   mode: 'desktop' | 'mobile';
+  onTransitionStart: (item: ProjectNavigationItem) => void;
+  pending: boolean;
 }) {
   const Icon = item.icon;
   const visualLabel = mode === 'mobile' ? (item.mobileLabel ?? item.label) : item.label;
 
   return (
     <Link
+      aria-busy={pending || undefined}
       aria-current={active ? 'page' : undefined}
       className={
         mode === 'desktop'
-          ? `focus-visible:outline-seraya-focus-ring group relative flex min-h-12 items-center gap-3 rounded-[0.9rem] px-3.5 text-sm font-semibold transition-[background-color,color,transform] focus-visible:outline-3 focus-visible:outline-offset-2 ${
+          ? `focus-visible:outline-seraya-focus-ring group relative flex min-h-12 items-center gap-3 rounded-[0.9rem] px-3.5 text-sm font-semibold transition-[background-color,color,opacity,transform] focus-visible:outline-3 focus-visible:outline-offset-2 ${
               active
                 ? 'bg-seraya-brand-soft text-seraya-action-primary'
-                : 'text-seraya-text-secondary hover:bg-seraya-soft hover:text-seraya-text-primary'
+                : pending
+                  ? 'bg-seraya-soft text-seraya-action-primary'
+                  : 'text-seraya-text-secondary hover:bg-seraya-soft hover:text-seraya-text-primary'
             }`
-          : `focus-visible:outline-seraya-focus-ring relative flex min-h-[4.25rem] min-w-0 flex-1 flex-col items-center justify-center gap-1 px-1 text-[0.625rem] font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-2 ${
-              active ? 'text-seraya-action-primary' : 'text-seraya-text-muted'
+          : `focus-visible:outline-seraya-focus-ring relative flex min-h-[4.25rem] min-w-0 flex-1 flex-col items-center justify-center gap-1 px-1 text-[0.625rem] font-semibold transition-[color,opacity] focus-visible:outline-3 focus-visible:outline-offset-2 ${
+              active || pending ? 'text-seraya-action-primary' : 'text-seraya-text-muted'
             }`
       }
+      data-workspace-destination={item.performanceWorkspace}
+      data-workspace-navigation-pending={pending || undefined}
       href={item.href}
       onClick={(event) => {
         if (
@@ -145,13 +154,16 @@ function ProjectNavigationLink({
           to: String(item.href),
           workspace: item.performanceWorkspace,
         });
+        onTransitionStart(item);
       }}
-      prefetch={false}
+      prefetch
     >
-      {mode === 'mobile' && active ? (
+      {mode === 'mobile' && (active || pending) ? (
         <span
           aria-hidden="true"
-          className="bg-seraya-action-primary absolute inset-x-4 top-0 h-0.5 rounded-full"
+          className={`bg-seraya-action-primary absolute inset-x-4 top-0 rounded-full ${
+            pending ? 'h-1 animate-pulse' : 'h-0.5'
+          }`}
         />
       ) : null}
       <span
@@ -159,16 +171,22 @@ function ProjectNavigationLink({
         className={
           mode === 'desktop'
             ? `grid size-8 place-items-center rounded-[0.7rem] transition-colors ${
-                active ? 'bg-seraya-surface' : 'group-hover:bg-seraya-surface bg-transparent'
+                active || pending
+                  ? 'bg-seraya-surface'
+                  : 'group-hover:bg-seraya-surface bg-transparent'
               }`
             : undefined
         }
       >
-        <Icon
-          className={mode === 'desktop' ? 'size-[1.05rem]' : 'size-[1.1rem]'}
-          focusable="false"
-          strokeWidth={1.65}
-        />
+        {pending ? (
+          <span className="border-seraya-action-primary/30 border-t-seraya-action-primary size-[1.05rem] animate-spin rounded-full border-2" />
+        ) : (
+          <Icon
+            className={mode === 'desktop' ? 'size-[1.05rem]' : 'size-[1.1rem]'}
+            focusable="false"
+            strokeWidth={1.65}
+          />
+        )}
       </span>
       {mode === 'mobile' ? (
         <>
@@ -185,6 +203,11 @@ function ProjectNavigationLink({
           aria-hidden="true"
           className="bg-seraya-action-primary ml-auto size-1.5 rounded-full"
         />
+      ) : null}
+      {mode === 'desktop' && pending ? (
+        <span aria-hidden="true" className="text-seraya-text-muted ml-auto text-xs font-medium">
+          Membuka…
+        </span>
       ) : null}
     </Link>
   );
@@ -203,12 +226,14 @@ export function ProjectNavigation({
   const pathname = usePathname();
   const items = getProjectNavigationItems(projectId);
   const previousPathnameRef = useRef(pathname);
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
   const [routeAnnouncement, setRouteAnnouncement] = useState('');
 
   useEffect(() => {
     if (previousPathnameRef.current === pathname) return undefined;
 
     previousPathnameRef.current = pathname;
+    setPendingHref(null);
     const focusFrame = window.requestAnimationFrame(() => {
       document.getElementById('project-workspace-content')?.focus({ preventScroll: true });
       setRouteAnnouncement(`Halaman ${getProjectRouteLabel(pathname, projectId)} dibuka.`);
@@ -217,12 +242,17 @@ export function ProjectNavigation({
     return () => window.cancelAnimationFrame(focusFrame);
   }, [pathname, projectId]);
 
+  const startTransition = (item: ProjectNavigationItem) => {
+    setPendingHref(String(item.href));
+    setRouteAnnouncement(`Membuka halaman ${item.label}.`);
+  };
+
   return (
     <>
       <aside className="border-seraya-border-default hidden min-w-0 border-r pr-6 lg:sticky lg:top-24 lg:flex lg:h-[calc(100svh-7.25rem)] lg:w-60 lg:flex-col">
         <div className="bg-seraya-soft/70 rounded-[1.1rem] px-4 py-4">
           <p className="text-seraya-text-muted text-[0.65rem] font-semibold tracking-[0.14em] uppercase">
-            Undangan aktif
+            Workspace undangan
           </p>
           <p className="text-seraya-text-primary mt-2 font-serif text-[1.45rem] leading-[1.02] font-medium tracking-[-0.025em]">
             {coupleLabel}
@@ -233,7 +263,12 @@ export function ProjectNavigation({
           </div>
         </div>
 
-        <nav aria-label="Navigasi workspace" className="mt-6 space-y-1.5">
+        <nav
+          aria-busy={Boolean(pendingHref)}
+          aria-label="Navigasi workspace"
+          className="mt-6 space-y-1.5"
+          data-project-navigation-pending={Boolean(pendingHref) || undefined}
+        >
           {items.map((item) => (
             <ProjectNavigationLink
               active={isCurrentProjectRoute(pathname, item, projectId)}
@@ -241,6 +276,8 @@ export function ProjectNavigation({
               item={item}
               key={item.label}
               mode="desktop"
+              onTransitionStart={startTransition}
+              pending={pendingHref === String(item.href)}
             />
           ))}
         </nav>
@@ -258,8 +295,11 @@ export function ProjectNavigation({
       </aside>
 
       <nav
+        aria-busy={Boolean(pendingHref)}
         aria-label="Navigasi workspace mobile"
-        className="border-seraya-border-default bg-seraya-canvas/96 fixed inset-x-0 bottom-0 z-30 flex min-h-[4.65rem] items-stretch border-t px-1 pt-1 pb-[max(0.3rem,env(safe-area-inset-bottom))] shadow-[0_-12px_35px_rgb(56_39_33_/_0.07)] backdrop-blur-xl lg:hidden"
+        className="border-seraya-border-default bg-seraya-canvas/96 pointer-events-auto fixed inset-x-0 bottom-0 isolate z-[80] flex min-h-[4.65rem] items-stretch border-t px-1 pt-1 pb-[max(0.3rem,env(safe-area-inset-bottom))] shadow-[0_-12px_35px_rgb(56_39_33_/_0.07)] backdrop-blur-xl lg:hidden"
+        data-project-mobile-navigation
+        data-project-navigation-pending={Boolean(pendingHref) || undefined}
       >
         {items.map((item) => (
           <ProjectNavigationLink
@@ -268,6 +308,8 @@ export function ProjectNavigation({
             item={item}
             key={item.label}
             mode="mobile"
+            onTransitionStart={startTransition}
+            pending={pendingHref === String(item.href)}
           />
         ))}
       </nav>

@@ -12,7 +12,7 @@ import {
 import { getPrivateGalleryImagesForVerifiedProject } from '@/modules/media/media.service';
 import type { InvitationGalleryImage } from '@/modules/media/media.types';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
-import { getWeddingReadinessForRequest } from '@/modules/readiness';
+import { getWeddingReadinessForVerifiedProject } from '@/modules/readiness';
 
 type InvitationEditorPageProps = {
   params: Promise<{ projectId: string }>;
@@ -21,7 +21,7 @@ type InvitationEditorPageProps = {
 type InvitationEditorScreen = {
   editor: Awaited<ReturnType<typeof getInvitationEditorForVerifiedProject>>;
   galleryImages: InvitationGalleryImage[];
-  readiness: Awaited<ReturnType<typeof getWeddingReadinessForRequest>>;
+  readiness: Awaited<ReturnType<typeof getWeddingReadinessForVerifiedProject>>;
 };
 
 // Invitation drafts are private owner data and must not participate in the
@@ -43,7 +43,7 @@ async function getInvitationEditorScreenOrNotFound(
         const project = await getOwnedProjectContextForRequest(projectId);
         const [editor, readiness] = await Promise.all([
           getInvitationEditorForVerifiedProject(project),
-          getWeddingReadinessForRequest(projectId),
+          getWeddingReadinessForVerifiedProject(project),
         ]);
 
         let galleryImages: InvitationGalleryImage[] = [];

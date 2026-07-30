@@ -14,7 +14,7 @@ const readinessRepository = read('src/modules/readiness/wedding-readiness.reposi
 const packageJson = read('package.json');
 
 const routeContracts = [
-  ['src/app/(dashboard)/dashboard/[projectId]/layout.tsx', 'project-shell-readiness'],
+  ['src/app/(dashboard)/dashboard/[projectId]/layout.tsx', 'project-shell-identity'],
   ['src/app/(dashboard)/dashboard/[projectId]/page.tsx', 'overview-readiness'],
   ['src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx', 'invitation-editor-screen'],
   ['src/app/(dashboard)/dashboard/[projectId]/guests/page.tsx', 'guest-manager-screen'],
@@ -22,8 +22,8 @@ const routeContracts = [
   ['src/app/(dashboard)/dashboard/[projectId]/rsvp/page.tsx', 'guest-response-screen'],
 ] as const;
 
-describe('P0-A1 workspace performance instrumentation contract', () => {
-  it('measures a canonical navigation from click through rendered workspace readiness', () => {
+describe('P0 workspace performance instrumentation contract', () => {
+  it('continues measuring canonical navigation through rendered workspace readiness', () => {
     expect(navigation).toContain('beginWorkspaceTransition');
     expect(
       navigation.match(/performanceWorkspace: '(?:compass|studio|guests|delivery|responses)',/g),
@@ -42,8 +42,11 @@ describe('P0-A1 workspace performance instrumentation contract', () => {
     expect(clientMetrics).toContain('to: normalizeWorkspacePath');
   });
 
-  it('keeps A1 observational and preserves the known prefetch-off baseline', () => {
-    expect(navigation).toContain('prefetch={false}');
+  it('restores canonical prefetch and immediate pending feedback after the A1 baseline', () => {
+    expect(navigation).toContain('data-workspace-navigation-pending');
+    expect(navigation).toContain('setPendingHref(String(item.href))');
+    expect(navigation).toContain('Membuka halaman');
+    expect(navigation).toContain('prefetch\n    >');
     expect(navigation).not.toContain('router.prefetch');
   });
 
@@ -59,7 +62,7 @@ describe('P0-A1 workspace performance instrumentation contract', () => {
     }
   });
 
-  it('records the current nine-query readiness batch without changing its semantics', () => {
+  it('retains the current nine-query readiness measurement for later A4 comparison', () => {
     expect(readinessRepository.match(/\.from\(/g)).toHaveLength(9);
     expect(readinessRepository).toContain('minimumQueryCount: 9');
     expect(readinessRepository).toContain("operation: 'aggregate-query-batch'");

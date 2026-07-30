@@ -244,7 +244,7 @@ export function EditorSection({
   return (
     <section
       aria-labelledby={headingId}
-      className="border-seraya-border-default bg-seraya-canvas rounded-[var(--seraya-radius-lg)] border p-4 shadow-[var(--seraya-shadow-soft)] sm:p-6"
+      className="border-seraya-border-default bg-seraya-canvas max-w-full min-w-0 overflow-hidden rounded-[var(--seraya-radius-lg)] border p-4 shadow-[var(--seraya-shadow-soft)] sm:p-6"
     >
       <div className="mb-6 flex items-start gap-3.5 sm:mb-7 sm:gap-4">
         <span
@@ -323,7 +323,7 @@ export function EditorScheduleEventCard({
   const isPrimary = index === 0;
 
   return (
-    <fieldset className="border-seraya-border-default bg-seraya-surface rounded-[var(--seraya-radius-md)] border p-4 sm:p-5">
+    <fieldset className="border-seraya-border-default bg-seraya-surface max-w-full min-w-0 rounded-[var(--seraya-radius-md)] border p-4 sm:p-5">
       <legend className="sr-only">Acara {index + 1}</legend>
       <div className="border-seraya-border-default flex flex-col gap-4 border-b pb-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
@@ -527,7 +527,7 @@ export function InvitationTemplatePicker({
   return (
     <fieldset
       aria-describedby={describedBy}
-      className="border-seraya-border-default bg-seraya-canvas rounded-[var(--seraya-radius-lg)] border p-4 shadow-[var(--seraya-shadow-soft)] sm:p-6"
+      className="border-seraya-border-default bg-seraya-canvas max-w-full min-w-0 rounded-[var(--seraya-radius-lg)] border p-4 shadow-[var(--seraya-shadow-soft)] sm:p-6"
     >
       <legend className="sr-only">Pilih desain undangan</legend>
       <div className="max-w-2xl">
@@ -539,7 +539,7 @@ export function InvitationTemplatePicker({
         </p>
       </div>
 
-      <div className="mt-5 grid gap-4 lg:grid-cols-3">
+      <div className="mt-5 grid max-w-full min-w-0 gap-4 lg:grid-cols-3">
         {invitationTemplateOptions.map((template) => {
           const selected = selectedTemplateKey === template.key;
           const inputId = fieldId(`templateKey-${template.key}`);
