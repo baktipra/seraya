@@ -24,10 +24,10 @@ export const flagshipCollections = [
   {
     key: 'laras',
     name: 'Laras',
-    personality: 'Formal evening',
+    personality: 'Refined Indonesian elegance',
     description:
-      'Formal, elegan, dan seremonial. Komposisi malam yang tenang untuk perayaan dengan nuansa berkelas.',
-    mood: 'Evening ceremony · fine borders · restrained ornament',
+      'Formal, tenang, dan berakar pada keramahan Indonesia. Komposisi malam yang halus untuk perayaan elegan.',
+    mood: 'Evening ceremony · antique gold · restrained heritage geometry',
   },
 ] as const;
 
@@ -36,33 +36,29 @@ const collectionStyles: Record<
   {
     canvas: string;
     frame: string;
-    accent: string;
-    quiet: string;
-    text: string;
+    label: string;
   }
 > = {
   roselle: {
     canvas: 'bg-[#f6e8e7]',
     frame: 'border-[#d9b9b7] bg-[#fffaf7]',
-    accent: 'text-[#8e4b52]',
-    quiet: 'text-[#795f5d]',
-    text: 'text-[#392c2b]',
+    label: 'text-[#8e4b52]',
   },
   aruna: {
     canvas: 'bg-[#e9e7df]',
     frame: 'border-[#b9b5aa] bg-[#f8f7f2]',
-    accent: 'text-[#5a625d]',
-    quiet: 'text-[#6d6b65]',
-    text: 'text-[#252724]',
+    label: 'text-[#5a625d]',
   },
   laras: {
     canvas: 'bg-[#201f26]',
     frame: 'border-[#6f6558] bg-[#2b2931]',
-    accent: 'text-[#d7b982]',
-    quiet: 'text-[#c9c0b4]',
-    text: 'text-[#fff9ed]',
+    label: 'text-[#d7b982]',
   },
 };
+
+function getShowroomHref(collection: FlagshipCollectionKey, surface: 'generic' | 'personal') {
+  return `/templates/${collection}/demo/${surface}`;
+}
 
 export function FlagshipHeader() {
   return (
@@ -147,17 +143,12 @@ export function InvitationCover({
   compact?: boolean;
 }) {
   const style = collectionStyles[collection];
-  const names =
-    collection === 'aruna'
-      ? ['Nadia', 'Raka']
-      : collection === 'laras'
-        ? ['Alya', 'Dimas']
-        : ['Mira', 'Arga'];
 
   return (
     <div
-      aria-label={`Pratinjau koleksi ${collection}`}
+      aria-label={`Pratinjau renderer asli koleksi ${collection} untuk Kirana dan Arga`}
       className={`${style.canvas} relative isolate overflow-hidden rounded-[1.75rem] p-4 shadow-[0_28px_70px_rgb(43_37_35_/_0.13)] sm:p-5`}
+      data-canonical-showroom-preview={collection}
     >
       <div
         aria-hidden="true"
@@ -168,41 +159,26 @@ export function InvitationCover({
         className="absolute -bottom-24 -left-20 size-52 rounded-full border border-current opacity-10"
       />
       <div
-        className={`${style.frame} ${style.text} relative mx-auto flex aspect-[9/16] w-full max-w-[18rem] flex-col overflow-hidden rounded-[1.35rem] border px-6 py-7 text-center shadow-[0_18px_45px_rgb(35_28_25_/_0.14)] ${compact ? 'max-h-[28rem]' : ''}`}
+        className={`${style.frame} relative mx-auto aspect-[9/16] w-full max-w-[18rem] overflow-hidden rounded-[1.35rem] border shadow-[0_18px_45px_rgb(35_28_25_/_0.14)] ${compact ? 'max-h-[28rem]' : ''}`}
       >
-        <p className={`${style.accent} text-[0.58rem] font-semibold tracking-[0.24em] uppercase`}>
-          The wedding of
+        <iframe
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 size-full border-0 bg-white"
+          loading={compact ? 'lazy' : 'eager'}
+          src={`${getShowroomHref(collection, 'generic')}#showroom-invitation`}
+          tabIndex={-1}
+          title={`Pembuka undangan demo ${collection}`}
+        />
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/18 to-transparent"
+        />
+      </div>
+      <div className="relative mx-auto mt-4 flex w-full max-w-[18rem] items-center justify-between gap-3">
+        <p className={`${style.label} text-[0.62rem] font-semibold tracking-[0.16em] uppercase`}>
+          Renderer asli
         </p>
-        <div className="my-auto">
-          {collection === 'aruna' ? (
-            <div className="text-left">
-              <p className="text-[0.65rem] font-semibold tracking-[0.18em] uppercase opacity-60">
-                Saturday
-              </p>
-              <p className="mt-4 font-serif text-[3.7rem] leading-[0.74] tracking-[-0.07em]">
-                {names[0]}
-              </p>
-              <p className={`${style.accent} my-3 text-2xl italic`}>&amp;</p>
-              <p className="ml-10 font-serif text-[3.7rem] leading-[0.74] tracking-[-0.07em]">
-                {names[1]}
-              </p>
-            </div>
-          ) : (
-            <>
-              <p className="font-serif text-[3.45rem] leading-[0.78] font-medium tracking-[-0.055em]">
-                {names[0]}
-              </p>
-              <p className={`${style.accent} my-3 font-serif text-2xl italic`}>&amp;</p>
-              <p className="font-serif text-[3.45rem] leading-[0.78] font-medium tracking-[-0.055em]">
-                {names[1]}
-              </p>
-            </>
-          )}
-        </div>
-        <div className={`${style.quiet} border-t border-current/20 pt-5`}>
-          <p className="text-[0.62rem] font-semibold tracking-[0.18em] uppercase">12 · 12 · 2026</p>
-          <p className="mt-2 text-[0.68rem]">Jakarta, Indonesia</p>
-        </div>
+        <p className={`${style.label} text-right text-[0.68rem] font-medium`}>Kirana &amp; Arga</p>
       </div>
     </div>
   );
@@ -231,8 +207,23 @@ export function CollectionCard({
         <p className="text-seraya-text-muted mt-4 text-xs font-semibold tracking-[0.1em] uppercase">
           {collection.mood}
         </p>
+        <div className="mt-7 flex flex-wrap gap-x-5 gap-y-3 text-sm font-semibold">
+          <Link
+            className="text-seraya-action-primary inline-flex min-h-11 items-center gap-2 transition-[gap] hover:gap-3"
+            href={getShowroomHref(collection.key, 'generic')}
+          >
+            Lihat undangan umum
+            <span aria-hidden="true">→</span>
+          </Link>
+          <Link
+            className="text-seraya-text-secondary inline-flex min-h-11 items-center gap-2 transition-colors hover:text-seraya-text-primary"
+            href={getShowroomHref(collection.key, 'personal')}
+          >
+            Simulasi personal
+          </Link>
+        </div>
         <Link
-          className="text-seraya-action-primary mt-7 inline-flex min-h-11 items-center gap-2 text-sm font-semibold transition-[gap] group-hover:gap-3"
+          className="seraya-button-secondary mt-5 min-h-11 px-5 text-sm"
           href="/dashboard/new"
         >
           Mulai dengan {collection.name}
