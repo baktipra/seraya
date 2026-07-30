@@ -17,8 +17,10 @@ function noStore(response: NextResponse) {
   return response;
 }
 
-function reject(status: number) {
-  return noStore(NextResponse.json({ error: 'Benchmark authorization failed.' }, { status }));
+function reject(status: number, stage: string) {
+  return noStore(
+    NextResponse.json({ error: 'Benchmark authorization failed.', stage }, { status }),
+  );
 }
 
 async function authorizeBenchmarkRequest(request: NextRequest) {
@@ -29,7 +31,12 @@ async function authorizeBenchmarkRequest(request: NextRequest) {
   const runId = request.headers.get('x-github-run-id');
   const authorization = request.headers.get('authorization');
 
-  if (!deploymentSha || measuredSha !== deploymentSha || !runId || !authorization?.startsWith('Bearer ')) {
+  if (
+    !deploymentSha ||
+    measuredSha !== deploymentSha ||
+    !runId ||
+    !authorization?.startsWith('Bearer ')
+  ) {
     return null;
   }
 
@@ -69,7 +76,7 @@ async function authorizeBenchmarkRequest(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const runId = await authorizeBenchmarkRequest(request);
-  if (!runId) return reject(403);
+  if (!runId) return reject(403, 'request_authority');
 
   const admin = createAdminSupabaseClient();
   const email = `p0-a4-${runId}@seraya.test`;
@@ -85,7 +92,7 @@ export async function POST(request: NextRequest) {
 
   const tokenHash = linkData?.properties?.hashed_token;
   const userId = linkData?.user?.id;
-  if (linkError || !tokenHash || !userId) return reject(500);
+  if (linkError || !tokenHash || !userId) return reject(500, 'magic_link');
 
   const { data: existingProject, error: existingProjectError } = await admin
     .from('wedding_projects')
@@ -94,7 +101,7 @@ export async function POST(request: NextRequest) {
     .is('deleted_at', null)
     .maybeSingle();
 
-  if (existingProjectError) return reject(500);
+  if (existingProjectError) return reject(500, 'project_lookup');
 
   let projectId = existingProject?.id ?? null;
   if (!projectId) {
@@ -111,29 +118,36 @@ export async function POST(request: NextRequest) {
       .select('id')
       .single();
 
-    if (projectError || !project) return reject(500);
+    if (projectError || !project) return reject(500, 'project_create');
     projectId = project.id;
   }
 
-  const server = await createServerSupabaseClient();
-  const { error: verifyError } = await server.auth.verifyOtp({
+  const { data: verified, error: verifyError } = await admin.auth.verifyOtp({
     token_hash: tokenHash,
     type: 'magiclink',
   });
 
-  if (verifyError) return reject(500);
+  if (verifyError || !verified.session) return reject(500, 'magic_link_verify');
+
+  const server = await createServerSupabaseClient();
+  const { error: sessionError } = await server.auth.setSession({
+    access_token: verified.session.access_token,
+    refresh_token: verified.session.refresh_token,
+  });
+
+  if (sessionError) return reject(500, 'session_cookie');
 
   return noStore(NextResponse.json({ projectId, userId }));
 }
 
 export async function DELETE(request: NextRequest) {
   const runId = await authorizeBenchmarkRequest(request);
-  if (!runId) return reject(403);
+  if (!runId) return reject(403, 'request_authority');
 
   const input = (await request.json().catch(() => null)) as
     | { projectId?: string; userId?: string }
     | null;
-  if (!input?.projectId || !input.userId) return reject(400);
+  if (!input?.projectId || !input.userId) return reject(400, 'cleanup_input');
 
   const admin = createAdminSupabaseClient();
   const { error: projectError } = await admin
@@ -142,10 +156,10 @@ export async function DELETE(request: NextRequest) {
     .eq('id', input.projectId)
     .eq('account_id', input.userId);
 
-  if (projectError) return reject(500);
+  if (projectError) return reject(500, 'cleanup_project');
 
   const { error: userError } = await admin.auth.admin.deleteUser(input.userId);
-  if (userError) return reject(500);
+  if (userError) return reject(500, 'cleanup_user');
 
   return noStore(NextResponse.json({ cleaned: true }));
 }
