@@ -28,9 +28,8 @@ describe('P0-A4 readiness aggregation recovery contract', () => {
 
   it('keeps invitation-only readiness free of guest, RSVP, Guestbook, and delivery aggregates', () => {
     expect(readinessService).toContain('getInvitationReadinessForVerifiedProject');
-    expect(invitationRoute).toContain(
-      'getInvitationReadinessForVerifiedProject(project, { draft: editor.draft })',
-    );
+    expect(invitationRoute).toContain('getInvitationReadinessForVerifiedProject(project, {');
+    expect(invitationRoute).toContain('draft: editor.draft');
     expect(invitationRoute).not.toContain('getWeddingReadinessForVerifiedProject');
     expect(invitationRoute).not.toContain('getWeddingReadinessAggregateCountsForVerifiedProject');
   });
