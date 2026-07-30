@@ -1,6 +1,7 @@
 name: P0 B1 B2 format once
 
 on:
+  pull_request:
   push:
     branches:
       - agent/p0-b1-b2-invitation-layout-recovery
