@@ -41,11 +41,14 @@ describe('P0-A2/A3 navigation and data-boundary recovery contract', () => {
 
   it('keeps mobile navigation above content with reserved clearance', () => {
     expect(navigation).toContain('data-project-mobile-navigation');
-    expect(navigation).toContain('z-[80]');
-    expect(navigation).toContain('pointer-events-auto');
-    expect(responsiveCss).toContain('[data-project-workspace-main]');
+    expect(responsiveCss).toContain('[data-project-workspace-shell] {\n  isolation: isolate;');
+    expect(responsiveCss).toContain(
+      '[data-project-workspace-main] {\n  position: relative;\n  z-index: 0;',
+    );
+    expect(responsiveCss).toContain(
+      '[data-project-mobile-navigation] {\n  position: fixed;\n  z-index: 100;\n  pointer-events: auto;',
+    );
     expect(responsiveCss).toContain('padding-bottom: calc(var(--seraya-mobile-safe-bottom)');
-    expect(responsiveCss).toContain('[data-project-mobile-navigation]');
   });
 
   it('reuses verified project context in the invitation readiness composition', () => {
