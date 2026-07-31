@@ -18,6 +18,33 @@ export const dynamic = 'force-static';
 export const revalidate = 3600;
 
 const SHOWROOM_SURFACES = ['generic', 'personal'] as const;
+
+const SHOWROOM_FINAL_ASSETS = [
+  '/showroom/kirana-arga/kirana-arga-opening-portrait.avif',
+  '/showroom/kirana-arga/kirana-arga-environmental-wide.avif',
+  '/showroom/kirana-arga/kirana-arga-gallery-lead.avif',
+  '/showroom/kirana-arga/kirana-arga-detail-rings.avif',
+  '/showroom/kirana-arga/kirana-arga-detail-bouquet.avif',
+  '/showroom/kirana-arga/kirana-arga-venue-wide.avif',
+] as const;
+
+const SHOWROOM_FINAL_ASSET_CSS = `
+#showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-template='roselle'] [data-roselle-chapter='opening']{background-image:linear-gradient(180deg,rgb(255 250 244/.7),rgb(255 250 244/.9)),url("${SHOWROOM_FINAL_ASSETS[0]}");background-position:center 38%;background-repeat:no-repeat;background-size:cover}
+#showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-template='aruna'] [data-invitation-chapter='opening']{background-image:linear-gradient(90deg,rgb(255 246 234/.97) 0%,rgb(255 246 234/.9) 44%,rgb(255 253 248/.48) 100%),url("${SHOWROOM_FINAL_ASSETS[0]}");background-position:center 38%;background-repeat:no-repeat;background-size:cover}
+#showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-template='laras'] [data-invitation-chapter='opening']{background-image:linear-gradient(180deg,rgb(27 23 31/.42),rgb(27 23 31/.84)),url("${SHOWROOM_FINAL_ASSETS[0]}");background-position:center 38%;background-repeat:no-repeat;background-size:cover}
+#showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-invitation-gallery] figure{background-color:#d7c8b7;background-position:center;background-repeat:no-repeat;background-size:cover}
+#showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-invitation-gallery] figure:nth-child(1){background-image:url("${SHOWROOM_FINAL_ASSETS[0]}");background-position:center 38%}
+#showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-invitation-gallery] figure:nth-child(2){background-image:url("${SHOWROOM_FINAL_ASSETS[1]}")}
+#showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-invitation-gallery] figure:nth-child(3){background-image:url("${SHOWROOM_FINAL_ASSETS[2]}");background-position:center 30%}
+#showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-invitation-gallery] figure:nth-child(4){background-image:url("${SHOWROOM_FINAL_ASSETS[3]}")}
+#showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-invitation-gallery] figure:nth-child(5){background-image:url("${SHOWROOM_FINAL_ASSETS[4]}")}
+#showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-invitation-gallery] figure:nth-child(6){background-image:url("${SHOWROOM_FINAL_ASSETS[5]}")}
+#showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-invitation-gallery] figure img{opacity:0}
+#showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-template='aruna'] [data-invitation-gallery] figure:nth-child(3){grid-column:span 6;aspect-ratio:4/5}
+#showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-template='aruna'] [data-invitation-gallery] figure:nth-child(6){grid-column:2/span 10;aspect-ratio:16/9}
+@media(max-width:36rem){#showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-template] [data-invitation-chapter='opening'],#showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-template='roselle'] [data-roselle-chapter='opening']{background-position:center 32%}#showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-template='aruna'] [data-invitation-gallery] figure:nth-child(3),#showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-template='aruna'] [data-invitation-gallery] figure:nth-child(6){grid-column:span 12;aspect-ratio:4/5}}
+`;
+
 type ShowroomSurface = (typeof SHOWROOM_SURFACES)[number];
 
 type ShowroomPageProps = {
@@ -124,8 +151,10 @@ export default async function CanonicalShowroomDemoPage({ params }: ShowroomPage
 
       <main
         className="bg-seraya-ivory min-h-screen px-0 py-0 sm:px-6 sm:py-8"
+        data-final-showroom-assets="kirana-arga-v1"
         id="showroom-invitation"
       >
+        <style>{SHOWROOM_FINAL_ASSET_CSS}</style>
         <InvitationTemplateRenderer
           invitation={invitation}
           personalSlots={personalSlots}
