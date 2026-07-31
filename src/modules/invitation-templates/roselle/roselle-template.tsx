@@ -35,6 +35,7 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
   const openingTargetId = personalSlots?.greeting
     ? 'roselle-personal-greeting'
     : 'roselle-couple-title';
+  const hasScheduleJourney = Boolean(invitation.events || invitation.location);
 
   return (
     <article
@@ -44,7 +45,7 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
       data-template="roselle"
     >
       <RoselleHero hero={invitation.hero} />
-      <a data-roselle-opening-action href={`#${openingTargetId}`}>
+      <a data-invitation-opening-action data-roselle-opening-action href={`#${openingTargetId}`}>
         <span>Buka undangan</span>
         <i aria-hidden="true" />
       </a>
@@ -63,8 +64,16 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
       <div className={styles.content}>
         <RoselleCouple couple={invitation.couple} />
         <RoselleStory story={invitation.story} />
-        <RoselleEvents events={invitation.events} />
-        <RoselleLocation location={invitation.location} />
+        {hasScheduleJourney ? (
+          <div
+            aria-label="Jadwal dan lokasi perayaan"
+            data-invitation-schedule-journey="roselle"
+            role="group"
+          >
+            <RoselleEvents events={invitation.events} />
+            <RoselleLocation location={invitation.location} />
+          </div>
+        ) : null}
         <RoselleGallery gallery={invitation.gallery} />
         <RoselleDigitalGift digitalGift={invitation.digitalGift} />
         {hasPersonalResponse ? (
@@ -105,7 +114,11 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
         ) : null}
         <RoselleClosing closing={invitation.closing} />
       </div>
-      <a data-roselle-return-to-opening href="#roselle-invitation-title">
+      <a
+        data-invitation-return-action
+        data-roselle-return-to-opening
+        href="#roselle-invitation-title"
+      >
         <span aria-hidden="true">↑</span>
         Kembali ke awal
       </a>

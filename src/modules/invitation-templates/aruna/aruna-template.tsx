@@ -40,12 +40,13 @@ function EventScheduleBlock({
       {event.address ? <p className={styles.eventAddress}>{event.address}</p> : null}
       {event.mapsHref ? (
         <a
+          aria-label={`Buka peta${event.title ? ` ${event.title}` : ' acara'} di tab baru`}
           className={styles.mapsLink}
           href={event.mapsHref}
           rel="noopener noreferrer"
           target="_blank"
         >
-          Buka peta acara (tab baru)
+          Buka peta
         </a>
       ) : null}
     </article>
@@ -65,14 +66,19 @@ export function ArunaTemplate({ invitation, renderContext }: InvitationTemplateP
       ? 'Konfirmasikan kehadiran dan titipkan ucapan untuk pasangan.'
       : 'Konfirmasikan kehadiran Anda untuk membantu pasangan mempersiapkan perayaan.'
     : 'Titipkan doa dan ucapan terbaik Anda untuk pasangan.';
+  const openingTargetId = personalSlots?.greeting
+    ? 'aruna-personal-greeting'
+    : 'aruna-couple-title';
+  const hasScheduleJourney = Boolean(invitation.events || invitation.location);
 
   return (
     <article
       aria-labelledby="aruna-invitation-title"
       className={styles.invitation}
+      data-surface={renderContext.surface}
       data-template="aruna"
     >
-      <header className={styles.hero}>
+      <header className={styles.hero} data-invitation-chapter="opening">
         <div className={styles.heroRule} aria-hidden="true" />
         <div className={styles.heroContent}>
           <p className={styles.kicker}>{invitation.hero.eyebrow ?? 'The Wedding Of'}</p>
@@ -89,13 +95,29 @@ export function ArunaTemplate({ invitation, renderContext }: InvitationTemplateP
         </div>
       </header>
 
+      <a data-invitation-opening-action href={`#${openingTargetId}`}>
+        <span>Buka undangan</span>
+        <span aria-hidden="true">↓</span>
+      </a>
+
+      {personalSlots?.greeting ? (
+        <div
+          aria-label="Sapaan untuk tamu"
+          className={styles.personalGreeting}
+          data-template-personal-greeting="aruna"
+          id="aruna-personal-greeting"
+          role="region"
+        >
+          {personalSlots.greeting}
+        </div>
+      ) : null}
+
       <div className={styles.content}>
-        {personalSlots?.greeting ? (
-          <div className={styles.personalGreeting} data-template-personal-greeting="aruna">
-            {personalSlots.greeting}
-          </div>
-        ) : null}
-        <section aria-labelledby="aruna-couple-title" className={styles.coupleSection}>
+        <section
+          aria-labelledby="aruna-couple-title"
+          className={styles.coupleSection}
+          data-invitation-chapter="couple"
+        >
           <div className={styles.sectionHeading}>
             <p>Perayaan cinta</p>
             <h2 id="aruna-couple-title">Dengan sukacita kami mengundang Anda</h2>
@@ -110,57 +132,78 @@ export function ArunaTemplate({ invitation, renderContext }: InvitationTemplateP
         </section>
 
         {invitation.story ? (
-          <section aria-labelledby="aruna-story-title" className={styles.storySection}>
+          <section
+            aria-labelledby="aruna-story-title"
+            className={styles.storySection}
+            data-invitation-chapter="story"
+          >
             <p className={styles.sectionKicker}>Cerita kami</p>
             <h2 id="aruna-story-title">{invitation.story.heading ?? 'Cerita kami'}</h2>
             {invitation.story.body ? <p className={styles.prose}>{invitation.story.body}</p> : null}
           </section>
         ) : null}
 
-        {invitation.events ? (
-          <section aria-labelledby="aruna-events-title" className={styles.eventsSection}>
-            <div className={styles.sectionHeading}>
-              <p>Detail acara</p>
-              <h2 id="aruna-events-title">Hari yang kami nantikan</h2>
-              {invitation.events.primaryDateLabel ? (
-                <span className={styles.primaryDate}>{invitation.events.primaryDateLabel}</span>
-              ) : null}
-            </div>
-            {invitation.events.items.length > 0 ? (
-              <div className={styles.eventsGrid}>
-                {invitation.events.items.map((event, index) => (
-                  <EventScheduleBlock
-                    event={event}
-                    key={`${event.title ?? 'acara'}-${index}`}
-                    sequence={index + 1}
-                  />
-                ))}
-              </div>
-            ) : null}
-          </section>
-        ) : null}
-
-        {invitation.location ? (
-          <section aria-labelledby="aruna-location-title" className={styles.locationSection}>
-            <p className={styles.sectionKicker}>Lokasi</p>
-            <h2 id="aruna-location-title">Mari bertemu di sini</h2>
-            {invitation.location.venueName ? (
-              <p className={styles.locationVenue}>{invitation.location.venueName}</p>
-            ) : null}
-            {invitation.location.address ? (
-              <p className={styles.prose}>{invitation.location.address}</p>
-            ) : null}
-            {invitation.location.mapsHref ? (
-              <a
-                className={styles.mapsLink}
-                href={invitation.location.mapsHref}
-                rel="noopener noreferrer"
-                target="_blank"
+        {hasScheduleJourney ? (
+          <div
+            aria-label="Jadwal dan lokasi perayaan"
+            data-invitation-schedule-journey="aruna"
+            role="group"
+          >
+            {invitation.events ? (
+              <section
+                aria-labelledby="aruna-events-title"
+                className={styles.eventsSection}
+                data-invitation-chapter="schedule"
               >
-                Buka peta lokasi (tab baru)
-              </a>
+                <div className={styles.sectionHeading}>
+                  <p>Detail acara</p>
+                  <h2 id="aruna-events-title">Hari yang kami nantikan</h2>
+                  {invitation.events.primaryDateLabel ? (
+                    <span className={styles.primaryDate}>{invitation.events.primaryDateLabel}</span>
+                  ) : null}
+                </div>
+                {invitation.events.items.length > 0 ? (
+                  <div className={styles.eventsGrid}>
+                    {invitation.events.items.map((event, index) => (
+                      <EventScheduleBlock
+                        event={event}
+                        key={`${event.title ?? 'acara'}-${index}`}
+                        sequence={index + 1}
+                      />
+                    ))}
+                  </div>
+                ) : null}
+              </section>
             ) : null}
-          </section>
+
+            {invitation.location ? (
+              <section
+                aria-labelledby="aruna-location-title"
+                className={styles.locationSection}
+                data-invitation-chapter="location"
+              >
+                <p className={styles.sectionKicker}>Lokasi utama</p>
+                <h2 id="aruna-location-title">Mari bertemu di sini</h2>
+                {invitation.location.venueName ? (
+                  <p className={styles.locationVenue}>{invitation.location.venueName}</p>
+                ) : null}
+                {invitation.location.address ? (
+                  <p className={styles.prose}>{invitation.location.address}</p>
+                ) : null}
+                {invitation.location.mapsHref ? (
+                  <a
+                    aria-label="Buka peta lokasi di tab baru"
+                    className={styles.mapsLink}
+                    href={invitation.location.mapsHref}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    Buka peta
+                  </a>
+                ) : null}
+              </section>
+            ) : null}
+          </div>
         ) : null}
 
         {invitation.gallery ? (
@@ -168,6 +211,7 @@ export function ArunaTemplate({ invitation, renderContext }: InvitationTemplateP
             aria-labelledby="aruna-gallery-title"
             className={styles.gallerySection}
             data-gallery-count={invitation.gallery.images.length}
+            data-invitation-chapter="gallery"
             data-invitation-gallery
           >
             <div className={styles.sectionHeading}>
@@ -190,7 +234,11 @@ export function ArunaTemplate({ invitation, renderContext }: InvitationTemplateP
         ) : null}
 
         {invitation.digitalGift ? (
-          <section aria-labelledby="aruna-digital-gift-title" className={styles.digitalGiftSection}>
+          <section
+            aria-labelledby="aruna-digital-gift-title"
+            className={styles.digitalGiftSection}
+            data-invitation-chapter="gift"
+          >
             <div className={styles.digitalGiftHeading}>
               <p>Amplop Digital</p>
               <h2 id="aruna-digital-gift-title">{invitation.digitalGift.heading}</h2>
@@ -248,7 +296,11 @@ export function ArunaTemplate({ invitation, renderContext }: InvitationTemplateP
         ) : null}
 
         {invitation.closing ? (
-          <section aria-labelledby="aruna-closing-title" className={styles.closingSection}>
+          <section
+            aria-labelledby="aruna-closing-title"
+            className={styles.closingSection}
+            data-invitation-chapter="closing"
+          >
             <div className={styles.closingRule} aria-hidden="true" />
             <h2 id="aruna-closing-title">Sampai jumpa di hari bahagia kami</h2>
             {invitation.closing.message ? (
@@ -260,6 +312,11 @@ export function ArunaTemplate({ invitation, renderContext }: InvitationTemplateP
           </section>
         ) : null}
       </div>
+
+      <a data-invitation-return-action href="#aruna-invitation-title">
+        <span aria-hidden="true">↑</span>
+        Kembali ke awal
+      </a>
     </article>
   );
 }

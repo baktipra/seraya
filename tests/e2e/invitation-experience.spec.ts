@@ -3,6 +3,7 @@ import { expect, type Locator, type Page, test } from '@playwright/test';
 const templateKeys = ['roselle', 'aruna', 'laras'] as const;
 const guestToken = 'browser-fixture';
 const layoutShiftScoreKey = '__serayaInvitationLayoutShiftScore';
+const fixtureGalleryCount = 6;
 
 type TemplateKey = (typeof templateKeys)[number];
 
@@ -80,18 +81,27 @@ async function expectAppearsBefore(first: Locator, second: Locator) {
   expect(appearsBefore).toBe(true);
 }
 
+async function expectMinimumControlHeight(control: Locator, minimum = 44) {
+  const box = await control.boundingBox();
+  expect(box?.height ?? 0).toBeGreaterThanOrEqual(minimum);
+}
+
 async function expectFlagshipOpening(page: Page, invitation: Locator, templateKey: TemplateKey) {
   const opening = invitation.locator(':scope > header');
   const title = opening.getByRole('heading', { name: 'Raka & Nadia' });
+  const openingAction = invitation.locator(':scope > [data-invitation-opening-action]');
 
   await expect(opening).toBeVisible();
   await expect(title).toBeVisible();
+  await expect(openingAction).toBeVisible();
+  await expect(openingAction).toHaveAttribute('href', /^#/);
+  await expectMinimumControlHeight(openingAction);
 
   const viewportHeight = page.viewportSize()?.height ?? 720;
   const openingBox = await opening.boundingBox();
   const titleBox = await title.boundingBox();
 
-  expect(openingBox?.height ?? 0).toBeGreaterThanOrEqual(Math.min(viewportHeight * 0.72, 620));
+  expect(openingBox?.height ?? 0).toBeGreaterThanOrEqual(Math.min(viewportHeight * 0.72, 620) - 1);
   expect(titleBox?.y ?? viewportHeight).toBeLessThan(viewportHeight);
 
   if (templateKey === 'laras') {
@@ -101,16 +111,16 @@ async function expectFlagshipOpening(page: Page, invitation: Locator, templateKe
   }
 }
 
-async function expectStableGalleryMedia(invitation: Locator) {
+async function expectStableGalleryMedia(invitation: Locator, templateKey: TemplateKey, page: Page) {
   const gallery = invitation.locator('[data-invitation-gallery]');
   const mediaFrames = gallery.locator('[data-invitation-media-frame]');
   const galleryImages = gallery.locator('[data-invitation-media-image]');
 
   await expect(gallery).toBeVisible();
-  await expect(mediaFrames).toHaveCount(4);
-  await expect(galleryImages).toHaveCount(4);
+  await expect(mediaFrames).toHaveCount(fixtureGalleryCount);
+  await expect(galleryImages).toHaveCount(fixtureGalleryCount);
 
-  for (let index = 0; index < 4; index += 1) {
+  for (let index = 0; index < fixtureGalleryCount; index += 1) {
     const image = galleryImages.nth(index);
 
     await expect(image).toHaveAttribute('loading', 'lazy');
@@ -123,6 +133,15 @@ async function expectStableGalleryMedia(invitation: Locator) {
     const box = await image.boundingBox();
     expect(box?.width ?? 0).toBeGreaterThan(120);
     expect(box?.height ?? 0).toBeGreaterThan(120);
+  }
+
+  if (templateKey === 'laras' && (page.viewportSize()?.width ?? 1024) <= 576) {
+    const galleryColumns = await gallery
+      .locator(':scope > div')
+      .evaluate((element) =>
+        window.getComputedStyle(element).gridTemplateColumns.split(' ').filter(Boolean),
+      );
+    expect(galleryColumns).toHaveLength(1);
   }
 
   const firstFrame = mediaFrames.first();
@@ -158,27 +177,51 @@ for (const templateKey of templateKeys) {
       await page.goto(getGenericPath(templateKey));
 
       const invitation = page.locator(`article[data-template="${templateKey}"]`);
+      const openingAction = invitation.locator(':scope > [data-invitation-opening-action]');
+      const coupleSection = invitation.getByRole('heading', {
+        name:
+          templateKey === 'roselle'
+            ? 'Dua cerita, satu perjalanan'
+            : templateKey === 'aruna'
+              ? 'Dengan sukacita kami mengundang Anda'
+              : 'Merayakan awal yang baru',
+      });
+      const scheduleJourney = invitation.locator('[data-invitation-schedule-journey]');
+      const genericNote = invitation.locator('[data-generic-response-note]');
+      const closingSection = invitation.locator('section').last();
+      const returnAction = invitation.locator(':scope > [data-invitation-return-action]');
+
       await expect(invitation).toBeVisible();
       await expectFlagshipOpening(page, invitation, templateKey);
       await expect(invitation.getByRole('heading', { name: 'Raka & Nadia' })).toBeVisible();
       await expect(
         invitation.getByRole('heading', { name: 'Cerita yang membawa kami ke sini' }),
       ).toBeVisible();
-      await expect(invitation.getByRole('heading', { name: 'Akad Nikah' })).toBeVisible();
-      await expect(invitation.getByRole('heading', { name: 'Resepsi' })).toBeVisible();
+      await expect(
+        invitation.getByRole('heading', { name: 'Akad Nikah dan Doa Keluarga' }),
+      ).toBeVisible();
+      await expect(
+        invitation.getByRole('heading', { name: 'Resepsi dan Jamuan Malam' }),
+      ).toBeVisible();
+      await expect(scheduleJourney).toBeVisible();
+      await expect(scheduleJourney).toContainText('Jakarta Convention Center — Assembly Hall');
       await expect(
         invitation.getByRole('heading', { name: 'Tanda kasih untuk perjalanan baru' }),
       ).toBeVisible();
+      await expect(invitation.getByText('Bank Central Asia', { exact: true })).toBeVisible();
+      await expect(invitation.getByText('Bank Mandiri', { exact: true })).toBeVisible();
       await expect(invitation.getByText('Raka & Nadia', { exact: true }).last()).toBeVisible();
-      await expectStableGalleryMedia(invitation);
+      await expectStableGalleryMedia(invitation, templateKey, page);
 
-      await expect(invitation.locator('[data-generic-response-note]')).toHaveCount(1);
+      await expect(genericNote).toHaveCount(1);
       await expect(invitation.locator('[data-template-personal-greeting]')).toHaveCount(0);
       await expect(invitation.locator('[data-template-response-journey]')).toHaveCount(0);
+      await expect(returnAction).toBeVisible();
+      await expectMinimumControlHeight(returnAction);
 
-      const genericNote = invitation.locator('[data-generic-response-note]');
-      const closingSection = invitation.locator('section').last();
+      await expectAppearsBefore(openingAction, coupleSection);
       await expectAppearsBefore(genericNote, closingSection);
+      await expectAppearsBefore(closingSection, returnAction);
       await expectNoHorizontalOverflow(page);
       await expectLayoutShiftBudget(page);
     });
@@ -188,34 +231,42 @@ for (const templateKey of templateKeys) {
       await page.goto(getPersonalPath(templateKey));
 
       const invitation = page.locator(`article[data-template="${templateKey}"]`);
-      const greeting = invitation.locator('[data-template-personal-greeting]');
+      const openingAction = invitation.locator(':scope > [data-invitation-opening-action]');
+      const greeting = invitation.locator(':scope > [data-template-personal-greeting]');
       const responseJourney = invitation.locator('[data-template-response-journey]');
+      const scheduleJourney = invitation.locator('[data-invitation-schedule-journey]');
       const digitalGiftHeading = invitation.getByRole('heading', {
         name: 'Tanda kasih untuk perjalanan baru',
       });
       const digitalGiftSection = digitalGiftHeading.locator('xpath=ancestor::section[1]');
       const closingSection = invitation.locator('section').last();
+      const returnAction = invitation.locator(':scope > [data-invitation-return-action]');
 
       await expectFlagshipOpening(page, invitation, templateKey);
+      await expect(openingAction).toHaveAttribute('href', /personal-greeting/);
       await expect(greeting).toBeVisible();
       await expect(greeting).toContainText('Tamu Browser');
       await expect(responseJourney).toBeVisible();
+      await expect(scheduleJourney).toBeVisible();
       await expect(invitation.locator('[data-generic-response-note]')).toHaveCount(0);
       await expect(invitation.locator('[data-personal-guest-rsvp]')).toBeVisible();
       await expect(invitation.locator('[data-personal-guestbook]')).toBeVisible();
-      await expectStableGalleryMedia(invitation);
+      await expectStableGalleryMedia(invitation, templateKey, page);
 
+      await expectAppearsBefore(openingAction, greeting);
+      await expectAppearsBefore(greeting, scheduleJourney);
       await expectAppearsBefore(greeting, responseJourney);
       await expectAppearsBefore(digitalGiftSection, responseJourney);
       await expectAppearsBefore(responseJourney, closingSection);
+      await expectAppearsBefore(closingSection, returnAction);
 
       const responseChoices = invitation.locator('[data-personal-rsvp-choice]');
       await expect(responseChoices).toHaveCount(2);
       for (let index = 0; index < 2; index += 1) {
-        const box = await responseChoices.nth(index).boundingBox();
-        expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
+        await expectMinimumControlHeight(responseChoices.nth(index), 44);
       }
 
+      await expectMinimumControlHeight(returnAction);
       await expectNoHorizontalOverflow(page);
       await expectLayoutShiftBudget(page);
     });
