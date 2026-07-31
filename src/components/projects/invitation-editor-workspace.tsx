@@ -1,4 +1,4 @@
-import { cloneElement, isValidElement, memo, type ReactNode } from 'react';
+import { memo, type ReactNode } from 'react';
 
 import type { InvitationEditorFieldErrors } from '@/modules/invitations/invitation-editor.schema';
 import type { InvitationDraft } from '@/modules/invitations/invitation-draft.types';
@@ -446,27 +446,6 @@ export const InvitationWorkspaceNavigation = memo(function InvitationWorkspaceNa
   );
 });
 
-function getCanonicalPanelChildren(
-  children: ReactNode,
-  section: InvitationEditorSectionKey,
-): ReactNode {
-  const chapter = invitationEditorSections.find((candidate) => candidate.key === section);
-
-  if (
-    !chapter ||
-    !isValidElement<{ number?: string; title?: string }>(children) ||
-    children.props.number === undefined ||
-    children.props.title === undefined
-  ) {
-    return children;
-  }
-
-  return cloneElement(children, {
-    number: chapter.number,
-    title: chapter.editorTitle,
-  });
-}
-
 export function InvitationWorkspacePanel({
   active,
   children,
@@ -489,7 +468,7 @@ export function InvitationWorkspacePanel({
       hidden={!active}
       id={`invitation-editor-panel-${section}`}
     >
-      {getCanonicalPanelChildren(children, section)}
+      {children}
     </div>
   );
 }
