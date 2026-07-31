@@ -14,6 +14,7 @@ import './invitation-opening-maturation-release.css';
 import './invitation-media-release.css';
 import './roselle-flagship-maturation-release.css';
 import './invitation-layout-recovery.css';
+import './invitation-template-quality-bar.css';
 
 export const metadata: Metadata = {
   title: {
