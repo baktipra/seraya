@@ -17,8 +17,7 @@ describe('P0-B3 invitation template quality bar contract', () => {
   it('loads the template quality layer after shared layout recovery in production and fixtures', () => {
     const recoveryImport = "import './invitation-layout-recovery.css';";
     const qualityImport = "import './invitation-template-quality-bar.css';";
-    const fixtureRecoveryImport =
-      "import '../../../../src/app/invitation-layout-recovery.css';";
+    const fixtureRecoveryImport = "import '../../../../src/app/invitation-layout-recovery.css';";
     const fixtureQualityImport =
       "import '../../../../src/app/invitation-template-quality-bar.css';";
 

@@ -41,8 +41,7 @@ article[data-template='roselle'] [data-invitation-schedule-journey] {
   position: relative;
   isolation: isolate;
   background:
-    linear-gradient(180deg, rgb(255 250 244 / 0.96), rgb(255 254 251 / 0.98)),
-    var(--roselle-ivory);
+    linear-gradient(180deg, rgb(255 250 244 / 0.96), rgb(255 254 251 / 0.98)), var(--roselle-ivory);
 }
 
 article[data-template='roselle'] [data-invitation-schedule-journey]::before {
@@ -78,8 +77,7 @@ article[data-template='roselle'] [data-invitation-gallery] figure {
 
 article[data-template='roselle'] [data-roselle-chapter='gift'] {
   background:
-    linear-gradient(135deg, rgb(247 236 231 / 0.82), rgb(255 250 244 / 0.95)),
-    var(--roselle-wash);
+    linear-gradient(135deg, rgb(247 236 231 / 0.82), rgb(255 250 244 / 0.95)), var(--roselle-wash);
 }
 
 article[data-template='roselle'] [data-template-response-journey='roselle'] {
@@ -120,8 +118,7 @@ article[data-template='aruna'] [data-invitation-chapter='couple'] {
 article[data-template='aruna'] [data-invitation-chapter='story']::before {
   inset: 0 calc(var(--seraya-invitation-inline-inset) * -0.42);
   background:
-    linear-gradient(120deg, rgb(249 237 225 / 0.96), rgb(255 253 248 / 0.72)),
-    var(--aruna-wash);
+    linear-gradient(120deg, rgb(249 237 225 / 0.96), rgb(255 253 248 / 0.72)), var(--aruna-wash);
 }
 
 article[data-template='aruna'] [data-invitation-schedule-journey] {
@@ -146,8 +143,7 @@ article[data-template='aruna'] [data-schedule-event='aruna']:focus-within {
 article[data-template='aruna'] [data-invitation-chapter='gallery']::before {
   inset: 0 calc(var(--seraya-invitation-inline-inset) * -0.42);
   background:
-    linear-gradient(150deg, rgb(255 253 248 / 0.7), rgb(249 237 225 / 0.92)),
-    var(--aruna-wash);
+    linear-gradient(150deg, rgb(255 253 248 / 0.7), rgb(249 237 225 / 0.92)), var(--aruna-wash);
 }
 
 article[data-template='aruna'] [data-invitation-gallery] figure {
@@ -161,8 +157,7 @@ article[data-template='aruna'] [data-invitation-chapter='gift'] {
 article[data-template='aruna'] [data-template-response-journey='aruna'] {
   border-top: 2px solid var(--aruna-clay);
   background:
-    linear-gradient(145deg, rgb(255 246 234 / 0.8), rgb(255 253 248 / 0.98)),
-    var(--aruna-paper);
+    linear-gradient(145deg, rgb(255 246 234 / 0.8), rgb(255 253 248 / 0.98)), var(--aruna-paper);
 }
 
 article[data-template='aruna'] [data-template-response-introduction='aruna'] {
@@ -183,8 +178,8 @@ article[data-template='laras'] {
   --seraya-laras-heritage-field:
     linear-gradient(45deg, transparent 47%, rgb(200 161 110 / 0.055) 48% 52%, transparent 53%) 0 0 /
       2.75rem 2.75rem,
-    linear-gradient(-45deg, transparent 47%, rgb(189 124 138 / 0.035) 48% 52%, transparent 53%)
-      0 0 / 2.75rem 2.75rem;
+    linear-gradient(-45deg, transparent 47%, rgb(189 124 138 / 0.035) 48% 52%, transparent 53%) 0
+      0 / 2.75rem 2.75rem;
 }
 
 article[data-template='laras'] [data-invitation-chapter='opening'] {
