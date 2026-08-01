@@ -22,40 +22,19 @@ type InvitationPreviewViewport = 'desktop' | 'mobile';
 type InvitationPreviewTargetState = 'available' | 'unavailable';
 
 const previewTargetSelectors: Record<InvitationEditorSectionKey, readonly string[]> = {
-  style: [
-    '[data-invitation-chapter="opening"]',
-    '[data-roselle-chapter="opening"]',
-  ],
-  opening: [
-    '[data-invitation-chapter="opening"]',
-    '[data-roselle-chapter="opening"]',
-  ],
-  couple: [
-    '[data-invitation-chapter="couple"]',
-    '[data-roselle-chapter="couple"]',
-  ],
-  story: [
-    '[data-invitation-chapter="story"]',
-    '[data-roselle-chapter="story"]',
-  ],
+  style: ['[data-invitation-chapter="opening"]', '[data-roselle-chapter="opening"]'],
+  opening: ['[data-invitation-chapter="opening"]', '[data-roselle-chapter="opening"]'],
+  couple: ['[data-invitation-chapter="couple"]', '[data-roselle-chapter="couple"]'],
+  story: ['[data-invitation-chapter="story"]', '[data-roselle-chapter="story"]'],
   schedule: [
     '[data-invitation-chapter="schedule"]',
     '[data-roselle-chapter="events"]',
     '[data-invitation-schedule-journey]',
   ],
-  gallery: [
-    '[data-invitation-chapter="gallery"]',
-    '[data-roselle-chapter="gallery"]',
-  ],
-  gift: [
-    '[data-invitation-chapter="gift"]',
-    '[data-roselle-chapter="gift"]',
-  ],
+  gallery: ['[data-invitation-chapter="gallery"]', '[data-roselle-chapter="gallery"]'],
+  gift: ['[data-invitation-chapter="gift"]', '[data-roselle-chapter="gift"]'],
   rsvp: ['[data-template-response-journey]', '[data-generic-response-note]'],
-  closing: [
-    '[data-invitation-chapter="closing"]',
-    '[data-roselle-chapter="closing"]',
-  ],
+  closing: ['[data-invitation-chapter="closing"]', '[data-roselle-chapter="closing"]'],
 };
 
 const templateAwarePreviewStyles = `
