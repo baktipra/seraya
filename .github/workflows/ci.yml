@@ -26,11 +26,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Show RB3 Prettier diff
-        run: |
-          npx prettier --write src/components/projects/invitation-editor-live-preview.tsx
-          git diff -- src/components/projects/invitation-editor-live-preview.tsx
-          exit 1
+      - name: Check formatting
+        run: npm run format:check
 
       - name: Lint
         run: npm run lint
