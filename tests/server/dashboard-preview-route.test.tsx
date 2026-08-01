@@ -64,7 +64,14 @@ const ownedPrivateDraft = {
   project,
 };
 
-describe('SRY-021B private invitation preview route', () => {
+function getPage(searchParams: Record<string, string> = {}) {
+  return InvitationPreviewPage({
+    params: Promise.resolve({ projectId: project.id }),
+    searchParams: Promise.resolve(searchParams),
+  });
+}
+
+describe('RB5 exact private invitation review route', () => {
   beforeEach(() => {
     getOverviewMock.mockReset();
     getOwnedProjectContextMock.mockReset().mockResolvedValue(project);
@@ -76,29 +83,25 @@ describe('SRY-021B private invitation preview route', () => {
     });
   });
 
-  it('renders the owner preview from the narrow draft-plus-gallery read path only', async () => {
-    const page = await InvitationPreviewPage({
-      params: Promise.resolve({ projectId: project.id }),
-    });
+  it('renders the owner review shell from the narrow saved-draft path without loading gallery data twice', async () => {
+    const page = await getPage({ surface: 'generic', viewport: 'mobile' });
     const html = renderToStaticMarkup(page);
 
     expect(getOwnedProjectContextMock).toHaveBeenCalledWith(project.id);
     expect(getPrivateDraftMock).toHaveBeenCalledWith(project);
-    expect(getPrivateGalleryMock).toHaveBeenCalledWith({
-      draftImageIds: [],
-      project,
-    });
-    expect(getPrivateGalleryMock).toHaveBeenCalledTimes(1);
+    expect(getPrivateGalleryMock).not.toHaveBeenCalled();
     expect(getOverviewMock).not.toHaveBeenCalled();
-    expect(html).toContain('← Kembali ke project');
-    expect(html).toContain('Pratinjau undangan');
-    expect(html).toContain('Belum dipublikasikan');
+    expect(html).toContain('← Kembali ke studio');
+    expect(html).toContain('Tinjau sebagai tamu');
+    expect(html).toContain('Undangan umum');
+    expect(html).toContain('Ponsel');
+    expect(html).toContain(`src="/dashboard/${project.id}/preview?embed=1&amp;surface=generic"`);
     expect(html).toContain('Raka &amp; Nadia');
     expect(html).not.toContain('draft-private-id');
     expect(html).not.toContain(project.account_id);
   });
 
-  it('renders the saved private draft schedule in its owner-defined order without loading public or guest data', async () => {
+  it('renders the saved private draft schedule in its owner-defined order inside the embedded guest surface', async () => {
     const draft = createDefaultInvitationDraftContent(project);
     const first = draft.eventSchedule.events[0]!;
     draft.eventSchedule.events = [
@@ -126,11 +129,13 @@ describe('SRY-021B private invitation preview route', () => {
       draft: { ...ownedPrivateDraft.draft, content: draft },
     });
 
-    const page = await InvitationPreviewPage({
-      params: Promise.resolve({ projectId: project.id }),
-    });
+    const page = await getPage({ embed: '1', surface: 'generic' });
     const html = renderToStaticMarkup(page);
 
+    expect(getPrivateGalleryMock).toHaveBeenCalledWith({
+      draftImageIds: [],
+      project,
+    });
     expect(html).toContain('Akad Nikah');
     expect(html).toContain('Resepsi');
     expect(html.indexOf('Akad Nikah')).toBeLessThan(html.indexOf('Resepsi'));
@@ -139,7 +144,7 @@ describe('SRY-021B private invitation preview route', () => {
     expect(getOverviewMock).not.toHaveBeenCalled();
   });
 
-  it('renders the selected private draft template without reading publication data', async () => {
+  it('renders the selected private draft template in the embedded generic surface', async () => {
     const draft = createDefaultInvitationDraftContent(project);
     draft.templateKey = 'aruna';
     getPrivateDraftMock.mockResolvedValue({
@@ -147,16 +152,14 @@ describe('SRY-021B private invitation preview route', () => {
       draft: { ...ownedPrivateDraft.draft, content: draft },
     });
 
-    const page = await InvitationPreviewPage({
-      params: Promise.resolve({ projectId: project.id }),
-    });
+    const page = await getPage({ embed: '1', surface: 'generic' });
     const html = renderToStaticMarkup(page);
 
     expect(html).toContain('data-template="aruna"');
     expect(getOverviewMock).not.toHaveBeenCalled();
   });
 
-  it('renders saved private-draft Amplop Digital without publication, payment, or guest reads', async () => {
+  it('renders saved private-draft Amplop Digital inside the embedded guest surface', async () => {
     const draft = createDefaultInvitationDraftContent(project);
     draft.digitalGift = {
       accounts: [
@@ -176,9 +179,7 @@ describe('SRY-021B private invitation preview route', () => {
       draft: { ...ownedPrivateDraft.draft, content: draft },
     });
 
-    const page = await InvitationPreviewPage({
-      params: Promise.resolve({ projectId: project.id }),
-    });
+    const page = await getPage({ embed: '1', surface: 'generic' });
     const html = renderToStaticMarkup(page);
 
     expect(html).toContain('Amplop Digital');
@@ -188,7 +189,7 @@ describe('SRY-021B private invitation preview route', () => {
     expect(getOverviewMock).not.toHaveBeenCalled();
   });
 
-  it('renders only owner-resolved gallery proxy images in the private preview', async () => {
+  it('renders only owner-resolved gallery proxy images in the embedded private review', async () => {
     const imageId = '11111111-1111-4111-8111-111111111111';
     const draft = createDefaultInvitationDraftContent(project);
     draft.gallery = { enabled: true, imageIds: [imageId] };
@@ -200,23 +201,26 @@ describe('SRY-021B private invitation preview route', () => {
       { alt: 'Foto pasangan 1', id: imageId, src: `/dashboard/media/${imageId}` },
     ]);
 
-    const page = await InvitationPreviewPage({
-      params: Promise.resolve({ projectId: project.id }),
-    });
+    const page = await getPage({ embed: '1', surface: 'generic' });
     const html = renderToStaticMarkup(page);
 
+    expect(getPrivateGalleryMock).toHaveBeenCalledWith({
+      draftImageIds: [imageId],
+      project,
+    });
     expect(html).toContain(`src="/dashboard/media/${imageId}"`);
     expect(html).toContain('alt="Foto pasangan 1"');
     expect(html).not.toContain('storage_path');
     expect(html).not.toContain('projects/');
   });
 
-  it('does not render a guessed cross-account or soft-deleted project preview', async () => {
+  it('does not render a guessed cross-account or soft-deleted project review', async () => {
     getOwnedProjectContextMock.mockRejectedValue(new ProjectAccessDeniedError());
 
     await expect(
       InvitationPreviewPage({
         params: Promise.resolve({ projectId: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb' }),
+        searchParams: Promise.resolve({ surface: 'generic' }),
       }),
     ).rejects.toThrow('NEXT_NOT_FOUND');
 
@@ -224,7 +228,9 @@ describe('SRY-021B private invitation preview route', () => {
     expect(getPrivateGalleryMock).not.toHaveBeenCalled();
   });
 
-  it('uses the preview render surface without constructing personal invitation slots', async () => {
+  it('renders a non-persisting personal simulation without guest capability authority', async () => {
+    const page = await getPage({ embed: '1', surface: 'personal' });
+    const html = renderToStaticMarkup(page);
     const testDirectory = path.dirname(fileURLToPath(import.meta.url));
     const routeSource = await readFile(
       path.resolve(
@@ -234,18 +240,20 @@ describe('SRY-021B private invitation preview route', () => {
       'utf8',
     );
 
-    expect(routeSource).toContain('surface="preview"');
-    expect(routeSource).not.toContain('personalSlots');
+    expect(html).toContain('data-review-surface="personal"');
+    expect(html).toContain('Bapak/Ibu Keluarga Pramudia');
+    expect(html).toContain('Konfirmasi Kehadiran');
+    expect(html).toContain('Titipkan Ucapan');
+    expect(html).toContain('disabled=""');
     expect(routeSource).not.toContain('personal-invitation');
     expect(routeSource).not.toContain('guestToken');
+    expect(routeSource).not.toContain('guest-link.service');
   });
 
   it('does not render an active project when its draft is absent or soft-deleted', async () => {
     getPrivateDraftMock.mockResolvedValue({ ...ownedPrivateDraft, draft: null });
 
-    await expect(
-      InvitationPreviewPage({ params: Promise.resolve({ projectId: project.id }) }),
-    ).rejects.toThrow('NEXT_NOT_FOUND');
+    await expect(getPage()).rejects.toThrow('NEXT_NOT_FOUND');
 
     expect(getPrivateGalleryMock).not.toHaveBeenCalled();
   });
