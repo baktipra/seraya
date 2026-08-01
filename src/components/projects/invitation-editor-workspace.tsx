@@ -3,16 +3,93 @@ import { memo, type ReactNode } from 'react';
 import type { InvitationEditorFieldErrors } from '@/modules/invitations/invitation-editor.schema';
 import type { InvitationDraft } from '@/modules/invitations/invitation-draft.types';
 
+/**
+ * Compatibility export for existing editor consumers and tests. The legacy
+ * label/order remain stable here while Release B navigation uses the canonical
+ * invitation journey derived from the same records below.
+ */
 export const invitationEditorSections = [
-  { key: 'style', label: 'Gaya undangan', number: '01' },
-  { key: 'opening', label: 'Pembuka', number: '02' },
-  { key: 'couple', label: 'Mempelai', number: '03' },
-  { key: 'story', label: 'Cerita', number: '04' },
-  { key: 'schedule', label: 'Rangkaian acara', number: '05' },
-  { key: 'gallery', label: 'Galeri', number: '06' },
-  { key: 'rsvp', label: 'Konfirmasi tamu', number: '07' },
-  { key: 'gift', label: 'Amplop Digital', number: '08' },
-  { key: 'closing', label: 'Penutup', number: '09' },
+  {
+    editorTitle: 'Desain',
+    key: 'style',
+    label: 'Gaya undangan',
+    number: '01',
+    optional: false,
+    previewTarget: 'opening',
+    studioLabel: 'Desain',
+  },
+  {
+    editorTitle: 'Sampul',
+    key: 'opening',
+    label: 'Pembuka',
+    number: '02',
+    optional: false,
+    previewTarget: 'opening',
+    studioLabel: 'Sampul',
+  },
+  {
+    editorTitle: 'Mempelai',
+    key: 'couple',
+    label: 'Mempelai',
+    number: '03',
+    optional: false,
+    previewTarget: 'couple',
+    studioLabel: 'Mempelai',
+  },
+  {
+    editorTitle: 'Cerita kalian',
+    key: 'story',
+    label: 'Cerita',
+    number: '04',
+    optional: true,
+    previewTarget: 'story',
+    studioLabel: 'Cerita',
+  },
+  {
+    editorTitle: 'Acara',
+    key: 'schedule',
+    label: 'Rangkaian acara',
+    number: '05',
+    optional: false,
+    previewTarget: 'events',
+    studioLabel: 'Acara',
+  },
+  {
+    editorTitle: 'Galeri',
+    key: 'gallery',
+    label: 'Galeri',
+    number: '06',
+    optional: true,
+    previewTarget: 'gallery',
+    studioLabel: 'Galeri',
+  },
+  {
+    editorTitle: 'Respons Tamu',
+    key: 'rsvp',
+    label: 'Konfirmasi tamu',
+    number: '08',
+    optional: true,
+    previewTarget: 'response',
+    studioLabel: 'Respons Tamu',
+  },
+  {
+    editorTitle: 'Amplop Digital',
+    key: 'gift',
+    label: 'Amplop Digital',
+    number: '07',
+    optional: true,
+    previewTarget: 'digital-gift',
+    studioLabel: 'Amplop Digital',
+  },
+  {
+    editorTitle: 'Penutup',
+    key: 'closing',
+    label: 'Penutup',
+    number: '09',
+    optional: true,
+    previewTarget: 'closing',
+    studioLabel: 'Penutup',
+  },
 ] as const;
 
 export type InvitationEditorSectionKey = (typeof invitationEditorSections)[number]['key'];
@@ -22,6 +99,28 @@ export type InvitationEditorSectionStatuses = Record<
   InvitationEditorSectionKey,
   InvitationEditorSectionStatus
 >;
+
+const canonicalChapterOrder: readonly InvitationEditorSectionKey[] = [
+  'style',
+  'opening',
+  'couple',
+  'story',
+  'schedule',
+  'gallery',
+  'gift',
+  'rsvp',
+  'closing',
+];
+
+const invitationStudioChapters = canonicalChapterOrder.map((chapterKey) => {
+  const chapter = invitationEditorSections.find((candidate) => candidate.key === chapterKey);
+
+  if (!chapter) {
+    throw new Error(`Unknown invitation studio chapter: ${chapterKey}`);
+  }
+
+  return chapter;
+});
 
 const sectionStatusCopy: Record<
   InvitationEditorSectionStatus | 'current',
@@ -70,7 +169,7 @@ function getSectionsWithErrors(errors?: InvitationEditorFieldErrors) {
 export function getInvitationEditorErrorSections(errors?: InvitationEditorFieldErrors) {
   const sectionsWithErrors = getSectionsWithErrors(errors);
 
-  return invitationEditorSections
+  return invitationStudioChapters
     .map((section) => section.key)
     .filter((section) => sectionsWithErrors.has(section));
 }
@@ -134,6 +233,16 @@ export function getInvitationEditorSectionStatuses(
   return statuses;
 }
 
+function getInvitationEditorProgress(statuses: InvitationEditorSectionStatuses) {
+  const values = Object.values(statuses);
+
+  return {
+    complete: values.filter((status) => status === 'complete').length,
+    error: values.filter((status) => status === 'error').length,
+    total: invitationStudioChapters.length,
+  };
+}
+
 function SectionState({
   current,
   status,
@@ -184,6 +293,7 @@ function SectionButton({
           ? 'bg-seraya-brand-soft text-seraya-action-primary font-semibold'
           : 'bg-seraya-surface text-seraya-text-secondary hover:bg-seraya-canvas hover:text-seraya-text-primary',
       ].join(' ')}
+      data-invitation-editor-chapter={section.key}
       onClick={() => onSelect(section.key)}
       type="button"
     >
@@ -192,7 +302,7 @@ function SectionButton({
         <span className="text-seraya-text-muted mr-1.5 text-[0.68rem] font-bold tracking-[0.06em]">
           {section.number}
         </span>
-        {section.label}
+        {section.studioLabel}
       </span>
     </button>
   );
@@ -207,10 +317,15 @@ export const InvitationWorkspaceNavigation = memo(function InvitationWorkspaceNa
   onSelect: (section: InvitationEditorSectionKey) => void;
   statuses: InvitationEditorSectionStatuses;
 }) {
-  const activeIndex = invitationEditorSections.findIndex(
+  const activeIndex = invitationStudioChapters.findIndex(
     (section) => section.key === activeSection,
   );
-  const active = invitationEditorSections[activeIndex] ?? invitationEditorSections[0];
+  const active = invitationStudioChapters[activeIndex] ?? invitationStudioChapters[0]!;
+  const progress = getInvitationEditorProgress(statuses);
+  const progressCopy =
+    progress.error > 0
+      ? `${progress.complete} lengkap · ${progress.error} perlu diperbaiki`
+      : `${progress.complete} dari ${progress.total} lengkap`;
 
   return (
     <>
@@ -218,15 +333,17 @@ export const InvitationWorkspaceNavigation = memo(function InvitationWorkspaceNa
         aria-label="Bagian undangan"
         className="border-seraya-border-default bg-seraya-surface/95 sticky top-16 z-20 -mx-5 w-auto max-w-full min-w-0 overflow-x-hidden border-y px-5 py-3 shadow-[0_8px_18px_rgb(62_42_34_/_0.06)] backdrop-blur sm:mx-0 sm:w-full sm:rounded-[var(--seraya-radius-lg)] sm:border sm:px-4 lg:hidden"
         data-invitation-editor-mobile-navigation
+        data-release-b-studio-navigation="rb1"
       >
         <div className="flex items-center justify-between gap-4">
           <div className="min-w-0">
             <p className="text-seraya-text-muted text-[0.68rem] font-bold tracking-[0.08em] uppercase">
-              Bagian {activeIndex + 1} dari {invitationEditorSections.length}
+              Bagian {activeIndex + 1} dari {invitationStudioChapters.length}
             </p>
             <p className="text-seraya-text-primary mt-0.5 truncate text-sm font-semibold">
-              {active.label}
+              {active.studioLabel}
             </p>
+            <p className="text-seraya-text-muted mt-0.5 text-xs leading-5">{progressCopy}</p>
           </div>
           <SectionState current status={statuses[activeSection]} />
         </div>
@@ -237,7 +354,7 @@ export const InvitationWorkspaceNavigation = memo(function InvitationWorkspaceNa
           data-invitation-editor-mobile-section-strip
           role="list"
         >
-          {invitationEditorSections.map((section) => {
+          {invitationStudioChapters.map((section) => {
             const current = section.key === activeSection;
 
             return (
@@ -258,7 +375,7 @@ export const InvitationWorkspaceNavigation = memo(function InvitationWorkspaceNa
             className="border-seraya-border-default text-seraya-text-primary focus-visible:outline-seraya-focus-ring min-h-11 rounded-[var(--seraya-radius-md)] border px-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-45"
             disabled={activeIndex === 0}
             onClick={() => {
-              const previous = invitationEditorSections[activeIndex - 1];
+              const previous = invitationStudioChapters[activeIndex - 1];
               if (previous) onSelect(previous.key);
             }}
             type="button"
@@ -267,9 +384,9 @@ export const InvitationWorkspaceNavigation = memo(function InvitationWorkspaceNa
           </button>
           <button
             className="bg-seraya-brand-soft text-seraya-action-primary focus-visible:outline-seraya-focus-ring min-h-11 rounded-[var(--seraya-radius-md)] px-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-45"
-            disabled={activeIndex === invitationEditorSections.length - 1}
+            disabled={activeIndex === invitationStudioChapters.length - 1}
             onClick={() => {
-              const next = invitationEditorSections[activeIndex + 1];
+              const next = invitationStudioChapters[activeIndex + 1];
               if (next) onSelect(next.key);
             }}
             type="button"
@@ -283,15 +400,20 @@ export const InvitationWorkspaceNavigation = memo(function InvitationWorkspaceNa
         aria-label="Bagian undangan"
         className="border-seraya-border-default bg-seraya-surface sticky top-20 hidden max-h-[calc(100svh-6rem)] self-start overflow-y-auto rounded-[var(--seraya-radius-lg)] border p-2.5 shadow-[var(--seraya-shadow-soft)] lg:block"
         data-invitation-editor-desktop-navigation
+        data-release-b-studio-navigation="rb1"
       >
-        <div className="px-2.5 pt-1.5 pb-2">
+        <div className="border-seraya-border-default border-b px-2.5 pt-1.5 pb-3">
           <p className="text-seraya-text-muted text-[0.68rem] font-bold tracking-[0.08em] uppercase">
-            Susunan undangan
+            Studio undangan
           </p>
-          <p className="text-seraya-text-muted mt-1 text-xs leading-5">Status draft tersimpan</p>
+          <p className="text-seraya-text-primary mt-1 text-sm font-semibold">9 bab perjalanan</p>
+          <p className="text-seraya-text-muted mt-1 text-xs leading-5">{progressCopy}</p>
+          <p className="text-seraya-text-muted mt-1 text-[0.7rem] leading-5">
+            Status draft tersimpan
+          </p>
         </div>
-        <ol className="space-y-0.5">
-          {invitationEditorSections.map((section) => {
+        <ol className="mt-2 space-y-0.5">
+          {invitationStudioChapters.map((section) => {
             const current = section.key === activeSection;
 
             return (
@@ -305,11 +427,12 @@ export const InvitationWorkspaceNavigation = memo(function InvitationWorkspaceNa
                       ? 'bg-seraya-brand-soft text-seraya-action-primary font-semibold'
                       : 'text-seraya-text-secondary hover:bg-seraya-canvas hover:text-seraya-text-primary',
                   ].join(' ')}
+                  data-invitation-editor-chapter={section.key}
                   onClick={() => onSelect(section.key)}
                   type="button"
                 >
                   <SectionState current={current} status={statuses[section.key]} />
-                  <span className="min-w-0 flex-1 truncate leading-5">{section.label}</span>
+                  <span className="min-w-0 flex-1 truncate leading-5">{section.studioLabel}</span>
                   <span className="text-seraya-text-muted text-[0.68rem] font-bold tracking-[0.06em]">
                     {section.number}
                   </span>
@@ -341,6 +464,7 @@ export function InvitationWorkspacePanel({
       className="max-w-full min-w-0"
       data-invitation-editor-panel={section}
       data-invitation-editor-panel-active={active ? 'true' : 'false'}
+      data-release-b-studio-panel="rb1"
       hidden={!active}
       id={`invitation-editor-panel-${section}`}
     >
