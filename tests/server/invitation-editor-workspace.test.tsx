@@ -69,7 +69,7 @@ describe('Slice A invitation editor workspace foundation', () => {
     };
 
     expect(getInvitationEditorSectionForField('digitalGift.accounts.0.accountNumber')).toBe('gift');
-    expect(getInvitationEditorSectionForField('gallery.imageIds')).toBeNull();
+    expect(getInvitationEditorSectionForField('gallery.imageIds')).toBe('gallery');
     expect(getInvitationEditorErrorSections(errors)).toEqual(['couple', 'schedule']);
     expect(getInvitationEditorSectionStatuses(draft, errors)).toMatchObject({
       couple: 'error',
@@ -95,7 +95,7 @@ describe('Slice A invitation editor workspace foundation', () => {
     expect(navigation).toContain('aria-label="Bagian undangan"');
     expect(navigation).toContain('Bagian 2 dari 9');
     expect(navigation).toContain('aria-current="step"');
-    expect(navigation).toContain('Status draft tersimpan');
+    expect(navigation).toContain('Status draf saat ini');
     expect(inactivePanel).toBe('');
     expect(inactivePanel).not.toContain('name="closing.signature"');
   });
