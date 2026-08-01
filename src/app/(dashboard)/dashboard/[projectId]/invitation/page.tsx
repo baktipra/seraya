@@ -1,7 +1,14 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { InvitationEditor } from '@/components/projects/invitation-editor';
 import { InvitationStudioShell } from '@/components/projects/invitation-studio-shell';
+import {
+  getInvitationEditorSectionStatuses,
+  invitationEditorSections,
+  type InvitationEditorSectionKey,
+  type InvitationEditorSectionStatus,
+} from '@/components/projects/invitation-editor-workspace';
 import { WorkspacePage } from '@/components/workspace/workspace-page';
 import { measureWorkspaceServerLoad } from '@/lib/performance/workspace-performance.server';
 import { getOwnedProjectContextForRequest } from '@/modules/auth/dashboard-request-context';
@@ -24,6 +31,31 @@ type InvitationEditorScreen = {
   readiness: Awaited<ReturnType<typeof getInvitationReadinessForVerifiedProject>>;
 };
 
+type InvitationReadinessHandoffProps = {
+  draft: OwnedInvitationEditor['draft'];
+  projectId: string;
+  readiness: InvitationEditorScreen['readiness'];
+};
+
+const readinessChapterOrder: readonly InvitationEditorSectionKey[] = [
+  'style',
+  'opening',
+  'couple',
+  'story',
+  'schedule',
+  'gallery',
+  'gift',
+  'rsvp',
+  'closing',
+];
+
+const readinessStatusCopy: Record<InvitationEditorSectionStatus, string> = {
+  complete: 'Siap',
+  error: 'Perlu diperbaiki',
+  incomplete: 'Belum lengkap',
+  optional_off: 'Tidak ditampilkan',
+};
+
 // Invitation drafts are private owner data and must not participate in the
 // public invitation snapshot cache.
 export const dynamic = 'force-dynamic';
@@ -36,6 +68,193 @@ function getDeferredGalleryImages(editor: OwnedInvitationEditor): InvitationGall
     id,
     src: `/dashboard/media/${id}`,
   }));
+}
+
+function InvitationReadinessHandoff({
+  draft,
+  projectId,
+  readiness,
+}: InvitationReadinessHandoffProps) {
+  const statuses = getInvitationEditorSectionStatuses(draft);
+  const chapters = readinessChapterOrder.map((key) => {
+    const chapter = invitationEditorSections.find((candidate) => candidate.key === key);
+
+    if (!chapter) {
+      throw new Error(`Unknown invitation readiness chapter: ${key}`);
+    }
+
+    return { ...chapter, status: statuses[key] };
+  });
+  const blockers = chapters.filter(
+    (chapter) =>
+      !chapter.optional && (chapter.status === 'error' || chapter.status === 'incomplete'),
+  );
+  const attention = chapters.filter(
+    (chapter) =>
+      chapter.optional && (chapter.status === 'error' || chapter.status === 'incomplete'),
+  );
+  const readyCount = chapters.filter(
+    (chapter) => chapter.status === 'complete' || chapter.status === 'optional_off',
+  ).length;
+  const firstBlocker = blockers[0];
+  const state = blockers.length > 0 ? 'blocked' : attention.length > 0 ? 'attention' : 'ready';
+  const stateCopy =
+    state === 'blocked'
+      ? {
+          badge: 'Menghambat publikasi',
+          description: `${blockers.length} bab wajib perlu dilengkapi pada draf tersimpan.`,
+          title: 'Lengkapi bagian utama sebelum menerbitkan.',
+        }
+      : state === 'attention'
+        ? {
+            badge: 'Perlu perhatian',
+            description: `${attention.length} bab opsional sedang aktif tetapi belum lengkap.`,
+            title: 'Draf utama siap, periksa bagian opsional.',
+          }
+        : {
+            badge: 'Siap',
+            description: 'Semua bab wajib pada draf tersimpan sudah lengkap.',
+            title: 'Draf tersimpan siap menuju penerbitan.',
+          };
+  const publicationControlAvailable =
+    readiness.invitation.state === 'ready_to_publish' ||
+    readiness.invitation.state === 'published_with_unpublished_changes';
+
+  return (
+    <section
+      aria-labelledby="invitation-canonical-readiness-title"
+      className="border-seraya-border-default bg-seraya-surface mb-5 rounded-[var(--seraya-radius-lg)] border p-4 shadow-[var(--seraya-shadow-soft)] sm:mb-6 sm:p-6"
+      data-release-b-readiness-handoff="rb4"
+    >
+      <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+        <div className="max-w-2xl">
+          <p className="text-seraya-text-muted text-[0.68rem] font-bold tracking-[0.08em] uppercase">
+            Kesiapan draf tersimpan
+          </p>
+          <div className="mt-2 flex flex-wrap items-center gap-2.5">
+            <span
+              className={[
+                'inline-flex min-h-7 items-center rounded-full px-3 text-xs font-bold',
+                state === 'blocked'
+                  ? 'bg-seraya-status-error-soft text-seraya-status-error'
+                  : state === 'attention'
+                    ? 'bg-seraya-brand-soft text-seraya-action-primary'
+                    : 'bg-seraya-status-success-soft text-seraya-status-success',
+              ].join(' ')}
+            >
+              {stateCopy.badge}
+            </span>
+            <span className="text-seraya-text-muted text-xs font-semibold">
+              {readyCount} dari {chapters.length} bab siap
+            </span>
+          </div>
+          <h2
+            className="text-seraya-text-primary mt-3 text-xl font-semibold tracking-[-0.02em] sm:text-2xl"
+            id="invitation-canonical-readiness-title"
+          >
+            {stateCopy.title}
+          </h2>
+          <p className="text-seraya-text-muted mt-2 text-sm leading-6">
+            {stateCopy.description} Perubahan yang masih berada di browser harus disimpan terlebih
+            dahulu dan tidak mengubah versi yang sedang dilihat tamu.
+          </p>
+        </div>
+
+        <div className="w-full shrink-0 xl:max-w-xs">
+          {firstBlocker ? (
+            <Link
+              className="bg-seraya-action-primary text-seraya-text-inverse hover:bg-seraya-action-primary-hover focus-visible:outline-seraya-focus-ring inline-flex min-h-12 w-full items-center justify-center rounded-[var(--seraya-radius-md)] px-5 text-center text-sm font-semibold shadow-[0_8px_18px_rgb(142_75_82_/_0.16)] transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
+              href={`/dashboard/${projectId}/invitation?focus=${firstBlocker.key}#bagian-${firstBlocker.key}`}
+              prefetch={false}
+            >
+              Lengkapi undangan
+            </Link>
+          ) : readiness.invitation.state === 'draft_ready_unactivated' ? (
+            <Link
+              className="bg-seraya-action-primary text-seraya-text-inverse hover:bg-seraya-action-primary-hover focus-visible:outline-seraya-focus-ring inline-flex min-h-12 w-full items-center justify-center rounded-[var(--seraya-radius-md)] px-5 text-center text-sm font-semibold shadow-[0_8px_18px_rgb(142_75_82_/_0.16)] transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
+              href={`/dashboard/${projectId}/billing`}
+            >
+              Lihat pembayaran
+            </Link>
+          ) : readiness.invitation.state === 'published' && readiness.invitation.publishedSlug ? (
+            <Link
+              className="bg-seraya-action-primary text-seraya-text-inverse hover:bg-seraya-action-primary-hover focus-visible:outline-seraya-focus-ring inline-flex min-h-12 w-full items-center justify-center rounded-[var(--seraya-radius-md)] px-5 text-center text-sm font-semibold shadow-[0_8px_18px_rgb(142_75_82_/_0.16)] transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
+              href={`/${readiness.invitation.publishedSlug}`}
+              rel="noreferrer"
+              target="_blank"
+            >
+              Lihat undangan terbit
+            </Link>
+          ) : publicationControlAvailable ? (
+            <p className="border-seraya-border-default bg-seraya-canvas text-seraya-text-secondary rounded-[var(--seraya-radius-md)] border px-4 py-3 text-sm leading-6">
+              Gunakan satu tombol penerbitan di area status dokumen dalam studio setelah perubahan
+              lokal tersimpan.
+            </p>
+          ) : (
+            <p className="border-seraya-border-default bg-seraya-canvas text-seraya-text-secondary rounded-[var(--seraya-radius-md)] border px-4 py-3 text-sm leading-6">
+              Simpan draf lalu periksa kembali kesiapan sebelum melanjutkan.
+            </p>
+          )}
+        </div>
+      </div>
+
+      <ol className="mt-5 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+        {chapters.map((chapter) => {
+          const needsAttention = chapter.status === 'error' || chapter.status === 'incomplete';
+          const content = (
+            <>
+              <span
+                aria-hidden="true"
+                className={[
+                  'inline-flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold',
+                  chapter.status === 'error'
+                    ? 'bg-seraya-status-error-soft text-seraya-status-error'
+                    : chapter.status === 'complete'
+                      ? 'bg-seraya-status-success-soft text-seraya-status-success'
+                      : 'bg-seraya-brand-soft text-seraya-text-secondary',
+                ].join(' ')}
+              >
+                {chapter.status === 'complete'
+                  ? '✓'
+                  : chapter.status === 'error'
+                    ? '!'
+                    : chapter.status === 'optional_off'
+                      ? '–'
+                      : '○'}
+              </span>
+              <span className="min-w-0">
+                <span className="text-seraya-text-primary block text-sm font-semibold">
+                  {chapter.number} · {chapter.studioLabel}
+                </span>
+                <span className="text-seraya-text-muted mt-0.5 block text-xs leading-5">
+                  {readinessStatusCopy[chapter.status]}
+                  {chapter.optional ? ' · Opsional' : ' · Wajib'}
+                </span>
+              </span>
+            </>
+          );
+
+          return (
+            <li key={chapter.key}>
+              {needsAttention ? (
+                <Link
+                  className="border-seraya-border-default bg-seraya-canvas hover:border-seraya-border-strong hover:bg-seraya-brand-soft/35 focus-visible:outline-seraya-focus-ring flex min-h-16 items-center gap-3 rounded-[var(--seraya-radius-md)] border px-3.5 py-3 transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
+                  href={`/dashboard/${projectId}/invitation?focus=${chapter.key}#bagian-${chapter.key}`}
+                  prefetch={false}
+                >
+                  {content}
+                </Link>
+              ) : (
+                <div className="border-seraya-border-default bg-seraya-canvas flex min-h-16 items-center gap-3 rounded-[var(--seraya-radius-md)] border px-3.5 py-3">
+                  {content}
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ol>
+    </section>
+  );
 }
 
 async function getInvitationEditorScreenOrNotFound(
@@ -80,6 +299,11 @@ export default async function InvitationEditorPage({ params }: InvitationEditorP
   return (
     <WorkspacePage kind="studio" width="studio">
       <InvitationStudioShell>
+        <InvitationReadinessHandoff
+          draft={screen.editor.draft}
+          projectId={screen.editor.project.id}
+          readiness={screen.readiness}
+        />
         <InvitationEditor
           draft={screen.editor.draft}
           galleryImages={screen.galleryImages}
