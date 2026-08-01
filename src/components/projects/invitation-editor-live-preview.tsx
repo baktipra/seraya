@@ -18,6 +18,7 @@ import {
 import styles from './invitation-editor-live-preview.module.css';
 
 type InvitationPreviewViewport = 'desktop' | 'mobile';
+
 type InvitationPreviewTargetState = 'available' | 'unavailable';
 
 const previewTargetIds: Record<
@@ -247,14 +248,7 @@ export const InvitationEditorLivePreview = memo(function InvitationEditorLivePre
       window.cancelAnimationFrame(firstFrame);
       window.cancelAnimationFrame(secondFrame);
     };
-  }, [
-    activeSection,
-    content.templateKey,
-    isOpen,
-    targetAvailable,
-    viewport,
-    visibilitySignature,
-  ]);
+  }, [activeSection, content.templateKey, isOpen, targetAvailable, viewport, visibilitySignature]);
 
   useEffect(() => {
     if (!isOpen) return undefined;
