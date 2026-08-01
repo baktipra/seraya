@@ -18,125 +18,71 @@ import {
 import styles from './invitation-editor-live-preview.module.css';
 
 type InvitationPreviewViewport = 'desktop' | 'mobile';
-
 type InvitationPreviewTargetState = 'available' | 'unavailable';
 
-const previewTargetSelectors: Record<InvitationEditorSectionKey, readonly string[]> = {
-  style: ['[data-invitation-chapter="opening"]', '[data-roselle-chapter="opening"]'],
-  opening: ['[data-invitation-chapter="opening"]', '[data-roselle-chapter="opening"]'],
-  couple: ['[data-invitation-chapter="couple"]', '[data-roselle-chapter="couple"]'],
-  story: ['[data-invitation-chapter="story"]', '[data-roselle-chapter="story"]'],
-  schedule: [
-    '[data-invitation-chapter="schedule"]',
-    '[data-roselle-chapter="events"]',
-    '[data-invitation-schedule-journey]',
-  ],
-  gallery: ['[data-invitation-chapter="gallery"]', '[data-roselle-chapter="gallery"]'],
-  gift: ['[data-invitation-chapter="gift"]', '[data-roselle-chapter="gift"]'],
-  rsvp: ['[data-template-response-journey]', '[data-generic-response-note]'],
-  closing: ['[data-invitation-chapter="closing"]', '[data-roselle-chapter="closing"]'],
+const previewTargetIds: Record<
+  InvitationDraftContent['templateKey'],
+  Partial<Record<InvitationEditorSectionKey, string>>
+> = {
+  aruna: {
+    closing: 'aruna-closing-title',
+    couple: 'aruna-couple-title',
+    gallery: 'aruna-gallery-title',
+    gift: 'aruna-digital-gift-title',
+    schedule: 'aruna-events-title',
+    story: 'aruna-story-title',
+  },
+  laras: {
+    closing: 'laras-closing-title',
+    couple: 'laras-couple-title',
+    gallery: 'laras-gallery-title',
+    gift: 'laras-digital-gift-title',
+    schedule: 'laras-events-title',
+    story: 'laras-story-title',
+  },
+  roselle: {
+    closing: 'roselle-closing-title',
+    couple: 'roselle-couple-title',
+    gallery: 'roselle-gallery-title',
+    gift: 'roselle-digital-gift-title',
+    schedule: 'roselle-events-title',
+    story: 'roselle-story-title',
+  },
 };
-
-const templateAwarePreviewStyles = `
-  [data-release-b-template-preview='rb3'][data-preview-viewport='mobile']
-    [data-template='aruna'] [data-invitation-chapter='opening'] {
-    grid-template-columns: 1fr;
-    min-height: 0;
-    padding: 4rem 1.35rem;
-  }
-
-  [data-release-b-template-preview='rb3'][data-preview-viewport='mobile']
-    [data-template='aruna'] [data-invitation-chapter='opening'] > div:last-child {
-    min-width: 0;
-    padding: 1rem 0 0;
-    border-top: 1px solid currentcolor;
-    border-left: 0;
-  }
-
-  [data-release-b-template-preview='rb3'][data-preview-viewport='mobile']
-    [data-template='aruna'] [data-invitation-chapter='couple'] > div:last-child,
-  [data-release-b-template-preview='rb3'][data-preview-viewport='mobile']
-    [data-template='aruna'] [data-invitation-chapter='schedule'] > div:last-child,
-  [data-release-b-template-preview='rb3'][data-preview-viewport='mobile']
-    [data-template='laras'] [data-invitation-chapter='couple'] > div:last-child,
-  [data-release-b-template-preview='rb3'][data-preview-viewport='mobile']
-    [data-template='laras'] [data-invitation-chapter='schedule'] > div:last-child {
-    grid-template-columns: 1fr;
-  }
-
-  [data-release-b-template-preview='rb3'][data-preview-viewport='mobile']
-    [data-template='aruna'] [data-invitation-chapter='couple'] article:last-child {
-    text-align: left;
-  }
-
-  [data-release-b-template-preview='rb3'][data-preview-viewport='mobile']
-    [data-template='aruna'] [data-invitation-chapter='couple'] > div:last-child > span,
-  [data-release-b-template-preview='rb3'][data-preview-viewport='mobile']
-    [data-template='laras'] [data-invitation-chapter='couple'] > div:last-child > span {
-    justify-self: center;
-  }
-
-  [data-release-b-template-preview='rb3'][data-preview-viewport='mobile']
-    [data-template='aruna'] [data-invitation-chapter='gallery'] > div:last-child,
-  [data-release-b-template-preview='rb3'][data-preview-viewport='mobile']
-    [data-template='laras'] [data-invitation-chapter='gallery'] > div:last-child {
-    grid-template-columns: 1fr;
-  }
-
-  [data-release-b-template-preview='rb3'][data-preview-viewport='mobile']
-    [data-template='aruna'] [data-invitation-chapter='gallery'] figure,
-  [data-release-b-template-preview='rb3'][data-preview-viewport='mobile']
-    [data-template='laras'] [data-invitation-chapter='gallery'] figure {
-    grid-column: auto;
-    transform: none;
-  }
-
-  [data-release-b-template-preview='rb3'][data-preview-viewport='desktop']
-    [data-template='roselle'] [data-roselle-chapter='opening'] {
-    min-height: min(82svh, 52rem);
-    padding: clamp(4.75rem, 14vw, 7.5rem) clamp(1.5rem, 8vw, 5rem)
-      clamp(5.5rem, 14vw, 7rem);
-  }
-
-  [data-release-b-template-preview='rb3'][data-preview-viewport='desktop']
-    [data-template='roselle'] [data-roselle-chapter='opening'] h1 {
-    font-size: clamp(3.65rem, 15vw, 7rem);
-  }
-
-  [data-release-b-template-preview='rb3'][data-preview-viewport='desktop']
-    [data-template='roselle'] [data-roselle-chapter] {
-    padding-right: clamp(1.5rem, 8vw, 5rem);
-    padding-left: clamp(1.5rem, 8vw, 5rem);
-  }
-
-  [data-release-b-template-preview='rb3'][data-preview-viewport='desktop']
-    [data-template='roselle'] [data-roselle-chapter] h2 {
-    font-size: clamp(2.65rem, 8vw, 4.4rem);
-  }
-
-  [data-release-b-template-preview='rb3'][data-preview-viewport='desktop']
-    [data-template='roselle'] [data-roselle-chapter='couple'] > div {
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  }
-`;
 
 function isInvitationEditorSectionKey(value: string): value is InvitationEditorSectionKey {
   return invitationEditorSections.some((section) => section.key === value);
 }
 
-function findPreviewTarget(
-  screen: HTMLElement,
-  activeSection: InvitationEditorSectionKey,
-): HTMLElement | null {
-  for (const selector of previewTargetSelectors[activeSection]) {
-    const target = screen.querySelector<HTMLElement>(selector);
-
-    if (target) {
-      return target;
-    }
+function getActivePreviewSection(): InvitationEditorSectionKey {
+  if (typeof window === 'undefined') {
+    return 'style';
   }
 
-  return null;
+  const requestedSection = window.location.hash.replace('#bagian-', '');
+  return isInvitationEditorSectionKey(requestedSection) ? requestedSection : 'style';
+}
+
+function isPreviewTargetAvailable(
+  content: InvitationDraftContent,
+  activeSection: InvitationEditorSectionKey,
+) {
+  switch (activeSection) {
+    case 'story':
+      return content.story.enabled;
+    case 'schedule':
+      return content.eventSchedule.events.length > 0;
+    case 'gallery':
+      return content.gallery.enabled && content.gallery.imageIds.length > 0;
+    case 'gift':
+      return content.digitalGift.enabled && content.digitalGift.accounts.length > 0;
+    case 'rsvp':
+      return content.rsvp.enabled;
+    case 'closing':
+      return content.closing.enabled;
+    default:
+      return true;
+  }
 }
 
 export type InvitationEditorLivePreviewProps = {
@@ -162,7 +108,9 @@ export const InvitationEditorLivePreview = memo(function InvitationEditorLivePre
   const onOpenChangeRef = useRef(onOpenChange);
   const screenRef = useRef<HTMLDivElement | null>(null);
   const scrollPositionRef = useRef(0);
-  const [activeSection, setActiveSection] = useState<InvitationEditorSectionKey>('style');
+  const [activeSection, setActiveSection] = useState<InvitationEditorSectionKey>(
+    getActivePreviewSection,
+  );
   const [canUseDesktopViewport, setCanUseDesktopViewport] = useState(false);
   const [targetState, setTargetState] = useState<InvitationPreviewTargetState>('available');
   const [viewport, setViewport] = useState<InvitationPreviewViewport>('mobile');
@@ -178,6 +126,7 @@ export const InvitationEditorLivePreview = memo(function InvitationEditorLivePre
   const activeChapter =
     invitationEditorSections.find((section) => section.key === activeSection) ??
     invitationEditorSections[0]!;
+  const targetAvailable = isPreviewTargetAvailable(content, activeSection);
   const visibilitySignature = [
     content.templateKey,
     content.story.enabled,
@@ -185,6 +134,7 @@ export const InvitationEditorLivePreview = memo(function InvitationEditorLivePre
     content.gallery.enabled,
     content.gallery.imageIds.length,
     content.digitalGift.enabled,
+    content.digitalGift.accounts.length,
     content.rsvp.enabled,
     content.closing.enabled,
   ].join(':');
@@ -197,34 +147,28 @@ export const InvitationEditorLivePreview = memo(function InvitationEditorLivePre
 
   useEffect(() => {
     const syncActiveSection = () => {
-      const currentChapter = document.querySelector<HTMLElement>(
-        '[data-invitation-editor-chapter][aria-current="step"]',
+      const nextSection = getActivePreviewSection();
+      setActiveSection((currentSection) =>
+        currentSection === nextSection ? currentSection : nextSection,
       );
-      const requestedSection = currentChapter?.dataset.invitationEditorChapter;
-
-      if (requestedSection && isInvitationEditorSectionKey(requestedSection)) {
-        setActiveSection(requestedSection);
-      }
     };
 
     syncActiveSection();
 
-    const editorRoot = document.querySelector<HTMLElement>(
-      '[data-invitation-editor-runtime-ready]',
-    );
-
-    if (!editorRoot) {
-      return undefined;
-    }
-
     const observer = new MutationObserver(syncActiveSection);
-    observer.observe(editorRoot, {
+    observer.observe(document.body, {
       attributeFilter: ['aria-current'],
       attributes: true,
       subtree: true,
     });
+    window.addEventListener('hashchange', syncActiveSection);
+    window.addEventListener('popstate', syncActiveSection);
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('hashchange', syncActiveSection);
+      window.removeEventListener('popstate', syncActiveSection);
+    };
   }, []);
 
   useEffect(() => {
@@ -259,17 +203,38 @@ export const InvitationEditorLivePreview = memo(function InvitationEditorLivePre
     let secondFrame = 0;
     const firstFrame = window.requestAnimationFrame(() => {
       secondFrame = window.requestAnimationFrame(() => {
-        const target = findPreviewTarget(screen, activeSection);
-        setTargetState(target ? 'available' : 'unavailable');
+        if (!targetAvailable) {
+          setTargetState('unavailable');
+          return;
+        }
 
-        if (!target) {
+        setTargetState('available');
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (activeSection === 'style' || activeSection === 'opening') {
+          screen.scrollTo({ behavior: reduceMotion ? 'auto' : 'smooth', top: 0 });
+          return;
+        }
+
+        if (activeSection === 'rsvp') {
+          screen.scrollTo({
+            behavior: reduceMotion ? 'auto' : 'smooth',
+            top: Math.max(0, screen.scrollHeight - screen.clientHeight - 160),
+          });
+          return;
+        }
+
+        const targetId = previewTargetIds[content.templateKey][activeSection];
+        const target = targetId ? screen.ownerDocument.getElementById(targetId) : null;
+
+        if (!target || !screen.contains(target)) {
+          setTargetState('unavailable');
           return;
         }
 
         const screenBox = screen.getBoundingClientRect();
         const targetBox = target.getBoundingClientRect();
         const targetTop = Math.max(0, screen.scrollTop + targetBox.top - screenBox.top - 16);
-        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         screen.scrollTo({
           behavior: reduceMotion ? 'auto' : 'smooth',
@@ -282,7 +247,14 @@ export const InvitationEditorLivePreview = memo(function InvitationEditorLivePre
       window.cancelAnimationFrame(firstFrame);
       window.cancelAnimationFrame(secondFrame);
     };
-  }, [activeSection, isOpen, viewport, visibilitySignature]);
+  }, [
+    activeSection,
+    content.templateKey,
+    isOpen,
+    targetAvailable,
+    viewport,
+    visibilitySignature,
+  ]);
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -324,10 +296,19 @@ export const InvitationEditorLivePreview = memo(function InvitationEditorLivePre
   }, [isOpen]);
 
   const status = isDirty ? 'Perubahan lokal · belum disimpan' : 'Draf tersimpan';
+  const viewportLabel = viewport === 'desktop' ? 'desktop' : 'ponsel';
   const chapterStatus =
     targetState === 'available'
-      ? `Menampilkan bab ${activeChapter.studioLabel}.`
+      ? `Menampilkan bab ${activeChapter.studioLabel} dalam mode ${viewportLabel}.`
       : `Bab ${activeChapter.studioLabel} belum ditampilkan karena bagian ini sedang nonaktif atau belum memiliki isi.`;
+  const desktopDeviceClasses =
+    viewport === 'desktop'
+      ? '!m-0 !h-full !min-h-0 !max-h-none !w-full !max-w-none !flex-1 !basis-auto !rounded-[1rem] !border-[0.22rem] !p-[0.08rem]'
+      : '';
+  const desktopScreenClasses =
+    viewport === 'desktop'
+      ? "!rounded-[0.72rem] [&_[data-template=roselle]_[data-roselle-chapter]]:!px-[clamp(1.5rem,8vw,5rem)] [&_[data-template=roselle]_[data-roselle-chapter=opening]]:!min-h-[min(82svh,52rem)] [&_[data-template=roselle]_[data-roselle-chapter=opening]_h1]:!text-[clamp(3.65rem,15vw,7rem)] [&_[data-template=roselle]_[data-roselle-chapter]_h2]:!text-[clamp(2.65rem,8vw,4.4rem)]"
+      : '';
 
   return (
     <aside
@@ -429,26 +410,9 @@ export const InvitationEditorLivePreview = memo(function InvitationEditorLivePre
           </div>
         </div>
 
-        <style>{templateAwarePreviewStyles}</style>
         <div
-          className={styles.deviceShell}
+          className={[styles.deviceShell, desktopDeviceClasses].filter(Boolean).join(' ')}
           data-local-preview-device
-          style={
-            viewport === 'desktop'
-              ? {
-                  aspectRatio: 'auto',
-                  borderRadius: '1rem',
-                  borderWidth: '0.22rem',
-                  flex: '1 1 auto',
-                  height: '100%',
-                  margin: 0,
-                  maxHeight: 'none',
-                  minHeight: 0,
-                  padding: '0.08rem',
-                  width: '100%',
-                }
-              : undefined
-          }
         >
           <span
             aria-hidden="true"
@@ -456,11 +420,11 @@ export const InvitationEditorLivePreview = memo(function InvitationEditorLivePre
           />
           <div
             ref={screenRef}
-            aria-label={`Pratinjau undangan ${viewport === 'desktop' ? 'desktop' : 'ponsel'} yang dapat digulir`}
-            className={styles.deviceScreen}
+            aria-label="Pratinjau undangan yang dapat digulir"
+            className={[styles.deviceScreen, desktopScreenClasses].filter(Boolean).join(' ')}
             data-local-preview-screen
+            data-preview-device-mode={viewport}
             role="region"
-            style={viewport === 'desktop' ? { borderRadius: '0.72rem' } : undefined}
             tabIndex={0}
           >
             <InvitationTemplateRenderer
