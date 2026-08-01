@@ -109,9 +109,8 @@ export const InvitationEditorLivePreview = memo(function InvitationEditorLivePre
   const onOpenChangeRef = useRef(onOpenChange);
   const screenRef = useRef<HTMLDivElement | null>(null);
   const scrollPositionRef = useRef(0);
-  const [activeSection, setActiveSection] = useState<InvitationEditorSectionKey>(
-    getActivePreviewSection,
-  );
+  const [activeSection, setActiveSection] =
+    useState<InvitationEditorSectionKey>(getActivePreviewSection);
   const [canUseDesktopViewport, setCanUseDesktopViewport] = useState(false);
   const [targetState, setTargetState] = useState<InvitationPreviewTargetState>('available');
   const [viewport, setViewport] = useState<InvitationPreviewViewport>('mobile');
@@ -301,7 +300,7 @@ export const InvitationEditorLivePreview = memo(function InvitationEditorLivePre
       : '';
   const desktopScreenClasses =
     viewport === 'desktop'
-      ? "!rounded-[0.72rem] [&_[data-template=roselle]_[data-roselle-chapter]]:!px-[clamp(1.5rem,8vw,5rem)] [&_[data-template=roselle]_[data-roselle-chapter=opening]]:!min-h-[min(82svh,52rem)] [&_[data-template=roselle]_[data-roselle-chapter=opening]_h1]:!text-[clamp(3.65rem,15vw,7rem)] [&_[data-template=roselle]_[data-roselle-chapter]_h2]:!text-[clamp(2.65rem,8vw,4.4rem)]"
+      ? '!rounded-[0.72rem] [&_[data-template=roselle]_[data-roselle-chapter]]:!px-[clamp(1.5rem,8vw,5rem)] [&_[data-template=roselle]_[data-roselle-chapter=opening]]:!min-h-[min(82svh,52rem)] [&_[data-template=roselle]_[data-roselle-chapter=opening]_h1]:!text-[clamp(3.65rem,15vw,7rem)] [&_[data-template=roselle]_[data-roselle-chapter]_h2]:!text-[clamp(2.65rem,8vw,4.4rem)]'
       : '';
 
   return (
