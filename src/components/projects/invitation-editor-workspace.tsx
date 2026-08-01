@@ -100,7 +100,7 @@ export type InvitationEditorSectionStatuses = Record<
   InvitationEditorSectionStatus
 >;
 
-const canonicalChapterOrder: readonly InvitationEditorSectionKey[] = [
+export const canonicalInvitationEditorSectionKeys = [
   'style',
   'opening',
   'couple',
@@ -110,9 +110,9 @@ const canonicalChapterOrder: readonly InvitationEditorSectionKey[] = [
   'gift',
   'rsvp',
   'closing',
-];
+] as const satisfies readonly InvitationEditorSectionKey[];
 
-const invitationStudioChapters = canonicalChapterOrder.map((chapterKey) => {
+export const invitationStudioChapters = canonicalInvitationEditorSectionKeys.map((chapterKey) => {
   const chapter = invitationEditorSections.find((candidate) => candidate.key === chapterKey);
 
   if (!chapter) {
@@ -126,30 +126,44 @@ const sectionStatusCopy: Record<
   InvitationEditorSectionStatus | 'current',
   { label: string; symbol: string }
 > = {
-  complete: { label: 'Lengkap', symbol: '✓' },
+  complete: { label: 'Siap', symbol: '✓' },
   current: { label: 'Sedang dibuka', symbol: '•' },
   error: { label: 'Perlu diperbaiki', symbol: '!' },
   incomplete: { label: 'Belum lengkap', symbol: '○' },
   optional_off: { label: 'Tidak ditampilkan', symbol: '–' },
 };
 
+const fieldSectionMatchers: ReadonlyArray<{
+  matches: (fieldName: string) => boolean;
+  section: InvitationEditorSectionKey;
+}> = [
+  { matches: (fieldName) => fieldName === 'templateKey', section: 'style' },
+  { matches: (fieldName) => fieldName.startsWith('hero.'), section: 'opening' },
+  { matches: (fieldName) => fieldName.startsWith('couple.'), section: 'couple' },
+  { matches: (fieldName) => fieldName.startsWith('story.'), section: 'story' },
+  { matches: (fieldName) => fieldName.startsWith('eventSchedule.'), section: 'schedule' },
+  { matches: (fieldName) => fieldName.startsWith('gallery.'), section: 'gallery' },
+  { matches: (fieldName) => fieldName.startsWith('digitalGift.'), section: 'gift' },
+  { matches: (fieldName) => fieldName.startsWith('rsvp.'), section: 'rsvp' },
+  { matches: (fieldName) => fieldName.startsWith('closing.'), section: 'closing' },
+];
+
 function hasText(value: string | null | undefined) {
   return Boolean(value?.trim());
+}
+
+function getOptionalSectionStatus(enabled: boolean, complete: boolean) {
+  if (!enabled) {
+    return 'optional_off' as const;
+  }
+
+  return complete ? ('complete' as const) : ('incomplete' as const);
 }
 
 export function getInvitationEditorSectionForField(
   fieldName: string,
 ): InvitationEditorSectionKey | null {
-  if (fieldName === 'templateKey') return 'style';
-  if (fieldName.startsWith('hero.')) return 'opening';
-  if (fieldName.startsWith('couple.')) return 'couple';
-  if (fieldName.startsWith('story.')) return 'story';
-  if (fieldName.startsWith('eventSchedule.')) return 'schedule';
-  if (fieldName.startsWith('rsvp.')) return 'rsvp';
-  if (fieldName.startsWith('digitalGift.')) return 'gift';
-  if (fieldName.startsWith('closing.')) return 'closing';
-
-  return null;
+  return fieldSectionMatchers.find((matcher) => matcher.matches(fieldName))?.section ?? null;
 }
 
 function getSectionsWithErrors(errors?: InvitationEditorFieldErrors) {
@@ -189,11 +203,10 @@ export function getInvitationEditorSectionStatuses(
       hasText(content.couple.personOne.displayName) && hasText(content.couple.personTwo.displayName)
         ? 'complete'
         : 'incomplete',
-    story: !content.story.enabled
-      ? 'optional_off'
-      : hasText(content.story.heading) || hasText(content.story.body)
-        ? 'complete'
-        : 'incomplete',
+    story: getOptionalSectionStatus(
+      content.story.enabled,
+      hasText(content.story.heading) || hasText(content.story.body),
+    ),
     schedule:
       firstEvent &&
       content.eventSchedule.events.every(
@@ -201,29 +214,25 @@ export function getInvitationEditorSectionStatuses(
       )
         ? 'complete'
         : 'incomplete',
-    gallery:
-      content.gallery.enabled && content.gallery.imageIds.length > 0 ? 'complete' : 'optional_off',
-    rsvp: !content.rsvp.enabled
-      ? 'optional_off'
-      : hasText(content.rsvp.heading) || hasText(content.rsvp.lead)
-        ? 'complete'
-        : 'incomplete',
-    gift: !content.digitalGift.enabled
-      ? 'optional_off'
-      : content.digitalGift.accounts.length > 0 &&
-          content.digitalGift.accounts.every(
-            (account) =>
-              hasText(account.providerName) &&
-              hasText(account.accountHolder) &&
-              hasText(account.accountNumber),
-          )
-        ? 'complete'
-        : 'incomplete',
-    closing: !content.closing.enabled
-      ? 'optional_off'
-      : hasText(content.closing.message) || hasText(content.closing.signature)
-        ? 'complete'
-        : 'incomplete',
+    gallery: getOptionalSectionStatus(content.gallery.enabled, content.gallery.imageIds.length > 0),
+    gift: getOptionalSectionStatus(
+      content.digitalGift.enabled,
+      content.digitalGift.accounts.length > 0 &&
+        content.digitalGift.accounts.every(
+          (account) =>
+            hasText(account.providerName) &&
+            hasText(account.accountHolder) &&
+            hasText(account.accountNumber),
+        ),
+    ),
+    rsvp: getOptionalSectionStatus(
+      content.rsvp.enabled,
+      hasText(content.rsvp.heading) || hasText(content.rsvp.lead),
+    ),
+    closing: getOptionalSectionStatus(
+      content.closing.enabled,
+      hasText(content.closing.message) || hasText(content.closing.signature),
+    ),
   };
 
   for (const section of errorSections) {
@@ -233,12 +242,12 @@ export function getInvitationEditorSectionStatuses(
   return statuses;
 }
 
-function getInvitationEditorProgress(statuses: InvitationEditorSectionStatuses) {
+export function getInvitationEditorProgress(statuses: InvitationEditorSectionStatuses) {
   const values = Object.values(statuses);
 
   return {
-    complete: values.filter((status) => status === 'complete').length,
     error: values.filter((status) => status === 'error').length,
+    ready: values.filter((status) => status === 'complete' || status === 'optional_off').length,
     total: invitationStudioChapters.length,
   };
 }
@@ -324,8 +333,8 @@ export const InvitationWorkspaceNavigation = memo(function InvitationWorkspaceNa
   const progress = getInvitationEditorProgress(statuses);
   const progressCopy =
     progress.error > 0
-      ? `${progress.complete} lengkap · ${progress.error} perlu diperbaiki`
-      : `${progress.complete} dari ${progress.total} lengkap`;
+      ? `${progress.ready} siap · ${progress.error} perlu diperbaiki`
+      : `${progress.ready} dari ${progress.total} siap`;
 
   return (
     <>
@@ -409,7 +418,7 @@ export const InvitationWorkspaceNavigation = memo(function InvitationWorkspaceNa
           <p className="text-seraya-text-primary mt-1 text-sm font-semibold">9 bab perjalanan</p>
           <p className="text-seraya-text-muted mt-1 text-xs leading-5">{progressCopy}</p>
           <p className="text-seraya-text-muted mt-1 text-[0.7rem] leading-5">
-            Status draft tersimpan
+            Status draf saat ini
           </p>
         </div>
         <ol className="mt-2 space-y-0.5">
