@@ -151,6 +151,27 @@ type InvitationEditorSaveStatus = {
   description: string;
   label: string;
 };
+
+type InvitationEditorDocumentTruthState = 'error' | 'neutral' | 'pending' | 'success' | 'warning';
+
+type InvitationEditorDocumentTruthItem = {
+  description: string;
+  label: string;
+  state: InvitationEditorDocumentTruthState;
+};
+
+type InvitationEditorDocumentTruthInput = InvitationEditorSaveStatusInput & {
+  hasPublishedSnapshot: boolean;
+  hasUnpublishedChanges: boolean;
+};
+
+type InvitationEditorDocumentTruth = {
+  browser: InvitationEditorDocumentTruthItem;
+  draft: InvitationEditorDocumentTruthItem;
+  published: InvitationEditorDocumentTruthItem;
+  saveActionLabel: string;
+};
+
 export const invitationEditorDirtyNavigationMessage =
   'Perubahan undangan belum disimpan. Yakin ingin meninggalkan halaman ini?';
 const fallbackWorkspaceReadiness: Pick<WeddingReadinessV1, 'identity' | 'invitation'> = {
@@ -249,6 +270,198 @@ export function getInvitationEditorSaveStatus({
     description: 'Mulai lengkapi detail undangan kalian di bawah ini.',
     label: 'Belum ada perubahan',
   };
+}
+
+export function getInvitationEditorDocumentTruth({
+  actionStatus,
+  hasPublishedSnapshot,
+  hasSaved,
+  hasUnpublishedChanges,
+  isDirty,
+  isPending,
+}: InvitationEditorDocumentTruthInput): InvitationEditorDocumentTruth {
+  const browser: InvitationEditorDocumentTruthItem = isPending
+    ? {
+        description: 'Perubahan sedang dikirim ke draf privat. Jangan tutup halaman ini dulu.',
+        label: 'Sedang menyimpan',
+        state: 'pending',
+      }
+    : actionStatus === 'error'
+      ? {
+          description:
+            'Perubahan lokal tetap aman di browser ini. Periksa pesan kesalahan lalu coba simpan lagi.',
+          label: 'Gagal menyimpan',
+          state: 'error',
+        }
+      : isDirty
+        ? {
+            description:
+              'Perubahan baru hanya ada di browser dan preview lokal sampai kalian menyimpannya.',
+            label: 'Perubahan lokal',
+            state: 'warning',
+          }
+        : {
+            description: 'Belum ada perubahan lokal yang berbeda dari draf privat.',
+            label: 'Draf tersimpan',
+            state: 'success',
+          };
+
+  const draft: InvitationEditorDocumentTruthItem = isPending
+    ? {
+        description:
+          'Versi tersimpan sebelumnya tetap aman sampai proses penyimpanan terbaru selesai.',
+        label: 'Draf tersimpan tetap aman',
+        state: 'pending',
+      }
+    : actionStatus === 'error'
+      ? {
+          description:
+            'Kegagalan simpan tidak menimpa draf privat yang sebelumnya sudah tersimpan.',
+          label: 'Draf tersimpan tetap aman',
+          state: 'warning',
+        }
+      : isDirty
+        ? {
+            description: 'Draf privat masih memakai versi terakhir yang berhasil disimpan.',
+            label: 'Draf tersimpan belum berubah',
+            state: 'neutral',
+          }
+        : {
+            description: 'Preview tersimpan membaca versi privat ini dari server.',
+            label: 'Draf tersimpan',
+            state: 'success',
+          };
+
+  let published: InvitationEditorDocumentTruthItem;
+
+  if (!hasPublishedSnapshot) {
+    published = {
+      description: 'Belum ada versi undangan yang dapat dilihat tamu.',
+      label: 'Belum diterbitkan',
+      state: 'neutral',
+    };
+  } else if (hasUnpublishedChanges || (actionStatus === 'success' && hasSaved && !isDirty)) {
+    published = {
+      description:
+        'Tamu masih melihat versi terbit sebelumnya sampai kalian menerbitkan perubahan.',
+      label: 'Draf lebih baru dari versi terbit',
+      state: 'warning',
+    };
+  } else if (isDirty || isPending || actionStatus === 'error') {
+    published = {
+      description:
+        'Perubahan di browser atau proses simpan tidak mengubah versi yang sedang dilihat tamu.',
+      label: 'Versi terbit tetap saat ini',
+      state: 'neutral',
+    };
+  } else {
+    published = {
+      description: 'Inilah versi undangan yang sedang dilihat tamu.',
+      label: 'Versi terbit saat ini',
+      state: 'success',
+    };
+  }
+
+  return {
+    browser,
+    draft,
+    published,
+    saveActionLabel: isPending
+      ? 'Menyimpan…'
+      : actionStatus === 'error'
+        ? 'Coba simpan lagi'
+        : 'Simpan perubahan',
+  };
+}
+
+function InvitationEditorDocumentTruthMark({
+  state,
+}: {
+  state: InvitationEditorDocumentTruthState;
+}) {
+  const symbol =
+    state === 'error'
+      ? '!'
+      : state === 'pending'
+        ? '…'
+        : state === 'success'
+          ? '✓'
+          : state === 'warning'
+            ? '•'
+            : '○';
+
+  return (
+    <span
+      aria-hidden="true"
+      className={[
+        'inline-flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold',
+        state === 'error'
+          ? 'bg-seraya-status-error-soft text-seraya-status-error'
+          : state === 'success'
+            ? 'bg-seraya-status-success-soft text-seraya-status-success'
+            : 'bg-seraya-brand-soft text-seraya-action-primary',
+      ].join(' ')}
+    >
+      {symbol}
+    </span>
+  );
+}
+
+function InvitationEditorDocumentTruthPanel({ truth }: { truth: InvitationEditorDocumentTruth }) {
+  const layers = [
+    { item: truth.browser, key: 'browser', label: 'Di browser ini' },
+    { item: truth.draft, key: 'draft', label: 'Draf privat' },
+    { item: truth.published, key: 'published', label: 'Untuk tamu' },
+  ] as const;
+
+  return (
+    <section
+      aria-labelledby="invitation-document-truth-title"
+      className="border-seraya-border-default bg-seraya-canvas rounded-[var(--seraya-radius-md)] border p-4 sm:p-5"
+      data-release-b-document-truth="rb2"
+    >
+      <div className="max-w-2xl">
+        <p className="text-seraya-text-muted text-[0.68rem] font-bold tracking-[0.08em] uppercase">
+          Status dokumen
+        </p>
+        <h2
+          className="text-seraya-text-primary mt-1 text-base font-semibold"
+          id="invitation-document-truth-title"
+        >
+          Ketahui versi mana yang sedang kalian ubah
+        </h2>
+        <p className="text-seraya-text-muted mt-1.5 text-sm leading-6">
+          Perubahan browser, draf privat, dan undangan yang dilihat tamu adalah tiga lapisan yang
+          berbeda.
+        </p>
+      </div>
+
+      <dl className="mt-4 grid gap-3 lg:grid-cols-3">
+        {layers.map((layer) => (
+          <div
+            className="border-seraya-border-default bg-seraya-surface rounded-[var(--seraya-radius-md)] border p-4"
+            data-document-truth-layer={layer.key}
+            key={layer.key}
+          >
+            <div className="flex items-start gap-3">
+              <InvitationEditorDocumentTruthMark state={layer.item.state} />
+              <div className="min-w-0">
+                <dt className="text-seraya-text-muted text-xs font-semibold tracking-[0.06em] uppercase">
+                  {layer.label}
+                </dt>
+                <dd className="text-seraya-text-primary mt-1 text-sm font-semibold">
+                  {layer.item.label}
+                </dd>
+                <dd className="text-seraya-text-muted mt-1 text-xs leading-5">
+                  {layer.item.description}
+                </dd>
+              </div>
+            </div>
+          </div>
+        ))}
+      </dl>
+    </section>
+  );
 }
 
 export function shouldConfirmInvitationEditorNavigation(currentHref: string, nextHref: string) {
@@ -906,22 +1119,31 @@ export function InvitationEditor({
   const errorSummaryRef = useRef<HTMLDivElement | null>(null);
   const workspaceStartRef = useRef<HTMLDivElement | null>(null);
   const sectionStatuses = useMemo(
-    () => getInvitationEditorSectionStatuses(draft, state.fieldErrors),
-    [draft, state.fieldErrors],
+    () => getInvitationEditorSectionStatuses({ ...draft, content }, state.fieldErrors),
+    [content, draft, state.fieldErrors],
   );
   const errorSections = useMemo(
     () => getInvitationEditorErrorSections(state.fieldErrors),
     [state.fieldErrors],
   );
-  const saveStatus = useMemo(
+  const documentTruth = useMemo(
     () =>
-      getInvitationEditorSaveStatus({
+      getInvitationEditorDocumentTruth({
         actionStatus: state.status,
+        hasPublishedSnapshot: workspaceReadiness.invitation.hasPublishedSnapshot,
         hasSaved,
+        hasUnpublishedChanges: workspaceReadiness.invitation.hasUnpublishedChanges,
         isDirty,
         isPending,
       }),
-    [hasSaved, isDirty, isPending, state.status],
+    [
+      hasSaved,
+      isDirty,
+      isPending,
+      state.status,
+      workspaceReadiness.invitation.hasPublishedSnapshot,
+      workspaceReadiness.invitation.hasUnpublishedChanges,
+    ],
   );
   const submissionPayload = useMemo(
     () => JSON.stringify(createInvitationEditorSubmissionPayload(content)),
@@ -1235,6 +1457,7 @@ export function InvitationEditor({
               ))}
             </ul>
           </section>
+          <InvitationEditorDocumentTruthPanel truth={documentTruth} />
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <CardTitle className="font-sans text-lg font-semibold tracking-[-0.02em]">
@@ -1356,10 +1579,10 @@ export function InvitationEditor({
                     role="status"
                   >
                     <p className="text-seraya-text-primary text-sm font-semibold">
-                      {saveStatus.label}
+                      {documentTruth.browser.label}
                     </p>
                     <p className="text-seraya-text-muted mt-1 text-sm leading-6">
-                      {saveStatus.description}
+                      {documentTruth.browser.description}
                     </p>
                   </div>
                   <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-56">
@@ -1375,8 +1598,14 @@ export function InvitationEditor({
                       >
                         Preview lokal
                       </Button>
-                      <Button loading={isPending} size="lg" type="submit">
-                        Simpan perubahan
+                      <Button
+                        data-release-b-save-action="rb2"
+                        disabled={!isDirty && state.status !== 'error'}
+                        loading={isPending}
+                        size="lg"
+                        type="submit"
+                      >
+                        {documentTruth.saveActionLabel}
                       </Button>
                     </div>
                     <Link
