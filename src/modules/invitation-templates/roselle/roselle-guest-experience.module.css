@@ -1,0 +1,706 @@
+.experience[data-roselle-experience='letter-v1'][data-template='roselle'] {
+  --roselle-letter-paper: #fffdfa;
+  --roselle-letter-cream: #fff7ef;
+  --roselle-letter-blush: #f7ebe7;
+  --roselle-letter-plum: #3d2933;
+  --roselle-letter-muted: #6d5961;
+  --roselle-letter-rose: #ac6f79;
+  --roselle-letter-sage: #718171;
+  --roselle-letter-line: rgb(130 91 99 / 0.24);
+  --roselle-letter-shadow: 0 2rem 5rem rgb(64 43 53 / 0.12);
+
+  max-width: 58rem;
+  border-color: rgb(130 91 99 / 0.24);
+  border-radius: 1.75rem;
+  background: var(--roselle-letter-paper);
+  box-shadow: var(--roselle-letter-shadow);
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-chapter]) {
+  scroll-margin-top: 1.5rem;
+}
+
+/* Opening — one layered love letter, not a generic hero. */
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-chapter='opening']) {
+  min-height: min(86svh, 54rem);
+  padding: clamp(4.75rem, 11vw, 7rem) clamp(1.25rem, 6vw, 4rem)
+    clamp(5.5rem, 12vw, 7.5rem);
+  background:
+    radial-gradient(circle at 12% 10%, rgb(172 111 121 / 0.13), transparent 18rem),
+    radial-gradient(circle at 88% 84%, rgb(113 129 113 / 0.12), transparent 20rem),
+    linear-gradient(145deg, #fffefa, var(--roselle-letter-cream));
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-chapter='opening'])::after {
+  inset: clamp(0.8rem, 2.5vw, 1.35rem);
+  border-color: rgb(172 111 121 / 0.26);
+  border-radius: clamp(0.65rem, 2vw, 1rem);
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-letter]) {
+  width: min(100%, 43rem);
+  padding: clamp(2.4rem, 6vw, 4.5rem) clamp(1.35rem, 5vw, 3.75rem);
+  border: 1px solid rgb(172 111 121 / 0.18);
+  border-radius: 0.6rem;
+  background: rgb(255 253 250 / 0.78);
+  box-shadow:
+    0 1.5rem 4rem rgb(64 43 53 / 0.075),
+    inset 0 0 0 0.35rem rgb(255 247 239 / 0.48);
+  backdrop-filter: blur(0.35rem);
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-letter-eyebrow]) {
+  color: var(--roselle-letter-rose);
+  letter-spacing: 0.22em;
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-letter-title]) {
+  max-width: 10ch;
+  margin-top: 1.25rem;
+  color: var(--roselle-letter-plum);
+  font-size: clamp(3.55rem, 13vw, 7.25rem);
+  line-height: 0.82;
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-letter-subtitle]) {
+  max-width: 30rem;
+  color: var(--roselle-letter-muted);
+  line-height: 1.75;
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-letter-date]) {
+  color: var(--roselle-letter-sage);
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-scroll-cue]) {
+  display: none;
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  > :global([data-roselle-opening-action]) {
+  position: relative;
+  z-index: 6;
+  display: flex;
+  width: fit-content;
+  min-width: 10.5rem;
+  min-height: 3.15rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  margin: -1.6rem auto 2.3rem;
+  padding: 0.72rem 1.35rem;
+  border: 1px solid rgb(172 111 121 / 0.42);
+  border-radius: 999px;
+  background: rgb(255 253 250 / 0.96);
+  box-shadow: 0 0.9rem 2.4rem rgb(64 43 53 / 0.12);
+  color: var(--roselle-letter-plum);
+  backdrop-filter: blur(0.75rem);
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  > :global([data-roselle-opening-action])
+  i {
+  width: 1.3rem;
+  height: 1px;
+  background: linear-gradient(90deg, var(--roselle-letter-rose), transparent);
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  > :global([data-roselle-opening-action]):hover {
+  border-color: var(--roselle-letter-rose);
+  box-shadow: 0 1.1rem 2.8rem rgb(64 43 53 / 0.15);
+  transform: translateY(-1px);
+}
+
+/* Personal greeting — an addressed note with a restrained seal. */
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-addressed-letter]) {
+  isolation: isolate;
+  overflow: hidden;
+  padding: clamp(3.5rem, 9vw, 6rem) clamp(1.35rem, 7vw, 5rem);
+  border: 0;
+  background:
+    radial-gradient(circle at 88% 15%, rgb(172 111 121 / 0.1), transparent 13rem),
+    linear-gradient(155deg, var(--roselle-letter-paper), var(--roselle-letter-cream));
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-addressed-letter])::before {
+  display: block;
+  width: 4rem;
+  height: 1px;
+  margin: 0 auto 1.6rem;
+  background: linear-gradient(90deg, transparent, var(--roselle-letter-rose), transparent);
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-addressed-letter])::after {
+  top: clamp(2.1rem, 5vw, 3.2rem);
+  right: clamp(1.5rem, 6vw, 4.25rem);
+  width: clamp(3.25rem, 8vw, 4.35rem);
+  border: 1px solid rgb(172 111 121 / 0.32);
+  background: rgb(255 253 250 / 0.42);
+  color: rgb(172 111 121 / 0.62);
+  box-shadow: inset 0 0 0 0.28rem rgb(172 111 121 / 0.06);
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-addressed-letter])
+  :global([data-personal-guest-greeting]) {
+  max-width: 40rem;
+  margin-inline: auto;
+  padding: clamp(2rem, 5vw, 3.25rem);
+  border: 1px solid var(--roselle-letter-line);
+  border-radius: 0.55rem;
+  background: rgb(255 253 250 / 0.88);
+  box-shadow:
+    0 1.5rem 3.8rem rgb(64 43 53 / 0.075),
+    inset 0 0 0 0.35rem rgb(247 235 231 / 0.36);
+}
+
+/* Couple — emotional focal point with no dashboard-card treatment. */
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-chapter='couple']) {
+  padding: clamp(4.5rem, 11vw, 7.5rem) clamp(1.35rem, 7vw, 5rem);
+  background:
+    linear-gradient(rgb(255 253 250 / 0.94), rgb(255 253 250 / 0.94)),
+    repeating-linear-gradient(0deg, transparent 0 2.5rem, rgb(172 111 121 / 0.035) 2.5rem 2.55rem);
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-couple-composition]) {
+  max-width: 45rem;
+  margin-top: clamp(3rem, 8vw, 5rem);
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-person]) {
+  position: relative;
+  padding: 1.5rem 0;
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-person])::before {
+  display: block;
+  width: 2.5rem;
+  height: 1px;
+  margin: 0 auto 1.35rem;
+  background: var(--roselle-letter-line);
+  content: '';
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-ampersand]) {
+  color: var(--roselle-letter-rose);
+  font-size: clamp(2.7rem, 7vw, 4.5rem);
+}
+
+/* Story — a quiet handwritten-page interlude. */
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-chapter='story']) {
+  padding: clamp(4.5rem, 11vw, 7.5rem) clamp(1.35rem, 8vw, 5.5rem);
+  background:
+    linear-gradient(110deg, rgb(247 235 231 / 0.96), rgb(255 247 239 / 0.78)),
+    var(--roselle-letter-blush);
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-story-letter]) {
+  position: relative;
+  max-width: 38rem;
+  margin-inline: auto;
+  padding-left: clamp(0rem, 4vw, 3rem);
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-story-letter])::before {
+  position: absolute;
+  top: -1.1rem;
+  left: 0;
+  color: rgb(172 111 121 / 0.2);
+  content: '“';
+  font-family: var(--roselle-display);
+  font-size: clamp(5rem, 13vw, 8rem);
+  line-height: 1;
+}
+
+/* Celebration — one woven schedule and location journey. */
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-celebration-thread]) {
+  position: relative;
+  display: grid;
+  border-block: 1px solid var(--roselle-letter-line);
+  background: var(--roselle-letter-cream);
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-woven-schedule]) {
+  padding: clamp(4.5rem, 11vw, 7rem) clamp(1.35rem, 7vw, 5rem) clamp(3.5rem, 8vw, 5rem);
+  background: transparent;
+  text-align: center;
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-event-thread]) {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  max-width: 40rem;
+  margin-top: clamp(2.8rem, 7vw, 4.5rem);
+  padding-left: clamp(1.9rem, 5vw, 3rem);
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-event-thread])::before {
+  position: absolute;
+  top: 0.7rem;
+  bottom: 0.7rem;
+  left: 0.45rem;
+  width: 1px;
+  background: linear-gradient(
+    var(--roselle-letter-rose),
+    var(--roselle-letter-line) 24%,
+    var(--roselle-letter-line) 76%,
+    var(--roselle-letter-sage)
+  );
+  content: '';
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-event]) {
+  position: relative;
+  padding: 0 0 clamp(2.5rem, 6vw, 3.5rem);
+  border: 0;
+  text-align: left;
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-event]):last-child {
+  padding-bottom: 0;
+  border: 0;
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-event])::before {
+  top: 0.35rem;
+  left: calc(clamp(1.9rem, 5vw, 3rem) * -1);
+  width: 0.9rem;
+  height: 0.9rem;
+  border: 1px solid var(--roselle-letter-rose);
+  background: var(--roselle-letter-cream);
+  box-shadow: 0 0 0 0.45rem var(--roselle-letter-cream);
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-event])::after {
+  display: none;
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-chapter='location']) {
+  padding: 0 clamp(1.35rem, 7vw, 5rem) clamp(4.5rem, 11vw, 7rem);
+  border: 0;
+  background: transparent;
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-location-note]) {
+  max-width: 38rem;
+  margin-top: 2.25rem;
+  padding: clamp(1.8rem, 5vw, 2.75rem);
+  border: 1px solid var(--roselle-letter-line);
+  border-radius: 0.55rem;
+  background: rgb(255 253 250 / 0.76);
+  box-shadow: inset 0 0 0 0.32rem rgb(247 235 231 / 0.28);
+}
+
+/* Gallery — a stable lead-first memory album. */
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-chapter='gallery']) {
+  padding: clamp(4.5rem, 11vw, 7.5rem) clamp(1.35rem, 7vw, 5rem);
+  background: var(--roselle-letter-paper);
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-memory-album]) {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: clamp(0.7rem, 2vw, 1.15rem);
+  max-width: 48rem;
+  margin-top: clamp(2.6rem, 7vw, 4.5rem);
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-memory-album])
+  figure {
+  position: relative;
+  min-width: 0;
+  margin: 0;
+  border: 0.45rem solid var(--roselle-letter-paper);
+  border-radius: 0.35rem;
+  background: var(--roselle-letter-blush);
+  box-shadow: 0 1.15rem 2.8rem rgb(64 43 53 / 0.1);
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-memory-album][data-gallery-layout='single'])
+  figure {
+  grid-column: 3 / 11;
+  aspect-ratio: 4 / 5;
+  border-radius: 9rem 9rem 0.35rem 0.35rem;
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-memory-album][data-gallery-layout='diptych'])
+  figure:first-child {
+  grid-column: 1 / 8;
+  aspect-ratio: 4 / 5;
+  border-radius: 9rem 9rem 0.35rem 0.35rem;
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-memory-album][data-gallery-layout='diptych'])
+  figure:last-child {
+  grid-column: 8 / 13;
+  align-self: end;
+  aspect-ratio: 3 / 4;
+  margin-bottom: clamp(1.5rem, 5vw, 3.5rem);
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-memory-album][data-gallery-layout='triptych'])
+  figure:first-child {
+  grid-column: 1 / 8;
+  grid-row: 1 / 3;
+  aspect-ratio: 3 / 4;
+  border-radius: 9rem 9rem 0.35rem 0.35rem;
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-memory-album][data-gallery-layout='triptych'])
+  figure:not(:first-child) {
+  grid-column: 8 / 13;
+  aspect-ratio: 4 / 3;
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-memory-album][data-gallery-layout='mosaic'])
+  figure {
+  grid-column: span 6;
+  aspect-ratio: 4 / 3;
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-memory-album][data-gallery-layout='mosaic'])
+  figure:first-child {
+  grid-column: 1 / 8;
+  grid-row: 1 / 3;
+  aspect-ratio: 4 / 5;
+  border-radius: 9rem 9rem 0.35rem 0.35rem;
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-memory-album][data-gallery-layout='mosaic'])
+  figure:nth-child(2),
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-memory-album][data-gallery-layout='mosaic'])
+  figure:nth-child(3) {
+  grid-column: 8 / 13;
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-memory-caption]) {
+  position: absolute;
+  right: 0.55rem;
+  bottom: 0.55rem;
+  display: grid;
+  min-width: 2rem;
+  min-height: 2rem;
+  place-items: center;
+  border-radius: 999px;
+  background: rgb(255 253 250 / 0.9);
+  color: var(--roselle-letter-rose);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  backdrop-filter: blur(0.4rem);
+}
+
+/* Digital Gift — a compact keepsake enclosure. */
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-gift-enclosure]) {
+  padding: clamp(4.5rem, 11vw, 7rem) clamp(1.35rem, 7vw, 5rem);
+  background:
+    linear-gradient(145deg, rgb(247 235 231 / 0.9), rgb(255 247 239 / 0.74)),
+    var(--roselle-letter-blush);
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-keepsake-list]) {
+  max-width: 40rem;
+  margin-top: 2.6rem;
+  padding: clamp(0.45rem, 1.5vw, 0.7rem);
+  border: 1px solid var(--roselle-letter-line);
+  background: rgb(255 253 250 / 0.62);
+  box-shadow: inset 0 0 0 0.3rem rgb(247 235 231 / 0.32);
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-keepsake]) {
+  padding: clamp(1.45rem, 4vw, 2rem);
+  border: 0;
+  border-bottom: 1px solid var(--roselle-letter-line);
+  background: transparent;
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-keepsake]):last-child {
+  border-bottom: 0;
+}
+
+/* Response — one warm chapter, two semantic letters, no app-card stack. */
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-template-response-journey='roselle']) {
+  gap: 0;
+  padding: clamp(4.75rem, 11vw, 7.5rem) clamp(1.35rem, 7vw, 5rem);
+  border-block: 1px solid var(--roselle-letter-line);
+  background:
+    radial-gradient(circle at 85% 12%, rgb(172 111 121 / 0.1), transparent 15rem),
+    linear-gradient(145deg, var(--roselle-letter-blush), var(--roselle-letter-cream));
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-template-response-introduction='roselle']) {
+  max-width: 35rem;
+  margin-bottom: clamp(2.8rem, 7vw, 4.5rem);
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-template-response-slot]) {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: clamp(2rem, 5vw, 3rem) 0;
+  border: 0;
+  border-top: 1px solid var(--roselle-letter-line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-template-response-slot])
+  + :global([data-template-response-slot]) {
+  margin-top: 0;
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-response-step]) {
+  margin-bottom: 1.25rem;
+  color: var(--roselle-letter-rose);
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-personal-rsvp-choice]) {
+  border-radius: 0.55rem;
+  background: rgb(255 253 250 / 0.86);
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-personal-rsvp-choice][data-selected='true']) {
+  border-color: var(--roselle-letter-rose);
+  background: var(--roselle-letter-rose);
+  color: var(--roselle-letter-paper);
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle'] select,
+.experience[data-roselle-experience='letter-v1'][data-template='roselle'] textarea {
+  border-color: rgb(130 91 99 / 0.3);
+  border-radius: 0.55rem;
+  background: rgb(255 253 250 / 0.92);
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-personal-response-submit]) {
+  min-height: 3rem;
+  border-color: var(--roselle-letter-plum);
+  background: var(--roselle-letter-plum);
+  color: var(--roselle-letter-paper);
+}
+
+/* Generic note stays quiet and has no action. */
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-generic-note]) {
+  max-width: 38rem;
+  margin-inline: auto;
+  padding: 2.2rem clamp(1.35rem, 7vw, 5rem);
+  border: 0;
+  background: var(--roselle-letter-paper);
+  color: var(--roselle-letter-muted);
+}
+
+/* Closing — signature, seal, and a calm return. */
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-letter-closing]) {
+  min-height: min(58svh, 38rem);
+  padding: clamp(4.5rem, 11vw, 7rem) clamp(1.35rem, 7vw, 5rem);
+  background:
+    radial-gradient(circle at 50% 28%, rgb(172 111 121 / 0.1), transparent 17rem),
+    linear-gradient(var(--roselle-letter-paper), var(--roselle-letter-cream));
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  :global([data-roselle-closing-seal]) {
+  display: grid;
+  width: 3.7rem;
+  aspect-ratio: 1;
+  place-items: center;
+  margin: 0 auto 1.5rem;
+  border: 1px solid rgb(172 111 121 / 0.34);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 0.32rem rgb(172 111 121 / 0.06);
+  color: var(--roselle-letter-rose);
+  font-family: var(--roselle-display);
+  font-size: 1.25rem;
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  > :global([data-roselle-return-to-opening]) {
+  display: flex;
+  min-height: 3.1rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1.25rem;
+  border-top: 1px solid var(--roselle-letter-line);
+  border-bottom: 0;
+  background: var(--roselle-letter-cream);
+  color: var(--roselle-letter-rose);
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  > :global([data-roselle-return-to-opening]):hover {
+  background: var(--roselle-letter-blush);
+  color: var(--roselle-letter-plum);
+}
+
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  > :global([data-roselle-opening-action]):focus-visible,
+.experience[data-roselle-experience='letter-v1'][data-template='roselle']
+  > :global([data-roselle-return-to-opening]):focus-visible {
+  outline: 3px solid rgb(172 111 121 / 0.48);
+  outline-offset: 4px;
+}
+
+@media (max-width: 36rem) {
+  .experience[data-roselle-experience='letter-v1'][data-template='roselle'] {
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+  }
+
+  .experience[data-roselle-experience='letter-v1'][data-template='roselle']
+    :global([data-roselle-chapter='opening']) {
+    min-height: min(76svh, 44rem);
+    padding-block: 3.8rem 5.2rem;
+  }
+
+  .experience[data-roselle-experience='letter-v1'][data-template='roselle']
+    :global([data-roselle-letter]) {
+    padding: 2.2rem 1.2rem;
+  }
+
+  .experience[data-roselle-experience='letter-v1'][data-template='roselle']
+    > :global([data-roselle-opening-action]) {
+    margin-top: -1.55rem;
+  }
+
+  .experience[data-roselle-experience='letter-v1'][data-template='roselle']
+    :global([data-roselle-addressed-letter])
+    :global([data-personal-guest-greeting]) {
+    padding: 1.65rem;
+  }
+
+  .experience[data-roselle-experience='letter-v1'][data-template='roselle']
+    :global([data-roselle-couple-composition]) {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
+
+  .experience[data-roselle-experience='letter-v1'][data-template='roselle']
+    :global([data-roselle-story-letter]) {
+    padding-left: 0;
+  }
+
+  .experience[data-roselle-experience='letter-v1'][data-template='roselle']
+    :global([data-roselle-story-letter])::before {
+    position: static;
+    display: block;
+    height: 3rem;
+  }
+
+  .experience[data-roselle-experience='letter-v1'][data-template='roselle']
+    :global([data-roselle-memory-album]) {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .experience[data-roselle-experience='letter-v1'][data-template='roselle']
+    :global([data-roselle-memory-album])
+    figure,
+  .experience[data-roselle-experience='letter-v1'][data-template='roselle']
+    :global([data-roselle-memory-album])
+    figure:first-child,
+  .experience[data-roselle-experience='letter-v1'][data-template='roselle']
+    :global([data-roselle-memory-album])
+    figure:not(:first-child) {
+    grid-column: 1;
+    grid-row: auto;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    margin: 0;
+    border-radius: 0.35rem;
+  }
+
+  .experience[data-roselle-experience='letter-v1'][data-template='roselle']
+    :global([data-roselle-memory-album])
+    figure:first-child {
+    aspect-ratio: 4 / 5;
+    border-radius: 7rem 7rem 0.35rem 0.35rem;
+  }
+
+  .experience[data-roselle-experience='letter-v1'][data-template='roselle']
+    :global([data-personal-rsvp-choices]) {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .experience[data-roselle-experience='letter-v1'][data-template='roselle']
+    :global([data-roselle-chapter]) {
+    animation: none;
+  }
+
+  .experience[data-roselle-experience='letter-v1'][data-template='roselle']
+    > :global([data-roselle-opening-action]),
+  .experience[data-roselle-experience='letter-v1'][data-template='roselle']
+    > :global([data-roselle-return-to-opening]),
+  .experience[data-roselle-experience='letter-v1'][data-template='roselle']
+    :global([data-invitation-gallery]) img {
+    transition: none;
+  }
+
+  .experience[data-roselle-experience='letter-v1'][data-template='roselle']
+    > :global([data-roselle-opening-action]):hover {
+    transform: none;
+  }
+}
