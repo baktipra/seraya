@@ -1,3 +1,5 @@
+import { deriveGuestLinkLifecycle } from '@/modules/guest-links/guest-link-lifecycle';
+
 import type {
   DeliveryGuestRow,
   DeliveryReadinessDerivation,
@@ -8,7 +10,10 @@ import type {
 
 type DeliveryReadinessSubject = Pick<
   DeliveryGuestRow,
-  'personalLinkReaccessState' | 'personalLinkState' | 'whatsappAvailability'
+  | 'personalLinkLifecycleState'
+  | 'personalLinkReaccessState'
+  | 'personalLinkState'
+  | 'whatsappAvailability'
 >;
 
 const readinessLabels: Record<DeliveryReadinessState, string> = {
@@ -25,25 +30,35 @@ const followUpLabels: Record<DeliveryReadinessState, string> = {
   ready_to_distribute: 'Siap dibagikan',
 };
 
+function getLifecycleState(row: DeliveryReadinessSubject) {
+  return (
+    row.personalLinkLifecycleState ??
+    deriveGuestLinkLifecycle({
+      currentState: row.personalLinkState,
+      reaccessState: row.personalLinkReaccessState,
+    }).lifecycleState
+  );
+}
+
 /**
  * Authoritative private delivery readiness derivation.
  *
  * An active link is never sufficient on its own. A row becomes ready only when
- * the active link is recoverable under the existing encrypted-token contract
- * and the guest has a canonical WhatsApp number.
+ * the canonical lifecycle says its active capability is recoverable and the
+ * guest has a canonical WhatsApp number.
  */
 export function deriveDeliveryReadiness(
   row: DeliveryReadinessSubject,
 ): DeliveryReadinessDerivation {
+  const lifecycleState = getLifecycleState(row);
   const hasValidWhatsApp = row.whatsappAvailability === 'available';
-  const hasRecoverableActivePersonalInvitation =
-    row.personalLinkState === 'active' && row.personalLinkReaccessState === 'recoverable';
+  const hasRecoverableActivePersonalInvitation = lifecycleState === 'active_recoverable';
 
   const deliveryReadinessState: DeliveryReadinessState = hasRecoverableActivePersonalInvitation
     ? hasValidWhatsApp
       ? 'ready_to_distribute'
       : 'needs_whatsapp'
-    : row.personalLinkState === 'not_created'
+    : lifecycleState === 'not_created'
       ? 'no_personal_invitation'
       : 'needs_link_update';
 
