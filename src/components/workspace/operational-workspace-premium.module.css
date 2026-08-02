@@ -1,0 +1,457 @@
+.workspace {
+  --ops-control-surface: var(--seraya-bg-surface-subtle);
+  --ops-row-hover: color-mix(in srgb, var(--seraya-bg-brand-softer) 48%, transparent);
+  --ops-rule: var(--seraya-border-subtle);
+  gap: clamp(1.35rem, 2.4vw, 2rem);
+}
+
+/* Slice F is presentation-only. Stable operational data attributes remain the
+   visual authority while controllers, filters, actions, and data truth stay intact. */
+.workspace :global([data-operational-header]) {
+  align-items: start;
+  gap: 1rem 2rem;
+  padding: 0.2rem 0 1.35rem;
+  border-bottom: 1px solid var(--ops-rule);
+}
+
+.workspace :global([data-operational-header] > div:first-child) {
+  max-width: 52rem;
+}
+
+.workspace :global([data-operational-header] h1) {
+  max-width: 50rem;
+  font-size: clamp(1.9rem, 4vw, 2.55rem);
+  line-height: 1.06;
+  letter-spacing: -0.04em;
+}
+
+.workspace :global([data-operational-header] h1 + div) {
+  max-width: 46rem;
+  margin-top: 0.65rem;
+  font-size: 0.9rem;
+  line-height: 1.55rem;
+}
+
+.workspace :global([data-operational-header-actions]) {
+  align-items: center;
+  padding-top: 0.1rem;
+}
+
+/* Metrics read as a compact operational pulse, not independent dashboard cards. */
+.workspace :global([data-operational-metrics]) {
+  gap: 0.65rem;
+}
+
+.workspace :global([data-operational-metric]) {
+  position: relative;
+  min-height: 6.75rem;
+  overflow: hidden;
+  border-color: var(--ops-rule);
+  border-radius: var(--seraya-radius-lg);
+  background: var(--seraya-bg-surface);
+  padding: 0.9rem 1rem;
+  box-shadow: none;
+}
+
+.workspace :global([data-operational-metric])::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 2px;
+  background: color-mix(in srgb, var(--seraya-action-primary) 28%, transparent);
+  content: '';
+}
+
+.workspace :global([data-operational-metric] dt) {
+  color: var(--seraya-text-secondary);
+  font-size: 0.72rem;
+  line-height: 1.1rem;
+}
+
+.workspace :global([data-operational-metric] .seraya-metric-value) {
+  margin-top: 0.45rem;
+  font-size: clamp(1.55rem, 2.5vw, 1.9rem);
+  line-height: 1;
+}
+
+.workspace :global([data-operational-metric] dd:last-child:not(.seraya-metric-value)) {
+  margin-top: 0.45rem;
+  color: var(--seraya-text-muted);
+  font-size: 0.7rem;
+  line-height: 1.05rem;
+}
+
+/* Section hierarchy is led by spacing and type. */
+.workspace :global([data-operational-section]) {
+  gap: 0.9rem;
+}
+
+.workspace :global([data-operational-section-heading]) {
+  align-items: end;
+  gap: 0.75rem 1.5rem;
+}
+
+.workspace :global([data-operational-section-heading] h2) {
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+
+.workspace :global([data-operational-section-heading] h2 + div) {
+  max-width: 48rem;
+  margin-top: 0.35rem;
+  font-size: 0.84rem;
+  line-height: 1.4rem;
+}
+
+/* Existing truth notes become quiet context strips instead of prominent cards. */
+.workspace :global([data-operational-section]) > :global([role='note']) {
+  position: relative;
+  border: 0 !important;
+  border-radius: 0 var(--seraya-radius-md) var(--seraya-radius-md) 0 !important;
+  background: var(--seraya-bg-surface-subtle) !important;
+  padding: 0.75rem 0.9rem 0.75rem 1rem !important;
+}
+
+.workspace :global([data-operational-section]) > :global([role='note'])::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 2px;
+  background: color-mix(in srgb, var(--seraya-action-primary) 64%, transparent);
+  content: '';
+}
+
+.workspace :global([data-operational-section]) > :global([role='note']) p:first-child {
+  font-size: 0.8rem;
+  line-height: 1.25rem;
+}
+
+.workspace :global([data-operational-section]) > :global([role='note']) p + p {
+  margin-top: 0.2rem;
+  font-size: 0.76rem;
+  line-height: 1.25rem;
+}
+
+/* Search and filters are one calm control surface. */
+.workspace :global([data-operational-toolbar]) {
+  gap: 0.75rem;
+  border-color: var(--ops-rule);
+  border-radius: var(--seraya-radius-md);
+  background: var(--ops-control-surface);
+  padding: 0.75rem;
+  box-shadow: none;
+}
+
+.workspace :global([data-operational-data-surface] > [data-operational-toolbar]) {
+  border: 0;
+  border-bottom: 1px solid var(--ops-rule);
+  border-radius: 0;
+  padding: 0.85rem 1rem;
+}
+
+.workspace :global([data-operational-toolbar-field] label) {
+  margin-bottom: 0.35rem;
+  color: var(--seraya-text-secondary);
+  font-size: 0.72rem;
+  line-height: 1rem;
+}
+
+.workspace :global([data-operational-toolbar] input),
+.workspace :global([data-operational-toolbar] select) {
+  min-height: 2.65rem;
+  border-color: var(--seraya-border-default);
+  border-radius: var(--seraya-radius-sm);
+  background: var(--seraya-bg-surface);
+}
+
+/* Data surfaces carry density without looking like generic admin tables. */
+.workspace :global([data-operational-data-surface]) {
+  border-color: var(--ops-rule);
+  border-radius: var(--seraya-radius-lg);
+  box-shadow: var(--seraya-shadow-level-1);
+}
+
+.workspace :global([data-operational-desktop-data] table) {
+  font-size: 0.82rem;
+}
+
+.workspace :global([data-operational-desktop-data] thead) {
+  border-bottom: 1px solid var(--ops-rule);
+  background: var(--seraya-bg-surface-subtle) !important;
+  color: var(--seraya-text-secondary) !important;
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+.workspace :global([data-operational-desktop-data] th) {
+  padding-top: 0.7rem !important;
+  padding-bottom: 0.7rem !important;
+  white-space: nowrap;
+}
+
+.workspace :global([data-operational-desktop-data] tbody) {
+  background: var(--seraya-bg-surface);
+}
+
+.workspace :global([data-operational-desktop-data] tbody tr) {
+  transition:
+    background-color var(--seraya-motion-default) var(--seraya-ease-standard),
+    box-shadow var(--seraya-motion-default) var(--seraya-ease-standard);
+}
+
+.workspace :global([data-operational-desktop-data] tbody tr:hover),
+.workspace :global([data-operational-desktop-data] tbody tr:focus-within) {
+  background: var(--ops-row-hover) !important;
+  box-shadow: inset 2px 0 0 color-mix(in srgb, var(--seraya-action-primary) 42%, transparent);
+}
+
+.workspace :global([data-operational-desktop-data] td) {
+  padding-top: 0.8rem !important;
+  padding-bottom: 0.8rem !important;
+}
+
+.workspace :global([data-operational-desktop-data] input[type='checkbox']),
+.workspace :global([data-operational-mobile-card] input[type='checkbox']) {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 0.25rem;
+}
+
+.workspace :global([data-operational-data-surface] span.rounded-full),
+.workspace :global([data-operational-responsive-row] span.rounded-full),
+.workspace :global([data-operational-mobile-card] span.rounded-full) {
+  border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+  padding: 0.22rem 0.55rem;
+  font-size: 0.68rem;
+  line-height: 1rem;
+  font-weight: 600;
+}
+
+/* Purpose-built mobile records: identity first, status second, facts below. */
+.workspace :global([data-operational-mobile-list]) {
+  gap: 0.7rem;
+  background: var(--seraya-bg-canvas);
+  padding: 0.7rem;
+}
+
+.workspace :global([data-operational-mobile-card]) {
+  border-color: var(--ops-rule);
+  border-radius: var(--seraya-radius-lg);
+  padding: 0.9rem;
+  box-shadow: var(--seraya-shadow-level-1);
+}
+
+.workspace :global([data-operational-mobile-card] > div:first-child) {
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+.workspace :global([data-operational-mobile-fields]) {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem 1rem;
+  margin-top: 0.8rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--ops-rule);
+}
+
+.workspace :global([data-operational-mobile-field] dt) {
+  color: var(--seraya-text-muted);
+  font-size: 0.68rem;
+  line-height: 1rem;
+}
+
+.workspace :global([data-operational-mobile-field] dd) {
+  margin-top: 0.15rem;
+  color: var(--seraya-text-secondary);
+  font-size: 0.74rem;
+  line-height: 1.15rem;
+  overflow-wrap: anywhere;
+}
+
+/* Selection stays visibly contextual and clear of product navigation. */
+.workspace :global([data-operational-selection-bar]) {
+  border-color: color-mix(in srgb, var(--seraya-action-primary) 20%, var(--ops-rule));
+  border-radius: var(--seraya-radius-lg);
+  background: color-mix(in srgb, var(--seraya-bg-surface-raised) 94%, var(--seraya-bg-brand-softer));
+  padding: 0.75rem 0.9rem;
+  box-shadow: var(--seraya-shadow-level-2);
+}
+
+.workspace :global([data-operational-selection-actions]) {
+  align-items: center;
+}
+
+/* Respons/Ucapan becomes a segmented workspace switch rather than underlined links. */
+.workspace :global([role='tablist']) {
+  display: inline-flex;
+  gap: 0.2rem !important;
+  padding: 0.22rem;
+  border: 1px solid var(--ops-rule);
+  border-radius: var(--seraya-radius-md);
+  background: var(--seraya-bg-surface-subtle);
+}
+
+.workspace :global([role='tablist'] [role='tab']) {
+  min-height: 2.35rem;
+  border: 0 !important;
+  border-radius: calc(var(--seraya-radius-md) - 0.18rem);
+  padding: 0.45rem 0.8rem !important;
+  color: var(--seraya-text-muted) !important;
+  line-height: 1rem;
+}
+
+.workspace :global([role='tablist'] [role='tab'][aria-selected='true']) {
+  background: var(--seraya-bg-surface);
+  color: var(--seraya-action-primary) !important;
+  box-shadow: var(--seraya-shadow-level-1);
+}
+
+/* Follow-up is an exception queue. Raw links receive compact button geometry. */
+.workspace :global([data-operational-responsive-list]) {
+  background: var(--seraya-bg-surface);
+}
+
+.workspace :global([data-operational-responsive-row]) {
+  gap: 0.8rem 1.25rem;
+  padding: 0.9rem 1rem;
+}
+
+.workspace :global([data-operational-responsive-row]:hover),
+.workspace :global([data-operational-responsive-row]:focus-within) {
+  background: var(--ops-row-hover);
+}
+
+.workspace :global([data-operational-row-action] a) {
+  display: inline-flex;
+  min-height: 2.4rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--seraya-border-default);
+  border-radius: var(--seraya-radius-sm);
+  background: var(--seraya-bg-surface);
+  padding: 0 0.7rem;
+  color: var(--seraya-action-primary);
+  text-decoration: none;
+}
+
+.workspace :global([data-operational-row-action] a:hover) {
+  border-color: color-mix(in srgb, var(--seraya-action-primary) 42%, var(--seraya-border-default));
+  background: var(--seraya-bg-brand-softer);
+}
+
+/* Guestbook is one calm inbox, not a stack of nested cards. */
+.workspace :global(section[aria-labelledby='guestbook-inbox-title']) > div:first-child {
+  padding: 1rem 1.1rem 0.8rem !important;
+}
+
+.workspace :global(section[aria-labelledby='guestbook-inbox-title']) > div:nth-child(2) {
+  padding: 0 !important;
+}
+
+.workspace :global(section[aria-labelledby='guestbook-inbox-title'] ul) {
+  margin: 0;
+  padding: 0;
+}
+
+.workspace :global(section[aria-labelledby='guestbook-inbox-title'] li + li) {
+  border-top: 1px solid var(--ops-rule);
+}
+
+.workspace :global(section[aria-labelledby='guestbook-inbox-title'] li > section) {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.workspace :global(section[aria-labelledby='guestbook-inbox-title'] li > section > div) {
+  padding: 1rem 1.1rem !important;
+}
+
+.workspace :global(section[aria-labelledby='guestbook-inbox-title'] li p:last-child) {
+  margin-top: 0.7rem;
+  max-width: 52rem;
+  font-size: 0.84rem;
+  line-height: 1.5rem;
+}
+
+.workspace :global([data-operational-empty-state]) {
+  padding-top: 3.5rem;
+  padding-bottom: 3.5rem;
+}
+
+@media (max-width: 47.99rem) {
+  .workspace {
+    gap: 1.25rem;
+  }
+
+  .workspace :global([data-operational-header]) {
+    padding-bottom: 1rem;
+  }
+
+  .workspace :global([data-operational-header] h1) {
+    font-size: clamp(1.75rem, 9vw, 2.15rem);
+  }
+
+  .workspace :global([data-operational-header-actions]) {
+    width: 100%;
+  }
+
+  .workspace :global([data-operational-header-actions] > *) {
+    flex: 1 1 auto;
+  }
+
+  .workspace :global([data-operational-metric]) {
+    min-height: 6.25rem;
+    padding: 0.8rem 0.85rem;
+  }
+
+  .workspace :global([data-operational-section-heading]) {
+    align-items: stretch;
+  }
+
+  .workspace :global([data-operational-section-actions]) {
+    width: 100%;
+  }
+
+  .workspace :global([role='tablist']) {
+    width: 100%;
+  }
+
+  .workspace :global([role='tablist'] [role='tab']) {
+    flex: 1 1 0;
+  }
+
+  .workspace :global([data-operational-selection-actions]) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .workspace :global([data-operational-selection-actions] > *) {
+    width: 100%;
+  }
+
+  .workspace :global([data-operational-responsive-row]) {
+    padding: 0.9rem;
+  }
+
+  .workspace :global([data-operational-row-action]) {
+    width: 100%;
+  }
+
+  .workspace :global([data-operational-row-action] > *) {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace :global([data-operational-desktop-data] tbody tr),
+  .workspace :global([data-operational-responsive-row]) {
+    transition: none !important;
+  }
+}
