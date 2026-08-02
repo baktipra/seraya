@@ -20,8 +20,13 @@ import {
   encryptPersonalGuestToken,
   PersonalGuestLinkEncryptionError,
 } from './guest-link-encryption';
+import { deriveGuestLinkLifecycleFromLatestRecord } from './guest-link-lifecycle';
 import { buildPersonalGuestInvitationUrl } from './guest-link-url';
-import type { GuestPersonalLinkCurrentState } from './guest-link.types';
+import type {
+  GuestLinkLifecycleDerivation,
+  GuestLinkLifecycleState,
+  GuestPersonalLinkCurrentState,
+} from './guest-link.types';
 import { generatePersonalGuestToken, hashPersonalGuestToken } from './guest-link-token';
 
 export class GuestLinkUnavailableError extends Error {
@@ -39,11 +44,48 @@ export class GuestLinkLegacyUpgradeRequiredError extends Error {
   }
 }
 
+/** The browser acted on a lifecycle snapshot that is no longer current. */
+export class GuestLinkLifecycleChangedError extends Error {
+  constructor() {
+    super('The personal guest-link lifecycle changed before the command completed.');
+    this.name = 'GuestLinkLifecycleChangedError';
+  }
+}
+
+/** Destructive replacement of an active capability always requires an explicit confirmation. */
+export class GuestLinkActiveReplacementConfirmationRequiredError extends Error {
+  constructor() {
+    super('Replacing an active personal guest link requires explicit confirmation.');
+    this.name = 'GuestLinkActiveReplacementConfirmationRequiredError';
+  }
+}
+
+/** Revocation is accepted only from the explicit owner confirmation surface. */
+export class GuestLinkRevocationConfirmationRequiredError extends Error {
+  constructor() {
+    super('Revoking an active personal guest link requires explicit confirmation.');
+    this.name = 'GuestLinkRevocationConfirmationRequiredError';
+  }
+}
+
+/** The requested command is not valid for the latest canonical lifecycle. */
+export class GuestLinkCommandNotAllowedError extends Error {
+  constructor() {
+    super('The requested personal guest-link command is not allowed for the latest lifecycle.');
+    this.name = 'GuestLinkCommandNotAllowedError';
+  }
+}
+
 /** Minimum server-only guest shape required by the existing link authority. */
 export type PersonalGuestLinkPreparationTarget = Pick<
   Guest,
   'deleted_at' | 'id' | 'project_id' | 'whatsapp_phone_e164'
 >;
+
+type VerifiedOwnerGuestTarget = {
+  guest: PersonalGuestLinkPreparationTarget;
+  project: OwnedProject;
+};
 
 function createEncryptedCapability(token: string) {
   const encrypted = encryptPersonalGuestToken(token);
@@ -53,6 +95,36 @@ function createEncryptedCapability(token: string) {
     tokenHash: hashPersonalGuestToken(token),
     tokenKeyVersion: encrypted.keyVersion,
   };
+}
+
+async function getVerifiedOwnerGuestTarget(input: {
+  guestId: string;
+  projectId: string;
+}): Promise<VerifiedOwnerGuestTarget> {
+  const user = await requireCurrentUser();
+  const project = await getOwnedProjectById(input.projectId, user.id);
+  const guest = assertGuestBelongsToProject(
+    await getActiveGuestForVerifiedProjectWithAdmin(project, input.guestId),
+    project.id,
+  );
+
+  return { guest, project };
+}
+
+async function getLatestPersonalGuestLinkLifecycleForVerifiedGuest(
+  guestId: string,
+): Promise<GuestLinkLifecycleDerivation> {
+  const records = await listLatestGuestLinkStatesForVerifiedGuestIds([guestId]);
+  return deriveGuestLinkLifecycleFromLatestRecord(records[0]);
+}
+
+function assertExpectedLifecycle(
+  lifecycle: GuestLinkLifecycleDerivation,
+  expectedLifecycleState: GuestLinkLifecycleState,
+) {
+  if (lifecycle.lifecycleState !== expectedLifecycleState) {
+    throw new GuestLinkLifecycleChangedError();
+  }
 }
 
 /**
@@ -114,19 +186,36 @@ export async function createOrReplacePersonalGuestLinkForVerifiedGuest(input: {
   };
 }
 
-/** Generates raw capability material only after owner + active guest checks pass. */
+/**
+ * Generates raw capability material only after owner + active guest checks pass.
+ * The expected lifecycle and explicit active-replacement confirmation prevent a
+ * stale browser row from silently replacing a newer active capability.
+ */
 export async function createOrReplacePersonalGuestLinkForCurrentUser(input: {
+  /** Optional only for existing server-internal callers; owner actions always provide it. */
+  confirmActiveReplacement?: boolean;
+  /** Optional only for existing server-internal callers; owner actions always provide it. */
+  expectedLifecycleState?: GuestLinkLifecycleState;
   guestId: string;
   projectId: string;
 }) {
-  const user = await requireCurrentUser();
-  const project = await getOwnedProjectById(input.projectId, user.id);
-  const guest = assertGuestBelongsToProject(
-    await getActiveGuestForVerifiedProjectWithAdmin(project, input.guestId),
-    project.id,
-  );
+  const { guest, project } = await getVerifiedOwnerGuestTarget(input);
+  const lifecycle = await getLatestPersonalGuestLinkLifecycleForVerifiedGuest(guest.id);
 
-  return createOrReplacePersonalGuestLinkForVerifiedGuest({ guest, project });
+  if (input.expectedLifecycleState) {
+    assertExpectedLifecycle(lifecycle, input.expectedLifecycleState);
+
+    if (lifecycle.requiresReplacementConfirmation && !input.confirmActiveReplacement) {
+      throw new GuestLinkActiveReplacementConfirmationRequiredError();
+    }
+  }
+
+  if (!lifecycle.canCreate && !lifecycle.canReplace) {
+    throw new GuestLinkCommandNotAllowedError();
+  }
+
+  const result = await createOrReplacePersonalGuestLinkForVerifiedGuest({ guest, project });
+  return { ...result, previousLifecycleState: lifecycle.lifecycleState };
 }
 
 /**
@@ -165,19 +254,24 @@ export async function reaccessPersonalGuestLinkForVerifiedGuest(input: {
 }
 
 /**
- * Owner-only, explicit re-access. It verifies project ownership and active guest
- * scope before delegating to the shared encrypted capability authority.
+ * Owner-only, explicit re-access. The lifecycle snapshot is checked before any
+ * encrypted capability material is selected or decrypted.
  */
 export async function reaccessPersonalGuestLinkForCurrentUser(input: {
+  expectedLifecycleState?: 'active_recoverable';
   guestId: string;
   projectId: string;
 }) {
-  const user = await requireCurrentUser();
-  const project = await getOwnedProjectById(input.projectId, user.id);
-  const guest = assertGuestBelongsToProject(
-    await getActiveGuestForVerifiedProjectWithAdmin(project, input.guestId),
-    project.id,
-  );
+  const { guest, project } = await getVerifiedOwnerGuestTarget(input);
+
+  if (input.expectedLifecycleState) {
+    const lifecycle = await getLatestPersonalGuestLinkLifecycleForVerifiedGuest(guest.id);
+    assertExpectedLifecycle(lifecycle, input.expectedLifecycleState);
+
+    if (!lifecycle.canReaccess) {
+      throw new GuestLinkCommandNotAllowedError();
+    }
+  }
 
   return reaccessPersonalGuestLinkForVerifiedGuest({ guest, project });
 }
@@ -186,29 +280,34 @@ export async function reaccessPersonalGuestLinkForCurrentUser(input: {
 export async function getLatestPersonalGuestLinkStateForVerifiedGuest(
   guestId: string,
 ): Promise<GuestPersonalLinkCurrentState> {
-  const records = await listLatestGuestLinkStatesForVerifiedGuestIds([guestId]);
-  const latestRecord = records.reduce<(typeof records)[number] | null>((latest, record) => {
-    if (!latest || record.created_at > latest.created_at) {
-      return record;
-    }
-
-    return latest;
-  }, null);
-
-  return latestRecord?.status ?? 'not_created';
+  const lifecycle = await getLatestPersonalGuestLinkLifecycleForVerifiedGuest(guestId);
+  return lifecycle.currentState;
 }
 
-/** Owner-only revocation; the database function atomically targets active link state. */
+/**
+ * Owner-only revocation. It is accepted only from an explicitly confirmed
+ * active lifecycle and the database function atomically targets active state.
+ */
 export async function revokePersonalGuestLinkForCurrentUser(input: {
+  confirmRevocation?: boolean;
+  expectedLifecycleState?: 'active_recoverable' | 'active_legacy';
   guestId: string;
   projectId: string;
 }) {
-  const user = await requireCurrentUser();
-  const project = await getOwnedProjectById(input.projectId, user.id);
-  const guest = assertGuestBelongsToProject(
-    await getActiveGuestForVerifiedProjectWithAdmin(project, input.guestId),
-    project.id,
-  );
+  const { guest } = await getVerifiedOwnerGuestTarget(input);
+
+  if (input.expectedLifecycleState) {
+    const lifecycle = await getLatestPersonalGuestLinkLifecycleForVerifiedGuest(guest.id);
+    assertExpectedLifecycle(lifecycle, input.expectedLifecycleState);
+
+    if (!lifecycle.canRevoke) {
+      throw new GuestLinkCommandNotAllowedError();
+    }
+
+    if (!input.confirmRevocation) {
+      throw new GuestLinkRevocationConfirmationRequiredError();
+    }
+  }
 
   await revokePersonalGuestLinkForVerifiedGuest(guest.id);
 }
