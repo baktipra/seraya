@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { requireCurrentUser } from '@/modules/auth/current-user';
+import { createLatestGuestLinkLifecycleMap } from '@/modules/guest-links/guest-link-lifecycle';
 import {
   GuestLinkActiveLinkExistsError,
   GuestLinkRepositoryError,
@@ -14,7 +15,7 @@ import {
   reaccessPersonalGuestLinkForCurrentUser,
 } from '@/modules/guest-links/guest-link.service';
 import { PersonalGuestLinkEncryptionError } from '@/modules/guest-links/guest-link-encryption';
-import type { LatestGuestLinkStateRecord } from '@/modules/guest-links/guest-link.types';
+import type { GuestLinkLifecycleDerivation } from '@/modules/guest-links/guest-link.types';
 import { assertGuestBelongsToProject, GuestAccessDeniedError } from '@/modules/guests/guest.policy';
 import { getActiveGuestForVerifiedProjectWithAdmin } from '@/modules/guests/guest.repository';
 import { isCanonicalGuestWhatsAppPhoneE164 } from '@/modules/guests/whatsapp-phone';
@@ -52,38 +53,12 @@ export class DeliveryActiveLinkConfirmationRequiredError extends Error {
   }
 }
 
-type LatestLinkState = {
-  hasRecoverableCapability: boolean;
-  state: DeliveryPersonalLinkState;
-};
-
 type DeliveryBatchItemFailureClassification =
   | 'encryption_runtime'
   | 'inactive_or_removed'
   | 'persistence_authority'
   | 'persistence_runtime'
   | 'unexpected';
-
-function getLatestLinkStates(records: LatestGuestLinkStateRecord[]) {
-  const latestRecords = new Map<string, LatestGuestLinkStateRecord>();
-
-  for (const record of records) {
-    const current = latestRecords.get(record.guest_id);
-    if (!current || record.created_at > current.created_at) {
-      latestRecords.set(record.guest_id, record);
-    }
-  }
-
-  const latestStates = new Map<string, LatestLinkState>();
-  for (const [guestId, record] of latestRecords) {
-    latestStates.set(guestId, {
-      hasRecoverableCapability: record.hasRecoverableCapability === true,
-      state: record.status,
-    });
-  }
-
-  return latestStates;
-}
 
 export function maskDeliveryWhatsAppPhone(phone: string): string {
   const prefixLength = Math.min(3, Math.max(2, phone.length - 4));
@@ -92,9 +67,9 @@ export function maskDeliveryWhatsAppPhone(phone: string): string {
 
 function mapDeliveryGuestRow(
   guest: DeliveryGuestRecord,
-  link: LatestLinkState | undefined,
+  link: GuestLinkLifecycleDerivation | undefined,
 ): DeliveryGuestActionRow {
-  const personalLinkState = link?.state ?? 'not_created';
+  const personalLinkState = link?.currentState ?? 'not_created';
   const whatsappPhone = guest.whatsapp_phone_e164;
   const hasValidWhatsApp = isCanonicalGuestWhatsAppPhoneE164(whatsappPhone);
 
@@ -104,12 +79,8 @@ function mapDeliveryGuestRow(
     guestId: guest.id,
     maskedWhatsAppNumber:
       hasValidWhatsApp && whatsappPhone ? maskDeliveryWhatsAppPhone(whatsappPhone) : null,
-    personalLinkReaccessState:
-      personalLinkState !== 'active'
-        ? 'unavailable'
-        : link?.hasRecoverableCapability
-          ? 'recoverable'
-          : 'legacy',
+    personalLinkLifecycleState: link?.lifecycleState ?? 'not_created',
+    personalLinkReaccessState: link?.reaccessState ?? 'unavailable',
     personalLinkState,
     rsvpStatus: guest.rsvp_status,
     whatsappAvailability: hasValidWhatsApp ? 'available' : 'missing',
@@ -118,7 +89,7 @@ function mapDeliveryGuestRow(
 
 async function getDeliveryGuestsWithLatestStates(project: OwnedProject) {
   const guests = await listActiveDeliveryGuestsForVerifiedProject(project);
-  const latestLinkStates = getLatestLinkStates(
+  const latestLinkStates = createLatestGuestLinkLifecycleMap(
     await listLatestGuestLinkStatesForVerifiedGuestIds(guests.map((guest) => guest.id)),
   );
   return { guests, latestLinkStates };
@@ -334,7 +305,7 @@ export async function prepareMissingPersonalGuestLinksForDeliveryForCurrentUser(
       continue;
     }
 
-    const state = latestLinkStates.get(activeGuest.id)?.state ?? 'not_created';
+    const state = latestLinkStates.get(activeGuest.id)?.currentState ?? 'not_created';
     if (state === 'active') {
       result.skippedActiveLinkCount += 1;
       continue;
