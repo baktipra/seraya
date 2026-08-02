@@ -12,7 +12,7 @@ export function CompassWorkspace({
   return (
     <section
       aria-labelledby={labelledBy}
-      className="grid min-w-0 gap-8 sm:gap-10"
+      className="grid min-w-0 gap-6 sm:gap-8"
       data-compass-workspace
     >
       {children}
@@ -37,29 +37,31 @@ export function CompassHeader({
 }) {
   return (
     <header
-      className="border-seraya-border-default min-w-0 border-b pb-6 sm:pb-7"
+      className="border-seraya-border-subtle bg-seraya-surface min-w-0 rounded-[var(--seraya-radius-xl)] border p-5 shadow-[var(--seraya-shadow-level-1)] sm:p-7"
       data-compass-header
     >
-      <div className="flex min-w-0 flex-col gap-5 lg:flex-row lg:items-end lg:justify-between lg:gap-8">
+      <div className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-10">
         <div className="min-w-0">
-          <p className="text-seraya-action-primary text-[0.6875rem] font-semibold tracking-[0.16em] uppercase">
-            {eyebrow}
-          </p>
-          <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2">
-            <h1
-              className="seraya-page-title min-w-0 text-[var(--seraya-type-page-title-mobile)] md:text-[var(--seraya-type-page-title)]"
-              id={titleId}
-            >
-              {title}
-            </h1>
+          <div className="flex min-w-0 flex-wrap items-center gap-2.5">
+            <p className="text-seraya-text-muted text-xs font-medium">{eyebrow}</p>
             {status}
           </div>
-          <div className="text-seraya-text-secondary mt-3 max-w-[45rem] text-[0.9375rem] leading-7">
+          <h1
+            className="seraya-page-title mt-3 min-w-0 text-[clamp(2.25rem,7vw,3.25rem)] md:text-[clamp(2.5rem,4vw,3.75rem)]"
+            id={titleId}
+          >
+            {title}
+          </h1>
+          <div className="text-seraya-text-secondary mt-3 max-w-[43rem] text-[0.9375rem] leading-7">
             {description}
           </div>
         </div>
         {actions ? (
-          <div className="flex min-w-0 shrink-0 flex-wrap gap-2" data-compass-header-actions>
+          <div
+            aria-label="Akses undangan"
+            className="flex min-w-0 flex-wrap gap-2 lg:justify-end"
+            data-compass-header-actions
+          >
             {actions}
           </div>
         ) : null}
@@ -84,27 +86,25 @@ export function CompassFocus({
   return (
     <section
       aria-labelledby={titleId}
-      className="border-seraya-action-primary bg-seraya-brand-soft min-w-0 border-l-2 px-5 py-5 sm:px-6 sm:py-6"
+      className="border-seraya-border-subtle bg-seraya-brand-softer min-w-0 rounded-[var(--seraya-radius-xl)] border p-5 shadow-[var(--seraya-shadow-level-1)] sm:p-7"
       data-compass-focus
     >
-      <div className="grid min-w-0 gap-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+      <div className="grid min-w-0 gap-6 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
         <div className="min-w-0">
-          <p className="text-seraya-action-primary text-[0.6875rem] font-semibold tracking-[0.16em] uppercase">
-            Fokus berikutnya
-          </p>
-          <h2 className="seraya-display-sm mt-1.5" id={titleId}>
+          <p className="text-seraya-action-primary text-xs font-semibold">Fokus berikutnya</p>
+          <h2 className="seraya-heading-lg mt-2 max-w-2xl" id={titleId}>
             {title}
           </h2>
-          <div className="text-seraya-text-secondary mt-1.5 max-w-2xl text-sm leading-6">
+          <div className="text-seraya-text-secondary mt-2 max-w-2xl text-sm leading-6">
             {description}
           </div>
         </div>
         <Link
-          className="bg-seraya-action-primary text-seraya-text-inverse hover:bg-seraya-action-primary-hover focus-visible:outline-seraya-focus-ring inline-flex min-h-11 shrink-0 items-center justify-center rounded-[var(--seraya-radius-sm)] px-4 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
+          className="bg-seraya-action-primary text-seraya-text-inverse hover:bg-seraya-action-primary-hover focus-visible:outline-seraya-focus-ring inline-flex min-h-11 shrink-0 items-center justify-center rounded-[var(--seraya-radius-sm)] px-4 text-sm font-semibold transition-[background-color,transform] duration-[var(--seraya-motion-default)] hover:-translate-y-px focus-visible:outline-3 focus-visible:outline-offset-2"
           href={href}
         >
           {actionLabel}
-          <span aria-hidden="true" className="ml-2">
+          <span aria-hidden="true" className="ml-2 text-base leading-none">
             →
           </span>
         </Link>
@@ -124,10 +124,8 @@ export function CompassSectionHeader({
 }) {
   return (
     <div className="min-w-0" data-compass-section-heading>
-      <p className="text-seraya-text-muted text-[0.6875rem] font-semibold tracking-[0.16em] uppercase">
-        {eyebrow}
-      </p>
-      <h2 className="seraya-display-sm mt-1.5" id={titleId}>
+      <p className="text-seraya-text-muted text-xs font-medium">{eyebrow}</p>
+      <h2 className="seraya-heading-md mt-1.5" id={titleId}>
         {title}
       </h2>
     </div>
@@ -144,9 +142,7 @@ export function CompassProgressStrip({
   return (
     <section aria-labelledby={titleId} className="min-w-0" data-compass-progress>
       <CompassSectionHeader eyebrow="Posisi proyek" title="Progress singkat" titleId={titleId} />
-      <dl className="border-seraya-border-default mt-4 grid min-w-0 border-y sm:grid-cols-2 md:grid-cols-4">
-        {children}
-      </dl>
+      <dl className="mt-4 grid min-w-0 grid-cols-2 gap-3 lg:grid-cols-4">{children}</dl>
     </section>
   );
 }
@@ -161,16 +157,20 @@ export function CompassProgressItem({
   value: ReactNode;
 }) {
   return (
-    <div className="border-seraya-border-default min-w-0 border-b px-0 py-4 last:border-b-0 sm:px-4 md:min-h-[6.25rem] md:border-r md:border-b-0 md:first:pl-0 md:last:border-r-0 md:last:pr-0">
-      <dt className="text-seraya-text-muted text-[0.625rem] font-semibold tracking-[0.15em] uppercase">
-        {label}
-      </dt>
-      <dd className="mt-1.5 min-w-0">
+    <div className="border-seraya-border-subtle bg-seraya-surface-subtle min-w-0 rounded-[var(--seraya-radius-lg)] border p-4 sm:p-5">
+      <dt className="text-seraya-text-muted text-xs font-medium">{label}</dt>
+      <dd className="mt-2 min-w-0">
         <Link
-          className="text-seraya-text-primary hover:text-seraya-action-primary focus-visible:outline-seraya-focus-ring inline-flex min-h-11 max-w-full items-start font-serif text-[clamp(1.25rem,2vw,1.5rem)] leading-[1.15] font-medium tracking-[-0.025em] transition-colors focus-visible:outline-3 focus-visible:outline-offset-3"
+          className="text-seraya-text-primary hover:text-seraya-action-primary focus-visible:outline-seraya-focus-ring group inline-flex min-h-11 max-w-full items-start gap-2 rounded-[var(--seraya-radius-sm)] text-[clamp(1.125rem,2vw,1.375rem)] leading-6 font-semibold tracking-[-0.025em] transition-colors focus-visible:outline-3 focus-visible:outline-offset-3"
           href={href}
         >
-          {value}
+          <span className="min-w-0 break-words">{value}</span>
+          <span
+            aria-hidden="true"
+            className="text-seraya-text-muted mt-px shrink-0 transition-transform duration-[var(--seraya-motion-default)] group-hover:translate-x-0.5"
+          >
+            →
+          </span>
         </Link>
       </dd>
     </div>
@@ -191,7 +191,9 @@ export function CompassAttentionList({
         title="Butuh perhatian Anda"
         titleId={titleId}
       />
-      <ul className="border-seraya-border-default mt-4 min-w-0 divide-y border-y">{children}</ul>
+      <ul className="border-seraya-border-subtle bg-seraya-surface mt-4 min-w-0 divide-y divide-seraya-border-subtle overflow-hidden rounded-[var(--seraya-radius-xl)] border shadow-[var(--seraya-shadow-level-1)]">
+        {children}
+      </ul>
     </section>
   );
 }
@@ -210,20 +212,18 @@ export function CompassAttentionItem({
   title: ReactNode;
 }) {
   return (
-    <li className="group grid min-w-0 gap-3 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+    <li className="group grid min-w-0 gap-4 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-5">
       <div className="min-w-0">
-        <p className="text-seraya-text-muted text-[0.625rem] font-semibold tracking-[0.14em] uppercase">
-          {section}
-        </p>
-        <h3 className="text-seraya-text-primary mt-1 text-sm font-semibold">{title}</h3>
-        <div className="text-seraya-text-secondary mt-0.5 text-sm leading-6">{description}</div>
+        <p className="text-seraya-action-primary text-xs font-medium">{section}</p>
+        <h3 className="text-seraya-text-primary mt-1.5 text-sm font-semibold">{title}</h3>
+        <div className="text-seraya-text-secondary mt-1 text-sm leading-6">{description}</div>
       </div>
       <Link
-        className="text-seraya-action-primary focus-visible:outline-seraya-focus-ring inline-flex min-h-10 shrink-0 items-center text-sm font-semibold underline-offset-4 group-hover:underline focus-visible:outline-3 focus-visible:outline-offset-3"
+        className="text-seraya-action-primary hover:bg-seraya-brand-softer focus-visible:outline-seraya-focus-ring inline-flex min-h-10 shrink-0 items-center justify-center rounded-[var(--seraya-radius-sm)] px-3 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
         href={href}
       >
         {actionLabel}
-        <span aria-hidden="true" className="ml-2">
+        <span aria-hidden="true" className="ml-2 transition-transform group-hover:translate-x-0.5">
           →
         </span>
       </Link>
@@ -235,18 +235,59 @@ export function CompassClearState({ titleId }: { titleId: string }) {
   return (
     <section
       aria-labelledby={titleId}
-      className="border-seraya-border-default min-w-0 border-y py-5"
+      className="border-seraya-border-subtle bg-seraya-status-success-soft min-w-0 rounded-[var(--seraya-radius-xl)] border p-5 sm:p-6"
       data-compass-clear-state
     >
-      <p className="text-seraya-text-muted text-[0.6875rem] font-semibold tracking-[0.16em] uppercase">
-        Perhatian
-      </p>
-      <h2 className="seraya-display-sm mt-1.5" id={titleId}>
+      <p className="text-seraya-status-success text-xs font-semibold">Perhatian proyek</p>
+      <h2 className="seraya-heading-sm mt-2" id={titleId}>
         Tidak ada hal mendesak saat ini.
       </h2>
       <p className="text-seraya-text-secondary mt-1.5 text-sm leading-6">
         Gunakan fokus berikutnya di atas untuk melanjutkan perjalanan proyek.
       </p>
     </section>
+  );
+}
+
+export function CompassContextList({
+  children,
+  titleId,
+}: {
+  children: ReactNode;
+  titleId: string;
+}) {
+  return (
+    <section aria-labelledby={titleId} className="min-w-0" data-compass-context>
+      <CompassSectionHeader
+        eyebrow="Respons dan kehadiran"
+        title="Konteks tamu saat ini"
+        titleId={titleId}
+      />
+      <dl className="mt-4 grid min-w-0 gap-3 sm:grid-cols-3">{children}</dl>
+    </section>
+  );
+}
+
+export function CompassContextItem({
+  href,
+  label,
+  value,
+}: {
+  href: Route;
+  label: string;
+  value: ReactNode;
+}) {
+  return (
+    <div className="border-seraya-border-subtle bg-seraya-surface min-w-0 rounded-[var(--seraya-radius-lg)] border p-4">
+      <dt className="text-seraya-text-muted text-xs font-medium">{label}</dt>
+      <dd className="mt-1.5 min-w-0">
+        <Link
+          className="text-seraya-text-primary hover:text-seraya-action-primary focus-visible:outline-seraya-focus-ring inline-flex min-h-10 max-w-full items-center rounded-[var(--seraya-radius-sm)] text-base font-semibold tracking-[-0.015em] transition-colors focus-visible:outline-3 focus-visible:outline-offset-3"
+          href={href}
+        >
+          {value}
+        </Link>
+      </dd>
+    </div>
   );
 }
