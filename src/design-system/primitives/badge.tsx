@@ -3,8 +3,8 @@ import type { ComponentPropsWithoutRef } from 'react';
 import { cn } from '@/lib/cn';
 
 export const badgeVariants = {
-  neutral: 'border-seraya-border-default bg-seraya-surface text-seraya-text-secondary',
-  brand: 'border-seraya-brand-soft bg-seraya-brand-soft text-seraya-action-primary',
+  neutral: 'border-seraya-border-subtle bg-seraya-surface-subtle text-seraya-text-secondary',
+  brand: 'border-seraya-brand-soft bg-seraya-brand-softer text-seraya-action-primary',
   success:
     'border-seraya-status-success-soft bg-seraya-status-success-soft text-seraya-status-success',
   warning:
@@ -23,7 +23,7 @@ export function Badge({ className, variant = 'neutral', ...props }: BadgeProps) 
   return (
     <span
       className={cn(
-        'inline-flex min-h-6 items-center rounded-[var(--seraya-radius-pill)] border px-2.5 py-1 text-[0.6875rem] font-semibold tracking-[0.035em]',
+        'inline-flex min-h-6 items-center rounded-[var(--seraya-radius-pill)] border px-2.5 py-1 text-xs leading-4 font-medium tracking-[-0.005em]',
         badgeVariants[variant],
         className,
       )}

@@ -1,43 +1,43 @@
-/**
- * Raw palette references for Seraya. Components should prefer semantic CSS tokens
- * (for example `--seraya-action-primary`) rather than consuming these values directly.
- */
+/** Raw palette references. Components should consume semantic CSS roles instead. */
 export const serayaPalette = {
-  ink: '#2B2523',
-  ivory: '#FCF8F3',
+  ink: '#211F1D',
+  ivory: '#F7F6F3',
   paper: '#FFFFFF',
-  rosewood: '#8E4B52',
-  rosewoodSoft: '#F3E4E5',
-  terracotta: '#B96B56',
-  sage: '#849386',
-  sand: '#F1E7DC',
-  muted: '#776C65',
-  border: '#E8DDD2',
-  success: '#2F6D58',
-  warning: '#9A6426',
-  error: '#A24242',
-  info: '#3D657C',
+  rosewood: '#7B414C',
+  rosewoodSoft: '#F5E9EB',
+  terracotta: '#A95F4D',
+  sage: '#788A7D',
+  sand: '#EEE9E3',
+  muted: '#8A847E',
+  border: '#E2DDD7',
+  success: '#2E6B57',
+  warning: '#95601E',
+  error: '#A84242',
+  info: '#42687B',
 } as const;
 
-/**
- * Semantic color names used by Seraya product components.
- * The values map to CSS custom properties defined in `src/app/globals.css`.
- */
+/** Semantic color names backed by `src/app/design-tokens.css`. */
 export const semanticColorTokens = {
   canvas: 'var(--seraya-bg-canvas)',
   surface: 'var(--seraya-bg-surface)',
-  surfaceSoft: 'var(--seraya-bg-soft)',
+  surfaceSubtle: 'var(--seraya-bg-surface-subtle)',
+  surfaceRaised: 'var(--seraya-bg-surface-raised)',
   surfaceBrandSoft: 'var(--seraya-bg-brand-soft)',
+  surfaceBrandSofter: 'var(--seraya-bg-brand-softer)',
   textPrimary: 'var(--seraya-text-primary)',
   textSecondary: 'var(--seraya-text-secondary)',
   textMuted: 'var(--seraya-text-muted)',
+  textDisabled: 'var(--seraya-text-disabled)',
   textInverse: 'var(--seraya-text-inverse)',
   actionPrimary: 'var(--seraya-action-primary)',
   actionPrimaryHover: 'var(--seraya-action-primary-hover)',
+  actionPrimaryPressed: 'var(--seraya-action-primary-pressed)',
   actionSecondary: 'var(--seraya-action-secondary)',
+  borderSubtle: 'var(--seraya-border-subtle)',
   borderDefault: 'var(--seraya-border-default)',
   borderStrong: 'var(--seraya-border-strong)',
   focusRing: 'var(--seraya-focus-ring)',
+  overlay: 'var(--seraya-overlay)',
   success: 'var(--seraya-status-success)',
   warning: 'var(--seraya-status-warning)',
   error: 'var(--seraya-status-error)',
