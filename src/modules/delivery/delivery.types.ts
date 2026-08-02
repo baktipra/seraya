@@ -8,10 +8,7 @@ import type { OwnedProject } from '@/modules/projects/project.repository';
 
 export type DeliveryPersonalLinkState = GuestPersonalLinkState | 'expired';
 
-/**
- * Mutually exclusive owner-facing delivery states. These states are derived
- * from existing guest/link projections only; they are never persisted.
- */
+/** Technical prerequisites only; these are not delivery receipts. */
 export type DeliveryReadinessState =
   | 'ready_to_distribute'
   | 'needs_whatsapp'
@@ -20,12 +17,25 @@ export type DeliveryReadinessState =
 
 export type DeliveryReadinessFilter = 'all' | DeliveryReadinessState;
 
+/**
+ * Canonical manual-distribution truth. `contact_recorded` is an explicit owner
+ * assertion and remains distinct from sent, delivered, opened, or read.
+ */
+export type DeliveryDistributionState =
+  | 'ready_for_handoff'
+  | 'handoff_prepared'
+  | 'contact_recorded'
+  | 'needs_whatsapp'
+  | 'no_personal_invitation'
+  | 'needs_link_update';
+
+export type DeliveryDistributionFilter =
+  | 'all'
+  | DeliveryDistributionState
+  | 'not_ready'
+  | 'awaiting_rsvp';
 export type DeliveryWhatsAppAvailability = 'available' | 'missing';
 
-/**
- * One pure, UI-safe readiness result shared by summary, filters, row actions,
- * bulk eligibility, and export. It deliberately contains no link material.
- */
 export type DeliveryReadinessDerivation = {
   canCopyLink: boolean;
   canOpenInvitation: boolean;
@@ -39,12 +49,27 @@ export type DeliveryReadinessDerivation = {
   requiresGuestManagerLifecycleAction: boolean;
 };
 
-/** Safe row shape for the owner browser. It intentionally has no token, URL, ciphertext, or key metadata. */
+export type DeliveryDistributionDerivation = {
+  canRecordContact: boolean;
+  contactRecordedAt: string | null;
+  distributionLabel: string;
+  distributionState: DeliveryDistributionState;
+  initialHandoffPreparedAt: string | null;
+  isAwaitingRsvp: boolean;
+  isContactRecorded: boolean;
+  isInitialHandoffPrepared: boolean;
+  isReadyForInitialHandoff: boolean;
+  nextStepLabel: string;
+  shareActionLabel: string;
+};
+
+/** Safe owner-browser row. No raw URL, token, ciphertext, or message body. */
 export type DeliveryGuestRow = {
+  contactRecordedAt?: string | null;
   displayName: string;
   groupLabel: string | null;
+  initialHandoffPreparedAt?: string | null;
   maskedWhatsAppNumber: string | null;
-  /** Production loaders provide the canonical state; optional keeps older fixtures compatible. */
   personalLinkLifecycleState?: GuestLinkLifecycleState;
   personalLinkReaccessState: GuestPersonalLinkReaccessState;
   personalLinkState: DeliveryPersonalLinkState;
@@ -52,15 +77,10 @@ export type DeliveryGuestRow = {
   whatsappAvailability: DeliveryWhatsAppAvailability;
 };
 
-/** Server-only row shape used by the RSC page to bind a verified action target. */
 export type DeliveryGuestActionRow = DeliveryGuestRow & {
   guestId: string;
 };
 
-/**
- * Every active guest belongs to exactly one state bucket. This is intentionally
- * independent of broader project readiness counts used by the overview.
- */
 export type DeliveryReadinessSummary = {
   activeGuestCount: number;
   needsLinkUpdateCount: number;
@@ -69,11 +89,13 @@ export type DeliveryReadinessSummary = {
   readyToDistributeCount: number;
 };
 
-/**
- * Aggregate-only batch outcome. It never identifies a guest or exposes a
- * capability. The counts make selection, eligibility, and runtime failures
- * observable without leaking link material or cross-project facts.
- */
+export type DeliveryHandoffSummary = {
+  awaitingRsvpCount: number;
+  contactRecordedCount: number;
+  handoffPreparedCount: number;
+  readyForHandoffCount: number;
+};
+
 export type DeliveryBatchPreparationResult = {
   createdCount: number;
   failedCount: number;
@@ -93,4 +115,8 @@ export type OwnedGuestDeliveryCenter = {
   project: OwnedProject;
   rows: DeliveryGuestActionRow[];
   summary: DeliveryReadinessSummary;
+};
+
+export type OwnedGuestDistributionCenter = OwnedGuestDeliveryCenter & {
+  handoffSummary: DeliveryHandoffSummary;
 };

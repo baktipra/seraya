@@ -11,14 +11,16 @@ import {
 import { WorkspacePage } from '@/components/workspace/workspace-page';
 import { measureWorkspaceServerLoad } from '@/lib/performance/workspace-performance.server';
 import { getOwnedProjectContextForRequest } from '@/modules/auth/dashboard-request-context';
+import { recordCanonicalInitialContactAction } from '@/modules/delivery/canonical-initial-contact.actions';
 import { reaccessOrPrepareCanonicalInitialHandoffAction } from '@/modules/delivery/canonical-initial-handoff.actions';
 import {
   copySelectedDeliveryWhatsAppNumbersAction,
   prepareMissingPersonalGuestLinksForDeliveryAction,
   preparePersonalGuestLinkForDeliveryAction,
 } from '@/modules/delivery/delivery.actions';
+import { deriveDeliveryDistribution } from '@/modules/delivery/delivery-distribution';
+import { getGuestDistributionCenterForVerifiedProject } from '@/modules/delivery/delivery-handoff.service';
 import { deriveDeliveryReadiness } from '@/modules/delivery/delivery-readiness';
-import { getGuestDeliveryCenterForVerifiedProject } from '@/modules/delivery/delivery.service';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 import { getCurrentPublishedInvitationForVerifiedProject } from '@/modules/publications/publication.service';
 
@@ -30,7 +32,7 @@ type DeliveryScreen =
   | { kind: 'blocked' }
   | {
       kind: 'delivery';
-      deliveryCenter: Awaited<ReturnType<typeof getGuestDeliveryCenterForVerifiedProject>>;
+      deliveryCenter: Awaited<ReturnType<typeof getGuestDistributionCenterForVerifiedProject>>;
     };
 
 export const dynamic = 'force-dynamic';
@@ -41,7 +43,7 @@ function DeliveryBlockedState({ projectId }: { projectId: string }) {
   return (
     <OperationalWorkspace labelledBy="delivery-blocked-title">
       <OperationalHeader
-        description="Terbitkan versi undangan yang sudah kalian setujui sebelum menyiapkan Undangan Pribadi untuk tamu."
+        description="Terbitkan versi undangan yang sudah kalian setujui sebelum menyiapkan pembagian manual untuk tamu."
         eyebrow="Bagikan"
         title="Bagikan tersedia setelah undangan diterbitkan"
         titleId="delivery-blocked-title"
@@ -66,27 +68,18 @@ function DeliveryBlockedState({ projectId }: { projectId: string }) {
 
 async function getDeliveryScreenOrNotFound(projectId: string): Promise<DeliveryScreen> {
   return measureWorkspaceServerLoad(
-    {
-      operation: 'delivery-center-screen',
-      workspace: 'delivery',
-    },
+    { operation: 'delivery-center-screen', workspace: 'delivery' },
     async () => {
       try {
         const project = await getOwnedProjectContextForRequest(projectId);
         const publication = await getCurrentPublishedInvitationForVerifiedProject(project);
-
-        if (!publication) {
-          return { kind: 'blocked' };
-        }
-
-        const deliveryCenter = await getGuestDeliveryCenterForVerifiedProject(project);
-
-        return { deliveryCenter, kind: 'delivery' };
+        if (!publication) return { kind: 'blocked' };
+        return {
+          deliveryCenter: await getGuestDistributionCenterForVerifiedProject(project),
+          kind: 'delivery',
+        };
       } catch (error) {
-        if (error instanceof ProjectAccessDeniedError) {
-          notFound();
-        }
-
+        if (error instanceof ProjectAccessDeniedError) notFound();
         throw error;
       }
     },
@@ -113,29 +106,28 @@ export default async function DeliveryCenterPage({ params }: DeliveryCenterPageP
         copyWhatsAppNumbersAction={copySelectedDeliveryWhatsAppNumbersAction.bind(null, {
           projectId: deliveryCenter.project.id,
         })}
+        handoffSummary={deliveryCenter.handoffSummary}
         projectId={deliveryCenter.project.id}
         prepareBatchAction={prepareMissingPersonalGuestLinksForDeliveryAction.bind(null, {
           projectId: deliveryCenter.project.id,
         })}
         rows={deliveryCenter.rows.map(({ guestId, ...row }, rowKey) => {
           const readiness = deriveDeliveryReadiness(row);
+          const truth = deriveDeliveryDistribution(row);
+          const bound = { guestId, projectId: deliveryCenter.project.id };
+
           return {
             ...row,
             ...(readiness.canPrepareNewLink
-              ? {
-                  prepareAction: preparePersonalGuestLinkForDeliveryAction.bind(null, {
-                    guestId,
-                    projectId: deliveryCenter.project.id,
-                  }),
-                }
+              ? { prepareAction: preparePersonalGuestLinkForDeliveryAction.bind(null, bound) }
               : {}),
             ...(readiness.isReadyToDistribute
               ? {
-                  reaccessAction: reaccessOrPrepareCanonicalInitialHandoffAction.bind(null, {
-                    guestId,
-                    projectId: deliveryCenter.project.id,
-                  }),
+                  reaccessAction: reaccessOrPrepareCanonicalInitialHandoffAction.bind(null, bound),
                 }
+              : {}),
+            ...(truth.canRecordContact
+              ? { contactAction: recordCanonicalInitialContactAction.bind(null, bound) }
               : {}),
             guestId,
             rowKey,

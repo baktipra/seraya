@@ -127,16 +127,15 @@ function isHandoffEligible(row: FollowUpGuestRow, messageKind: GuestFollowUpHand
 }
 
 /**
- * Manual handoff authority. It verifies the current owner, published snapshot,
- * active guest, Slice B eligibility, recoverable capability, and canonical
- * WhatsApp contact before appending the truthful event. A browser receives the
- * temporary payload only after that append succeeds.
+ * Manual handoff authority. A browser receives temporary compose material only
+ * after the truthful `handoff_prepared` event is appended.
  */
 export async function prepareGuestFollowUpHandoffForVerifiedProject(input: {
   guestId: string;
   messageKind: GuestFollowUpHandoffMessageKind;
   preparedAt?: Date;
   project: OwnedProject;
+  sourceSurface?: 'delivery_center' | 'follow_up_center';
 }): Promise<GuestFollowUpHandoffResult> {
   const [center, snapshot, guestCandidate] = await Promise.all([
     getGuestFollowUpCenterForVerifiedProject(input.project),
@@ -149,7 +148,7 @@ export async function prepareGuestFollowUpHandoffForVerifiedProject(input: {
     throw new GuestFollowUpPublicationRequiredError();
   }
 
-  const row = center.rows.find((candidate) => candidate.guestId === guest.id);
+  const row = center.rows.find((candidate: FollowUpGuestRow) => candidate.guestId === guest.id);
   if (!row || !isHandoffEligible(row, input.messageKind)) {
     throw new GuestFollowUpHandoffNotEligibleError();
   }
@@ -187,7 +186,7 @@ export async function prepareGuestFollowUpHandoffForVerifiedProject(input: {
     guestId: guest.id,
     messageKind: input.messageKind,
     metadata: {
-      sourceSurface: 'follow_up_center',
+      sourceSurface: input.sourceSurface ?? 'follow_up_center',
       templateVersion: 'manual-handoff-v1',
     },
     occurredAt: preparedAtIso,
@@ -202,6 +201,7 @@ export async function prepareGuestFollowUpHandoffForCurrentUser(input: {
   messageKind: GuestFollowUpHandoffMessageKind;
   preparedAt?: Date;
   projectId: string;
+  sourceSurface?: 'delivery_center' | 'follow_up_center';
 }): Promise<GuestFollowUpHandoffResult> {
   const user = await requireCurrentUser();
   const project = await getOwnedProjectById(input.projectId, user.id);
@@ -211,5 +211,6 @@ export async function prepareGuestFollowUpHandoffForCurrentUser(input: {
     messageKind: input.messageKind,
     preparedAt: input.preparedAt,
     project,
+    sourceSurface: input.sourceSurface,
   });
 }
