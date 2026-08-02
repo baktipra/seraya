@@ -12,16 +12,26 @@ export function RoselleHero({ hero }: RoselleHeroProps) {
     <header className={styles.hero} data-roselle-chapter="opening">
       <RosellePetalDecoration className={styles.heroPetalOne} />
       <RosellePetalDecoration className={styles.heroPetalTwo} />
-      <div className={styles.heroLetter}>
-        {hero.eyebrow ? <p className={styles.eyebrow}>{hero.eyebrow}</p> : null}
-        <h1 className={styles.heroTitle} id="roselle-invitation-title">
+      <div className={styles.heroLetter} data-roselle-letter>
+        <p className={styles.eyebrow} data-roselle-letter-eyebrow>
+          {hero.eyebrow ?? 'Undangan Pernikahan'}
+        </p>
+        <h1 className={styles.heroTitle} data-roselle-letter-title id="roselle-invitation-title">
           {hero.title}
         </h1>
-        {hero.subtitle ? <p className={styles.heroSubtitle}>{hero.subtitle}</p> : null}
-        {hero.primaryDateLabel ? <p className={styles.heroDate}>{hero.primaryDateLabel}</p> : null}
+        {hero.subtitle ? (
+          <p className={styles.heroSubtitle} data-roselle-letter-subtitle>
+            {hero.subtitle}
+          </p>
+        ) : null}
+        {hero.primaryDateLabel ? (
+          <p className={styles.heroDate} data-roselle-letter-date>
+            {hero.primaryDateLabel}
+          </p>
+        ) : null}
         <RoselleDivider />
       </div>
-      <p aria-hidden="true" className={styles.scrollCue}>
+      <p aria-hidden="true" className={styles.scrollCue} data-roselle-scroll-cue>
         <span>Gulir untuk melanjutkan</span>
         <i />
       </p>
@@ -31,7 +41,7 @@ export function RoselleHero({ hero }: RoselleHeroProps) {
 
 function RosellePerson({ person }: { person: InvitationViewModel['couple']['personOne'] }) {
   return (
-    <article className={styles.person}>
+    <article className={styles.person} data-roselle-person>
       <h3 className={styles.personName}>{person.displayName}</h3>
       {person.fullName ? <p className={styles.personFullName}>{person.fullName}</p> : null}
       {person.parentLine ? <p className={styles.personParentLine}>{person.parentLine}</p> : null}
@@ -50,9 +60,9 @@ export function RoselleCouple({ couple }: Pick<InvitationViewModel, 'couple'>) {
       <h2 className={styles.sectionTitle} id="roselle-couple-title">
         Dua cerita, satu perjalanan
       </h2>
-      <div className={styles.coupleGrid}>
+      <div className={styles.coupleGrid} data-roselle-couple-composition>
         <RosellePerson person={couple.personOne} />
-        <span aria-hidden="true" className={styles.coupleAmpersand}>
+        <span aria-hidden="true" className={styles.coupleAmpersand} data-roselle-ampersand>
           &amp;
         </span>
         <RosellePerson person={couple.personTwo} />
@@ -73,7 +83,7 @@ export function RoselleStory({ story }: Pick<InvitationViewModel, 'story'>) {
       data-roselle-chapter="story"
     >
       <RosellePetalDecoration className={styles.storyPetal} />
-      <div className={styles.storyInner}>
+      <div className={styles.storyInner} data-roselle-story-letter>
         <p className={styles.sectionEyebrow}>Cerita kami</p>
         <h2 className={styles.storyTitle} id="roselle-story-title">
           {story.heading ?? 'Cerita kami'}
@@ -94,7 +104,11 @@ function RoselleScheduleEvent({
   showDate: boolean;
 }) {
   return (
-    <article className={styles.eventPart} data-schedule-event="roselle">
+    <article
+      className={styles.eventPart}
+      data-roselle-event
+      data-schedule-event="roselle"
+    >
       <p className={styles.eventSequence}>{String(sequence).padStart(2, '0')}</p>
       {event.title ? <h3 className={styles.eventTitle}>{event.title}</h3> : null}
       {showDate && event.dateLabel ? <p className={styles.eventDate}>{event.dateLabel}</p> : null}
@@ -103,11 +117,11 @@ function RoselleScheduleEvent({
       {event.address ? <p className={styles.eventAddress}>{event.address}</p> : null}
       {event.mapsHref ? (
         <a
+          aria-label={`Buka peta${event.title ? ` ${event.title}` : ' acara'} di tab baru`}
           className={styles.mapsLink}
           href={event.mapsHref}
           rel="noopener noreferrer"
           target="_blank"
-          aria-label={`Buka peta${event.title ? ` ${event.title}` : ' acara'} di tab baru`}
         >
           Buka peta
         </a>
@@ -127,6 +141,7 @@ export function RoselleEvents({ events }: Pick<InvitationViewModel, 'events'>) {
       className={styles.eventsSection}
       data-event-count={events.items.length}
       data-roselle-chapter="events"
+      data-roselle-woven-schedule
     >
       <p className={styles.sectionEyebrow}>Rangkaian acara</p>
       <h2 className={styles.sectionTitle} id="roselle-events-title">
@@ -136,7 +151,11 @@ export function RoselleEvents({ events }: Pick<InvitationViewModel, 'events'>) {
         <p className={styles.eventPrimaryDate}>{events.primaryDateLabel}</p>
       ) : null}
       {events.items.length > 0 ? (
-        <div className={styles.eventGrid} data-event-layout={getEventLayout(events.items.length)}>
+        <div
+          className={styles.eventGrid}
+          data-event-layout={getEventLayout(events.items.length)}
+          data-roselle-event-thread
+        >
           {events.items.map((event, index) => (
             <RoselleScheduleEvent
               event={event}
@@ -166,16 +185,16 @@ export function RoselleLocation({ location }: Pick<InvitationViewModel, 'locatio
       <h2 className={styles.sectionTitle} id="roselle-location-title">
         Tempat kami bersua
       </h2>
-      <div className={styles.locationContent}>
+      <div className={styles.locationContent} data-roselle-location-note>
         {location.venueName ? <p className={styles.locationVenue}>{location.venueName}</p> : null}
         {location.address ? <p className={styles.locationAddress}>{location.address}</p> : null}
         {location.mapsHref ? (
           <a
+            aria-label="Buka peta lokasi di tab baru"
             className={styles.mapsLink}
             href={location.mapsHref}
             rel="noopener noreferrer"
             target="_blank"
-            aria-label="Buka peta lokasi di tab baru"
           >
             Buka peta
           </a>
@@ -204,7 +223,11 @@ export function RoselleGallery({ gallery }: Pick<InvitationViewModel, 'gallery'>
       <h2 className={styles.sectionTitle} id="roselle-gallery-title">
         Fragmen yang kami simpan
       </h2>
-      <div className={styles.galleryGrid} data-gallery-layout={galleryLayout}>
+      <div
+        className={styles.galleryGrid}
+        data-gallery-layout={galleryLayout}
+        data-roselle-memory-album
+      >
         {gallery.images.map((image, index) => (
           <figure className={styles.galleryFigure} data-gallery-index={index} key={image.id}>
             <InvitationGalleryImage
@@ -212,6 +235,9 @@ export function RoselleGallery({ gallery }: Pick<InvitationViewModel, 'gallery'>
               className={styles.galleryImage}
               src={image.src}
             />
+            <figcaption aria-hidden="true" data-roselle-memory-caption>
+              {String(index + 1).padStart(2, '0')}
+            </figcaption>
           </figure>
         ))}
       </div>
@@ -229,15 +255,16 @@ export function RoselleDigitalGift({ digitalGift }: Pick<InvitationViewModel, 'd
       aria-labelledby="roselle-digital-gift-title"
       className={styles.digitalGiftSection}
       data-roselle-chapter="gift"
+      data-roselle-gift-enclosure
     >
       <p className={styles.sectionEyebrow}>Hadiah &amp; doa</p>
       <h2 className={styles.sectionTitle} id="roselle-digital-gift-title">
         {digitalGift.heading}
       </h2>
       {digitalGift.lead ? <p className={styles.prose}>{digitalGift.lead}</p> : null}
-      <div className={styles.digitalGiftGrid}>
+      <div className={styles.digitalGiftGrid} data-roselle-keepsake-list>
         {digitalGift.accounts.map((account) => (
-          <article className={styles.digitalGiftCard} key={account.id}>
+          <article className={styles.digitalGiftCard} data-roselle-keepsake key={account.id}>
             <span aria-hidden="true" className={styles.digitalGiftRule} />
             <p className={styles.digitalGiftProvider}>{account.providerName}</p>
             <p className={styles.digitalGiftHolder}>{account.accountHolder}</p>
@@ -264,8 +291,12 @@ export function RoselleClosing({ closing }: Pick<InvitationViewModel, 'closing'>
       aria-labelledby="roselle-closing-title"
       className={styles.closing}
       data-roselle-chapter="closing"
+      data-roselle-letter-closing
     >
       <RosellePetalDecoration className={styles.closingPetal} />
+      <span aria-hidden="true" data-roselle-closing-seal>
+        ✦
+      </span>
       <p className={styles.sectionEyebrow}>Sampai berjumpa</p>
       <h2 className={styles.closingTitle} id="roselle-closing-title">
         Terima kasih telah menjadi bagian dari hari kami
