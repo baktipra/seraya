@@ -115,11 +115,13 @@
 
   /* Canonical product shell and workspace geometry. */
   --seraya-shell-max: 90rem;
+  --seraya-shell-inline: clamp(1rem, 2vw, 2rem);
+  --seraya-topbar-height: 4rem;
   --seraya-workspace-width-reading: 58rem;
   --seraya-workspace-width-standard: 64rem;
   --seraya-workspace-width-operations: 74rem;
-  --seraya-project-rail-width: 15rem;
-  --seraya-project-rail-gap: 2rem;
+  --seraya-project-rail-width: 15.5rem;
+  --seraya-project-rail-gap: 2.5rem;
 
   /* Canonical page anatomy. */
   --seraya-workspace-flow-gap: clamp(1.75rem, 2.2vw, 2.25rem);
@@ -128,7 +130,7 @@
   --seraya-workspace-header-end-space: clamp(1.5rem, 2vw, 2rem);
 
   /* Mobile owner workspace behavior. */
-  --seraya-mobile-nav-clearance: 4.75rem;
+  --seraya-mobile-nav-clearance: 4.5rem;
   --seraya-mobile-safe-bottom: calc(
     var(--seraya-mobile-nav-clearance) + env(safe-area-inset-bottom)
   );

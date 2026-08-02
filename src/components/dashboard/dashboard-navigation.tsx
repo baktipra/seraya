@@ -1,25 +1,29 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 /**
- * Global dashboard navigation stays deliberately small: project-specific work
- * belongs to the project rail, while these links only switch or create a project.
+ * Global navigation only returns the owner to the project collection. Project
+ * destinations remain exclusively owned by the persistent project rail.
  */
 export function DashboardDesktopNavigation() {
+  const pathname = usePathname();
+  const active = pathname === '/dashboard';
+
   return (
-    <nav aria-label="Navigasi undangan" className="hidden items-center gap-1 sm:flex">
+    <nav aria-label="Navigasi undangan" className="hidden items-center sm:flex">
       <Link
-        className="text-seraya-text-secondary hover:bg-seraya-soft hover:text-seraya-text-primary focus-visible:outline-seraya-focus-ring inline-flex min-h-9 items-center rounded-[var(--seraya-radius-sm)] px-3 text-sm font-medium transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
+        aria-current={active ? 'page' : undefined}
+        className={`focus-visible:outline-seraya-focus-ring inline-flex min-h-10 items-center rounded-[var(--seraya-radius-sm)] px-3 text-sm font-medium transition-colors duration-[var(--seraya-motion-default)] focus-visible:outline-3 focus-visible:outline-offset-2 ${
+          active
+            ? 'bg-seraya-brand-softer text-seraya-action-primary'
+            : 'text-seraya-text-secondary hover:bg-seraya-surface-subtle hover:text-seraya-text-primary'
+        }`}
         href="/dashboard"
         prefetch={false}
       >
         Semua undangan
-      </Link>
-      <Link
-        className="border-seraya-border-strong bg-seraya-surface text-seraya-text-primary hover:bg-seraya-soft focus-visible:outline-seraya-focus-ring inline-flex min-h-9 items-center rounded-[var(--seraya-radius-sm)] border px-3 text-sm font-medium transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
-        href="/dashboard/new"
-        prefetch={false}
-      >
-        Buat undangan
       </Link>
     </nav>
   );

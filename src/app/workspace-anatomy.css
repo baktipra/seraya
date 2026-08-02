@@ -1,5 +1,6 @@
 [data-project-workspace-shell],
 [data-project-workspace-main],
+[data-project-mobile-context],
 [data-workspace-page] {
   min-width: 0;
 }
@@ -67,7 +68,7 @@
 
 [data-workspace-page][data-workspace-anatomy='compass'] h1,
 [data-workspace-page][data-workspace-anatomy='operations'] h1 {
-  scroll-margin-top: 5.5rem;
+  scroll-margin-top: calc(var(--seraya-topbar-height) + 2rem);
 }
 
 @media (min-width: 1024px) {
