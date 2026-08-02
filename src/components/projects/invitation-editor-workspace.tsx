@@ -3,6 +3,8 @@ import { memo, type ReactNode } from 'react';
 import type { InvitationEditorFieldErrors } from '@/modules/invitations/invitation-editor.schema';
 import type { InvitationDraft } from '@/modules/invitations/invitation-draft.types';
 
+import studioStyles from './invitation-editor-romantic-clarity.module.css';
+
 /**
  * Compatibility export for existing editor consumers and tests. The legacy
  * label/order remain stable here while Release B navigation uses the canonical
@@ -344,6 +346,11 @@ export const InvitationWorkspaceNavigation = memo(function InvitationWorkspaceNa
         data-invitation-editor-mobile-navigation
         data-release-b-studio-navigation="rb1"
       >
+        <span
+          aria-hidden="true"
+          className={studioStyles.workspace}
+          data-local-preview-overlay
+        />
         <div className="flex items-center justify-between gap-4">
           <div className="min-w-0">
             <p className="text-seraya-text-muted text-[0.68rem] font-bold tracking-[0.08em] uppercase">
