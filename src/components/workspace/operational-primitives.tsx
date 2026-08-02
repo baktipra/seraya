@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 
+import styles from './operational-workspace-premium.module.css';
+
 export function OperationalWorkspace({
   children,
   labelledBy,
@@ -10,7 +12,7 @@ export function OperationalWorkspace({
   return (
     <section
       aria-labelledby={labelledBy}
-      className="grid min-w-0 gap-[var(--seraya-workspace-flow-gap-compact)]"
+      className={`${styles.workspace} grid min-w-0 gap-[var(--seraya-workspace-flow-gap-compact)]`}
       data-operational-workspace
     >
       {children}
