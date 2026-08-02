@@ -1,11 +1,8 @@
 import 'server-only';
 
 import { requireCurrentUser } from '@/modules/auth/current-user';
-import { listGuestLinkStatesForVerifiedGuestIds } from '@/modules/guest-links/guest-link.repository';
-import type {
-  GuestLinkStateRecord,
-  GuestPersonalLinkState,
-} from '@/modules/guest-links/guest-link.types';
+import { createLatestGuestLinkLifecycleMap } from '@/modules/guest-links/guest-link-lifecycle';
+import { listLatestGuestLinkStatesForVerifiedGuestIds } from '@/modules/guest-links/guest-link.repository';
 import { getOwnedProjectById, type OwnedProject } from '@/modules/projects/project.repository';
 
 import { mapGuestListItem } from './guest.mapper';
@@ -44,33 +41,23 @@ export type OwnedGuestManager = {
   project: OwnedProject;
 };
 
-function mapGuestLinkStates(records: GuestLinkStateRecord[]) {
-  const states = new Map<string, GuestPersonalLinkState>();
-
-  for (const record of records) {
-    const current = states.get(record.guest_id);
-
-    if (record.status === 'active') {
-      states.set(record.guest_id, 'active');
-    } else if (!current) {
-      states.set(record.guest_id, 'revoked');
-    }
-  }
-
-  return states;
-}
-
-/** Loads active guests plus factual operational state after verified server project scope. */
+/**
+ * Loads active guests plus the same latest-state/recoverability lifecycle used
+ * by downstream operational workspaces. No capability material enters this
+ * owner-browser projection.
+ */
 export async function getGuestManagerForVerifiedProject(
   project: OwnedProject,
 ): Promise<OwnedGuestManager> {
   const guests = await listActiveGuestsForVerifiedProject(project);
-  const linkStates = mapGuestLinkStates(
-    await listGuestLinkStatesForVerifiedGuestIds(guests.map((guest) => guest.id)),
+  const lifecycleByGuest = createLatestGuestLinkLifecycleMap(
+    await listLatestGuestLinkStatesForVerifiedGuestIds(guests.map((guest) => guest.id)),
   );
 
   return {
-    guests: guests.map((guest) => mapGuestListItem(guest, linkStates.get(guest.id))),
+    guests: guests.map((guest) =>
+      mapGuestListItem(guest, lifecycleByGuest.get(guest.id)?.lifecycleState),
+    ),
     project,
   };
 }

@@ -1,4 +1,7 @@
-import type { GuestPersonalLinkState } from '@/modules/guest-links/guest-link.types';
+import type {
+  GuestLinkLifecycleState,
+  GuestPersonalLinkState,
+} from '@/modules/guest-links/guest-link.types';
 
 export const GUEST_RSVP_STATUS = 'pending' as const;
 
@@ -23,7 +26,10 @@ export type GuestListItem = Pick<
   Guest,
   'display_name' | 'group_label' | 'id' | 'party_size' | 'rsvp_attendee_count' | 'rsvp_status'
 > & {
+  /** Compatibility state retained until the RC2 Tamu surface migrates its copy and filters. */
   link_state: GuestPersonalLinkState;
+  /** Production loaders always provide this canonical state; optional keeps legacy fixtures compatible. */
+  link_lifecycle_state?: GuestLinkLifecycleState;
   whatsapp_phone_e164: string | null;
 };
 

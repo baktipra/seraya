@@ -1,4 +1,5 @@
 import type {
+  GuestLinkLifecycleState,
   GuestPersonalLinkReaccessState,
   GuestPersonalLinkState,
 } from '@/modules/guest-links/guest-link.types';
@@ -43,6 +44,8 @@ export type DeliveryGuestRow = {
   displayName: string;
   groupLabel: string | null;
   maskedWhatsAppNumber: string | null;
+  /** Production loaders provide the canonical state; optional keeps older fixtures compatible. */
+  personalLinkLifecycleState?: GuestLinkLifecycleState;
   personalLinkReaccessState: GuestPersonalLinkReaccessState;
   personalLinkState: DeliveryPersonalLinkState;
   rsvpStatus: GuestRsvpStatus;
