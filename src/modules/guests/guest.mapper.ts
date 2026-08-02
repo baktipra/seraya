@@ -1,4 +1,5 @@
-import type { GuestPersonalLinkState } from '@/modules/guest-links/guest-link.types';
+import { getCompactGuestPersonalLinkState } from '@/modules/guest-links/guest-link-lifecycle';
+import type { GuestLinkLifecycleState } from '@/modules/guest-links/guest-link.types';
 
 import type { Guest, GuestListItem } from './guest.types';
 
@@ -34,13 +35,14 @@ export function mapGuest(record: GuestDatabaseRecord): Guest {
 
 export function mapGuestListItem(
   guest: Guest,
-  linkState: GuestPersonalLinkState = 'not_created',
+  linkLifecycleState: GuestLinkLifecycleState = 'not_created',
 ): GuestListItem {
   return {
     display_name: guest.display_name,
     group_label: guest.group_label,
     id: guest.id,
-    link_state: linkState,
+    link_lifecycle_state: linkLifecycleState,
+    link_state: getCompactGuestPersonalLinkState(linkLifecycleState),
     party_size: guest.party_size,
     rsvp_attendee_count: guest.rsvp_attendee_count,
     rsvp_status: guest.rsvp_status,
