@@ -10,7 +10,7 @@ export function OperationalWorkspace({
   return (
     <section
       aria-labelledby={labelledBy}
-      className="grid min-w-0 gap-6 sm:gap-7"
+      className="grid min-w-0 gap-[var(--seraya-workspace-flow-gap-compact)]"
       data-operational-workspace
     >
       {children}
@@ -33,20 +33,15 @@ export function OperationalHeader({
 }) {
   return (
     <header
-      className="border-seraya-border-default grid min-w-0 gap-5 border-b pb-6 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end sm:pb-7"
+      className="grid min-w-0 gap-5 pb-1 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end"
       data-operational-header
     >
       <div className="min-w-0">
-        <p className="text-seraya-action-primary text-[0.6875rem] font-semibold tracking-[0.17em] uppercase">
-          {eyebrow}
-        </p>
-        <h1
-          className="text-seraya-text-primary mt-1.5 max-w-[46rem] font-serif text-[clamp(2.65rem,5vw,4rem)] leading-[0.96] font-medium tracking-[-0.035em]"
-          id={titleId}
-        >
+        <p className="text-seraya-text-muted text-xs leading-5 font-medium">{eyebrow}</p>
+        <h1 className="seraya-operational-title mt-1.5 max-w-[46rem]" id={titleId}>
           {title}
         </h1>
-        <div className="text-seraya-text-secondary mt-3 max-w-3xl text-sm leading-6">
+        <div className="text-seraya-text-secondary mt-2.5 max-w-3xl text-sm leading-6">
           {description}
         </div>
       </div>
@@ -81,7 +76,7 @@ export function OperationalMetricStrip({
   return (
     <dl
       aria-label={label}
-      className={`border-seraya-border-default bg-seraya-border-default grid grid-cols-2 gap-px border-y ${metricGridClasses[columns]}`}
+      className={`grid grid-cols-2 gap-2.5 sm:gap-3 ${metricGridClasses[columns]}`}
       data-columns={columns}
       data-operational-metrics
     >
@@ -103,18 +98,14 @@ export function OperationalMetric({
 }) {
   return (
     <div
-      className="bg-seraya-surface min-w-0 px-3 py-3.5 sm:px-5 sm:py-4"
+      className="border-seraya-border-subtle bg-seraya-surface-subtle min-w-0 rounded-[var(--seraya-radius-lg)] border px-3.5 py-3.5 sm:px-4 sm:py-4"
       data-mobile-span={mobileSpan}
       data-operational-metric
     >
-      <dt className="text-seraya-text-muted text-[0.625rem] font-semibold tracking-[0.15em] uppercase">
-        {label}
-      </dt>
-      <dd className="text-seraya-text-primary mt-1.5 font-serif text-[clamp(1.45rem,2.4vw,2.05rem)] leading-none font-medium tracking-[-0.025em] tabular-nums">
-        {value}
-      </dd>
+      <dt className="text-seraya-text-muted text-xs leading-5 font-medium">{label}</dt>
+      <dd className="seraya-metric-value mt-1.5">{value}</dd>
       {detail ? (
-        <dd className="text-seraya-text-muted mt-1.5 max-w-[18rem] text-[0.6875rem] leading-4">
+        <dd className="text-seraya-text-muted mt-1.5 max-w-[18rem] text-xs leading-5">
           {detail}
         </dd>
       ) : null}
@@ -138,18 +129,15 @@ export function OperationalSection({
   return (
     <section aria-labelledby={titleId} className="grid min-w-0 gap-4" data-operational-section>
       <div
-        className="border-seraya-border-default flex min-w-0 flex-col gap-4 border-b pb-4 sm:flex-row sm:items-end sm:justify-between"
+        className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
         data-operational-section-heading
       >
         <div className="min-w-0">
-          <h2
-            className="text-seraya-text-primary font-serif text-[clamp(1.65rem,3vw,2.15rem)] leading-tight font-medium tracking-[-0.025em]"
-            id={titleId}
-          >
+          <h2 className="seraya-operational-section-title" id={titleId}>
             {title}
           </h2>
           {description ? (
-            <div className="text-seraya-text-secondary mt-1 max-w-3xl text-sm leading-6">
+            <div className="text-seraya-text-secondary mt-1.5 max-w-3xl text-sm leading-6">
               {description}
             </div>
           ) : null}
@@ -180,7 +168,7 @@ export function OperationalToolbar({
   return (
     <div
       aria-label={label}
-      className="border-seraya-border-default bg-seraya-canvas grid gap-3 border-b p-3 sm:grid-cols-[minmax(0,1fr)_15rem] sm:p-4"
+      className="border-seraya-border-subtle bg-seraya-surface-subtle grid gap-3 rounded-[var(--seraya-radius-lg)] border p-3 sm:grid-cols-[minmax(0,1fr)_15rem] sm:p-3.5"
       data-operational-toolbar
       role="search"
     >
@@ -200,10 +188,7 @@ export function OperationalToolbarField({
 }) {
   return (
     <div className="min-w-0" data-operational-toolbar-field>
-      <label
-        className="text-seraya-text-muted mb-1.5 block text-[0.625rem] font-semibold tracking-[0.12em] uppercase"
-        htmlFor={htmlFor}
-      >
+      <label className="seraya-field-label mb-1.5" htmlFor={htmlFor}>
         {label}
       </label>
       {children}
@@ -214,7 +199,7 @@ export function OperationalToolbarField({
 export function OperationalDataSurface({ children }: { children: ReactNode }) {
   return (
     <div
-      className="border-seraya-border-default bg-seraya-surface min-w-0 overflow-hidden border"
+      className="border-seraya-border-subtle bg-seraya-surface min-w-0 overflow-hidden rounded-[var(--seraya-radius-lg)] border shadow-[var(--seraya-shadow-level-1)]"
       data-operational-data-surface
     >
       {children}
@@ -252,7 +237,7 @@ export function OperationalMobileDataList({
   return (
     <ul
       aria-label={label}
-      className="divide-seraya-border-default divide-y md:hidden"
+      className="bg-seraya-canvas grid gap-2.5 p-2.5 md:hidden"
       data-operational-mobile-list
     >
       {children}
@@ -270,10 +255,13 @@ export function OperationalMobileDataCard({
   status?: ReactNode;
 }) {
   return (
-    <li className="px-3.5 py-3.5" data-operational-mobile-card>
+    <li
+      className="border-seraya-border-subtle bg-seraya-surface rounded-[var(--seraya-radius-md)] border px-3.5 py-3.5"
+      data-operational-mobile-card
+    >
       <div className="flex min-w-0 items-start justify-between gap-3">
         <div className="min-w-0">{identity}</div>
-        {status ? <div className="shrink-0">{status}</div> : null}
+        {status ? <div className="min-w-0 shrink-0">{status}</div> : null}
       </div>
       {children}
     </li>
@@ -291,10 +279,8 @@ export function OperationalMobileField({
 }) {
   return (
     <div className={align === 'end' ? 'text-right' : undefined} data-operational-mobile-field>
-      <dt className="text-seraya-text-muted text-[0.625rem] font-semibold tracking-[0.1em] uppercase">
-        {label}
-      </dt>
-      <dd className="text-seraya-text-secondary mt-1 text-xs leading-5">{value}</dd>
+      <dt className="text-seraya-text-muted text-xs leading-5 font-medium">{label}</dt>
+      <dd className="text-seraya-text-secondary mt-0.5 text-xs leading-5">{value}</dd>
     </div>
   );
 }
@@ -309,7 +295,7 @@ export function OperationalResponsiveList({
   return (
     <ul
       aria-label={label}
-      className="divide-seraya-border-default divide-y"
+      className="divide-seraya-border-subtle divide-y"
       data-operational-responsive-list
     >
       {children}
@@ -326,7 +312,7 @@ export function OperationalResponsiveRow({
 }) {
   return (
     <li
-      className="grid min-w-0 gap-3 px-4 py-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center"
+      className="hover:bg-seraya-surface-subtle grid min-w-0 gap-3 px-4 py-4 transition-colors duration-[var(--seraya-motion-default)] lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center"
       data-operational-responsive-row
     >
       <div className="min-w-0">{children}</div>
@@ -343,22 +329,29 @@ export function OperationalResponsiveRow({
 export function OperationalEmptyState({
   action,
   description,
+  icon,
   title,
 }: {
   action?: ReactNode;
   description: ReactNode;
+  icon?: ReactNode;
   title: ReactNode;
 }) {
   return (
     <div
       aria-atomic="true"
       aria-live="polite"
-      className="px-5 py-10 text-center"
+      className="px-5 py-12 text-center"
       data-operational-empty-state
       role="status"
     >
-      <p className="text-seraya-text-primary font-semibold">{title}</p>
-      <div className="text-seraya-text-muted mx-auto mt-2 max-w-xl text-sm leading-6">
+      {icon ? (
+        <div className="bg-seraya-surface-subtle text-seraya-text-muted mx-auto mb-4 grid size-10 place-items-center rounded-full">
+          {icon}
+        </div>
+      ) : null}
+      <p className="text-seraya-text-primary text-base leading-6 font-semibold">{title}</p>
+      <div className="text-seraya-text-muted mx-auto mt-1.5 max-w-xl text-sm leading-6">
         {description}
       </div>
       {action ? <div className="mt-4 flex justify-center">{action}</div> : null}
@@ -378,7 +371,7 @@ export function OperationalSelectionBar({
   return (
     <div
       aria-label={label}
-      className="border-seraya-border-default bg-seraya-canvas sticky bottom-0 z-20 flex flex-col gap-3 border-t px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+      className="border-seraya-border-subtle bg-seraya-surface-raised sticky bottom-3 z-20 mx-2 flex flex-col gap-3 rounded-[var(--seraya-radius-lg)] border px-4 py-3 shadow-[var(--seraya-shadow-level-2)] sm:mx-3 sm:flex-row sm:items-center sm:justify-between"
       data-operational-selection-bar
       role="region"
     >
@@ -399,6 +392,55 @@ export function OperationalSelectionBar({
       >
         {actions}
       </div>
+    </div>
+  );
+}
+
+export function OperationalSkeleton({
+  className = '',
+}: {
+  className?: string;
+}) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`bg-seraya-sand/70 block animate-pulse rounded-[var(--seraya-radius-sm)] ${className}`}
+      data-operational-skeleton
+    />
+  );
+}
+
+export function OperationalLoadingState({
+  label = 'Memuat data',
+  rows = 4,
+}: {
+  label?: string;
+  rows?: number;
+}) {
+  return (
+    <div
+      aria-busy="true"
+      aria-label={label}
+      className="border-seraya-border-subtle bg-seraya-surface overflow-hidden rounded-[var(--seraya-radius-lg)] border"
+      data-operational-loading-state
+      role="status"
+    >
+      <div className="border-seraya-border-subtle bg-seraya-surface-subtle grid gap-2 border-b p-4 sm:grid-cols-[minmax(0,1fr)_15rem]">
+        <OperationalSkeleton className="h-10 w-full" />
+        <OperationalSkeleton className="h-10 w-full" />
+      </div>
+      <div className="divide-seraya-border-subtle divide-y">
+        {Array.from({ length: rows }, (_, index) => (
+          <div className="grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_9rem]" key={index}>
+            <div className="grid gap-2">
+              <OperationalSkeleton className="h-4 w-2/5" />
+              <OperationalSkeleton className="h-3 w-3/5" />
+            </div>
+            <OperationalSkeleton className="h-8 w-full" />
+          </div>
+        ))}
+      </div>
+      <span className="sr-only">{label}…</span>
     </div>
   );
 }

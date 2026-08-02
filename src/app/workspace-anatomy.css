@@ -23,6 +23,10 @@
   --workspace-page-flow-gap: var(--seraya-workspace-flow-gap-compact);
 }
 
+[data-workspace-page][data-workspace-anatomy='operations'] > [data-operational-workspace] {
+  gap: var(--workspace-page-flow-gap);
+}
+
 [data-workspace-page][data-workspace-anatomy='onboarding'] > *,
 [data-workspace-page][data-workspace-anatomy='studio'] > *,
 [data-workspace-page][data-workspace-kind='guests'] > * {
