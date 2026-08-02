@@ -5,6 +5,8 @@ import {
   CompassAttentionItem,
   CompassAttentionList,
   CompassClearState,
+  CompassContextItem,
+  CompassContextList,
   CompassFocus,
   CompassHeader,
   CompassProgressItem,
@@ -151,6 +153,7 @@ export function ProjectOverviewBootstrap({ projectId, readiness }: ProjectOvervi
   const responseProgress = activeGuestCount
     ? `${readiness.responses.nonPendingRsvpCount} dari ${activeGuestCount}`
     : 'Belum ada';
+  const responseHref = `${base}/rsvp` as Route;
 
   return (
     <CompassWorkspace labelledBy="owner-workspace-overview-title">
@@ -158,14 +161,14 @@ export function ProjectOverviewBootstrap({ projectId, readiness }: ProjectOvervi
         actions={
           <nav aria-label="Akses undangan" className="flex min-w-0 flex-wrap gap-2">
             <Link
-              className="border-seraya-border-default text-seraya-action-primary hover:border-seraya-action-primary focus-visible:outline-seraya-focus-ring inline-flex min-h-11 items-center justify-center rounded-[var(--seraya-radius-sm)] border px-3.5 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
+              className="border-seraya-border-default bg-seraya-surface-subtle text-seraya-action-primary hover:border-seraya-action-primary hover:bg-seraya-brand-softer focus-visible:outline-seraya-focus-ring inline-flex min-h-11 items-center justify-center rounded-[var(--seraya-radius-sm)] border px-3.5 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
               href={`${base}/preview` as Route}
             >
               Preview
             </Link>
             {publicHref ? (
               <Link
-                className="border-seraya-border-default text-seraya-action-primary hover:border-seraya-action-primary focus-visible:outline-seraya-focus-ring inline-flex min-h-11 items-center justify-center rounded-[var(--seraya-radius-sm)] border px-3.5 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
+                className="border-seraya-border-default bg-seraya-surface-subtle text-seraya-action-primary hover:border-seraya-action-primary hover:bg-seraya-brand-softer focus-visible:outline-seraya-focus-ring inline-flex min-h-11 items-center justify-center rounded-[var(--seraya-radius-sm)] border px-3.5 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
                 href={publicHref}
               >
                 Link Publik
@@ -205,7 +208,7 @@ export function ProjectOverviewBootstrap({ projectId, readiness }: ProjectOvervi
           value={`${readiness.guests.readyToDistributeCount ?? 0} tamu`}
         />
         <CompassProgressItem
-          href={`${base}/rsvp` as Route}
+          href={responseHref}
           label="Respons masuk"
           value={responseProgress}
         />
@@ -227,6 +230,24 @@ export function ProjectOverviewBootstrap({ projectId, readiness }: ProjectOvervi
       ) : (
         <CompassClearState titleId="workspace-clear-title" />
       )}
+
+      <CompassContextList titleId="workspace-context-title">
+        <CompassContextItem
+          href={responseHref}
+          label="Hadir terkonfirmasi"
+          value={`${readiness.responses.confirmedAttendeeCount} orang`}
+        />
+        <CompassContextItem
+          href={responseHref}
+          label="Tidak hadir"
+          value={`${readiness.responses.declinedCount} tamu`}
+        />
+        <CompassContextItem
+          href={responseHref}
+          label="Ucapan masuk"
+          value={`${readiness.responses.activeGuestbookCount} ucapan`}
+        />
+      </CompassContextList>
     </CompassWorkspace>
   );
 }
