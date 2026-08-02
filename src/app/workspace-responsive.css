@@ -37,6 +37,25 @@
   overscroll-behavior-inline: contain;
 }
 
+[data-operational-desktop-data] table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+[data-operational-desktop-data] thead {
+  background: var(--seraya-bg-surface-subtle);
+}
+
+[data-operational-desktop-data] tbody > tr {
+  transition:
+    background-color var(--seraya-motion-default) var(--seraya-ease-standard),
+    color var(--seraya-motion-default) var(--seraya-ease-standard);
+}
+
+[data-operational-desktop-data] tbody > tr:hover {
+  background: color-mix(in srgb, var(--seraya-bg-surface-subtle) 72%, transparent);
+}
+
 [data-operational-mobile-card],
 [data-operational-responsive-row] {
   min-width: 0;
@@ -49,12 +68,37 @@
   gap: var(--seraya-space-3);
   margin-top: var(--seraya-space-3);
   padding-top: var(--seraya-space-3);
-  border-top: 1px solid var(--seraya-border-default);
+  border-top: 1px solid var(--seraya-border-subtle);
 }
 
 [data-operational-selection-bar] {
   background: var(--seraya-sticky-surface);
-  backdrop-filter: blur(14px);
+  backdrop-filter: blur(18px);
+}
+
+[data-operational-skeleton] {
+  overflow: hidden;
+  position: relative;
+}
+
+[data-operational-skeleton]::after {
+  position: absolute;
+  inset: 0;
+  content: '';
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--seraya-bg-surface) 58%, transparent),
+    transparent
+  );
+  transform: translateX(-100%);
+  animation: seraya-workspace-skeleton 1.35s var(--seraya-ease-standard) infinite;
+}
+
+@keyframes seraya-workspace-skeleton {
+  to {
+    transform: translateX(100%);
+  }
 }
 
 @media (max-width: 1023px) {
@@ -63,23 +107,22 @@
   }
 
   [data-operational-selection-bar] {
-    bottom: var(--seraya-mobile-safe-bottom) !important;
+    bottom: calc(var(--seraya-mobile-safe-bottom) + var(--seraya-space-2)) !important;
   }
 }
 
 @media (max-width: 767px) {
   [data-operational-workspace] {
-    gap: var(--seraya-space-5);
+    gap: var(--seraya-space-6);
   }
 
   [data-operational-header] {
     gap: var(--seraya-space-4);
-    padding-bottom: var(--seraya-space-5);
   }
 
   [data-operational-header] h1 {
-    font-size: var(--seraya-type-page-title-mobile);
-    line-height: 0.98;
+    font-size: var(--seraya-type-operational-title-mobile);
+    line-height: 1.08;
   }
 
   [data-operational-header-actions] {
@@ -102,7 +145,7 @@
   }
 
   [data-operational-metric] {
-    min-height: 5.5rem;
+    min-height: 6rem;
   }
 
   [data-operational-metric] dd {
@@ -110,12 +153,11 @@
   }
 
   [data-operational-section] {
-    gap: 0.875rem;
+    gap: var(--seraya-space-4);
   }
 
   [data-operational-section-heading] {
-    gap: 0.875rem;
-    padding-bottom: 0.875rem;
+    gap: var(--seraya-space-3);
   }
 
   [data-operational-section-actions] {
@@ -139,17 +181,13 @@
     padding: var(--seraya-space-3);
   }
 
-  [data-operational-data-surface] {
-    border-inline: 0;
-  }
-
   [data-operational-empty-state] {
-    padding: 2.25rem var(--seraya-space-4);
+    padding: 2.75rem var(--seraya-space-4);
   }
 
   [data-operational-mobile-card],
   [data-operational-responsive-row] {
-    padding: 0.875rem;
+    padding: var(--seraya-space-4);
   }
 
   [data-operational-mobile-card] > div:first-child {
@@ -157,7 +195,7 @@
   }
 
   [data-operational-mobile-card] > div:first-child > :last-child {
-    max-width: 55%;
+    max-width: 58%;
   }
 
   [data-operational-row-action] {
@@ -166,7 +204,7 @@
     align-items: center;
     justify-content: flex-start;
     padding-top: var(--seraya-space-3);
-    border-top: 1px solid var(--seraya-border-default);
+    border-top: 1px solid var(--seraya-border-subtle);
   }
 
   [data-operational-row-action] :where(a, button, form) {
@@ -182,8 +220,8 @@
 
   [data-operational-selection-bar] {
     gap: var(--seraya-space-3);
-    padding: var(--seraya-space-3) 0.875rem
-      calc(var(--seraya-space-3) + env(safe-area-inset-bottom));
+    margin-inline: var(--seraya-space-2);
+    padding: var(--seraya-space-3);
   }
 
   [data-operational-selection-actions] {
@@ -205,5 +243,11 @@
 @media (min-width: 768px) {
   [data-operational-metric][data-mobile-span='full'] {
     grid-column: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-operational-skeleton]::after {
+    animation: none;
   }
 }
