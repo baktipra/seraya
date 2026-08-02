@@ -20,15 +20,21 @@
 
   --color-seraya-canvas: var(--seraya-bg-canvas);
   --color-seraya-surface: var(--seraya-bg-surface);
+  --color-seraya-surface-subtle: var(--seraya-bg-surface-subtle);
+  --color-seraya-surface-raised: var(--seraya-bg-surface-raised);
   --color-seraya-soft: var(--seraya-bg-soft);
   --color-seraya-brand-soft: var(--seraya-bg-brand-soft);
+  --color-seraya-brand-softer: var(--seraya-bg-brand-softer);
   --color-seraya-text-primary: var(--seraya-text-primary);
   --color-seraya-text-secondary: var(--seraya-text-secondary);
   --color-seraya-text-muted: var(--seraya-text-muted);
+  --color-seraya-text-disabled: var(--seraya-text-disabled);
   --color-seraya-text-inverse: var(--seraya-text-inverse);
   --color-seraya-action-primary: var(--seraya-action-primary);
   --color-seraya-action-primary-hover: var(--seraya-action-primary-hover);
+  --color-seraya-action-primary-pressed: var(--seraya-action-primary-pressed);
   --color-seraya-action-secondary: var(--seraya-action-secondary);
+  --color-seraya-border-subtle: var(--seraya-border-subtle);
   --color-seraya-border-default: var(--seraya-border-default);
   --color-seraya-border-strong: var(--seraya-border-strong);
   --color-seraya-focus-ring: var(--seraya-focus-ring);
@@ -63,6 +69,7 @@ body {
   font-size: 1rem;
   line-height: 1.6;
   text-rendering: optimizeLegibility;
+  font-synthesis: none;
 }
 
 button,
@@ -83,7 +90,7 @@ button:not(:disabled),
 }
 
 :focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--seraya-focus-ring) 46%, transparent);
+  outline: 3px solid color-mix(in srgb, var(--seraya-focus-ring) 42%, transparent);
   outline-offset: 3px;
 }
 
@@ -119,7 +126,8 @@ button:not(:disabled),
 .seraya-heading-md,
 .seraya-heading-sm {
   color: var(--seraya-text-primary);
-  font-weight: 650;
+  font-family: var(--font-ui);
+  font-weight: 600;
   letter-spacing: -0.025em;
   line-height: 1.15;
 }
@@ -141,30 +149,30 @@ button:not(:disabled),
 }
 
 .seraya-body-lg {
-  font-size: 1.125rem;
-  line-height: 1.65;
+  font-size: var(--seraya-type-body-lg);
+  line-height: 1.625;
 }
 
 .seraya-body-md {
-  font-size: 1rem;
-  line-height: 1.6;
+  font-size: var(--seraya-type-body);
+  line-height: 1.57;
 }
 
 .seraya-body-sm {
-  font-size: 0.875rem;
-  line-height: 1.5;
+  font-size: var(--seraya-type-body-compact);
+  line-height: 1.46;
 }
 
 .seraya-caption {
-  font-size: 0.75rem;
-  line-height: 1.35;
+  font-size: var(--seraya-type-caption);
+  line-height: 1.42;
 }
 
 .seraya-eyebrow {
   color: var(--seraya-text-muted);
-  font-size: 0.6875rem;
-  font-weight: 650;
-  letter-spacing: 0.18em;
+  font-size: var(--seraya-type-micro);
+  font-weight: 600;
+  letter-spacing: 0.16em;
   line-height: 1.35;
   text-transform: uppercase;
 }
@@ -172,11 +180,10 @@ button:not(:disabled),
 .seraya-field-label {
   display: block;
   color: var(--seraya-text-secondary);
-  font-size: 0.75rem;
-  font-weight: 650;
-  letter-spacing: 0.075em;
+  font-size: var(--seraya-type-body-compact);
+  font-weight: 600;
+  letter-spacing: 0;
   line-height: 1.4;
-  text-transform: uppercase;
 }
 
 .seraya-page-title {
@@ -188,9 +195,93 @@ button:not(:disabled),
   line-height: 1;
 }
 
+.seraya-operational-title {
+  color: var(--seraya-text-primary);
+  font-family: var(--font-ui);
+  font-size: var(--seraya-type-operational-title);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.12;
+}
+
+.seraya-operational-section-title {
+  color: var(--seraya-text-primary);
+  font-family: var(--font-ui);
+  font-size: var(--seraya-type-section-title);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.seraya-metric-value {
+  color: var(--seraya-text-primary);
+  font-family: var(--font-ui);
+  font-size: var(--seraya-type-metric-value);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
 /* The shell owns the maximum canvas. WorkspacePage owns page-specific width. */
 .seraya-dashboard-content {
   max-width: var(--seraya-shell-max);
+}
+
+@keyframes seraya-backdrop-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes seraya-dialog-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes seraya-toast-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.seraya-dialog-backdrop {
+  animation: seraya-backdrop-enter var(--seraya-motion-panel) var(--seraya-ease-standard) both;
+}
+
+.seraya-dialog-surface {
+  animation: seraya-dialog-enter var(--seraya-motion-panel) var(--seraya-ease-standard) both;
+  transform-origin: center bottom;
+}
+
+.seraya-toast-surface {
+  animation: seraya-toast-enter var(--seraya-motion-panel) var(--seraya-ease-standard) both;
+}
+
+@media (min-width: 640px) {
+  .seraya-dialog-surface {
+    transform-origin: center;
+  }
+}
+
+@media (max-width: 767px) {
+  .seraya-operational-title {
+    font-size: var(--seraya-type-operational-title-mobile);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

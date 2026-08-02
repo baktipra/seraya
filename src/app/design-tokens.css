@@ -1,48 +1,55 @@
 :root {
   color-scheme: light;
 
-  /* Raw palette. Components should consume semantic roles below. */
-  --seraya-ink: #2b2523;
-  --seraya-ivory: #fcf8f3;
+  /* Raw palette. Feature components consume semantic roles, never raw values. */
+  --seraya-ink: #211f1d;
+  --seraya-ivory: #f7f6f3;
   --seraya-paper: #ffffff;
-  --seraya-rosewood: #8e4b52;
-  --seraya-rosewood-soft: #f3e4e5;
-  --seraya-terracotta: #b96b56;
-  --seraya-sage: #849386;
-  --seraya-sand: #f1e7dc;
-  --seraya-muted: #776c65;
-  --seraya-border: #e8ddd2;
-  --seraya-success: #2f6d58;
-  --seraya-warning: #9a6426;
-  --seraya-error: #a24242;
-  --seraya-info: #3d657c;
+  --seraya-rosewood: #7b414c;
+  --seraya-rosewood-soft: #f5e9eb;
+  --seraya-terracotta: #a95f4d;
+  --seraya-sage: #788a7d;
+  --seraya-sand: #eee9e3;
+  --seraya-muted: #8a847e;
+  --seraya-border: #e2ddd7;
+  --seraya-success: #2e6b57;
+  --seraya-warning: #95601e;
+  --seraya-error: #a84242;
+  --seraya-info: #42687b;
 
-  /* Semantic color roles. */
+  /* Semantic color roles — Quiet Editorial Precision. */
   --seraya-bg-canvas: var(--seraya-ivory);
   --seraya-bg-surface: var(--seraya-paper);
-  --seraya-bg-soft: #f7f0e9;
+  --seraya-bg-surface-subtle: #fbfaf8;
+  --seraya-bg-surface-raised: var(--seraya-paper);
+  --seraya-bg-soft: var(--seraya-bg-surface-subtle);
   --seraya-bg-brand-soft: var(--seraya-rosewood-soft);
+  --seraya-bg-brand-softer: #fbf5f6;
   --seraya-text-primary: var(--seraya-ink);
-  --seraya-text-secondary: #5f5550;
+  --seraya-text-secondary: #625d58;
   --seraya-text-muted: var(--seraya-muted);
-  --seraya-text-inverse: #fffdfb;
+  --seraya-text-disabled: #aaa49e;
+  --seraya-text-inverse: #ffffff;
   --seraya-action-primary: var(--seraya-rosewood);
-  --seraya-action-primary-hover: #733c43;
+  --seraya-action-primary-hover: #64343d;
+  --seraya-action-primary-pressed: #512a32;
   --seraya-action-secondary: var(--seraya-terracotta);
+  --seraya-border-subtle: #ece8e3;
   --seraya-border-default: var(--seraya-border);
-  --seraya-border-strong: #cdbfb2;
-  --seraya-focus-ring: #a55e67;
+  --seraya-border-strong: #cfc8c1;
+  --seraya-focus-ring: #8e4d58;
+  --seraya-overlay: rgb(33 31 29 / 0.42);
   --seraya-status-success: var(--seraya-success);
-  --seraya-status-success-soft: #e8f3ed;
+  --seraya-status-success-soft: #eaf4ef;
   --seraya-status-warning: var(--seraya-warning);
-  --seraya-status-warning-soft: #fbf0df;
+  --seraya-status-warning-soft: #fbf1e1;
   --seraya-status-error: var(--seraya-error);
-  --seraya-status-error-soft: #f9e8e8;
+  --seraya-status-error-soft: #f9eaea;
   --seraya-status-info: var(--seraya-info);
-  --seraya-status-info-soft: #e9f2f6;
+  --seraya-status-info-soft: #ebf2f5;
 
-  /* Typography roles. */
-  --font-ui: 'Aptos', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  /* Typography roles. Geist is self-hosted by next/font in the root layout. */
+  --font-ui: var(--font-geist), 'Geist', 'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   --font-editorial:
     'Cormorant Garamond Variable', 'Cormorant Garamond', 'Iowan Old Style', 'Baskerville',
     'Times New Roman', serif;
@@ -52,23 +59,43 @@
   --seraya-type-display-sm: clamp(1.625rem, 2.5vw, 2.125rem);
   --seraya-type-page-title: clamp(2.5rem, 4vw, 3.75rem);
   --seraya-type-page-title-mobile: clamp(2.2rem, 12vw, 3.1rem);
-  --seraya-type-section-title: clamp(1.65rem, 3vw, 2.15rem);
-  --seraya-type-metric-value: clamp(1.45rem, 2.4vw, 2.05rem);
+  --seraya-type-operational-title: clamp(2rem, 3vw, 2.5rem);
+  --seraya-type-operational-title-mobile: clamp(1.75rem, 8vw, 2.125rem);
+  --seraya-type-section-title: clamp(1.5rem, 2.4vw, 1.75rem);
+  --seraya-type-subsection-title: 1.125rem;
+  --seraya-type-metric-value: clamp(1.5rem, 2vw, 1.875rem);
+  --seraya-type-body-lg: 1rem;
+  --seraya-type-body: 0.875rem;
+  --seraya-type-body-compact: 0.8125rem;
+  --seraya-type-caption: 0.75rem;
+  --seraya-type-micro: 0.6875rem;
 
-  /* Quiet Romantic Clarity geometry. */
-  --seraya-radius-sm: 0.25rem;
-  --seraya-radius-md: 0.375rem;
-  --seraya-radius-lg: 0.5rem;
-  --seraya-radius-xl: 0.75rem;
+  /* Radius and elevation. Existing aliases remain for compatibility. */
+  --seraya-radius-sm: 0.5rem;
+  --seraya-radius-md: 0.625rem;
+  --seraya-radius-lg: 0.75rem;
+  --seraya-radius-xl: 1rem;
+  --seraya-radius-dialog: 1.125rem;
   --seraya-radius-pill: 999px;
-  --seraya-shadow-soft: 0 1px 0 rgb(43 37 35 / 0.025), 0 8px 24px rgb(43 37 35 / 0.04);
-  --seraya-shadow-float: 0 16px 42px rgb(43 37 35 / 0.1);
-  --seraya-shadow-modal: 0 24px 64px rgb(43 37 35 / 0.16);
-  --seraya-surface-rule: color-mix(in srgb, var(--seraya-border-default) 86%, transparent);
-  --seraya-surface-soft: color-mix(in srgb, var(--seraya-bg-soft) 64%, transparent);
-  --seraya-sticky-surface: color-mix(in srgb, var(--seraya-bg-surface) 95%, transparent);
+  --seraya-shadow-level-1: 0 1px 2px rgb(31 29 27 / 0.04), 0 6px 18px rgb(31 29 27 / 0.04);
+  --seraya-shadow-level-2: 0 16px 40px rgb(31 29 27 / 0.1);
+  --seraya-shadow-level-3: 0 24px 64px rgb(31 29 27 / 0.16);
+  --seraya-shadow-soft: var(--seraya-shadow-level-1);
+  --seraya-shadow-float: var(--seraya-shadow-level-2);
+  --seraya-shadow-modal: var(--seraya-shadow-level-3);
+  --seraya-surface-rule: color-mix(in srgb, var(--seraya-border-subtle) 88%, transparent);
+  --seraya-surface-soft: color-mix(in srgb, var(--seraya-bg-surface-subtle) 72%, transparent);
+  --seraya-sticky-surface: color-mix(in srgb, var(--seraya-bg-surface-raised) 94%, transparent);
 
-  /* Shared spacing and control scale. */
+  /* Motion roles. */
+  --seraya-motion-fast: 120ms;
+  --seraya-motion-default: 180ms;
+  --seraya-motion-panel: 240ms;
+  --seraya-motion-large: 320ms;
+  --seraya-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --seraya-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+
+  /* Shared spacing and controls. */
   --seraya-space-1: 0.25rem;
   --seraya-space-2: 0.5rem;
   --seraya-space-3: 0.75rem;
@@ -77,7 +104,14 @@
   --seraya-space-6: 1.5rem;
   --seraya-space-7: 1.75rem;
   --seraya-space-8: 2rem;
-  --seraya-touch-target: 2.75rem;
+  --seraya-space-10: 2.5rem;
+  --seraya-space-12: 3rem;
+  --seraya-space-16: 4rem;
+  --seraya-space-20: 5rem;
+  --seraya-control-height-compact: 2.5rem;
+  --seraya-control-height: 2.75rem;
+  --seraya-control-height-large: 3rem;
+  --seraya-touch-target: var(--seraya-control-height);
 
   /* Canonical product shell and workspace geometry. */
   --seraya-shell-max: 90rem;

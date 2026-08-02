@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Geist } from 'next/font/google';
 
 import { siteConfig } from '@/config/site';
 import { ToastProvider } from '@/design-system';
@@ -16,6 +17,12 @@ import './roselle-flagship-maturation-release.css';
 import './invitation-layout-recovery.css';
 import './invitation-template-quality-bar.css';
 
+const geist = Geist({
+  display: 'swap',
+  subsets: ['latin'],
+  variable: '--font-geist',
+});
+
 export const metadata: Metadata = {
   title: {
     default: `${siteConfig.name} — Pengalaman Tamu Pernikahan yang Personal`,
@@ -30,7 +37,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" className="bg-seraya-ivory h-full">
+    <html lang="id" className={`${geist.variable} bg-seraya-ivory h-full`}>
       <body className="min-h-full antialiased">
         <ToastProvider>{children}</ToastProvider>
       </body>

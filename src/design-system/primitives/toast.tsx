@@ -34,17 +34,10 @@ interface ToastContextValue {
 }
 
 const toastVariantClasses: Record<ToastVariant, string> = {
-  success: 'border-seraya-status-success/25 bg-seraya-status-success-soft',
-  info: 'border-seraya-status-info/25 bg-seraya-status-info-soft',
-  warning: 'border-seraya-status-warning/25 bg-seraya-status-warning-soft',
-  error: 'border-seraya-status-error/25 bg-seraya-status-error-soft',
-};
-
-const toastTitleClasses: Record<ToastVariant, string> = {
-  success: 'text-seraya-status-success',
-  info: 'text-seraya-status-info',
-  warning: 'text-seraya-status-warning',
-  error: 'text-seraya-status-error',
+  success: 'border-l-seraya-status-success',
+  info: 'border-l-seraya-status-info',
+  warning: 'border-l-seraya-status-warning',
+  error: 'border-l-seraya-status-error',
 };
 
 const ToastContext = createContext<ToastContextValue | null>(null);
@@ -103,16 +96,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             aria-atomic="true"
             key={item.id}
             className={cn(
-              'pointer-events-auto rounded-[var(--seraya-radius-lg)] border p-4 shadow-[var(--seraya-shadow-float)]',
+              'seraya-toast-surface border-seraya-border-subtle bg-seraya-surface-raised pointer-events-auto rounded-[var(--seraya-radius-lg)] border border-l-4 p-4 shadow-[var(--seraya-shadow-level-2)]',
               toastVariantClasses[item.variant],
             )}
             role={item.variant === 'error' ? 'alert' : 'status'}
           >
             <div className="flex items-start gap-3">
               <div className="min-w-0 flex-1">
-                <p className={cn('text-sm font-semibold', toastTitleClasses[item.variant])}>
-                  {item.title}
-                </p>
+                <p className="text-seraya-text-primary text-sm font-semibold">{item.title}</p>
                 {item.description ? (
                   <p className="text-seraya-text-secondary mt-1 text-sm leading-5">
                     {item.description}
@@ -121,7 +112,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               </div>
               <button
                 aria-label="Tutup notifikasi"
-                className="text-seraya-text-secondary hover:bg-seraya-surface/70 hover:text-seraya-text-primary focus-visible:outline-seraya-focus-ring inline-flex size-11 shrink-0 items-center justify-center rounded-full text-lg transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
+                className="text-seraya-text-secondary hover:bg-seraya-surface-subtle hover:text-seraya-text-primary focus-visible:outline-seraya-focus-ring inline-flex size-10 shrink-0 items-center justify-center rounded-full text-lg transition-colors duration-[var(--seraya-motion-default)] focus-visible:outline-3 focus-visible:outline-offset-2"
                 onClick={() => dismiss(item.id)}
                 type="button"
               >

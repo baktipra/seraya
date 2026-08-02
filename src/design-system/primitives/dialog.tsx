@@ -92,7 +92,7 @@ export function Dialog({
     >
       <button
         aria-hidden="true"
-        className="bg-seraya-ink/35 absolute inset-0 backdrop-blur-[1px]"
+        className="seraya-dialog-backdrop absolute inset-0 bg-[var(--seraya-overlay)] backdrop-blur-[2px]"
         onClick={() => onOpenChange(false)}
         tabIndex={-1}
         type="button"
@@ -103,7 +103,7 @@ export function Dialog({
         aria-labelledby={titleId}
         aria-modal="true"
         className={cn(
-          'border-seraya-border-default bg-seraya-surface relative z-10 w-full max-w-lg rounded-[var(--seraya-radius-xl)] border p-5 shadow-[var(--seraya-shadow-modal)] outline-none sm:p-6',
+          'seraya-dialog-surface border-seraya-border-subtle bg-seraya-surface-raised relative z-10 w-full max-w-lg rounded-[var(--seraya-radius-dialog)] border p-5 shadow-[var(--seraya-shadow-level-3)] outline-none sm:p-6',
           className,
         )}
         data-dialog-surface
@@ -111,10 +111,10 @@ export function Dialog({
         tabIndex={-1}
       >
         <div className="flex items-start justify-between gap-4">
-          <div>
+          <div className="min-w-0">
             <h2
               id={titleId}
-              className="text-seraya-text-primary font-serif text-2xl leading-tight tracking-[-0.02em]"
+              className="text-seraya-text-primary font-sans text-xl leading-7 font-semibold tracking-[-0.025em]"
             >
               {title}
             </h2>
@@ -126,7 +126,7 @@ export function Dialog({
           </div>
           <button
             aria-label="Tutup dialog"
-            className="text-seraya-text-secondary hover:bg-seraya-soft hover:text-seraya-text-primary focus-visible:outline-seraya-focus-ring inline-flex size-11 shrink-0 items-center justify-center rounded-full text-lg transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
+            className="text-seraya-text-secondary hover:bg-seraya-surface-subtle hover:text-seraya-text-primary focus-visible:outline-seraya-focus-ring inline-flex size-11 shrink-0 items-center justify-center rounded-full text-lg transition-colors duration-[var(--seraya-motion-default)] focus-visible:outline-3 focus-visible:outline-offset-2"
             onClick={() => onOpenChange(false)}
             type="button"
           >
