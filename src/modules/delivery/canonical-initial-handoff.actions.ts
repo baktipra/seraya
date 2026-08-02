@@ -8,7 +8,7 @@ import {
   prepareGuestFollowUpHandoffForCurrentUser,
 } from '@/modules/follow-up/follow-up.service';
 
-type BoundInput = Parameters<typeof reaccessPersonalGuestLinkForDeliveryAction>[0];
+type BoundInput = { guestId: string; projectId: string };
 
 function getRecipientFromComposeUrl(value: string) {
   try {
@@ -20,10 +20,9 @@ function getRecipientFromComposeUrl(value: string) {
 }
 
 /**
- * Keeps Copy/Open as ordinary capability re-access. The first WhatsApp share
- * uses Slice C authority and records truthful `handoff_prepared`; a later
- * repeat share falls back to ordinary re-access without fabricating another
- * initial-distribution event.
+ * Copy/Open remain ordinary capability re-access. The first WhatsApp action
+ * records truthful `handoff_prepared`; later actions reopen WhatsApp without
+ * fabricating another initial-distribution event.
  */
 export async function reaccessOrPrepareCanonicalInitialHandoffAction(
   boundInput: BoundInput,
@@ -41,6 +40,7 @@ export async function reaccessOrPrepareCanonicalInitialHandoffAction(
       guestId: boundInput.guestId,
       messageKind: 'initial_invitation',
       projectId: boundInput.projectId,
+      sourceSurface: 'delivery_center',
     });
 
     return {
@@ -48,6 +48,7 @@ export async function reaccessOrPrepareCanonicalInitialHandoffAction(
       personalUrl: result.personalUrl,
       recipientWhatsAppPhoneE164: getRecipientFromComposeUrl(result.whatsappComposeUrl),
       status: 'success',
+      whatsappComposeUrl: result.whatsappComposeUrl,
     };
   } catch (error) {
     if (error instanceof GuestFollowUpHandoffNotEligibleError) {

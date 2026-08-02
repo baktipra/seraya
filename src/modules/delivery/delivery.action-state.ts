@@ -2,12 +2,23 @@ export type DeliveryLinkActionState = {
   message?: string;
   personalUrl?: string;
   recipientWhatsAppPhoneE164?: string | null;
+  resultKey?: string;
   status: 'idle' | 'error' | 'success';
+  /** Temporary exact compose URL returned only by an authorized manual handoff action. */
+  whatsappComposeUrl?: string;
 };
 
 export const initialDeliveryLinkActionState: DeliveryLinkActionState = { status: 'idle' };
 
-/** Batch state intentionally exposes aggregate counts only, never raw capability material. */
+export type DeliveryContactActionState = {
+  message?: string;
+  resultKey?: string;
+  status: 'idle' | 'error' | 'success';
+};
+
+export const initialDeliveryContactActionState: DeliveryContactActionState = { status: 'idle' };
+
+/** Batch state exposes aggregate counts only, never capability material. */
 export type DeliveryBatchActionState = {
   createdCount?: number;
   failedCount?: number;
@@ -26,7 +37,6 @@ export type DeliveryBatchActionState = {
 
 export const initialDeliveryBatchActionState: DeliveryBatchActionState = { status: 'idle' };
 
-/** Explicit owner clipboard action; phone values are not persisted in list DTOs or exports. */
 export type DeliveryWhatsAppClipboardActionState = {
   message?: string;
   numbersText?: string;

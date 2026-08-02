@@ -42,7 +42,7 @@ describe('canonical initial handoff adapter', () => {
     expect(prepareMock).not.toHaveBeenCalled();
   });
 
-  it('uses Slice C authority for the first WhatsApp share', async () => {
+  it('uses the manual-handoff authority and exact compose URL for the first WhatsApp action', async () => {
     prepareMock.mockResolvedValue({
       personalUrl: 'https://example.test/g',
       whatsappComposeUrl: 'https://wa.me/62811111111?text=hello',
@@ -52,11 +52,18 @@ describe('canonical initial handoff adapter', () => {
       initialDeliveryLinkActionState,
       form('share'),
     );
-    expect(prepareMock).toHaveBeenCalledWith({ ...bound, messageKind: 'initial_invitation' });
+
+    expect(prepareMock).toHaveBeenCalledWith({
+      ...bound,
+      messageKind: 'initial_invitation',
+      sourceSurface: 'delivery_center',
+    });
     expect(result).toMatchObject({
+      message: 'share',
       personalUrl: 'https://example.test/g',
       recipientWhatsAppPhoneE164: '+62811111111',
       status: 'success',
+      whatsappComposeUrl: 'https://wa.me/62811111111?text=hello',
     });
   });
 
