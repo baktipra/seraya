@@ -33,6 +33,8 @@ import {
   createOrReplacePersonalGuestLinkAction,
   revokePersonalGuestLinkAction,
 } from '@/modules/guest-links/guest-link.actions';
+import { getGuestLinkLifecycleCopy } from '@/modules/guest-links/guest-link-lifecycle';
+import type { GuestLinkLifecycleState } from '@/modules/guest-links/guest-link.types';
 import { initialGuestActionState } from '@/modules/guests/guest.action-state';
 import type { GuestActionState } from '@/modules/guests/guest.action-state';
 import {
@@ -59,13 +61,149 @@ type NativeGuestManagerProps = {
   projectId: string;
 };
 
-type GuestManagerFilter =
+type GuestLifecycleFilter =
   | 'all'
-  | 'has_whatsapp'
-  | 'missing_whatsapp'
-  | 'active_link'
-  | 'missing_link'
-  | 'needs_link_update';
+  | 'not_created'
+  | 'active_recoverable'
+  | 'active_legacy'
+  | 'revoked'
+  | 'expired'
+  | 'missing_whatsapp';
+
+const guestLifecycleFilterOptions: ReadonlyArray<{
+  label: string;
+  value: GuestLifecycleFilter;
+}> = [
+  { label: 'Semua tamu', value: 'all' },
+  { label: 'Belum dibuat', value: 'not_created' },
+  { label: 'Aktif dan dapat dikelola', value: 'active_recoverable' },
+  { label: 'Aktif lama', value: 'active_legacy' },
+  { label: 'Nonaktif', value: 'revoked' },
+  { label: 'Kedaluwarsa', value: 'expired' },
+  { label: 'Tanpa Nomor WhatsApp', value: 'missing_whatsapp' },
+];
+
+function getGuestLifecycleState(guest: GuestListItem): GuestLinkLifecycleState {
+  if (guest.link_lifecycle_state) {
+    return guest.link_lifecycle_state;
+  }
+
+  if (guest.link_state === 'active') {
+    return 'active_recoverable';
+  }
+
+  return guest.link_state;
+}
+
+function isActiveGuestLifecycle(state: GuestLinkLifecycleState) {
+  return state === 'active_recoverable' || state === 'active_legacy';
+}
+
+function canBatchPrepareGuestLink(state: GuestLinkLifecycleState) {
+  return state === 'not_created' || state === 'revoked' || state === 'expired';
+}
+
+function matchesGuestLifecycleFilter(guest: GuestListItem, filter: GuestLifecycleFilter) {
+  if (filter === 'all') {
+    return true;
+  }
+
+  if (filter === 'missing_whatsapp') {
+    return !guest.whatsapp_phone_e164;
+  }
+
+  return getGuestLifecycleState(guest) === filter;
+}
+
+function createGuestLifecycleSummary(guests: readonly GuestListItem[]) {
+  let manageableLinkCount = 0;
+  let missingLinkCount = 0;
+  let needsUpdateCount = 0;
+
+  for (const guest of guests) {
+    const state = getGuestLifecycleState(guest);
+
+    if (state === 'active_recoverable') {
+      manageableLinkCount += 1;
+    } else if (state === 'not_created') {
+      missingLinkCount += 1;
+    } else {
+      needsUpdateCount += 1;
+    }
+  }
+
+  return {
+    activeGuestCount: guests.length,
+    manageableLinkCount,
+    missingLinkCount,
+    needsUpdateCount,
+  };
+}
+
+function getGuestLifecycleActionLabel(state: GuestLinkLifecycleState) {
+  if (state === 'active_recoverable') {
+    return 'Ganti tautan';
+  }
+
+  if (state === 'active_legacy') {
+    return 'Perbarui tautan';
+  }
+
+  if (state === 'not_created') {
+    return 'Buat Undangan Pribadi';
+  }
+
+  return 'Buat tautan baru';
+}
+
+function getGuestLifecycleDialogCopy(state: GuestLinkLifecycleState) {
+  if (state === 'active_recoverable') {
+    return {
+      buttonLabel: 'Ganti tautan',
+      description:
+        'Link saat ini masih aktif dan dapat dikelola. Ganti hanya jika akses tamu memang perlu diubah.',
+      notice:
+        'URL lama akan langsung dinonaktifkan ketika URL baru dibuat. Perubahan isi undangan tidak memerlukan penggantian link.',
+      title: 'Ganti tautan pribadi?',
+    };
+  }
+
+  if (state === 'active_legacy') {
+    return {
+      buttonLabel: 'Perbarui tautan',
+      description:
+        'Link lama masih aktif untuk tamu, tetapi Seraya tidak dapat menampilkan kembali URL tersebut.',
+      notice:
+        'Memperbarui link akan langsung menonaktifkan URL lama. Pastikan tamu menerima URL pengganti.',
+      title: 'Perbarui tautan lama?',
+    };
+  }
+
+  if (state === 'revoked') {
+    return {
+      buttonLabel: 'Buat tautan baru',
+      description: 'Link sebelumnya sudah dinonaktifkan dan tidak dapat digunakan.',
+      notice: 'URL baru akan menjadi akses aktif untuk tamu ini.',
+      title: 'Buat tautan baru?',
+    };
+  }
+
+  if (state === 'expired') {
+    return {
+      buttonLabel: 'Buat tautan baru',
+      description: 'Link sebelumnya sudah kedaluwarsa dan tidak dapat digunakan.',
+      notice: 'URL baru akan menjadi akses aktif untuk tamu ini.',
+      title: 'Buat tautan baru?',
+    };
+  }
+
+  return {
+    buttonLabel: 'Buat tautan',
+    description: 'Tamu ini belum mempunyai Undangan Pribadi.',
+    notice: 'URL baru akan ditampilkan sekali setelah berhasil dibuat.',
+    title: 'Buat tautan pribadi?',
+  };
+}
 
 type SuccessActionState = Pick<
   GuestActionState | GuestImportActionState | GuestLinkActionState,
@@ -78,21 +216,6 @@ const rsvpStatusLabels: Record<GuestRsvpStatus, string> = {
   pending: 'Belum merespons',
 };
 
-const personalLinkStateLabels: Record<GuestListItem['link_state'], string> = {
-  active: 'Aktif',
-  not_created: 'Belum ada',
-  revoked: 'Perlu diperbarui',
-};
-
-function matchesGuestManagerFilter(guest: GuestListItem, filter: GuestManagerFilter) {
-  if (filter === 'has_whatsapp') return Boolean(guest.whatsapp_phone_e164);
-  if (filter === 'missing_whatsapp') return !guest.whatsapp_phone_e164;
-  if (filter === 'active_link') return guest.link_state === 'active';
-  if (filter === 'missing_link') return guest.link_state !== 'active';
-  if (filter === 'needs_link_update') return guest.link_state === 'revoked';
-  return true;
-}
-
 function getRsvpDisplay(guest: GuestListItem): string {
   if (guest.rsvp_status !== 'attending') {
     return rsvpStatusLabels[guest.rsvp_status];
@@ -103,6 +226,44 @@ function getRsvpDisplay(guest: GuestListItem): string {
   }
 
   return `Hadir — ${guest.rsvp_attendee_count} dari ${guest.party_size} orang`;
+}
+
+function getLifecycleTone(state: GuestLinkLifecycleState) {
+  if (state === 'active_recoverable') {
+    return 'bg-seraya-status-success-soft text-seraya-status-success';
+  }
+
+  if (state === 'not_created') {
+    return 'bg-seraya-soft text-seraya-text-secondary';
+  }
+
+  return 'bg-seraya-status-warning-soft text-seraya-status-warning';
+}
+
+function GuestLinkStatus({
+  guest,
+  showDescription = true,
+}: {
+  guest: GuestListItem;
+  showDescription?: boolean;
+}) {
+  const state = getGuestLifecycleState(guest);
+  const copy = getGuestLinkLifecycleCopy(state);
+
+  return (
+    <div className="min-w-0">
+      <span
+        className={`${getLifecycleTone(state)} inline-flex max-w-full rounded-full px-2.5 py-1 text-xs leading-5 font-semibold`}
+      >
+        {copy.label}
+      </span>
+      {showDescription ? (
+        <p className="text-seraya-text-muted mt-1.5 max-w-[19rem] text-xs leading-5">
+          {copy.description}
+        </p>
+      ) : null}
+    </div>
+  );
 }
 
 function FieldError({ id, message }: { id: string; message?: string }) {
@@ -223,21 +384,6 @@ function GuestFields({
   );
 }
 
-function GuestLinkStatus({ state }: { state: GuestListItem['link_state'] }) {
-  const className =
-    state === 'active'
-      ? 'bg-seraya-status-success-soft text-seraya-status-success'
-      : state === 'revoked'
-        ? 'bg-seraya-status-warning-soft text-seraya-status-warning'
-        : 'bg-seraya-soft text-seraya-text-secondary';
-
-  return (
-    <span className={`${className} inline-flex rounded-full px-2.5 py-1 text-xs font-semibold`}>
-      {personalLinkStateLabels[state]}
-    </span>
-  );
-}
-
 function useGuestActionFeedback(state: SuccessActionState, onSuccess: () => void) {
   const router = useRouter();
   const { toast } = useToast();
@@ -298,7 +444,7 @@ function GuestManagerBatchPreparationDialog({
 
   return (
     <Dialog
-      description="Tautan aktif yang sudah ada tidak akan diubah. Link baru tidak ditampilkan dari proses batch."
+      description="Hanya tamu tanpa link aktif yang diproses. Link aktif—termasuk link lama—tidak akan diganti secara batch."
       onOpenChange={onOpenChange}
       open={open}
       title={`Siapkan Undangan Pribadi untuk ${guestIds.length} tamu?`}
@@ -319,8 +465,8 @@ function GuestManagerBatchPreparationDialog({
           <input name="confirmBatchPreparation" type="hidden" value="true" />
           <input name="selectedGuestIds" type="hidden" value={JSON.stringify(guestIds)} />
           <p className="text-seraya-text-secondary text-sm leading-6">
-            Tamu dengan link aktif tidak akan diubah. Pembagian WhatsApp tetap dilakukan manual per
-            tamu.
+            Tamu berstatus Belum dibuat, Nonaktif, atau Kedaluwarsa akan disiapkan. Pembagian
+            WhatsApp tetap dilakukan manual per tamu di Bagikan.
           </p>
           {actionState.status === 'error' && actionState.message ? (
             <p className="text-seraya-status-error text-sm leading-6" role="alert">
@@ -363,7 +509,7 @@ export function NativeGuestManager({
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
   const [selectedGuestIds, setSelectedGuestIds] = useState<string[]>([]);
   const [query, setQuery] = useState('');
-  const [guestFilter, setGuestFilter] = useState<GuestManagerFilter>('all');
+  const [guestFilter, setGuestFilter] = useState<GuestLifecycleFilter>('all');
   const [batchOpen, setBatchOpen] = useState(false);
   const [openOverflowKey, setOpenOverflowKey] = useState<string | null>(null);
   const lastRevealedUrl = useRef<string | null>(null);
@@ -439,13 +585,15 @@ export function NativeGuestManager({
 
   const filteredGuests = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase('id-ID');
+
     return initialGuests.filter((guest) => {
       const matchesQuery =
         !normalizedQuery ||
         guest.display_name.toLocaleLowerCase('id-ID').includes(normalizedQuery) ||
         guest.group_label?.toLocaleLowerCase('id-ID').includes(normalizedQuery) ||
         guest.whatsapp_phone_e164?.includes(normalizedQuery);
-      return matchesQuery && matchesGuestManagerFilter(guest, guestFilter);
+
+      return matchesQuery && matchesGuestLifecycleFilter(guest, guestFilter);
     });
   }, [guestFilter, initialGuests, query]);
 
@@ -455,15 +603,9 @@ export function NativeGuestManager({
     visibleGuestIds.length > 0 && selectedVisibleIds.length === visibleGuestIds.length;
   const selectedGuests = filteredGuests.filter((guest) => selectedVisibleIds.includes(guest.id));
   const selectedEligibleIds = selectedGuests
-    .filter((guest) => guest.link_state !== 'active')
+    .filter((guest) => canBatchPrepareGuestLink(getGuestLifecycleState(guest)))
     .map((guest) => guest.id);
-  const guestQualitySummary = {
-    active: initialGuests.length,
-    missingWhatsApp: initialGuests.filter((guest) => !guest.whatsapp_phone_e164).length,
-    missingPersonalInvitation: initialGuests.filter((guest) => guest.link_state !== 'active')
-      .length,
-    needsLinkUpdate: initialGuests.filter((guest) => guest.link_state === 'revoked').length,
-  };
+  const guestLifecycleSummary = createGuestLifecycleSummary(initialGuests);
 
   function updateQuery(nextQuery: string) {
     setQuery(nextQuery);
@@ -471,7 +613,7 @@ export function NativeGuestManager({
     setOpenOverflowKey(null);
   }
 
-  function updateGuestFilter(nextFilter: GuestManagerFilter) {
+  function updateGuestFilter(nextFilter: GuestLifecycleFilter) {
     setGuestFilter(nextFilter);
     setSelectedGuestIds([]);
     setOpenOverflowKey(null);
@@ -530,10 +672,12 @@ export function NativeGuestManager({
 
   function renderRowMenu(guest: GuestListItem, view: 'desktop' | 'mobile') {
     const menuKey = `${guest.id}:${view}`;
+    const lifecycleState = getGuestLifecycleState(guest);
+
     return (
       <RowOverflowMenu
         ariaLabel={`Aksi untuk ${guest.display_name}`}
-        onOpenChange={(open) => setOpenOverflowKey(open ? menuKey : null)}
+        onOpenChange={(open: boolean) => setOpenOverflowKey(open ? menuKey : null)}
         open={openOverflowKey === menuKey}
       >
         <OverflowMenuAction
@@ -550,13 +694,9 @@ export function NativeGuestManager({
             setLinkGuest(guest);
           }}
         >
-          {guest.link_state === 'active'
-            ? 'Buat ulang tautan'
-            : guest.link_state === 'revoked'
-              ? 'Perbarui tautan agar dapat dikelola'
-              : 'Siapkan Undangan Pribadi'}
+          {getGuestLifecycleActionLabel(lifecycleState)}
         </OverflowMenuAction>
-        {guest.link_state === 'active' ? (
+        {isActiveGuestLifecycle(lifecycleState) ? (
           <OverflowMenuAction
             onClick={() => {
               setOpenOverflowKey(null);
@@ -577,6 +717,11 @@ export function NativeGuestManager({
       </RowOverflowMenu>
     );
   }
+
+  const linkGuestLifecycleState = linkGuest ? getGuestLifecycleState(linkGuest) : null;
+  const linkDialogCopy = linkGuestLifecycleState
+    ? getGuestLifecycleDialogCopy(linkGuestLifecycleState)
+    : null;
 
   return (
     <>
@@ -607,55 +752,76 @@ export function NativeGuestManager({
               </Button>
             </>
           }
-          description="Rapikan data tamu, jumlah rombongan, nomor WhatsApp, dan lifecycle Undangan Pribadi dalam satu workspace privat."
+          description="Kelola penerima, data kontak, jumlah undangan, dan status Undangan Pribadi dari satu authority yang sama."
           eyebrow="Tamu undangan"
           title="Daftar tamu"
           titleId="guest-manager-title"
         />
 
-        <OperationalMetricStrip columns={4} label="Kualitas data tamu">
-          <OperationalMetric label="Tamu aktif" value={guestQualitySummary.active} />
+        <OperationalMetricStrip columns={4} label="Status Undangan Pribadi">
           <OperationalMetric
-            label="Belum punya WhatsApp"
-            value={guestQualitySummary.missingWhatsApp}
+            detail="Semua penerima aktif pada project ini."
+            label="Tamu aktif"
+            value={guestLifecycleSummary.activeGuestCount}
           />
           <OperationalMetric
-            label="Belum punya Undangan Pribadi"
-            value={guestQualitySummary.missingPersonalInvitation}
+            detail="Link aktif yang dapat diakses kembali oleh owner."
+            label="Link dapat dikelola"
+            value={guestLifecycleSummary.manageableLinkCount}
           />
           <OperationalMetric
-            label="Tautan perlu diperbarui"
-            value={guestQualitySummary.needsLinkUpdate}
+            detail="Tamu yang belum pernah mempunyai link."
+            label="Belum mempunyai link"
+            value={guestLifecycleSummary.missingLinkCount}
+          />
+          <OperationalMetric
+            detail="Link aktif lama, nonaktif, atau kedaluwarsa."
+            label="Perlu diperbarui"
+            value={guestLifecycleSummary.needsUpdateCount}
           />
         </OperationalMetricStrip>
 
         <OperationalSection
-          description="Cari, pilih, dan kelola tamu. Lifecycle tautan tetap dikelola di sini; pembagian awal dilakukan dari Bagikan."
+          description="Status link menunjukkan akses tamu, bukan status kirim atau status baca. Publikasi ulang memperbarui isi undangan tanpa mengganti link aktif."
           title="Kelola tamu"
           titleId="guest-list-title"
         >
-          <OperationalToolbar>
+          <div
+            className="border-seraya-border-default bg-seraya-brand-soft rounded-[var(--seraya-radius-sm)] border px-4 py-3 text-sm leading-6"
+            role="note"
+          >
+            <p className="text-seraya-text-primary font-semibold">
+              Isi undangan dan akses tamu adalah dua hal berbeda.
+            </p>
+            <p className="text-seraya-text-secondary mt-1">
+              Ganti link hanya ketika akses tamu memang perlu diubah. Mengedit lalu memublikasikan
+              ulang undangan tidak memerlukan URL baru.
+            </p>
+          </div>
+
+          <OperationalToolbar label="Cari dan filter tamu berdasarkan lifecycle link">
             <OperationalToolbarField htmlFor="guest-search" label="Cari tamu">
               <Input
                 id="guest-search"
-                onChange={(event) => updateQuery(event.target.value)}
+                onChange={(event: { target: { value: string } }) => updateQuery(event.target.value)}
                 placeholder="Cari nama, grup, atau Nomor WhatsApp"
                 value={query}
               />
             </OperationalToolbarField>
-            <OperationalToolbarField htmlFor="guest-data-quality-filter" label="Filter data">
+            <OperationalToolbarField htmlFor="guest-lifecycle-filter" label="Status Undangan Pribadi">
               <select
                 className="border-seraya-border-default bg-seraya-surface text-seraya-text-primary focus-visible:outline-seraya-focus-ring min-h-11 w-full rounded-[var(--seraya-radius-sm)] border px-3 text-sm focus-visible:outline-3 focus-visible:outline-offset-2"
-                id="guest-data-quality-filter"
-                onChange={(event) => updateGuestFilter(event.target.value as GuestManagerFilter)}
+                id="guest-lifecycle-filter"
+                onChange={(event: { target: { value: string } }) =>
+                  updateGuestFilter(event.target.value as GuestLifecycleFilter)
+                }
                 value={guestFilter}
               >
-                <option value="all">Semua tamu</option>
-                <option value="has_whatsapp">Punya Nomor WhatsApp</option>
-                <option value="missing_whatsapp">Belum punya Nomor WhatsApp</option>
-                <option value="active_link">Undangan Pribadi aktif</option>
-                <option value="missing_link">Belum punya Undangan Pribadi</option>
-                <option value="needs_link_update">Tautan perlu diperbarui</option>
+                {guestLifecycleFilterOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
             </OperationalToolbarField>
           </OperationalToolbar>
@@ -678,8 +844,8 @@ export function NativeGuestManager({
               />
             ) : (
               <>
-                <OperationalDesktopData>
-                  <table className="w-full min-w-[820px] border-collapse text-left text-sm">
+                <OperationalDesktopData label="Tabel lifecycle Undangan Pribadi">
+                  <table className="w-full min-w-[980px] border-collapse text-left text-sm">
                     <thead className="bg-seraya-canvas text-seraya-text-muted text-xs font-semibold tracking-[0.06em] uppercase">
                       <tr>
                         <th className="w-12 px-3 py-2.5">
@@ -694,8 +860,8 @@ export function NativeGuestManager({
                         <th className="px-3 py-2.5">Tamu</th>
                         <th className="px-3 py-2.5 text-right">Rombongan</th>
                         <th className="px-3 py-2.5">WhatsApp</th>
-                        <th className="px-3 py-2.5">Status link</th>
-                        <th className="px-3 py-2.5">Status RSVP</th>
+                        <th className="px-3 py-2.5">Undangan Pribadi</th>
+                        <th className="px-3 py-2.5">RSVP</th>
                         <th className="w-12 px-3 py-2.5">
                           <span className="sr-only">Aksi</span>
                         </th>
@@ -730,7 +896,7 @@ export function NativeGuestManager({
                             {guest.whatsapp_phone_e164 ?? 'Belum ada nomor'}
                           </td>
                           <td className="px-3 py-3 align-top">
-                            <GuestLinkStatus state={guest.link_state} />
+                            <GuestLinkStatus guest={guest} />
                           </td>
                           <td className="text-seraya-text-secondary px-3 py-3 align-top">
                             {getRsvpDisplay(guest)}
@@ -744,57 +910,64 @@ export function NativeGuestManager({
                   </table>
                 </OperationalDesktopData>
 
-                <OperationalMobileDataList>
-                  {filteredGuests.map((guest) => (
-                    <OperationalMobileDataCard
-                      identity={
-                        <div className="flex min-w-0 items-start gap-3">
-                          <input
-                            aria-label={`Pilih ${guest.display_name}`}
-                            checked={selectedVisibleIds.includes(guest.id)}
-                            className="accent-seraya-action-primary mt-1 size-4 shrink-0"
-                            onChange={() => toggleGuestSelection(guest.id)}
-                            type="checkbox"
-                          />
-                          <div className="min-w-0">
-                            <p className="text-seraya-text-primary leading-5 font-semibold">
-                              {guest.display_name}
-                            </p>
-                            {guest.group_label ? (
-                              <p className="text-seraya-text-muted mt-0.5 text-xs leading-5">
-                                {guest.group_label}
+                <OperationalMobileDataList label="Daftar lifecycle Undangan Pribadi">
+                  {filteredGuests.map((guest) => {
+                    const lifecycleCopy = getGuestLinkLifecycleCopy(getGuestLifecycleState(guest));
+
+                    return (
+                      <OperationalMobileDataCard
+                        identity={
+                          <div className="flex min-w-0 items-start gap-3">
+                            <input
+                              aria-label={`Pilih ${guest.display_name}`}
+                              checked={selectedVisibleIds.includes(guest.id)}
+                              className="accent-seraya-action-primary mt-1 size-4 shrink-0"
+                              onChange={() => toggleGuestSelection(guest.id)}
+                              type="checkbox"
+                            />
+                            <div className="min-w-0">
+                              <p className="text-seraya-text-primary leading-5 font-semibold">
+                                {guest.display_name}
                               </p>
-                            ) : null}
+                              {guest.group_label ? (
+                                <p className="text-seraya-text-muted mt-0.5 text-xs leading-5">
+                                  {guest.group_label}
+                                </p>
+                              ) : null}
+                            </div>
                           </div>
-                        </div>
-                      }
-                      key={guest.id}
-                      status={
-                        <div className="flex items-start gap-2">
-                          <GuestLinkStatus state={guest.link_state} />
-                          {renderRowMenu(guest, 'mobile')}
-                        </div>
-                      }
-                    >
-                      <dl data-operational-mobile-fields>
-                        <OperationalMobileField
-                          label="Rombongan"
-                          value={`${guest.party_size} orang`}
-                        />
-                        <OperationalMobileField
-                          align="end"
-                          label="WhatsApp"
-                          value={guest.whatsapp_phone_e164 ?? 'Belum ada'}
-                        />
-                        <OperationalMobileField label="RSVP" value={getRsvpDisplay(guest)} />
-                        <OperationalMobileField
-                          align="end"
-                          label="Undangan Pribadi"
-                          value={personalLinkStateLabels[guest.link_state]}
-                        />
-                      </dl>
-                    </OperationalMobileDataCard>
-                  ))}
+                        }
+                        key={guest.id}
+                        status={
+                          <div className="flex items-start gap-2">
+                            <GuestLinkStatus guest={guest} showDescription={false} />
+                            {renderRowMenu(guest, 'mobile')}
+                          </div>
+                        }
+                      >
+                        <p className="text-seraya-text-muted mt-3 text-xs leading-5">
+                          {lifecycleCopy.description}
+                        </p>
+                        <dl data-operational-mobile-fields>
+                          <OperationalMobileField
+                            label="Rombongan"
+                            value={`${guest.party_size} orang`}
+                          />
+                          <OperationalMobileField
+                            align="end"
+                            label="WhatsApp"
+                            value={guest.whatsapp_phone_e164 ?? 'Belum ada'}
+                          />
+                          <OperationalMobileField label="RSVP" value={getRsvpDisplay(guest)} />
+                          <OperationalMobileField
+                            align="end"
+                            label="Status link"
+                            value={lifecycleCopy.label}
+                          />
+                        </dl>
+                      </OperationalMobileDataCard>
+                    );
+                  })}
                 </OperationalMobileDataList>
               </>
             )}
@@ -837,7 +1010,7 @@ export function NativeGuestManager({
                   <span className="text-seraya-text-primary font-semibold">
                     {selectedVisibleIds.length} tamu terpilih
                   </span>{' '}
-                  dari hasil aktif
+                  · {selectedEligibleIds.length} dapat disiapkan tanpa mengganti link aktif
                 </>
               }
             />
@@ -968,13 +1141,7 @@ export function NativeGuestManager({
                 >
                   File CSV
                 </label>
-                <Input
-                  accept=".csv,text/csv"
-                  id="guest-csv-file"
-                  name="file"
-                  required
-                  type="file"
-                />
+                <Input accept=".csv,text/csv" id="guest-csv-file" name="file" required type="file" />
               </div>
               <div className="border-seraya-border-default bg-seraya-canvas rounded-[var(--seraya-radius-sm)] border px-4 py-3 text-sm leading-6">
                 <p className="text-seraya-text-primary font-semibold">Format CSV yang diperlukan</p>
@@ -1035,7 +1202,7 @@ export function NativeGuestManager({
 
       <Dialog
         description="Perbarui detail tamu tanpa mengubah data project lainnya."
-        onOpenChange={(open) => !open && setEditGuest(null)}
+        onOpenChange={(open: boolean) => !open && setEditGuest(null)}
         open={Boolean(editGuest)}
         title="Edit tamu"
       >
@@ -1062,24 +1229,23 @@ export function NativeGuestManager({
       </Dialog>
 
       <Dialog
-        description={
-          linkGuest
-            ? `Tautan baru untuk ${linkGuest.display_name} siap digunakan. Simpan atau salin sekarang; untuk membagikan kembali, gunakan Bagikan.`
-            : undefined
-        }
-        onOpenChange={(open) => !open && setLinkGuest(null)}
+        description={linkGuest && linkDialogCopy ? linkDialogCopy.description : undefined}
+        onOpenChange={(open: boolean) => !open && setLinkGuest(null)}
         open={Boolean(linkGuest)}
-        title={
-          linkGuest?.link_state === 'active' ? 'Buat ulang tautan pribadi' : 'Buat tautan pribadi'
-        }
+        title={linkDialogCopy?.title ?? 'Kelola tautan pribadi'}
       >
-        {linkGuest ? (
+        {linkGuest && linkDialogCopy ? (
           <form action={linkAction} className="space-y-5">
             <input name="guestId" type="hidden" value={linkGuest.id} />
             <input name="projectId" type="hidden" value={projectId} />
-            <p className="text-seraya-text-secondary text-sm leading-6">
-              Tautan lama akan langsung dinonaktifkan ketika tautan baru dibuat.
-            </p>
+            <div
+              className="border-seraya-border-default bg-seraya-status-warning-soft rounded-[var(--seraya-radius-sm)] border px-4 py-3"
+              role="note"
+            >
+              <p className="text-seraya-text-secondary text-sm leading-6">
+                {linkDialogCopy.notice}
+              </p>
+            </div>
             {linkState.status === 'error' && linkState.message ? (
               <p className="text-seraya-status-error text-sm leading-6" role="alert">
                 {linkState.message}
@@ -1090,7 +1256,7 @@ export function NativeGuestManager({
                 Batal
               </Button>
               <Button loading={linkPending} type="submit">
-                {linkGuest.link_state === 'active' ? 'Buat tautan baru' : 'Buat tautan'}
+                {linkDialogCopy.buttonLabel}
               </Button>
             </div>
           </form>
@@ -1099,7 +1265,7 @@ export function NativeGuestManager({
 
       <Dialog
         description="Simpan atau salin tautan ini sekarang. Untuk membagikannya kembali, gunakan Bagikan."
-        onOpenChange={(open) => {
+        onOpenChange={(open: boolean) => {
           if (!open) {
             setRevealedPersonalLink(null);
             setCopyFeedback(null);
@@ -1135,10 +1301,10 @@ export function NativeGuestManager({
       <Dialog
         description={
           revokeLinkGuest
-            ? `Tautan pribadi untuk ${revokeLinkGuest.display_name} tidak dapat digunakan lagi setelah dinonaktifkan.`
+            ? `URL aktif untuk ${revokeLinkGuest.display_name} akan langsung berhenti berfungsi. Tindakan ini tidak membuat URL pengganti.`
             : undefined
         }
-        onOpenChange={(open) => !open && setRevokeLinkGuest(null)}
+        onOpenChange={(open: boolean) => !open && setRevokeLinkGuest(null)}
         open={Boolean(revokeLinkGuest)}
         title="Nonaktifkan tautan pribadi?"
       >
@@ -1169,7 +1335,7 @@ export function NativeGuestManager({
             ? `${removeGuest.display_name} akan dihapus dari daftar tamu aktif. Tautan pribadi aktifnya juga akan langsung dinonaktifkan.`
             : undefined
         }
-        onOpenChange={(open) => !open && setRemoveGuest(null)}
+        onOpenChange={(open: boolean) => !open && setRemoveGuest(null)}
         open={Boolean(removeGuest)}
         title="Hapus tamu?"
       >
