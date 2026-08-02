@@ -1,6 +1,8 @@
 import 'server-only';
 
 import { measureWorkspaceServerLoad } from '@/lib/performance/workspace-performance.server';
+import { createLatestGuestLinkLifecycleMap } from '@/modules/guest-links/guest-link-lifecycle';
+import type { LatestGuestLinkStateRecord } from '@/modules/guest-links/guest-link.types';
 import { isCanonicalGuestWhatsAppPhoneE164 } from '@/modules/guests/whatsapp-phone';
 import type { OwnedProject } from '@/modules/projects/project.repository';
 import { createAdminSupabaseClient } from '@/server/supabase/admin';
@@ -284,44 +286,59 @@ export async function getWeddingReadinessAggregateCountsForVerifiedProject(
   ]);
 
   const guestFacts = reduceActiveGuestReadinessRows(activeGuestRowsResult.data);
-  const latestLinks = new Map<
-    string,
-    { status: string; token_key_version: number | null; whatsapp_phone_e164: string | null }
-  >();
-  let activePersonalLinkGuestCount = 0;
+  const lifecycleRecords: LatestGuestLinkStateRecord[] = [];
+  const whatsappByGuest = new Map<string, string | null>();
 
   for (const candidate of guestLinkRowsResult.data ?? []) {
     const row = candidate as {
+      created_at?: string;
       guest_id?: string;
+      guests?: { whatsapp_phone_e164?: string | null } | { whatsapp_phone_e164?: string | null }[];
       status?: string;
       token_key_version?: number | null;
-      guests?: { whatsapp_phone_e164?: string | null } | { whatsapp_phone_e164?: string | null }[];
     };
 
-    if (row.status === 'active') {
-      activePersonalLinkGuestCount += 1;
-    }
-    if (!row.guest_id || latestLinks.has(row.guest_id)) {
+    if (
+      !row.guest_id ||
+      !row.created_at ||
+      (row.status !== 'active' && row.status !== 'revoked' && row.status !== 'expired')
+    ) {
       continue;
     }
 
-    const joinedGuest = Array.isArray(row.guests) ? row.guests[0] : row.guests;
-    latestLinks.set(row.guest_id, {
-      status: row.status ?? 'unknown',
-      token_key_version: row.token_key_version ?? null,
-      whatsapp_phone_e164: joinedGuest?.whatsapp_phone_e164 ?? null,
+    lifecycleRecords.push({
+      created_at: row.created_at,
+      guest_id: row.guest_id,
+      hasRecoverableCapability: row.status === 'active' && row.token_key_version !== null,
+      status: row.status,
     });
+
+    if (!whatsappByGuest.has(row.guest_id)) {
+      const joinedGuest = Array.isArray(row.guests) ? row.guests[0] : row.guests;
+      whatsappByGuest.set(row.guest_id, joinedGuest?.whatsapp_phone_e164 ?? null);
+    }
   }
 
+  const latestLinks = createLatestGuestLinkLifecycleMap(lifecycleRecords);
+  let activePersonalLinkGuestCount = 0;
   let readyToDistributeCount = 0;
   let needsWhatsAppCount = 0;
   let needsLinkUpdateCount = 0;
 
-  for (const link of latestLinks.values()) {
-    const recoverable = link.status === 'active' && link.token_key_version !== null;
-    if (recoverable && isCanonicalGuestWhatsAppPhoneE164(link.whatsapp_phone_e164)) {
+  for (const [guestId, link] of latestLinks) {
+    if (
+      link.lifecycleState === 'active_recoverable' ||
+      link.lifecycleState === 'active_legacy'
+    ) {
+      activePersonalLinkGuestCount += 1;
+    }
+
+    if (
+      link.lifecycleState === 'active_recoverable' &&
+      isCanonicalGuestWhatsAppPhoneE164(whatsappByGuest.get(guestId) ?? null)
+    ) {
       readyToDistributeCount += 1;
-    } else if (recoverable) {
+    } else if (link.lifecycleState === 'active_recoverable') {
       needsWhatsAppCount += 1;
     } else {
       needsLinkUpdateCount += 1;
