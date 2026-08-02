@@ -35,16 +35,19 @@ export function DashboardShell({
 }: DashboardShellProps) {
   const pathname = usePathname();
   const isDashboardHome = pathname === '/dashboard';
-  const contextLabel = hasActiveProject ? 'Workspace undangan' : 'Ruang undangan';
   const greetingName = getDashboardGreetingName(displayName, email);
 
   return (
-    <div className="bg-seraya-canvas min-h-screen">
-      <header className="border-seraya-border-default bg-seraya-canvas/94 sticky top-0 z-40 h-[4.5rem] border-b backdrop-blur-xl">
-        <div className="mx-auto flex h-full max-w-[94rem] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-          <div className="flex min-w-0 items-center gap-4 lg:gap-6">
+    <div className="bg-seraya-canvas min-h-screen" data-dashboard-shell>
+      <header
+        className="border-seraya-border-subtle bg-seraya-surface/94 sticky top-0 z-[90] h-[var(--seraya-topbar-height)] border-b backdrop-blur-xl"
+        data-dashboard-topbar
+      >
+        <div className="mx-auto flex h-full max-w-[var(--seraya-shell-max)] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+          <div className="flex min-w-0 items-center gap-3 sm:gap-5">
             <Link
-              className="text-seraya-text-primary shrink-0 font-serif text-[1.9rem] leading-none font-medium tracking-[-0.04em] focus-visible:rounded-sm"
+              aria-label={`${siteConfig.name}, kembali ke semua undangan`}
+              className="text-seraya-text-primary shrink-0 font-serif text-[1.65rem] leading-none font-medium tracking-[-0.04em] focus-visible:rounded-sm"
               href="/dashboard"
             >
               {siteConfig.name}
@@ -53,22 +56,22 @@ export function DashboardShell({
               aria-hidden="true"
               className="bg-seraya-border-default hidden h-5 w-px sm:block"
             />
-            <p className="text-seraya-text-muted hidden truncate text-[0.65rem] font-semibold tracking-[0.14em] uppercase lg:block">
-              {contextLabel}
-            </p>
             <DashboardDesktopNavigation />
           </div>
           <AccountMenu displayName={displayName} email={email} />
         </div>
       </header>
 
-      <main className="mx-auto max-w-[94rem] min-w-0 px-4 py-7 pb-24 sm:px-6 sm:py-10 sm:pb-24 lg:px-8 lg:py-12">
+      <main
+        className="mx-auto max-w-[var(--seraya-shell-max)] min-w-0 px-4 py-6 pb-24 sm:px-6 sm:py-8 sm:pb-24 lg:px-8 lg:py-9"
+        data-dashboard-main
+      >
         <div className={`mx-auto w-full ${isDashboardHome ? 'max-w-[76rem]' : ''}`}>
           {isDashboardHome ? (
             <>
               <section
                 aria-labelledby="dashboard-home-title"
-                className="border-seraya-border-default flex flex-col gap-7 border-b pb-10 sm:flex-row sm:items-end sm:justify-between lg:pb-12"
+                className="border-seraya-border-subtle flex flex-col gap-7 border-b pb-10 sm:flex-row sm:items-end sm:justify-between lg:pb-12"
               >
                 <div className="max-w-3xl">
                   <p className="seraya-eyebrow text-seraya-action-primary">Ruang undangan kalian</p>
@@ -85,7 +88,7 @@ export function DashboardShell({
                 </div>
                 <form action="/dashboard/new" method="get">
                   <button
-                    className="bg-seraya-action-primary text-seraya-text-inverse hover:bg-seraya-action-primary-hover focus-visible:outline-seraya-focus-ring inline-flex min-h-12 w-full shrink-0 items-center justify-center gap-2 rounded-[var(--seraya-radius-pill)] px-5 text-sm font-semibold shadow-[0_12px_28px_rgb(142_75_82_/_0.17)] transition-[background-color,transform,box-shadow] hover:-translate-y-0.5 hover:shadow-[0_16px_34px_rgb(142_75_82_/_0.22)] focus-visible:outline-3 focus-visible:outline-offset-2 sm:w-auto"
+                    className="bg-seraya-action-primary text-seraya-text-inverse hover:bg-seraya-action-primary-hover active:bg-seraya-action-primary-pressed focus-visible:outline-seraya-focus-ring inline-flex min-h-12 w-full shrink-0 items-center justify-center gap-2 rounded-[var(--seraya-radius-sm)] px-5 text-sm font-semibold shadow-[var(--seraya-shadow-level-1)] transition-[background-color,transform,box-shadow] duration-[var(--seraya-motion-default)] ease-[var(--seraya-ease-standard)] hover:-translate-y-px focus-visible:outline-3 focus-visible:outline-offset-2 sm:w-auto"
                     type="submit"
                   >
                     <span aria-hidden="true" className="text-lg leading-none">

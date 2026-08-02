@@ -7,7 +7,14 @@ import { useEffect, useRef, useState, type ComponentType, type SVGProps } from '
 
 import { beginWorkspaceTransition } from '@/lib/performance/workspace-performance.client';
 
-import { GuestsIcon, HelpIcon, InvitationIcon, OverviewIcon, ShareIcon } from './dashboard-icons';
+import {
+  GuestsIcon,
+  HelpIcon,
+  InvitationIcon,
+  OverviewIcon,
+  SettingsIcon,
+  ShareIcon,
+} from './dashboard-icons';
 
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
@@ -20,11 +27,6 @@ type ProjectNavigationItem = {
   performanceWorkspace: 'compass' | 'delivery' | 'guests' | 'responses' | 'studio';
 };
 
-/**
- * The owner workspace follows one stable five-destination journey. Individual
- * pages still own authorization and unavailable states; the rail owns only
- * navigation, project identity, and current-location clarity.
- */
 function getProjectNavigationItems(projectId: string): ProjectNavigationItem[] {
   const base = `/dashboard/${projectId}`;
 
@@ -122,15 +124,19 @@ function ProjectNavigationLink({
       aria-current={active ? 'page' : undefined}
       className={
         mode === 'desktop'
-          ? `focus-visible:outline-seraya-focus-ring group relative flex min-h-12 items-center gap-3 rounded-[0.9rem] px-3.5 text-sm font-semibold transition-[background-color,color,opacity,transform] focus-visible:outline-3 focus-visible:outline-offset-2 ${
+          ? `focus-visible:outline-seraya-focus-ring group relative flex min-h-11 items-center gap-3 rounded-[var(--seraya-radius-sm)] px-3 text-sm font-medium transition-[background-color,color,opacity] duration-[var(--seraya-motion-default)] ease-[var(--seraya-ease-standard)] focus-visible:outline-3 focus-visible:outline-offset-2 ${
               active
-                ? 'bg-seraya-brand-soft text-seraya-action-primary'
+                ? 'bg-seraya-brand-softer text-seraya-action-primary'
                 : pending
-                  ? 'bg-seraya-soft text-seraya-action-primary'
-                  : 'text-seraya-text-secondary hover:bg-seraya-soft hover:text-seraya-text-primary'
+                  ? 'bg-seraya-surface-subtle text-seraya-action-primary'
+                  : 'text-seraya-text-secondary hover:bg-seraya-surface-subtle hover:text-seraya-text-primary'
             }`
-          : `focus-visible:outline-seraya-focus-ring relative flex min-h-[4.25rem] min-w-0 flex-1 flex-col items-center justify-center gap-1 px-1 text-[0.625rem] font-semibold transition-[color,opacity] focus-visible:outline-3 focus-visible:outline-offset-2 ${
-              active || pending ? 'text-seraya-action-primary' : 'text-seraya-text-muted'
+          : `focus-visible:outline-seraya-focus-ring relative flex min-h-[4rem] min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[var(--seraya-radius-sm)] px-1 text-[0.625rem] font-medium transition-[background-color,color,opacity] duration-[var(--seraya-motion-default)] focus-visible:outline-3 focus-visible:outline-offset-2 ${
+              active
+                ? 'bg-seraya-brand-softer text-seraya-action-primary'
+                : pending
+                  ? 'bg-seraya-surface-subtle text-seraya-action-primary'
+                  : 'text-seraya-text-muted'
             }`
       }
       data-workspace-destination={item.performanceWorkspace}
@@ -158,33 +164,20 @@ function ProjectNavigationLink({
       }}
       prefetch
     >
-      {mode === 'mobile' && (active || pending) ? (
+      {active && mode === 'desktop' ? (
         <span
           aria-hidden="true"
-          className={`bg-seraya-action-primary absolute inset-x-4 top-0 rounded-full ${
-            pending ? 'h-1 animate-pulse' : 'h-0.5'
-          }`}
+          className="bg-seraya-action-primary absolute inset-y-2 left-0 w-0.5 rounded-full"
         />
       ) : null}
-      <span
-        aria-hidden="true"
-        className={
-          mode === 'desktop'
-            ? `grid size-8 place-items-center rounded-[0.7rem] transition-colors ${
-                active || pending
-                  ? 'bg-seraya-surface'
-                  : 'group-hover:bg-seraya-surface bg-transparent'
-              }`
-            : undefined
-        }
-      >
+      <span aria-hidden="true" className="grid size-6 shrink-0 place-items-center">
         {pending ? (
-          <span className="border-seraya-action-primary/30 border-t-seraya-action-primary size-[1.05rem] animate-spin rounded-full border-2" />
+          <span className="border-seraya-action-primary/30 border-t-seraya-action-primary size-4 animate-spin rounded-full border-2" />
         ) : (
           <Icon
-            className={mode === 'desktop' ? 'size-[1.05rem]' : 'size-[1.1rem]'}
+            className={mode === 'desktop' ? 'size-[1.1rem]' : 'size-[1.15rem]'}
             focusable="false"
-            strokeWidth={1.65}
+            strokeWidth={1.7}
           />
         )}
       </span>
@@ -198,14 +191,8 @@ function ProjectNavigationLink({
       ) : (
         <span>{visualLabel}</span>
       )}
-      {mode === 'desktop' && active ? (
-        <span
-          aria-hidden="true"
-          className="bg-seraya-action-primary ml-auto size-1.5 rounded-full"
-        />
-      ) : null}
       {mode === 'desktop' && pending ? (
-        <span aria-hidden="true" className="text-seraya-text-muted ml-auto text-xs font-medium">
+        <span aria-hidden="true" className="text-seraya-text-muted ml-auto text-xs">
           Membuka…
         </span>
       ) : null}
@@ -213,7 +200,6 @@ function ProjectNavigationLink({
   );
 }
 
-/** Client-side active state only affects presentation; route authorization remains local to each page. */
 export function ProjectNavigation({
   coupleLabel,
   projectId,
@@ -228,6 +214,9 @@ export function ProjectNavigation({
   const previousPathnameRef = useRef(pathname);
   const [pendingHref, setPendingHref] = useState<string | null>(null);
   const [routeAnnouncement, setRouteAnnouncement] = useState('');
+  const currentRouteLabel = getProjectRouteLabel(pathname, projectId);
+  const settingsHref = `/dashboard/${projectId}/settings` as Route;
+  const settingsActive = pathname.startsWith(String(settingsHref));
 
   useEffect(() => {
     if (previousPathnameRef.current === pathname) return undefined;
@@ -249,24 +238,51 @@ export function ProjectNavigation({
 
   return (
     <>
-      <aside className="border-seraya-border-default hidden min-w-0 border-r pr-6 lg:sticky lg:top-24 lg:flex lg:h-[calc(100svh-7.25rem)] lg:w-60 lg:flex-col">
-        <div className="bg-seraya-soft/70 rounded-[1.1rem] px-4 py-4">
-          <p className="text-seraya-text-muted text-[0.65rem] font-semibold tracking-[0.14em] uppercase">
-            Workspace undangan
+      <div
+        className="border-seraya-border-subtle bg-seraya-surface/92 sticky top-[calc(var(--seraya-topbar-height)+0.5rem)] z-30 mb-5 flex min-w-0 items-center justify-between gap-4 rounded-[var(--seraya-radius-lg)] border px-3.5 py-3 shadow-[var(--seraya-shadow-level-1)] backdrop-blur-xl lg:hidden"
+        data-project-mobile-context
+      >
+        <div className="min-w-0">
+          <p className="text-seraya-text-muted truncate text-xs font-medium">{coupleLabel}</p>
+          <p className="text-seraya-text-primary mt-0.5 truncate text-sm font-semibold">
+            {currentRouteLabel}
           </p>
-          <p className="text-seraya-text-primary mt-2 font-serif text-[1.45rem] leading-[1.02] font-medium tracking-[-0.025em]">
+        </div>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <span className="bg-seraya-surface-subtle text-seraya-text-secondary border-seraya-border-subtle hidden items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.6875rem] font-medium min-[430px]:inline-flex">
+            <span aria-hidden="true" className="bg-seraya-status-success size-1.5 rounded-full" />
+            {statusLabel}
+          </span>
+          <Link
+            aria-label="Buka pengaturan proyek"
+            className={`focus-visible:outline-seraya-focus-ring grid size-10 place-items-center rounded-[var(--seraya-radius-sm)] transition-colors duration-[var(--seraya-motion-default)] focus-visible:outline-3 focus-visible:outline-offset-2 ${
+              settingsActive
+                ? 'bg-seraya-brand-softer text-seraya-action-primary'
+                : 'text-seraya-text-secondary hover:bg-seraya-surface-subtle hover:text-seraya-text-primary'
+            }`}
+            href={settingsHref}
+          >
+            <SettingsIcon aria-hidden="true" className="size-[1.1rem]" strokeWidth={1.7} />
+          </Link>
+        </div>
+      </div>
+
+      <aside className="border-seraya-border-subtle hidden min-w-0 border-r pr-6 lg:sticky lg:top-[calc(var(--seraya-topbar-height)+2rem)] lg:flex lg:h-[calc(100svh-var(--seraya-topbar-height)-4rem)] lg:w-[var(--seraya-project-rail-width)] lg:flex-col">
+        <div className="border-seraya-border-subtle border-b pb-5">
+          <p className="text-seraya-text-muted text-xs font-medium">Workspace undangan</p>
+          <p className="text-seraya-text-primary mt-2 text-[1.05rem] leading-6 font-semibold tracking-[-0.02em]">
             {coupleLabel}
           </p>
-          <div className="mt-3 flex items-center gap-2">
-            <span aria-hidden="true" className="bg-seraya-action-primary size-1.5 rounded-full" />
-            <p className="text-seraya-text-muted text-xs leading-5">{statusLabel}</p>
-          </div>
+          <p className="text-seraya-text-muted mt-2 flex items-center gap-2 text-xs leading-5">
+            <span aria-hidden="true" className="bg-seraya-status-success size-1.5 rounded-full" />
+            {statusLabel}
+          </p>
         </div>
 
         <nav
           aria-busy={Boolean(pendingHref)}
           aria-label="Navigasi workspace"
-          className="mt-6 space-y-1.5"
+          className="mt-5 space-y-1"
           data-project-navigation-pending={Boolean(pendingHref) || undefined}
         >
           {items.map((item) => (
@@ -282,22 +298,39 @@ export function ProjectNavigation({
           ))}
         </nav>
 
-        <div className="border-seraya-border-default mt-auto border-t pt-5">
+        <nav
+          aria-label="Navigasi utilitas proyek"
+          className="border-seraya-border-subtle mt-auto space-y-1 border-t pt-4"
+        >
           <Link
-            className="text-seraya-text-muted hover:text-seraya-action-primary focus-visible:outline-seraya-focus-ring inline-flex min-h-11 items-center gap-2 rounded-[var(--seraya-radius-sm)] px-2 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
+            aria-current={settingsActive ? 'page' : undefined}
+            className={`focus-visible:outline-seraya-focus-ring flex min-h-11 items-center gap-3 rounded-[var(--seraya-radius-sm)] px-3 text-sm font-medium transition-colors duration-[var(--seraya-motion-default)] focus-visible:outline-3 focus-visible:outline-offset-2 ${
+              settingsActive
+                ? 'bg-seraya-brand-softer text-seraya-action-primary'
+                : 'text-seraya-text-secondary hover:bg-seraya-surface-subtle hover:text-seraya-text-primary'
+            }`}
+            href={settingsHref}
+          >
+            <SettingsIcon aria-hidden="true" className="size-[1.1rem]" strokeWidth={1.7} />
+            Pengaturan
+          </Link>
+          <Link
+            className="text-seraya-text-secondary hover:bg-seraya-surface-subtle hover:text-seraya-text-primary focus-visible:outline-seraya-focus-ring flex min-h-11 items-center gap-3 rounded-[var(--seraya-radius-sm)] px-3 text-sm font-medium transition-colors duration-[var(--seraya-motion-default)] focus-visible:outline-3 focus-visible:outline-offset-2"
             href="/dashboard"
             prefetch={false}
           >
-            <span aria-hidden="true">←</span>
+            <span aria-hidden="true" className="grid size-[1.1rem] place-items-center text-base">
+              ←
+            </span>
             Semua undangan
           </Link>
-        </div>
+        </nav>
       </aside>
 
       <nav
         aria-busy={Boolean(pendingHref)}
         aria-label="Navigasi workspace mobile"
-        className="border-seraya-border-default bg-seraya-canvas/96 pointer-events-auto fixed inset-x-0 bottom-0 isolate z-[80] flex min-h-[4.65rem] items-stretch border-t px-1 pt-1 pb-[max(0.3rem,env(safe-area-inset-bottom))] shadow-[0_-12px_35px_rgb(56_39_33_/_0.07)] backdrop-blur-xl lg:hidden"
+        className="border-seraya-border-subtle bg-seraya-surface/96 pointer-events-auto fixed inset-x-0 bottom-0 isolate z-[100] flex min-h-[var(--seraya-mobile-nav-clearance)] items-stretch gap-1 border-t px-2 pt-1.5 pb-[max(0.35rem,env(safe-area-inset-bottom))] shadow-[0_-8px_24px_rgb(31_29_27_/_0.06)] backdrop-blur-xl lg:hidden"
         data-project-mobile-navigation
         data-project-navigation-pending={Boolean(pendingHref) || undefined}
       >
