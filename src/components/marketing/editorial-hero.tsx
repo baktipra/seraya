@@ -1,27 +1,87 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
+import { useEffect, useRef } from 'react';
 
 import styles from './editorial-hero.module.css';
 
+const resetMotion = (element: HTMLElement) => {
+  element.style.setProperty('--hero-shift-x', '0px');
+  element.style.setProperty('--hero-shift-y', '0px');
+  element.style.setProperty('--hero-shift-x-reverse', '0px');
+  element.style.setProperty('--hero-shift-y-reverse', '0px');
+  element.style.setProperty('--hero-rotate', '0deg');
+};
+
 export function EditorialHero() {
+  const panelRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const panel = panelRef.current;
+
+    if (!panel) {
+      return;
+    }
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    if (reduceMotion.matches) {
+      resetMotion(panel);
+      return;
+    }
+
+    let animationFrame = 0;
+
+    const handlePointerMove = (event: PointerEvent) => {
+      if (event.pointerType === 'touch') {
+        return;
+      }
+
+      const bounds = panel.getBoundingClientRect();
+      const normalizedX = ((event.clientX - bounds.left) / bounds.width - 0.5) * 2;
+      const normalizedY = ((event.clientY - bounds.top) / bounds.height - 0.5) * 2;
+
+      cancelAnimationFrame(animationFrame);
+      animationFrame = window.requestAnimationFrame(() => {
+        panel.style.setProperty('--hero-shift-x', `${(normalizedX * 9).toFixed(2)}px`);
+        panel.style.setProperty('--hero-shift-y', `${(normalizedY * 7).toFixed(2)}px`);
+        panel.style.setProperty(
+          '--hero-shift-x-reverse',
+          `${(normalizedX * -6).toFixed(2)}px`,
+        );
+        panel.style.setProperty(
+          '--hero-shift-y-reverse',
+          `${(normalizedY * -5).toFixed(2)}px`,
+        );
+        panel.style.setProperty('--hero-rotate', `${(normalizedX * 0.8).toFixed(2)}deg`);
+      });
+    };
+
+    const handlePointerLeave = () => {
+      cancelAnimationFrame(animationFrame);
+      animationFrame = window.requestAnimationFrame(() => resetMotion(panel));
+    };
+
+    panel.addEventListener('pointermove', handlePointerMove);
+    panel.addEventListener('pointerleave', handlePointerLeave);
+
+    return () => {
+      cancelAnimationFrame(animationFrame);
+      panel.removeEventListener('pointermove', handlePointerMove);
+      panel.removeEventListener('pointerleave', handlePointerLeave);
+    };
+  }, []);
+
   return (
     <section className={styles.hero} data-homepage-campaign-hero data-homepage-editorial-hero>
       <div className={styles.frame}>
-        <Image
-          alt=""
-          aria-hidden="true"
-          className={styles.backdrop}
-          fill
-          priority
-          sizes="(min-width: 1536px) 1536px, 100vw"
-          src="/showroom/kirana-arga/kirana-arga-opening-portrait.avif"
-        />
-        <div aria-hidden="true" className={styles.backdropWash} />
-
         <figure
-          aria-label="Visual editorial undangan Roselle untuk Kirana dan Arga di atas bidang fotografis pernikahan bernuansa lembut."
+          aria-label="Visual editorial undangan Roselle untuk Kirana dan Arga dengan kartu undangan bergerak lembut, detail cincin, dan suasana pernikahan Indonesia."
           className={styles.productPanel}
+          data-editorial-hero-motion
           data-editorial-hero-theater
+          ref={panelRef}
           role="img"
         >
           <div aria-hidden="true" className={styles.productPhoto}>
@@ -30,22 +90,40 @@ export function EditorialHero() {
               className={styles.productPhotoImage}
               fill
               priority
-              sizes="(min-width: 1024px) 46vw, 100vw"
-              src="/showroom/kirana-arga/kirana-arga-opening-portrait.avif"
+              sizes="(min-width: 1024px) 43rem, 100vw"
+              src="/showroom/kirana-arga/kirana-arga-environmental-wide.avif"
             />
             <div className={styles.productPhotoWash} />
+            <div className={styles.productLightSweep} />
+            <div className={styles.productGrain} />
           </div>
 
-          <div aria-hidden="true" className={styles.invitationSheet}>
-            <p className={styles.invitationEyebrow}>The wedding of</p>
-            <p className={styles.invitationNames}>
-              Kirana <span>&amp;</span> Arga
-            </p>
-            <div className={styles.invitationRule} />
-            <p className={styles.invitationDate}>17 Agustus 2027</p>
-            <p className={styles.invitationPlace}>Jakarta · Indonesia</p>
+          <div aria-hidden="true" className={styles.detailFloat}>
+            <div className={styles.detailCard}>
+              <Image
+                alt=""
+                className={styles.detailCardImage}
+                fill
+                sizes="9rem"
+                src="/showroom/kirana-arga/kirana-arga-detail-rings.avif"
+              />
+              <span className={styles.detailCardLabel}>Wedding detail</span>
+            </div>
           </div>
 
+          <div aria-hidden="true" className={styles.sheetFloat}>
+            <div className={styles.invitationSheet}>
+              <p className={styles.invitationEyebrow}>The wedding of</p>
+              <p className={styles.invitationNames}>
+                Kirana <span>&amp;</span> Arga
+              </p>
+              <div className={styles.invitationRule} />
+              <p className={styles.invitationDate}>17 Agustus 2027</p>
+              <p className={styles.invitationPlace}>Jakarta · Indonesia</p>
+            </div>
+          </div>
+
+          <div aria-hidden="true" className={styles.productEdgeGlow} />
           <figcaption className={styles.productCaption}>Roselle · personal invitation</figcaption>
         </figure>
 
