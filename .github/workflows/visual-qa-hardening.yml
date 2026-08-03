@@ -1,0 +1,88 @@
+name: Visual QA and hardening
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/visual-qa-hardening.yml'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'playwright.visual-qa.config.ts'
+      - 'src/app/invitation-media-release.css'
+      - 'src/modules/invitation-templates/**'
+      - 'tests/e2e/visual-qa-hardening.spec.ts'
+      - 'tests/e2e/fixture-app/**'
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/visual-qa-hardening.yml'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'playwright.visual-qa.config.ts'
+      - 'src/app/invitation-media-release.css'
+      - 'src/modules/invitation-templates/**'
+      - 'tests/e2e/visual-qa-hardening.spec.ts'
+      - 'tests/e2e/fixture-app/**'
+
+permissions:
+  contents: read
+
+jobs:
+  visual-qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check H formatting
+        run: |
+          npx prettier --check \
+            .github/workflows/visual-qa-hardening.yml \
+            package.json \
+            playwright.visual-qa.config.ts \
+            src/modules/invitation-templates/invitation-template-parity-boundary.module.css \
+            tests/e2e/visual-qa-hardening.spec.ts
+
+      - name: Lint H files
+        run: |
+          npx eslint \
+            playwright.visual-qa.config.ts \
+            tests/e2e/visual-qa-hardening.spec.ts
+
+      - name: Run collection source contracts
+        run: |
+          npm test -- \
+            src/modules/invitation-templates/__tests__/cross-template-parity-v1.test.ts \
+            src/modules/invitation-templates/__tests__/invitation-opening-identity-contract.test.ts \
+            src/modules/invitation-templates/__tests__/invitation-media-delivery-contract.test.ts
+
+      - name: Build production application
+        run: npm run build
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run 12-surface visual QA matrix
+        run: npm run e2e:visual-qa
+
+      - name: Upload H visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-qa-hardening-evidence
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+          retention-days: 7
