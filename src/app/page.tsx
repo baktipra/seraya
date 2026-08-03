@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+import { EditorialHero } from '@/components/marketing/editorial-hero';
 import {
   CollectionCard,
   FlagshipFooter,
   FlagshipHeader,
-  InvitationCover,
   flagshipCollections,
 } from '@/components/marketing/flagship-marketing';
 
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     absolute: 'Seraya — Pengalaman tamu pernikahan yang personal',
   },
   description:
-    'Susun undangan, bagikan tautan personal, dan kelola perjalanan tamu pernikahan Indonesia dalam satu pengalaman yang indah dan mudah digunakan.',
+    'Buat undangan pernikahan digital dengan tautan personal, RSVP keluarga, dan pengelolaan tamu dalam satu workspace yang tenang.',
 };
 
 const ownerJourney = [
@@ -109,90 +109,9 @@ export default function Home() {
       <FlagshipHeader />
 
       <main>
-        <section className="relative isolate overflow-hidden">
-          <div
-            aria-hidden="true"
-            className="seraya-ambient-orb bg-seraya-rosewood-soft/80 absolute top-2 right-[-9rem] -z-10 size-[30rem] rounded-full blur-3xl"
-          />
-          <div
-            aria-hidden="true"
-            className="seraya-ambient-orb bg-seraya-sand/75 absolute bottom-[-14rem] left-[-12rem] -z-10 size-[34rem] rounded-full blur-3xl [animation-delay:-4s]"
-          />
+        <EditorialHero />
 
-          <div className="mx-auto grid w-full max-w-[90rem] gap-12 px-5 py-14 sm:px-8 sm:py-18 lg:grid-cols-[minmax(0,1.02fr)_minmax(24rem,0.98fr)] lg:items-center lg:gap-16 lg:px-10 lg:py-16 xl:py-20">
-            <div className="max-w-[46rem]">
-              <p className="seraya-eyebrow text-seraya-action-primary seraya-reveal-up">
-                Undangan personal untuk pernikahan Indonesia
-              </p>
-              <h1 className="text-seraya-text-primary seraya-reveal-up mt-5 font-serif text-[clamp(3.45rem,7.2vw,7rem)] leading-[0.83] font-medium tracking-[-0.065em] [animation-delay:80ms]">
-                Satu undangan yang indah.
-                <span className="text-seraya-action-primary mt-2 block italic">
-                  Personal untuk setiap tamu.
-                </span>
-              </h1>
-              <p className="text-seraya-text-secondary seraya-reveal-up mt-7 max-w-2xl text-base leading-7 [animation-delay:160ms] sm:text-lg sm:leading-8">
-                Susun undangan, bagikan tautan personal, dan kelola respons tamu dalam satu
-                pengalaman yang tenang—dari kabar pertama sampai hari pernikahan.
-              </p>
-              <div className="seraya-reveal-up mt-8 flex flex-col gap-3 [animation-delay:240ms] sm:flex-row sm:flex-wrap">
-                <Link className="seraya-button-primary min-h-13 px-6" href="/dashboard/new">
-                  Mulai buat undangan
-                  <span aria-hidden="true">→</span>
-                </Link>
-                <Link className="seraya-button-secondary min-h-13 px-6" href="/templates">
-                  Lihat koleksi desain
-                </Link>
-              </div>
-              <div className="text-seraya-text-muted seraya-reveal-up mt-7 flex flex-wrap gap-x-6 gap-y-2 text-xs font-semibold [animation-delay:320ms]">
-                <span>Dirancang mobile-first</span>
-                <span>Tautan personal</span>
-                <span>RSVP keluarga</span>
-              </div>
-            </div>
-
-            <figure className="seraya-reveal-scale relative mx-auto w-full max-w-[31rem] [animation-delay:120ms]">
-              <div
-                aria-hidden="true"
-                className="border-seraya-action-primary/25 absolute top-[8%] -left-[8%] h-[70%] w-[72%] rotate-[-7deg] rounded-[2rem] border"
-              />
-              <div
-                aria-hidden="true"
-                className="bg-seraya-ink absolute right-[-4%] bottom-[5%] h-[78%] w-[72%] rotate-[6deg] rounded-[2rem] opacity-[0.07]"
-              />
-              <div className="relative mx-auto w-[78%] min-w-[17rem]">
-                <InvitationCover collection="roselle" />
-              </div>
-              <figcaption className="text-seraya-text-muted mt-4 text-center text-xs leading-5">
-                Roselle — pengalaman romantis yang hangat, ringan, dan personal.
-              </figcaption>
-            </figure>
-          </div>
-        </section>
-
-        <section className="border-seraya-border-default bg-seraya-surface border-y">
-          <div className="mx-auto grid w-full max-w-[90rem] gap-6 px-5 py-7 text-center sm:grid-cols-3 sm:px-8 lg:px-10">
-            <p className="text-seraya-text-secondary text-sm leading-6">
-              <strong className="text-seraya-text-primary block font-serif text-2xl font-medium">
-                Draf pribadi
-              </strong>
-              Tidak terlihat oleh tamu sebelum diterbitkan.
-            </p>
-            <p className="text-seraya-text-secondary border-seraya-border-default text-sm leading-6 sm:border-x sm:px-6">
-              <strong className="text-seraya-text-primary block font-serif text-2xl font-medium">
-                Tautan personal
-              </strong>
-              Sapaan dan respons terpisah untuk setiap tamu.
-            </p>
-            <p className="text-seraya-text-secondary text-sm leading-6">
-              <strong className="text-seraya-text-primary block font-serif text-2xl font-medium">
-                Satu workspace
-              </strong>
-              Undangan, tamu, pembagian, RSVP, dan ucapan.
-            </p>
-          </div>
-        </section>
-
-        <section id="koleksi" aria-labelledby="collection-title">
+        <section id="koleksi" aria-labelledby="collection-title" className="scroll-mt-24">
           <div className="mx-auto w-full max-w-[90rem] px-5 py-20 sm:px-8 sm:py-24 lg:px-10 lg:py-32">
             <div className="grid gap-7 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-end">
               <div>
@@ -209,11 +128,13 @@ export default function Home() {
 
             <div className="mt-14 space-y-16 lg:mt-20 lg:space-y-24">
               {flagshipCollections.map((collection, index) => (
-                <CollectionCard
-                  collection={collection}
+                <div
+                  className="scroll-mt-24"
+                  id={`koleksi-${collection.key}`}
                   key={collection.key}
-                  priority={index % 2 === 1}
-                />
+                >
+                  <CollectionCard collection={collection} priority={index % 2 === 1} />
+                </div>
               ))}
             </div>
 
@@ -226,7 +147,11 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="bg-seraya-ink text-white" aria-labelledby="personal-journey-title">
+        <section
+          id="tautan-personal"
+          className="bg-seraya-ink scroll-mt-24 text-white"
+          aria-labelledby="personal-journey-title"
+        >
           <div className="mx-auto grid w-full max-w-[90rem] gap-12 px-5 py-20 sm:px-8 sm:py-24 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-center lg:gap-18 lg:px-10 lg:py-32">
             <div>
               <p className="text-seraya-sand text-xs font-semibold tracking-[0.18em] uppercase">
