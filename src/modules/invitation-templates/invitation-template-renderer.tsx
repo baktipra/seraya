@@ -1,12 +1,10 @@
+import { getInvitationTemplate } from './invitation-template.registry';
 import type { InvitationViewModel } from './invitation-view-model';
 import type { InvitationTemplateKey } from './invitation-template.keys';
 import type {
   InvitationTemplateRenderContextV1,
   PersonalInvitationPresentationSlotsV1,
 } from './invitation-template.types';
-import { ArunaTemplate } from './aruna/aruna-template';
-import { LarasTemplate } from './laras/laras-template';
-import { RoselleTemplate } from './roselle/roselle-template';
 
 type InvitationTemplateRendererProps = {
   invitation: InvitationViewModel;
@@ -32,9 +30,11 @@ function createRenderContext({
 }
 
 /**
- * Server-renderable renderer boundary. Template keys are schema-validated before
- * reaching this component; the explicit switch keeps each presentation renderer
- * statically analyzable and avoids unsafe runtime key interpolation.
+ * Canonical server-renderable collection boundary.
+ *
+ * Every route resolves its schema-validated template key through the same
+ * registry, so parity hardening and privacy isolation cannot drift between the
+ * generic, personal, preview, and showroom render paths.
  */
 export function InvitationTemplateRenderer({
   invitation,
@@ -42,19 +42,8 @@ export function InvitationTemplateRenderer({
   surface,
   templateKey,
 }: InvitationTemplateRendererProps) {
+  const Template = getInvitationTemplate(templateKey);
   const renderContext = createRenderContext({ personalSlots, surface });
-  const renderedTemplate =
-    templateKey === 'aruna' ? (
-      <ArunaTemplate invitation={invitation} renderContext={renderContext} />
-    ) : templateKey === 'laras' ? (
-      <LarasTemplate invitation={invitation} renderContext={renderContext} />
-    ) : (
-      <RoselleTemplate invitation={invitation} renderContext={renderContext} />
-    );
 
-  return (
-    <div data-surface={surface} data-template={templateKey} style={{ display: 'contents' }}>
-      {renderedTemplate}
-    </div>
-  );
+  return <Template invitation={invitation} renderContext={renderContext} />;
 }
