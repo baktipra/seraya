@@ -91,11 +91,7 @@ export function ArunaTemplate({ invitation, renderContext }: InvitationTemplateP
       data-surface={renderContext.surface}
       data-template="aruna"
     >
-      <header
-        className={styles.hero}
-        data-aruna-journal-cover
-        data-invitation-chapter="opening"
-      >
+      <header className={styles.hero} data-aruna-journal-cover data-invitation-chapter="opening">
         <div className={styles.heroRule} data-aruna-cover-rule aria-hidden="true" />
         <div className={styles.heroContent} data-aruna-cover-story>
           <p className={styles.kicker} data-aruna-cover-masthead>
@@ -114,11 +110,7 @@ export function ArunaTemplate({ invitation, renderContext }: InvitationTemplateP
         </div>
       </header>
 
-      <a
-        data-aruna-opening-action
-        data-invitation-opening-action
-        href={`#${openingTargetId}`}
-      >
+      <a data-aruna-opening-action data-invitation-opening-action href={`#${openingTargetId}`}>
         <span>Buka undangan</span>
         <span aria-hidden="true">↓</span>
       </a>

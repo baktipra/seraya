@@ -78,8 +78,7 @@ const fullInvitation: InvitationViewModel = {
     title: 'Kirana & Arga',
   },
   location: {
-    address:
-      'Jalan Perayaan Keluarga Nomor 123, Kecamatan Kebahagiaan, Kota Jakarta, Indonesia',
+    address: 'Jalan Perayaan Keluarga Nomor 123, Kecamatan Kebahagiaan, Kota Jakarta, Indonesia',
     mapsHref: 'https://maps.example.com/main-venue',
     venueName: 'Gedung Perayaan Keluarga Nusantara',
   },
@@ -173,12 +172,13 @@ describe('Slice G4 cross-template parity contract', () => {
     expect(Object.keys(invitationTemplateRegistry).sort()).toEqual(
       [...invitationTemplateParityIds].sort(),
     );
-    expect(new Set(Object.values(invitationTemplateParityV1).map(({ identity }) => identity)).size).toBe(
-      invitationTemplateParityIds.length,
-    );
     expect(
-      new Set(Object.values(invitationTemplateParityV1).map(({ experienceValue }) => experienceValue))
-        .size,
+      new Set(Object.values(invitationTemplateParityV1).map(({ identity }) => identity)).size,
+    ).toBe(invitationTemplateParityIds.length);
+    expect(
+      new Set(
+        Object.values(invitationTemplateParityV1).map(({ experienceValue }) => experienceValue),
+      ).size,
     ).toBe(invitationTemplateParityIds.length);
   });
 
@@ -193,9 +193,7 @@ describe('Slice G4 cross-template parity contract', () => {
         expect(html).toContain('data-invitation-parity="v1"');
         expect(html).toContain(`data-parity-identity="${descriptor.identity}"`);
         expect(html).toContain(`data-template="${templateId}"`);
-        expect(html).toContain(
-          `${descriptor.experienceHook}="${descriptor.experienceValue}"`,
-        );
+        expect(html).toContain(`${descriptor.experienceHook}="${descriptor.experienceValue}"`);
         expect(html).toContain(`href="#${descriptor.coupleAnchorId}"`);
         expect(html).not.toContain('PRIVATE_GREETING_CONTENT');
         expect(html).not.toContain('PRIVATE_RSVP_CONTENT');

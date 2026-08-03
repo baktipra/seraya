@@ -13,14 +13,8 @@ import {
   type InvitationTemplateRegistry,
 } from './invitation-template.types';
 
-export const ArunaParityTemplate = createInvitationTemplateParityBoundary(
-  'aruna',
-  ArunaTemplate,
-);
-export const LarasParityTemplate = createInvitationTemplateParityBoundary(
-  'laras',
-  LarasTemplate,
-);
+export const ArunaParityTemplate = createInvitationTemplateParityBoundary('aruna', ArunaTemplate);
+export const LarasParityTemplate = createInvitationTemplateParityBoundary('laras', LarasTemplate);
 export const RoselleParityTemplate = createInvitationTemplateParityBoundary(
   'roselle',
   RoselleTemplate,
