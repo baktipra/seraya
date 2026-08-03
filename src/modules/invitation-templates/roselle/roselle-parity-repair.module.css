@@ -1,0 +1,32 @@
+@media (max-width: 36rem) {
+  .parityRepair[data-roselle-experience='letter-v1'][data-template='roselle']
+    :global([data-roselle-memory-album][data-gallery-layout]) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .parityRepair[data-roselle-experience='letter-v1'][data-template='roselle']
+    :global([data-roselle-memory-album][data-gallery-layout])
+    figure,
+  .parityRepair[data-roselle-experience='letter-v1'][data-template='roselle']
+    :global([data-roselle-memory-album][data-gallery-layout])
+    figure:first-child,
+  .parityRepair[data-roselle-experience='letter-v1'][data-template='roselle']
+    :global([data-roselle-memory-album][data-gallery-layout])
+    figure:not(:first-child) {
+    grid-column: 1 / -1;
+    grid-row: auto;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+  }
+
+  .parityRepair[data-roselle-experience='letter-v1'][data-template='roselle']
+    :global([data-roselle-memory-album][data-gallery-layout])
+    :global([data-invitation-media-frame]),
+  .parityRepair[data-roselle-experience='letter-v1'][data-template='roselle']
+    :global([data-roselle-memory-album][data-gallery-layout])
+    :global([data-invitation-media-image]) {
+    width: 100%;
+    min-width: 0;
+  }
+}

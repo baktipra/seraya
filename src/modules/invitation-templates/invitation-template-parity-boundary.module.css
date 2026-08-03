@@ -1,0 +1,46 @@
+.parityBoundary {
+  display: contents;
+}
+
+.parityBoundary :global([data-template]) {
+  width: 100%;
+  min-width: 0;
+}
+
+.parityBoundary :global([data-template]) :is(h1, h2, h3, p, a, button, label, span, strong, em) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.parityBoundary
+  :global([data-template])
+  :is(
+    [data-invitation-chapter],
+    [data-invitation-schedule-journey],
+    [data-invitation-gallery],
+    [data-template-personal-greeting],
+    [data-template-response-journey],
+    [data-template-response-slot]
+  ) {
+  min-width: 0;
+}
+
+.parityBoundary :global([data-template]) img {
+  max-width: 100%;
+}
+
+@media (max-width: 36rem) {
+  .parityBoundary :global([data-template]) {
+    max-width: 100%;
+  }
+
+  .parityBoundary :global([data-template]) :is(a, button) {
+    touch-action: manipulation;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .parityBoundary :global([data-template]) {
+    scroll-behavior: auto;
+  }
+}

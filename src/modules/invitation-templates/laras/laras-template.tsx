@@ -96,26 +96,13 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
       data-surface={renderContext.surface}
       data-template="laras"
     >
-      <header
-        className={styles.hero}
-        data-invitation-chapter="opening"
-        data-laras-evening-cover
-      >
+      <header className={styles.hero} data-invitation-chapter="opening" data-laras-evening-cover>
         <span className={styles.cornerTop} data-laras-cover-corner="top" aria-hidden="true" />
-        <span
-          className={styles.cornerBottom}
-          data-laras-cover-corner="bottom"
-          aria-hidden="true"
-        />
+        <span className={styles.cornerBottom} data-laras-cover-corner="bottom" aria-hidden="true" />
         <p className={styles.eyebrow} data-laras-cover-eyebrow>
           {invitation.hero.eyebrow ?? 'The Wedding Of'}
         </p>
-        <div
-          className={styles.monogram}
-          aria-hidden="true"
-          data-laras-crest
-          data-opening-monogram
-        >
+        <div className={styles.monogram} aria-hidden="true" data-laras-crest data-opening-monogram>
           {monogram}
         </div>
         <h1 id="laras-invitation-title" data-laras-cover-title>
@@ -133,11 +120,7 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
         ) : null}
       </header>
 
-      <a
-        data-invitation-opening-action
-        data-laras-opening-action
-        href={`#${openingTargetId}`}
-      >
+      <a data-invitation-opening-action data-laras-opening-action href={`#${openingTargetId}`}>
         <span>Buka undangan</span>
         <span aria-hidden="true">↓</span>
       </a>
@@ -276,9 +259,7 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
                     className={styles.galleryImage}
                     src={image.src}
                   />
-                  <figcaption aria-hidden="true">
-                    {String(index + 1).padStart(2, '0')}
-                  </figcaption>
+                  <figcaption aria-hidden="true">{String(index + 1).padStart(2, '0')}</figcaption>
                 </figure>
               ))}
             </div>
@@ -387,11 +368,7 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
         ) : null}
       </div>
 
-      <a
-        data-invitation-return-action
-        data-laras-return-action
-        href="#laras-invitation-title"
-      >
+      <a data-invitation-return-action data-laras-return-action href="#laras-invitation-title">
         <span aria-hidden="true">↑</span>
         Kembali ke awal
       </a>

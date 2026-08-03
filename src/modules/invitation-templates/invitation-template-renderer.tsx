@@ -1,12 +1,14 @@
-import type { InvitationViewModel } from './invitation-view-model';
+import {
+  ArunaParityTemplate,
+  LarasParityTemplate,
+  RoselleParityTemplate,
+} from './invitation-template.registry';
 import type { InvitationTemplateKey } from './invitation-template.keys';
 import type {
   InvitationTemplateRenderContextV1,
   PersonalInvitationPresentationSlotsV1,
 } from './invitation-template.types';
-import { ArunaTemplate } from './aruna/aruna-template';
-import { LarasTemplate } from './laras/laras-template';
-import { RoselleTemplate } from './roselle/roselle-template';
+import type { InvitationViewModel } from './invitation-view-model';
 
 type InvitationTemplateRendererProps = {
   invitation: InvitationViewModel;
@@ -32,9 +34,10 @@ function createRenderContext({
 }
 
 /**
- * Server-renderable renderer boundary. Template keys are schema-validated before
- * reaching this component; the explicit switch keeps each presentation renderer
- * statically analyzable and avoids unsafe runtime key interpolation.
+ * Canonical server-renderable collection boundary.
+ *
+ * The explicit branch keeps all renderer components static for React analysis,
+ * while every branch still passes through the parity registry wrappers.
  */
 export function InvitationTemplateRenderer({
   invitation,
@@ -43,18 +46,12 @@ export function InvitationTemplateRenderer({
   templateKey,
 }: InvitationTemplateRendererProps) {
   const renderContext = createRenderContext({ personalSlots, surface });
-  const renderedTemplate =
-    templateKey === 'aruna' ? (
-      <ArunaTemplate invitation={invitation} renderContext={renderContext} />
-    ) : templateKey === 'laras' ? (
-      <LarasTemplate invitation={invitation} renderContext={renderContext} />
-    ) : (
-      <RoselleTemplate invitation={invitation} renderContext={renderContext} />
-    );
 
-  return (
-    <div data-surface={surface} data-template={templateKey} style={{ display: 'contents' }}>
-      {renderedTemplate}
-    </div>
+  return templateKey === 'aruna' ? (
+    <ArunaParityTemplate invitation={invitation} renderContext={renderContext} />
+  ) : templateKey === 'laras' ? (
+    <LarasParityTemplate invitation={invitation} renderContext={renderContext} />
+  ) : (
+    <RoselleParityTemplate invitation={invitation} renderContext={renderContext} />
   );
 }

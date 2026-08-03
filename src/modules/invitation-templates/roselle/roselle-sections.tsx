@@ -104,11 +104,7 @@ function RoselleScheduleEvent({
   showDate: boolean;
 }) {
   return (
-    <article
-      className={styles.eventPart}
-      data-roselle-event
-      data-schedule-event="roselle"
-    >
+    <article className={styles.eventPart} data-roselle-event data-schedule-event="roselle">
       <p className={styles.eventSequence}>{String(sequence).padStart(2, '0')}</p>
       {event.title ? <h3 className={styles.eventTitle}>{event.title}</h3> : null}
       {showDate && event.dateLabel ? <p className={styles.eventDate}>{event.dateLabel}</p> : null}
