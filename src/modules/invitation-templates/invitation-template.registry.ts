@@ -1,5 +1,6 @@
 import { ArunaTemplate } from './aruna/aruna-template';
 import { LarasTemplate } from './laras/laras-template';
+import { createInvitationTemplateParityBoundary } from './invitation-template-parity-boundary';
 import {
   getInvitationTemplateParityDescriptor,
   invitationTemplateParityIds,
@@ -13,9 +14,9 @@ import {
 } from './invitation-template.types';
 
 export const invitationTemplateRegistry = {
-  aruna: ArunaTemplate,
-  laras: LarasTemplate,
-  roselle: RoselleTemplate,
+  aruna: createInvitationTemplateParityBoundary('aruna', ArunaTemplate),
+  laras: createInvitationTemplateParityBoundary('laras', LarasTemplate),
+  roselle: createInvitationTemplateParityBoundary('roselle', RoselleTemplate),
 } satisfies InvitationTemplateRegistry;
 
 const registeredTemplateIds = Object.keys(invitationTemplateRegistry) as InvitationTemplateId[];
