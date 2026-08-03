@@ -5,16 +5,23 @@ import {
   type InvitationTemplateProps,
 } from '../invitation-template.types';
 
+import experienceStyles from './laras-guest-experience.module.css';
 import { createLarasMonogram } from './laras-monogram';
 import styles from './laras.module.css';
 
 function Person({
   person,
+  sequence,
 }: {
   person: InvitationTemplateProps['invitation']['couple']['personOne'];
+  sequence: number;
 }) {
   return (
-    <article className={styles.person}>
+    <article
+      className={styles.person}
+      data-laras-couple-profile
+      data-profile-sequence={String(sequence).padStart(2, '0')}
+    >
       <h3>{person.displayName}</h3>
       {person.fullName ? <p className={styles.personFullName}>{person.fullName}</p> : null}
       {person.parentLine ? <p className={styles.personParent}>{person.parentLine}</p> : null}
@@ -29,9 +36,16 @@ function EventScheduleBlock({
   event: NonNullable<InvitationTemplateProps['invitation']['events']>['items'][number];
   sequence: number;
 }) {
+  const sequenceLabel = String(sequence).padStart(2, '0');
+
   return (
-    <article className={styles.eventCard} data-schedule-event="laras">
-      <span className={styles.eventLabel}>{String(sequence).padStart(2, '0')}</span>
+    <article
+      className={styles.eventCard}
+      data-laras-program-entry
+      data-program-sequence={sequenceLabel}
+      data-schedule-event="laras"
+    >
+      <span className={styles.eventLabel}>{sequenceLabel}</span>
       {event.title ? <h3>{event.title}</h3> : null}
       {event.dateLabel ? <p>{event.dateLabel}</p> : null}
       {event.timeLabel ? <p>{event.timeLabel}</p> : null}
@@ -52,7 +66,7 @@ function EventScheduleBlock({
   );
 }
 
-/** Deep formal evening invitation composition. */
+/** Formal evening ceremony-folio invitation composition. */
 export function LarasTemplate({ invitation, renderContext }: InvitationTemplateProps) {
   const personalSlots = getPersonalInvitationPresentationSlots(renderContext);
   const hasPersonalResponse = Boolean(personalSlots?.rsvp || personalSlots?.guestbook);
@@ -77,27 +91,53 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
   return (
     <article
       aria-labelledby="laras-invitation-title"
-      className={styles.invitation}
+      className={`${styles.invitation} ${experienceStyles.experience}`}
+      data-laras-experience="evening-folio-v1"
       data-surface={renderContext.surface}
       data-template="laras"
     >
-      <header className={styles.hero} data-invitation-chapter="opening">
-        <span className={styles.cornerTop} aria-hidden="true" />
-        <span className={styles.cornerBottom} aria-hidden="true" />
-        <p className={styles.eyebrow}>{invitation.hero.eyebrow ?? 'The Wedding Of'}</p>
-        <div className={styles.monogram} aria-hidden="true" data-opening-monogram>
+      <header
+        className={styles.hero}
+        data-invitation-chapter="opening"
+        data-laras-evening-cover
+      >
+        <span className={styles.cornerTop} data-laras-cover-corner="top" aria-hidden="true" />
+        <span
+          className={styles.cornerBottom}
+          data-laras-cover-corner="bottom"
+          aria-hidden="true"
+        />
+        <p className={styles.eyebrow} data-laras-cover-eyebrow>
+          {invitation.hero.eyebrow ?? 'The Wedding Of'}
+        </p>
+        <div
+          className={styles.monogram}
+          aria-hidden="true"
+          data-laras-crest
+          data-opening-monogram
+        >
           {monogram}
         </div>
-        <h1 id="laras-invitation-title">{invitation.hero.title}</h1>
+        <h1 id="laras-invitation-title" data-laras-cover-title>
+          {invitation.hero.title}
+        </h1>
         {invitation.hero.subtitle ? (
-          <p className={styles.heroSubtitle}>{invitation.hero.subtitle}</p>
+          <p className={styles.heroSubtitle} data-laras-cover-subtitle>
+            {invitation.hero.subtitle}
+          </p>
         ) : null}
         {invitation.hero.primaryDateLabel ? (
-          <p className={styles.heroDate}>{invitation.hero.primaryDateLabel}</p>
+          <p className={styles.heroDate} data-laras-cover-date>
+            {invitation.hero.primaryDateLabel}
+          </p>
         ) : null}
       </header>
 
-      <a data-invitation-opening-action href={`#${openingTargetId}`}>
+      <a
+        data-invitation-opening-action
+        data-laras-opening-action
+        href={`#${openingTargetId}`}
+      >
         <span>Buka undangan</span>
         <span aria-hidden="true">↓</span>
       </a>
@@ -106,6 +146,7 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
         <div
           aria-label="Sapaan untuk tamu"
           className={styles.personalGreeting}
+          data-laras-place-card
           data-template-personal-greeting="laras"
           id="laras-personal-greeting"
           role="region"
@@ -114,20 +155,21 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
         </div>
       ) : null}
 
-      <div className={styles.content}>
+      <div className={styles.content} data-laras-evening-pages>
         <section
           aria-labelledby="laras-couple-title"
           className={styles.coupleSection}
           data-invitation-chapter="couple"
+          data-laras-couple-presentation
         >
           <p className={styles.sectionLabel}>Kami yang berbahagia</p>
           <h2 id="laras-couple-title">Merayakan awal yang baru</h2>
-          <div className={styles.coupleGrid}>
-            <Person person={invitation.couple.personOne} />
-            <span className={styles.ampersand} aria-hidden="true">
+          <div className={styles.coupleGrid} data-laras-couple-grid>
+            <Person person={invitation.couple.personOne} sequence={1} />
+            <span className={styles.ampersand} data-laras-couple-medallion aria-hidden="true">
               &amp;
             </span>
-            <Person person={invitation.couple.personTwo} />
+            <Person person={invitation.couple.personTwo} sequence={2} />
           </div>
         </section>
 
@@ -136,6 +178,7 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
             aria-labelledby="laras-story-title"
             className={styles.storySection}
             data-invitation-chapter="story"
+            data-laras-toast-note
           >
             <p className={styles.sectionLabel}>Catatan kecil</p>
             <h2 id="laras-story-title">{invitation.story.heading ?? 'Cerita kami'}</h2>
@@ -147,6 +190,7 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
           <div
             aria-label="Jadwal dan lokasi perayaan"
             data-invitation-schedule-journey="laras"
+            data-laras-evening-program
             role="group"
           >
             {invitation.events ? (
@@ -154,8 +198,9 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
                 aria-labelledby="laras-events-title"
                 className={styles.eventsSection}
                 data-invitation-chapter="schedule"
+                data-laras-program-page
               >
-                <div className={styles.eventsHeading}>
+                <div className={styles.eventsHeading} data-laras-program-heading>
                   <p className={styles.sectionLabel}>Rangkaian acara</p>
                   <h2 id="laras-events-title">Malam yang kami nantikan</h2>
                   {invitation.events.primaryDateLabel ? (
@@ -163,7 +208,7 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
                   ) : null}
                 </div>
                 {invitation.events.items.length > 0 ? (
-                  <div className={styles.eventsGrid}>
+                  <div className={styles.eventsGrid} data-laras-program-list>
                     {invitation.events.items.map((event, index) => (
                       <EventScheduleBlock
                         event={event}
@@ -181,6 +226,7 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
                 aria-labelledby="laras-location-title"
                 className={styles.locationSection}
                 data-invitation-chapter="location"
+                data-laras-venue-card
               >
                 <p className={styles.sectionLabel}>Lokasi utama</p>
                 <h2 id="laras-location-title">Tempat perayaan kami</h2>
@@ -213,17 +259,26 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
             data-gallery-count={invitation.gallery.images.length}
             data-invitation-chapter="gallery"
             data-invitation-gallery
+            data-laras-salon-gallery
           >
             <p className={styles.sectionLabel}>Galeri</p>
             <h2 id="laras-gallery-title">Momen yang kami pilih</h2>
-            <div className={styles.galleryGrid}>
-              {invitation.gallery.images.map((image) => (
-                <figure className={styles.galleryFigure} key={image.id}>
+            <div className={styles.galleryGrid} data-laras-salon-grid>
+              {invitation.gallery.images.map((image, index) => (
+                <figure
+                  className={styles.galleryFigure}
+                  data-laras-salon-frame
+                  data-photo-sequence={String(index + 1).padStart(2, '0')}
+                  key={image.id}
+                >
                   <InvitationGalleryImage
                     alt={image.alt}
                     className={styles.galleryImage}
                     src={image.src}
                   />
+                  <figcaption aria-hidden="true">
+                    {String(index + 1).padStart(2, '0')}
+                  </figcaption>
                 </figure>
               ))}
             </div>
@@ -235,6 +290,7 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
             aria-labelledby="laras-digital-gift-title"
             className={styles.digitalGiftSection}
             data-invitation-chapter="gift"
+            data-laras-gift-ledger
           >
             <div className={styles.digitalGiftHeading}>
               <p className={styles.sectionLabel}>Amplop Digital</p>
@@ -244,8 +300,13 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
               ) : null}
             </div>
             <div className={styles.digitalGiftGrid}>
-              {invitation.digitalGift.accounts.map((account) => (
-                <article className={styles.digitalGiftCard} key={account.id}>
+              {invitation.digitalGift.accounts.map((account, index) => (
+                <article
+                  className={styles.digitalGiftCard}
+                  data-gift-sequence={String(index + 1).padStart(2, '0')}
+                  data-laras-gift-entry
+                  key={account.id}
+                >
                   <span className={styles.digitalGiftFrame} aria-hidden="true" />
                   <p className={styles.digitalGiftProvider}>{account.providerName}</p>
                   <h3>{account.accountHolder}</h3>
@@ -262,20 +323,31 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
         ) : null}
 
         {hasPersonalResponse ? (
-          <div className={styles.personalResponseJourney} data-template-response-journey="laras">
+          <div
+            className={styles.personalResponseJourney}
+            data-laras-response-ledger
+            data-template-response-journey="laras"
+          >
             <div data-template-response-introduction="laras">
               <p data-personal-response-eyebrow>Respons tamu</p>
               <h2 data-personal-response-title>Kabar dari Anda</h2>
               <p data-personal-response-copy>{personalResponseLead}</p>
             </div>
             {personalSlots?.rsvp ? (
-              <div className={styles.personalResponseSection} data-template-response-slot="rsvp">
+              <div
+                className={styles.personalResponseSection}
+                data-laras-response-panel
+                data-response-kind="rsvp"
+                data-template-response-slot="rsvp"
+              >
                 {personalSlots.rsvp}
               </div>
             ) : null}
             {personalSlots?.guestbook ? (
               <div
                 className={styles.personalResponseSection}
+                data-laras-response-panel
+                data-response-kind="guestbook"
                 data-template-response-slot="guestbook"
               >
                 {personalSlots.guestbook}
@@ -285,7 +357,11 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
         ) : null}
 
         {showGenericResponseNote ? (
-          <p className={styles.genericResponseNote} data-generic-response-note="laras">
+          <p
+            className={styles.genericResponseNote}
+            data-generic-response-note="laras"
+            data-laras-private-response-note
+          >
             {genericResponseCopy}
           </p>
         ) : null}
@@ -295,6 +371,7 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
             aria-labelledby="laras-closing-title"
             className={styles.closingSection}
             data-invitation-chapter="closing"
+            data-laras-final-toast
           >
             <span className={styles.closingMark} aria-hidden="true">
               ✦
@@ -310,7 +387,11 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
         ) : null}
       </div>
 
-      <a data-invitation-return-action href="#laras-invitation-title">
+      <a
+        data-invitation-return-action
+        data-laras-return-action
+        href="#laras-invitation-title"
+      >
         <span aria-hidden="true">↑</span>
         Kembali ke awal
       </a>
