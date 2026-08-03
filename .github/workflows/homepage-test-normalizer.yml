@@ -1,0 +1,42 @@
+name: Homepage test normalizer
+
+on:
+  push:
+    branches:
+      - agent/homepage-flagship-maturity-v1
+
+permissions:
+  contents: write
+
+jobs:
+  normalize:
+    if: ${{ !contains(github.event.head_commit.message, '[homepage-test-normalized]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/homepage-flagship-maturity-v1
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Normalize homepage browser contract
+        run: npx prettier --write tests/e2e/homepage-product-theater.spec.ts
+
+      - name: Commit normalized contract
+        run: |
+          if git diff --quiet; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests/e2e/homepage-product-theater.spec.ts
+          git commit -m "SERAYA — Normalize homepage browser contract [homepage-test-normalized]"
+          git push origin HEAD:agent/homepage-flagship-maturity-v1
