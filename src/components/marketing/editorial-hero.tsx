@@ -46,14 +46,8 @@ export function EditorialHero() {
       animationFrame = window.requestAnimationFrame(() => {
         panel.style.setProperty('--hero-shift-x', `${(normalizedX * 9).toFixed(2)}px`);
         panel.style.setProperty('--hero-shift-y', `${(normalizedY * 7).toFixed(2)}px`);
-        panel.style.setProperty(
-          '--hero-shift-x-reverse',
-          `${(normalizedX * -6).toFixed(2)}px`,
-        );
-        panel.style.setProperty(
-          '--hero-shift-y-reverse',
-          `${(normalizedY * -5).toFixed(2)}px`,
-        );
+        panel.style.setProperty('--hero-shift-x-reverse', `${(normalizedX * -6).toFixed(2)}px`);
+        panel.style.setProperty('--hero-shift-y-reverse', `${(normalizedY * -5).toFixed(2)}px`);
         panel.style.setProperty('--hero-rotate', `${(normalizedX * 0.8).toFixed(2)}deg`);
       });
     };
