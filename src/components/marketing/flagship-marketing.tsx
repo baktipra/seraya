@@ -70,9 +70,9 @@ const previewCopy: Record<
 };
 
 const previewClassByCollection: Record<FlagshipCollectionKey, string> = {
-  roselle: styles.roselle,
-  aruna: styles.aruna,
-  laras: styles.laras,
+  roselle: styles.roselle ?? '',
+  aruna: styles.aruna ?? '',
+  laras: styles.laras ?? '',
 };
 
 const collectionOrdinal: Record<FlagshipCollectionKey, string> = {
