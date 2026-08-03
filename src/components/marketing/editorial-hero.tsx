@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 
 import styles from './editorial-hero.module.css';
@@ -19,6 +20,34 @@ export function EditorialHero() {
       <div aria-hidden="true" className={styles.botanicalField} />
 
       <div className={styles.shell}>
+        <div className={styles.copy}>
+          <p className={styles.eyebrow}>Undangan pernikahan personal</p>
+          <h1 className={styles.title}>
+            Satu undangan yang indah.
+            <span>Personal untuk setiap tamu.</span>
+          </h1>
+          <p className={styles.lead}>
+            Susun undangan, bagikan tautan personal, dan kelola respons tamu dalam satu pengalaman
+            yang tenang—dari kabar pertama sampai hari pernikahan.
+          </p>
+
+          <div className={styles.actions}>
+            <Link className={styles.primaryAction} href="/dashboard/new">
+              Mulai buat undangan
+              <span aria-hidden="true">→</span>
+            </Link>
+            <Link className={styles.secondaryAction} href="/templates">
+              Lihat koleksi desain
+            </Link>
+          </div>
+
+          <ul aria-label="Keunggulan utama Seraya" className={styles.proofs}>
+            {proofSignals.map((signal) => (
+              <li key={signal}>{signal}</li>
+            ))}
+          </ul>
+        </div>
+
         <figure
           aria-label="Komposisi stationery undangan Roselle untuk Kirana dan Arga, dengan amplop, sapaan personal untuk Bapak Aditya dan keluarga, serta konfirmasi hadir untuk dua tamu."
           className={styles.theater}
@@ -64,10 +93,13 @@ export function EditorialHero() {
             </div>
 
             <div className={styles.responseCard}>
-              <img
+              <Image
                 alt=""
                 className={styles.replyMark}
+                height={160}
                 src="/marketing/hero/seraya-reply-mark.svg"
+                unoptimized
+                width={160}
               />
               <div>
                 <p className={styles.cardEyebrow}>Konfirmasi kehadiran</p>
@@ -75,38 +107,17 @@ export function EditorialHero() {
               </div>
             </div>
 
-            <img alt="" className={styles.waxSeal} src="/marketing/hero/seraya-wax-monogram.svg" />
+            <Image
+              alt=""
+              className={styles.waxSeal}
+              height={180}
+              src="/marketing/hero/seraya-wax-monogram.svg"
+              unoptimized
+              width={180}
+            />
             <p className={styles.theaterCaption}>Tautan personal · RSVP keluarga</p>
           </div>
         </figure>
-
-        <div className={styles.copy}>
-          <p className={styles.eyebrow}>Undangan pernikahan personal</p>
-          <h1 className={styles.title}>
-            Satu undangan yang indah.
-            <span>Personal untuk setiap tamu.</span>
-          </h1>
-          <p className={styles.lead}>
-            Susun undangan, bagikan tautan personal, dan kelola respons tamu dalam satu pengalaman
-            yang tenang—dari kabar pertama sampai hari pernikahan.
-          </p>
-
-          <div className={styles.actions}>
-            <Link className={styles.primaryAction} href="/dashboard/new">
-              Mulai buat undangan
-              <span aria-hidden="true">→</span>
-            </Link>
-            <Link className={styles.secondaryAction} href="/templates">
-              Lihat koleksi desain
-            </Link>
-          </div>
-
-          <ul aria-label="Keunggulan utama Seraya" className={styles.proofs}>
-            {proofSignals.map((signal) => (
-              <li key={signal}>{signal}</li>
-            ))}
-          </ul>
-        </div>
       </div>
 
       <nav aria-label="Jelajahi homepage Seraya" className={styles.rail}>
