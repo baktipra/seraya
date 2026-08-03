@@ -77,8 +77,7 @@ jobs:
             src/app/page.tsx \
             src/components/marketing/editorial-hero.tsx \
             src/components/marketing/editorial-hero.module.css \
-            tests/e2e/homepage-product-theater.spec.ts \
-            public/marketing/hero/*.svg
+            tests/e2e/homepage-product-theater.spec.ts
 
       - name: Commit normalized files
         run: |
@@ -91,8 +90,7 @@ jobs:
             src/app/page.tsx \
             src/components/marketing/editorial-hero.tsx \
             src/components/marketing/editorial-hero.module.css \
-            tests/e2e/homepage-product-theater.spec.ts \
-            public/marketing/hero/*.svg
+            tests/e2e/homepage-product-theater.spec.ts
           git commit -m "SERAYA — Normalize editorial hero files [hero-normalized]"
           git push origin HEAD:${{ github.head_ref }}
 
