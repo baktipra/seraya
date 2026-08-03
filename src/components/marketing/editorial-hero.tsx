@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useRef } from 'react';
 
@@ -16,29 +15,33 @@ const resetMotion = (element: HTMLElement) => {
 
 export function EditorialHero() {
   const panelRef = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const panel = panelRef.current;
+    const video = videoRef.current;
 
-    if (!panel) {
+    if (!panel || !video) {
       return;
     }
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     panel.dataset.motionReady = 'true';
 
-    if (reduceMotion.matches) {
-      resetMotion(panel);
+    const syncMotionPreference = () => {
+      if (reduceMotion.matches) {
+        resetMotion(panel);
+        video.pause();
+        return;
+      }
 
-      return () => {
-        delete panel.dataset.motionReady;
-      };
-    }
+      void video.play().catch(() => undefined);
+    };
 
     let animationFrame = 0;
 
     const handlePointerMove = (event: PointerEvent) => {
-      if (event.pointerType === 'touch') {
+      if (event.pointerType === 'touch' || reduceMotion.matches) {
         return;
       }
 
@@ -48,11 +51,11 @@ export function EditorialHero() {
 
       cancelAnimationFrame(animationFrame);
       animationFrame = window.requestAnimationFrame(() => {
-        panel.style.setProperty('--hero-shift-x', `${(normalizedX * 9).toFixed(2)}px`);
-        panel.style.setProperty('--hero-shift-y', `${(normalizedY * 7).toFixed(2)}px`);
-        panel.style.setProperty('--hero-shift-x-reverse', `${(normalizedX * -6).toFixed(2)}px`);
-        panel.style.setProperty('--hero-shift-y-reverse', `${(normalizedY * -5).toFixed(2)}px`);
-        panel.style.setProperty('--hero-rotate', `${(normalizedX * 0.8).toFixed(2)}deg`);
+        panel.style.setProperty('--hero-shift-x', `${(normalizedX * 4).toFixed(2)}px`);
+        panel.style.setProperty('--hero-shift-y', `${(normalizedY * 3).toFixed(2)}px`);
+        panel.style.setProperty('--hero-shift-x-reverse', `${(normalizedX * -2).toFixed(2)}px`);
+        panel.style.setProperty('--hero-shift-y-reverse', `${(normalizedY * -1.5).toFixed(2)}px`);
+        panel.style.setProperty('--hero-rotate', `${(normalizedX * 0.35).toFixed(2)}deg`);
       });
     };
 
@@ -61,12 +64,15 @@ export function EditorialHero() {
       animationFrame = window.requestAnimationFrame(() => resetMotion(panel));
     };
 
+    syncMotionPreference();
+    reduceMotion.addEventListener('change', syncMotionPreference);
     panel.addEventListener('pointermove', handlePointerMove);
     panel.addEventListener('pointerleave', handlePointerLeave);
 
     return () => {
       cancelAnimationFrame(animationFrame);
       delete panel.dataset.motionReady;
+      reduceMotion.removeEventListener('change', syncMotionPreference);
       panel.removeEventListener('pointermove', handlePointerMove);
       panel.removeEventListener('pointerleave', handlePointerLeave);
     };
@@ -76,38 +82,34 @@ export function EditorialHero() {
     <section className={styles.hero} data-homepage-campaign-hero data-homepage-editorial-hero>
       <div className={styles.frame}>
         <figure
-          aria-label="Visual editorial undangan Roselle untuk Kirana dan Arga dengan kartu undangan bergerak lembut, detail cincin, dan suasana pernikahan Indonesia."
+          aria-label="Film editorial pernikahan Seraya dengan stationery, bunga putih, cincin, dan kartu undangan Roselle untuk Kirana dan Arga yang bergerak lembut."
           className={styles.productPanel}
           data-editorial-hero-motion
           data-editorial-hero-theater
-          ref={panelRef}
           role="img"
+          ref={panelRef}
         >
-          <div aria-hidden="true" className={styles.productPhoto}>
-            <Image
-              alt=""
-              className={styles.productPhotoImage}
-              fill
-              priority
-              sizes="(min-width: 1024px) 43rem, 100vw"
-              src="/showroom/kirana-arga/kirana-arga-environmental-wide.avif"
-            />
+          <div aria-hidden="true" className={styles.productFilm}>
+            <video
+              autoPlay
+              className={styles.productVideo}
+              data-editorial-hero-video
+              loop
+              muted
+              playsInline
+              poster="/marketing/hero/seraya-wedding-editorial-poster.avif"
+              preload="metadata"
+              ref={videoRef}
+              tabIndex={-1}
+            >
+              <source
+                src="/marketing/hero/seraya-wedding-editorial-loop.mp4"
+                type="video/mp4"
+              />
+            </video>
             <div className={styles.productPhotoWash} />
             <div className={styles.productLightSweep} />
             <div className={styles.productGrain} />
-          </div>
-
-          <div aria-hidden="true" className={styles.detailFloat}>
-            <div className={styles.detailCard}>
-              <Image
-                alt=""
-                className={styles.detailCardImage}
-                fill
-                sizes="9rem"
-                src="/showroom/kirana-arga/kirana-arga-detail-rings.avif"
-              />
-              <span className={styles.detailCardLabel}>Wedding detail</span>
-            </div>
           </div>
 
           <div aria-hidden="true" className={styles.sheetFloat}>

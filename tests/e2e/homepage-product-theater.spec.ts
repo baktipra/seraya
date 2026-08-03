@@ -9,7 +9,7 @@ const assertNoHorizontalOverflow = async (page: Page) => {
   expect(hasHorizontalOverflow).toBe(false);
 };
 
-test('renders the seamless campaign hero with a layered motion composition', async ({ page }) => {
+test('renders the seamless campaign hero with an editorial film composition', async ({ page }) => {
   await page.goto('/');
 
   await expect(
@@ -26,25 +26,36 @@ test('renders the seamless campaign hero with a layered motion composition', asy
     'data-editorial-hero-motion',
     'true',
   );
+  await expect(page.locator('[data-editorial-hero-video]')).toHaveCount(1);
   await expect(page.locator('[data-editorial-personal-card]')).toHaveCount(0);
   await expect(page.getByRole('navigation', { name: 'Jelajahi homepage Seraya' })).toHaveCount(0);
 
   await expect(
     page.getByRole('img', {
-      name: /Visual editorial undangan Roselle untuk Kirana dan Arga dengan kartu undangan bergerak lembut/,
+      name: /Film editorial pernikahan Seraya dengan stationery, bunga putih, cincin/,
     }),
   ).toBeVisible();
+
+  const video = page.locator('[data-editorial-hero-video]');
+  await expect(video).toHaveAttribute('autoplay', '');
+  await expect(video).toHaveAttribute('loop', '');
+  await expect(video).toHaveAttribute('muted', '');
+  await expect(video).toHaveAttribute('playsinline', '');
+  await expect(video).toHaveAttribute(
+    'poster',
+    '/marketing/hero/seraya-wedding-editorial-poster.avif',
+  );
 
   const primaryAction = page.getByRole('link', { name: 'Jelajahi koleksi' });
   await expect(primaryAction).toBeVisible();
   await expect(primaryAction).toHaveAttribute('href', '/templates');
 
-  const [environmentResponse, detailResponse] = await Promise.all([
-    page.request.get('/showroom/kirana-arga/kirana-arga-environmental-wide.avif'),
-    page.request.get('/showroom/kirana-arga/kirana-arga-detail-rings.avif'),
+  const [mp4Response, posterResponse] = await Promise.all([
+    page.request.get('/marketing/hero/seraya-wedding-editorial-loop.mp4'),
+    page.request.get('/marketing/hero/seraya-wedding-editorial-poster.avif'),
   ]);
-  expect(environmentResponse.ok()).toBe(true);
-  expect(detailResponse.ok()).toBe(true);
+  expect(mp4Response.ok()).toBe(true);
+  expect(posterResponse.ok()).toBe(true);
 
   const [headerBorderWidth, heroBackground, bodyBackground, heroAnimationName] =
     await page.evaluate(() => {
@@ -66,12 +77,13 @@ test('renders the seamless campaign hero with a layered motion composition', asy
   await assertNoHorizontalOverflow(page);
 });
 
-test('keeps the campaign hero composed on a narrow mobile viewport', async ({ page }) => {
+test('keeps the campaign film composed on a narrow mobile viewport', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 740 });
   await page.goto('/');
 
   await expect(page.locator('[data-homepage-campaign-hero]')).toBeVisible();
   await expect(page.locator('[data-editorial-hero-theater]')).toBeVisible();
+  await expect(page.locator('[data-editorial-hero-video]')).toBeVisible();
   await expect(page.getByRole('link', { name: 'Jelajahi koleksi' })).toBeVisible();
   await assertNoHorizontalOverflow(page);
 });
