@@ -52,6 +52,7 @@ jobs:
             package.json \
             playwright.visual-qa.config.ts \
             src/modules/invitation-templates/invitation-template-parity-boundary.module.css \
+            src/modules/invitation-templates/roselle/roselle-parity-repair.module.css \
             tests/e2e/visual-qa-hardening.spec.ts
 
       - name: Lint H files
