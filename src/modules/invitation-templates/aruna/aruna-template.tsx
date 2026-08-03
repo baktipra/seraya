@@ -6,14 +6,21 @@ import {
 } from '../invitation-template.types';
 
 import styles from './aruna.module.css';
+import experienceStyles from './aruna-guest-experience.module.css';
 
 function Person({
   person,
+  sequence,
 }: {
   person: InvitationTemplateProps['invitation']['couple']['personOne'];
+  sequence: number;
 }) {
   return (
-    <article className={styles.person}>
+    <article
+      className={styles.person}
+      data-aruna-profile
+      data-profile-sequence={String(sequence).padStart(2, '0')}
+    >
       <p className={styles.personLabel}>Mempelai</p>
       <h3 className={styles.personName}>{person.displayName}</h3>
       {person.fullName ? <p className={styles.personFullName}>{person.fullName}</p> : null}
@@ -30,7 +37,12 @@ function EventScheduleBlock({
   sequence: number;
 }) {
   return (
-    <article className={styles.eventCard} data-schedule-event="aruna">
+    <article
+      className={styles.eventCard}
+      data-agenda-sequence={String(sequence).padStart(2, '0')}
+      data-aruna-agenda-entry
+      data-schedule-event="aruna"
+    >
       <span className={styles.eventRule} aria-hidden="true" />
       <span className={styles.eventSequence}>{String(sequence).padStart(2, '0')}</span>
       {event.title ? <h3>{event.title}</h3> : null}
@@ -74,20 +86,27 @@ export function ArunaTemplate({ invitation, renderContext }: InvitationTemplateP
   return (
     <article
       aria-labelledby="aruna-invitation-title"
-      className={styles.invitation}
+      className={`${styles.invitation} ${experienceStyles.experience}`}
+      data-aruna-experience="journal-v1"
       data-surface={renderContext.surface}
       data-template="aruna"
     >
-      <header className={styles.hero} data-invitation-chapter="opening">
-        <div className={styles.heroRule} aria-hidden="true" />
-        <div className={styles.heroContent}>
-          <p className={styles.kicker}>{invitation.hero.eyebrow ?? 'The Wedding Of'}</p>
+      <header
+        className={styles.hero}
+        data-aruna-journal-cover
+        data-invitation-chapter="opening"
+      >
+        <div className={styles.heroRule} data-aruna-cover-rule aria-hidden="true" />
+        <div className={styles.heroContent} data-aruna-cover-story>
+          <p className={styles.kicker} data-aruna-cover-masthead>
+            {invitation.hero.eyebrow ?? 'The Wedding Of'}
+          </p>
           <h1 id="aruna-invitation-title">{invitation.hero.title}</h1>
           {invitation.hero.subtitle ? (
             <p className={styles.heroSubtitle}>{invitation.hero.subtitle}</p>
           ) : null}
         </div>
-        <div className={styles.heroDateWrap}>
+        <div className={styles.heroDateWrap} data-aruna-cover-date>
           <span className={styles.heroDateLabel}>Save the date</span>
           <span className={styles.heroDate}>
             {invitation.hero.primaryDateLabel ?? 'Hari bahagia kami'}
@@ -95,7 +114,11 @@ export function ArunaTemplate({ invitation, renderContext }: InvitationTemplateP
         </div>
       </header>
 
-      <a data-invitation-opening-action href={`#${openingTargetId}`}>
+      <a
+        data-aruna-opening-action
+        data-invitation-opening-action
+        href={`#${openingTargetId}`}
+      >
         <span>Buka undangan</span>
         <span aria-hidden="true">↓</span>
       </a>
@@ -104,6 +127,7 @@ export function ArunaTemplate({ invitation, renderContext }: InvitationTemplateP
         <div
           aria-label="Sapaan untuk tamu"
           className={styles.personalGreeting}
+          data-aruna-editors-note
           data-template-personal-greeting="aruna"
           id="aruna-personal-greeting"
           role="region"
@@ -112,22 +136,23 @@ export function ArunaTemplate({ invitation, renderContext }: InvitationTemplateP
         </div>
       ) : null}
 
-      <div className={styles.content}>
+      <div className={styles.content} data-aruna-journal-pages>
         <section
           aria-labelledby="aruna-couple-title"
           className={styles.coupleSection}
+          data-aruna-couple-feature
           data-invitation-chapter="couple"
         >
           <div className={styles.sectionHeading}>
             <p>Perayaan cinta</p>
             <h2 id="aruna-couple-title">Dengan sukacita kami mengundang Anda</h2>
           </div>
-          <div className={styles.coupleGrid}>
-            <Person person={invitation.couple.personOne} />
+          <div className={styles.coupleGrid} data-aruna-profile-grid>
+            <Person person={invitation.couple.personOne} sequence={1} />
             <span className={styles.ampersand} aria-hidden="true">
               &amp;
             </span>
-            <Person person={invitation.couple.personTwo} />
+            <Person person={invitation.couple.personTwo} sequence={2} />
           </div>
         </section>
 
@@ -135,6 +160,7 @@ export function ArunaTemplate({ invitation, renderContext }: InvitationTemplateP
           <section
             aria-labelledby="aruna-story-title"
             className={styles.storySection}
+            data-aruna-feature-story
             data-invitation-chapter="story"
           >
             <p className={styles.sectionKicker}>Cerita kami</p>
@@ -146,6 +172,7 @@ export function ArunaTemplate({ invitation, renderContext }: InvitationTemplateP
         {hasScheduleJourney ? (
           <div
             aria-label="Jadwal dan lokasi perayaan"
+            data-aruna-agenda
             data-invitation-schedule-journey="aruna"
             role="group"
           >
@@ -153,6 +180,7 @@ export function ArunaTemplate({ invitation, renderContext }: InvitationTemplateP
               <section
                 aria-labelledby="aruna-events-title"
                 className={styles.eventsSection}
+                data-aruna-agenda-page
                 data-invitation-chapter="schedule"
               >
                 <div className={styles.sectionHeading}>
@@ -180,6 +208,7 @@ export function ArunaTemplate({ invitation, renderContext }: InvitationTemplateP
               <section
                 aria-labelledby="aruna-location-title"
                 className={styles.locationSection}
+                data-aruna-venue-brief
                 data-invitation-chapter="location"
               >
                 <p className={styles.sectionKicker}>Lokasi utama</p>
@@ -210,6 +239,7 @@ export function ArunaTemplate({ invitation, renderContext }: InvitationTemplateP
           <section
             aria-labelledby="aruna-gallery-title"
             className={styles.gallerySection}
+            data-aruna-photo-essay
             data-gallery-count={invitation.gallery.images.length}
             data-invitation-chapter="gallery"
             data-invitation-gallery
@@ -218,9 +248,14 @@ export function ArunaTemplate({ invitation, renderContext }: InvitationTemplateP
               <p>Galeri</p>
               <h2 id="aruna-gallery-title">Fragmen yang kami simpan</h2>
             </div>
-            <div className={styles.galleryGrid}>
+            <div className={styles.galleryGrid} data-aruna-photo-grid>
               {invitation.gallery.images.map((image, index) => (
-                <figure className={styles.galleryFigure} key={image.id}>
+                <figure
+                  className={styles.galleryFigure}
+                  data-aruna-photo-frame
+                  data-photo-sequence={String(index + 1).padStart(2, '0')}
+                  key={image.id}
+                >
                   <InvitationGalleryImage
                     alt={image.alt}
                     className={styles.galleryImage}
@@ -237,6 +272,7 @@ export function ArunaTemplate({ invitation, renderContext }: InvitationTemplateP
           <section
             aria-labelledby="aruna-digital-gift-title"
             className={styles.digitalGiftSection}
+            data-aruna-gift-desk
             data-invitation-chapter="gift"
           >
             <div className={styles.digitalGiftHeading}>
@@ -267,20 +303,29 @@ export function ArunaTemplate({ invitation, renderContext }: InvitationTemplateP
         ) : null}
 
         {hasPersonalResponse ? (
-          <div className={styles.personalResponseJourney} data-template-response-journey="aruna">
+          <div
+            className={styles.personalResponseJourney}
+            data-aruna-reader-response
+            data-template-response-journey="aruna"
+          >
             <div data-template-response-introduction="aruna">
               <p data-personal-response-eyebrow>Respons tamu</p>
               <h2 data-personal-response-title>Kabar dari Anda</h2>
               <p data-personal-response-copy>{personalResponseLead}</p>
             </div>
             {personalSlots?.rsvp ? (
-              <div className={styles.personalResponseSection} data-template-response-slot="rsvp">
+              <div
+                className={styles.personalResponseSection}
+                data-aruna-response-column="rsvp"
+                data-template-response-slot="rsvp"
+              >
                 {personalSlots.rsvp}
               </div>
             ) : null}
             {personalSlots?.guestbook ? (
               <div
                 className={styles.personalResponseSection}
+                data-aruna-response-column="guestbook"
                 data-template-response-slot="guestbook"
               >
                 {personalSlots.guestbook}
@@ -299,6 +344,7 @@ export function ArunaTemplate({ invitation, renderContext }: InvitationTemplateP
           <section
             aria-labelledby="aruna-closing-title"
             className={styles.closingSection}
+            data-aruna-colophon
             data-invitation-chapter="closing"
           >
             <div className={styles.closingRule} aria-hidden="true" />
@@ -313,7 +359,7 @@ export function ArunaTemplate({ invitation, renderContext }: InvitationTemplateP
         ) : null}
       </div>
 
-      <a data-invitation-return-action href="#aruna-invitation-title">
+      <a data-aruna-return-action data-invitation-return-action href="#aruna-invitation-title">
         <span aria-hidden="true">↑</span>
         Kembali ke awal
       </a>
