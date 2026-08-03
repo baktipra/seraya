@@ -29,6 +29,13 @@
   max-width: 100%;
 }
 
+.parityBoundary
+  :global([data-template])
+  :is(a[href], button, input, select, textarea):focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 3px;
+}
+
 @media (max-width: 36rem) {
   .parityBoundary :global([data-template]) {
     max-width: 100%;
@@ -40,7 +47,13 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .parityBoundary :global([data-template]) {
-    scroll-behavior: auto;
+  .parityBoundary :global([data-template]),
+  .parityBoundary :global([data-template]) *,
+  .parityBoundary :global([data-template]) *::before,
+  .parityBoundary :global([data-template]) *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

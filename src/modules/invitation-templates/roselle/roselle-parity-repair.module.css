@@ -1,3 +1,12 @@
+@media (min-width: 36.001rem) {
+  .parityRepair[data-roselle-experience='letter-v1'][data-template='roselle']
+    :global([data-roselle-letter-title]) {
+    width: 100%;
+    max-width: 100%;
+    text-wrap: balance;
+  }
+}
+
 @media (max-width: 36rem) {
   .parityRepair[data-roselle-experience='letter-v1'][data-template='roselle']
     :global([data-roselle-memory-album][data-gallery-layout]) {
