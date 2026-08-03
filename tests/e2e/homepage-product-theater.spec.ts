@@ -22,7 +22,10 @@ test('renders the seamless campaign hero with a layered motion composition', asy
   await expect(page.locator('main iframe')).toHaveCount(0);
   await expect(page.locator('[data-homepage-campaign-hero]')).toHaveCount(1);
   await expect(page.locator('[data-editorial-hero-theater]')).toBeVisible();
-  await expect(page.locator('[data-editorial-hero-motion]')).toHaveCount(1);
+  await expect(page.locator('[data-editorial-hero-motion]')).toHaveAttribute(
+    'data-editorial-hero-motion',
+    'true',
+  );
   await expect(page.locator('[data-editorial-personal-card]')).toHaveCount(0);
   await expect(page.getByRole('navigation', { name: 'Jelajahi homepage Seraya' })).toHaveCount(0);
 
@@ -43,45 +46,24 @@ test('renders the seamless campaign hero with a layered motion composition', asy
   expect(environmentResponse.ok()).toBe(true);
   expect(detailResponse.ok()).toBe(true);
 
-  const [headerBorderWidth, heroBackground, bodyBackground] = await page.evaluate(() => {
-    const header = document.querySelector('header');
-    const hero = document.querySelector<HTMLElement>('[data-homepage-campaign-hero]');
+  const [headerBorderWidth, heroBackground, bodyBackground, heroAnimationName] = await page.evaluate(
+    () => {
+      const header = document.querySelector('header');
+      const hero = document.querySelector<HTMLElement>('[data-homepage-campaign-hero]');
+      const theater = document.querySelector<HTMLElement>('[data-editorial-hero-theater]');
 
-    return [
-      header ? window.getComputedStyle(header).borderBottomWidth : null,
-      hero ? window.getComputedStyle(hero).backgroundColor : null,
-      window.getComputedStyle(document.body).backgroundColor,
-    ];
-  });
+      return [
+        header ? window.getComputedStyle(header).borderBottomWidth : null,
+        hero ? window.getComputedStyle(hero).backgroundColor : null,
+        window.getComputedStyle(document.body).backgroundColor,
+        theater ? window.getComputedStyle(theater).animationName : null,
+      ];
+    },
+  );
 
   expect(headerBorderWidth).toBe('0px');
   expect(heroBackground).toBe(bodyBackground);
-  await assertNoHorizontalOverflow(page);
-});
-
-test('adds gentle pointer depth without changing the campaign layout', async ({ page }) => {
-  await page.setViewportSize({ width: 1366, height: 768 });
-  await page.goto('/');
-
-  const motionPanel = page.locator('[data-editorial-hero-motion]');
-  await expect(motionPanel).toHaveAttribute('data-motion-ready', 'true');
-
-  await motionPanel.evaluate((element) => {
-    const bounds = element.getBoundingClientRect();
-    element.dispatchEvent(
-      new PointerEvent('pointermove', {
-        bubbles: true,
-        clientX: bounds.left + bounds.width * 0.82,
-        clientY: bounds.top + 80,
-        pointerType: 'mouse',
-      }),
-    );
-  });
-
-  await expect
-    .poll(() => motionPanel.evaluate((element) => element.style.getPropertyValue('--hero-shift-x')))
-    .not.toBe('0px');
-
+  expect(heroAnimationName).not.toBe('none');
   await assertNoHorizontalOverflow(page);
 });
 
