@@ -9,6 +9,7 @@ export default defineConfig({
     'personal-response.spec.ts',
     'release-a-showroom.spec.ts',
     'roselle-flagship-guest-experience.spec.ts',
+    'visual-qa-hardening.spec.ts',
   ],
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
