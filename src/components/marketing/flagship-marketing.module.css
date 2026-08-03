@@ -16,7 +16,11 @@
   border-radius: 2.25rem;
   background:
     radial-gradient(circle at 80% 14%, rgb(255 255 255 / 72%), transparent 28%),
-    linear-gradient(145deg, color-mix(in srgb, var(--preview-canvas) 94%, white), var(--preview-canvas));
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--preview-canvas) 94%, white),
+      var(--preview-canvas)
+    );
   box-shadow: 0 32px 90px rgb(55 43 39 / 13%);
   color: var(--preview-ink);
 }
@@ -158,21 +162,36 @@
 
 .roselle .phone::before {
   background-image:
-    linear-gradient(180deg, rgb(255 250 247 / 84%) 0%, rgb(255 250 247 / 94%) 52%, rgb(255 250 247 / 98%) 100%),
+    linear-gradient(
+      180deg,
+      rgb(255 250 247 / 84%) 0%,
+      rgb(255 250 247 / 94%) 52%,
+      rgb(255 250 247 / 98%) 100%
+    ),
     url('/showroom/kirana-arga/kirana-arga-opening-portrait.avif');
   background-position: center 28%;
 }
 
 .aruna .phone::before {
   background-image:
-    linear-gradient(90deg, rgb(248 247 242 / 94%) 0%, rgb(248 247 242 / 82%) 47%, rgb(248 247 242 / 18%) 100%),
+    linear-gradient(
+      90deg,
+      rgb(248 247 242 / 94%) 0%,
+      rgb(248 247 242 / 82%) 47%,
+      rgb(248 247 242 / 18%) 100%
+    ),
     url('/showroom/kirana-arga/kirana-arga-opening-portrait.avif');
   background-position: center 30%;
 }
 
 .laras .phone::before {
   background-image:
-    linear-gradient(180deg, rgb(31 29 37 / 38%) 0%, rgb(31 29 37 / 78%) 58%, rgb(31 29 37 / 96%) 100%),
+    linear-gradient(
+      180deg,
+      rgb(31 29 37 / 38%) 0%,
+      rgb(31 29 37 / 78%) 58%,
+      rgb(31 29 37 / 96%) 100%
+    ),
     url('/showroom/kirana-arga/kirana-arga-opening-portrait.avif');
   background-position: center 30%;
 }

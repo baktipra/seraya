@@ -195,8 +195,8 @@ export function InvitationCover({
             {copy.showMonogram ? <span className={styles.monogram}>KA</span> : null}
             <p className={styles.phoneNames}>Kirana &amp; Arga</p>
             <p className={styles.phoneCopy}>
-              Dengan penuh syukur, kami mengundang Anda untuk hadir dalam perayaan keluarga dan
-              awal perjalanan baru kami.
+              Dengan penuh syukur, kami mengundang Anda untuk hadir dalam perayaan keluarga dan awal
+              perjalanan baru kami.
             </p>
             <p className={styles.phoneDate}>{copy.date}</p>
             <span className={styles.phoneRule}>
@@ -265,7 +265,10 @@ export function CollectionCard({
             Simulasi personal
           </Link>
         </div>
-        <Link className="seraya-button-secondary mt-6 min-h-11 w-fit px-5 text-sm" href="/dashboard/new">
+        <Link
+          className="seraya-button-secondary mt-6 min-h-11 w-fit px-5 text-sm"
+          href="/dashboard/new"
+        >
           Mulai dengan {collection.name}
           <span aria-hidden="true">→</span>
         </Link>
