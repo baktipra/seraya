@@ -128,11 +128,7 @@ export default function Home() {
 
             <div className="mt-14 space-y-16 lg:mt-20 lg:space-y-24">
               {flagshipCollections.map((collection, index) => (
-                <div
-                  className="scroll-mt-24"
-                  id={`koleksi-${collection.key}`}
-                  key={collection.key}
-                >
+                <div className="scroll-mt-24" id={`koleksi-${collection.key}`} key={collection.key}>
                   <CollectionCard collection={collection} priority={index % 2 === 1} />
                 </div>
               ))}

@@ -58,8 +58,7 @@
   border-radius: 2rem;
   background:
     linear-gradient(rgb(255 255 255 / 22%), rgb(255 255 255 / 22%)),
-    url('/marketing/hero/seraya-stationery-grain.svg'),
-    #decfc5;
+    url('/marketing/hero/seraya-stationery-grain.svg'), #decfc5;
   box-shadow: 0 34px 90px rgb(68 49 42 / 16%);
 }
 
@@ -162,7 +161,8 @@
 }
 
 .invitationPhoto {
-  background: url('/showroom/kirana-arga/kirana-arga-opening-portrait.avif') center 28% / cover no-repeat;
+  background: url('/showroom/kirana-arga/kirana-arga-opening-portrait.avif') center 28% / cover
+    no-repeat;
   filter: saturate(0.76) contrast(0.94);
 }
 
@@ -255,9 +255,7 @@
   position: absolute;
   z-index: 6;
   border: 1px solid rgb(142 75 82 / 16%);
-  background:
-    url('/marketing/hero/seraya-stationery-grain.svg'),
-    rgb(255 251 247 / 96%);
+  background: url('/marketing/hero/seraya-stationery-grain.svg'), rgb(255 251 247 / 96%);
   box-shadow: 0 20px 45px rgb(65 47 41 / 19%);
   backdrop-filter: blur(10px);
 }

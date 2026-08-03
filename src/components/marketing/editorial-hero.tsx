@@ -47,7 +47,8 @@ export function EditorialHero() {
                   Arga
                 </p>
                 <p className={styles.invitationCopy}>
-                  Dengan penuh syukur, kami mengundang Anda untuk hadir dalam perayaan keluarga kami.
+                  Dengan penuh syukur, kami mengundang Anda untuk hadir dalam perayaan keluarga
+                  kami.
                 </p>
                 <div className={styles.invitationDate}>
                   <span>17</span>
@@ -63,18 +64,18 @@ export function EditorialHero() {
             </div>
 
             <div className={styles.responseCard}>
-              <img alt="" className={styles.replyMark} src="/marketing/hero/seraya-reply-mark.svg" />
+              <img
+                alt=""
+                className={styles.replyMark}
+                src="/marketing/hero/seraya-reply-mark.svg"
+              />
               <div>
                 <p className={styles.cardEyebrow}>Konfirmasi kehadiran</p>
                 <p className={styles.responseTitle}>Hadir · 2 tamu</p>
               </div>
             </div>
 
-            <img
-              alt=""
-              className={styles.waxSeal}
-              src="/marketing/hero/seraya-wax-monogram.svg"
-            />
+            <img alt="" className={styles.waxSeal} src="/marketing/hero/seraya-wax-monogram.svg" />
             <p className={styles.theaterCaption}>Tautan personal · RSVP keluarga</p>
           </div>
         </figure>
