@@ -105,6 +105,11 @@ async function expectStableMedia(invitation: Locator) {
   expect(Math.abs((afterFailure?.width ?? 0) - (beforeFailure?.width ?? 0))).toBeLessThan(1);
   expect(Math.abs((afterFailure?.height ?? 0) - (beforeFailure?.height ?? 0))).toBeLessThan(1);
 
+  await firstImage.evaluate((element) => {
+    element.dispatchEvent(new Event('load', { bubbles: true }));
+  });
+  await expect(firstFrame).toHaveAttribute('data-media-state', 'ready');
+
   return imageCount;
 }
 
@@ -208,7 +213,12 @@ async function auditSemanticContract(invitation: Locator) {
         if (text) return text;
       }
 
-      if (control instanceof HTMLInputElement && control.labels?.length) {
+      if (
+        (control instanceof HTMLInputElement ||
+          control instanceof HTMLSelectElement ||
+          control instanceof HTMLTextAreaElement) &&
+        control.labels?.length
+      ) {
         const text = Array.from(control.labels)
           .map((label) => label.textContent?.trim() ?? '')
           .join(' ')
@@ -278,6 +288,10 @@ async function auditReducedMotion(invitation: Locator) {
 
     const offenders: string[] = [];
     const elements = [root, ...Array.from(root.querySelectorAll('*'))];
+
+    if (window.getComputedStyle(root).scrollBehavior !== 'auto') {
+      offenders.push(`article: scroll-behavior=${window.getComputedStyle(root).scrollBehavior}`);
+    }
 
     for (const element of elements) {
       for (const pseudoElement of [null, '::before', '::after'] as const) {
@@ -357,7 +371,12 @@ for (const templateKey of Object.keys(templates) as TemplateKey[]) {
       await expect(openingAction).toHaveAttribute('href', expectedOpeningTarget);
       await expect(invitation.locator(expectedOpeningTarget)).toBeVisible();
       await expect(returnAction).toHaveAttribute('href', /^#/);
-      await expect(invitation.locator(await returnAction.getAttribute('href'))).toBeVisible();
+
+      const returnTarget = await returnAction.getAttribute('href');
+      if (!returnTarget) {
+        throw new Error(`${templateKey} ${surface} return action has no target`);
+      }
+      await expect(invitation.locator(returnTarget)).toBeVisible();
 
       if (surface === 'generic') {
         await expect(invitation.locator('[data-template-personal-greeting]')).toHaveCount(0);
