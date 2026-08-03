@@ -3,6 +3,8 @@ import Link from 'next/link';
 
 import { siteConfig } from '@/config/site';
 
+import styles from './flagship-marketing.module.css';
+
 export type FlagshipCollectionKey = 'roselle' | 'aruna' | 'laras';
 
 export const flagshipCollections = [
@@ -32,29 +34,51 @@ export const flagshipCollections = [
   },
 ] as const;
 
-const collectionStyles: Record<
+const previewCopy: Record<
   FlagshipCollectionKey,
   {
-    canvas: string;
-    frame: string;
-    label: string;
+    eyebrow: string;
+    date: string;
+    guestLine: string;
+    guestName: string;
+    stageLabel: string;
+    showMonogram?: boolean;
   }
 > = {
   roselle: {
-    canvas: 'bg-[#f6e8e7]',
-    frame: 'border-[#d9b9b7] bg-[#fffaf7]',
-    label: 'text-[#8e4b52]',
+    eyebrow: 'The wedding of',
+    date: '17 Agustus 2027',
+    guestLine: 'Undangan personal telah disiapkan untuk',
+    guestName: 'Bapak Aditya & Keluarga',
+    stageLabel: 'Romantic warmth',
   },
   aruna: {
-    canvas: 'bg-[#e9e7df]',
-    frame: 'border-[#b9b5aa] bg-[#f8f7f2]',
-    label: 'text-[#5a625d]',
+    eyebrow: 'Wedding journal · 017',
+    date: 'Jakarta · 17.08.27',
+    guestLine: 'Personal edition prepared for',
+    guestName: 'Aditya & Family',
+    stageLabel: 'Modern editorial',
   },
   laras: {
-    canvas: 'bg-[#201f26]',
-    frame: 'border-[#6f6558] bg-[#2b2931]',
-    label: 'text-[#d7b982]',
+    eyebrow: 'A formal evening',
+    date: 'Sabtu · 17 Agustus 2027',
+    guestLine: 'Dengan hormat mengundang',
+    guestName: 'Bapak Aditya sekeluarga',
+    stageLabel: 'Formal evening',
+    showMonogram: true,
   },
+};
+
+const previewClassByCollection: Record<FlagshipCollectionKey, string> = {
+  roselle: styles.roselle,
+  aruna: styles.aruna,
+  laras: styles.laras,
+};
+
+const collectionOrdinal: Record<FlagshipCollectionKey, string> = {
+  roselle: '01',
+  aruna: '02',
+  laras: '03',
 };
 
 export function getShowroomHref(
@@ -146,43 +170,54 @@ export function InvitationCover({
   collection: FlagshipCollectionKey;
   compact?: boolean;
 }) {
-  const style = collectionStyles[collection];
+  const copy = previewCopy[collection];
 
   return (
     <div
-      aria-label={`Pratinjau renderer asli koleksi ${collection} untuk Kirana dan Arga`}
-      className={`${style.canvas} relative isolate overflow-hidden rounded-[1.75rem] p-4 shadow-[0_28px_70px_rgb(43_37_35_/_0.13)] sm:p-5`}
-      data-canonical-showroom-preview={collection}
+      aria-label={`Preview artistik koleksi ${collection}: undangan Kirana dan Arga, sapaan personal, dan konfirmasi kehadiran`}
+      className={`${styles.preview} ${previewClassByCollection[collection]} ${compact ? styles.compact : ''}`}
+      data-marketing-invitation-preview={collection}
+      role="img"
     >
-      <div
-        aria-hidden="true"
-        className="absolute -top-16 -right-12 size-44 rounded-full border border-current opacity-15"
-      />
-      <div
-        aria-hidden="true"
-        className="absolute -bottom-24 -left-20 size-52 rounded-full border border-current opacity-10"
-      />
-      <div
-        className={`${style.frame} relative mx-auto aspect-[9/16] w-full max-w-[18rem] overflow-hidden rounded-[1.35rem] border shadow-[0_18px_45px_rgb(35_28_25_/_0.14)] ${compact ? 'max-h-[28rem]' : ''}`}
-      >
-        <iframe
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 size-full border-0 bg-white"
-          loading={compact ? 'lazy' : 'eager'}
-          src={`${getShowroomHref(collection, 'generic')}#showroom-invitation`}
-          tabIndex={-1}
-          title={`Pembuka undangan demo ${collection}`}
-        />
-        <div
-          aria-hidden="true"
-          className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/18 to-transparent"
-        />
-      </div>
-      <div className="relative mx-auto mt-4 flex w-full max-w-[18rem] items-center justify-between gap-3">
-        <p className={`${style.label} text-[0.62rem] font-semibold tracking-[0.16em] uppercase`}>
-          Renderer asli
-        </p>
-        <p className={`${style.label} text-right text-[0.68rem] font-medium`}>Kirana &amp; Arga</p>
+      <div aria-hidden="true" className={styles.motif} />
+      <div aria-hidden="true">
+        <p className={styles.stageLabel}>{copy.stageLabel}</p>
+
+        <div className={`${styles.floatingCard} ${styles.guestCard}`}>
+          <p className={styles.floatingEyebrow}>Sapaan tamu</p>
+          <p className={styles.floatingTitle}>{copy.guestName}</p>
+          <p className={styles.floatingMeta}>{copy.guestLine}</p>
+        </div>
+
+        <div className={styles.phone}>
+          <div className={styles.phoneContent}>
+            <p className={styles.phoneEyebrow}>{copy.eyebrow}</p>
+            {copy.showMonogram ? <span className={styles.monogram}>KA</span> : null}
+            <p className={styles.phoneNames}>Kirana &amp; Arga</p>
+            <p className={styles.phoneCopy}>
+              Dengan penuh syukur, kami mengundang Anda untuk hadir dalam perayaan keluarga dan
+              awal perjalanan baru kami.
+            </p>
+            <p className={styles.phoneDate}>{copy.date}</p>
+            <span className={styles.phoneRule}>
+              <span />
+            </span>
+          </div>
+        </div>
+
+        <div className={`${styles.floatingCard} ${styles.responseCard}`}>
+          <p className={styles.floatingEyebrow}>Konfirmasi tamu</p>
+          <p className={styles.floatingTitle}>Apakah Anda hadir?</p>
+          <div className={styles.responseOptions}>
+            <span className={`${styles.responseOption} ${styles.responseOptionActive}`}>Hadir</span>
+            <span className={styles.responseOption}>Belum pasti</span>
+          </div>
+        </div>
+
+        <div className={styles.previewFooter}>
+          <span>Product preview</span>
+          <span>Kirana &amp; Arga</span>
+        </div>
       </div>
     </div>
   );
@@ -196,37 +231,41 @@ export function CollectionCard({
   priority?: boolean;
 }) {
   return (
-    <article className="group grid min-w-0 gap-6 border-t border-[var(--seraya-border-default)] pt-7 lg:grid-cols-[minmax(15rem,0.9fr)_minmax(0,1.1fr)] lg:items-center lg:gap-10">
-      <div className={priority ? 'lg:order-2' : undefined}>
+    <article
+      className={`${styles.collectionArticle} ${priority ? styles.collectionArticleReversed : ''}`}
+    >
+      <div className={styles.collectionPreview}>
         <InvitationCover collection={collection.key} compact />
       </div>
-      <div className={priority ? 'lg:order-1' : undefined}>
-        <p className="seraya-eyebrow text-seraya-action-primary">{collection.personality}</p>
-        <h3 className="text-seraya-text-primary mt-3 font-serif text-[clamp(2.8rem,5vw,4.8rem)] leading-[0.88] font-medium tracking-[-0.05em]">
+      <div className={styles.collectionCopy}>
+        <p className={styles.collectionIndex}>
+          {collectionOrdinal[collection.key]} · {collection.personality}
+        </p>
+        <h3 className="text-seraya-text-primary mt-5 font-serif text-[clamp(3.2rem,5vw,5.4rem)] leading-[0.82] font-medium tracking-[-0.06em]">
           {collection.name}
         </h3>
-        <p className="text-seraya-text-secondary mt-5 max-w-xl text-base leading-7">
+        <p className="text-seraya-text-secondary mt-6 max-w-xl text-base leading-7 sm:text-lg sm:leading-8">
           {collection.description}
         </p>
-        <p className="text-seraya-text-muted mt-4 text-xs font-semibold tracking-[0.1em] uppercase">
+        <p className="text-seraya-text-muted mt-5 text-xs font-semibold tracking-[0.1em] uppercase">
           {collection.mood}
         </p>
-        <div className="mt-7 flex flex-wrap gap-x-5 gap-y-3 text-sm font-semibold">
+        <div className={styles.collectionActions}>
           <Link
-            className="text-seraya-action-primary inline-flex min-h-11 items-center gap-2 transition-[gap] hover:gap-3"
+            className="text-seraya-action-primary inline-flex min-h-11 items-center gap-2 text-sm font-semibold transition-[gap] hover:gap-3"
             href={getShowroomHref(collection.key, 'generic')}
           >
             Lihat undangan umum
             <span aria-hidden="true">→</span>
           </Link>
           <Link
-            className="text-seraya-text-secondary hover:text-seraya-text-primary inline-flex min-h-11 items-center gap-2 transition-colors"
+            className="text-seraya-text-secondary hover:text-seraya-text-primary inline-flex min-h-11 items-center gap-2 text-sm font-semibold transition-colors"
             href={getShowroomHref(collection.key, 'personal')}
           >
             Simulasi personal
           </Link>
         </div>
-        <Link className="seraya-button-secondary mt-5 min-h-11 px-5 text-sm" href="/dashboard/new">
+        <Link className="seraya-button-secondary mt-6 min-h-11 w-fit px-5 text-sm" href="/dashboard/new">
           Mulai dengan {collection.name}
           <span aria-hidden="true">→</span>
         </Link>
