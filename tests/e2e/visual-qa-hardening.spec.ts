@@ -181,7 +181,10 @@ async function auditKeyboardJourney(page: Page, invitation: Locator) {
       failures.push(`${activeState.signature}: missing visible keyboard focus`);
     }
 
-    if (['a', 'button', 'select', 'textarea'].includes(activeState.tagName) && activeState.height < 40) {
+    if (
+      ['a', 'button', 'select', 'textarea'].includes(activeState.tagName) &&
+      activeState.height < 40
+    ) {
       failures.push(`${activeState.signature}: ${activeState.height.toFixed(1)}px control height`);
     }
   }
