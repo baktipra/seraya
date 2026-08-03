@@ -3,6 +3,7 @@ import {
   type InvitationTemplateProps,
 } from '../invitation-template.types';
 
+import experienceStyles from './roselle-guest-experience.module.css';
 import {
   RoselleClosing,
   RoselleCouple,
@@ -40,7 +41,8 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
   return (
     <article
       aria-labelledby="roselle-invitation-title"
-      className={styles.invitation}
+      className={`${styles.invitation} ${experienceStyles.experience}`}
+      data-roselle-experience="letter-v1"
       data-surface={renderContext.surface}
       data-template="roselle"
     >
@@ -54,6 +56,7 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
           aria-label="Sapaan untuk tamu"
           className={styles.personalGreeting}
           data-roselle-addressed-letter
+          data-roselle-chapter="greeting"
           data-template-personal-greeting="roselle"
           id="roselle-personal-greeting"
           role="region"
@@ -68,6 +71,7 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
           <div
             aria-label="Jadwal dan lokasi perayaan"
             data-invitation-schedule-journey="roselle"
+            data-roselle-celebration-thread
             role="group"
           >
             <RoselleEvents events={invitation.events} />
@@ -77,7 +81,11 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
         <RoselleGallery gallery={invitation.gallery} />
         <RoselleDigitalGift digitalGift={invitation.digitalGift} />
         {hasPersonalResponse ? (
-          <div className={styles.personalResponseJourney} data-template-response-journey="roselle">
+          <div
+            className={styles.personalResponseJourney}
+            data-roselle-chapter="response"
+            data-template-response-journey="roselle"
+          >
             <div
               className={styles.responseIntroduction}
               data-template-response-introduction="roselle"
@@ -108,7 +116,11 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
           </div>
         ) : null}
         {showGenericResponseNote ? (
-          <p className={styles.genericResponseNote} data-generic-response-note="roselle">
+          <p
+            className={styles.genericResponseNote}
+            data-generic-response-note="roselle"
+            data-roselle-generic-note
+          >
             {genericResponseCopy}
           </p>
         ) : null}
