@@ -25,10 +25,14 @@ export function EditorialHero() {
     }
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    panel.dataset.motionReady = 'true';
 
     if (reduceMotion.matches) {
       resetMotion(panel);
-      return;
+
+      return () => {
+        delete panel.dataset.motionReady;
+      };
     }
 
     let animationFrame = 0;
@@ -62,6 +66,7 @@ export function EditorialHero() {
 
     return () => {
       cancelAnimationFrame(animationFrame);
+      delete panel.dataset.motionReady;
       panel.removeEventListener('pointermove', handlePointerMove);
       panel.removeEventListener('pointerleave', handlePointerLeave);
     };
