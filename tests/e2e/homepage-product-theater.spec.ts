@@ -46,8 +46,8 @@ test('renders the seamless campaign hero with a layered motion composition', asy
   expect(environmentResponse.ok()).toBe(true);
   expect(detailResponse.ok()).toBe(true);
 
-  const [headerBorderWidth, heroBackground, bodyBackground, heroAnimationName] = await page.evaluate(
-    () => {
+  const [headerBorderWidth, heroBackground, bodyBackground, heroAnimationName] =
+    await page.evaluate(() => {
       const header = document.querySelector('header');
       const hero = document.querySelector<HTMLElement>('[data-homepage-campaign-hero]');
       const theater = document.querySelector<HTMLElement>('[data-editorial-hero-theater]');
@@ -58,8 +58,7 @@ test('renders the seamless campaign hero with a layered motion composition', asy
         window.getComputedStyle(document.body).backgroundColor,
         theater ? window.getComputedStyle(theater).animationName : null,
       ];
-    },
-  );
+    });
 
   expect(headerBorderWidth).toBe('0px');
   expect(heroBackground).toBe(bodyBackground);
