@@ -95,7 +95,7 @@ export function EditorialHero() {
               Mulai buat undangan
               <span aria-hidden="true">→</span>
             </Link>
-            <Link className={styles.secondaryAction} href="/#koleksi">
+            <Link className={styles.secondaryAction} href="/templates">
               Lihat koleksi desain
             </Link>
           </div>
