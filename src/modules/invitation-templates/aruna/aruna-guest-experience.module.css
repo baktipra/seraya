@@ -1,0 +1,1123 @@
+.experience[data-aruna-experience='journal-v1'][data-template='aruna'] {
+  --aruna-journal-paper: #fffdf8;
+  --aruna-journal-canvas: #f1ece4;
+  --aruna-journal-ink: #26221f;
+  --aruna-journal-muted: #706a64;
+  --aruna-journal-rust: #a94e3f;
+  --aruna-journal-gold: #b88a49;
+  --aruna-journal-blue: #68727a;
+  --aruna-journal-line: rgb(72 62 56 / 0.2);
+  --aruna-journal-soft-line: rgb(72 62 56 / 0.11);
+  --aruna-journal-shadow: 0 2.25rem 6rem rgb(49 39 33 / 0.14);
+
+  max-width: 60rem;
+  border-color: var(--aruna-journal-line);
+  border-radius: 0.8rem;
+  background: var(--aruna-journal-paper);
+  box-shadow: var(--aruna-journal-shadow);
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-invitation-chapter]) {
+  scroll-margin-top: 1.5rem;
+}
+
+/* Opening — a directional journal cover, not a generic centered hero. */
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-journal-cover]) {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-content: space-between;
+  min-height: min(88svh, 57rem);
+  gap: clamp(1rem, 3vw, 2.25rem);
+  padding: clamp(2.5rem, 7vw, 5.5rem) clamp(1.3rem, 6vw, 4.75rem)
+    clamp(4rem, 9vw, 6.25rem);
+  background:
+    linear-gradient(90deg, transparent 0 8.25%, rgb(38 34 31 / 0.055) 8.25% 8.4%, transparent 8.4%),
+    linear-gradient(90deg, transparent 0 66.4%, rgb(38 34 31 / 0.055) 66.4% 66.55%, transparent 66.55%),
+    radial-gradient(circle at 88% 14%, rgb(169 78 63 / 0.16), transparent 18rem),
+    linear-gradient(145deg, #f6f0e7, var(--aruna-journal-paper) 48%, #f8f2e9);
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-journal-cover])::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  display: flex;
+  min-height: 1.7rem;
+  align-items: center;
+  border-bottom: 1px solid var(--aruna-journal-line);
+  background: rgb(255 253 248 / 0.68);
+  color: var(--aruna-journal-muted);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  content: 'SERAYA / WEDDING JOURNAL / EDITION 01';
+  padding-inline: clamp(1.3rem, 6vw, 4.75rem);
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-journal-cover])::after {
+  position: absolute;
+  right: clamp(1rem, 4vw, 3rem);
+  bottom: clamp(1rem, 4vw, 3rem);
+  width: clamp(5rem, 13vw, 8rem);
+  aspect-ratio: 1;
+  border: 1px solid rgb(169 78 63 / 0.34);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 0.3rem rgb(169 78 63 / 0.055);
+  color: rgb(169 78 63 / 0.54);
+  content: '';
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-cover-rule]) {
+  grid-column: 1 / -1;
+  align-self: start;
+  margin-top: 0.75rem;
+  background: var(--aruna-journal-ink);
+  opacity: 0.82;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-cover-story]) {
+  grid-column: 1 / span 9;
+  align-self: end;
+  max-width: none;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-cover-masthead]) {
+  display: inline-flex;
+  margin-bottom: clamp(1.6rem, 4vw, 2.6rem);
+  border-top: 2px solid var(--aruna-journal-rust);
+  padding-top: 0.55rem;
+  color: var(--aruna-journal-rust);
+  letter-spacing: 0.22em;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-cover-story])
+  h1 {
+  max-width: 9.2ch;
+  margin: 0;
+  color: var(--aruna-journal-ink);
+  font-size: clamp(4.2rem, 12vw, 8.8rem);
+  line-height: 0.78;
+  letter-spacing: -0.065em;
+  text-wrap: balance;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-cover-story])
+  p:last-child:not(:first-child) {
+  max-width: 34rem;
+  margin-top: clamp(1.6rem, 4vw, 2.5rem);
+  border-left: 1px solid var(--aruna-journal-rust);
+  padding-left: 1rem;
+  color: var(--aruna-journal-muted);
+  font-size: clamp(0.95rem, 2vw, 1.08rem);
+  line-height: 1.75;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-cover-date]) {
+  grid-column: 10 / -1;
+  align-self: end;
+  min-width: 0;
+  padding: 1.1rem 0 0;
+  border-top: 1px solid var(--aruna-journal-ink);
+  border-left: 0;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-cover-date])
+  span:first-child {
+  color: var(--aruna-journal-muted);
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-cover-date])
+  span:last-child {
+  max-width: 11ch;
+  color: var(--aruna-journal-rust);
+  font-size: clamp(1.2rem, 2.5vw, 1.65rem);
+  line-height: 1.05;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  > :global([data-aruna-opening-action]) {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  width: min(100% - 2rem, 21rem);
+  min-height: 3.2rem;
+  align-items: center;
+  justify-content: space-between;
+  margin: -1.6rem auto 0;
+  padding: 0.75rem 1rem 0.75rem 1.2rem;
+  border: 1px solid var(--aruna-journal-line);
+  border-radius: 0;
+  background: var(--aruna-journal-ink);
+  box-shadow: 0 1rem 2.5rem rgb(38 34 31 / 0.16);
+  color: var(--aruna-journal-paper);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  > :global([data-aruna-opening-action]):hover {
+  background: var(--aruna-journal-rust);
+  transform: translateY(-1px);
+}
+
+/* Personal greeting — a calm editor's note placed before the couple feature. */
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-editors-note]) {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(4rem, 9vw, 6.5rem) clamp(1.3rem, 7vw, 5.5rem);
+  border-bottom: 1px solid var(--aruna-journal-line);
+  background:
+    linear-gradient(90deg, transparent 0 14%, rgb(38 34 31 / 0.045) 14% 14.15%, transparent 14.15%),
+    var(--aruna-journal-paper);
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-editors-note])::before {
+  display: block;
+  margin-bottom: 1rem;
+  color: var(--aruna-journal-rust);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  content: 'EDITOR’S NOTE';
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-editors-note])::after {
+  position: absolute;
+  top: clamp(4rem, 9vw, 6.5rem);
+  right: clamp(1.3rem, 7vw, 5.5rem);
+  color: rgb(169 78 63 / 0.16);
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: clamp(5rem, 15vw, 9rem);
+  line-height: 0.7;
+  content: '“';
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-editors-note])
+  :global([data-personal-guest-greeting]) {
+  max-width: 43rem;
+  margin: 0;
+  padding: clamp(1.5rem, 4vw, 2.3rem) 0 0;
+  border: 0;
+  border-top: 1px solid var(--aruna-journal-ink);
+  background: transparent;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-editors-note])
+  :global([data-personal-greeting-title]) {
+  max-width: 13ch;
+  color: var(--aruna-journal-ink);
+  font-size: clamp(2.3rem, 6vw, 4.15rem);
+  line-height: 0.94;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-editors-note])
+  :global([data-personal-greeting-lead]) {
+  max-width: 38rem;
+  color: var(--aruna-journal-muted);
+  line-height: 1.8;
+}
+
+/* Journal pages — long-form rhythm with one directional grid. */
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-journal-pages]) {
+  padding-inline: clamp(1.3rem, 7vw, 5.5rem);
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-journal-pages])
+  > section,
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-agenda])
+  > section {
+  padding-block: clamp(4.5rem, 10vw, 7.5rem);
+  border-top-color: var(--aruna-journal-line);
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-journal-pages])
+  h2 {
+  color: var(--aruna-journal-ink);
+  text-wrap: balance;
+}
+
+/* Couple — split editorial profiles instead of one centered romantic card. */
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-couple-feature]) {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(11rem, 0.7fr) minmax(0, 1.3fr);
+  gap: clamp(2.5rem, 7vw, 5rem);
+  align-items: start;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-couple-feature])
+  > div:first-child {
+  position: sticky;
+  top: 1.5rem;
+  padding-top: 0.75rem;
+  border-top: 3px solid var(--aruna-journal-rust);
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-profile-grid]) {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  margin-top: 0;
+  border-top: 1px solid var(--aruna-journal-ink);
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-profile]) {
+  position: relative;
+  min-width: 0;
+  padding: clamp(2rem, 5vw, 3.5rem) 0;
+  border-bottom: 1px solid var(--aruna-journal-line);
+  text-align: left;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-profile])::before {
+  display: block;
+  margin-bottom: 1.1rem;
+  color: var(--aruna-journal-gold);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  content: attr(data-profile-sequence);
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-profile])
+  h3 {
+  max-width: 12ch;
+  color: var(--aruna-journal-ink);
+  font-size: clamp(2.65rem, 6vw, 4.6rem);
+  line-height: 0.88;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-profile])
+  p {
+  max-width: 31rem;
+  overflow-wrap: anywhere;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-profile-grid])
+  > span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+/* Story — a feature article with a disciplined reading measure. */
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-feature-story]) {
+  display: grid;
+  grid-template-columns: minmax(10rem, 0.55fr) minmax(0, 1.45fr);
+  gap: clamp(2rem, 7vw, 5.5rem);
+  align-items: start;
+  background:
+    linear-gradient(90deg, transparent 0 31%, rgb(38 34 31 / 0.055) 31% 31.15%, transparent 31.15%);
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-feature-story])
+  > p:first-child,
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-feature-story])
+  > h2 {
+  grid-column: 1;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-feature-story])
+  > h2 {
+  margin-top: 0.65rem;
+  font-size: clamp(2.3rem, 5vw, 3.6rem);
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-feature-story])
+  > p:last-child {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  max-width: 40rem;
+  margin-top: 0;
+  color: var(--aruna-journal-muted);
+  font-size: clamp(1rem, 2vw, 1.08rem);
+  line-height: 1.9;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-feature-story])
+  > p:last-child::first-letter {
+  float: left;
+  margin: 0.12em 0.16em 0 0;
+  color: var(--aruna-journal-rust);
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 4.3em;
+  line-height: 0.75;
+}
+
+/* Agenda — a precise run-of-show, not a grid of dashboard cards. */
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-agenda]) {
+  border-top: 1px solid var(--aruna-journal-line);
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-agenda-page])
+  > div:first-child {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem 2rem;
+  max-width: none;
+  align-items: end;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-agenda-page])
+  > div:first-child
+  p,
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-agenda-page])
+  > div:first-child
+  h2 {
+  grid-column: 1;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-agenda-page])
+  > div:first-child
+  span {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: end;
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--aruna-journal-rust);
+  padding-top: 0.5rem;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-agenda-page])
+  > div:nth-child(2) {
+  grid-template-columns: 1fr;
+  gap: 0;
+  margin-top: clamp(2rem, 5vw, 3.5rem);
+  border-top: 1px solid var(--aruna-journal-ink);
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-agenda-entry]) {
+  display: grid;
+  grid-template-columns: 4rem minmax(9rem, 0.7fr) minmax(0, 1.3fr);
+  gap: 1rem clamp(1rem, 4vw, 2.5rem);
+  align-items: start;
+  padding: clamp(1.5rem, 4vw, 2.25rem) 0;
+  border: 0;
+  border-bottom: 1px solid var(--aruna-journal-line);
+  background: transparent;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-agenda-entry])
+  > span:first-child {
+  display: none;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-agenda-entry])
+  > span:nth-child(2) {
+  grid-column: 1;
+  grid-row: 1 / span 6;
+  margin: 0;
+  color: var(--aruna-journal-rust);
+  font-size: 0.72rem;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-agenda-entry])
+  h3 {
+  grid-column: 2;
+  margin: 0;
+  color: var(--aruna-journal-ink);
+  font-size: clamp(1.65rem, 3vw, 2.15rem);
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-agenda-entry])
+  p {
+  grid-column: 3;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-agenda-entry])
+  a {
+  grid-column: 3;
+  justify-self: start;
+  margin-top: 0.35rem;
+}
+
+/* Venue brief — an editorial sidebar appended to the agenda. */
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-venue-brief]) {
+  display: grid;
+  grid-template-columns: minmax(10rem, 0.65fr) minmax(0, 1.35fr);
+  gap: clamp(2rem, 7vw, 5rem);
+  padding-inline: clamp(1.2rem, 4vw, 2.5rem);
+  border-top: 0;
+  background: var(--aruna-journal-canvas);
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-venue-brief])
+  > p:first-child,
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-venue-brief])
+  > h2 {
+  grid-column: 1;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-venue-brief])
+  > p:nth-of-type(n + 2),
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-venue-brief])
+  > a {
+  grid-column: 2;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-venue-brief])
+  > p:nth-of-type(2) {
+  margin-top: 0;
+  color: var(--aruna-journal-ink);
+  font-size: clamp(1.45rem, 3vw, 2rem);
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-venue-brief])
+  > p:nth-of-type(3) {
+  margin-top: 0.75rem;
+}
+
+/* Photo essay — paced frames with a dominant lead image. */
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-photo-essay]) {
+  position: relative;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-photo-essay])::before {
+  position: absolute;
+  top: clamp(4.5rem, 10vw, 7.5rem);
+  right: 0;
+  color: var(--aruna-journal-muted);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  content: 'PHOTO ESSAY / 01';
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-photo-grid]) {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: clamp(0.55rem, 1.8vw, 1rem);
+  margin-top: clamp(2.5rem, 6vw, 4rem);
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-photo-frame]) {
+  position: relative;
+  grid-column: span 5;
+  aspect-ratio: 4 / 5;
+  margin: 0;
+  border: 0;
+  background: var(--aruna-journal-canvas);
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-photo-frame]):first-child {
+  grid-column: 1 / span 8;
+  aspect-ratio: 16 / 10;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-photo-frame]):nth-child(2) {
+  grid-column: 9 / -1;
+  align-self: end;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-photo-frame]):nth-child(3n + 3) {
+  grid-column: 2 / span 5;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-photo-frame]):nth-child(3n + 4) {
+  grid-column: 7 / span 6;
+  aspect-ratio: 3 / 2;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-photo-frame])
+  img {
+  transition: transform 420ms ease;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-photo-frame]):hover
+  img {
+  transform: scale(1.015);
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-photo-frame])
+  figcaption {
+  right: auto;
+  bottom: -1.45rem;
+  left: 0;
+  color: var(--aruna-journal-muted);
+  font-size: 0.64rem;
+  letter-spacing: 0.16em;
+}
+
+/* Gift desk — a restrained registry ledger. */
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-gift-desk]) {
+  display: grid;
+  grid-template-columns: minmax(11rem, 0.7fr) minmax(0, 1.3fr);
+  gap: clamp(2rem, 7vw, 5rem);
+  background: linear-gradient(135deg, rgb(184 138 73 / 0.075), transparent 54%);
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-gift-desk])
+  > div:first-child {
+  position: sticky;
+  top: 1.5rem;
+  align-self: start;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-gift-desk])
+  > div:last-child {
+  grid-template-columns: 1fr;
+  gap: 0;
+  margin-top: 0;
+  border-top: 1px solid var(--aruna-journal-ink);
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-gift-desk])
+  article {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr) auto;
+  gap: 0.35rem 1rem;
+  align-items: center;
+  padding: 1.35rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--aruna-journal-line);
+  background: transparent;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-gift-desk])
+  article
+  > span:first-child {
+  grid-column: 1;
+  grid-row: 1 / span 4;
+  margin: 0;
+  color: var(--aruna-journal-gold);
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-gift-desk])
+  article
+  p,
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-gift-desk])
+  article
+  h3 {
+  grid-column: 2;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-gift-desk])
+  article
+  button {
+  grid-column: 3;
+  grid-row: 1 / span 4;
+  min-height: 2.75rem;
+  align-self: center;
+}
+
+/* Personal response — a precise reader-response spread. */
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-reader-response]) {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  margin: 0;
+  padding: clamp(4.5rem, 10vw, 7.5rem) 0;
+  border-top: 1px solid var(--aruna-journal-line);
+  background:
+    linear-gradient(90deg, transparent 0 calc(50% - 0.5px), var(--aruna-journal-line) calc(50% - 0.5px) calc(50% + 0.5px), transparent calc(50% + 0.5px));
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-reader-response])
+  > div:first-child {
+  grid-column: 1 / -1;
+  margin-bottom: clamp(2.5rem, 6vw, 4rem);
+  padding-bottom: 1.4rem;
+  border-bottom: 1px solid var(--aruna-journal-ink);
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-reader-response])
+  :global([data-personal-response-title]) {
+  max-width: 14ch;
+  color: var(--aruna-journal-ink);
+  font-size: clamp(2.4rem, 6vw, 4.2rem);
+  line-height: 0.9;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-reader-response])
+  :global([data-personal-response-copy]) {
+  max-width: 40rem;
+  color: var(--aruna-journal-muted);
+  line-height: 1.75;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-response-column]) {
+  min-width: 0;
+  padding: 0 clamp(1.2rem, 4vw, 2.5rem);
+  border: 0;
+  background: transparent;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-response-column='rsvp']) {
+  padding-left: 0;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-response-column='guestbook']) {
+  padding-right: 0;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-response-column])
+  :global([data-personal-response-step]) {
+  color: var(--aruna-journal-rust);
+  letter-spacing: 0.18em;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-response-column])
+  form {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-response-column])
+  button {
+  min-height: 3rem;
+  border-radius: 0;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-response-column])
+  input,
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-response-column])
+  textarea,
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-response-column])
+  select {
+  border-radius: 0;
+  border-color: var(--aruna-journal-line);
+  background: rgb(255 253 248 / 0.76);
+}
+
+/* Generic handoff remains singular, quiet, and without a CTA. */
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-generic-response-note='aruna']) {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 1.2rem 0;
+  border: 0;
+  border-top: 1px solid var(--aruna-journal-line);
+  border-bottom: 1px solid var(--aruna-journal-line);
+  background: transparent;
+  color: var(--aruna-journal-muted);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
+/* Closing — a journal colophon rather than a decorative final card. */
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-colophon]) {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem 3rem;
+  align-items: end;
+  text-align: left;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-colophon])::before {
+  grid-column: 1 / -1;
+  color: var(--aruna-journal-rust);
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  content: 'COLOPHON / WITH GRATITUDE';
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-colophon])
+  > div:first-child {
+  grid-column: 1 / -1;
+  max-width: none;
+  margin: 0;
+  background: var(--aruna-journal-ink);
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-colophon])
+  h2 {
+  max-width: 15ch;
+  margin: 0;
+  font-size: clamp(2.5rem, 6vw, 4.3rem);
+  line-height: 0.9;
+  text-align: left;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-colophon])
+  p {
+  max-width: 34rem;
+  margin: 0;
+  text-align: left;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-colophon])
+  p:nth-of-type(1) {
+  grid-column: 1;
+  margin-top: 1.4rem;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  :global([data-aruna-colophon])
+  p:last-child {
+  grid-column: 2;
+  grid-row: 3;
+  align-self: end;
+  margin: 0;
+  color: var(--aruna-journal-rust);
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  > :global([data-aruna-return-action]) {
+  display: flex;
+  min-height: 3rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  border-top: 1px solid var(--aruna-journal-line);
+  background: var(--aruna-journal-canvas);
+  color: var(--aruna-journal-ink);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  > :global([data-aruna-return-action]):hover {
+  background: var(--aruna-journal-ink);
+  color: var(--aruna-journal-paper);
+}
+
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  a:focus-visible,
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  button:focus-visible,
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  input:focus-visible,
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  textarea:focus-visible,
+.experience[data-aruna-experience='journal-v1'][data-template='aruna']
+  select:focus-visible {
+  outline: 3px solid rgb(169 78 63 / 0.48);
+  outline-offset: 4px;
+}
+
+@media (max-width: 48rem) {
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-couple-feature]),
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-feature-story]),
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-venue-brief]),
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-gift-desk]) {
+    grid-template-columns: 1fr;
+    background-image: none;
+  }
+
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-couple-feature])
+    > div:first-child,
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-gift-desk])
+    > div:first-child {
+    position: static;
+  }
+
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-feature-story])
+    > p:first-child,
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-feature-story])
+    > h2,
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-feature-story])
+    > p:last-child,
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-venue-brief])
+    > *,
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-gift-desk])
+    > * {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-feature-story])
+    > p:last-child {
+    margin-top: 1rem;
+  }
+
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-agenda-entry]) {
+    grid-template-columns: 3rem minmax(0, 1fr);
+  }
+
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-agenda-entry])
+    h3,
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-agenda-entry])
+    p,
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-agenda-entry])
+    a {
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 36rem) {
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna'] {
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+  }
+
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-journal-cover]) {
+    grid-template-columns: 1fr;
+    min-height: min(88svh, 48rem);
+    padding-top: 3.25rem;
+  }
+
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-cover-rule]),
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-cover-story]),
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-cover-date]) {
+    grid-column: 1;
+  }
+
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-cover-story])
+    h1 {
+    max-width: 10ch;
+    font-size: clamp(3.6rem, 19vw, 5.7rem);
+  }
+
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-cover-date]) {
+    align-self: end;
+  }
+
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-journal-pages]) {
+    padding-inline: 1.2rem;
+  }
+
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-couple-feature]) {
+    gap: 2rem;
+  }
+
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-agenda-page])
+    > div:first-child {
+    grid-template-columns: 1fr;
+  }
+
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-agenda-page])
+    > div:first-child
+    span {
+    grid-column: 1;
+    grid-row: auto;
+    justify-self: start;
+  }
+
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-agenda-entry]) {
+    grid-template-columns: 2.4rem minmax(0, 1fr);
+    gap: 0.6rem 1rem;
+  }
+
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-photo-essay])::before {
+    position: static;
+    display: block;
+    margin: 1rem 0 0;
+  }
+
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-photo-grid]) {
+    grid-template-columns: 1fr;
+    gap: 2.2rem;
+  }
+
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-photo-frame]),
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-photo-frame]):first-child,
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-photo-frame]):nth-child(2),
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-photo-frame]):nth-child(3n + 3),
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-photo-frame]):nth-child(3n + 4) {
+    grid-column: 1;
+    aspect-ratio: 4 / 5;
+  }
+
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-gift-desk])
+    article {
+    grid-template-columns: 2rem minmax(0, 1fr);
+  }
+
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-gift-desk])
+    article
+    button {
+    grid-column: 2;
+    grid-row: auto;
+    justify-self: start;
+  }
+
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-reader-response]) {
+    grid-template-columns: 1fr;
+    background-image: none;
+  }
+
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-response-column]) {
+    grid-column: 1;
+    padding: 2rem 0 0;
+    border-top: 1px solid var(--aruna-journal-line);
+  }
+
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-response-column='guestbook']) {
+    margin-top: 2rem;
+  }
+
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-colophon]) {
+    grid-template-columns: 1fr;
+  }
+
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-colophon])
+    p:last-child {
+    grid-column: 1;
+    grid-row: auto;
+    margin-top: 1.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna'] *,
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna'] *::before,
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna'] *::after {
+    scroll-behavior: auto !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    :global([data-aruna-photo-frame]):hover
+    img,
+  .experience[data-aruna-experience='journal-v1'][data-template='aruna']
+    > :global([data-aruna-opening-action]):hover {
+    transform: none;
+  }
+}
