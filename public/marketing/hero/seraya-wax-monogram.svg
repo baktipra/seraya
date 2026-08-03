@@ -1,0 +1,5 @@
+<svg viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M90 9C106 9 116 18 129 23C143 28 157 29 164 42C171 55 165 68 168 82C172 97 177 111 168 123C159 136 144 136 133 146C122 156 116 170 101 172C86 175 75 164 61 162C46 160 31 164 22 152C13 140 18 126 14 112C10 97 4 84 12 71C20 58 35 55 46 45C57 34 62 20 77 16C82 12 86 9 90 9Z" fill="currentColor" opacity=".96"/>
+  <circle cx="90" cy="90" r="57" stroke="white" stroke-opacity=".48"/>
+  <path d="M57 116V64M57 90H85M85 64V116M105 116L124 64L143 116M112 96H136" stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
