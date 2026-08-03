@@ -13,10 +13,23 @@ import {
   type InvitationTemplateRegistry,
 } from './invitation-template.types';
 
+export const ArunaParityTemplate = createInvitationTemplateParityBoundary(
+  'aruna',
+  ArunaTemplate,
+);
+export const LarasParityTemplate = createInvitationTemplateParityBoundary(
+  'laras',
+  LarasTemplate,
+);
+export const RoselleParityTemplate = createInvitationTemplateParityBoundary(
+  'roselle',
+  RoselleTemplate,
+);
+
 export const invitationTemplateRegistry = {
-  aruna: createInvitationTemplateParityBoundary('aruna', ArunaTemplate),
-  laras: createInvitationTemplateParityBoundary('laras', LarasTemplate),
-  roselle: createInvitationTemplateParityBoundary('roselle', RoselleTemplate),
+  aruna: ArunaParityTemplate,
+  laras: LarasParityTemplate,
+  roselle: RoselleParityTemplate,
 } satisfies InvitationTemplateRegistry;
 
 const registeredTemplateIds = Object.keys(invitationTemplateRegistry) as InvitationTemplateId[];
