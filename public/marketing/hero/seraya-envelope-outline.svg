@@ -1,0 +1,6 @@
+<svg viewBox="0 0 720 460" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="20" y="20" width="680" height="420" rx="28" stroke="currentColor" stroke-width="2" opacity=".5"/>
+  <path d="M42 52L360 274L678 52" stroke="currentColor" stroke-width="2" opacity=".62"/>
+  <path d="M42 408L256 222M678 408L464 222" stroke="currentColor" stroke-width="2" opacity=".34"/>
+  <path d="M42 52L310 240C341 262 379 262 410 240L678 52" stroke="currentColor" stroke-width="1.2" opacity=".24"/>
+</svg>
