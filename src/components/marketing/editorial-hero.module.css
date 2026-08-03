@@ -72,8 +72,7 @@
   object-fit: cover;
   object-position: center;
   filter: saturate(0.9) contrast(0.98) brightness(1.02);
-  transform: translate3d(var(--hero-shift-x-reverse), var(--hero-shift-y-reverse), 0)
-    scale(1.018);
+  transform: translate3d(var(--hero-shift-x-reverse), var(--hero-shift-y-reverse), 0) scale(1.018);
   transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform;
 }

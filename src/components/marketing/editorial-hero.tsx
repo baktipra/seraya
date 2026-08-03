@@ -102,10 +102,7 @@ export function EditorialHero() {
               ref={videoRef}
               tabIndex={-1}
             >
-              <source
-                src="/marketing/hero/seraya-wedding-editorial-loop.mp4"
-                type="video/mp4"
-              />
+              <source src="/marketing/hero/seraya-wedding-editorial-loop.mp4" type="video/mp4" />
             </video>
             <div className={styles.productPhotoWash} />
             <div className={styles.productLightSweep} />
