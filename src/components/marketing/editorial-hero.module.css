@@ -1,195 +1,102 @@
 .hero {
+  border-bottom: 1px solid var(--seraya-border-default);
+  background: #fff;
+  padding: 0.35rem 1.25rem 1.5rem;
+}
+
+.frame {
   position: relative;
   isolation: isolate;
-  overflow: hidden;
-  border-bottom: 1px solid var(--seraya-border-default);
-  background:
-    radial-gradient(circle at 13% 8%, rgb(255 255 255 / 86%), transparent 29rem),
-    linear-gradient(132deg, #f5efe8 0%, #f7f3ed 44%, #efe3df 100%);
-}
-
-.ambientGlow {
-  position: absolute;
-  top: -16rem;
-  right: -12rem;
-  z-index: -2;
-  width: 42rem;
-  height: 42rem;
-  border-radius: 999px;
-  background: rgb(145 70 80 / 14%);
-  filter: blur(72px);
-}
-
-.botanicalField {
-  position: absolute;
-  bottom: -11rem;
-  left: -8rem;
-  z-index: -1;
-  width: min(42rem, 54vw);
-  aspect-ratio: 1.23;
-  background: url('/marketing/hero/seraya-botanical-corner.svg') center / contain no-repeat;
-  color: #8e4b52;
-  opacity: 0.17;
-  transform: rotate(-7deg);
-}
-
-.shell {
   display: grid;
-  width: min(100%, 94rem);
-  min-height: 40rem;
+  grid-template-columns: minmax(0, 1.05fr) minmax(25rem, 0.95fr);
+  width: min(100%, 96rem);
+  min-height: 27rem;
   margin-inline: auto;
-  padding: 2rem 1.25rem 2.25rem;
-  gap: 2.5rem;
-  align-items: center;
-}
-
-.theater {
-  position: relative;
-  width: 100%;
-  max-width: 45rem;
-  margin-inline: auto;
-}
-
-.theaterInner {
-  position: relative;
-  min-height: 35rem;
   overflow: hidden;
-  border: 1px solid rgb(112 83 72 / 15%);
-  border-radius: 2rem;
-  background:
-    linear-gradient(rgb(255 255 255 / 22%), rgb(255 255 255 / 22%)),
-    url('/marketing/hero/seraya-stationery-grain.svg'), #decfc5;
-  box-shadow: 0 34px 90px rgb(68 49 42 / 16%);
+  border: 1px solid rgb(71 57 51 / 8%);
+  background: #e9ded7;
 }
 
-.theaterInner::before {
+.frame::after {
   position: absolute;
   inset: 0;
+  z-index: -1;
   background:
-    radial-gradient(circle at 20% 14%, rgb(255 255 255 / 78%), transparent 26%),
-    linear-gradient(110deg, transparent 34%, rgb(255 255 255 / 26%) 56%, transparent 75%);
+    radial-gradient(circle at 91% 82%, rgb(255 255 255 / 28%), transparent 16rem),
+    linear-gradient(112deg, transparent 0 39%, rgb(255 255 255 / 18%) 52%, transparent 70%);
   content: '';
+  pointer-events: none;
 }
 
-.sceneLabel {
-  position: absolute;
-  top: 1.35rem;
-  right: 1.5rem;
-  left: 1.5rem;
-  z-index: 8;
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  color: rgb(63 44 50 / 67%);
-  font-size: 0.61rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+.backdrop {
+  z-index: -3;
+  object-fit: cover;
+  object-position: center 42%;
+  filter: saturate(0.68) contrast(0.91) brightness(1.13);
+  transform: scale(1.055);
 }
 
-.stationeryBoard {
+.backdropWash {
   position: absolute;
-  top: 7.8rem;
-  left: -4.6rem;
-  width: 75%;
-  height: 57%;
-  border: 1px solid rgb(96 72 63 / 14%);
-  border-radius: 1.4rem;
+  inset: 0;
+  z-index: -2;
   background:
-    url('/marketing/hero/seraya-botanical-corner.svg') left bottom / 72% auto no-repeat,
-    url('/marketing/hero/seraya-stationery-grain.svg'),
-    #f2e9df;
-  color: #8e4b52;
-  box-shadow: 0 22px 48px rgb(71 55 48 / 12%);
-  transform: rotate(-7deg);
-  animation: boardIn 720ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    linear-gradient(90deg, rgb(236 220 213 / 42%) 0%, rgb(247 241 236 / 52%) 46%, rgb(248 244 239 / 88%) 100%),
+    linear-gradient(180deg, rgb(255 255 255 / 7%), rgb(240 228 221 / 17%));
 }
 
-.envelope {
-  position: absolute;
-  top: 6.9rem;
-  right: -4.8rem;
-  width: 70%;
-  aspect-ratio: 1.48;
+.productPanel {
+  position: relative;
+  align-self: stretch;
+  width: min(78%, 39rem);
+  min-height: 20.5rem;
+  margin: 3.7rem 0 0 6.8%;
   overflow: hidden;
-  border: 1px solid rgb(49 77 66 / 20%);
-  border-radius: 1.35rem;
-  background: #526b5f;
-  box-shadow: 0 24px 54px rgb(43 56 49 / 19%);
-  transform: rotate(7deg);
-  animation: envelopeIn 780ms 70ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  border: 1px solid rgb(105 76 70 / 11%);
+  background: #ead5d2;
+  box-shadow: 0 24px 62px rgb(66 47 40 / 16%);
+  animation: campaignProductIn 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.envelope::before {
+.productPhoto,
+.productPhotoWash {
   position: absolute;
   inset: 0;
-  background: url('/marketing/hero/seraya-envelope-outline.svg') center / 100% 100% no-repeat;
-  color: rgb(255 255 255 / 42%);
-  content: '';
 }
 
-.envelopeLiner {
-  position: absolute;
-  inset: 0;
+.productPhotoImage {
+  object-fit: cover;
+  object-position: center 28%;
+  filter: saturate(0.61) contrast(0.91) brightness(1.08);
+  transform: scale(1.03);
+}
+
+.productPhotoWash {
   background:
-    radial-gradient(circle at 78% 20%, rgb(255 255 255 / 18%), transparent 24%),
-    url('/marketing/hero/seraya-botanical-corner.svg') left bottom / 78% auto no-repeat;
-  color: #ead8ce;
-  opacity: 0.72;
+    linear-gradient(90deg, rgb(236 211 210 / 74%), rgb(241 223 220 / 48%) 47%, rgb(255 255 255 / 12%)),
+    linear-gradient(180deg, rgb(255 255 255 / 14%), rgb(226 198 196 / 22%));
 }
 
-.invitationCard {
-  position: relative;
-  z-index: 4;
-  width: min(52%, 20.5rem);
-  min-width: 17rem;
-  aspect-ratio: 0.69;
-  margin: 4.45rem auto 0;
-  overflow: hidden;
-  border: 1px solid rgb(142 75 82 / 18%);
-  border-radius: 1.5rem 1.5rem 1rem 1rem;
-  background: #fffaf7;
-  box-shadow: 0 32px 70px rgb(64 46 41 / 25%);
-  transform: rotate(-1.6deg);
-  animation: invitationIn 760ms 130ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.invitationPhoto,
-.invitationWash {
+.invitationSheet {
   position: absolute;
-  inset: 0;
-}
-
-.invitationPhoto {
-  background: url('/showroom/kirana-arga/kirana-arga-opening-portrait.avif') center 28% / cover
-    no-repeat;
-  filter: saturate(0.76) contrast(0.94);
-}
-
-.invitationWash {
-  background: linear-gradient(
-    180deg,
-    rgb(255 250 247 / 28%) 0%,
-    rgb(255 250 247 / 82%) 48%,
-    rgb(255 250 247 / 98%) 100%
-  );
-}
-
-.invitationContent {
-  position: relative;
-  z-index: 1;
+  top: 12%;
+  left: 50%;
   display: flex;
-  min-height: 100%;
+  width: min(46%, 15.8rem);
+  aspect-ratio: 0.71;
   flex-direction: column;
   align-items: center;
-  padding: 2rem 1.4rem 1.25rem;
+  justify-content: center;
+  border: 1px solid rgb(67 56 51 / 10%);
+  background: rgb(255 253 249 / 96%);
+  box-shadow: 0 20px 48px rgb(45 36 31 / 22%);
+  color: #2b2522;
   text-align: center;
+  transform: translateX(-50%) rotate(-7deg);
 }
 
-.invitationEyebrow,
-.cardEyebrow {
-  color: #8e4b52;
-  font-size: 0.55rem;
+.invitationEyebrow {
+  font-size: 0.54rem;
   font-weight: 700;
   letter-spacing: 0.17em;
   text-transform: uppercase;
@@ -198,585 +105,245 @@
 .invitationNames {
   display: flex;
   flex-direction: column;
-  margin-top: 1.2rem;
-  color: #3f2c32;
+  margin-top: 1.1rem;
   font-family: var(--font-editorial);
-  font-size: clamp(3.35rem, 6vw, 5.1rem);
+  font-size: clamp(2.7rem, 4.5vw, 4.5rem);
   font-weight: 500;
   letter-spacing: -0.07em;
-  line-height: 0.69;
+  line-height: 0.72;
 }
 
 .invitationNames span {
-  margin-block: 0.2rem;
-  color: #8e4b52;
+  margin-block: 0.18rem;
+  color: var(--seraya-action-primary);
   font-size: 0.58em;
   font-style: italic;
 }
 
-.invitationCopy {
-  max-width: 13rem;
-  margin-top: 1.55rem;
-  color: #765f65;
-  font-size: 0.69rem;
-  line-height: 1.65;
+.invitationRule {
+  width: 2.4rem;
+  height: 1px;
+  margin-top: 1.35rem;
+  background: rgb(142 75 82 / 45%);
 }
 
 .invitationDate {
-  display: grid;
-  grid-template-columns: auto auto;
-  align-items: center;
-  gap: 0.65rem;
-  margin-top: auto;
-  padding-top: 1rem;
-  color: #8e4b52;
-}
-
-.invitationDate span {
-  font-family: var(--font-editorial);
-  font-size: 2.4rem;
-  line-height: 0.8;
-}
-
-.invitationDate p {
-  max-width: 4.3rem;
-  border-left: 1px solid rgb(142 75 82 / 32%);
-  padding-left: 0.65rem;
-  font-size: 0.56rem;
+  margin-top: 1rem;
+  font-size: 0.61rem;
   font-weight: 700;
-  letter-spacing: 0.11em;
-  line-height: 1.35;
-  text-align: left;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
-.personalCard,
-.responseCard {
+.invitationPlace {
+  margin-top: 0.4rem;
+  color: rgb(43 37 34 / 62%);
+  font-size: 0.53rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.productCaption {
   position: absolute;
-  z-index: 6;
-  border: 1px solid rgb(142 75 82 / 16%);
-  background: url('/marketing/hero/seraya-stationery-grain.svg'), rgb(255 251 247 / 96%);
-  box-shadow: 0 20px 45px rgb(65 47 41 / 19%);
-  backdrop-filter: blur(10px);
-}
-
-.personalCard {
-  top: 12.1rem;
-  left: 1.25rem;
-  width: 13.4rem;
-  border-radius: 1rem;
-  padding: 1.15rem 1.2rem 1.25rem;
-  transform: rotate(-5deg);
-  animation: personalIn 720ms 230ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.personalName {
-  margin-top: 0.55rem;
-  color: #3f2c32;
-  font-family: var(--font-editorial);
-  font-size: 1.65rem;
-  letter-spacing: -0.045em;
-  line-height: 0.94;
-}
-
-.personalMeta {
-  margin-top: 0.65rem;
-  color: #78656a;
-  font-size: 0.63rem;
-  line-height: 1.5;
-}
-
-.responseCard {
-  right: 1.15rem;
-  bottom: 4rem;
-  display: grid;
-  grid-template-columns: 2.7rem minmax(0, 1fr);
-  align-items: center;
-  gap: 0.7rem;
-  width: 13rem;
-  border-radius: 999px;
-  padding: 0.65rem 0.85rem 0.65rem 0.7rem;
-  transform: rotate(4deg);
-  animation: responseIn 680ms 310ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.replyMark {
-  width: 2.7rem;
-  height: 2.7rem;
-  color: #526b5f;
-}
-
-.responseTitle {
-  margin-top: 0.2rem;
-  color: #31483e;
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-
-.waxSeal {
-  position: absolute;
-  right: 7.2rem;
-  bottom: 8.1rem;
-  z-index: 7;
-  width: 4.1rem;
-  height: 4.1rem;
-  color: #8e4b52;
-  filter: drop-shadow(0 10px 12px rgb(71 40 45 / 26%));
-  transform: rotate(9deg);
-  animation: sealIn 560ms 390ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.theaterCaption {
-  position: absolute;
-  bottom: 1.35rem;
-  left: 1.5rem;
-  z-index: 8;
-  color: rgb(63 44 50 / 68%);
-  font-size: 0.59rem;
+  right: 1rem;
+  bottom: 0.85rem;
+  color: rgb(58 45 41 / 68%);
+  font-size: 0.56rem;
   font-weight: 700;
   letter-spacing: 0.13em;
   text-transform: uppercase;
 }
 
 .copy {
-  max-width: 42rem;
+  width: min(100%, 39rem);
   margin-inline: auto;
+  padding: 3rem 3.25rem;
   text-align: center;
+  animation: campaignCopyIn 600ms 90ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .eyebrow {
   color: var(--seraya-action-primary);
-  font-size: 0.69rem;
+  font-size: 0.67rem;
   font-weight: 700;
-  letter-spacing: 0.19em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
 }
 
 .title {
-  margin-top: 1.2rem;
-  color: var(--seraya-text-primary);
+  margin-top: 1rem;
+  color: #211d1a;
   font-family: var(--font-editorial);
-  font-size: clamp(3.45rem, 10.8vw, 6.6rem);
+  font-size: clamp(2.5rem, 3.5vw, 3.75rem);
   font-weight: 500;
-  letter-spacing: -0.068em;
-  line-height: 0.83;
-}
-
-.title span {
-  display: block;
-  margin-top: 0.16em;
-  color: var(--seraya-action-primary);
-  font-style: italic;
+  letter-spacing: -0.047em;
+  line-height: 0.98;
+  text-wrap: balance;
 }
 
 .lead {
-  max-width: 39rem;
-  margin: 1.6rem auto 0;
-  color: var(--seraya-text-secondary);
-  font-size: clamp(1rem, 2vw, 1.18rem);
-  line-height: 1.72;
-}
-
-.actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-top: 1.85rem;
-}
-
-.primaryAction,
-.secondaryAction {
-  display: inline-flex;
-  min-height: 3.25rem;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  border-radius: 999px;
-  padding-inline: 1.5rem;
-  font-size: 0.91rem;
-  font-weight: 700;
-  transition:
-    transform 180ms ease,
-    background-color 180ms ease,
-    border-color 180ms ease;
+  max-width: 35rem;
+  margin: 1.1rem auto 0;
+  color: rgb(39 32 28 / 78%);
+  font-size: clamp(0.98rem, 1.3vw, 1.12rem);
+  line-height: 1.55;
+  text-wrap: balance;
 }
 
 .primaryAction {
-  background: var(--seraya-action-primary);
-  box-shadow: 0 16px 36px rgb(112 54 64 / 18%);
-  color: white;
+  display: inline-flex;
+  min-height: 3.4rem;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1.45rem;
+  border: 1px solid rgb(61 47 42 / 8%);
+  background: rgb(255 255 255 / 94%);
+  box-shadow: 0 14px 34px rgb(73 54 46 / 12%);
+  color: #241f1c;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  padding-inline: 2rem;
+  text-transform: uppercase;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease;
 }
 
-.secondaryAction {
-  border: 1px solid var(--seraya-border-strong);
-  background: rgb(255 255 255 / 58%);
-  color: var(--seraya-text-primary);
-}
-
-.primaryAction:hover,
-.secondaryAction:hover {
+.primaryAction:hover {
+  background: #fff;
+  box-shadow: 0 18px 38px rgb(73 54 46 / 17%);
   transform: translateY(-2px);
 }
 
-.primaryAction:focus-visible,
-.secondaryAction:focus-visible,
-.railLink:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--seraya-action-primary) 42%, transparent);
-  outline-offset: 3px;
+.primaryAction:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--seraya-action-primary) 44%, transparent);
+  outline-offset: 4px;
 }
 
-.proofs {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.6rem 1.2rem;
-  margin-top: 1.55rem;
-  color: var(--seraya-text-muted);
-  font-size: 0.7rem;
-  font-weight: 700;
-}
-
-.proofs li {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-}
-
-.proofs li::before {
-  width: 0.32rem;
-  height: 0.32rem;
-  border-radius: 999px;
-  background: var(--seraya-action-primary);
-  content: '';
-  opacity: 0.55;
-}
-
-.rail {
-  border-top: 1px solid rgb(82 65 59 / 13%);
-  background: rgb(255 255 255 / 48%);
-  backdrop-filter: blur(16px);
-}
-
-.railTrack {
-  display: flex;
-  width: min(100%, 94rem);
-  margin-inline: auto;
-  overflow-x: auto;
-  padding-inline: 1.25rem;
-  scroll-snap-type: x proximity;
-  scrollbar-width: none;
-}
-
-.railTrack::-webkit-scrollbar {
-  display: none;
-}
-
-.railLink {
-  position: relative;
-  display: inline-flex;
-  min-width: max-content;
-  min-height: 4.2rem;
-  flex: 1 0 auto;
-  align-items: center;
-  justify-content: center;
-  gap: 0.55rem;
-  padding-inline: 1.25rem;
-  color: var(--seraya-text-secondary);
-  font-size: 0.79rem;
-  font-weight: 700;
-  scroll-snap-align: start;
-}
-
-.railLink span {
-  color: var(--seraya-action-primary);
-  font-size: 0.56rem;
-  letter-spacing: 0.12em;
-}
-
-.railLink::after {
-  position: absolute;
-  right: 1.25rem;
-  bottom: 0;
-  left: 1.25rem;
-  height: 2px;
-  background: var(--seraya-action-primary);
-  content: '';
-  opacity: 0;
-  transform: scaleX(0.45);
-  transition:
-    opacity 180ms ease,
-    transform 180ms ease;
-}
-
-.railLink:hover,
-.railLinkActive {
-  color: var(--seraya-text-primary);
-}
-
-.railLink:hover::after,
-.railLinkActive::after {
-  opacity: 1;
-  transform: scaleX(1);
-}
-
-@keyframes boardIn {
+@keyframes campaignProductIn {
   from {
     opacity: 0;
-    transform: translateY(10px) rotate(-7deg);
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-@keyframes envelopeIn {
+@keyframes campaignCopyIn {
   from {
     opacity: 0;
-    transform: translateY(12px) rotate(7deg);
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-@keyframes invitationIn {
-  from {
-    opacity: 0;
-    transform: translateY(16px) rotate(-1.6deg);
-  }
-}
-
-@keyframes personalIn {
-  from {
-    opacity: 0;
-    transform: translate(-12px, 8px) rotate(-5deg);
-  }
-}
-
-@keyframes responseIn {
-  from {
-    opacity: 0;
-    transform: translate(10px, 8px) rotate(4deg);
-  }
-}
-
-@keyframes sealIn {
-  from {
-    opacity: 0;
-    transform: scale(0.82) rotate(9deg);
-  }
-}
-
-@media (min-width: 640px) {
-  .shell {
-    padding: 3rem 2rem 2.8rem;
+@media (max-width: 70rem) {
+  .frame {
+    grid-template-columns: minmax(0, 1fr) minmax(22rem, 0.92fr);
   }
 
-  .actions {
-    flex-direction: row;
-    justify-content: center;
+  .productPanel {
+    width: 82%;
+    margin-left: 4%;
   }
 
-  .primaryAction,
-  .secondaryAction {
-    min-width: 13rem;
-  }
-
-  .railTrack {
+  .copy {
     padding-inline: 2rem;
   }
 }
 
-@media (min-width: 1024px) {
-  .shell {
-    grid-template-columns: minmax(31rem, 1.12fr) minmax(27rem, 0.88fr);
-    min-height: 43rem;
-    gap: 4rem;
-    padding: 3.25rem 2.5rem 3.1rem;
+@media (max-width: 56rem) {
+  .hero {
+    padding: 0.5rem 0 1.25rem;
   }
 
-  .theater {
-    order: 0;
+  .frame {
+    grid-template-columns: 1fr;
+    width: 100%;
+    min-height: 0;
+    border-right: 0;
+    border-left: 0;
   }
 
-  .theaterInner {
-    min-height: 38rem;
-    border-radius: 2.35rem;
+  .backdrop {
+    object-position: center 33%;
+  }
+
+  .backdropWash {
+    background: linear-gradient(180deg, rgb(237 218 214 / 52%) 0 51%, rgb(250 247 243 / 95%) 64% 100%);
+  }
+
+  .productPanel {
+    grid-row: 1;
+    width: calc(100% - 2rem);
+    min-height: 20rem;
+    margin: 1rem;
   }
 
   .copy {
-    order: 1;
-    margin-inline: 0;
-    text-align: left;
+    grid-row: 2;
+    width: 100%;
+    padding: 2.6rem 1.5rem 2.8rem;
+    background: rgb(250 247 243 / 94%);
   }
 
   .title {
-    font-size: clamp(4.6rem, 5.6vw, 7rem);
+    max-width: 31rem;
+    margin-inline: auto;
+    font-size: clamp(2.55rem, 8vw, 3.4rem);
   }
 
   .lead {
-    margin-inline: 0;
-  }
-
-  .actions {
-    justify-content: flex-start;
-  }
-
-  .proofs {
-    justify-content: flex-start;
-  }
-
-  .railTrack {
-    padding-inline: 2.5rem;
+    max-width: 31rem;
   }
 }
 
-@media (max-width: 767px) {
-  .theaterInner {
-    min-height: 31rem;
+@media (max-width: 34rem) {
+  .productPanel {
+    min-height: 18rem;
   }
 
-  .sceneLabel span:last-child {
-    display: none;
-  }
-
-  .stationeryBoard {
-    top: 8rem;
-    left: -6rem;
-    width: 92%;
-  }
-
-  .envelope {
-    top: 7.5rem;
-    right: -6.5rem;
-    width: 88%;
-  }
-
-  .invitationCard {
-    width: min(59%, 18rem);
-    min-width: 15.7rem;
-    margin-top: 4.2rem;
-  }
-
-  .personalCard {
-    top: 11.3rem;
-    left: -0.6rem;
-    width: 11.2rem;
-    padding: 0.9rem;
-  }
-
-  .personalName {
-    font-size: 1.35rem;
-  }
-
-  .responseCard {
-    right: -0.7rem;
-    bottom: 3.7rem;
-    width: 11.5rem;
-    grid-template-columns: 2.2rem minmax(0, 1fr);
-  }
-
-  .replyMark {
-    width: 2.2rem;
-    height: 2.2rem;
-  }
-
-  .waxSeal {
-    right: 4.2rem;
-    bottom: 7.7rem;
-    width: 3.5rem;
-    height: 3.5rem;
-  }
-}
-
-@media (max-width: 420px) {
-  .shell {
-    gap: 2rem;
-    padding-top: 1.5rem;
-  }
-
-  .theaterInner {
-    min-height: 27.8rem;
-    border-radius: 1.55rem;
-  }
-
-  .sceneLabel {
-    top: 1rem;
-    right: 1rem;
-    left: 1rem;
-  }
-
-  .stationeryBoard {
-    display: none;
-  }
-
-  .envelope {
-    top: 6.1rem;
-    right: -8.5rem;
-    width: 106%;
-  }
-
-  .invitationCard {
-    width: 70%;
-    min-width: 14.6rem;
-    margin-top: 3.55rem;
-  }
-
-  .invitationContent {
-    padding: 1.45rem 1.1rem 1rem;
+  .invitationSheet {
+    width: min(44%, 12.8rem);
   }
 
   .invitationNames {
-    font-size: 3.25rem;
+    font-size: clamp(2.35rem, 12vw, 3.2rem);
   }
 
-  .invitationCopy {
-    margin-top: 1rem;
-    font-size: 0.61rem;
-  }
-
-  .personalCard {
-    top: 10.1rem;
-    left: -2.5rem;
-    width: 10.5rem;
-  }
-
-  .responseCard {
-    right: -2.9rem;
-    bottom: 3rem;
-    width: 10.8rem;
-  }
-
-  .waxSeal {
-    right: 2.65rem;
-    bottom: 6.6rem;
-    width: 3.1rem;
-    height: 3.1rem;
-  }
-
-  .theaterCaption {
-    bottom: 1rem;
-    left: 1rem;
-    font-size: 0.52rem;
+  .copy {
+    padding-inline: 1.25rem;
   }
 
   .title {
-    font-size: clamp(3.15rem, 15vw, 4.25rem);
+    font-size: clamp(2.35rem, 10.6vw, 3rem);
   }
 
-  .primaryAction,
-  .secondaryAction {
+  .lead {
+    font-size: 0.98rem;
+  }
+
+  .primaryAction {
     width: 100%;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .stationeryBoard,
-  .envelope,
-  .invitationCard,
-  .personalCard,
-  .responseCard,
-  .waxSeal {
+  .productPanel,
+  .copy {
     animation: none;
   }
 
-  .primaryAction,
-  .secondaryAction,
-  .railLink::after {
+  .primaryAction {
     transition: none;
   }
 }
