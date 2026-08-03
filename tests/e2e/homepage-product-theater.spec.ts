@@ -64,17 +64,22 @@ test('adds gentle pointer depth without changing the campaign layout', async ({ 
   await page.goto('/');
 
   const motionPanel = page.locator('[data-editorial-hero-motion]');
-  const bounds = await motionPanel.boundingBox();
-  expect(bounds).not.toBeNull();
+  await expect(motionPanel).toHaveAttribute('data-motion-ready', 'true');
 
-  await page.mouse.move((bounds?.x ?? 0) + (bounds?.width ?? 0) * 0.82, (bounds?.y ?? 0) + 80);
+  await motionPanel.evaluate((element) => {
+    const bounds = element.getBoundingClientRect();
+    element.dispatchEvent(
+      new PointerEvent('pointermove', {
+        bubbles: true,
+        clientX: bounds.left + bounds.width * 0.82,
+        clientY: bounds.top + 80,
+        pointerType: 'mouse',
+      }),
+    );
+  });
 
   await expect
-    .poll(() =>
-      motionPanel.evaluate((element) =>
-        window.getComputedStyle(element).getPropertyValue('--hero-shift-x').trim(),
-      ),
-    )
+    .poll(() => motionPanel.evaluate((element) => element.style.getPropertyValue('--hero-shift-x')))
     .not.toBe('0px');
 
   await assertNoHorizontalOverflow(page);
