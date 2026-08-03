@@ -5,11 +5,7 @@ import styles from './editorial-hero.module.css';
 
 export function EditorialHero() {
   return (
-    <section
-      className={styles.hero}
-      data-homepage-campaign-hero
-      data-homepage-editorial-hero
-    >
+    <section className={styles.hero} data-homepage-campaign-hero data-homepage-editorial-hero>
       <div className={styles.frame}>
         <Image
           alt=""
