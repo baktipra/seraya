@@ -10,15 +10,9 @@ test('renders homepage product theater without iframes', async ({ page }) => {
     }),
   ).toBeVisible();
 
-  const rosellePreviews = page.locator(
-    '[data-marketing-invitation-preview="roselle"]',
-  );
-  const arunaPreviews = page.locator(
-    '[data-marketing-invitation-preview="aruna"]',
-  );
-  const larasPreviews = page.locator(
-    '[data-marketing-invitation-preview="laras"]',
-  );
+  const rosellePreviews = page.locator('[data-marketing-invitation-preview="roselle"]');
+  const arunaPreviews = page.locator('[data-marketing-invitation-preview="aruna"]');
+  const larasPreviews = page.locator('[data-marketing-invitation-preview="laras"]');
 
   await expect(page.locator('main iframe')).toHaveCount(0);
   await expect(rosellePreviews).toHaveCount(2);
