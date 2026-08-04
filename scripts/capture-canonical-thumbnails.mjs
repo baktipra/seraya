@@ -25,9 +25,7 @@ const baseUrl = readArgument(
   'base-url',
   process.env.SERAYA_THUMBNAIL_BASE_URL ?? 'http://127.0.0.1:3000',
 );
-const outputDirectory = resolve(
-  readArgument('output', 'public/invitation-thumbnails/v4g'),
-);
+const outputDirectory = resolve(readArgument('output', 'public/invitation-thumbnails/v4g'));
 
 await mkdir(outputDirectory, { recursive: true });
 
@@ -48,12 +46,10 @@ try {
         timeout: 90_000,
         waitUntil: 'networkidle',
       });
-      await page
-        .locator(`[data-template="${templateKey}"][data-palette="${paletteKey}"]`)
-        .waitFor({
-          state: 'visible',
-          timeout: 30_000,
-        });
+      await page.locator(`[data-template="${templateKey}"][data-palette="${paletteKey}"]`).waitFor({
+        state: 'visible',
+        timeout: 30_000,
+      });
       await page.evaluate(async () => {
         await document.fonts.ready;
       });

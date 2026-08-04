@@ -72,9 +72,7 @@ export function CanonicalInvitationThumbnail({
       style={thumbnailStyle}
     >
       <picture aria-hidden="true">
-        {CANONICAL_THUMBNAIL_WEBP_READY ? (
-          <source srcSet={webpHref} type="image/webp" />
-        ) : null}
+        {CANONICAL_THUMBNAIL_WEBP_READY ? <source srcSet={webpHref} type="image/webp" /> : null}
         <img
           alt=""
           className={`pointer-events-none absolute inset-0 h-full w-full object-cover opacity-95 mix-blend-multiply ${imageClassByVariant[variant]}`}
@@ -89,7 +87,7 @@ export function CanonicalInvitationThumbnail({
 
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,transparent_70%,rgb(20_16_15_/_0.16))] ring-1 ring-inset ring-black/8"
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,transparent_70%,rgb(20_16_15_/_0.16))] ring-1 ring-black/8 ring-inset"
       />
       <span
         aria-hidden="true"

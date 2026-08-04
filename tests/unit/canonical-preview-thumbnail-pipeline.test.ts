@@ -15,15 +15,13 @@ describe('canonical static thumbnail capture pipeline V4G', () => {
     expect(invitationThemePackages.flatMap((themePackage) => themePackage.palettes)).toHaveLength(
       12,
     );
-    expect(invitationThemePackages.every((themePackage) => themePackage.palettes.length === 4)).toBe(
-      true,
-    );
+    expect(
+      invitationThemePackages.every((themePackage) => themePackage.palettes.length === 4),
+    ).toBe(true);
   });
 
   it('renders catalog thumbnails from optimized static assets instead of iframe renderers', () => {
-    const thumbnail = readSource(
-      'src/components/marketing/canonical-invitation-thumbnail.tsx',
-    );
+    const thumbnail = readSource('src/components/marketing/canonical-invitation-thumbnail.tsx');
 
     expect(thumbnail).toContain('data-canonical-thumbnail-source="static-canonical-capture"');
     expect(thumbnail).toContain('<picture aria-hidden="true">');
@@ -52,9 +50,7 @@ describe('canonical static thumbnail capture pipeline V4G', () => {
   });
 
   it('ships a complete static fallback matrix and promotes WebP captures atomically', () => {
-    const manifest = JSON.parse(
-      readSource('public/invitation-thumbnails/v4g/manifest.json'),
-    ) as {
+    const manifest = JSON.parse(readSource('public/invitation-thumbnails/v4g/manifest.json')) as {
       entries: Array<{ fallback: string; paletteKey: string; templateKey: string; webp: string }>;
       version: string;
     };
@@ -62,9 +58,9 @@ describe('canonical static thumbnail capture pipeline V4G', () => {
     expect(manifest.version).toBe('v4g');
     expect(manifest.entries).toHaveLength(12);
     for (const entry of manifest.entries) {
-      expect(
-        existsSync(resolve(process.cwd(), entry.fallback.replace(/^\//, 'public/'))),
-      ).toBe(true);
+      expect(existsSync(resolve(process.cwd(), entry.fallback.replace(/^\//, 'public/')))).toBe(
+        true,
+      );
     }
 
     const captureStatus = readSource(
@@ -84,6 +80,8 @@ describe('canonical static thumbnail capture pipeline V4G', () => {
     expect(workflow).toContain('npx playwright install --with-deps chromium');
     expect(workflow).toContain('cwebp -quiet -q 86 -m 6');
     expect(workflow).toContain('CANONICAL_THUMBNAIL_WEBP_READY = true as const');
-    expect(workflow).toContain("test \"$(find public/invitation-thumbnails/v4g -maxdepth 1 -name '*.webp' | wc -l)\" -eq 12");
+    expect(workflow).toContain(
+      'test "$(find public/invitation-thumbnails/v4g -maxdepth 1 -name \'*.webp\' | wc -l)" -eq 12',
+    );
   });
 });

@@ -1,143 +1,119 @@
 {
-  "version": "v4g",
   "captureViewport": {
-    "width": 430,
+    "deviceScaleFactor": 2,
     "height": 932,
-    "deviceScaleFactor": 2
+    "width": 430
   },
   "entries": [
     {
-      "templateKey": "roselle",
-      "paletteKey": "rose",
-      "paletteName": "Rose",
-      "sourceRoute": "/templates/roselle/demo/generic?palette=rose&embed=thumbnail",
-      "webp": "/invitation-thumbnails/v4g/roselle-rose.webp",
-      "fallback": "/invitation-thumbnails/v4g/roselle.svg",
-      "width": 430,
+      "fallback": "/invitation-thumbnails/v4g/aruna.svg",
       "height": 932,
-      "bootstrap": "semantic-static"
-    },
-    {
-      "templateKey": "roselle",
-      "paletteKey": "sage",
-      "paletteName": "Sage",
-      "sourceRoute": "/templates/roselle/demo/generic?palette=sage&embed=thumbnail",
-      "webp": "/invitation-thumbnails/v4g/roselle-sage.webp",
-      "fallback": "/invitation-thumbnails/v4g/roselle.svg",
-      "width": 430,
-      "height": 932,
-      "bootstrap": "semantic-static"
-    },
-    {
-      "templateKey": "roselle",
-      "paletteKey": "butter",
-      "paletteName": "Butter",
-      "sourceRoute": "/templates/roselle/demo/generic?palette=butter&embed=thumbnail",
-      "webp": "/invitation-thumbnails/v4g/roselle-butter.webp",
-      "fallback": "/invitation-thumbnails/v4g/roselle.svg",
-      "width": 430,
-      "height": 932,
-      "bootstrap": "semantic-static"
-    },
-    {
-      "templateKey": "roselle",
-      "paletteKey": "berry",
-      "paletteName": "Berry",
-      "sourceRoute": "/templates/roselle/demo/generic?palette=berry&embed=thumbnail",
-      "webp": "/invitation-thumbnails/v4g/roselle-berry.webp",
-      "fallback": "/invitation-thumbnails/v4g/roselle.svg",
-      "width": 430,
-      "height": 932,
-      "bootstrap": "semantic-static"
-    },
-    {
-      "templateKey": "aruna",
       "paletteKey": "stone",
-      "paletteName": "Stone",
       "sourceRoute": "/templates/aruna/demo/generic?palette=stone&embed=thumbnail",
+      "templateKey": "aruna",
       "webp": "/invitation-thumbnails/v4g/aruna-stone.webp",
-      "fallback": "/invitation-thumbnails/v4g/aruna.svg",
-      "width": 430,
-      "height": 932,
-      "bootstrap": "semantic-static"
+      "width": 430
     },
     {
-      "templateKey": "aruna",
+      "fallback": "/invitation-thumbnails/v4g/aruna.svg",
+      "height": 932,
       "paletteKey": "matcha",
-      "paletteName": "Matcha",
       "sourceRoute": "/templates/aruna/demo/generic?palette=matcha&embed=thumbnail",
+      "templateKey": "aruna",
       "webp": "/invitation-thumbnails/v4g/aruna-matcha.webp",
-      "fallback": "/invitation-thumbnails/v4g/aruna.svg",
-      "width": 430,
-      "height": 932,
-      "bootstrap": "semantic-static"
+      "width": 430
     },
     {
-      "templateKey": "aruna",
+      "fallback": "/invitation-thumbnails/v4g/aruna.svg",
+      "height": 932,
       "paletteKey": "cobalt",
-      "paletteName": "Cobalt",
       "sourceRoute": "/templates/aruna/demo/generic?palette=cobalt&embed=thumbnail",
-      "webp": "/invitation-thumbnails/v4g/aruna-cobalt.webp",
-      "fallback": "/invitation-thumbnails/v4g/aruna.svg",
-      "width": 430,
-      "height": 932,
-      "bootstrap": "semantic-static"
-    },
-    {
       "templateKey": "aruna",
-      "paletteKey": "apricot",
-      "paletteName": "Apricot",
-      "sourceRoute": "/templates/aruna/demo/generic?palette=apricot&embed=thumbnail",
-      "webp": "/invitation-thumbnails/v4g/aruna-apricot.webp",
+      "webp": "/invitation-thumbnails/v4g/aruna-cobalt.webp",
+      "width": 430
+    },
+    {
       "fallback": "/invitation-thumbnails/v4g/aruna.svg",
-      "width": 430,
       "height": 932,
-      "bootstrap": "semantic-static"
+      "paletteKey": "apricot",
+      "sourceRoute": "/templates/aruna/demo/generic?palette=apricot&embed=thumbnail",
+      "templateKey": "aruna",
+      "webp": "/invitation-thumbnails/v4g/aruna-apricot.webp",
+      "width": 430
     },
     {
-      "templateKey": "laras",
+      "fallback": "/invitation-thumbnails/v4g/laras.svg",
+      "height": 932,
       "paletteKey": "midnight",
-      "paletteName": "Midnight",
       "sourceRoute": "/templates/laras/demo/generic?palette=midnight&embed=thumbnail",
+      "templateKey": "laras",
       "webp": "/invitation-thumbnails/v4g/laras-midnight.webp",
-      "fallback": "/invitation-thumbnails/v4g/laras.svg",
-      "width": 430,
-      "height": 932,
-      "bootstrap": "semantic-static"
+      "width": 430
     },
     {
-      "templateKey": "laras",
+      "fallback": "/invitation-thumbnails/v4g/laras.svg",
+      "height": 932,
       "paletteKey": "burgundy",
-      "paletteName": "Burgundy",
       "sourceRoute": "/templates/laras/demo/generic?palette=burgundy&embed=thumbnail",
+      "templateKey": "laras",
       "webp": "/invitation-thumbnails/v4g/laras-burgundy.webp",
-      "fallback": "/invitation-thumbnails/v4g/laras.svg",
-      "width": 430,
-      "height": 932,
-      "bootstrap": "semantic-static"
+      "width": 430
     },
     {
-      "templateKey": "laras",
+      "fallback": "/invitation-thumbnails/v4g/laras.svg",
+      "height": 932,
       "paletteKey": "emerald",
-      "paletteName": "Emerald",
       "sourceRoute": "/templates/laras/demo/generic?palette=emerald&embed=thumbnail",
+      "templateKey": "laras",
       "webp": "/invitation-thumbnails/v4g/laras-emerald.webp",
-      "fallback": "/invitation-thumbnails/v4g/laras.svg",
-      "width": 430,
-      "height": 932,
-      "bootstrap": "semantic-static"
+      "width": 430
     },
     {
-      "templateKey": "laras",
-      "paletteKey": "ivory",
-      "paletteName": "Ivory",
-      "sourceRoute": "/templates/laras/demo/generic?palette=ivory&embed=thumbnail",
-      "webp": "/invitation-thumbnails/v4g/laras-ivory.webp",
       "fallback": "/invitation-thumbnails/v4g/laras.svg",
-      "width": 430,
       "height": 932,
-      "bootstrap": "semantic-static"
+      "paletteKey": "ivory",
+      "sourceRoute": "/templates/laras/demo/generic?palette=ivory&embed=thumbnail",
+      "templateKey": "laras",
+      "webp": "/invitation-thumbnails/v4g/laras-ivory.webp",
+      "width": 430
+    },
+    {
+      "fallback": "/invitation-thumbnails/v4g/roselle.svg",
+      "height": 932,
+      "paletteKey": "rose",
+      "sourceRoute": "/templates/roselle/demo/generic?palette=rose&embed=thumbnail",
+      "templateKey": "roselle",
+      "webp": "/invitation-thumbnails/v4g/roselle-rose.webp",
+      "width": 430
+    },
+    {
+      "fallback": "/invitation-thumbnails/v4g/roselle.svg",
+      "height": 932,
+      "paletteKey": "sage",
+      "sourceRoute": "/templates/roselle/demo/generic?palette=sage&embed=thumbnail",
+      "templateKey": "roselle",
+      "webp": "/invitation-thumbnails/v4g/roselle-sage.webp",
+      "width": 430
+    },
+    {
+      "fallback": "/invitation-thumbnails/v4g/roselle.svg",
+      "height": 932,
+      "paletteKey": "butter",
+      "sourceRoute": "/templates/roselle/demo/generic?palette=butter&embed=thumbnail",
+      "templateKey": "roselle",
+      "webp": "/invitation-thumbnails/v4g/roselle-butter.webp",
+      "width": 430
+    },
+    {
+      "fallback": "/invitation-thumbnails/v4g/roselle.svg",
+      "height": 932,
+      "paletteKey": "berry",
+      "sourceRoute": "/templates/roselle/demo/generic?palette=berry&embed=thumbnail",
+      "templateKey": "roselle",
+      "webp": "/invitation-thumbnails/v4g/roselle-berry.webp",
+      "width": 430
     }
   ],
-  "source": "static-bootstrap-palette-composition"
+  "source": "canonical-showroom-renderer",
+  "version": "v4g"
 }
