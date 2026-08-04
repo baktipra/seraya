@@ -87,6 +87,7 @@ export default async function PersonalGuestInvitationPage({
     <main className="bg-seraya-ivory min-h-screen px-0 py-0 sm:px-6 sm:py-8">
       <InvitationTemplateRenderer
         invitation={invitation}
+        paletteKey={snapshot.draft.paletteKey}
         personalSlots={{
           greeting: <PersonalGuestGreeting displayName={personalInvitation.guestDisplayName} />,
           guestbook: (

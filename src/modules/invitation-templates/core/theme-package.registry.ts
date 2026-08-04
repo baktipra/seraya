@@ -1,6 +1,7 @@
 import { arunaThemePackage } from '../aruna/aruna.package';
 import { larasThemePackage } from '../laras/laras.package';
 import { roselleThemePackage } from '../roselle/roselle.package';
+import type { ThemePaletteDescriptor } from './theme-package.types';
 
 export const invitationThemePackageRegistry = Object.freeze({
   roselle: roselleThemePackage,
@@ -39,7 +40,9 @@ export const featuredInvitationThemePackages = Object.freeze(
   invitationThemePackages.filter((themePackage) => themePackage.manifest.featured),
 );
 
-export function getDefaultInvitationThemePalette(templateKey: InvitationTemplateKey) {
+export function getDefaultInvitationThemePalette(
+  templateKey: InvitationTemplateKey,
+): ThemePaletteDescriptor {
   const themePackage = getInvitationThemePackage(templateKey);
   const palette = themePackage.palettes.find(
     (candidate) => candidate.key === themePackage.defaultPaletteKey,
@@ -50,4 +53,45 @@ export function getDefaultInvitationThemePalette(templateKey: InvitationTemplate
   }
 
   return palette;
+}
+
+export function getInvitationThemePalette(
+  templateKey: InvitationTemplateKey,
+  paletteKey: unknown,
+): ThemePaletteDescriptor | null {
+  if (typeof paletteKey !== 'string') {
+    return null;
+  }
+
+  return (
+    getInvitationThemePackage(templateKey).palettes.find(
+      (candidate) => candidate.key === paletteKey,
+    ) ?? null
+  );
+}
+
+export function isInvitationThemePaletteKey(
+  templateKey: InvitationTemplateKey,
+  value: unknown,
+): value is string {
+  return getInvitationThemePalette(templateKey, value) !== null;
+}
+
+export function resolveInvitationThemePaletteKey(
+  templateKey: InvitationTemplateKey,
+  value: unknown,
+): string {
+  return (
+    getInvitationThemePalette(templateKey, value)?.key ??
+    getDefaultInvitationThemePalette(templateKey).key
+  );
+}
+
+export function resolveInvitationThemePalette(
+  templateKey: InvitationTemplateKey,
+  value: unknown,
+): ThemePaletteDescriptor {
+  return (
+    getInvitationThemePalette(templateKey, value) ?? getDefaultInvitationThemePalette(templateKey)
+  );
 }

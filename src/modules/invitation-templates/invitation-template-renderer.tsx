@@ -1,6 +1,9 @@
 import { createElement } from 'react';
 
-import type { InvitationTemplateKey } from './core/theme-package.registry';
+import {
+  resolveInvitationThemePalette,
+  type InvitationTemplateKey,
+} from './core/theme-package.registry';
 import type {
   InvitationTemplateRenderContextV1,
   PersonalInvitationPresentationSlotsV1,
@@ -10,33 +13,44 @@ import type { InvitationViewModel } from './invitation-view-model';
 
 type InvitationTemplateRendererProps = {
   invitation: InvitationViewModel;
+  paletteKey?: string;
   personalSlots?: PersonalInvitationPresentationSlotsV1;
   surface: InvitationTemplateRenderContextV1['surface'];
   templateKey: InvitationTemplateKey;
 };
 
 function createRenderContext({
+  paletteKey,
   personalSlots,
   surface,
+  templateKey,
 }: Pick<
   InvitationTemplateRendererProps,
-  'personalSlots' | 'surface'
+  'paletteKey' | 'personalSlots' | 'surface' | 'templateKey'
 >): InvitationTemplateRenderContextV1 {
+  const palette = resolveInvitationThemePalette(templateKey, paletteKey);
+
   if (surface !== 'personal') {
-    return { surface };
+    return { palette, surface };
   }
 
-  return { personalSlots, surface };
+  return { palette, personalSlots, surface };
 }
 
 /** Canonical renderer used by preview, generic, and personal invitation surfaces. */
 export function InvitationTemplateRenderer({
   invitation,
+  paletteKey,
   personalSlots,
   surface,
   templateKey,
 }: InvitationTemplateRendererProps) {
-  const renderContext = createRenderContext({ personalSlots, surface });
+  const renderContext = createRenderContext({
+    paletteKey,
+    personalSlots,
+    surface,
+    templateKey,
+  });
 
   return createElement(invitationTemplateRegistry[templateKey], {
     invitation,

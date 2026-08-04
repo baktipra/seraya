@@ -496,9 +496,14 @@ export function InvitationEditorActivePanel({
         <InvitationWorkspacePanel active section="style">
           <InvitationTemplatePicker
             error={getError(fieldErrors, 'templateKey')}
+            onPaletteSelect={(paletteKey) => {
+              updateLocalContent({ paletteKey, type: 'palette' });
+            }}
             onSelect={(templateKey) => {
               updateLocalContent({ templateKey, type: 'template' });
             }}
+            paletteError={getError(fieldErrors, 'paletteKey')}
+            selectedPaletteKey={content.paletteKey}
             selectedTemplateKey={content.templateKey}
           />
         </InvitationWorkspacePanel>

@@ -129,6 +129,7 @@ export const InvitationEditorLivePreview = memo(function InvitationEditorLivePre
   const targetAvailable = isPreviewTargetAvailable(content, activeSection);
   const visibilitySignature = [
     content.templateKey,
+    content.paletteKey,
     content.story.enabled,
     content.eventSchedule.events.length,
     content.gallery.enabled,
@@ -422,6 +423,7 @@ export const InvitationEditorLivePreview = memo(function InvitationEditorLivePre
           >
             <InvitationTemplateRenderer
               invitation={invitation}
+              paletteKey={content.paletteKey}
               surface="preview"
               templateKey={content.templateKey}
             />

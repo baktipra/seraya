@@ -7,6 +7,8 @@ import {
   DEFAULT_INVITATION_TEMPLATE_KEY,
   getDefaultInvitationThemePalette,
   getInvitationThemePackage,
+  resolveInvitationThemePalette,
+  resolveInvitationThemePaletteKey,
   INVITATION_TEMPLATE_KEYS,
   invitationThemePackages,
 } from '../../src/modules/invitation-templates/core/theme-package.registry';
@@ -28,6 +30,11 @@ describe('canonical invitation theme package registry', () => {
     expect(themePackage.Renderer).toBeTypeOf('function');
     expect(themePackage.palettes.length).toBeGreaterThanOrEqual(4);
     expect(defaultPalette.key).toBe(themePackage.defaultPaletteKey);
+    expect(resolveInvitationThemePaletteKey(templateKey, undefined)).toBe(
+      themePackage.defaultPaletteKey,
+    );
+    expect(resolveInvitationThemePalette(templateKey, 'not-a-palette')).toBe(defaultPalette);
+    expect(Object.keys(defaultPalette.variables).length).toBeGreaterThanOrEqual(8);
     expect(themePackage.manifest.capabilities).toEqual({
       digitalGift: true,
       gallery: true,
@@ -52,6 +59,7 @@ describe('canonical invitation theme package registry', () => {
       'utf8',
     );
 
+    expect(rendererSource).toContain('resolveInvitationThemePalette(templateKey, paletteKey)');
     expect(rendererSource).toContain('invitationTemplateRegistry[templateKey]');
     expect(rendererSource).not.toContain("templateKey === 'aruna'");
     expect(rendererSource).not.toContain("templateKey === 'laras'");

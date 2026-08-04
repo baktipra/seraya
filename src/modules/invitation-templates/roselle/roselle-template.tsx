@@ -44,7 +44,9 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
       aria-labelledby="roselle-invitation-title"
       className={`${styles.invitation} ${experienceStyles.experience} ${parityRepairStyles.parityRepair}`}
       data-roselle-experience="letter-v1"
+      data-palette={renderContext.palette?.key}
       data-surface={renderContext.surface}
+      style={renderContext.palette?.variables}
       data-template="roselle"
     >
       <RoselleHero hero={invitation.hero} />

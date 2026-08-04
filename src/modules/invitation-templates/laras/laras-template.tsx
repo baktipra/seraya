@@ -93,7 +93,9 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
       aria-labelledby="laras-invitation-title"
       className={`${styles.invitation} ${experienceStyles.experience}`}
       data-laras-experience="evening-folio-v1"
+      data-palette={renderContext.palette?.key}
       data-surface={renderContext.surface}
+      style={renderContext.palette?.variables}
       data-template="laras"
     >
       <header className={styles.hero} data-invitation-chapter="opening" data-laras-evening-cover>

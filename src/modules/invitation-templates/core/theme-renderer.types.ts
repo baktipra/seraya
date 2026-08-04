@@ -1,6 +1,7 @@
 import type { ComponentType, ReactNode } from 'react';
 
 import type { InvitationViewModel } from '../invitation-view-model';
+import type { ThemePaletteDescriptor } from './theme-package.types';
 
 /** A rendering surface controls presentation composition only. */
 export type InvitationRenderSurfaceV1 = 'generic' | 'personal' | 'preview';
@@ -16,6 +17,7 @@ export type PersonalInvitationPresentationSlotsV1 = Readonly<{
 }>;
 
 export type InvitationTemplateRenderContextV1 = Readonly<{
+  palette?: ThemePaletteDescriptor;
   personalSlots?: PersonalInvitationPresentationSlotsV1;
   surface: InvitationRenderSurfaceV1;
 }>;

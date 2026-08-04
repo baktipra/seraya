@@ -1,4 +1,12 @@
+import type { CSSProperties } from 'react';
+
 import type { InvitationTemplateComponent } from './theme-renderer.types';
+
+export type ThemePaletteVariables = Readonly<
+  CSSProperties & {
+    [key: `--${string}`]: string | number | undefined;
+  }
+>;
 
 export type ThemePaletteDescriptor = Readonly<{
   accent: string;
@@ -9,6 +17,7 @@ export type ThemePaletteDescriptor = Readonly<{
   paper: string;
   soft: string;
   swatch: string;
+  variables: ThemePaletteVariables;
 }>;
 
 export type ThemeCapabilityContract = Readonly<{

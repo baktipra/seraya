@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { requireCurrentUser } from '@/modules/auth/current-user';
+import { resolveInvitationThemePaletteKey } from '@/modules/invitation-templates/core/theme-package.registry';
 import {
   getActiveInvitationDraftForVerifiedProject,
   updateActiveInvitationDraftForVerifiedProject,
@@ -34,6 +35,7 @@ export async function createProjectForCurrentUser(input: CreateProjectInput) {
     if (draft) {
       const candidate = invitationDraftContentSchema.safeParse({
         ...draft.content,
+        paletteKey: resolveInvitationThemePaletteKey(input.templateKey, undefined),
         templateKey: input.templateKey,
       });
 

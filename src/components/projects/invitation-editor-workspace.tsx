@@ -139,7 +139,10 @@ const fieldSectionMatchers: ReadonlyArray<{
   matches: (fieldName: string) => boolean;
   section: InvitationEditorSectionKey;
 }> = [
-  { matches: (fieldName) => fieldName === 'templateKey', section: 'style' },
+  {
+    matches: (fieldName) => fieldName === 'templateKey' || fieldName === 'paletteKey',
+    section: 'style',
+  },
   { matches: (fieldName) => fieldName.startsWith('hero.'), section: 'opening' },
   { matches: (fieldName) => fieldName.startsWith('couple.'), section: 'couple' },
   { matches: (fieldName) => fieldName.startsWith('story.'), section: 'story' },
@@ -199,7 +202,7 @@ export function getInvitationEditorSectionStatuses(
   const firstEvent = content.eventSchedule.events[0];
 
   const statuses: InvitationEditorSectionStatuses = {
-    style: content.templateKey ? 'complete' : 'incomplete',
+    style: content.templateKey && content.paletteKey ? 'complete' : 'incomplete',
     opening: hasText(content.hero.title) ? 'complete' : 'incomplete',
     couple:
       hasText(content.couple.personOne.displayName) && hasText(content.couple.personTwo.displayName)
@@ -346,11 +349,7 @@ export const InvitationWorkspaceNavigation = memo(function InvitationWorkspaceNa
         data-invitation-editor-mobile-navigation
         data-release-b-studio-navigation="rb1"
       >
-        <span
-          aria-hidden="true"
-          className={studioStyles.workspace}
-          data-local-preview-overlay
-        />
+        <span aria-hidden="true" className={studioStyles.workspace} data-local-preview-overlay />
         <div className="flex items-center justify-between gap-4">
           <div className="min-w-0">
             <p className="text-seraya-text-muted text-[0.68rem] font-bold tracking-[0.08em] uppercase">
