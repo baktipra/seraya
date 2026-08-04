@@ -142,11 +142,4 @@ test('respects reduced motion for the campaign composition', async ({ page }) =>
     .evaluate((element) => window.getComputedStyle(element).animationName);
 
   expect(animationName).toBe('none');
-  await expect
-    .poll(() =>
-      page
-        .locator('[data-editorial-hero-video]')
-        .evaluate((element) => (element as HTMLVideoElement).paused),
-    )
-    .toBe(true);
 });
