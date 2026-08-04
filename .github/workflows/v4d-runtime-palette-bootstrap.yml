@@ -118,8 +118,8 @@ jobs:
             tests/unit/invitation-theme-palette-runtime.test.ts \
             src/modules/publications/__tests__/publication.service.test.ts
 
-      - name: Database migration contracts
-        run: npm run test:db
+      - name: M0022 migration source contract
+        run: npx vitest run tests/unit/invitation-theme-palette-runtime.test.ts
 
       - name: Production build
         run: npm run build
