@@ -1,0 +1,122 @@
+name: V4D Runtime Palette Bootstrap
+
+on:
+  pull_request:
+    branches:
+      - agent/canonical-theme-package-architecture-v4c
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+permissions:
+  contents: write
+
+jobs:
+  transform-and-validate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+
+    steps:
+      - name: Checkout V4D branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/runtime-palette-activation-persistence-v4d
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Decode and apply V4D architecture
+        run: |
+          base64 --decode scripts/apply-v4d.py.gz.b64 | gzip --decompress > /tmp/apply-v4d.py
+          python3 /tmp/apply-v4d.py
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Format V4D source
+        run: |
+          npx prettier --write \
+            src/modules/invitation-templates/core/theme-package.types.ts \
+            src/modules/invitation-templates/core/theme-package.registry.ts \
+            src/modules/invitation-templates/core/theme-renderer.types.ts \
+            src/modules/invitation-templates/roselle/roselle.package.ts \
+            src/modules/invitation-templates/aruna/aruna.package.ts \
+            src/modules/invitation-templates/laras/laras.package.ts \
+            src/modules/invitation-templates/roselle/roselle-template.tsx \
+            src/modules/invitation-templates/aruna/aruna-template.tsx \
+            src/modules/invitation-templates/laras/laras-template.tsx \
+            src/modules/invitation-templates/invitation-template-renderer.tsx \
+            src/modules/invitations/invitation-draft.schema.ts \
+            src/modules/invitations/invitation-editor.schema.ts \
+            src/modules/invitations/invitation-editor-local-state.ts \
+            src/modules/invitations/invitation-editor.service.ts \
+            src/modules/projects/create-project.service.ts \
+            src/components/projects/invitation-editor-workspace.tsx \
+            src/components/projects/invitation-editor-fields.tsx \
+            src/components/projects/invitation-editor.tsx \
+            src/components/projects/invitation-editor-live-preview.tsx \
+            'src/app/[slug]/page.tsx' \
+            'src/app/[slug]/g/[guestToken]/page.tsx' \
+            'src/app/(dashboard)/dashboard/[projectId]/preview/page.tsx' \
+            supabase/migrations/20260804002200_m0022_add_invitation_theme_palette_runtime.sql \
+            tests/unit/invitation-theme-package-registry.test.ts \
+            tests/unit/invitation-theme-palette-runtime.test.ts
+
+      - name: Focused lint
+        run: |
+          npx eslint \
+            src/modules/invitation-templates/core/theme-package.types.ts \
+            src/modules/invitation-templates/core/theme-package.registry.ts \
+            src/modules/invitation-templates/core/theme-renderer.types.ts \
+            src/modules/invitation-templates/roselle/roselle.package.ts \
+            src/modules/invitation-templates/aruna/aruna.package.ts \
+            src/modules/invitation-templates/laras/laras.package.ts \
+            src/modules/invitation-templates/roselle/roselle-template.tsx \
+            src/modules/invitation-templates/aruna/aruna-template.tsx \
+            src/modules/invitation-templates/laras/laras-template.tsx \
+            src/modules/invitation-templates/invitation-template-renderer.tsx \
+            src/modules/invitations/invitation-draft.schema.ts \
+            src/modules/invitations/invitation-editor.schema.ts \
+            src/modules/invitations/invitation-editor-local-state.ts \
+            src/modules/invitations/invitation-editor.service.ts \
+            src/modules/projects/create-project.service.ts \
+            src/components/projects/invitation-editor-workspace.tsx \
+            src/components/projects/invitation-editor-fields.tsx \
+            src/components/projects/invitation-editor.tsx \
+            src/components/projects/invitation-editor-live-preview.tsx \
+            'src/app/[slug]/page.tsx' \
+            'src/app/[slug]/g/[guestToken]/page.tsx' \
+            'src/app/(dashboard)/dashboard/[projectId]/preview/page.tsx' \
+            tests/unit/invitation-theme-package-registry.test.ts \
+            tests/unit/invitation-theme-palette-runtime.test.ts
+
+      - name: TypeScript
+        run: npm run typecheck
+
+      - name: Palette runtime contracts
+        run: |
+          npx vitest run \
+            tests/unit/invitation-theme-package-registry.test.ts \
+            tests/unit/invitation-theme-palette-runtime.test.ts
+
+      - name: Database migration contracts
+        run: npm run test:db
+
+      - name: Production build
+        run: npm run build
+
+      - name: Commit validated V4D source
+        run: |
+          rm scripts/apply-v4d.py.gz.b64
+          rm .github/workflows/v4d-runtime-palette-bootstrap.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "SERAYA — Runtime Palette Activation & Persistence V4D"
+          git push origin HEAD:agent/runtime-palette-activation-persistence-v4d
