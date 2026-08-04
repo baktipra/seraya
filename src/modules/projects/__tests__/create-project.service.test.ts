@@ -51,7 +51,7 @@ describe('SRY-005 server-owned project creation service', () => {
     getActiveInvitationDraftMock.mockResolvedValue(draft);
     updateActiveInvitationDraftMock.mockResolvedValue({
       ...draft,
-      content: { templateKey: 'aruna' },
+      content: { paletteKey: 'stone', templateKey: 'aruna' },
     });
 
     await createProjectForCurrentUser({
@@ -73,7 +73,7 @@ describe('SRY-005 server-owned project creation service', () => {
     });
     expect(getActiveInvitationDraftMock).toHaveBeenCalledWith(project);
     expect(updateActiveInvitationDraftMock).toHaveBeenCalledWith({
-      content: { templateKey: 'aruna' },
+      content: { paletteKey: 'stone', templateKey: 'aruna' },
       draft,
       project,
     });
