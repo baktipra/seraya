@@ -106,7 +106,7 @@ export function EditorialHero() {
 
   return (
     <section className={styles.hero} data-homepage-campaign-hero data-homepage-editorial-hero>
-      <div className={styles.frame}>
+      <div className={styles.frame} data-editorial-hero-frame>
         <figure
           aria-label="Film editorial pernikahan Seraya dengan stationery, bunga putih, cincin, dan kartu undangan Roselle untuk Kirana dan Arga yang bergerak lembut."
           className={styles.productPanel}
@@ -151,7 +151,7 @@ export function EditorialHero() {
           <figcaption className={styles.productCaption}>Roselle · personal invitation</figcaption>
         </figure>
 
-        <div className={styles.copy}>
+        <div className={styles.copy} data-editorial-hero-copy>
           <p className={styles.eyebrow}>Undangan pernikahan digital</p>
           <h1 className={styles.title}>Undangan pernikahan yang terasa personal</h1>
           <p className={styles.lead}>
