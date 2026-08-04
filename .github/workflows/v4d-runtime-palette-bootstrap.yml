@@ -33,7 +33,7 @@ jobs:
 
       - name: Decode and apply V4D architecture
         run: |
-          base64 --decode scripts/apply-v4d.py.gz.b64 | gzip --decompress > /tmp/apply-v4d.py
+          cat scripts/v4d-parts/part-*.b64 | base64 --decode | gzip --decompress > /tmp/apply-v4d.py
           python3 /tmp/apply-v4d.py
 
       - name: Install dependencies
@@ -114,6 +114,7 @@ jobs:
       - name: Commit validated V4D source
         run: |
           rm scripts/apply-v4d.py.gz.b64
+          rm -rf scripts/v4d-parts
           rm .github/workflows/v4d-runtime-palette-bootstrap.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
