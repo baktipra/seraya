@@ -145,14 +145,22 @@ test('renders the seamless full-width campaign hero with a verified playing edit
   expect(Math.abs(geometry.frameLeft ?? 0)).toBeLessThanOrEqual(1);
   expect(Math.abs((geometry.frameRight ?? 0) - geometry.viewportWidth)).toBeLessThanOrEqual(1);
   expect(Math.abs((geometry.theaterLeft ?? 0) - (geometry.frameLeft ?? 0))).toBeLessThanOrEqual(1);
-  expect(Math.abs((geometry.theaterRight ?? 0) - (geometry.frameRight ?? 0))).toBeLessThanOrEqual(1);
+  expect(Math.abs((geometry.theaterRight ?? 0) - (geometry.frameRight ?? 0))).toBeLessThanOrEqual(
+    1,
+  );
   expect(Math.abs((geometry.theaterTop ?? 0) - (geometry.frameTop ?? 0))).toBeLessThanOrEqual(1);
-  expect(Math.abs((geometry.theaterBottom ?? 0) - (geometry.frameBottom ?? 0))).toBeLessThanOrEqual(1);
-  expect(Math.abs((geometry.collectionTop ?? 0) - (geometry.heroBottom ?? 0))).toBeLessThanOrEqual(1);
+  expect(Math.abs((geometry.theaterBottom ?? 0) - (geometry.frameBottom ?? 0))).toBeLessThanOrEqual(
+    1,
+  );
+  expect(Math.abs((geometry.collectionTop ?? 0) - (geometry.heroBottom ?? 0))).toBeLessThanOrEqual(
+    1,
+  );
   await assertNoHorizontalOverflow(page);
 });
 
-test('keeps the full-width campaign film composed on a narrow mobile viewport', async ({ page }) => {
+test('keeps the full-width campaign film composed on a narrow mobile viewport', async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 320, height: 740 });
   await page.goto('/');
 
@@ -178,9 +186,9 @@ test('keeps the full-width campaign film composed on a narrow mobile viewport', 
   });
 
   expect(Math.abs(mobileGeometry.frameLeft ?? 0)).toBeLessThanOrEqual(1);
-  expect(Math.abs((mobileGeometry.frameRight ?? 0) - mobileGeometry.viewportWidth)).toBeLessThanOrEqual(
-    1,
-  );
+  expect(
+    Math.abs((mobileGeometry.frameRight ?? 0) - mobileGeometry.viewportWidth),
+  ).toBeLessThanOrEqual(1);
   expect(Math.abs(mobileGeometry.theaterLeft ?? 0)).toBeLessThanOrEqual(1);
   expect(
     Math.abs((mobileGeometry.theaterRight ?? 0) - mobileGeometry.viewportWidth),
