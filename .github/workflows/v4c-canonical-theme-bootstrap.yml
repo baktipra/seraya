@@ -32,7 +32,9 @@ jobs:
           cache: npm
 
       - name: Apply V4C architecture
-        run: python3 scripts/apply-v4c.py
+        run: |
+          python3 scripts/apply-v4c.py
+          python3 scripts/repair-v4c-static-renderer.py
 
       - name: Install dependencies
         run: npm ci
@@ -90,6 +92,7 @@ jobs:
       - name: Commit validated V4C source
         run: |
           rm scripts/apply-v4c.py
+          rm scripts/repair-v4c-static-renderer.py
           rm .github/workflows/v4c-canonical-theme-bootstrap.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
