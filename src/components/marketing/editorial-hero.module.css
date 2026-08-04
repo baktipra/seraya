@@ -1,112 +1,244 @@
+:global(header:has(> nav[aria-label='Navigasi utama'])) {
+  border-bottom: 0;
+  background: var(--seraya-bg-canvas);
+  box-shadow: none;
+}
+
 .hero {
-  border-bottom: 1px solid var(--seraya-border-default);
-  background: #fff;
-  padding: 0.35rem 1.25rem 1.5rem;
+  margin: 0;
+  padding: 0;
+  background: var(--seraya-bg-canvas);
 }
 
 .frame {
   position: relative;
   isolation: isolate;
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(25rem, 0.95fr);
-  width: min(100%, 96rem);
-  min-height: 27rem;
-  margin-inline: auto;
+  grid-template-columns: minmax(0, 1.08fr) minmax(25rem, 0.92fr);
+  width: 100%;
+  min-height: clamp(21.5rem, 27vw, 25rem);
+  margin: 0;
   overflow: hidden;
-  border: 1px solid rgb(71 57 51 / 8%);
-  background: #e9ded7;
+  background: #d8cfc8;
 }
 
-.frame::after {
+.frame::before {
   position: absolute;
   inset: 0;
-  z-index: -1;
+  z-index: 1;
   background:
-    radial-gradient(circle at 91% 82%, rgb(255 255 255 / 28%), transparent 16rem),
-    linear-gradient(112deg, transparent 0 39%, rgb(255 255 255 / 18%) 52%, transparent 70%);
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      transparent 39%,
+      rgb(247 244 240 / 22%) 49%,
+      rgb(247 244 240 / 78%) 62%,
+      rgb(247 244 240 / 95%) 76%,
+      var(--seraya-bg-canvas) 100%
+    ),
+    linear-gradient(180deg, rgb(255 255 255 / 4%), rgb(44 31 25 / 5%));
   content: '';
   pointer-events: none;
 }
 
-.backdrop {
-  z-index: -3;
-  object-fit: cover;
-  object-position: center 42%;
-  filter: saturate(0.68) contrast(0.91) brightness(1.13);
-  transform: scale(1.055);
-}
-
-.backdropWash {
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-  background:
-    linear-gradient(
-      90deg,
-      rgb(236 220 213 / 42%) 0%,
-      rgb(247 241 236 / 52%) 46%,
-      rgb(248 244 239 / 88%) 100%
-    ),
-    linear-gradient(180deg, rgb(255 255 255 / 7%), rgb(240 228 221 / 17%));
-}
-
 .productPanel {
-  position: relative;
-  align-self: stretch;
-  width: min(78%, 39rem);
-  min-height: 20.5rem;
-  margin: 3.7rem 0 0 6.8%;
+  --hero-shift-x: 0px;
+  --hero-shift-y: 0px;
+  --hero-shift-x-reverse: 0px;
+  --hero-shift-y-reverse: 0px;
+  --hero-rotate: 0deg;
+  --card-shift-x: 0px;
+  --card-shift-y: 0px;
+  --card-tilt-x: 0deg;
+  --card-tilt-y: 0deg;
+  --card-glint-x: 50%;
+  --card-glint-y: 45%;
+  --card-glint-opacity: 0.16;
+
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
   overflow: hidden;
-  border: 1px solid rgb(105 76 70 / 11%);
-  background: #ead5d2;
-  box-shadow: 0 24px 62px rgb(66 47 40 / 16%);
+  background: #d9cfc7;
   animation: campaignProductIn 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  perspective: 1200px;
 }
 
-.productPhoto,
-.productPhotoWash {
+.productFilm,
+.productPhotoWash,
+.productLightSweep,
+.productGrain,
+.productEdgeGlow {
   position: absolute;
   inset: 0;
 }
 
-.productPhotoImage {
+.productFilm {
+  overflow: hidden;
+  background: #d8c8bd;
+}
+
+.productVideo {
+  display: block;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  object-position: center 28%;
-  filter: saturate(0.61) contrast(0.91) brightness(1.08);
-  transform: scale(1.03);
+  object-position: 50% 48%;
+  filter: saturate(0.92) contrast(0.99) brightness(1.02);
+  transform: translate3d(var(--hero-shift-x-reverse), var(--hero-shift-y-reverse), 0) scale(1.018);
+  transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
 }
 
 .productPhotoWash {
   background:
-    linear-gradient(
-      90deg,
-      rgb(236 211 210 / 74%),
-      rgb(241 223 220 / 48%) 47%,
-      rgb(255 255 255 / 12%)
-    ),
-    linear-gradient(180deg, rgb(255 255 255 / 14%), rgb(226 198 196 / 22%));
+    linear-gradient(90deg, rgb(195 159 151 / 8%), transparent 46%, rgb(255 250 244 / 6%)),
+    linear-gradient(180deg, rgb(255 252 248 / 3%), rgb(85 62 51 / 8%));
+  pointer-events: none;
+}
+
+.productLightSweep {
+  inset: -20% -55%;
+  background: linear-gradient(
+    104deg,
+    transparent 35%,
+    rgb(255 255 255 / 0%) 42%,
+    rgb(255 255 255 / 20%) 50%,
+    rgb(255 255 255 / 0%) 58%,
+    transparent 65%
+  );
+  mix-blend-mode: soft-light;
+  transform: translateX(-38%);
+  animation: campaignLightSweep 12s 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.productGrain {
+  opacity: 0.1;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgb(255 255 255 / 28%) 0 0.5px, transparent 0.8px),
+    radial-gradient(circle at 70% 40%, rgb(42 30 25 / 14%) 0 0.4px, transparent 0.75px);
+  background-position:
+    0 0,
+    7px 9px;
+  background-size:
+    12px 12px,
+    14px 14px;
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+
+.sheetFloat {
+  position: absolute;
+  top: 50%;
+  left: 23.5%;
+  z-index: 2;
+  width: min(15vw, 12.5rem);
+  min-width: 9.75rem;
+  translate: -50% -50%;
+  animation: campaignSheetFloat 7.2s ease-in-out infinite alternate;
+  perspective: 1000px;
+  transform-style: preserve-3d;
+  will-change: translate;
+}
+
+.invitationMotionStage {
+  position: relative;
+  transform: translate3d(var(--card-shift-x), var(--card-shift-y), 0)
+    rotateX(var(--card-tilt-x)) rotateY(var(--card-tilt-y))
+    rotateZ(calc(-2.4deg + var(--hero-rotate)));
+  transform-style: preserve-3d;
+  transition: transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.invitationBackdrop {
+  position: absolute;
+  inset: -12% -17%;
+  border: 1px solid rgb(255 255 255 / 30%);
+  background:
+    radial-gradient(circle at 24% 18%, rgb(255 255 255 / 38%), transparent 32%),
+    linear-gradient(145deg, rgb(255 255 255 / 14%), rgb(126 95 82 / 8%));
+  box-shadow:
+    0 32px 70px rgb(44 32 27 / 16%),
+    0 1px 0 rgb(255 255 255 / 42%) inset;
+  transform: translate3d(0.75rem, 0.8rem, -36px) rotate(5deg);
+  animation: campaignBackdropBreath 8.4s ease-in-out infinite alternate;
+  backdrop-filter: blur(5px);
+}
+
+.invitationGhostSheet {
+  position: absolute;
+  inset: -3% -4%;
+  border: 1px solid rgb(71 55 48 / 8%);
+  background: rgb(248 242 236 / 48%);
+  box-shadow: 0 18px 42px rgb(43 31 26 / 12%);
+  transform: translate3d(-0.55rem, 0.55rem, -18px) rotate(-3.5deg);
 }
 
 .invitationSheet {
-  position: absolute;
-  top: 12%;
-  left: 50%;
+  position: relative;
   display: flex;
-  width: min(46%, 15.8rem);
+  width: 100%;
   aspect-ratio: 0.71;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgb(67 56 51 / 10%);
-  background: rgb(255 253 249 / 96%);
-  box-shadow: 0 20px 48px rgb(45 36 31 / 22%);
+  overflow: hidden;
+  border: 1px solid rgb(67 56 51 / 9%);
+  background:
+    radial-gradient(circle at 13% 12%, rgb(142 75 82 / 7%), transparent 29%),
+    radial-gradient(circle at 88% 88%, rgb(72 104 79 / 6%), transparent 31%),
+    rgb(255 253 249 / 96%);
+  box-shadow:
+    0 24px 56px rgb(45 36 31 / 22%),
+    0 1px 0 rgb(255 255 255 / 84%) inset;
   color: #2b2522;
   text-align: center;
-  transform: translateX(-50%) rotate(-7deg);
+  transform: translateZ(24px);
+}
+
+.invitationSheet::before {
+  position: absolute;
+  inset: 0.55rem;
+  border: 1px solid rgb(142 75 82 / 8%);
+  content: '';
+  pointer-events: none;
+}
+
+.invitationGlint {
+  position: absolute;
+  inset: -15%;
+  opacity: var(--card-glint-opacity);
+  background:
+    radial-gradient(
+      circle at var(--card-glint-x) var(--card-glint-y),
+      rgb(255 255 255 / 82%) 0,
+      rgb(255 255 255 / 18%) 18%,
+      transparent 42%
+    ),
+    linear-gradient(120deg, transparent 30%, rgb(255 255 255 / 12%) 50%, transparent 70%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  transition:
+    opacity 260ms ease,
+    background-position 260ms ease;
+}
+
+.invitationEyebrow,
+.invitationNames,
+.invitationRule,
+.invitationDate,
+.invitationPlace {
+  position: relative;
+  z-index: 1;
 }
 
 .invitationEyebrow {
-  font-size: 0.54rem;
+  font-size: 0.46rem;
   font-weight: 700;
   letter-spacing: 0.17em;
   text-transform: uppercase;
@@ -115,105 +247,123 @@
 .invitationNames {
   display: flex;
   flex-direction: column;
-  margin-top: 1.1rem;
+  margin-top: 0.72rem;
   font-family: var(--font-editorial);
-  font-size: clamp(2.7rem, 4.5vw, 4.5rem);
+  font-size: clamp(2.05rem, 3.15vw, 3.05rem);
   font-weight: 500;
   letter-spacing: -0.07em;
-  line-height: 0.72;
+  line-height: 0.74;
 }
 
 .invitationNames span {
-  margin-block: 0.18rem;
+  margin-block: 0.14rem;
   color: var(--seraya-action-primary);
   font-size: 0.58em;
   font-style: italic;
 }
 
 .invitationRule {
-  width: 2.4rem;
+  width: 2rem;
   height: 1px;
-  margin-top: 1.35rem;
-  background: rgb(142 75 82 / 45%);
+  margin-top: 0.92rem;
+  background: rgb(142 75 82 / 42%);
 }
 
 .invitationDate {
-  margin-top: 1rem;
-  font-size: 0.61rem;
+  margin-top: 0.72rem;
+  font-size: 0.5rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
 .invitationPlace {
-  margin-top: 0.4rem;
-  color: rgb(43 37 34 / 62%);
-  font-size: 0.53rem;
+  margin-top: 0.28rem;
+  color: rgb(43 37 34 / 60%);
+  font-size: 0.44rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
+.productEdgeGlow {
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 18%) inset,
+    0 -28px 70px rgb(34 23 19 / 7%) inset;
+  pointer-events: none;
+}
+
 .productCaption {
   position: absolute;
-  right: 1rem;
-  bottom: 0.85rem;
-  color: rgb(58 45 41 / 68%);
-  font-size: 0.56rem;
+  bottom: 0.8rem;
+  left: 1.2rem;
+  z-index: 2;
+  color: rgb(255 255 255 / 78%);
+  font-size: 0.52rem;
   font-weight: 700;
   letter-spacing: 0.13em;
+  text-shadow: 0 1px 14px rgb(40 30 25 / 45%);
   text-transform: uppercase;
 }
 
 .copy {
-  width: min(100%, 39rem);
-  margin-inline: auto;
-  padding: 3rem 3.25rem;
+  position: relative;
+  z-index: 2;
+  grid-column: 2;
+  display: flex;
+  width: 100%;
+  min-height: inherit;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 1.75rem clamp(2rem, 4.5vw, 5rem) 1.75rem clamp(1.75rem, 3.6vw, 4rem);
   text-align: center;
   animation: campaignCopyIn 600ms 90ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .eyebrow {
   color: var(--seraya-action-primary);
-  font-size: 0.67rem;
+  font-size: 0.63rem;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
 }
 
 .title {
-  margin-top: 1rem;
+  max-width: 36rem;
+  margin-top: 0.72rem;
   color: #211d1a;
   font-family: var(--font-editorial);
-  font-size: clamp(2.5rem, 3.5vw, 3.75rem);
+  font-size: clamp(2.35rem, 3.2vw, 3.45rem);
   font-weight: 500;
   letter-spacing: -0.047em;
-  line-height: 0.98;
+  line-height: 0.97;
   text-wrap: balance;
 }
 
 .lead {
-  max-width: 35rem;
-  margin: 1.1rem auto 0;
+  max-width: 33rem;
+  margin: 0.82rem auto 0;
   color: rgb(39 32 28 / 78%);
-  font-size: clamp(0.98rem, 1.3vw, 1.12rem);
-  line-height: 1.55;
+  font-size: clamp(0.92rem, 1.15vw, 1.04rem);
+  line-height: 1.48;
   text-wrap: balance;
 }
 
 .primaryAction {
   display: inline-flex;
-  min-height: 3.4rem;
+  min-height: 3.05rem;
   align-items: center;
   justify-content: center;
-  margin-top: 1.45rem;
+  margin-top: 1.05rem;
   border: 1px solid rgb(61 47 42 / 8%);
   background: rgb(255 255 255 / 94%);
-  box-shadow: 0 14px 34px rgb(73 54 46 / 12%);
+  box-shadow: 0 12px 30px rgb(73 54 46 / 12%);
   color: #241f1c;
-  font-size: 0.74rem;
+  font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.16em;
-  padding-inline: 2rem;
+  padding-inline: 1.75rem;
   text-transform: uppercase;
   transition:
     transform 180ms ease,
@@ -223,7 +373,7 @@
 
 .primaryAction:hover {
   background: #fff;
-  box-shadow: 0 18px 38px rgb(73 54 46 / 17%);
+  box-shadow: 0 16px 34px rgb(73 54 46 / 17%);
   transform: translateY(-2px);
 }
 
@@ -235,19 +385,19 @@
 @keyframes campaignProductIn {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: scale(1.012);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: scale(1);
   }
 }
 
 @keyframes campaignCopyIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
 
   to {
@@ -256,14 +406,60 @@
   }
 }
 
-@media (max-width: 70rem) {
-  .frame {
-    grid-template-columns: minmax(0, 1fr) minmax(22rem, 0.92fr);
+@keyframes campaignLightSweep {
+  0%,
+  30% {
+    opacity: 0;
+    transform: translateX(-38%);
   }
 
-  .productPanel {
-    width: 82%;
-    margin-left: 4%;
+  46% {
+    opacity: 0.65;
+  }
+
+  65%,
+  100% {
+    opacity: 0;
+    transform: translateX(38%);
+  }
+}
+
+@keyframes campaignSheetFloat {
+  from {
+    translate: -50% calc(-50% - 3px);
+  }
+
+  to {
+    translate: -50% calc(-50% + 4px);
+  }
+}
+
+@keyframes campaignBackdropBreath {
+  from {
+    opacity: 0.72;
+    transform: translate3d(0.65rem, 0.7rem, -36px) rotate(4.4deg) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0.85rem, 0.9rem, -36px) rotate(5.4deg) scale(1.015);
+  }
+}
+
+@media (min-width: 96rem) {
+  .productVideo {
+    object-position: 50% 46%;
+  }
+}
+
+@media (max-width: 70rem) {
+  .frame {
+    grid-template-columns: minmax(0, 1fr) minmax(23rem, 0.9fr);
+  }
+
+  .sheetFloat {
+    left: 22.5%;
+    width: min(16vw, 11.75rem);
   }
 
   .copy {
@@ -272,48 +468,45 @@
 }
 
 @media (max-width: 56rem) {
-  .hero {
-    padding: 0.5rem 0 1.25rem;
-  }
-
   .frame {
-    grid-template-columns: 1fr;
-    width: 100%;
+    display: block;
     min-height: 0;
-    border-right: 0;
-    border-left: 0;
+    background: var(--seraya-bg-canvas);
   }
 
-  .backdrop {
-    object-position: center 33%;
-  }
-
-  .backdropWash {
-    background: linear-gradient(
-      180deg,
-      rgb(237 218 214 / 52%) 0 51%,
-      rgb(250 247 243 / 95%) 64% 100%
-    );
+  .frame::before {
+    display: none;
   }
 
   .productPanel {
-    grid-row: 1;
-    width: calc(100% - 2rem);
-    min-height: 20rem;
-    margin: 1rem;
+    position: relative;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+  }
+
+  .productVideo {
+    object-position: 50% 48%;
+  }
+
+  .sheetFloat {
+    top: 50%;
+    left: 32%;
+    width: min(25%, 10.75rem);
+    min-width: 8.75rem;
   }
 
   .copy {
-    grid-row: 2;
     width: 100%;
-    padding: 2.6rem 1.5rem 2.8rem;
-    background: rgb(250 247 243 / 94%);
+    min-height: 0;
+    padding: 2.5rem 1.5rem 2.7rem;
+    background: var(--seraya-bg-canvas);
   }
 
   .title {
     max-width: 31rem;
     margin-inline: auto;
-    font-size: clamp(2.55rem, 8vw, 3.4rem);
+    font-size: clamp(2.4rem, 7.7vw, 3.2rem);
   }
 
   .lead {
@@ -323,15 +516,17 @@
 
 @media (max-width: 34rem) {
   .productPanel {
-    min-height: 18rem;
+    aspect-ratio: 16 / 9.5;
   }
 
-  .invitationSheet {
-    width: min(44%, 12.8rem);
+  .sheetFloat {
+    left: 33%;
+    width: min(29%, 9.5rem);
+    min-width: 8rem;
   }
 
   .invitationNames {
-    font-size: clamp(2.35rem, 12vw, 3.2rem);
+    font-size: clamp(1.85rem, 9.8vw, 2.5rem);
   }
 
   .copy {
@@ -339,11 +534,11 @@
   }
 
   .title {
-    font-size: clamp(2.35rem, 10.6vw, 3rem);
+    font-size: clamp(2.25rem, 10vw, 2.85rem);
   }
 
   .lead {
-    font-size: 0.98rem;
+    font-size: 0.96rem;
   }
 
   .primaryAction {
@@ -351,13 +546,31 @@
   }
 }
 
+@media (hover: none), (pointer: coarse) {
+  .productVideo,
+  .invitationMotionStage,
+  .invitationGlint {
+    transition: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .productPanel,
-  .copy {
+  .copy,
+  .productLightSweep,
+  .sheetFloat,
+  .invitationBackdrop {
     animation: none;
   }
 
+  .productVideo,
+  .invitationMotionStage,
+  .invitationGlint,
   .primaryAction {
     transition: none;
+  }
+
+  .primaryAction:hover {
+    transform: none;
   }
 }
