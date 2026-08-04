@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { EditorialHero } from '@/components/marketing/editorial-hero';
+import { MarketingPageShell } from '@/components/marketing/marketing-page-shell';
 import {
   CollectionCard,
   FlagshipFooter,
@@ -105,7 +106,7 @@ const faqs = [
 
 export default function Home() {
   return (
-    <div className="bg-seraya-canvas min-h-screen overflow-x-hidden">
+    <MarketingPageShell>
       <FlagshipHeader />
 
       <main>
@@ -396,6 +397,6 @@ export default function Home() {
       </main>
 
       <FlagshipFooter />
-    </div>
+    </MarketingPageShell>
   );
 }

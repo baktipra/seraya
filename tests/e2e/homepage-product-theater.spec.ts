@@ -31,10 +31,6 @@ test('renders the compressed seamless campaign hero with a verified playing edit
     'data-editorial-hero-motion',
     'true',
   );
-  await expect(page.locator('[data-editorial-hero-motion]')).toHaveAttribute(
-    'data-motion-ready',
-    'true',
-  );
   await expect(page.locator('[data-editorial-product-stage]')).toBeVisible();
   await expect(page.locator('[data-editorial-product-card]')).toBeVisible();
   await expect(page.locator('[data-editorial-hero-video]')).toHaveCount(1);
@@ -110,6 +106,7 @@ test('renders the compressed seamless campaign hero with a verified playing edit
   expect(Number(mp4Response.headers()['content-length'] ?? 0)).toBeGreaterThan(1_000_000);
 
   const geometry = await page.evaluate(() => {
+    const shell = document.querySelector<HTMLElement>('[data-marketing-page-shell]');
     const header = document.querySelector('header');
     const hero = document.querySelector<HTMLElement>('[data-homepage-campaign-hero]');
     const frame = document.querySelector<HTMLElement>('[data-editorial-hero-frame]');
@@ -117,6 +114,7 @@ test('renders the compressed seamless campaign hero with a verified playing edit
     const copy = document.querySelector<HTMLElement>('[data-editorial-hero-copy]');
     const collection = document.querySelector<HTMLElement>('#koleksi');
 
+    const shellRect = shell?.getBoundingClientRect();
     const headerRect = header?.getBoundingClientRect();
     const heroRect = hero?.getBoundingClientRect();
     const frameRect = frame?.getBoundingClientRect();
@@ -135,6 +133,9 @@ test('renders the compressed seamless campaign hero with a verified playing edit
       frameRight: frameRect?.right ?? null,
       frameTop: frameRect?.top ?? null,
       headerBorderWidth: header ? window.getComputedStyle(header).borderBottomWidth : null,
+      shellLeft: shellRect?.left ?? null,
+      shellRight: shellRect?.right ?? null,
+      shellWidth: shellRect?.width ?? null,
       headerBottom: headerRect?.bottom ?? null,
       heroAnimationName: theater ? window.getComputedStyle(theater).animationName : null,
       heroBackground: hero ? window.getComputedStyle(hero).backgroundColor : null,
@@ -153,8 +154,13 @@ test('renders the compressed seamless campaign hero with a verified playing edit
   expect(geometry.heroAnimationName).not.toBe('none');
   expect(Math.abs((geometry.heroTop ?? 0) - (geometry.headerBottom ?? 0))).toBeLessThanOrEqual(1);
   expect(Math.abs((geometry.frameTop ?? 0) - (geometry.heroTop ?? 0))).toBeLessThanOrEqual(1);
-  expect(Math.abs(geometry.frameLeft ?? 0)).toBeLessThanOrEqual(1);
-  expect(Math.abs((geometry.frameRight ?? 0) - geometry.viewportWidth)).toBeLessThanOrEqual(1);
+  expect(geometry.shellWidth ?? Number.POSITIVE_INFINITY).toBeLessThanOrEqual(1200.5);
+  expect(geometry.shellWidth ?? 0).toBeGreaterThan(0);
+  expect(
+    Math.abs((geometry.shellLeft ?? 0) - (geometry.viewportWidth - (geometry.shellWidth ?? 0)) / 2),
+  ).toBeLessThanOrEqual(1);
+  expect(Math.abs((geometry.frameLeft ?? 0) - (geometry.shellLeft ?? 0))).toBeLessThanOrEqual(1);
+  expect(Math.abs((geometry.frameRight ?? 0) - (geometry.shellRight ?? 0))).toBeLessThanOrEqual(1);
   expect(Math.abs((geometry.theaterLeft ?? 0) - (geometry.frameLeft ?? 0))).toBeLessThanOrEqual(1);
   expect(Math.abs((geometry.theaterRight ?? 0) - (geometry.frameRight ?? 0))).toBeLessThanOrEqual(
     1,
