@@ -1,6 +1,8 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
+const HAVE_CURRENT_DATA = 2;
+
 const assertNoHorizontalOverflow = async (page: Page) => {
   const hasHorizontalOverflow = await page.evaluate(
     () => document.documentElement.scrollWidth > window.innerWidth + 1,
@@ -81,7 +83,7 @@ test('renders the seamless campaign hero with a verified playing editorial film'
   expect(playbackState.duration).toBeLessThanOrEqual(9);
   expect(playbackState.videoWidth).toBe(1280);
   expect(playbackState.videoHeight).toBe(720);
-  expect(playbackState.readyState).toBeGreaterThanOrEqual(HTMLMediaElement.HAVE_CURRENT_DATA);
+  expect(playbackState.readyState).toBeGreaterThanOrEqual(HAVE_CURRENT_DATA);
   expect(playbackState.currentTime).toBeGreaterThan(0.25);
   expect(playbackState.paused).toBe(false);
   expect(playbackState.errorCode).toBeNull();
