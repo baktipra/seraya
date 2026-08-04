@@ -9,7 +9,7 @@ const assertNoHorizontalOverflow = async (page: Page) => {
   expect(hasHorizontalOverflow).toBe(false);
 };
 
-test('renders the seamless campaign hero with an editorial film composition', async ({ page }) => {
+test('renders the seamless campaign hero with a verified playing editorial film', async ({ page }) => {
   await page.goto('/');
 
   await expect(
@@ -46,6 +46,46 @@ test('renders the seamless campaign hero with an editorial film composition', as
     '/marketing/hero/seraya-wedding-editorial-poster.avif',
   );
 
+  await page.waitForFunction(
+    () => {
+      const media = document.querySelector<HTMLVideoElement>('[data-editorial-hero-video]');
+
+      return Boolean(
+        media &&
+          media.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA &&
+          media.videoWidth > 0 &&
+          media.videoHeight > 0 &&
+          !media.paused &&
+          media.currentTime > 0.25,
+      );
+    },
+    undefined,
+    { timeout: 10_000 },
+  );
+
+  const playbackState = await video.evaluate((element) => {
+    const media = element as HTMLVideoElement;
+
+    return {
+      currentTime: media.currentTime,
+      duration: media.duration,
+      errorCode: media.error?.code ?? null,
+      paused: media.paused,
+      readyState: media.readyState,
+      videoHeight: media.videoHeight,
+      videoWidth: media.videoWidth,
+    };
+  });
+
+  expect(playbackState.duration).toBeGreaterThanOrEqual(7);
+  expect(playbackState.duration).toBeLessThanOrEqual(9);
+  expect(playbackState.videoWidth).toBe(1280);
+  expect(playbackState.videoHeight).toBe(720);
+  expect(playbackState.readyState).toBeGreaterThanOrEqual(HTMLMediaElement.HAVE_CURRENT_DATA);
+  expect(playbackState.currentTime).toBeGreaterThan(0.25);
+  expect(playbackState.paused).toBe(false);
+  expect(playbackState.errorCode).toBeNull();
+
   const primaryAction = page.getByRole('link', { name: 'Jelajahi koleksi' });
   await expect(primaryAction).toBeVisible();
   await expect(primaryAction).toHaveAttribute('href', '/templates');
@@ -56,6 +96,7 @@ test('renders the seamless campaign hero with an editorial film composition', as
   ]);
   expect(mp4Response.ok()).toBe(true);
   expect(posterResponse.ok()).toBe(true);
+  expect(Number(mp4Response.headers()['content-length'] ?? 0)).toBeGreaterThan(1_000_000);
 
   const [headerBorderWidth, heroBackground, bodyBackground, heroAnimationName] =
     await page.evaluate(() => {
@@ -97,4 +138,11 @@ test('respects reduced motion for the campaign composition', async ({ page }) =>
     .evaluate((element) => window.getComputedStyle(element).animationName);
 
   expect(animationName).toBe('none');
+  await expect
+    .poll(() =>
+      page
+        .locator('[data-editorial-hero-video]')
+        .evaluate((element) => (element as HTMLVideoElement).paused),
+    )
+    .toBe(true);
 });
