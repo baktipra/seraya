@@ -1,0 +1,224 @@
+name: Apply marketing shell V4A once
+
+on:
+  push:
+    branches:
+      - agent/gen-z-theme-discovery-v4a-fixed-shell
+    paths:
+      - '.github/workflows/apply-marketing-shell-v4a-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/gen-z-theme-discovery-v4a-fixed-shell
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Apply fixed-width marketing shell
+        run: |
+          python <<'PY'
+          from pathlib import Path
+
+          shell_path = Path('src/components/marketing/marketing-page-shell.tsx')
+          shell_path.write_text("""import type { PropsWithChildren } from 'react';
+
+export function MarketingPageShell({ children }: PropsWithChildren) {
+  return (
+    <div
+      className=\"bg-seraya-canvas mx-auto min-h-screen w-full max-w-[75rem] overflow-x-hidden\"
+      data-marketing-page-shell
+    >
+      {children}
+    </div>
+  );
+}
+""", encoding='utf-8')
+
+          def wire_shell(path_value: str, import_anchor: str, import_line: str) -> None:
+            path = Path(path_value)
+            source = path.read_text(encoding='utf-8')
+            if import_line not in source:
+              source = source.replace(import_anchor, import_anchor + import_line, 1)
+            source = source.replace(
+              '<div className="bg-seraya-canvas min-h-screen overflow-x-hidden">',
+              '<MarketingPageShell>',
+              1,
+            )
+            closing = '\n    </div>\n  );'
+            if closing not in source:
+              raise SystemExit(f'outer closing marker missing in {path_value}')
+            source = source.rsplit(closing, 1)[0] + '\n    </MarketingPageShell>\n  );' + source.rsplit(closing, 1)[1]
+            path.write_text(source, encoding='utf-8')
+
+          wire_shell(
+            'src/app/page.tsx',
+            "import { EditorialHero } from '@/components/marketing/editorial-hero';\n",
+            "import { MarketingPageShell } from '@/components/marketing/marketing-page-shell';\n",
+          )
+          wire_shell(
+            'src/app/templates/page.tsx',
+            "import Link from 'next/link';\n",
+            "\nimport { MarketingPageShell } from '@/components/marketing/marketing-page-shell';\n",
+          )
+
+          test_path = Path('tests/e2e/homepage-product-theater.spec.ts')
+          test_source = test_path.read_text(encoding='utf-8')
+          test_source = test_source.replace(
+            "  await expect(page.locator('[data-editorial-hero-motion]')).toHaveAttribute(\n    'data-motion-ready',\n    'true',\n  );\n",
+            '',
+            1,
+          )
+          pointer_block = """\n    const panel = page.locator('[data-editorial-hero-motion]');
+    const panelBox = await panel.boundingBox();
+    expect(panelBox).not.toBeNull();
+
+    if (panelBox) {
+      await page.mouse.move(
+        panelBox.x + panelBox.width * 0.28,
+        panelBox.y + panelBox.height * 0.28,
+      );
+
+      await expect
+        .poll(() =>
+          panel.evaluate((element) => element.style.getPropertyValue('--card-tilt-y').trim()),
+        )
+        .not.toBe('0deg');
+    }
+"""
+          test_source = test_source.replace(pointer_block, '\n', 1)
+          test_source = test_source.replace(
+            "    const header = document.querySelector('header');\n",
+            "    const shell = document.querySelector<HTMLElement>('[data-marketing-page-shell]');\n    const header = document.querySelector('header');\n",
+            1,
+          )
+          test_source = test_source.replace(
+            "    const headerRect = header?.getBoundingClientRect();\n",
+            "    const shellRect = shell?.getBoundingClientRect();\n    const headerRect = header?.getBoundingClientRect();\n",
+            1,
+          )
+          test_source = test_source.replace(
+            "      headerBorderWidth: header ? window.getComputedStyle(header).borderBottomWidth : null,\n",
+            "      headerBorderWidth: header ? window.getComputedStyle(header).borderBottomWidth : null,\n      shellLeft: shellRect?.left ?? null,\n      shellRight: shellRect?.right ?? null,\n      shellWidth: shellRect?.width ?? null,\n",
+            1,
+          )
+          test_source = test_source.replace(
+            "  expect(Math.abs(geometry.frameLeft ?? 0)).toBeLessThanOrEqual(1);\n  expect(Math.abs((geometry.frameRight ?? 0) - geometry.viewportWidth)).toBeLessThanOrEqual(1);\n",
+            "  expect(geometry.shellWidth ?? Number.POSITIVE_INFINITY).toBeLessThanOrEqual(1200.5);\n  expect(geometry.shellWidth ?? 0).toBeGreaterThan(0);\n  expect(\n    Math.abs((geometry.shellLeft ?? 0) - (geometry.viewportWidth - (geometry.shellWidth ?? 0)) / 2),\n  ).toBeLessThanOrEqual(1);\n  expect(Math.abs((geometry.frameLeft ?? 0) - (geometry.shellLeft ?? 0))).toBeLessThanOrEqual(1);\n  expect(Math.abs((geometry.frameRight ?? 0) - (geometry.shellRight ?? 0))).toBeLessThanOrEqual(1);\n",
+            1,
+          )
+          test_path.write_text(test_source, encoding='utf-8')
+
+          Path('tests/e2e/marketing-fixed-shell.spec.ts').write_text("""import { expect, test } from '@playwright/test';
+
+const routes = [
+  { path: '/', heading: 'Undangan pernikahan yang terasa personal' },
+  { path: '/templates', heading: /Pilih rasa/ },
+] as const;
+
+for (const route of routes) {
+  test(`${route.path} uses the canonical centered marketing shell`, async ({ page }) => {
+    await page.setViewportSize({ width: 1600, height: 900 });
+    await page.goto(route.path);
+
+    await expect(page.getByRole('heading', { level: 1, name: route.heading })).toBeVisible();
+    const shell = page.locator('[data-marketing-page-shell]');
+    await expect(shell).toBeVisible();
+
+    const geometry = await page.evaluate(() => {
+      const shellElement = document.querySelector<HTMLElement>('[data-marketing-page-shell]');
+      const header = document.querySelector<HTMLElement>('header');
+      const main = document.querySelector<HTMLElement>('main');
+      const footer = document.querySelector<HTMLElement>('footer');
+      const shellRect = shellElement?.getBoundingClientRect();
+      const headerRect = header?.getBoundingClientRect();
+      const mainRect = main?.getBoundingClientRect();
+      const footerRect = footer?.getBoundingClientRect();
+
+      return {
+        footerLeft: footerRect?.left ?? null,
+        footerRight: footerRect?.right ?? null,
+        headerLeft: headerRect?.left ?? null,
+        headerRight: headerRect?.right ?? null,
+        mainLeft: mainRect?.left ?? null,
+        mainRight: mainRect?.right ?? null,
+        shellLeft: shellRect?.left ?? null,
+        shellRight: shellRect?.right ?? null,
+        shellWidth: shellRect?.width ?? null,
+        viewportWidth: window.innerWidth,
+      };
+    });
+
+    expect(geometry.shellWidth ?? Number.POSITIVE_INFINITY).toBeLessThanOrEqual(1200.5);
+    expect(geometry.shellWidth ?? 0).toBeGreaterThanOrEqual(1199);
+    expect(
+      Math.abs((geometry.shellLeft ?? 0) - (geometry.viewportWidth - (geometry.shellWidth ?? 0)) / 2),
+    ).toBeLessThanOrEqual(1);
+    expect(Math.abs((geometry.headerLeft ?? 0) - (geometry.shellLeft ?? 0))).toBeLessThanOrEqual(1);
+    expect(Math.abs((geometry.headerRight ?? 0) - (geometry.shellRight ?? 0))).toBeLessThanOrEqual(1);
+    expect((geometry.mainLeft ?? 0) >= (geometry.shellLeft ?? 0)).toBe(true);
+    expect((geometry.mainRight ?? 0) <= (geometry.shellRight ?? 0) + 1).toBe(true);
+    expect(Math.abs((geometry.footerLeft ?? 0) - (geometry.shellLeft ?? 0))).toBeLessThanOrEqual(1);
+    expect(Math.abs((geometry.footerRight ?? 0) - (geometry.shellRight ?? 0))).toBeLessThanOrEqual(1);
+  });
+}
+
+test('the marketing shell remains fluid on a narrow viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 740 });
+  await page.goto('/');
+
+  const geometry = await page.locator('[data-marketing-page-shell]').evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return { left: rect.left, right: rect.right, width: rect.width, viewportWidth: window.innerWidth };
+  });
+
+  expect(Math.abs(geometry.left)).toBeLessThanOrEqual(1);
+  expect(Math.abs(geometry.right - geometry.viewportWidth)).toBeLessThanOrEqual(1);
+  expect(Math.abs(geometry.width - geometry.viewportWidth)).toBeLessThanOrEqual(1);
+});
+""", encoding='utf-8')
+          PY
+      - name: Normalize focused V4A files
+        run: |
+          npx prettier --write \
+            src/components/marketing/marketing-page-shell.tsx \
+            src/components/marketing/editorial-hero.tsx \
+            src/components/marketing/editorial-hero.module.css \
+            src/app/page.tsx \
+            src/app/templates/page.tsx \
+            tests/e2e/homepage-product-theater.spec.ts \
+            tests/e2e/marketing-fixed-shell.spec.ts
+      - name: Validate focused V4A source
+        run: |
+          npx eslint \
+            src/components/marketing/marketing-page-shell.tsx \
+            src/components/marketing/editorial-hero.tsx \
+            src/app/page.tsx \
+            src/app/templates/page.tsx \
+            tests/e2e/homepage-product-theater.spec.ts \
+            tests/e2e/marketing-fixed-shell.spec.ts
+          npm run build
+      - name: Commit V4A and remove runner
+        run: |
+          git rm .github/workflows/apply-marketing-shell-v4a-once.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            src/components/marketing/marketing-page-shell.tsx \
+            src/components/marketing/editorial-hero.tsx \
+            src/components/marketing/editorial-hero.module.css \
+            src/app/page.tsx \
+            src/app/templates/page.tsx \
+            tests/e2e/homepage-product-theater.spec.ts \
+            tests/e2e/marketing-fixed-shell.spec.ts
+          git commit -m "SERAYA — Unified Fixed-Width Marketing Shell V4A"
+          git push origin HEAD:agent/gen-z-theme-discovery-v4a-fixed-shell
