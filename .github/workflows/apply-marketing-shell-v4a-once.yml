@@ -1,18 +1,20 @@
 name: Apply marketing shell V4A once
 
 on:
-  push:
+  pull_request:
     branches:
-      - agent/gen-z-theme-discovery-v4a-fixed-shell
-    paths:
-      - '.github/workflows/apply-marketing-shell-v4a-once.yml'
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
 
 permissions:
   contents: write
 
 jobs:
   apply:
-    if: github.actor != 'github-actions[bot]'
+    if: github.event.pull_request.head.ref == 'agent/gen-z-theme-discovery-v4a-fixed-shell' && github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -57,7 +59,8 @@ export function MarketingPageShell({ children }: PropsWithChildren) {
             closing = '\n    </div>\n  );'
             if closing not in source:
               raise SystemExit(f'outer closing marker missing in {path_value}')
-            source = source.rsplit(closing, 1)[0] + '\n    </MarketingPageShell>\n  );' + source.rsplit(closing, 1)[1]
+            before, after = source.rsplit(closing, 1)
+            source = before + '\n    </MarketingPageShell>\n  );' + after
             path.write_text(source, encoding='utf-8')
 
           wire_shell(
