@@ -27,7 +27,6 @@ jobs:
         run: |
           python <<'RUNNER'
           from pathlib import Path
-          import textwrap
 
           workflow = Path('.github/workflows/apply-marketing-shell-v4a-once.yml').read_text(
               encoding='utf-8'
@@ -36,8 +35,9 @@ jobs:
           end_marker = "\n          PY\n"
           if start_marker not in workflow or end_marker not in workflow:
               raise SystemExit('V4A transformer block not found')
-          code = workflow.split(start_marker, 1)[1].split(end_marker, 1)[0]
-          exec(compile(textwrap.dedent(code), '<v4a-transformer>', 'exec'))
+          block = workflow.split(start_marker, 1)[1].split(end_marker, 1)[0]
+          code = '\n'.join(line[10:] if line.startswith('          ') else line for line in block.splitlines())
+          exec(compile(code, '<v4a-transformer>', 'exec'))
           RUNNER
       - name: Normalize focused V4A files
         run: |
