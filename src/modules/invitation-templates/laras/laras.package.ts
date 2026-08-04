@@ -1,0 +1,82 @@
+import {
+  defineInvitationThemePackage,
+  FULL_INVITATION_THEME_CAPABILITIES,
+} from '../core/theme-package.types';
+
+import { LarasTemplate } from './laras-template';
+
+export const larasThemePackage = defineInvitationThemePackage({
+  defaultPaletteKey: 'midnight',
+  manifest: {
+    badge: 'After-dark',
+    capabilities: FULL_INVITATION_THEME_CAPABILITIES,
+    description: 'Formal tetapi tetap muda, dengan suasana malam dan detail metalik yang tenang.',
+    featured: true,
+    key: 'laras',
+    mood: 'Evening ceremony · antique gold · restrained heritage geometry',
+    moods: ['formal', 'dramatic', 'elegant'],
+    motif: '/marketing/laras-evening-geometry.svg',
+    name: 'Laras',
+    parity: {
+      coupleAnchorId: 'laras-couple-title',
+      experienceHook: 'data-laras-experience',
+      experienceValue: 'evening-folio-v1',
+      greetingAnchorId: 'laras-personal-greeting',
+      identity: 'formal-evening-ceremony-folio',
+      invitationTitleId: 'laras-invitation-title',
+    },
+    personality: 'Modern evening formal',
+    preview: {
+      date: 'Sabtu · 17 Agustus 2027',
+      eyebrow: 'A formal evening',
+      guestLine: 'Dengan hormat mengundang',
+      guestName: 'Bapak Aditya sekeluarga',
+      showMonogram: true,
+      stageLabel: 'Formal evening',
+    },
+    styles: ['formal', 'evening', 'editorial'],
+  },
+  palettes: [
+    {
+      accent: '#d7b982',
+      canvas: '#201f26',
+      ink: '#f4ead8',
+      key: 'midnight',
+      name: 'Midnight',
+      paper: '#2b2931',
+      soft: '#655b4f',
+      swatch: '#2c2a34',
+    },
+    {
+      accent: '#e1b28e',
+      canvas: '#3a2028',
+      ink: '#fff1e7',
+      key: 'burgundy',
+      name: 'Burgundy',
+      paper: '#4a2731',
+      soft: '#8d5362',
+      swatch: '#7b394c',
+    },
+    {
+      accent: '#d4c58c',
+      canvas: '#18362f',
+      ink: '#f4f0db',
+      key: 'emerald',
+      name: 'Emerald',
+      paper: '#21443b',
+      soft: '#53776b',
+      swatch: '#2e6455',
+    },
+    {
+      accent: '#8a6443',
+      canvas: '#eee6da',
+      ink: '#3e3228',
+      key: 'ivory',
+      name: 'Ivory',
+      paper: '#fffaf2',
+      soft: '#cdbba6',
+      swatch: '#d7c8b5',
+    },
+  ],
+  Renderer: LarasTemplate,
+});

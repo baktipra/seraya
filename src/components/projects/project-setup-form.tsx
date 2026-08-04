@@ -5,7 +5,11 @@ import { useActionState, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Input } from '@/design-system';
 import { siteConfig } from '@/config/site';
 import { normalizeSlug } from '@/lib/slug';
-import type { InvitationTemplateKey } from '@/modules/invitation-templates/invitation-template.keys';
+import {
+  getDefaultInvitationThemePalette,
+  invitationThemePackages,
+  type InvitationTemplateKey,
+} from '@/modules/invitation-templates/core/theme-package.registry';
 import {
   initialCreateProjectActionState,
   type CreateProjectActionState,
@@ -13,47 +17,21 @@ import {
 import { createProjectAction } from '@/modules/projects/create-project.actions';
 import { suggestProjectSlug } from '@/modules/projects/create-project.schema';
 
-const collectionOptions: Array<{
-  accent: string;
-  canvas: string;
-  description: string;
-  frame: string;
-  key: InvitationTemplateKey;
-  name: string;
-  personality: string;
-  text: string;
-}> = [
-  {
-    accent: 'text-[#8e4b52]',
-    canvas: 'bg-[#f3e1e1]',
-    description: 'Lembut, hangat, dan intim seperti surat personal.',
-    frame: 'border-[#d8b7b5] bg-[#fffaf7]',
-    key: 'roselle',
-    name: 'Roselle',
-    personality: 'Romantic warmth',
-    text: 'text-[#392c2b]',
-  },
-  {
-    accent: 'text-[#59615d]',
-    canvas: 'bg-[#e7e5dc]',
-    description: 'Grid editorial, tipografi tegas, dan ruang putih modern.',
-    frame: 'border-[#b8b4aa] bg-[#f8f7f2]',
-    key: 'aruna',
-    name: 'Aruna',
-    personality: 'Modern editorial',
-    text: 'text-[#252724]',
-  },
-  {
-    accent: 'text-[#d7b982]',
-    canvas: 'bg-[#222129]',
-    description: 'Formal, elegan, dan tenang untuk perayaan berkelas.',
-    frame: 'border-[#716759] bg-[#2c2a32]',
-    key: 'laras',
-    name: 'Laras',
-    personality: 'Formal evening',
-    text: 'text-[#fff9ed]',
-  },
-];
+const collectionOptions = invitationThemePackages.map((themePackage) => {
+  const palette = getDefaultInvitationThemePalette(themePackage.manifest.key);
+
+  return {
+    accent: palette.accent,
+    canvas: palette.canvas,
+    description: themePackage.manifest.description,
+    frame: palette.paper,
+    frameBorder: palette.soft,
+    key: themePackage.manifest.key,
+    name: themePackage.manifest.name,
+    personality: themePackage.manifest.personality,
+    text: palette.ink,
+  };
+});
 
 type SetupStep = 1 | 2 | 3;
 
@@ -130,17 +108,24 @@ function InvitationSetupPreview({
         className="bg-seraya-ink/7 absolute right-[-5%] bottom-[4%] h-[78%] w-[70%] rotate-6 rounded-[2rem]"
       />
       <div
-        className={`${collection.canvas} relative rounded-[2rem] p-4 shadow-[0_30px_80px_rgb(53_37_32_/_0.16)] sm:p-5`}
+        className="relative rounded-[2rem] p-4 shadow-[0_30px_80px_rgb(53_37_32_/_0.16)] sm:p-5"
+        style={{ backgroundColor: collection.canvas }}
       >
         <div
-          className={`${collection.frame} ${collection.text} relative flex aspect-[9/16] flex-col overflow-hidden rounded-[1.45rem] border px-7 py-8 text-center shadow-[0_16px_45px_rgb(36_29_27_/_0.13)]`}
+          className="relative flex aspect-[9/16] flex-col overflow-hidden rounded-[1.45rem] border px-7 py-8 text-center shadow-[0_16px_45px_rgb(36_29_27_/_0.13)]"
+          style={{
+            backgroundColor: collection.frame,
+            borderColor: collection.frameBorder,
+            color: collection.text,
+          }}
         >
           <div
             aria-hidden="true"
             className="absolute -top-12 -right-12 size-36 rounded-full border border-current opacity-10"
           />
           <p
-            className={`${collection.accent} text-[0.58rem] font-semibold tracking-[0.24em] uppercase`}
+            className="text-[0.58rem] font-semibold tracking-[0.24em] uppercase"
+            style={{ color: collection.accent }}
           >
             The wedding of
           </p>
@@ -154,7 +139,9 @@ function InvitationSetupPreview({
                 <p className="mt-5 font-serif text-[3.2rem] leading-[0.78] tracking-[-0.06em]">
                   {personOne}
                 </p>
-                <p className={`${collection.accent} my-3 text-xl italic`}>&amp;</p>
+                <p className="my-3 text-xl italic" style={{ color: collection.accent }}>
+                  &amp;
+                </p>
                 <p className="ml-8 font-serif text-[3.2rem] leading-[0.78] tracking-[-0.06em]">
                   {personTwo}
                 </p>
@@ -164,7 +151,9 @@ function InvitationSetupPreview({
                 <p className="font-serif text-[3.15rem] leading-[0.8] font-medium tracking-[-0.055em]">
                   {personOne}
                 </p>
-                <p className={`${collection.accent} my-3 font-serif text-2xl italic`}>&amp;</p>
+                <p className="my-3 font-serif text-2xl italic" style={{ color: collection.accent }}>
+                  &amp;
+                </p>
                 <p className="font-serif text-[3.15rem] leading-[0.8] font-medium tracking-[-0.055em]">
                   {personTwo}
                 </p>
@@ -540,10 +529,16 @@ export function ProjectSetupForm({ previewMode = false }: { previewMode?: boolea
                         value={collection.key}
                       />
                       <span
-                        className={`${collection.canvas} flex aspect-[4/5] items-center justify-center rounded-[0.85rem] p-2`}
+                        className="flex aspect-[4/5] items-center justify-center rounded-[0.85rem] p-2"
+                        style={{ backgroundColor: collection.canvas }}
                       >
                         <span
-                          className={`${collection.frame} ${collection.text} flex size-full items-center justify-center rounded-[0.55rem] border font-serif text-xl`}
+                          className="flex size-full items-center justify-center rounded-[0.55rem] border font-serif text-xl"
+                          style={{
+                            backgroundColor: collection.frame,
+                            borderColor: collection.frameBorder,
+                            color: collection.text,
+                          }}
                         >
                           {collection.name.slice(0, 1)}
                         </span>

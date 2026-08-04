@@ -3,7 +3,7 @@ import { InvitationGalleryImage } from '../invitation-gallery-image';
 import {
   getPersonalInvitationPresentationSlots,
   type InvitationTemplateProps,
-} from '../invitation-template.types';
+} from '../core/theme-renderer.types';
 
 import experienceStyles from './laras-guest-experience.module.css';
 import { createLarasMonogram } from './laras-monogram';

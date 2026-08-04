@@ -3,7 +3,7 @@ import { InvitationGalleryImage } from '../invitation-gallery-image';
 import {
   getPersonalInvitationPresentationSlots,
   type InvitationTemplateProps,
-} from '../invitation-template.types';
+} from '../core/theme-renderer.types';
 
 import styles from './aruna.module.css';
 import experienceStyles from './aruna-guest-experience.module.css';

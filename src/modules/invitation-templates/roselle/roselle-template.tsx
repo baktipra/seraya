@@ -1,7 +1,7 @@
 import {
   getPersonalInvitationPresentationSlots,
   type InvitationTemplateProps,
-} from '../invitation-template.types';
+} from '../core/theme-renderer.types';
 
 import experienceStyles from './roselle-guest-experience.module.css';
 import parityRepairStyles from './roselle-parity-repair.module.css';

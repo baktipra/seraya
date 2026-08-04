@@ -1,0 +1,81 @@
+import {
+  defineInvitationThemePackage,
+  FULL_INVITATION_THEME_CAPABILITIES,
+} from '../core/theme-package.types';
+
+import { ArunaTemplate } from './aruna-template';
+
+export const arunaThemePackage = defineInvitationThemePackage({
+  defaultPaletteKey: 'stone',
+  manifest: {
+    badge: 'Gen Z editorial',
+    capabilities: FULL_INVITATION_THEME_CAPABILITIES,
+    description: 'Grid bersih, tipografi tegas, dan komposisi yang terasa seperti wedding zine.',
+    featured: true,
+    key: 'aruna',
+    mood: 'Editorial grid · directional type · refined contrast',
+    moods: ['modern', 'cool', 'expressive'],
+    motif: '/marketing/aruna-editorial-grid.svg',
+    name: 'Aruna',
+    parity: {
+      coupleAnchorId: 'aruna-couple-title',
+      experienceHook: 'data-aruna-experience',
+      experienceValue: 'journal-v1',
+      greetingAnchorId: 'aruna-personal-greeting',
+      identity: 'modern-wedding-journal',
+      invitationTitleId: 'aruna-invitation-title',
+    },
+    personality: 'Modern wedding journal',
+    preview: {
+      date: 'Jakarta · 17.08.27',
+      eyebrow: 'Wedding journal · 017',
+      guestLine: 'Personal edition prepared for',
+      guestName: 'Aditya & Family',
+      stageLabel: 'Modern editorial',
+    },
+    styles: ['editorial', 'modern', 'minimal'],
+  },
+  palettes: [
+    {
+      accent: '#59625d',
+      canvas: '#e7e5dc',
+      ink: '#252a27',
+      key: 'stone',
+      name: 'Stone',
+      paper: '#f8f7f2',
+      soft: '#b9b9ae',
+      swatch: '#757c77',
+    },
+    {
+      accent: '#63764e',
+      canvas: '#e6ead7',
+      ink: '#303827',
+      key: 'matcha',
+      name: 'Matcha',
+      paper: '#fafbf3',
+      soft: '#b9c797',
+      swatch: '#80945f',
+    },
+    {
+      accent: '#315b9b',
+      canvas: '#dce7f7',
+      ink: '#20334e',
+      key: 'cobalt',
+      name: 'Cobalt',
+      paper: '#f8fbff',
+      soft: '#94afd7',
+      swatch: '#4778bf',
+    },
+    {
+      accent: '#a95f42',
+      canvas: '#f3dfd2',
+      ink: '#4a3026',
+      key: 'apricot',
+      name: 'Apricot',
+      paper: '#fffaf6',
+      soft: '#d7a086',
+      swatch: '#c97b59',
+    },
+  ],
+  Renderer: ArunaTemplate,
+});

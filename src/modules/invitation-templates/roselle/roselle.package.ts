@@ -1,0 +1,81 @@
+import {
+  defineInvitationThemePackage,
+  FULL_INVITATION_THEME_CAPABILITIES,
+} from '../core/theme-package.types';
+
+import { RoselleTemplate } from './roselle-template';
+
+export const roselleThemePackage = defineInvitationThemePackage({
+  defaultPaletteKey: 'rose',
+  manifest: {
+    badge: 'Soft romance',
+    capabilities: FULL_INVITATION_THEME_CAPABILITIES,
+    description: 'Botanical, hangat, dan terasa seperti surat personal untuk setiap tamu.',
+    featured: true,
+    key: 'roselle',
+    mood: 'Botanical softness · warm editorial · intimate rhythm',
+    moods: ['soft', 'warm', 'romantic'],
+    motif: '/marketing/roselle-botanical-line.svg',
+    name: 'Roselle',
+    parity: {
+      coupleAnchorId: 'roselle-couple-title',
+      experienceHook: 'data-roselle-experience',
+      experienceValue: 'letter-v1',
+      greetingAnchorId: 'roselle-personal-greeting',
+      identity: 'intimate-romantic-letter',
+      invitationTitleId: 'roselle-invitation-title',
+    },
+    personality: 'Romantic editorial',
+    preview: {
+      date: '17 Agustus 2027',
+      eyebrow: 'The wedding of',
+      guestLine: 'Undangan personal telah disiapkan untuk',
+      guestName: 'Bapak Aditya & Keluarga',
+      stageLabel: 'Romantic warmth',
+    },
+    styles: ['romantic', 'editorial', 'botanical'],
+  },
+  palettes: [
+    {
+      accent: '#8e4b52',
+      canvas: '#f2dedd',
+      ink: '#3d2d31',
+      key: 'rose',
+      name: 'Rose',
+      paper: '#fffaf7',
+      soft: '#dcb9b6',
+      swatch: '#b96872',
+    },
+    {
+      accent: '#5f7562',
+      canvas: '#e2eadf',
+      ink: '#2f3d33',
+      key: 'sage',
+      name: 'Sage',
+      paper: '#fbfcf7',
+      soft: '#b7c9b5',
+      swatch: '#7d9a7f',
+    },
+    {
+      accent: '#a66b35',
+      canvas: '#f5e8c9',
+      ink: '#4a3725',
+      key: 'butter',
+      name: 'Butter',
+      paper: '#fffdf5',
+      soft: '#dfc786',
+      swatch: '#d5ae54',
+    },
+    {
+      accent: '#783c54',
+      canvas: '#ead9e2',
+      ink: '#3f2832',
+      key: 'berry',
+      name: 'Berry',
+      paper: '#fff9fc',
+      soft: '#c49aad',
+      swatch: '#96546f',
+    },
+  ],
+  Renderer: RoselleTemplate,
+});

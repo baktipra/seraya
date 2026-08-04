@@ -2,84 +2,28 @@ import type { Route } from 'next';
 import Link from 'next/link';
 
 import { siteConfig } from '@/config/site';
+import {
+  getInvitationThemePackage,
+  invitationThemePackages,
+  type InvitationTemplateKey,
+} from '@/modules/invitation-templates/core/theme-package.registry';
 
 import styles from './flagship-marketing.module.css';
 
-export type FlagshipCollectionKey = 'roselle' | 'aruna' | 'laras';
+export type FlagshipCollectionKey = InvitationTemplateKey;
 
-export const flagshipCollections = [
-  {
-    key: 'roselle',
-    name: 'Roselle',
-    personality: 'Romantic warmth',
-    description:
-      'Hangat, lembut, dan intim. Dibangun untuk perjalanan undangan yang terasa seperti surat personal.',
-    mood: 'Botanical softness · warm editorial · intimate rhythm',
-  },
-  {
-    key: 'aruna',
-    name: 'Aruna',
-    personality: 'Modern editorial',
-    description:
-      'Berani tetapi tetap tenang. Grid editorial, tipografi tegas, dan ruang putih yang terasa modern.',
-    mood: 'Editorial grid · directional type · refined contrast',
-  },
-  {
-    key: 'laras',
-    name: 'Laras',
-    personality: 'Formal evening',
-    description:
-      'Formal, tenang, dan berakar pada keramahan Indonesia. Komposisi malam yang halus untuk perayaan elegan.',
-    mood: 'Evening ceremony · antique gold · restrained heritage geometry',
-  },
-] as const;
+export const flagshipCollections = Object.freeze(
+  invitationThemePackages.map((themePackage, index) => ({
+    description: themePackage.manifest.description,
+    key: themePackage.manifest.key,
+    mood: themePackage.manifest.mood,
+    name: themePackage.manifest.name,
+    ordinal: String(index + 1).padStart(2, '0'),
+    personality: themePackage.manifest.personality,
+  })),
+);
 
-const previewCopy: Record<
-  FlagshipCollectionKey,
-  {
-    eyebrow: string;
-    date: string;
-    guestLine: string;
-    guestName: string;
-    stageLabel: string;
-    showMonogram?: boolean;
-  }
-> = {
-  roselle: {
-    eyebrow: 'The wedding of',
-    date: '17 Agustus 2027',
-    guestLine: 'Undangan personal telah disiapkan untuk',
-    guestName: 'Bapak Aditya & Keluarga',
-    stageLabel: 'Romantic warmth',
-  },
-  aruna: {
-    eyebrow: 'Wedding journal · 017',
-    date: 'Jakarta · 17.08.27',
-    guestLine: 'Personal edition prepared for',
-    guestName: 'Aditya & Family',
-    stageLabel: 'Modern editorial',
-  },
-  laras: {
-    eyebrow: 'A formal evening',
-    date: 'Sabtu · 17 Agustus 2027',
-    guestLine: 'Dengan hormat mengundang',
-    guestName: 'Bapak Aditya sekeluarga',
-    stageLabel: 'Formal evening',
-    showMonogram: true,
-  },
-};
-
-const previewClassByCollection: Record<FlagshipCollectionKey, string> = {
-  roselle: styles.roselle ?? '',
-  aruna: styles.aruna ?? '',
-  laras: styles.laras ?? '',
-};
-
-const collectionOrdinal: Record<FlagshipCollectionKey, string> = {
-  roselle: '01',
-  aruna: '02',
-  laras: '03',
-};
+const previewStyles = styles as Readonly<Record<string, string>>;
 
 export function getShowroomHref(
   collection: FlagshipCollectionKey,
@@ -170,12 +114,12 @@ export function InvitationCover({
   collection: FlagshipCollectionKey;
   compact?: boolean;
 }) {
-  const copy = previewCopy[collection];
+  const copy = getInvitationThemePackage(collection).manifest.preview;
 
   return (
     <div
       aria-label={`Preview artistik koleksi ${collection}: undangan Kirana dan Arga, sapaan personal, dan konfirmasi kehadiran`}
-      className={`${styles.preview} ${previewClassByCollection[collection]} ${compact ? styles.compact : ''}`}
+      className={`${styles.preview} ${previewStyles[collection] ?? ''} ${compact ? styles.compact : ''}`}
       data-marketing-invitation-preview={collection}
       role="img"
     >
@@ -239,7 +183,7 @@ export function CollectionCard({
       </div>
       <div className={styles.collectionCopy}>
         <p className={styles.collectionIndex}>
-          {collectionOrdinal[collection.key]} · {collection.personality}
+          {collection.ordinal} · {collection.personality}
         </p>
         <h3 className="text-seraya-text-primary mt-5 font-serif text-[clamp(3.2rem,5vw,5.4rem)] leading-[0.82] font-medium tracking-[-0.06em]">
           {collection.name}

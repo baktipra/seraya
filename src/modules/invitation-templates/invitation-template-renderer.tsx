@@ -1,13 +1,11 @@
-import {
-  ArunaParityTemplate,
-  LarasParityTemplate,
-  RoselleParityTemplate,
-} from './invitation-template.registry';
-import type { InvitationTemplateKey } from './invitation-template.keys';
+import { createElement } from 'react';
+
+import type { InvitationTemplateKey } from './core/theme-package.registry';
 import type {
   InvitationTemplateRenderContextV1,
   PersonalInvitationPresentationSlotsV1,
-} from './invitation-template.types';
+} from './core/theme-renderer.types';
+import { invitationTemplateRegistry } from './invitation-template.registry';
 import type { InvitationViewModel } from './invitation-view-model';
 
 type InvitationTemplateRendererProps = {
@@ -24,8 +22,6 @@ function createRenderContext({
   InvitationTemplateRendererProps,
   'personalSlots' | 'surface'
 >): InvitationTemplateRenderContextV1 {
-  // Personal slots are intentionally dropped for generic and preview surfaces.
-  // This keeps accidental route wiring from rendering guest-private UI publicly.
   if (surface !== 'personal') {
     return { surface };
   }
@@ -33,12 +29,7 @@ function createRenderContext({
   return { personalSlots, surface };
 }
 
-/**
- * Canonical server-renderable collection boundary.
- *
- * The explicit branch keeps all renderer components static for React analysis,
- * while every branch still passes through the parity registry wrappers.
- */
+/** Canonical renderer used by preview, generic, and personal invitation surfaces. */
 export function InvitationTemplateRenderer({
   invitation,
   personalSlots,
@@ -47,11 +38,8 @@ export function InvitationTemplateRenderer({
 }: InvitationTemplateRendererProps) {
   const renderContext = createRenderContext({ personalSlots, surface });
 
-  return templateKey === 'aruna' ? (
-    <ArunaParityTemplate invitation={invitation} renderContext={renderContext} />
-  ) : templateKey === 'laras' ? (
-    <LarasParityTemplate invitation={invitation} renderContext={renderContext} />
-  ) : (
-    <RoselleParityTemplate invitation={invitation} renderContext={renderContext} />
-  );
+  return createElement(invitationTemplateRegistry[templateKey], {
+    invitation,
+    renderContext,
+  });
 }
