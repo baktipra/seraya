@@ -3,7 +3,7 @@ import { InvitationGalleryImage } from '../invitation-gallery-image';
 import {
   getPersonalInvitationPresentationSlots,
   type InvitationTemplateProps,
-} from '../invitation-template.types';
+} from '../core/theme-renderer.types';
 
 import styles from './aruna.module.css';
 import experienceStyles from './aruna-guest-experience.module.css';
@@ -88,7 +88,9 @@ export function ArunaTemplate({ invitation, renderContext }: InvitationTemplateP
       aria-labelledby="aruna-invitation-title"
       className={`${styles.invitation} ${experienceStyles.experience}`}
       data-aruna-experience="journal-v1"
+      data-palette={renderContext.palette?.key}
       data-surface={renderContext.surface}
+      style={renderContext.palette?.variables}
       data-template="aruna"
     >
       <header className={styles.hero} data-aruna-journal-cover data-invitation-chapter="opening">

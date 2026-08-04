@@ -1,43 +1,34 @@
-import { ArunaTemplate } from './aruna/aruna-template';
-import { LarasTemplate } from './laras/laras-template';
+import {
+  DEFAULT_INVITATION_TEMPLATE_KEY,
+  getInvitationThemePackage,
+  INVITATION_TEMPLATE_KEYS,
+  type InvitationTemplateKey,
+} from './core/theme-package.registry';
 import { createInvitationTemplateParityBoundary } from './invitation-template-parity-boundary';
-import {
-  getInvitationTemplateParityDescriptor,
-  invitationTemplateParityIds,
-} from './invitation-template-parity';
-import { RoselleTemplate } from './roselle/roselle-template';
-import {
-  DEFAULT_PREVIEW_TEMPLATE_ID,
-  type InvitationTemplateComponent,
-  type InvitationTemplateId,
-  type InvitationTemplateRegistry,
+import type {
+  InvitationTemplateComponent,
+  InvitationTemplateRegistry,
 } from './invitation-template.types';
 
-export const ArunaParityTemplate = createInvitationTemplateParityBoundary('aruna', ArunaTemplate);
-export const LarasParityTemplate = createInvitationTemplateParityBoundary('laras', LarasTemplate);
-export const RoselleParityTemplate = createInvitationTemplateParityBoundary(
-  'roselle',
-  RoselleTemplate,
+export const invitationTemplateRegistry = Object.freeze(
+  Object.fromEntries(
+    INVITATION_TEMPLATE_KEYS.map((templateKey) => [
+      templateKey,
+      createInvitationTemplateParityBoundary(
+        templateKey,
+        getInvitationThemePackage(templateKey).Renderer,
+      ),
+    ]),
+  ) as InvitationTemplateRegistry,
 );
 
-export const invitationTemplateRegistry = {
-  aruna: ArunaParityTemplate,
-  laras: LarasParityTemplate,
-  roselle: RoselleParityTemplate,
-} satisfies InvitationTemplateRegistry;
-
-const registeredTemplateIds = Object.keys(invitationTemplateRegistry) as InvitationTemplateId[];
-
-if (
-  registeredTemplateIds.length !== invitationTemplateParityIds.length ||
-  registeredTemplateIds.some((templateId) => !invitationTemplateParityIds.includes(templateId))
-) {
-  throw new Error('Invitation template registry and parity manifest are out of sync.');
-}
+/** Compatibility exports retained while consumers migrate to package selectors. */
+export const ArunaParityTemplate = invitationTemplateRegistry.aruna;
+export const LarasParityTemplate = invitationTemplateRegistry.laras;
+export const RoselleParityTemplate = invitationTemplateRegistry.roselle;
 
 export function getInvitationTemplate(
-  templateId: InvitationTemplateId = DEFAULT_PREVIEW_TEMPLATE_ID,
+  templateId: InvitationTemplateKey = DEFAULT_INVITATION_TEMPLATE_KEY,
 ): InvitationTemplateComponent {
-  getInvitationTemplateParityDescriptor(templateId);
   return invitationTemplateRegistry[templateId];
 }

@@ -71,6 +71,7 @@ export default async function PublicInvitationPage({ params }: PublicInvitationP
     <main className="bg-seraya-ivory min-h-screen px-0 py-0 sm:px-6 sm:py-8">
       <InvitationTemplateRenderer
         invitation={invitation}
+        paletteKey={snapshot.draft.paletteKey}
         surface="generic"
         templateKey={snapshot.draft.templateKey}
       />

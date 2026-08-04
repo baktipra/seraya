@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { requireCurrentUser } from '@/modules/auth/current-user';
+import { resolveInvitationThemePaletteKey } from '@/modules/invitation-templates/core/theme-package.registry';
 import { getOwnedProjectById, type OwnedProject } from '@/modules/projects/project.repository';
 
 import {
@@ -80,6 +81,9 @@ function applyEditorInputToActiveDraft(
     })),
   };
   const primaryCompatibility = derivePrimaryEventCompatibility(eventSchedule);
+  const paletteCandidate =
+    input.paletteKey ??
+    (input.templateKey === currentContent.templateKey ? currentContent.paletteKey : undefined);
 
   return {
     ...currentContent,
@@ -137,6 +141,7 @@ function applyEditorInputToActiveDraft(
       enabled: input.story.enabled,
       heading: input.story.heading,
     },
+    paletteKey: resolveInvitationThemePaletteKey(input.templateKey, paletteCandidate),
     templateKey: input.templateKey,
   };
 }

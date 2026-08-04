@@ -3,19 +3,18 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import {
-  INVITATION_TEMPLATE_KEYS,
   InvitationTemplateRenderer,
   isInvitationTemplateKey,
   type InvitationTemplateKey,
 } from '@/modules/invitation-templates';
+import { resolveInvitationThemePaletteKey } from '@/modules/invitation-templates/core/theme-package.registry';
 import {
   CANONICAL_SHOWROOM_COUPLE,
   createCanonicalShowroomInvitation,
   createCanonicalShowroomPersonalSlots,
 } from '@/modules/invitation-templates/showroom/canonical-showroom-invitation';
 
-export const dynamic = 'force-static';
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 const SHOWROOM_SURFACES = ['generic', 'personal'] as const;
 
@@ -48,6 +47,7 @@ const SHOWROOM_FINAL_ASSET_CSS = `
 type ShowroomSurface = (typeof SHOWROOM_SURFACES)[number];
 
 type ShowroomPageProps = {
+  searchParams?: Promise<{ palette?: string | string[] }>;
   params: Promise<{
     surface: string;
     templateKey: string;
@@ -62,14 +62,12 @@ function getTemplateLabel(templateKey: InvitationTemplateKey) {
   return templateKey.charAt(0).toUpperCase() + templateKey.slice(1);
 }
 
-function getDemoHref(templateKey: InvitationTemplateKey, surface: ShowroomSurface): Route {
-  return `/templates/${templateKey}/demo/${surface}` as Route;
-}
-
-export function generateStaticParams() {
-  return INVITATION_TEMPLATE_KEYS.flatMap((templateKey) =>
-    SHOWROOM_SURFACES.map((surface) => ({ surface, templateKey })),
-  );
+function getDemoHref(
+  templateKey: InvitationTemplateKey,
+  surface: ShowroomSurface,
+  paletteKey: string,
+): Route {
+  return `/templates/${templateKey}/demo/${surface}?palette=${encodeURIComponent(paletteKey)}` as Route;
 }
 
 export async function generateMetadata({ params }: ShowroomPageProps): Promise<Metadata> {
@@ -84,19 +82,25 @@ export async function generateMetadata({ params }: ShowroomPageProps): Promise<M
   const surfaceLabel = surface === 'personal' ? 'personal' : 'umum';
 
   return {
-    description: `Showroom statis ${getTemplateLabel(templateKey)} dengan undangan demo ${surfaceLabel} Kirana dan Arga.`,
+    description: `Showroom ${getTemplateLabel(templateKey)} dengan undangan demo ${surfaceLabel} Kirana dan Arga.`,
     robots: { follow: false, index: false, noarchive: true },
     title: `${getTemplateLabel(templateKey)} — Demo ${surfaceLabel}`,
   };
 }
 
-export default async function CanonicalShowroomDemoPage({ params }: ShowroomPageProps) {
+export default async function CanonicalShowroomDemoPage({
+  params,
+  searchParams,
+}: ShowroomPageProps) {
   const { surface, templateKey } = await params;
 
   if (!isInvitationTemplateKey(templateKey) || !isShowroomSurface(surface)) {
     notFound();
   }
 
+  const query = searchParams ? await searchParams : undefined;
+  const requestedPalette = Array.isArray(query?.palette) ? query?.palette[0] : query?.palette;
+  const paletteKey = resolveInvitationThemePaletteKey(templateKey, requestedPalette);
   const invitation = createCanonicalShowroomInvitation(templateKey);
   const personalSlots = surface === 'personal' ? createCanonicalShowroomPersonalSlots() : undefined;
   const templateLabel = getTemplateLabel(templateKey);
@@ -125,7 +129,7 @@ export default async function CanonicalShowroomDemoPage({ params }: ShowroomPage
                   ? 'bg-seraya-ink text-white'
                   : 'border-seraya-border-default bg-seraya-surface text-seraya-text-primary border'
               }`}
-              href={getDemoHref(templateKey, 'generic')}
+              href={getDemoHref(templateKey, 'generic', paletteKey)}
             >
               Undangan umum
             </Link>
@@ -136,7 +140,7 @@ export default async function CanonicalShowroomDemoPage({ params }: ShowroomPage
                   ? 'bg-seraya-ink text-white'
                   : 'border-seraya-border-default bg-seraya-surface text-seraya-text-primary border'
               }`}
-              href={getDemoHref(templateKey, 'personal')}
+              href={getDemoHref(templateKey, 'personal', paletteKey)}
             >
               Undangan personal
             </Link>
@@ -157,6 +161,7 @@ export default async function CanonicalShowroomDemoPage({ params }: ShowroomPage
         <style>{SHOWROOM_FINAL_ASSET_CSS}</style>
         <InvitationTemplateRenderer
           invitation={invitation}
+          paletteKey={paletteKey}
           personalSlots={personalSlots}
           surface={surface}
           templateKey={templateKey}

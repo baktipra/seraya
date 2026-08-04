@@ -2,7 +2,13 @@ import type { InputHTMLAttributes, ReactNode } from 'react';
 
 import { Button, Input } from '@/design-system';
 import type { InvitationEditorFieldErrors } from '@/modules/invitations/invitation-editor.schema';
-import type { InvitationTemplateKey } from '@/modules/invitation-templates/invitation-template.keys';
+import {
+  getDefaultInvitationThemePalette,
+  getInvitationThemePalette,
+  invitationThemePackages,
+  type InvitationTemplateKey,
+} from '@/modules/invitation-templates/core/theme-package.registry';
+import type { ThemePaletteDescriptor } from '@/modules/invitation-templates/core/theme-package.types';
 import type { InvitationDraft } from '@/modules/invitations/invitation-draft.types';
 
 type EditorFieldProps = {
@@ -444,41 +450,44 @@ export function getError(errors: InvitationEditorFieldErrors | undefined, name: 
   return errors?.[name as keyof InvitationEditorFieldErrors];
 }
 
-const invitationTemplateOptions: ReadonlyArray<{
-  description: string;
-  key: InvitationTemplateKey;
-  name: string;
-}> = [
-  {
-    description: 'Hangat, romantis, dan lembut dengan detail kelopak yang tenang.',
-    key: 'roselle',
-    name: 'Roselle',
-  },
-  {
-    description: 'Terang dan editorial dengan aksen terracotta serta ruang yang lega.',
-    key: 'aruna',
-    name: 'Aruna',
-  },
-  {
-    description: 'Elegan dan formal dengan suasana malam bernuansa plum yang dalam.',
-    key: 'laras',
-    name: 'Laras',
-  },
-];
+const invitationTemplateOptions = invitationThemePackages.map((themePackage) => ({
+  defaultPaletteKey: themePackage.defaultPaletteKey,
+  description: themePackage.manifest.description,
+  key: themePackage.manifest.key,
+  name: themePackage.manifest.name,
+  palettes: themePackage.palettes,
+}));
 
-function InvitationTemplateMiniPreview({ templateKey }: { templateKey: InvitationTemplateKey }) {
+function InvitationTemplateMiniPreview({
+  palette,
+  templateKey,
+}: {
+  palette: ThemePaletteDescriptor;
+  templateKey: InvitationTemplateKey;
+}) {
   if (templateKey === 'aruna') {
     return (
       <div
         aria-hidden="true"
-        className="relative h-32 overflow-hidden rounded-[var(--seraya-radius-sm)] border border-[#d8b89f] bg-[#fff6ea] p-3"
+        className="relative h-32 overflow-hidden rounded-[var(--seraya-radius-sm)] border p-3"
+        data-editor-template-mini-preview="aruna"
+        style={{ backgroundColor: palette.canvas, borderColor: palette.soft }}
       >
-        <span className="absolute inset-x-3 top-3 h-px bg-[#b95f48]" />
-        <span className="absolute right-3 bottom-3 h-12 w-10 border-l border-[#b95f48]" />
-        <span className="mt-5 block h-2 w-12 bg-[#b95f48]" />
-        <span className="mt-3 block h-5 w-4/5 bg-[#4b332d]" />
-        <span className="mt-2 block h-2 w-3/5 bg-[#c9a995]" />
-        <span className="absolute bottom-4 left-3 h-6 w-2/5 bg-[#f1ddcc]" />
+        <span
+          className="absolute inset-x-3 top-3 h-px"
+          style={{ backgroundColor: palette.accent }}
+        />
+        <span
+          className="absolute right-3 bottom-3 h-12 w-10 border-l"
+          style={{ borderColor: palette.accent }}
+        />
+        <span className="mt-5 block h-2 w-12" style={{ backgroundColor: palette.accent }} />
+        <span className="mt-3 block h-5 w-4/5" style={{ backgroundColor: palette.ink }} />
+        <span className="mt-2 block h-2 w-3/5" style={{ backgroundColor: palette.soft }} />
+        <span
+          className="absolute bottom-4 left-3 h-6 w-2/5"
+          style={{ backgroundColor: palette.paper }}
+        />
       </div>
     );
   }
@@ -487,13 +496,24 @@ function InvitationTemplateMiniPreview({ templateKey }: { templateKey: Invitatio
     return (
       <div
         aria-hidden="true"
-        className="relative h-32 overflow-hidden rounded-[var(--seraya-radius-sm)] border border-[#c8a16e] bg-[#211a2b] p-3"
+        className="relative h-32 overflow-hidden rounded-[var(--seraya-radius-sm)] border p-3"
+        data-editor-template-mini-preview="laras"
+        style={{ backgroundColor: palette.canvas, borderColor: palette.accent }}
       >
-        <span className="absolute top-3 left-3 size-7 rounded-full border border-[#c8a16e]" />
-        <span className="absolute top-6 left-6 h-px w-12 bg-[#c8a16e]" />
-        <span className="mt-9 block h-5 w-4/5 bg-[#fff8ed]" />
-        <span className="mt-2 block h-2 w-1/2 bg-[#c8a16e]" />
-        <span className="absolute right-3 bottom-3 h-12 w-2/5 border border-[#c8a16e]/70 bg-[#3d3048]" />
+        <span
+          className="absolute top-3 left-3 size-7 rounded-full border"
+          style={{ borderColor: palette.accent }}
+        />
+        <span
+          className="absolute top-6 left-6 h-px w-12"
+          style={{ backgroundColor: palette.accent }}
+        />
+        <span className="mt-9 block h-5 w-4/5" style={{ backgroundColor: palette.ink }} />
+        <span className="mt-2 block h-2 w-1/2" style={{ backgroundColor: palette.accent }} />
+        <span
+          className="absolute right-3 bottom-3 h-12 w-2/5 border"
+          style={{ backgroundColor: palette.paper, borderColor: palette.accent }}
+        />
       </div>
     );
   }
@@ -501,41 +521,61 @@ function InvitationTemplateMiniPreview({ templateKey }: { templateKey: Invitatio
   return (
     <div
       aria-hidden="true"
-      className="relative h-32 overflow-hidden rounded-[var(--seraya-radius-sm)] border border-[#e6d6ca] bg-[#fffaf4] p-3"
+      className="relative h-32 overflow-hidden rounded-[var(--seraya-radius-sm)] border p-3"
+      data-editor-template-mini-preview="roselle"
+      style={{ backgroundColor: palette.canvas, borderColor: palette.soft }}
     >
-      <span className="absolute -top-4 -left-3 size-16 rounded-full border border-[#7a8b79]/50" />
-      <span className="absolute -right-4 bottom-0 size-16 rounded-full border border-[#bd7d83]/45" />
-      <span className="relative mt-5 block h-2 w-10 bg-[#97636d]" />
-      <span className="relative mt-3 block h-5 w-4/5 bg-[#402b35]" />
-      <span className="relative mt-2 block h-2 w-3/5 bg-[#b8a3a5]" />
-      <span className="absolute right-3 bottom-3 h-7 w-2/5 rounded-[0.7rem] border border-[#e6d6ca] bg-[#fffefb]" />
+      <span
+        className="absolute -top-4 -left-3 size-16 rounded-full border opacity-60"
+        style={{ borderColor: palette.accent }}
+      />
+      <span
+        className="absolute -right-4 bottom-0 size-16 rounded-full border opacity-45"
+        style={{ borderColor: palette.swatch }}
+      />
+      <span className="relative mt-5 block h-2 w-10" style={{ backgroundColor: palette.accent }} />
+      <span className="relative mt-3 block h-5 w-4/5" style={{ backgroundColor: palette.ink }} />
+      <span className="relative mt-2 block h-2 w-3/5" style={{ backgroundColor: palette.soft }} />
+      <span
+        className="absolute right-3 bottom-3 h-7 w-2/5 rounded-[0.7rem] border"
+        style={{ backgroundColor: palette.paper, borderColor: palette.soft }}
+      />
     </div>
   );
 }
 
 export function InvitationTemplatePicker({
   error,
+  onPaletteSelect,
   onSelect,
+  paletteError,
+  selectedPaletteKey,
   selectedTemplateKey,
 }: {
   error?: string;
+  onPaletteSelect: (paletteKey: string) => void;
   onSelect: (templateKey: InvitationTemplateKey) => void;
+  paletteError?: string;
+  selectedPaletteKey: string;
   selectedTemplateKey: InvitationTemplateKey;
 }) {
   const describedBy = error ? `${fieldId('templateKey')}-error` : undefined;
+  const selectedTemplate =
+    invitationTemplateOptions.find((template) => template.key === selectedTemplateKey) ??
+    invitationTemplateOptions[0]!;
 
   return (
     <fieldset
       aria-describedby={describedBy}
       className="border-seraya-border-default bg-seraya-canvas max-w-full min-w-0 rounded-[var(--seraya-radius-lg)] border p-4 shadow-[var(--seraya-shadow-soft)] sm:p-6"
     >
-      <legend className="sr-only">Pilih desain undangan</legend>
+      <legend className="sr-only">Pilih desain dan palet undangan</legend>
       <div className="max-w-2xl">
         <h2 className="text-seraya-text-primary text-xl font-semibold tracking-[-0.025em]">
           Pilih desain undangan
         </h2>
         <p className="text-seraya-text-muted mt-1.5 text-sm leading-6">
-          Pilih tampilan yang paling sesuai untuk hari spesial kalian.
+          Pilih komposisi utama, lalu tentukan palet warna yang paling dekat dengan suasana kalian.
         </p>
       </div>
 
@@ -543,6 +583,11 @@ export function InvitationTemplatePicker({
         {invitationTemplateOptions.map((template) => {
           const selected = selectedTemplateKey === template.key;
           const inputId = fieldId(`templateKey-${template.key}`);
+          const palette =
+            getInvitationThemePalette(
+              template.key,
+              selected ? selectedPaletteKey : template.defaultPaletteKey,
+            ) ?? getDefaultInvitationThemePalette(template.key);
 
           return (
             <label
@@ -564,7 +609,7 @@ export function InvitationTemplatePicker({
                 type="radio"
                 value={template.key}
               />
-              <InvitationTemplateMiniPreview templateKey={template.key} />
+              <InvitationTemplateMiniPreview palette={palette} templateKey={template.key} />
               <span className="flex items-start justify-between gap-3">
                 <span className="min-w-0">
                   <span className="text-seraya-text-primary block text-base font-semibold">
@@ -585,6 +630,54 @@ export function InvitationTemplatePicker({
         })}
       </div>
       <FieldError message={error} name="templateKey" />
+
+      <fieldset className="border-seraya-border-default mt-6 border-t pt-6">
+        <legend className="text-seraya-text-primary text-base font-semibold">
+          Palet {selectedTemplate.name}
+        </legend>
+        <p className="text-seraya-text-muted mt-1 text-sm leading-6">
+          Perubahan palet langsung terlihat pada pratinjau lokal dan baru menjadi versi tamu setelah
+          disimpan serta diterbitkan.
+        </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {selectedTemplate.palettes.map((palette) => {
+            const selected = selectedPaletteKey === palette.key;
+            const inputId = fieldId(`paletteKey-${selectedTemplate.key}-${palette.key}`);
+
+            return (
+              <label
+                className={[
+                  'border-seraya-border-default bg-seraya-surface focus-within:outline-seraya-focus-ring flex min-h-12 cursor-pointer items-center gap-3 rounded-[var(--seraya-radius-md)] border px-3 py-2.5 focus-within:outline-3 focus-within:outline-offset-2',
+                  selected
+                    ? 'border-seraya-action-primary ring-seraya-action-primary/15 ring-2'
+                    : '',
+                ].join(' ')}
+                htmlFor={inputId}
+                key={palette.key}
+              >
+                <input
+                  checked={selected}
+                  className="sr-only"
+                  id={inputId}
+                  name="paletteKey"
+                  onChange={() => onPaletteSelect(palette.key)}
+                  type="radio"
+                  value={palette.key}
+                />
+                <span
+                  aria-hidden="true"
+                  className="size-8 shrink-0 rounded-full border-2 border-white shadow-[0_0_0_1px_var(--seraya-border-default)]"
+                  style={{ backgroundColor: palette.swatch }}
+                />
+                <span className="text-seraya-text-primary text-sm font-semibold">
+                  {palette.name}
+                </span>
+              </label>
+            );
+          })}
+        </div>
+        <FieldError message={paletteError} name="paletteKey" />
+      </fieldset>
     </fieldset>
   );
 }

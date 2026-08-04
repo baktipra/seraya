@@ -1,6 +1,10 @@
 import { z } from 'zod';
 
 import {
+  isInvitationThemePaletteKey,
+  resolveInvitationThemePaletteKey,
+} from '@/modules/invitation-templates/core/theme-package.registry';
+import {
   DEFAULT_INVITATION_TEMPLATE_KEY,
   INVITATION_TEMPLATE_KEYS,
 } from '@/modules/invitation-templates/invitation-template.keys';
@@ -155,6 +159,13 @@ const invitationTemplateKeySchema = z
   .enum(INVITATION_TEMPLATE_KEYS)
   .default(DEFAULT_INVITATION_TEMPLATE_KEY);
 
+const invitationPaletteKeySchema = z
+  .string()
+  .trim()
+  .min(1, 'Palet undangan perlu dipilih.')
+  .max(40, 'Palet undangan tidak valid.')
+  .optional();
+
 const digitalGiftAccountNumberSchema = z
   .string()
   .trim()
@@ -271,11 +282,42 @@ const invitationDraftContentBaseSchema = z
         heading: nullableText(120, 'Judul cerita'),
       })
       .strict(),
-    // Legacy documents predate this key. Zod defaults absent values to Roselle
-    // while still rejecting unknown values on every new save and snapshot parse.
+    // Legacy documents predate theme and palette selection. Missing values
+    // resolve at the compatibility boundary while malformed present values fail.
+    paletteKey: invitationPaletteKeySchema,
     templateKey: invitationTemplateKeySchema,
   })
   .strict();
+
+type InvitationDraftThemeSelection = Pick<
+  z.infer<typeof invitationDraftContentBaseSchema>,
+  'paletteKey' | 'templateKey'
+>;
+
+function validateInvitationThemeSelection(
+  content: InvitationDraftThemeSelection,
+  context: z.RefinementCtx,
+) {
+  if (
+    content.paletteKey !== undefined &&
+    !isInvitationThemePaletteKey(content.templateKey, content.paletteKey)
+  ) {
+    context.addIssue({
+      code: 'custom',
+      message: 'Palet tidak tersedia untuk desain yang dipilih.',
+      path: ['paletteKey'],
+    });
+  }
+}
+
+function normalizeInvitationThemeSelection<TContent extends InvitationDraftThemeSelection>(
+  content: TContent,
+) {
+  return {
+    ...content,
+    paletteKey: resolveInvitationThemePaletteKey(content.templateKey, content.paletteKey),
+  };
+}
 
 function selectLegacyPrimaryEvent(
   events: z.infer<typeof invitationDraftContentBaseSchema>['events'],
@@ -316,16 +358,21 @@ const modernInvitationDraftContentSchema = invitationDraftContentBaseSchema
   .extend({
     eventSchedule: eventScheduleSchema,
   })
-  .strict();
+  .strict()
+  .superRefine(validateInvitationThemeSelection)
+  .transform(normalizeInvitationThemeSelection);
 
-const legacyInvitationDraftContentSchema = invitationDraftContentBaseSchema.transform((content) => {
-  const normalizedContent = {
-    ...content,
-    eventSchedule: deriveLegacyEventSchedule(content),
-  };
+const legacyInvitationDraftContentSchema = invitationDraftContentBaseSchema
+  .superRefine(validateInvitationThemeSelection)
+  .transform((content) => {
+    const normalizedTheme = normalizeInvitationThemeSelection(content);
+    const normalizedContent = {
+      ...normalizedTheme,
+      eventSchedule: deriveLegacyEventSchedule(normalizedTheme),
+    };
 
-  return markLegacyEventScheduleDerived(normalizedContent);
-});
+    return markLegacyEventScheduleDerived(normalizedContent);
+  });
 
 /**
  * New documents must provide the strict multi-event contract. A missing

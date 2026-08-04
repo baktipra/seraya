@@ -1,3 +1,4 @@
+import { resolveInvitationThemePaletteKey } from '@/modules/invitation-templates/core/theme-package.registry';
 import type { InvitationTemplateKey } from '@/modules/invitation-templates/invitation-template.keys';
 import {
   createInvitationViewModel,
@@ -16,6 +17,7 @@ type ClosingField = keyof InvitationDraftContent['closing'];
 
 export type InvitationEditorLocalAction =
   | { content: InvitationDraftContent; type: 'replace' }
+  | { paletteKey: string; type: 'palette' }
   | { templateKey: InvitationTemplateKey; type: 'template' }
   | { field: HeroField; type: 'hero'; value: string | null }
   | {
@@ -65,8 +67,14 @@ export function invitationEditorLocalContentReducer(
   switch (action.type) {
     case 'replace':
       return action.content;
+    case 'palette':
+      return { ...content, paletteKey: action.paletteKey };
     case 'template':
-      return { ...content, templateKey: action.templateKey };
+      return {
+        ...content,
+        paletteKey: resolveInvitationThemePaletteKey(action.templateKey, undefined),
+        templateKey: action.templateKey,
+      };
     case 'hero':
       return {
         ...content,
@@ -178,6 +186,7 @@ export function createInvitationEditorSubmissionPayload(content: InvitationDraft
       enabled: content.story.enabled,
       heading: content.story.heading,
     },
+    paletteKey: content.paletteKey,
     templateKey: content.templateKey,
   };
 }

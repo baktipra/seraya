@@ -1,6 +1,9 @@
 import { z } from 'zod';
 
-import { INVITATION_TEMPLATE_KEYS } from '@/modules/invitation-templates/invitation-template.keys';
+import {
+  INVITATION_TEMPLATE_KEYS,
+  isInvitationThemePaletteKey,
+} from '@/modules/invitation-templates/core/theme-package.registry';
 import {
   RESERVED_SLUGS,
   SLUG_MAX_LENGTH,
@@ -55,16 +58,27 @@ const slugSchema = z
     'Gunakan huruf kecil, angka, dan tanda hubung untuk link undangan.',
   );
 
-export const createProjectSchema = z.object({
-  eventCity: eventCitySchema,
-  eventDatePrimary: eventDateSchema,
-  personOneName: nameSchema('Gunakan nama panggilan untuk pasangan pertama.'),
-  personTwoName: nameSchema('Gunakan nama panggilan untuk pasangan kedua.'),
-  slug: slugSchema,
-  templateKey: z.enum(INVITATION_TEMPLATE_KEYS, {
-    message: 'Pilih salah satu pengalaman undangan.',
-  }),
-});
+export const createProjectSchema = z
+  .object({
+    eventCity: eventCitySchema,
+    eventDatePrimary: eventDateSchema,
+    paletteKey: z.string().trim().min(1, 'Pilih salah satu warna undangan.'),
+    personOneName: nameSchema('Gunakan nama panggilan untuk pasangan pertama.'),
+    personTwoName: nameSchema('Gunakan nama panggilan untuk pasangan kedua.'),
+    slug: slugSchema,
+    templateKey: z.enum(INVITATION_TEMPLATE_KEYS, {
+      message: 'Pilih salah satu pengalaman undangan.',
+    }),
+  })
+  .superRefine((value, context) => {
+    if (!isInvitationThemePaletteKey(value.templateKey, value.paletteKey)) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Pilih warna yang tersedia untuk pengalaman undangan ini.',
+        path: ['paletteKey'],
+      });
+    }
+  });
 
 export type CreateProjectInput = z.infer<typeof createProjectSchema>;
 export type CreateProjectField = keyof CreateProjectInput;
@@ -83,6 +97,7 @@ export function parseCreateProjectFormData(formData: FormData) {
   return createProjectSchema.safeParse({
     eventCity: getFormText(formData, 'eventCity'),
     eventDatePrimary: getFormText(formData, 'eventDatePrimary'),
+    paletteKey: getFormText(formData, 'paletteKey'),
     personOneName: getFormText(formData, 'personOneName'),
     personTwoName: getFormText(formData, 'personTwoName'),
     slug: getFormText(formData, 'slug'),
@@ -99,6 +114,7 @@ export function getCreateProjectFieldErrors(error: z.ZodError): CreateProjectFie
     if (
       typeof field === 'string' &&
       [
+        'paletteKey',
         'personOneName',
         'personTwoName',
         'eventDatePrimary',

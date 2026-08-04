@@ -8,18 +8,29 @@ function readSource(relativePath: string) {
 }
 
 describe('Release A guided entry and workspace contract', () => {
-  it('keeps project creation as a three-step flagship collection journey', () => {
+  it('keeps project creation as a three-step registry-driven theme journey', () => {
     const setupSource = readSource('src/components/projects/project-setup-form.tsx');
+    const registrySource = readSource(
+      'src/modules/invitation-templates/core/theme-package.registry.ts',
+    );
     const schemaSource = readSource('src/modules/projects/create-project.schema.ts');
     const serviceSource = readSource('src/modules/projects/create-project.service.ts');
 
     expect(setupSource).toContain('Tentang kalian');
     expect(setupSource).toContain('Pilih pengalaman');
     expect(setupSource).toContain('Buat draf');
-    expect(setupSource).toContain("key: 'roselle'");
-    expect(setupSource).toContain("key: 'aruna'");
-    expect(setupSource).toContain("key: 'laras'");
+    expect(setupSource).toContain('invitationThemePackages.map');
+    expect(setupSource).toContain('getDefaultInvitationThemePalette');
+    expect(setupSource).not.toContain("key: 'roselle'");
+    expect(setupSource).not.toContain("key: 'aruna'");
+    expect(setupSource).not.toContain("key: 'laras'");
     expect(setupSource).toContain('name="templateKey"');
+
+    expect(registrySource).toContain('roselle: roselleThemePackage');
+    expect(registrySource).toContain('aruna: arunaThemePackage');
+    expect(registrySource).toContain('laras: larasThemePackage');
+    expect(registrySource).toContain('Object.keys(invitationThemePackageRegistry)');
+
     expect(schemaSource).toContain('templateKey: z.enum(INVITATION_TEMPLATE_KEYS');
     expect(serviceSource).toContain('updateActiveInvitationDraftForVerifiedProject');
     expect(serviceSource).toContain('templateKey: input.templateKey');

@@ -5,7 +5,11 @@ import { useActionState, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Input } from '@/design-system';
 import { siteConfig } from '@/config/site';
 import { normalizeSlug } from '@/lib/slug';
-import type { InvitationTemplateKey } from '@/modules/invitation-templates/invitation-template.keys';
+import {
+  getDefaultInvitationThemePalette,
+  invitationThemePackages,
+  type InvitationTemplateKey,
+} from '@/modules/invitation-templates/core/theme-package.registry';
 import {
   initialCreateProjectActionState,
   type CreateProjectActionState,
@@ -13,47 +17,22 @@ import {
 import { createProjectAction } from '@/modules/projects/create-project.actions';
 import { suggestProjectSlug } from '@/modules/projects/create-project.schema';
 
-const collectionOptions: Array<{
-  accent: string;
-  canvas: string;
-  description: string;
-  frame: string;
-  key: InvitationTemplateKey;
-  name: string;
-  personality: string;
-  text: string;
-}> = [
-  {
-    accent: 'text-[#8e4b52]',
-    canvas: 'bg-[#f3e1e1]',
-    description: 'Lembut, hangat, dan intim seperti surat personal.',
-    frame: 'border-[#d8b7b5] bg-[#fffaf7]',
-    key: 'roselle',
-    name: 'Roselle',
-    personality: 'Romantic warmth',
-    text: 'text-[#392c2b]',
-  },
-  {
-    accent: 'text-[#59615d]',
-    canvas: 'bg-[#e7e5dc]',
-    description: 'Grid editorial, tipografi tegas, dan ruang putih modern.',
-    frame: 'border-[#b8b4aa] bg-[#f8f7f2]',
-    key: 'aruna',
-    name: 'Aruna',
-    personality: 'Modern editorial',
-    text: 'text-[#252724]',
-  },
-  {
-    accent: 'text-[#d7b982]',
-    canvas: 'bg-[#222129]',
-    description: 'Formal, elegan, dan tenang untuk perayaan berkelas.',
-    frame: 'border-[#716759] bg-[#2c2a32]',
-    key: 'laras',
-    name: 'Laras',
-    personality: 'Formal evening',
-    text: 'text-[#fff9ed]',
-  },
-];
+const collectionOptions = invitationThemePackages.map((themePackage) => {
+  const palette = getDefaultInvitationThemePalette(themePackage.manifest.key);
+
+  return {
+    accent: palette.accent,
+    canvas: palette.canvas,
+    description: themePackage.manifest.description,
+    frame: palette.paper,
+    frameBorder: palette.soft,
+    key: themePackage.manifest.key,
+    name: themePackage.manifest.name,
+    palettes: themePackage.palettes,
+    personality: themePackage.manifest.personality,
+    text: palette.ink,
+  };
+});
 
 type SetupStep = 1 | 2 | 3;
 
@@ -103,17 +82,22 @@ function InvitationSetupPreview({
   personOne,
   personTwo,
   slug,
+  paletteKey,
   templateKey,
 }: {
   city: string;
   date: string;
   personOne: string;
   personTwo: string;
+  paletteKey: string;
   slug: string;
   templateKey: InvitationTemplateKey;
 }) {
   const collection =
     collectionOptions.find((item) => item.key === templateKey) ?? collectionOptions[0]!;
+  const palette =
+    collection.palettes.find((candidate) => candidate.key === paletteKey) ??
+    collection.palettes[0]!;
 
   return (
     <div
@@ -130,17 +114,24 @@ function InvitationSetupPreview({
         className="bg-seraya-ink/7 absolute right-[-5%] bottom-[4%] h-[78%] w-[70%] rotate-6 rounded-[2rem]"
       />
       <div
-        className={`${collection.canvas} relative rounded-[2rem] p-4 shadow-[0_30px_80px_rgb(53_37_32_/_0.16)] sm:p-5`}
+        className="relative rounded-[2rem] p-4 shadow-[0_30px_80px_rgb(53_37_32_/_0.16)] sm:p-5"
+        style={{ backgroundColor: palette.canvas }}
       >
         <div
-          className={`${collection.frame} ${collection.text} relative flex aspect-[9/16] flex-col overflow-hidden rounded-[1.45rem] border px-7 py-8 text-center shadow-[0_16px_45px_rgb(36_29_27_/_0.13)]`}
+          className="relative flex aspect-[9/16] flex-col overflow-hidden rounded-[1.45rem] border px-7 py-8 text-center shadow-[0_16px_45px_rgb(36_29_27_/_0.13)]"
+          style={{
+            backgroundColor: palette.paper,
+            borderColor: palette.soft,
+            color: palette.ink,
+          }}
         >
           <div
             aria-hidden="true"
             className="absolute -top-12 -right-12 size-36 rounded-full border border-current opacity-10"
           />
           <p
-            className={`${collection.accent} text-[0.58rem] font-semibold tracking-[0.24em] uppercase`}
+            className="text-[0.58rem] font-semibold tracking-[0.24em] uppercase"
+            style={{ color: palette.accent }}
           >
             The wedding of
           </p>
@@ -154,7 +145,9 @@ function InvitationSetupPreview({
                 <p className="mt-5 font-serif text-[3.2rem] leading-[0.78] tracking-[-0.06em]">
                   {personOne}
                 </p>
-                <p className={`${collection.accent} my-3 text-xl italic`}>&amp;</p>
+                <p className="my-3 text-xl italic" style={{ color: palette.accent }}>
+                  &amp;
+                </p>
                 <p className="ml-8 font-serif text-[3.2rem] leading-[0.78] tracking-[-0.06em]">
                   {personTwo}
                 </p>
@@ -164,7 +157,9 @@ function InvitationSetupPreview({
                 <p className="font-serif text-[3.15rem] leading-[0.8] font-medium tracking-[-0.055em]">
                   {personOne}
                 </p>
-                <p className={`${collection.accent} my-3 font-serif text-2xl italic`}>&amp;</p>
+                <p className="my-3 font-serif text-2xl italic" style={{ color: palette.accent }}>
+                  &amp;
+                </p>
                 <p className="font-serif text-[3.15rem] leading-[0.8] font-medium tracking-[-0.055em]">
                   {personTwo}
                 </p>
@@ -255,6 +250,9 @@ export function ProjectSetupForm({ previewMode = false }: { previewMode?: boolea
   const [slug, setSlug] = useState('');
   const [slugEdited, setSlugEdited] = useState(false);
   const [templateKey, setTemplateKey] = useState<InvitationTemplateKey>('roselle');
+  const [paletteKey, setPaletteKey] = useState(
+    () => getDefaultInvitationThemePalette('roselle').key,
+  );
   const formRef = useRef<HTMLFormElement>(null);
   const errors = state.fieldErrors ?? {};
 
@@ -274,7 +272,7 @@ export function ProjectSetupForm({ previewMode = false }: { previewMode?: boolea
       errors.eventCity
     ) {
       recoveryStep = 1;
-    } else if (errors.templateKey) {
+    } else if (errors.templateKey || errors.paletteKey) {
       recoveryStep = 2;
     } else if (errors.slug) {
       recoveryStep = 3;
@@ -292,6 +290,7 @@ export function ProjectSetupForm({ previewMode = false }: { previewMode?: boolea
     errors.eventDatePrimary,
     errors.personOneName,
     errors.personTwoName,
+    errors.paletteKey,
     errors.slug,
     errors.templateKey,
     state.status,
@@ -354,6 +353,7 @@ export function ProjectSetupForm({ previewMode = false }: { previewMode?: boolea
             date={preview.date}
             personOne={preview.personOne}
             personTwo={preview.personTwo}
+            paletteKey={paletteKey}
             slug={preview.slug}
             templateKey={templateKey}
           />
@@ -535,15 +535,24 @@ export function ProjectSetupForm({ previewMode = false }: { previewMode?: boolea
                         checked={selected}
                         className="sr-only"
                         name="templateKey"
-                        onChange={() => setTemplateKey(collection.key)}
+                        onChange={() => {
+                          setTemplateKey(collection.key);
+                          setPaletteKey(getDefaultInvitationThemePalette(collection.key).key);
+                        }}
                         type="radio"
                         value={collection.key}
                       />
                       <span
-                        className={`${collection.canvas} flex aspect-[4/5] items-center justify-center rounded-[0.85rem] p-2`}
+                        className="flex aspect-[4/5] items-center justify-center rounded-[0.85rem] p-2"
+                        style={{ backgroundColor: collection.canvas }}
                       >
                         <span
-                          className={`${collection.frame} ${collection.text} flex size-full items-center justify-center rounded-[0.55rem] border font-serif text-xl`}
+                          className="flex size-full items-center justify-center rounded-[0.55rem] border font-serif text-xl"
+                          style={{
+                            backgroundColor: collection.frame,
+                            borderColor: collection.frameBorder,
+                            color: collection.text,
+                          }}
                         >
                           {collection.name.slice(0, 1)}
                         </span>
@@ -574,6 +583,54 @@ export function ProjectSetupForm({ previewMode = false }: { previewMode?: boolea
                 })}
               </div>
               <ErrorMessage id="template-key-error" message={errors.templateKey} />
+            </fieldset>
+
+            <fieldset className="mt-7">
+              <legend className="text-seraya-text-primary text-sm font-semibold">
+                Pilih warna
+              </legend>
+              <p className="text-seraya-text-muted mt-1 text-xs leading-5">
+                Struktur desain tetap sama. Warna dapat diganti lagi dari studio undangan.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                {(collectionOptions.find((item) => item.key === templateKey)?.palettes ?? []).map(
+                  (palette) => {
+                    const selected = palette.key === paletteKey;
+
+                    return (
+                      <label
+                        className="focus-within:outline-seraya-focus-ring cursor-pointer rounded-full focus-within:outline-3 focus-within:outline-offset-3"
+                        key={palette.key}
+                        title={palette.name}
+                      >
+                        <input
+                          checked={selected}
+                          className="sr-only"
+                          name="paletteKey"
+                          onChange={() => setPaletteKey(palette.key)}
+                          type="radio"
+                          value={palette.key}
+                        />
+                        <span
+                          className={`flex min-h-11 items-center gap-2 rounded-full border px-3 text-xs font-semibold ${
+                            selected
+                              ? 'border-seraya-action-primary bg-seraya-brand-soft text-seraya-text-primary'
+                              : 'border-seraya-border-default bg-seraya-surface text-seraya-text-secondary'
+                          }`}
+                        >
+                          <span
+                            aria-hidden="true"
+                            className="size-5 rounded-full border border-black/10"
+                            style={{ backgroundColor: palette.swatch }}
+                          />
+                          {palette.name}
+                        </span>
+                      </label>
+                    );
+                  },
+                )}
+              </div>
+              <ErrorMessage id="palette-key-error" message={errors.paletteKey} />
             </fieldset>
 
             <div className="border-seraya-border-default mt-9 flex flex-col-reverse gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between">

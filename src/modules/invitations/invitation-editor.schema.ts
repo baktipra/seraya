@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { isInvitationThemePaletteKey } from '@/modules/invitation-templates/core/theme-package.registry';
 import { INVITATION_TEMPLATE_KEYS } from '@/modules/invitation-templates/invitation-template.keys';
 
 const databaseUuidShape = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -33,6 +34,7 @@ const checkboxInputSchema = z
 const baseEditorFormFieldNames = [
   'projectId',
   'templateKey',
+  'paletteKey',
   'hero.eyebrow',
   'hero.title',
   'hero.subtitle',
@@ -160,6 +162,7 @@ const invitationEditorFormSchema = z
             lead: formTextSchema,
           })
           .strict(),
+        paletteKey: formTextSchema.optional(),
         templateKey: z.enum(INVITATION_TEMPLATE_KEYS),
         story: z
           .object({
@@ -172,7 +175,19 @@ const invitationEditorFormSchema = z
       .strict(),
     projectId: projectIdSchema,
   })
-  .strict();
+  .strict()
+  .superRefine((value, context) => {
+    if (
+      value.content.paletteKey !== undefined &&
+      !isInvitationThemePaletteKey(value.content.templateKey, value.content.paletteKey)
+    ) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Palet tidak tersedia untuk desain yang dipilih.',
+        path: ['content', 'paletteKey'],
+      });
+    }
+  });
 
 export type InvitationEditorFormInput = z.output<typeof invitationEditorFormSchema>;
 
@@ -397,6 +412,7 @@ export function parseInvitationEditorFormData(formData: FormData) {
         heading: getFormValue(formData, 'rsvp.heading'),
         lead: getFormValue(formData, 'rsvp.lead'),
       },
+      paletteKey: getFormValue(formData, 'paletteKey') ?? undefined,
       templateKey: getFormValue(formData, 'templateKey'),
       story: {
         body: getFormValue(formData, 'story.body'),
