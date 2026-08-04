@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+import { MarketingPageShell } from '@/components/marketing/marketing-page-shell';
+
 import {
   CollectionCard,
   FlagshipFooter,
@@ -50,7 +52,7 @@ const showroomPrinciples = [
 
 export default function TemplatesPage() {
   return (
-    <div className="bg-seraya-canvas min-h-screen overflow-x-hidden">
+    <MarketingPageShell>
       <FlagshipHeader />
 
       <main>
@@ -254,6 +256,6 @@ export default function TemplatesPage() {
       </main>
 
       <FlagshipFooter />
-    </div>
+    </MarketingPageShell>
   );
 }

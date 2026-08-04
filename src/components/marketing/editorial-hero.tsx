@@ -92,10 +92,7 @@ export function EditorialHero() {
         panel.style.setProperty('--card-tilt-y', `${(normalizedX * 5).toFixed(2)}deg`);
         panel.style.setProperty('--card-glint-x', `${(50 + normalizedX * 30).toFixed(2)}%`);
         panel.style.setProperty('--card-glint-y', `${(45 + normalizedY * 24).toFixed(2)}%`);
-        panel.style.setProperty(
-          '--card-glint-opacity',
-          `${(0.16 + intensity * 0.22).toFixed(2)}`,
-        );
+        panel.style.setProperty('--card-glint-opacity', `${(0.16 + intensity * 0.22).toFixed(2)}`);
       });
     };
 
