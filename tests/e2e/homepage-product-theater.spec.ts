@@ -108,17 +108,21 @@ test('renders the seamless full-width campaign hero with a verified playing edit
     const hero = document.querySelector<HTMLElement>('[data-homepage-campaign-hero]');
     const frame = document.querySelector<HTMLElement>('[data-editorial-hero-frame]');
     const theater = document.querySelector<HTMLElement>('[data-editorial-hero-theater]');
+    const copy = document.querySelector<HTMLElement>('[data-editorial-hero-copy]');
     const collection = document.querySelector<HTMLElement>('#koleksi');
 
     const headerRect = header?.getBoundingClientRect();
     const heroRect = hero?.getBoundingClientRect();
     const frameRect = frame?.getBoundingClientRect();
     const theaterRect = theater?.getBoundingClientRect();
+    const copyRect = copy?.getBoundingClientRect();
     const collectionRect = collection?.getBoundingClientRect();
 
     return {
       bodyBackground: window.getComputedStyle(document.body).backgroundColor,
       collectionTop: collectionRect?.top ?? null,
+      copyBottom: copyRect?.bottom ?? null,
+      copyTop: copyRect?.top ?? null,
       frameBottom: frameRect?.bottom ?? null,
       frameLeft: frameRect?.left ?? null,
       frameRight: frameRect?.right ?? null,
@@ -149,9 +153,17 @@ test('renders the seamless full-width campaign hero with a verified playing edit
     1,
   );
   expect(Math.abs((geometry.theaterTop ?? 0) - (geometry.frameTop ?? 0))).toBeLessThanOrEqual(1);
-  expect(Math.abs((geometry.theaterBottom ?? 0) - (geometry.frameBottom ?? 0))).toBeLessThanOrEqual(
-    1,
-  );
+
+  if (geometry.viewportWidth > 896) {
+    expect(
+      Math.abs((geometry.theaterBottom ?? 0) - (geometry.frameBottom ?? 0)),
+    ).toBeLessThanOrEqual(1);
+  } else {
+    expect((geometry.theaterBottom ?? 0) < (geometry.frameBottom ?? 0)).toBe(true);
+    expect(Math.abs((geometry.copyTop ?? 0) - (geometry.theaterBottom ?? 0))).toBeLessThanOrEqual(1);
+    expect(Math.abs((geometry.copyBottom ?? 0) - (geometry.frameBottom ?? 0))).toBeLessThanOrEqual(1);
+  }
+
   expect(Math.abs((geometry.collectionTop ?? 0) - (geometry.heroBottom ?? 0))).toBeLessThanOrEqual(
     1,
   );
