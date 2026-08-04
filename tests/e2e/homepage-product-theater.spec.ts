@@ -11,7 +11,7 @@ const assertNoHorizontalOverflow = async (page: Page) => {
   expect(hasHorizontalOverflow).toBe(false);
 };
 
-test('renders the seamless full-width campaign hero with a verified playing editorial film', async ({
+test('renders the compressed seamless campaign hero with a verified playing editorial film', async ({
   page,
 }) => {
   await page.goto('/');
@@ -31,6 +31,12 @@ test('renders the seamless full-width campaign hero with a verified playing edit
     'data-editorial-hero-motion',
     'true',
   );
+  await expect(page.locator('[data-editorial-hero-motion]')).toHaveAttribute(
+    'data-motion-ready',
+    'true',
+  );
+  await expect(page.locator('[data-editorial-product-stage]')).toBeVisible();
+  await expect(page.locator('[data-editorial-product-card]')).toBeVisible();
   await expect(page.locator('[data-editorial-hero-video]')).toHaveCount(1);
   await expect(page.locator('[data-editorial-personal-card]')).toHaveCount(0);
   await expect(page.getByRole('navigation', { name: 'Jelajahi homepage Seraya' })).toHaveCount(0);
@@ -124,6 +130,7 @@ test('renders the seamless full-width campaign hero with a verified playing edit
       copyBottom: copyRect?.bottom ?? null,
       copyTop: copyRect?.top ?? null,
       frameBottom: frameRect?.bottom ?? null,
+      frameHeight: frameRect?.height ?? null,
       frameLeft: frameRect?.left ?? null,
       frameRight: frameRect?.right ?? null,
       frameTop: frameRect?.top ?? null,
@@ -155,9 +162,28 @@ test('renders the seamless full-width campaign hero with a verified playing edit
   expect(Math.abs((geometry.theaterTop ?? 0) - (geometry.frameTop ?? 0))).toBeLessThanOrEqual(1);
 
   if (geometry.viewportWidth > 896) {
+    expect(geometry.frameHeight ?? 0).toBeGreaterThanOrEqual(330);
+    expect(geometry.frameHeight ?? Number.POSITIVE_INFINITY).toBeLessThanOrEqual(410);
     expect(
       Math.abs((geometry.theaterBottom ?? 0) - (geometry.frameBottom ?? 0)),
     ).toBeLessThanOrEqual(1);
+
+    const panel = page.locator('[data-editorial-hero-motion]');
+    const panelBox = await panel.boundingBox();
+    expect(panelBox).not.toBeNull();
+
+    if (panelBox) {
+      await page.mouse.move(
+        panelBox.x + panelBox.width * 0.28,
+        panelBox.y + panelBox.height * 0.28,
+      );
+
+      await expect
+        .poll(() =>
+          panel.evaluate((element) => element.style.getPropertyValue('--card-tilt-y').trim()),
+        )
+        .not.toBe('0deg');
+    }
   } else {
     expect((geometry.theaterBottom ?? 0) < (geometry.frameBottom ?? 0)).toBe(true);
     expect(Math.abs((geometry.copyTop ?? 0) - (geometry.theaterBottom ?? 0))).toBeLessThanOrEqual(
@@ -174,7 +200,7 @@ test('renders the seamless full-width campaign hero with a verified playing edit
   await assertNoHorizontalOverflow(page);
 });
 
-test('keeps the full-width campaign film composed on a narrow mobile viewport', async ({
+test('keeps the compressed full-width campaign film composed on a narrow mobile viewport', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 320, height: 740 });
@@ -184,6 +210,7 @@ test('keeps the full-width campaign film composed on a narrow mobile viewport', 
   await expect(page.locator('[data-editorial-hero-frame]')).toBeVisible();
   await expect(page.locator('[data-editorial-hero-theater]')).toBeVisible();
   await expect(page.locator('[data-editorial-hero-video]')).toBeVisible();
+  await expect(page.locator('[data-editorial-product-stage]')).toBeVisible();
   await expect(page.getByRole('link', { name: 'Jelajahi koleksi' })).toBeVisible();
 
   const mobileGeometry = await page.evaluate(() => {
@@ -212,13 +239,22 @@ test('keeps the full-width campaign film composed on a narrow mobile viewport', 
   await assertNoHorizontalOverflow(page);
 });
 
-test('respects reduced motion for the campaign composition', async ({ page }) => {
+test('respects reduced motion for the compressed campaign composition', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
 
-  const animationName = await page
-    .locator('[data-editorial-hero-theater]')
-    .evaluate((element) => window.getComputedStyle(element).animationName);
+  const animationState = await page.evaluate(() => {
+    const theater = document.querySelector<HTMLElement>('[data-editorial-hero-theater]');
+    const backdrop = document.querySelector<HTMLElement>(
+      '[data-editorial-product-stage] > div:first-child',
+    );
 
-  expect(animationName).toBe('none');
+    return {
+      backdropAnimationName: backdrop ? window.getComputedStyle(backdrop).animationName : null,
+      theaterAnimationName: theater ? window.getComputedStyle(theater).animationName : null,
+    };
+  });
+
+  expect(animationState.theaterAnimationName).toBe('none');
+  expect(animationState.backdropAnimationName).toBe('none');
 });

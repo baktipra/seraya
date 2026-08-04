@@ -11,6 +11,13 @@ const resetMotion = (element: HTMLElement) => {
   element.style.setProperty('--hero-shift-x-reverse', '0px');
   element.style.setProperty('--hero-shift-y-reverse', '0px');
   element.style.setProperty('--hero-rotate', '0deg');
+  element.style.setProperty('--card-shift-x', '0px');
+  element.style.setProperty('--card-shift-y', '0px');
+  element.style.setProperty('--card-tilt-x', '0deg');
+  element.style.setProperty('--card-tilt-y', '0deg');
+  element.style.setProperty('--card-glint-x', '50%');
+  element.style.setProperty('--card-glint-y', '45%');
+  element.style.setProperty('--card-glint-opacity', '0.16');
 };
 
 export function EditorialHero() {
@@ -70,14 +77,25 @@ export function EditorialHero() {
       const bounds = panel.getBoundingClientRect();
       const normalizedX = ((event.clientX - bounds.left) / bounds.width - 0.5) * 2;
       const normalizedY = ((event.clientY - bounds.top) / bounds.height - 0.5) * 2;
+      const intensity = Math.min(1, Math.hypot(normalizedX, normalizedY));
 
       cancelAnimationFrame(animationFrame);
       animationFrame = window.requestAnimationFrame(() => {
-        panel.style.setProperty('--hero-shift-x', `${(normalizedX * 4).toFixed(2)}px`);
-        panel.style.setProperty('--hero-shift-y', `${(normalizedY * 3).toFixed(2)}px`);
-        panel.style.setProperty('--hero-shift-x-reverse', `${(normalizedX * -2).toFixed(2)}px`);
-        panel.style.setProperty('--hero-shift-y-reverse', `${(normalizedY * -1.5).toFixed(2)}px`);
-        panel.style.setProperty('--hero-rotate', `${(normalizedX * 0.35).toFixed(2)}deg`);
+        panel.style.setProperty('--hero-shift-x', `${(normalizedX * 3).toFixed(2)}px`);
+        panel.style.setProperty('--hero-shift-y', `${(normalizedY * 2).toFixed(2)}px`);
+        panel.style.setProperty('--hero-shift-x-reverse', `${(normalizedX * -1.5).toFixed(2)}px`);
+        panel.style.setProperty('--hero-shift-y-reverse', `${(normalizedY * -1).toFixed(2)}px`);
+        panel.style.setProperty('--hero-rotate', `${(normalizedX * 0.3).toFixed(2)}deg`);
+        panel.style.setProperty('--card-shift-x', `${(normalizedX * 9).toFixed(2)}px`);
+        panel.style.setProperty('--card-shift-y', `${(normalizedY * 6).toFixed(2)}px`);
+        panel.style.setProperty('--card-tilt-x', `${(normalizedY * -4).toFixed(2)}deg`);
+        panel.style.setProperty('--card-tilt-y', `${(normalizedX * 5).toFixed(2)}deg`);
+        panel.style.setProperty('--card-glint-x', `${(50 + normalizedX * 30).toFixed(2)}%`);
+        panel.style.setProperty('--card-glint-y', `${(45 + normalizedY * 24).toFixed(2)}%`);
+        panel.style.setProperty(
+          '--card-glint-opacity',
+          `${(0.16 + intensity * 0.22).toFixed(2)}`,
+        );
       });
     };
 
@@ -136,14 +154,19 @@ export function EditorialHero() {
           </div>
 
           <div aria-hidden="true" className={styles.sheetFloat}>
-            <div className={styles.invitationSheet}>
-              <p className={styles.invitationEyebrow}>The wedding of</p>
-              <p className={styles.invitationNames}>
-                Kirana <span>&amp;</span> Arga
-              </p>
-              <div className={styles.invitationRule} />
-              <p className={styles.invitationDate}>17 Agustus 2027</p>
-              <p className={styles.invitationPlace}>Jakarta · Indonesia</p>
+            <div className={styles.invitationMotionStage} data-editorial-product-stage>
+              <div className={styles.invitationBackdrop} />
+              <div className={styles.invitationGhostSheet} />
+              <div className={styles.invitationSheet} data-editorial-product-card>
+                <p className={styles.invitationEyebrow}>The wedding of</p>
+                <p className={styles.invitationNames}>
+                  Kirana <span>&amp;</span> Arga
+                </p>
+                <div className={styles.invitationRule} />
+                <p className={styles.invitationDate}>17 Agustus 2027</p>
+                <p className={styles.invitationPlace}>Jakarta · Indonesia</p>
+                <div className={styles.invitationGlint} />
+              </div>
             </div>
           </div>
 
