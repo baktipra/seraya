@@ -28,6 +28,7 @@ const collectionOptions = invitationThemePackages.map((themePackage) => {
     frameBorder: palette.soft,
     key: themePackage.manifest.key,
     name: themePackage.manifest.name,
+    palettes: themePackage.palettes,
     personality: themePackage.manifest.personality,
     text: palette.ink,
   };
@@ -81,17 +82,22 @@ function InvitationSetupPreview({
   personOne,
   personTwo,
   slug,
+  paletteKey,
   templateKey,
 }: {
   city: string;
   date: string;
   personOne: string;
   personTwo: string;
+  paletteKey: string;
   slug: string;
   templateKey: InvitationTemplateKey;
 }) {
   const collection =
     collectionOptions.find((item) => item.key === templateKey) ?? collectionOptions[0]!;
+  const palette =
+    collection.palettes.find((candidate) => candidate.key === paletteKey) ??
+    collection.palettes[0]!;
 
   return (
     <div
@@ -109,14 +115,14 @@ function InvitationSetupPreview({
       />
       <div
         className="relative rounded-[2rem] p-4 shadow-[0_30px_80px_rgb(53_37_32_/_0.16)] sm:p-5"
-        style={{ backgroundColor: collection.canvas }}
+        style={{ backgroundColor: palette.canvas }}
       >
         <div
           className="relative flex aspect-[9/16] flex-col overflow-hidden rounded-[1.45rem] border px-7 py-8 text-center shadow-[0_16px_45px_rgb(36_29_27_/_0.13)]"
           style={{
-            backgroundColor: collection.frame,
-            borderColor: collection.frameBorder,
-            color: collection.text,
+            backgroundColor: palette.paper,
+            borderColor: palette.soft,
+            color: palette.ink,
           }}
         >
           <div
@@ -125,7 +131,7 @@ function InvitationSetupPreview({
           />
           <p
             className="text-[0.58rem] font-semibold tracking-[0.24em] uppercase"
-            style={{ color: collection.accent }}
+            style={{ color: palette.accent }}
           >
             The wedding of
           </p>
@@ -139,7 +145,7 @@ function InvitationSetupPreview({
                 <p className="mt-5 font-serif text-[3.2rem] leading-[0.78] tracking-[-0.06em]">
                   {personOne}
                 </p>
-                <p className="my-3 text-xl italic" style={{ color: collection.accent }}>
+                <p className="my-3 text-xl italic" style={{ color: palette.accent }}>
                   &amp;
                 </p>
                 <p className="ml-8 font-serif text-[3.2rem] leading-[0.78] tracking-[-0.06em]">
@@ -151,7 +157,7 @@ function InvitationSetupPreview({
                 <p className="font-serif text-[3.15rem] leading-[0.8] font-medium tracking-[-0.055em]">
                   {personOne}
                 </p>
-                <p className="my-3 font-serif text-2xl italic" style={{ color: collection.accent }}>
+                <p className="my-3 font-serif text-2xl italic" style={{ color: palette.accent }}>
                   &amp;
                 </p>
                 <p className="font-serif text-[3.15rem] leading-[0.8] font-medium tracking-[-0.055em]">
@@ -244,6 +250,9 @@ export function ProjectSetupForm({ previewMode = false }: { previewMode?: boolea
   const [slug, setSlug] = useState('');
   const [slugEdited, setSlugEdited] = useState(false);
   const [templateKey, setTemplateKey] = useState<InvitationTemplateKey>('roselle');
+  const [paletteKey, setPaletteKey] = useState(
+    () => getDefaultInvitationThemePalette('roselle').key,
+  );
   const formRef = useRef<HTMLFormElement>(null);
   const errors = state.fieldErrors ?? {};
 
@@ -263,7 +272,7 @@ export function ProjectSetupForm({ previewMode = false }: { previewMode?: boolea
       errors.eventCity
     ) {
       recoveryStep = 1;
-    } else if (errors.templateKey) {
+    } else if (errors.templateKey || errors.paletteKey) {
       recoveryStep = 2;
     } else if (errors.slug) {
       recoveryStep = 3;
@@ -281,6 +290,7 @@ export function ProjectSetupForm({ previewMode = false }: { previewMode?: boolea
     errors.eventDatePrimary,
     errors.personOneName,
     errors.personTwoName,
+    errors.paletteKey,
     errors.slug,
     errors.templateKey,
     state.status,
@@ -343,6 +353,7 @@ export function ProjectSetupForm({ previewMode = false }: { previewMode?: boolea
             date={preview.date}
             personOne={preview.personOne}
             personTwo={preview.personTwo}
+            paletteKey={paletteKey}
             slug={preview.slug}
             templateKey={templateKey}
           />
@@ -524,7 +535,10 @@ export function ProjectSetupForm({ previewMode = false }: { previewMode?: boolea
                         checked={selected}
                         className="sr-only"
                         name="templateKey"
-                        onChange={() => setTemplateKey(collection.key)}
+                        onChange={() => {
+                          setTemplateKey(collection.key);
+                          setPaletteKey(getDefaultInvitationThemePalette(collection.key).key);
+                        }}
                         type="radio"
                         value={collection.key}
                       />
@@ -569,6 +583,54 @@ export function ProjectSetupForm({ previewMode = false }: { previewMode?: boolea
                 })}
               </div>
               <ErrorMessage id="template-key-error" message={errors.templateKey} />
+            </fieldset>
+
+            <fieldset className="mt-7">
+              <legend className="text-seraya-text-primary text-sm font-semibold">
+                Pilih warna
+              </legend>
+              <p className="text-seraya-text-muted mt-1 text-xs leading-5">
+                Struktur desain tetap sama. Warna dapat diganti lagi dari studio undangan.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                {(collectionOptions.find((item) => item.key === templateKey)?.palettes ?? []).map(
+                  (palette) => {
+                    const selected = palette.key === paletteKey;
+
+                    return (
+                      <label
+                        className="focus-within:outline-seraya-focus-ring cursor-pointer rounded-full focus-within:outline-3 focus-within:outline-offset-3"
+                        key={palette.key}
+                        title={palette.name}
+                      >
+                        <input
+                          checked={selected}
+                          className="sr-only"
+                          name="paletteKey"
+                          onChange={() => setPaletteKey(palette.key)}
+                          type="radio"
+                          value={palette.key}
+                        />
+                        <span
+                          className={`flex min-h-11 items-center gap-2 rounded-full border px-3 text-xs font-semibold ${
+                            selected
+                              ? 'border-seraya-action-primary bg-seraya-brand-soft text-seraya-text-primary'
+                              : 'border-seraya-border-default bg-seraya-surface text-seraya-text-secondary'
+                          }`}
+                        >
+                          <span
+                            aria-hidden="true"
+                            className="size-5 rounded-full border border-black/10"
+                            style={{ backgroundColor: palette.swatch }}
+                          />
+                          {palette.name}
+                        </span>
+                      </label>
+                    );
+                  },
+                )}
+              </div>
+              <ErrorMessage id="palette-key-error" message={errors.paletteKey} />
             </fieldset>
 
             <div className="border-seraya-border-default mt-9 flex flex-col-reverse gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between">

@@ -16,6 +16,7 @@ function getParitySafeRenderContext(
   }
 
   return {
+    palette: renderContext.palette,
     surface: renderContext.surface,
   };
 }

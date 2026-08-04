@@ -37,8 +37,8 @@ export function ThemeCard({ theme }: { theme: ThemeCatalogItem }) {
     '--theme-paper': activePalette.paper,
     '--theme-soft': activePalette.soft,
   };
-  const previewHref = `/templates/${theme.key}/demo/generic` as Route;
-  const selectHref = `/dashboard/new?template=${theme.key}` as Route;
+  const previewHref = `/templates/${theme.key}/demo/generic?palette=${activePalette.key}` as Route;
+  const selectHref = `/dashboard/new?template=${theme.key}&palette=${activePalette.key}` as Route;
 
   return (
     <article

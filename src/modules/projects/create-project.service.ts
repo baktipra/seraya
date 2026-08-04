@@ -1,7 +1,6 @@
 import 'server-only';
 
 import { requireCurrentUser } from '@/modules/auth/current-user';
-import { resolveInvitationThemePaletteKey } from '@/modules/invitation-templates/core/theme-package.registry';
 import {
   getActiveInvitationDraftForVerifiedProject,
   updateActiveInvitationDraftForVerifiedProject,
@@ -35,7 +34,7 @@ export async function createProjectForCurrentUser(input: CreateProjectInput) {
     if (draft) {
       const candidate = invitationDraftContentSchema.safeParse({
         ...draft.content,
-        paletteKey: resolveInvitationThemePaletteKey(input.templateKey, undefined),
+        paletteKey: input.paletteKey,
         templateKey: input.templateKey,
       });
 
@@ -48,6 +47,7 @@ export async function createProjectForCurrentUser(input: CreateProjectInput) {
       } else {
         console.error('Seraya initial collection validation failed.', {
           projectId: project.id,
+          paletteKey: input.paletteKey,
           templateKey: input.templateKey,
         });
       }
@@ -61,6 +61,7 @@ export async function createProjectForCurrentUser(input: CreateProjectInput) {
     // collection. Do not encourage a retry that could create a duplicate project.
     console.error('Seraya initial collection persistence failed.', {
       errorName: error instanceof Error ? error.name : 'UnknownError',
+      paletteKey: input.paletteKey,
       projectId: project.id,
       templateKey: input.templateKey,
     });

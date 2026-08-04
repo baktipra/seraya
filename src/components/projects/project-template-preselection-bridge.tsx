@@ -2,27 +2,55 @@
 
 import { useEffect } from 'react';
 
-const supportedTemplates = new Set(['roselle', 'aruna', 'laras']);
+import {
+  isInvitationTemplateKey,
+  isInvitationThemePaletteKey,
+} from '@/modules/invitation-templates/core/theme-package.registry';
 
 export function ProjectTemplatePreselectionBridge() {
   useEffect(() => {
-    const requestedTemplate = new URLSearchParams(window.location.search).get('template');
+    const search = new URLSearchParams(window.location.search);
+    const requestedTemplate = search.get('template');
+    const requestedPalette = search.get('palette');
 
-    if (!requestedTemplate || !supportedTemplates.has(requestedTemplate)) {
+    if (!requestedTemplate || !isInvitationTemplateKey(requestedTemplate)) {
       return undefined;
     }
 
-    const preselectionFrame = window.requestAnimationFrame(() => {
-      const option = document.querySelector<HTMLInputElement>(
-        `input[name="templateKey"][value="${requestedTemplate}"]`,
-      );
+    let paletteFrame: number | undefined;
+    const templateFrame = window.requestAnimationFrame(() => {
+      const templateOption = [
+        ...document.querySelectorAll<HTMLInputElement>('input[name="templateKey"]'),
+      ].find((candidate) => candidate.value === requestedTemplate);
 
-      if (option && !option.checked) {
-        option.click();
+      if (templateOption && !templateOption.checked) {
+        templateOption.click();
       }
+
+      paletteFrame = window.requestAnimationFrame(() => {
+        if (
+          !requestedPalette ||
+          !isInvitationThemePaletteKey(requestedTemplate, requestedPalette)
+        ) {
+          return;
+        }
+
+        const paletteOption = [
+          ...document.querySelectorAll<HTMLInputElement>('input[name="paletteKey"]'),
+        ].find((candidate) => candidate.value === requestedPalette);
+
+        if (paletteOption && !paletteOption.checked) {
+          paletteOption.click();
+        }
+      });
     });
 
-    return () => window.cancelAnimationFrame(preselectionFrame);
+    return () => {
+      window.cancelAnimationFrame(templateFrame);
+      if (paletteFrame !== undefined) {
+        window.cancelAnimationFrame(paletteFrame);
+      }
+    };
   }, []);
 
   return null;
