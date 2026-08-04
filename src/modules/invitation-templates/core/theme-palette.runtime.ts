@@ -18,14 +18,14 @@ export function getInvitationPaletteRuntime(
     palette.key === themePackage.defaultPaletteKey
       ? {}
       : {
-    '--invitation-accent': palette.tokens.accent,
-    '--invitation-border': palette.tokens.border,
-    '--invitation-canvas': palette.tokens.canvas,
-    '--invitation-highlight': palette.tokens.highlight,
-    '--invitation-ink': palette.tokens.ink,
-    '--invitation-muted': palette.tokens.muted,
-    '--invitation-secondary': palette.tokens.secondary,
-    '--invitation-surface': palette.tokens.surface,
+          '--invitation-accent': palette.tokens.accent,
+          '--invitation-border': palette.tokens.border,
+          '--invitation-canvas': palette.tokens.canvas,
+          '--invitation-highlight': palette.tokens.highlight,
+          '--invitation-ink': palette.tokens.ink,
+          '--invitation-muted': palette.tokens.muted,
+          '--invitation-secondary': palette.tokens.secondary,
+          '--invitation-surface': palette.tokens.surface,
           '--invitation-wash': palette.tokens.wash,
         };
 
