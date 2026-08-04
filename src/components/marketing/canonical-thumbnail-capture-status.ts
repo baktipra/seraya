@@ -1,3 +1,3 @@
-// This file is promoted to true by the canonical thumbnail capture workflow
-// after the optimized WebP matrix has been generated and committed.
+// All consumers stay on the resilient SVG fallback until the canonical capture workflow
+// has generated and committed the complete optimized WebP matrix.
 export const CANONICAL_THUMBNAIL_WEBP_READY = false as const;
