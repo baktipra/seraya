@@ -71,7 +71,7 @@ try {
       });
 
       entries.push({
-        fallback: `/invitation-thumbnails/v4g/${templateKey}-${paletteKey}.svg`,
+        fallback: `/invitation-thumbnails/v4g/${templateKey}.svg`,
         height: VIEWPORT.height,
         paletteKey,
         sourceRoute: route,
