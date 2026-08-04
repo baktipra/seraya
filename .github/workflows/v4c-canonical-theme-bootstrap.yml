@@ -1,9 +1,13 @@
 name: V4C Canonical Theme Package Bootstrap
 
 on:
-  push:
+  pull_request:
     branches:
-      - agent/canonical-theme-package-architecture-v4c
+      - main
+    types:
+      - opened
+      - reopened
+      - synchronize
 
 permissions:
   contents: write
