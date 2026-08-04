@@ -11,7 +11,9 @@ const assertNoHorizontalOverflow = async (page: Page) => {
   expect(hasHorizontalOverflow).toBe(false);
 };
 
-test('renders the seamless campaign hero with a verified playing editorial film', async ({ page }) => {
+test('renders the seamless campaign hero with a verified playing editorial film', async ({
+  page,
+}) => {
   await page.goto('/');
 
   await expect(
@@ -54,11 +56,11 @@ test('renders the seamless campaign hero with a verified playing editorial film'
 
       return Boolean(
         media &&
-          media.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA &&
-          media.videoWidth > 0 &&
-          media.videoHeight > 0 &&
-          !media.paused &&
-          media.currentTime > 0.25,
+        media.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA &&
+        media.videoWidth > 0 &&
+        media.videoHeight > 0 &&
+        !media.paused &&
+        media.currentTime > 0.25,
       );
     },
     undefined,
