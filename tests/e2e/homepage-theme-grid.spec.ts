@@ -19,14 +19,17 @@ test('shows a compact interactive featured theme grid on the homepage', async ({
   await expect(page.locator('[data-homepage-theme-card]')).toHaveCount(3);
 
   const roselleCard = page.locator('[data-homepage-theme-card="roselle"]');
+  const previewLink = roselleCard.getByRole('link', { name: 'Preview' });
+  const selectLink = roselleCard.getByRole('link', { name: /Pilih tema/ });
+
   await expect(roselleCard).toHaveAttribute('data-active-palette', 'rose');
-  await expect(roselleCard.getByRole('link', { name: 'Preview' })).toHaveAttribute(
+  await expect(previewLink).toHaveAttribute(
     'href',
-    '/templates/roselle/demo/generic',
+    '/templates/roselle/demo/generic?palette=rose',
   );
-  await expect(roselleCard.getByRole('link', { name: /Pilih tema/ })).toHaveAttribute(
+  await expect(selectLink).toHaveAttribute(
     'href',
-    '/dashboard/new?template=roselle',
+    '/dashboard/new?template=roselle&palette=rose',
   );
 
   const preview = roselleCard.getByRole('img');
@@ -40,6 +43,14 @@ test('shows a compact interactive featured theme grid on the homepage', async ({
   await roselleCard.locator('label[title="Sage"]').click();
   await expect(sageOption).toBeChecked();
   await expect(roselleCard).toHaveAttribute('data-active-palette', 'sage');
+  await expect(previewLink).toHaveAttribute(
+    'href',
+    '/templates/roselle/demo/generic?palette=sage',
+  );
+  await expect(selectLink).toHaveAttribute(
+    'href',
+    '/dashboard/new?template=roselle&palette=sage',
+  );
 
   await expect
     .poll(() => preview.evaluate((element) => window.getComputedStyle(element).backgroundColor))
