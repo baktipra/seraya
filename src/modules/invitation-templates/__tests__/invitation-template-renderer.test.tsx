@@ -138,4 +138,27 @@ describe('SRY-033 invitation template render surfaces', () => {
       expect(html).not.toContain(`id="${templateKey}-rsvp-title"`);
     },
   );
+
+  it('applies canonical palette runtime tokens and a safe fallback', () => {
+    const sage = renderToStaticMarkup(
+      <InvitationTemplateRenderer
+        invitation={createInvitation()}
+        paletteKey="sage"
+        surface="generic"
+        templateKey="roselle"
+      />,
+    );
+    expect(sage).toContain('data-invitation-palette="sage"');
+    expect(sage).toContain('--invitation-accent:#5f7562');
+
+    const fallback = renderToStaticMarkup(
+      <InvitationTemplateRenderer
+        invitation={createInvitation()}
+        paletteKey="midnight"
+        surface="generic"
+        templateKey="roselle"
+      />,
+    );
+    expect(fallback).toContain('data-invitation-palette="rose"');
+  });
 });

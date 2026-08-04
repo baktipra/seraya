@@ -1,12 +1,12 @@
 .invitation {
-  --aruna-paper: #fffdf8;
-  --aruna-ivory: #fff6ea;
-  --aruna-ink: #392a26;
-  --aruna-clay: #b95f48;
-  --aruna-clay-deep: #8f4235;
-  --aruna-sand: #ead8c2;
-  --aruna-wash: #f9ede1;
-  --aruna-muted: #75625a;
+  --aruna-paper: var(--invitation-surface, #fffdf8);
+  --aruna-ivory: var(--invitation-canvas, #fff6ea);
+  --aruna-ink: var(--invitation-ink, #392a26);
+  --aruna-clay: var(--invitation-highlight, #b95f48);
+  --aruna-clay-deep: var(--invitation-accent, #8f4235);
+  --aruna-sand: var(--invitation-border, #ead8c2);
+  --aruna-wash: var(--invitation-wash, #f9ede1);
+  --aruna-muted: var(--invitation-muted, #75625a);
 
   width: 100%;
   max-width: 48rem;

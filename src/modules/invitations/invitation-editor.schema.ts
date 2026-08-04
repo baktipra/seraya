@@ -1,6 +1,9 @@
 import { z } from 'zod';
 
-import { INVITATION_TEMPLATE_KEYS } from '@/modules/invitation-templates/invitation-template.keys';
+import {
+  INVITATION_TEMPLATE_KEYS,
+  isInvitationThemePaletteKey,
+} from '@/modules/invitation-templates/core/theme-package.registry';
 
 const databaseUuidShape = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const digitalGiftAccountMaximum = 3 as const;
@@ -33,6 +36,7 @@ const checkboxInputSchema = z
 const baseEditorFormFieldNames = [
   'projectId',
   'templateKey',
+  'paletteKey',
   'hero.eyebrow',
   'hero.title',
   'hero.subtitle',
@@ -153,6 +157,7 @@ const invitationEditorFormSchema = z
             title: formTextSchema,
           })
           .strict(),
+        paletteKey: z.string().trim().min(1).max(40),
         rsvp: z
           .object({
             enabled: checkboxInputSchema,
@@ -172,7 +177,16 @@ const invitationEditorFormSchema = z
       .strict(),
     projectId: projectIdSchema,
   })
-  .strict();
+  .strict()
+  .superRefine((value, context) => {
+    if (!isInvitationThemePaletteKey(value.content.templateKey, value.content.paletteKey)) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Pilih warna yang tersedia untuk desain undangan ini.',
+        path: ['content', 'paletteKey'],
+      });
+    }
+  });
 
 export type InvitationEditorFormInput = z.output<typeof invitationEditorFormSchema>;
 
@@ -392,6 +406,7 @@ export function parseInvitationEditorFormData(formData: FormData) {
         subtitle: getFormValue(formData, 'hero.subtitle'),
         title: getFormValue(formData, 'hero.title'),
       },
+      paletteKey: getFormValue(formData, 'paletteKey'),
       rsvp: {
         enabled: getCheckboxValue(formData, 'rsvp.enabled'),
         heading: getFormValue(formData, 'rsvp.heading'),

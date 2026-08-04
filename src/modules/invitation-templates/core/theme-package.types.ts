@@ -1,5 +1,17 @@
 import type { InvitationTemplateComponent } from './theme-renderer.types';
 
+export type ThemePaletteRuntimeTokens = Readonly<{
+  accent: string;
+  border: string;
+  canvas: string;
+  highlight: string;
+  ink: string;
+  muted: string;
+  secondary: string;
+  surface: string;
+  wash: string;
+}>;
+
 export type ThemePaletteDescriptor = Readonly<{
   accent: string;
   canvas: string;
@@ -9,6 +21,7 @@ export type ThemePaletteDescriptor = Readonly<{
   paper: string;
   soft: string;
   swatch: string;
+  tokens: ThemePaletteRuntimeTokens;
 }>;
 
 export type ThemeCapabilityContract = Readonly<{

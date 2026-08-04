@@ -51,3 +51,29 @@ export function getDefaultInvitationThemePalette(templateKey: InvitationTemplate
 
   return palette;
 }
+
+export function isInvitationThemePaletteKey(
+  templateKey: InvitationTemplateKey,
+  value: unknown,
+): value is string {
+  return (
+    typeof value === 'string' &&
+    getInvitationThemePackage(templateKey).palettes.some((palette) => palette.key === value)
+  );
+}
+
+export function getInvitationThemePalette(templateKey: InvitationTemplateKey, paletteKey: unknown) {
+  const themePackage = getInvitationThemePackage(templateKey);
+
+  return (
+    themePackage.palettes.find((palette) => palette.key === paletteKey) ??
+    getDefaultInvitationThemePalette(templateKey)
+  );
+}
+
+export function resolveInvitationThemePaletteKey(
+  templateKey: InvitationTemplateKey,
+  paletteKey: unknown,
+) {
+  return getInvitationThemePalette(templateKey, paletteKey).key;
+}

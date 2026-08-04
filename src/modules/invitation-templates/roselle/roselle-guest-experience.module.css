@@ -1,12 +1,12 @@
 .experience[data-roselle-experience='letter-v1'][data-template='roselle'] {
-  --roselle-letter-paper: #fffdfa;
-  --roselle-letter-cream: #fff7ef;
-  --roselle-letter-blush: #f7ebe7;
-  --roselle-letter-plum: #3d2933;
-  --roselle-letter-muted: #6d5961;
-  --roselle-letter-rose: #ac6f79;
-  --roselle-letter-sage: #718171;
-  --roselle-letter-line: rgb(130 91 99 / 0.24);
+  --roselle-letter-paper: var(--invitation-surface, #fffdfa);
+  --roselle-letter-cream: var(--invitation-canvas, #fff7ef);
+  --roselle-letter-blush: var(--invitation-wash, #f7ebe7);
+  --roselle-letter-plum: var(--invitation-ink, #3d2933);
+  --roselle-letter-muted: var(--invitation-muted, #6d5961);
+  --roselle-letter-rose: var(--invitation-accent, #ac6f79);
+  --roselle-letter-sage: var(--invitation-secondary, #718171);
+  --roselle-letter-line: color-mix(in srgb, var(--invitation-border, #825b63) 55%, transparent);
   --roselle-letter-shadow: 0 2rem 5rem rgb(64 43 53 / 0.12);
 
   max-width: 58rem;
@@ -25,8 +25,7 @@
 .experience[data-roselle-experience='letter-v1'][data-template='roselle']
   :global([data-roselle-chapter='opening']) {
   min-height: min(86svh, 54rem);
-  padding: clamp(4.75rem, 11vw, 7rem) clamp(1.25rem, 6vw, 4rem)
-    clamp(5.5rem, 12vw, 7.5rem);
+  padding: clamp(4.75rem, 11vw, 7rem) clamp(1.25rem, 6vw, 4rem) clamp(5.5rem, 12vw, 7.5rem);
   background:
     radial-gradient(circle at 12% 10%, rgb(172 111 121 / 0.13), transparent 18rem),
     radial-gradient(circle at 88% 84%, rgb(113 129 113 / 0.12), transparent 20rem),
@@ -695,7 +694,8 @@
   .experience[data-roselle-experience='letter-v1'][data-template='roselle']
     > :global([data-roselle-return-to-opening]),
   .experience[data-roselle-experience='letter-v1'][data-template='roselle']
-    :global([data-invitation-gallery]) img {
+    :global([data-invitation-gallery])
+    img {
     transition: none;
   }
 

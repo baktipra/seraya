@@ -1,14 +1,14 @@
 .experience[data-laras-experience='evening-folio-v1'][data-template='laras'] {
-  --laras-night: #141019;
-  --laras-aubergine: #241a29;
-  --laras-aubergine-soft: #302338;
-  --laras-ivory-bright: #fff9ee;
-  --laras-ivory-muted: #ddd2d5;
-  --laras-champagne: #d6b77f;
-  --laras-champagne-soft: rgb(214 183 127 / 0.34);
-  --laras-burgundy: #8f5364;
-  --laras-line-soft: rgb(255 249 238 / 0.16);
-  --laras-line-strong: rgb(214 183 127 / 0.45);
+  --laras-night: var(--invitation-canvas, #141019);
+  --laras-aubergine: var(--invitation-surface, #241a29);
+  --laras-aubergine-soft: var(--invitation-wash, #302338);
+  --laras-ivory-bright: var(--invitation-ink, #fff9ee);
+  --laras-ivory-muted: var(--invitation-muted, #ddd2d5);
+  --laras-champagne: var(--invitation-accent, #d6b77f);
+  --laras-champagne-soft: color-mix(in srgb, var(--invitation-accent, #d6b77f) 34%, transparent);
+  --laras-burgundy: var(--invitation-secondary, #8f5364);
+  --laras-line-soft: color-mix(in srgb, var(--invitation-border, #fff9ee) 25%, transparent);
+  --laras-line-strong: color-mix(in srgb, var(--invitation-accent, #d6b77f) 55%, transparent);
   --laras-shadow-deep: 0 2.5rem 7rem rgb(9 6 12 / 0.46);
 
   max-width: 60rem;
@@ -793,7 +793,8 @@
 }
 
 .experience[data-laras-experience='evening-folio-v1'][data-template='laras']
-  :global([data-laras-response-panel='true']) + :global([data-laras-response-panel='true']),
+  :global([data-laras-response-panel='true'])
+  + :global([data-laras-response-panel='true']),
 .experience[data-laras-experience='evening-folio-v1'][data-template='laras']
   :global([data-response-kind='guestbook']) {
   border-left: 1px solid var(--laras-line-strong);

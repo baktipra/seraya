@@ -8,6 +8,7 @@ import {
   isInvitationTemplateKey,
   type InvitationTemplateKey,
 } from '@/modules/invitation-templates';
+import { resolveInvitationThemePaletteKey } from '@/modules/invitation-templates/core/theme-package.registry';
 import {
   CANONICAL_SHOWROOM_COUPLE,
   createCanonicalShowroomInvitation,
@@ -48,6 +49,7 @@ const SHOWROOM_FINAL_ASSET_CSS = `
 type ShowroomSurface = (typeof SHOWROOM_SURFACES)[number];
 
 type ShowroomPageProps = {
+  searchParams?: Promise<{ palette?: string | string[] }>;
   params: Promise<{
     surface: string;
     templateKey: string;
@@ -90,13 +92,19 @@ export async function generateMetadata({ params }: ShowroomPageProps): Promise<M
   };
 }
 
-export default async function CanonicalShowroomDemoPage({ params }: ShowroomPageProps) {
+export default async function CanonicalShowroomDemoPage({
+  params,
+  searchParams,
+}: ShowroomPageProps) {
   const { surface, templateKey } = await params;
 
   if (!isInvitationTemplateKey(templateKey) || !isShowroomSurface(surface)) {
     notFound();
   }
 
+  const query = searchParams ? await searchParams : undefined;
+  const requestedPalette = Array.isArray(query?.palette) ? query?.palette[0] : query?.palette;
+  const paletteKey = resolveInvitationThemePaletteKey(templateKey, requestedPalette);
   const invitation = createCanonicalShowroomInvitation(templateKey);
   const personalSlots = surface === 'personal' ? createCanonicalShowroomPersonalSlots() : undefined;
   const templateLabel = getTemplateLabel(templateKey);
@@ -157,6 +165,7 @@ export default async function CanonicalShowroomDemoPage({ params }: ShowroomPage
         <style>{SHOWROOM_FINAL_ASSET_CSS}</style>
         <InvitationTemplateRenderer
           invitation={invitation}
+          paletteKey={paletteKey}
           personalSlots={personalSlots}
           surface={surface}
           templateKey={templateKey}

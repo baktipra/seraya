@@ -92,6 +92,7 @@ function snapshot(): PublishedInvitationSnapshot {
         hero: { eyebrow: 'The Wedding Of', subtitle: null, title: 'Raka & Nadia' },
         location: { address: null, enabled: false, mapsUrl: null, venueName: null },
         meta: { locale: 'id-ID', timezone: 'Asia/Jakarta' },
+        paletteKey: 'rose',
         rsvp: { enabled: true, heading: null, lead: null },
         story: { body: null, enabled: false, heading: null },
         templateKey: 'roselle',

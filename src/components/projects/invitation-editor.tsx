@@ -54,6 +54,7 @@ import {
   EditorToggle,
   FieldError,
   getError,
+  InvitationPalettePicker,
   InvitationTemplatePicker,
 } from './invitation-editor-fields';
 import { PublishInvitationControls } from './publish-invitation-controls';
@@ -500,6 +501,12 @@ export function InvitationEditorActivePanel({
               updateLocalContent({ templateKey, type: 'template' });
             }}
             selectedTemplateKey={content.templateKey}
+          />
+          <InvitationPalettePicker
+            error={getError(fieldErrors, 'paletteKey')}
+            onSelect={(paletteKey) => updateLocalContent({ paletteKey, type: 'palette' })}
+            paletteKey={content.paletteKey}
+            templateKey={content.templateKey}
           />
         </InvitationWorkspacePanel>
       );

@@ -2,7 +2,11 @@ import type { InputHTMLAttributes, ReactNode } from 'react';
 
 import { Button, Input } from '@/design-system';
 import type { InvitationEditorFieldErrors } from '@/modules/invitations/invitation-editor.schema';
-import type { InvitationTemplateKey } from '@/modules/invitation-templates/invitation-template.keys';
+import {
+  getInvitationThemePackage,
+  invitationThemePackages,
+  type InvitationTemplateKey,
+} from '@/modules/invitation-templates/core/theme-package.registry';
 import type { InvitationDraft } from '@/modules/invitations/invitation-draft.types';
 
 type EditorFieldProps = {
@@ -444,27 +448,11 @@ export function getError(errors: InvitationEditorFieldErrors | undefined, name: 
   return errors?.[name as keyof InvitationEditorFieldErrors];
 }
 
-const invitationTemplateOptions: ReadonlyArray<{
-  description: string;
-  key: InvitationTemplateKey;
-  name: string;
-}> = [
-  {
-    description: 'Hangat, romantis, dan lembut dengan detail kelopak yang tenang.',
-    key: 'roselle',
-    name: 'Roselle',
-  },
-  {
-    description: 'Terang dan editorial dengan aksen terracotta serta ruang yang lega.',
-    key: 'aruna',
-    name: 'Aruna',
-  },
-  {
-    description: 'Elegan dan formal dengan suasana malam bernuansa plum yang dalam.',
-    key: 'laras',
-    name: 'Laras',
-  },
-];
+const invitationTemplateOptions = invitationThemePackages.map((themePackage) => ({
+  description: themePackage.manifest.description,
+  key: themePackage.manifest.key,
+  name: themePackage.manifest.name,
+}));
 
 function InvitationTemplateMiniPreview({ templateKey }: { templateKey: InvitationTemplateKey }) {
   if (templateKey === 'aruna') {
@@ -585,6 +573,61 @@ export function InvitationTemplatePicker({
         })}
       </div>
       <FieldError message={error} name="templateKey" />
+    </fieldset>
+  );
+}
+
+export function InvitationPalettePicker({
+  error,
+  onSelect,
+  paletteKey,
+  templateKey,
+}: {
+  error?: string;
+  onSelect: (paletteKey: string) => void;
+  paletteKey: string;
+  templateKey: InvitationTemplateKey;
+}) {
+  const themePackage = getInvitationThemePackage(templateKey);
+
+  return (
+    <fieldset className="border-seraya-border-default bg-seraya-canvas mt-5 rounded-[var(--seraya-radius-lg)] border p-4 sm:p-6">
+      <legend className="text-seraya-text-primary text-base font-semibold">Pilihan warna</legend>
+      <p className="text-seraya-text-muted mt-1 text-sm leading-6">
+        Warna mengubah suasana tanpa mengubah struktur, ornamen, atau ritme desain.
+      </p>
+      <div className="mt-4 flex flex-wrap gap-3">
+        {themePackage.palettes.map((palette) => {
+          const selected = palette.key === paletteKey;
+          return (
+            <label className="cursor-pointer" key={palette.key}>
+              <input
+                checked={selected}
+                className="sr-only"
+                name="paletteKey"
+                onChange={() => onSelect(palette.key)}
+                type="radio"
+                value={palette.key}
+              />
+              <span
+                className={`flex min-h-11 items-center gap-2 rounded-full border px-3 text-sm font-semibold ${
+                  selected
+                    ? 'border-seraya-action-primary bg-seraya-brand-soft text-seraya-text-primary'
+                    : 'border-seraya-border-default bg-seraya-surface text-seraya-text-secondary'
+                }`}
+              >
+                <span
+                  aria-hidden="true"
+                  className="size-6 rounded-full border border-black/10"
+                  style={{ backgroundColor: palette.swatch }}
+                />
+                {palette.name}
+              </span>
+            </label>
+          );
+        })}
+      </div>
+      <FieldError message={error} name="paletteKey" />
     </fieldset>
   );
 }

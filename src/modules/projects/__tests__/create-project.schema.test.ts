@@ -2,32 +2,40 @@ import { describe, expect, it } from 'vitest';
 
 import { createProjectSchema, suggestProjectSlug } from '@/modules/projects/create-project.schema';
 
+const baseInput = {
+  eventCity: 'Jakarta',
+  eventDatePrimary: '2027-08-17',
+  paletteKey: 'rose',
+  personOneName: 'Raka',
+  personTwoName: 'Nadia',
+  slug: 'raka-nadia',
+  templateKey: 'roselle',
+} as const;
+
 describe('SRY-005 create project schema', () => {
-  it('trims and accepts the minimum setup fields with a flagship collection', () => {
+  it('trims and accepts the setup fields with a theme palette', () => {
     const result = createProjectSchema.safeParse({
+      ...baseInput,
       eventCity: ' Jakarta ',
-      eventDatePrimary: '2027-08-17',
+      paletteKey: 'matcha',
       personOneName: ' Raka ',
       personTwoName: ' Nadia ',
-      slug: 'raka-nadia',
       templateKey: 'aruna',
     });
 
     expect(result.success).toBe(true);
     expect(result.data).toEqual({
-      eventCity: 'Jakarta',
-      eventDatePrimary: '2027-08-17',
-      personOneName: 'Raka',
-      personTwoName: 'Nadia',
-      slug: 'raka-nadia',
+      ...baseInput,
+      paletteKey: 'matcha',
       templateKey: 'aruna',
     });
   });
 
-  it('rejects missing required values, invalid date input, and missing collection', () => {
+  it('rejects missing required values, invalid date input, and missing theme selection', () => {
     const result = createProjectSchema.safeParse({
       eventCity: '',
       eventDatePrimary: '2027-02-31',
+      paletteKey: '',
       personOneName: '',
       personTwoName: '',
       slug: '',
@@ -44,44 +52,24 @@ describe('SRY-005 create project schema', () => {
       expect(messages).toContain('Kota acara perlu diisi dulu.');
       expect(messages).toContain('Tentukan link undangan terlebih dahulu.');
       expect(messages).toContain('Pilih salah satu pengalaman undangan.');
+      expect(messages).toContain('Pilih salah satu warna undangan.');
     }
   });
 
-  it('rejects reserved slugs, non-canonical slugs, and unknown collections', () => {
-    const reserved = createProjectSchema.safeParse({
-      eventCity: 'Jakarta',
-      eventDatePrimary: '2027-08-17',
-      personOneName: 'Raka',
-      personTwoName: 'Nadia',
-      slug: 'dashboard',
-      templateKey: 'roselle',
-    });
-    const uppercase = createProjectSchema.safeParse({
-      eventCity: 'Jakarta',
-      eventDatePrimary: '2027-08-17',
-      personOneName: 'Raka',
-      personTwoName: 'Nadia',
-      slug: 'Raka-Nadia',
-      templateKey: 'laras',
-    });
-    const unknownCollection = createProjectSchema.safeParse({
-      eventCity: 'Jakarta',
-      eventDatePrimary: '2027-08-17',
-      personOneName: 'Raka',
-      personTwoName: 'Nadia',
-      slug: 'raka-nadia',
-      templateKey: 'unknown',
-    });
+  it('rejects reserved slugs, non-canonical slugs, and unknown themes', () => {
+    const reserved = createProjectSchema.safeParse({ ...baseInput, slug: 'dashboard' });
+    const uppercase = createProjectSchema.safeParse({ ...baseInput, slug: 'Raka-Nadia' });
+    const unknownTheme = createProjectSchema.safeParse({ ...baseInput, templateKey: 'unknown' });
 
     expect(reserved.success).toBe(false);
     expect(uppercase.success).toBe(false);
-    expect(unknownCollection.success).toBe(false);
+    expect(unknownTheme.success).toBe(false);
+  });
 
-    if (!reserved.success) {
-      expect(reserved.error.issues[0]?.message).toBe(
-        'Link undangan ini digunakan oleh halaman sistem Seraya.',
-      );
-    }
+  it('rejects a palette that belongs to another theme', () => {
+    expect(createProjectSchema.safeParse({ ...baseInput, paletteKey: 'midnight' }).success).toBe(
+      false,
+    );
   });
 
   it('suggests a lowercase kebab-case slug from both couple names', () => {

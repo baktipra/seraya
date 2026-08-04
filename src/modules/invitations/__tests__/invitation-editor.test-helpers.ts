@@ -21,6 +21,7 @@ export function createValidInvitationEditorFormData() {
 
   formData.set('projectId', invitationEditorTestProjectId);
   text('templateKey', content.templateKey);
+  text('paletteKey', content.paletteKey);
   text('hero.eyebrow', content.hero.eyebrow);
   text('hero.title', content.hero.title);
   text('hero.subtitle', content.hero.subtitle);
@@ -79,6 +80,7 @@ export function createValidInvitationEditorPayloadFormData() {
   // The runtime form keeps only the active chapter mounted. Known visible
   // fields may still accompany the strict payload and are intentionally ignored.
   formData.set('templateKey', content.templateKey);
+  formData.set('paletteKey', content.paletteKey);
 
   return formData;
 }

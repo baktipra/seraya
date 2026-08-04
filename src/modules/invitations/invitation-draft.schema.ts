@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { resolveInvitationThemePaletteKey } from '@/modules/invitation-templates/core/theme-package.registry';
+
 import {
   DEFAULT_INVITATION_TEMPLATE_KEY,
   INVITATION_TEMPLATE_KEYS,
@@ -257,6 +259,7 @@ const invitationDraftContentBaseSchema = z
         timezone: requiredText(100, 'Zona waktu'),
       })
       .strict(),
+    paletteKey: z.string().trim().max(40).optional(),
     rsvp: z
       .object({
         enabled: z.boolean(),
@@ -312,17 +315,27 @@ function deriveLegacyEventSchedule(
   };
 }
 
+function normalizeInvitationThemeSelection<
+  TContent extends z.infer<typeof invitationDraftContentBaseSchema>,
+>(content: TContent) {
+  return {
+    ...content,
+    paletteKey: resolveInvitationThemePaletteKey(content.templateKey, content.paletteKey),
+  };
+}
+
 const modernInvitationDraftContentSchema = invitationDraftContentBaseSchema
   .extend({
     eventSchedule: eventScheduleSchema,
   })
-  .strict();
+  .strict()
+  .transform(normalizeInvitationThemeSelection);
 
 const legacyInvitationDraftContentSchema = invitationDraftContentBaseSchema.transform((content) => {
-  const normalizedContent = {
+  const normalizedContent = normalizeInvitationThemeSelection({
     ...content,
     eventSchedule: deriveLegacyEventSchedule(content),
-  };
+  });
 
   return markLegacyEventScheduleDerived(normalizedContent);
 });

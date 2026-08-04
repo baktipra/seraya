@@ -1,13 +1,13 @@
 .experience[data-aruna-experience='journal-v1'][data-template='aruna'] {
-  --aruna-journal-paper: #fffdf8;
-  --aruna-journal-canvas: #f1ece4;
-  --aruna-journal-ink: #26221f;
-  --aruna-journal-muted: #706a64;
-  --aruna-journal-rust: #a94e3f;
-  --aruna-journal-gold: #b88a49;
-  --aruna-journal-blue: #68727a;
-  --aruna-journal-line: rgb(72 62 56 / 0.2);
-  --aruna-journal-soft-line: rgb(72 62 56 / 0.11);
+  --aruna-journal-paper: var(--invitation-surface, #fffdf8);
+  --aruna-journal-canvas: var(--invitation-canvas, #f1ece4);
+  --aruna-journal-ink: var(--invitation-ink, #26221f);
+  --aruna-journal-muted: var(--invitation-muted, #706a64);
+  --aruna-journal-rust: var(--invitation-accent, #a94e3f);
+  --aruna-journal-gold: var(--invitation-highlight, #b88a49);
+  --aruna-journal-blue: var(--invitation-secondary, #68727a);
+  --aruna-journal-line: color-mix(in srgb, var(--invitation-border, #483e38) 55%, transparent);
+  --aruna-journal-soft-line: color-mix(in srgb, var(--invitation-border, #483e38) 30%, transparent);
   --aruna-journal-shadow: 0 2.25rem 6rem rgb(49 39 33 / 0.14);
 
   max-width: 60rem;
@@ -31,11 +31,15 @@
   align-content: space-between;
   min-height: min(88svh, 57rem);
   gap: clamp(1rem, 3vw, 2.25rem);
-  padding: clamp(2.5rem, 7vw, 5.5rem) clamp(1.3rem, 6vw, 4.75rem)
-    clamp(4rem, 9vw, 6.25rem);
+  padding: clamp(2.5rem, 7vw, 5.5rem) clamp(1.3rem, 6vw, 4.75rem) clamp(4rem, 9vw, 6.25rem);
   background:
     linear-gradient(90deg, transparent 0 8.25%, rgb(38 34 31 / 0.055) 8.25% 8.4%, transparent 8.4%),
-    linear-gradient(90deg, transparent 0 66.4%, rgb(38 34 31 / 0.055) 66.4% 66.55%, transparent 66.55%),
+    linear-gradient(
+      90deg,
+      transparent 0 66.4%,
+      rgb(38 34 31 / 0.055) 66.4% 66.55%,
+      transparent 66.55%
+    ),
     radial-gradient(circle at 88% 14%, rgb(169 78 63 / 0.16), transparent 18rem),
     linear-gradient(145deg, #f6f0e7, var(--aruna-journal-paper) 48%, #f8f2e9);
 }
@@ -344,8 +348,12 @@
   grid-template-columns: minmax(10rem, 0.55fr) minmax(0, 1.45fr);
   gap: clamp(2rem, 7vw, 5.5rem);
   align-items: start;
-  background:
-    linear-gradient(90deg, transparent 0 31%, rgb(38 34 31 / 0.055) 31% 31.15%, transparent 31.15%);
+  background: linear-gradient(
+    90deg,
+    transparent 0 31%,
+    rgb(38 34 31 / 0.055) 31% 31.15%,
+    transparent 31.15%
+  );
 }
 
 .experience[data-aruna-experience='journal-v1'][data-template='aruna']
@@ -695,8 +703,12 @@
   margin: 0;
   padding: clamp(4.5rem, 10vw, 7.5rem) 0;
   border-top: 1px solid var(--aruna-journal-line);
-  background:
-    linear-gradient(90deg, transparent 0 calc(50% - 0.5px), var(--aruna-journal-line) calc(50% - 0.5px) calc(50% + 0.5px), transparent calc(50% + 0.5px));
+  background: linear-gradient(
+    90deg,
+    transparent 0 calc(50% - 0.5px),
+    var(--aruna-journal-line) calc(50% - 0.5px) calc(50% + 0.5px),
+    transparent calc(50% + 0.5px)
+  );
 }
 
 .experience[data-aruna-experience='journal-v1'][data-template='aruna']
@@ -885,16 +897,11 @@
   color: var(--aruna-journal-paper);
 }
 
-.experience[data-aruna-experience='journal-v1'][data-template='aruna']
-  a:focus-visible,
-.experience[data-aruna-experience='journal-v1'][data-template='aruna']
-  button:focus-visible,
-.experience[data-aruna-experience='journal-v1'][data-template='aruna']
-  input:focus-visible,
-.experience[data-aruna-experience='journal-v1'][data-template='aruna']
-  textarea:focus-visible,
-.experience[data-aruna-experience='journal-v1'][data-template='aruna']
-  select:focus-visible {
+.experience[data-aruna-experience='journal-v1'][data-template='aruna'] a:focus-visible,
+.experience[data-aruna-experience='journal-v1'][data-template='aruna'] button:focus-visible,
+.experience[data-aruna-experience='journal-v1'][data-template='aruna'] input:focus-visible,
+.experience[data-aruna-experience='journal-v1'][data-template='aruna'] textarea:focus-visible,
+.experience[data-aruna-experience='journal-v1'][data-template='aruna'] select:focus-visible {
   outline: 3px solid rgb(169 78 63 / 0.48);
   outline-offset: 4px;
 }

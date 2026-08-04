@@ -1,16 +1,16 @@
 @import '@fontsource-variable/cormorant-garamond/wght.css';
 
 .invitation {
-  --roselle-ivory: #fffaf4;
-  --roselle-paper: #fffefb;
-  --roselle-plum: #402b35;
-  --roselle-plum-soft: #68545c;
-  --roselle-mauve: #97636d;
-  --roselle-rose: #bd7d83;
-  --roselle-sage: #718373;
-  --roselle-line: #e6d6ca;
-  --roselle-wash: #f7ece7;
-  --roselle-wash-deep: #f2e2dc;
+  --roselle-ivory: var(--invitation-canvas, #fffaf4);
+  --roselle-paper: var(--invitation-surface, #fffefb);
+  --roselle-plum: var(--invitation-ink, #402b35);
+  --roselle-plum-soft: var(--invitation-muted, #68545c);
+  --roselle-mauve: var(--invitation-accent, #97636d);
+  --roselle-rose: var(--invitation-highlight, #bd7d83);
+  --roselle-sage: var(--invitation-secondary, #718373);
+  --roselle-line: var(--invitation-border, #e6d6ca);
+  --roselle-wash: var(--invitation-wash, #f7ece7);
+  --roselle-wash-deep: color-mix(in srgb, var(--roselle-wash) 82%, var(--roselle-plum));
   --roselle-display: 'Cormorant Garamond Variable', 'Iowan Old Style', Baskerville, Georgia, serif;
 
   position: relative;

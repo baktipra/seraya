@@ -126,6 +126,7 @@ function applyEditorInputToActiveDraft(
     // draft. The editor has no controls for them, so client input cannot mutate
     // timezone, gallery membership, or schema-level metadata.
     meta: currentContent.meta,
+    paletteKey: input.paletteKey,
     gallery: currentContent.gallery,
     rsvp: {
       enabled: input.rsvp.enabled,

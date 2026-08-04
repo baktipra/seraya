@@ -422,6 +422,7 @@ export const InvitationEditorLivePreview = memo(function InvitationEditorLivePre
           >
             <InvitationTemplateRenderer
               invitation={invitation}
+              paletteKey={content.paletteKey}
               surface="preview"
               templateKey={content.templateKey}
             />

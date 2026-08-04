@@ -14,6 +14,21 @@ const project = {
 };
 
 describe('Slice C local invitation editor state', () => {
+  it('resets the palette when changing theme and accepts a palette action', () => {
+    const savedContent = createDefaultInvitationDraftContent(project);
+    const aruna = invitationEditorLocalContentReducer(savedContent, {
+      templateKey: 'aruna',
+      type: 'template',
+    });
+    expect(aruna.paletteKey).toBe('stone');
+
+    const matcha = invitationEditorLocalContentReducer(aruna, {
+      paletteKey: 'matcha',
+      type: 'palette',
+    });
+    expect(matcha.paletteKey).toBe('matcha');
+  });
+
   it('updates incomplete local text immediately without mutating the saved draft input', () => {
     const savedContent = createDefaultInvitationDraftContent(project);
     const localContent = invitationEditorLocalContentReducer(savedContent, {
@@ -56,7 +71,11 @@ describe('Slice C local invitation editor state', () => {
     });
 
     expect(localContent.templateKey).toBe('laras');
-    expect({ ...localContent, templateKey: savedContent.templateKey }).toEqual(savedContent);
+    expect({
+      ...localContent,
+      paletteKey: savedContent.paletteKey,
+      templateKey: savedContent.templateKey,
+    }).toEqual(savedContent);
   });
 
   it('can render only the owner-authorized media supplied by the server load', () => {

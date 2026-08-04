@@ -37,7 +37,7 @@ describe('SRY-005 server-owned project creation service', () => {
   it('uses authenticated ownership and initializes the chosen flagship collection', async () => {
     const project = { id: 'created-project' };
     const draft = {
-      content: { templateKey: 'roselle' },
+      content: { paletteKey: 'rose', templateKey: 'roselle' },
       id: 'created-draft',
       projectId: 'created-project',
     };
@@ -51,13 +51,14 @@ describe('SRY-005 server-owned project creation service', () => {
     getActiveInvitationDraftMock.mockResolvedValue(draft);
     updateActiveInvitationDraftMock.mockResolvedValue({
       ...draft,
-      content: { templateKey: 'aruna' },
+      content: { paletteKey: 'matcha', templateKey: 'aruna' },
     });
 
     await createProjectForCurrentUser({
       eventCity: 'Jakarta',
       eventDatePrimary: '2027-08-17',
       personOneName: 'Raka',
+      paletteKey: 'matcha',
       personTwoName: 'Nadia',
       slug: 'raka-nadia',
       templateKey: 'aruna',
@@ -73,7 +74,7 @@ describe('SRY-005 server-owned project creation service', () => {
     });
     expect(getActiveInvitationDraftMock).toHaveBeenCalledWith(project);
     expect(updateActiveInvitationDraftMock).toHaveBeenCalledWith({
-      content: { templateKey: 'aruna' },
+      content: { paletteKey: 'matcha', templateKey: 'aruna' },
       draft,
       project,
     });

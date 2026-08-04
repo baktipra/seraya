@@ -94,6 +94,7 @@ function createEditorInput(): InvitationEditorFormInput {
         ],
       },
       hero: { eyebrow: ' The Wedding Of ', subtitle: ' ', title: ' Raka & Nadia ' },
+      paletteKey: 'matcha',
       rsvp: { enabled: true, heading: ' Konfirmasi Kehadiran ', lead: ' ' },
       templateKey: 'aruna',
       story: { body: ' ', enabled: false, heading: '' },
@@ -168,6 +169,7 @@ describe('SRY-016 invitation editor service', () => {
     expect(update.content.events.ceremony.title).toBe('Akad Nikah');
     expect(update.content.location.mapsUrl).toBe('https://maps.example.test/raka-nadia');
     expect(update.content.templateKey).toBe('aruna');
+    expect(update.content.paletteKey).toBe('matcha');
     expect(update.content.digitalGift).toEqual({
       accounts: [
         {

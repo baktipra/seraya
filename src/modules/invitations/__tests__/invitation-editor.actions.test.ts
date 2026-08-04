@@ -49,6 +49,7 @@ describe('SRY-016 invitation editor server action', () => {
     expect(submitted.content.gallery).toBeUndefined();
     expect(submitted.content.meta).toBeUndefined();
     expect(submitted.content.templateKey).toBe('roselle');
+    expect(submitted.content.paletteKey).toBe('rose');
     expect(revalidatePathMock).toHaveBeenCalledWith(`/dashboard/${projectId}`);
     expect(revalidatePathMock).toHaveBeenCalledWith(`/dashboard/${projectId}/invitation`);
     expect(revalidatePathMock).toHaveBeenCalledWith(`/dashboard/${projectId}/preview`);

@@ -34,9 +34,20 @@ describe('SRY-016 invitation editor form boundary', () => {
     if (parsed.success) {
       expect(parsed.data.projectId).toBe(invitationEditorTestProjectId);
       expect(parsed.data.content.templateKey).toBe('roselle');
+      expect(parsed.data.content.paletteKey).toBe('rose');
       expect(parsed.data.content.eventSchedule.events).toHaveLength(1);
       expect(parsed.data.content.couple.personOne.displayName).toBe('Raka');
     }
+  });
+
+  it('rejects a palette from another theme', () => {
+    const formData = createValidInvitationEditorPayloadFormData();
+    const payload = JSON.parse(String(formData.get('editorPayload'))) as Record<string, unknown>;
+    payload.paletteKey = 'midnight';
+    formData.set('editorPayload', JSON.stringify(payload));
+
+    const parsed = parseInvitationEditorFormData(formData);
+    expect(parsed.success).toBe(false);
   });
 
   it('rejects malformed, duplicated, or authority-expanding runtime payloads', () => {

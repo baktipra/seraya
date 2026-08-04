@@ -281,6 +281,26 @@ describe('SRY-006 invitation draft V1 content contract', () => {
     expect(parsed.location.mapsUrl).toBeNull();
   });
 
+  it('defaults missing or cross-theme palette keys to the selected theme default', () => {
+    const legacy = structuredClone(defaultContent) as Partial<typeof defaultContent>;
+    delete legacy.paletteKey;
+    expect(invitationDraftContentSchema.parse(legacy).paletteKey).toBe('rose');
+    expect(
+      invitationDraftContentSchema.parse({
+        ...defaultContent,
+        paletteKey: 'midnight',
+        templateKey: 'aruna',
+      }).paletteKey,
+    ).toBe('stone');
+    expect(
+      invitationDraftContentSchema.parse({
+        ...defaultContent,
+        paletteKey: 'sage',
+        templateKey: 'roselle',
+      }).paletteKey,
+    ).toBe('sage');
+  });
+
   it('defaults a legacy draft without templateKey to Roselle and accepts all supported keys', () => {
     const legacy = { ...defaultContent };
     delete (legacy as Partial<typeof defaultContent>).templateKey;

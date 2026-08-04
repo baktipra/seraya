@@ -207,6 +207,7 @@ export default async function InvitationPreviewPage({
       >
         <InvitationTemplateRenderer
           invitation={invitation}
+          paletteKey={privateDraft.draft.content.paletteKey}
           personalSlots={personalSlots}
           surface={surface}
           templateKey={privateDraft.draft.content.templateKey}

@@ -1,6 +1,9 @@
 import { randomUUID } from 'node:crypto';
 
-import { DEFAULT_INVITATION_TEMPLATE_KEY } from '@/modules/invitation-templates/invitation-template.keys';
+import {
+  DEFAULT_INVITATION_TEMPLATE_KEY,
+  getDefaultInvitationThemePalette,
+} from '@/modules/invitation-templates/core/theme-package.registry';
 import { getProjectCoupleLabel } from '@/modules/projects/project.mapper';
 
 import {
@@ -98,6 +101,7 @@ export function createDefaultInvitationDraftContent(
       locale: 'id-ID',
       timezone: project.default_timezone,
     },
+    paletteKey: getDefaultInvitationThemePalette(DEFAULT_INVITATION_TEMPLATE_KEY).key,
     rsvp: {
       enabled: true,
       heading: null,

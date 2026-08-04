@@ -1,12 +1,12 @@
 .invitation {
-  --laras-ink: #181521;
-  --laras-plum: #282033;
-  --laras-plum-light: #3d3048;
-  --laras-ivory: #fff8ed;
-  --laras-gold: #c8a16e;
-  --laras-rose: #bd7c8a;
-  --laras-muted: #d8cdd2;
-  --laras-line: rgb(255 248 237 / 0.2);
+  --laras-ink: var(--invitation-canvas, #181521);
+  --laras-plum: var(--invitation-surface, #282033);
+  --laras-plum-light: var(--invitation-wash, #3d3048);
+  --laras-ivory: var(--invitation-ink, #fff8ed);
+  --laras-gold: var(--invitation-accent, #c8a16e);
+  --laras-rose: var(--invitation-secondary, #bd7c8a);
+  --laras-muted: var(--invitation-muted, #d8cdd2);
+  --laras-line: color-mix(in srgb, var(--invitation-border, #fff8ed) 45%, transparent);
 
   width: 100%;
   max-width: 48rem;
