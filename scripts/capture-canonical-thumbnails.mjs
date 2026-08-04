@@ -93,7 +93,6 @@ await writeFile(
     {
       captureViewport: VIEWPORT,
       entries,
-      generatedAt: new Date().toISOString(),
       source: 'canonical-showroom-renderer',
       version: 'v4g',
     },
