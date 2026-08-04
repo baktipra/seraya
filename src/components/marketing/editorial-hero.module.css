@@ -1,32 +1,42 @@
 :global(header:has(> nav[aria-label='Navigasi utama'])) {
   border-bottom: 0;
+  background: var(--seraya-bg-canvas);
+  box-shadow: none;
 }
 
 .hero {
+  margin: 0;
+  padding: 0;
   background: var(--seraya-bg-canvas);
-  padding: 0.4rem 1.25rem 1.5rem;
 }
 
 .frame {
   position: relative;
   isolation: isolate;
   display: grid;
-  grid-template-columns: minmax(0, 1.06fr) minmax(25rem, 0.94fr);
-  width: min(100%, 96rem);
-  min-height: 27rem;
-  margin-inline: auto;
+  grid-template-columns: minmax(0, 1.12fr) minmax(27rem, 0.88fr);
+  width: 100%;
+  min-height: clamp(29rem, 39vw, 36rem);
+  margin: 0;
   overflow: hidden;
-  background: var(--seraya-bg-canvas);
+  background: #d8cfc8;
 }
 
 .frame::before {
   position: absolute;
   inset: 0;
-  z-index: -2;
+  z-index: 1;
   background:
-    radial-gradient(circle at 15% 18%, rgb(174 139 128 / 10%), transparent 24rem),
-    radial-gradient(circle at 82% 72%, rgb(214 196 184 / 14%), transparent 24rem),
-    linear-gradient(112deg, rgb(255 255 255 / 32%), transparent 48%);
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      transparent 39%,
+      rgb(247 244 240 / 24%) 49%,
+      rgb(247 244 240 / 78%) 62%,
+      rgb(247 244 240 / 95%) 76%,
+      var(--seraya-bg-canvas) 100%
+    ),
+    linear-gradient(180deg, rgb(255 255 255 / 4%), rgb(44 31 25 / 5%));
   content: '';
   pointer-events: none;
 }
@@ -38,16 +48,14 @@
   --hero-shift-y-reverse: 0px;
   --hero-rotate: 0deg;
 
-  position: relative;
-  align-self: center;
-  width: min(90%, 43rem);
-  aspect-ratio: 16 / 9;
-  margin: 1.8rem 0 1.8rem 4.2%;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
   overflow: hidden;
   background: #d9cfc7;
-  box-shadow:
-    0 30px 74px rgb(69 51 43 / 16%),
-    0 1px 0 rgb(255 255 255 / 60%) inset;
   animation: campaignProductIn 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
   perspective: 1200px;
 }
@@ -67,20 +75,22 @@
 }
 
 .productVideo {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
-  filter: saturate(0.9) contrast(0.98) brightness(1.02);
-  transform: translate3d(var(--hero-shift-x-reverse), var(--hero-shift-y-reverse), 0) scale(1.018);
+  object-position: 50% 48%;
+  filter: saturate(0.92) contrast(0.99) brightness(1.02);
+  transform: translate3d(var(--hero-shift-x-reverse), var(--hero-shift-y-reverse), 0)
+    scale(1.018);
   transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform;
 }
 
 .productPhotoWash {
   background:
-    linear-gradient(90deg, rgb(195 159 151 / 10%), transparent 48%, rgb(255 250 244 / 7%)),
-    linear-gradient(180deg, rgb(255 252 248 / 4%), rgb(85 62 51 / 9%));
+    linear-gradient(90deg, rgb(195 159 151 / 8%), transparent 46%, rgb(255 250 244 / 6%)),
+    linear-gradient(180deg, rgb(255 252 248 / 3%), rgb(85 62 51 / 8%));
   pointer-events: none;
 }
 
@@ -90,7 +100,7 @@
     104deg,
     transparent 35%,
     rgb(255 255 255 / 0%) 42%,
-    rgb(255 255 255 / 22%) 50%,
+    rgb(255 255 255 / 20%) 50%,
     rgb(255 255 255 / 0%) 58%,
     transparent 65%
   );
@@ -101,7 +111,7 @@
 }
 
 .productGrain {
-  opacity: 0.13;
+  opacity: 0.1;
   background-image:
     radial-gradient(circle at 20% 20%, rgb(255 255 255 / 28%) 0 0.5px, transparent 0.8px),
     radial-gradient(circle at 70% 40%, rgb(42 30 25 / 14%) 0 0.4px, transparent 0.75px);
@@ -117,9 +127,12 @@
 
 .sheetFloat {
   position: absolute;
-  top: 10%;
-  left: 51%;
-  width: min(35%, 14.5rem);
+  top: 50%;
+  left: 24%;
+  z-index: 2;
+  width: min(18vw, 15rem);
+  min-width: 11.5rem;
+  translate: -50% -50%;
   animation: campaignSheetFloat 8.2s ease-in-out infinite alternate;
   will-change: translate;
 }
@@ -134,12 +147,12 @@
   border: 1px solid rgb(67 56 51 / 9%);
   background: rgb(255 253 249 / 96%);
   box-shadow:
-    0 22px 52px rgb(45 36 31 / 22%),
+    0 24px 60px rgb(45 36 31 / 24%),
     0 1px 0 rgb(255 255 255 / 84%) inset;
   color: #2b2522;
   text-align: center;
-  transform: translate3d(calc(-50% + var(--hero-shift-x)), var(--hero-shift-y), 0)
-    rotate(calc(-4deg + var(--hero-rotate)));
+  transform: translate3d(var(--hero-shift-x), var(--hero-shift-y), 0)
+    rotate(calc(-3deg + var(--hero-rotate)));
   transition: transform 650ms cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform;
 }
@@ -194,15 +207,15 @@
 
 .productEdgeGlow {
   box-shadow:
-    0 0 0 1px rgb(255 255 255 / 26%) inset,
-    0 -34px 80px rgb(34 23 19 / 8%) inset;
+    0 0 0 1px rgb(255 255 255 / 18%) inset,
+    0 -34px 80px rgb(34 23 19 / 7%) inset;
   pointer-events: none;
 }
 
 .productCaption {
   position: absolute;
-  right: 1rem;
-  bottom: 0.85rem;
+  bottom: 1rem;
+  left: 1.4rem;
   z-index: 2;
   color: rgb(255 255 255 / 78%);
   font-size: 0.56rem;
@@ -213,10 +226,17 @@
 }
 
 .copy {
-  align-self: center;
-  width: min(100%, 39rem);
-  margin-inline: auto;
-  padding: 3rem 3.25rem;
+  position: relative;
+  z-index: 2;
+  grid-column: 2;
+  display: flex;
+  width: 100%;
+  min-height: inherit;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 3.5rem clamp(2.5rem, 5vw, 6rem) 3.5rem clamp(2rem, 4vw, 5rem);
   text-align: center;
   animation: campaignCopyIn 600ms 90ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -230,10 +250,11 @@
 }
 
 .title {
+  max-width: 39rem;
   margin-top: 1rem;
   color: #211d1a;
   font-family: var(--font-editorial);
-  font-size: clamp(2.5rem, 3.5vw, 3.75rem);
+  font-size: clamp(2.55rem, 3.7vw, 4rem);
   font-weight: 500;
   letter-spacing: -0.047em;
   line-height: 0.98;
@@ -284,12 +305,12 @@
 @keyframes campaignProductIn {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: scale(1.012);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: scale(1);
   }
 }
 
@@ -325,56 +346,68 @@
 
 @keyframes campaignSheetFloat {
   from {
-    translate: 0 -2px;
+    translate: -50% calc(-50% - 2px);
   }
 
   to {
-    translate: 0 5px;
+    translate: -50% calc(-50% + 5px);
+  }
+}
+
+@media (min-width: 96rem) {
+  .productVideo {
+    object-position: 50% 46%;
   }
 }
 
 @media (max-width: 70rem) {
   .frame {
-    grid-template-columns: minmax(0, 1fr) minmax(22rem, 0.92fr);
+    grid-template-columns: minmax(0, 1fr) minmax(24rem, 0.9fr);
   }
 
-  .productPanel {
-    width: 92%;
-    margin-left: 2%;
+  .sheetFloat {
+    left: 23%;
+    width: min(20vw, 13.5rem);
   }
 
   .copy {
-    padding-inline: 2rem;
+    padding-inline: 2.25rem;
   }
 }
 
 @media (max-width: 56rem) {
-  .hero {
-    padding: 0.25rem 0 1.25rem;
-  }
-
   .frame {
-    grid-template-columns: 1fr;
-    width: 100%;
+    display: block;
     min-height: 0;
+    background: var(--seraya-bg-canvas);
   }
 
   .frame::before {
-    background:
-      radial-gradient(circle at 24% 12%, rgb(174 139 128 / 11%), transparent 18rem),
-      linear-gradient(180deg, rgb(255 255 255 / 18%), transparent 55%);
+    display: none;
   }
 
   .productPanel {
-    grid-row: 1;
-    width: calc(100% - 2rem);
-    margin: 1rem;
+    position: relative;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+  }
+
+  .productVideo {
+    object-position: 50% 48%;
+  }
+
+  .sheetFloat {
+    top: 50%;
+    left: 32%;
+    width: min(27%, 12.5rem);
+    min-width: 9.5rem;
   }
 
   .copy {
-    grid-row: 2;
     width: 100%;
-    padding: 2.6rem 1.5rem 2.8rem;
+    min-height: 0;
+    padding: 2.8rem 1.5rem 3rem;
     background: var(--seraya-bg-canvas);
   }
 
@@ -390,10 +423,14 @@
 }
 
 @media (max-width: 34rem) {
+  .productPanel {
+    aspect-ratio: 16 / 10;
+  }
+
   .sheetFloat {
-    top: 9%;
-    left: 52%;
-    width: min(38%, 11.5rem);
+    left: 34%;
+    width: min(32%, 10.5rem);
+    min-width: 8.75rem;
   }
 
   .invitationNames {
