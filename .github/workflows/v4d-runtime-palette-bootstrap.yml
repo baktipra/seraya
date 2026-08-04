@@ -64,7 +64,6 @@ jobs:
             'src/app/[slug]/page.tsx' \
             'src/app/[slug]/g/[guestToken]/page.tsx' \
             'src/app/(dashboard)/dashboard/[projectId]/preview/page.tsx' \
-            supabase/migrations/20260804002200_m0022_add_invitation_theme_palette_runtime.sql \
             tests/unit/invitation-theme-package-registry.test.ts \
             tests/unit/invitation-theme-palette-runtime.test.ts
 
