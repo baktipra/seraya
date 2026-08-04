@@ -37,7 +37,11 @@ export function getCanonicalInvitationThumbnailAssetHref(
   paletteKey: string,
   extension: 'svg' | 'webp',
 ) {
-  return `/invitation-thumbnails/${STATIC_THUMBNAIL_VERSION}/${templateKey}-${paletteKey}.${extension}`;
+  if (extension === 'svg') {
+    return `/invitation-thumbnails/${STATIC_THUMBNAIL_VERSION}/${templateKey}.svg`;
+  }
+
+  return `/invitation-thumbnails/${STATIC_THUMBNAIL_VERSION}/${templateKey}-${paletteKey}.webp`;
 }
 
 export function CanonicalInvitationThumbnail({
@@ -73,7 +77,7 @@ export function CanonicalInvitationThumbnail({
         ) : null}
         <img
           alt=""
-          className={`pointer-events-none absolute inset-0 h-full w-full object-cover ${imageClassByVariant[variant]}`}
+          className={`pointer-events-none absolute inset-0 h-full w-full object-cover opacity-95 mix-blend-multiply ${imageClassByVariant[variant]}`}
           decoding="async"
           fetchPriority={priority ? 'high' : 'auto'}
           height={932}
