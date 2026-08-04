@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
@@ -9,30 +9,28 @@ function readSource(relativePath: string) {
   return readFileSync(resolve(process.cwd(), relativePath), 'utf8');
 }
 
-describe('canonical preview and thumbnail pipeline V4E', () => {
+describe('canonical static thumbnail capture pipeline V4G', () => {
   it('exposes twelve package-owned theme and palette combinations', () => {
     expect(invitationThemePackages).toHaveLength(3);
     expect(invitationThemePackages.flatMap((themePackage) => themePackage.palettes)).toHaveLength(
       12,
     );
-    expect(invitationThemePackages.every((themePackage) => themePackage.palettes.length === 4)).toBe(
-      true,
-    );
+    expect(
+      invitationThemePackages.every((themePackage) => themePackage.palettes.length === 4),
+    ).toBe(true);
   });
 
-  it('builds thumbnails from the canonical showroom renderer route', () => {
-    const thumbnail = readSource(
-      'src/components/marketing/canonical-invitation-thumbnail.tsx',
-    );
+  it('renders catalog thumbnails from optimized static assets instead of iframe renderers', () => {
+    const thumbnail = readSource('src/components/marketing/canonical-invitation-thumbnail.tsx');
 
-    expect(thumbnail).toContain('data-canonical-thumbnail-source="showroom-renderer"');
-    expect(thumbnail).toContain('/demo/generic?palette=');
-    expect(thumbnail).toContain('&embed=thumbnail');
-    expect(thumbnail).toContain('paletteCanvas: string');
-    expect(thumbnail).toContain('paletteName: string');
+    expect(thumbnail).toContain('data-canonical-thumbnail-source="static-canonical-capture"');
+    expect(thumbnail).toContain('<picture aria-hidden="true">');
+    expect(thumbnail).toContain("extension: 'svg' | 'webp'");
+    expect(thumbnail).toContain('/invitation-thumbnails/${STATIC_THUMBNAIL_VERSION}/');
+    expect(thumbnail).not.toContain('<iframe');
   });
 
-  it('replaces the homepage marketing mock with the canonical thumbnail component', () => {
+  it('keeps homepage palette interaction connected to the static canonical thumbnail component', () => {
     const themeCard = readSource('src/components/marketing/theme-card.tsx');
 
     expect(themeCard).toContain('<CanonicalInvitationThumbnail');
@@ -41,7 +39,7 @@ describe('canonical preview and thumbnail pipeline V4E', () => {
     expect(themeCard).not.toContain('Hadir · 2 tamu');
   });
 
-  it('supports a headerless and non-interactive thumbnail surface without forking the renderer', () => {
+  it('preserves the headerless canonical renderer surface as the capture source of truth', () => {
     const showroom = readSource('src/app/templates/[templateKey]/demo/[surface]/page.tsx');
 
     expect(showroom).toContain("getQueryValue(query?.embed) === 'thumbnail'");
@@ -49,5 +47,41 @@ describe('canonical preview and thumbnail pipeline V4E', () => {
     expect(showroom).toContain('embedMode ? null : (');
     expect(showroom).toContain('<InvitationTemplateRenderer');
     expect(showroom).toContain('paletteKey={paletteKey}');
+  });
+
+  it('ships a complete static fallback matrix and promotes WebP captures atomically', () => {
+    const manifest = JSON.parse(readSource('public/invitation-thumbnails/v4g/manifest.json')) as {
+      entries: Array<{ fallback: string; paletteKey: string; templateKey: string; webp: string }>;
+      version: string;
+    };
+
+    expect(manifest.version).toBe('v4g');
+    expect(manifest.entries).toHaveLength(12);
+    for (const entry of manifest.entries) {
+      expect(existsSync(resolve(process.cwd(), entry.fallback.replace(/^\//, 'public/')))).toBe(
+        true,
+      );
+    }
+
+    const captureStatus = readSource(
+      'src/components/marketing/canonical-thumbnail-capture-status.ts',
+    );
+    expect(captureStatus).toContain('CANONICAL_THUMBNAIL_WEBP_READY');
+  });
+
+  it('can recapture, optimize, verify, and commit thumbnails from the canonical showroom', () => {
+    const captureScript = readSource('scripts/capture-canonical-thumbnails.mjs');
+    const workflow = readSource('.github/workflows/capture-canonical-thumbnails.yml');
+
+    expect(captureScript).toContain("roselle: ['rose', 'sage', 'butter', 'berry']");
+    expect(captureScript).toContain("aruna: ['stone', 'matcha', 'cobalt', 'apricot']");
+    expect(captureScript).toContain("laras: ['midnight', 'burgundy', 'emerald', 'ivory']");
+    expect(captureScript).toContain("source: 'canonical-showroom-renderer'");
+    expect(workflow).toContain('npx playwright install --with-deps chromium');
+    expect(workflow).toContain('cwebp -quiet -q 86 -m 6');
+    expect(workflow).toContain('CANONICAL_THUMBNAIL_WEBP_READY = true as const');
+    expect(workflow).toContain(
+      'test "$(find public/invitation-thumbnails/v4g -maxdepth 1 -name \'*.webp\' | wc -l)" -eq 12',
+    );
   });
 });

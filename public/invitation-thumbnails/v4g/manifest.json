@@ -1,0 +1,119 @@
+{
+  "captureViewport": {
+    "deviceScaleFactor": 2,
+    "height": 932,
+    "width": 430
+  },
+  "entries": [
+    {
+      "fallback": "/invitation-thumbnails/v4g/aruna.svg",
+      "height": 932,
+      "paletteKey": "stone",
+      "sourceRoute": "/templates/aruna/demo/generic?palette=stone&embed=thumbnail",
+      "templateKey": "aruna",
+      "webp": "/invitation-thumbnails/v4g/aruna-stone.webp",
+      "width": 430
+    },
+    {
+      "fallback": "/invitation-thumbnails/v4g/aruna.svg",
+      "height": 932,
+      "paletteKey": "matcha",
+      "sourceRoute": "/templates/aruna/demo/generic?palette=matcha&embed=thumbnail",
+      "templateKey": "aruna",
+      "webp": "/invitation-thumbnails/v4g/aruna-matcha.webp",
+      "width": 430
+    },
+    {
+      "fallback": "/invitation-thumbnails/v4g/aruna.svg",
+      "height": 932,
+      "paletteKey": "cobalt",
+      "sourceRoute": "/templates/aruna/demo/generic?palette=cobalt&embed=thumbnail",
+      "templateKey": "aruna",
+      "webp": "/invitation-thumbnails/v4g/aruna-cobalt.webp",
+      "width": 430
+    },
+    {
+      "fallback": "/invitation-thumbnails/v4g/aruna.svg",
+      "height": 932,
+      "paletteKey": "apricot",
+      "sourceRoute": "/templates/aruna/demo/generic?palette=apricot&embed=thumbnail",
+      "templateKey": "aruna",
+      "webp": "/invitation-thumbnails/v4g/aruna-apricot.webp",
+      "width": 430
+    },
+    {
+      "fallback": "/invitation-thumbnails/v4g/laras.svg",
+      "height": 932,
+      "paletteKey": "midnight",
+      "sourceRoute": "/templates/laras/demo/generic?palette=midnight&embed=thumbnail",
+      "templateKey": "laras",
+      "webp": "/invitation-thumbnails/v4g/laras-midnight.webp",
+      "width": 430
+    },
+    {
+      "fallback": "/invitation-thumbnails/v4g/laras.svg",
+      "height": 932,
+      "paletteKey": "burgundy",
+      "sourceRoute": "/templates/laras/demo/generic?palette=burgundy&embed=thumbnail",
+      "templateKey": "laras",
+      "webp": "/invitation-thumbnails/v4g/laras-burgundy.webp",
+      "width": 430
+    },
+    {
+      "fallback": "/invitation-thumbnails/v4g/laras.svg",
+      "height": 932,
+      "paletteKey": "emerald",
+      "sourceRoute": "/templates/laras/demo/generic?palette=emerald&embed=thumbnail",
+      "templateKey": "laras",
+      "webp": "/invitation-thumbnails/v4g/laras-emerald.webp",
+      "width": 430
+    },
+    {
+      "fallback": "/invitation-thumbnails/v4g/laras.svg",
+      "height": 932,
+      "paletteKey": "ivory",
+      "sourceRoute": "/templates/laras/demo/generic?palette=ivory&embed=thumbnail",
+      "templateKey": "laras",
+      "webp": "/invitation-thumbnails/v4g/laras-ivory.webp",
+      "width": 430
+    },
+    {
+      "fallback": "/invitation-thumbnails/v4g/roselle.svg",
+      "height": 932,
+      "paletteKey": "rose",
+      "sourceRoute": "/templates/roselle/demo/generic?palette=rose&embed=thumbnail",
+      "templateKey": "roselle",
+      "webp": "/invitation-thumbnails/v4g/roselle-rose.webp",
+      "width": 430
+    },
+    {
+      "fallback": "/invitation-thumbnails/v4g/roselle.svg",
+      "height": 932,
+      "paletteKey": "sage",
+      "sourceRoute": "/templates/roselle/demo/generic?palette=sage&embed=thumbnail",
+      "templateKey": "roselle",
+      "webp": "/invitation-thumbnails/v4g/roselle-sage.webp",
+      "width": 430
+    },
+    {
+      "fallback": "/invitation-thumbnails/v4g/roselle.svg",
+      "height": 932,
+      "paletteKey": "butter",
+      "sourceRoute": "/templates/roselle/demo/generic?palette=butter&embed=thumbnail",
+      "templateKey": "roselle",
+      "webp": "/invitation-thumbnails/v4g/roselle-butter.webp",
+      "width": 430
+    },
+    {
+      "fallback": "/invitation-thumbnails/v4g/roselle.svg",
+      "height": 932,
+      "paletteKey": "berry",
+      "sourceRoute": "/templates/roselle/demo/generic?palette=berry&embed=thumbnail",
+      "templateKey": "roselle",
+      "webp": "/invitation-thumbnails/v4g/roselle-berry.webp",
+      "width": 430
+    }
+  ],
+  "source": "canonical-showroom-renderer",
+  "version": "v4g"
+}
