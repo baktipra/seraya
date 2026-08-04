@@ -3,11 +3,13 @@ import Link from 'next/link';
 
 import { siteConfig } from '@/config/site';
 import {
+  getDefaultInvitationThemePalette,
   getInvitationThemePackage,
   invitationThemePackages,
   type InvitationTemplateKey,
 } from '@/modules/invitation-templates/core/theme-package.registry';
 
+import { CanonicalInvitationThumbnail } from './canonical-invitation-thumbnail';
 import styles from './flagship-marketing.module.css';
 
 export type FlagshipCollectionKey = InvitationTemplateKey;
@@ -114,56 +116,18 @@ export function InvitationCover({
   collection: FlagshipCollectionKey;
   compact?: boolean;
 }) {
-  const copy = getInvitationThemePackage(collection).manifest.preview;
+  const themePackage = getInvitationThemePackage(collection);
+  const palette = getDefaultInvitationThemePalette(collection);
 
   return (
-    <div
-      aria-label={`Preview artistik koleksi ${collection}: undangan Kirana dan Arga, sapaan personal, dan konfirmasi kehadiran`}
+    <CanonicalInvitationThumbnail
       className={`${styles.preview} ${previewStyles[collection] ?? ''} ${compact ? styles.compact : ''}`}
-      data-marketing-invitation-preview={collection}
-      role="img"
-    >
-      <div aria-hidden="true" className={styles.motif} />
-      <div aria-hidden="true">
-        <p className={styles.stageLabel}>{copy.stageLabel}</p>
-
-        <div className={`${styles.floatingCard} ${styles.guestCard}`}>
-          <p className={styles.floatingEyebrow}>Sapaan tamu</p>
-          <p className={styles.floatingTitle}>{copy.guestName}</p>
-          <p className={styles.floatingMeta}>{copy.guestLine}</p>
-        </div>
-
-        <div className={styles.phone}>
-          <div className={styles.phoneContent}>
-            <p className={styles.phoneEyebrow}>{copy.eyebrow}</p>
-            {copy.showMonogram ? <span className={styles.monogram}>KA</span> : null}
-            <p className={styles.phoneNames}>Kirana &amp; Arga</p>
-            <p className={styles.phoneCopy}>
-              Dengan penuh syukur, kami mengundang Anda untuk hadir dalam perayaan keluarga dan awal
-              perjalanan baru kami.
-            </p>
-            <p className={styles.phoneDate}>{copy.date}</p>
-            <span className={styles.phoneRule}>
-              <span />
-            </span>
-          </div>
-        </div>
-
-        <div className={`${styles.floatingCard} ${styles.responseCard}`}>
-          <p className={styles.floatingEyebrow}>Konfirmasi tamu</p>
-          <p className={styles.floatingTitle}>Apakah Anda hadir?</p>
-          <div className={styles.responseOptions}>
-            <span className={`${styles.responseOption} ${styles.responseOptionActive}`}>Hadir</span>
-            <span className={styles.responseOption}>Belum pasti</span>
-          </div>
-        </div>
-
-        <div className={styles.previewFooter}>
-          <span>Product preview</span>
-          <span>Kirana &amp; Arga</span>
-        </div>
-      </div>
-    </div>
+      paletteCanvas={palette.canvas}
+      paletteKey={themePackage.defaultPaletteKey}
+      paletteName={palette.name}
+      templateKey={collection}
+      variant="showcase"
+    />
   );
 }
 
