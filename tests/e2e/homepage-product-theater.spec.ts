@@ -11,7 +11,7 @@ const assertNoHorizontalOverflow = async (page: Page) => {
   expect(hasHorizontalOverflow).toBe(false);
 };
 
-test('renders the seamless campaign hero with a verified playing editorial film', async ({
+test('renders the seamless full-width campaign hero with a verified playing editorial film', async ({
   page,
 }) => {
   await page.goto('/');
@@ -25,6 +25,7 @@ test('renders the seamless campaign hero with a verified playing editorial film'
 
   await expect(page.locator('main iframe')).toHaveCount(0);
   await expect(page.locator('[data-homepage-campaign-hero]')).toHaveCount(1);
+  await expect(page.locator('[data-editorial-hero-frame]')).toBeVisible();
   await expect(page.locator('[data-editorial-hero-theater]')).toBeVisible();
   await expect(page.locator('[data-editorial-hero-motion]')).toHaveAttribute(
     'data-editorial-hero-motion',
@@ -102,34 +103,88 @@ test('renders the seamless campaign hero with a verified playing editorial film'
   expect(posterResponse.ok()).toBe(true);
   expect(Number(mp4Response.headers()['content-length'] ?? 0)).toBeGreaterThan(1_000_000);
 
-  const [headerBorderWidth, heroBackground, bodyBackground, heroAnimationName] =
-    await page.evaluate(() => {
-      const header = document.querySelector('header');
-      const hero = document.querySelector<HTMLElement>('[data-homepage-campaign-hero]');
-      const theater = document.querySelector<HTMLElement>('[data-editorial-hero-theater]');
+  const geometry = await page.evaluate(() => {
+    const header = document.querySelector('header');
+    const hero = document.querySelector<HTMLElement>('[data-homepage-campaign-hero]');
+    const frame = document.querySelector<HTMLElement>('[data-editorial-hero-frame]');
+    const theater = document.querySelector<HTMLElement>('[data-editorial-hero-theater]');
+    const collection = document.querySelector<HTMLElement>('#koleksi');
 
-      return [
-        header ? window.getComputedStyle(header).borderBottomWidth : null,
-        hero ? window.getComputedStyle(hero).backgroundColor : null,
-        window.getComputedStyle(document.body).backgroundColor,
-        theater ? window.getComputedStyle(theater).animationName : null,
-      ];
-    });
+    const headerRect = header?.getBoundingClientRect();
+    const heroRect = hero?.getBoundingClientRect();
+    const frameRect = frame?.getBoundingClientRect();
+    const theaterRect = theater?.getBoundingClientRect();
+    const collectionRect = collection?.getBoundingClientRect();
 
-  expect(headerBorderWidth).toBe('0px');
-  expect(heroBackground).toBe(bodyBackground);
-  expect(heroAnimationName).not.toBe('none');
+    return {
+      bodyBackground: window.getComputedStyle(document.body).backgroundColor,
+      collectionTop: collectionRect?.top ?? null,
+      frameBottom: frameRect?.bottom ?? null,
+      frameLeft: frameRect?.left ?? null,
+      frameRight: frameRect?.right ?? null,
+      frameTop: frameRect?.top ?? null,
+      headerBorderWidth: header ? window.getComputedStyle(header).borderBottomWidth : null,
+      headerBottom: headerRect?.bottom ?? null,
+      heroAnimationName: theater ? window.getComputedStyle(theater).animationName : null,
+      heroBackground: hero ? window.getComputedStyle(hero).backgroundColor : null,
+      heroBottom: heroRect?.bottom ?? null,
+      heroTop: heroRect?.top ?? null,
+      theaterBottom: theaterRect?.bottom ?? null,
+      theaterLeft: theaterRect?.left ?? null,
+      theaterRight: theaterRect?.right ?? null,
+      theaterTop: theaterRect?.top ?? null,
+      viewportWidth: window.innerWidth,
+    };
+  });
+
+  expect(geometry.headerBorderWidth).toBe('0px');
+  expect(geometry.heroBackground).toBe(geometry.bodyBackground);
+  expect(geometry.heroAnimationName).not.toBe('none');
+  expect(Math.abs((geometry.heroTop ?? 0) - (geometry.headerBottom ?? 0))).toBeLessThanOrEqual(1);
+  expect(Math.abs((geometry.frameTop ?? 0) - (geometry.heroTop ?? 0))).toBeLessThanOrEqual(1);
+  expect(Math.abs(geometry.frameLeft ?? 0)).toBeLessThanOrEqual(1);
+  expect(Math.abs((geometry.frameRight ?? 0) - geometry.viewportWidth)).toBeLessThanOrEqual(1);
+  expect(Math.abs((geometry.theaterLeft ?? 0) - (geometry.frameLeft ?? 0))).toBeLessThanOrEqual(1);
+  expect(Math.abs((geometry.theaterRight ?? 0) - (geometry.frameRight ?? 0))).toBeLessThanOrEqual(1);
+  expect(Math.abs((geometry.theaterTop ?? 0) - (geometry.frameTop ?? 0))).toBeLessThanOrEqual(1);
+  expect(Math.abs((geometry.theaterBottom ?? 0) - (geometry.frameBottom ?? 0))).toBeLessThanOrEqual(1);
+  expect(Math.abs((geometry.collectionTop ?? 0) - (geometry.heroBottom ?? 0))).toBeLessThanOrEqual(1);
   await assertNoHorizontalOverflow(page);
 });
 
-test('keeps the campaign film composed on a narrow mobile viewport', async ({ page }) => {
+test('keeps the full-width campaign film composed on a narrow mobile viewport', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 740 });
   await page.goto('/');
 
   await expect(page.locator('[data-homepage-campaign-hero]')).toBeVisible();
+  await expect(page.locator('[data-editorial-hero-frame]')).toBeVisible();
   await expect(page.locator('[data-editorial-hero-theater]')).toBeVisible();
   await expect(page.locator('[data-editorial-hero-video]')).toBeVisible();
   await expect(page.getByRole('link', { name: 'Jelajahi koleksi' })).toBeVisible();
+
+  const mobileGeometry = await page.evaluate(() => {
+    const frame = document.querySelector<HTMLElement>('[data-editorial-hero-frame]');
+    const theater = document.querySelector<HTMLElement>('[data-editorial-hero-theater]');
+    const frameRect = frame?.getBoundingClientRect();
+    const theaterRect = theater?.getBoundingClientRect();
+
+    return {
+      frameLeft: frameRect?.left ?? null,
+      frameRight: frameRect?.right ?? null,
+      theaterLeft: theaterRect?.left ?? null,
+      theaterRight: theaterRect?.right ?? null,
+      viewportWidth: window.innerWidth,
+    };
+  });
+
+  expect(Math.abs(mobileGeometry.frameLeft ?? 0)).toBeLessThanOrEqual(1);
+  expect(Math.abs((mobileGeometry.frameRight ?? 0) - mobileGeometry.viewportWidth)).toBeLessThanOrEqual(
+    1,
+  );
+  expect(Math.abs(mobileGeometry.theaterLeft ?? 0)).toBeLessThanOrEqual(1);
+  expect(
+    Math.abs((mobileGeometry.theaterRight ?? 0) - mobileGeometry.viewportWidth),
+  ).toBeLessThanOrEqual(1);
   await assertNoHorizontalOverflow(page);
 });
 
