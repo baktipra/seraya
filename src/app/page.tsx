@@ -3,12 +3,8 @@ import Link from 'next/link';
 
 import { EditorialHero } from '@/components/marketing/editorial-hero';
 import { MarketingPageShell } from '@/components/marketing/marketing-page-shell';
-import {
-  CollectionCard,
-  FlagshipFooter,
-  FlagshipHeader,
-  flagshipCollections,
-} from '@/components/marketing/flagship-marketing';
+import { HomepageThemeGrid } from '@/components/marketing/homepage-theme-grid';
+import { FlagshipFooter, FlagshipHeader } from '@/components/marketing/flagship-marketing';
 
 export const dynamic = 'force-static';
 export const revalidate = 3600;
@@ -112,37 +108,7 @@ export default function Home() {
       <main>
         <EditorialHero />
 
-        <section id="koleksi" aria-labelledby="collection-title" className="scroll-mt-24">
-          <div className="mx-auto w-full max-w-[90rem] px-5 py-20 sm:px-8 sm:py-24 lg:px-10 lg:py-32">
-            <div className="grid gap-7 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-end">
-              <div>
-                <p className="seraya-eyebrow text-seraya-action-primary">Koleksi flagship</p>
-                <h2 id="collection-title" className="seraya-display-lg mt-4 max-w-3xl">
-                  Bukan sekadar ganti warna. Tiga pengalaman dengan karakter berbeda.
-                </h2>
-              </div>
-              <p className="text-seraya-text-secondary max-w-xl text-base leading-7 lg:justify-self-end">
-                Roselle, Aruna, dan Laras memiliki ritme, tipografi, komposisi, dan motion
-                sendiri—tanpa mengorbankan fungsi penting undangan personal.
-              </p>
-            </div>
-
-            <div className="mt-14 space-y-16 lg:mt-20 lg:space-y-24">
-              {flagshipCollections.map((collection, index) => (
-                <div className="scroll-mt-24" id={`koleksi-${collection.key}`} key={collection.key}>
-                  <CollectionCard collection={collection} priority={index % 2 === 1} />
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-14 text-center lg:mt-20">
-              <Link className="seraya-button-secondary min-h-12 px-6" href="/templates">
-                Bandingkan seluruh koleksi
-                <span aria-hidden="true">→</span>
-              </Link>
-            </div>
-          </div>
-        </section>
+        <HomepageThemeGrid />
 
         <section
           id="tautan-personal"

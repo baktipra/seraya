@@ -1,0 +1,51 @@
+.grid {
+  position: relative;
+}
+
+:global([data-homepage-theme-card='roselle'][data-active-palette='rose'] [role='img']) {
+  background-color: #f2dedd !important;
+}
+
+:global([data-homepage-theme-card='roselle'][data-active-palette='sage'] [role='img']) {
+  background-color: #e2eadf !important;
+}
+
+:global([data-homepage-theme-card='roselle'][data-active-palette='butter'] [role='img']) {
+  background-color: #f5e8c9 !important;
+}
+
+:global([data-homepage-theme-card='roselle'][data-active-palette='berry'] [role='img']) {
+  background-color: #ead9e2 !important;
+}
+
+:global([data-homepage-theme-card='aruna'][data-active-palette='stone'] [role='img']) {
+  background-color: #e7e5dc !important;
+}
+
+:global([data-homepage-theme-card='aruna'][data-active-palette='matcha'] [role='img']) {
+  background-color: #e6ead7 !important;
+}
+
+:global([data-homepage-theme-card='aruna'][data-active-palette='cobalt'] [role='img']) {
+  background-color: #dce7f7 !important;
+}
+
+:global([data-homepage-theme-card='aruna'][data-active-palette='apricot'] [role='img']) {
+  background-color: #f3dfd2 !important;
+}
+
+:global([data-homepage-theme-card='laras'][data-active-palette='midnight'] [role='img']) {
+  background-color: #201f26 !important;
+}
+
+:global([data-homepage-theme-card='laras'][data-active-palette='burgundy'] [role='img']) {
+  background-color: #3a2028 !important;
+}
+
+:global([data-homepage-theme-card='laras'][data-active-palette='emerald'] [role='img']) {
+  background-color: #18362f !important;
+}
+
+:global([data-homepage-theme-card='laras'][data-active-palette='ivory'] [role='img']) {
+  background-color: #eee6da !important;
+}
