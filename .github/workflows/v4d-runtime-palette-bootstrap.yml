@@ -35,6 +35,17 @@ jobs:
         run: |
           cat scripts/v4d-parts/part-*.b64 | base64 --decode | gzip --decompress > /tmp/apply-v4d.py
           python3 /tmp/apply-v4d.py
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/modules/publications/__tests__/publication.service.test.ts')
+          source = path.read_text(encoding='utf-8')
+          old = "        story: { body: null, enabled: false, heading: null },\n        templateKey: 'roselle',"
+          new = "        story: { body: null, enabled: false, heading: null },\n        paletteKey: 'rose',\n        templateKey: 'roselle',"
+          if source.count(old) != 1:
+              raise RuntimeError('Expected one publication snapshot fixture theme selection.')
+          path.write_text(source.replace(old, new, 1), encoding='utf-8')
+          PY
 
       - name: Install dependencies
         run: npm ci
@@ -57,6 +68,7 @@ jobs:
             src/modules/invitations/invitation-editor-local-state.ts \
             src/modules/invitations/invitation-editor.service.ts \
             src/modules/projects/create-project.service.ts \
+            src/modules/publications/__tests__/publication.service.test.ts \
             src/components/projects/invitation-editor-workspace.tsx \
             src/components/projects/invitation-editor-fields.tsx \
             src/components/projects/invitation-editor.tsx \
@@ -85,6 +97,7 @@ jobs:
             src/modules/invitations/invitation-editor-local-state.ts \
             src/modules/invitations/invitation-editor.service.ts \
             src/modules/projects/create-project.service.ts \
+            src/modules/publications/__tests__/publication.service.test.ts \
             src/components/projects/invitation-editor-workspace.tsx \
             src/components/projects/invitation-editor-fields.tsx \
             src/components/projects/invitation-editor.tsx \
@@ -102,7 +115,8 @@ jobs:
         run: |
           npx vitest run \
             tests/unit/invitation-theme-package-registry.test.ts \
-            tests/unit/invitation-theme-palette-runtime.test.ts
+            tests/unit/invitation-theme-palette-runtime.test.ts \
+            src/modules/publications/__tests__/publication.service.test.ts
 
       - name: Database migration contracts
         run: npm run test:db
