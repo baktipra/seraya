@@ -28,14 +28,36 @@ export function EditorialHero() {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     panel.dataset.motionReady = 'true';
 
+    const stopReducedMotionPlayback = () => {
+      resetMotion(panel);
+      video.autoplay = false;
+      video.pause();
+
+      if (video.readyState >= HTMLMediaElement.HAVE_METADATA && video.currentTime !== 0) {
+        video.currentTime = 0;
+      }
+    };
+
     const syncMotionPreference = () => {
       if (reduceMotion.matches) {
-        resetMotion(panel);
-        video.pause();
+        stopReducedMotionPlayback();
         return;
       }
 
+      video.autoplay = true;
       void video.play().catch(() => undefined);
+    };
+
+    const handleVideoPlay = () => {
+      if (reduceMotion.matches) {
+        stopReducedMotionPlayback();
+      }
+    };
+
+    const handleLoadedMetadata = () => {
+      if (reduceMotion.matches) {
+        stopReducedMotionPlayback();
+      }
     };
 
     let animationFrame = 0;
@@ -64,14 +86,18 @@ export function EditorialHero() {
       animationFrame = window.requestAnimationFrame(() => resetMotion(panel));
     };
 
-    syncMotionPreference();
+    video.addEventListener('play', handleVideoPlay);
+    video.addEventListener('loadedmetadata', handleLoadedMetadata);
     reduceMotion.addEventListener('change', syncMotionPreference);
     panel.addEventListener('pointermove', handlePointerMove);
     panel.addEventListener('pointerleave', handlePointerLeave);
+    syncMotionPreference();
 
     return () => {
       cancelAnimationFrame(animationFrame);
       delete panel.dataset.motionReady;
+      video.removeEventListener('play', handleVideoPlay);
+      video.removeEventListener('loadedmetadata', handleLoadedMetadata);
       reduceMotion.removeEventListener('change', syncMotionPreference);
       panel.removeEventListener('pointermove', handlePointerMove);
       panel.removeEventListener('pointerleave', handlePointerLeave);
