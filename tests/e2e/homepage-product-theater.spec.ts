@@ -160,8 +160,12 @@ test('renders the seamless full-width campaign hero with a verified playing edit
     ).toBeLessThanOrEqual(1);
   } else {
     expect((geometry.theaterBottom ?? 0) < (geometry.frameBottom ?? 0)).toBe(true);
-    expect(Math.abs((geometry.copyTop ?? 0) - (geometry.theaterBottom ?? 0))).toBeLessThanOrEqual(1);
-    expect(Math.abs((geometry.copyBottom ?? 0) - (geometry.frameBottom ?? 0))).toBeLessThanOrEqual(1);
+    expect(Math.abs((geometry.copyTop ?? 0) - (geometry.theaterBottom ?? 0))).toBeLessThanOrEqual(
+      1,
+    );
+    expect(Math.abs((geometry.copyBottom ?? 0) - (geometry.frameBottom ?? 0))).toBeLessThanOrEqual(
+      1,
+    );
   }
 
   expect(Math.abs((geometry.collectionTop ?? 0) - (geometry.heroBottom ?? 0))).toBeLessThanOrEqual(
