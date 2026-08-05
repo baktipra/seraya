@@ -33,235 +33,212 @@ jobs:
           python <<'PY'
           from pathlib import Path
 
-          def replace(path, old, new):
+          def edit(path, transform):
               file = Path(path)
               text = file.read_text()
-              if old not in text:
-                  raise SystemExit(f'Anchor missing in {path}: {old[:80]!r}')
-              file.write_text(text.replace(old, new, 1))
+              updated = transform(text)
+              if updated == text:
+                  raise SystemExit(f'No change produced for {path}')
+              file.write_text(updated)
 
-          replace(
+          def before(text, marker, addition):
+              if addition.strip() in text:
+                  return text
+              if marker not in text:
+                  raise SystemExit(f'Missing marker: {marker!r}')
+              return text.replace(marker, addition + marker, 1)
+
+          def after(text, marker, addition):
+              if addition.strip() in text:
+                  return text
+              if marker not in text:
+                  raise SystemExit(f'Missing marker: {marker!r}')
+              return text.replace(marker, marker + addition, 1)
+
+          edit(
               'src/modules/invitations/invitation-draft.schema.ts',
-              """    livestreamEnabled: z.boolean().optional(),
-              livestreamHeading: nullableText(160, 'Judul siaran langsung').optional(),
-              livestreamUrl: nullableLivestreamUrl.optional(),
-          """,
-              """    livestreamDescription: nullableText(600, 'Deskripsi siaran').optional(),
-              livestreamEnabled: z.boolean().optional(),
-              livestreamHeading: nullableText(160, 'Judul siaran langsung').optional(),
-              livestreamPostEventMode: z.enum(['hide', 'recording']).optional(),
-              livestreamPreEventMessage: nullableText(600, 'Pesan sebelum siaran').optional(),
-              livestreamUrl: nullableLivestreamUrl.optional(),
-          """,
+              lambda text: after(
+                  before(
+                      text,
+                      "    livestreamEnabled: z.boolean().optional(),\n",
+                      "    livestreamDescription: nullableText(600, 'Deskripsi siaran').optional(),\n",
+                  ),
+                  "    livestreamHeading: nullableText(160, 'Judul siaran langsung').optional(),\n",
+                  "    livestreamPostEventMode: z.enum(['hide', 'recording']).optional(),\n"
+                  "    livestreamPreEventMessage: nullableText(600, 'Pesan sebelum siaran').optional(),\n",
+              ),
           )
 
-          replace(
+          edit(
               'src/modules/invitations/invitation-draft.defaults.ts',
-              """          latitude: null,
-              livestreamEnabled: false,
-              livestreamHeading: null,
-              livestreamUrl: null,
-          """,
-              """          latitude: null,
-              livestreamDescription: null,
-              livestreamEnabled: false,
-              livestreamHeading: null,
-              livestreamPostEventMode: 'recording',
-              livestreamPreEventMessage: null,
-              livestreamUrl: null,
-          """,
+              lambda text: after(
+                  before(
+                      text,
+                      "          livestreamEnabled: false,\n",
+                      "          livestreamDescription: null,\n",
+                  ),
+                  "          livestreamHeading: null,\n",
+                  "          livestreamPostEventMode: 'recording',\n"
+                  "          livestreamPreEventMessage: null,\n",
+              ),
           )
 
-          replace(
+          edit(
               'src/modules/invitations/invitation-editor.schema.ts',
-              """  'livestreamEnabled',
-            'livestreamUrl',
-            'livestreamHeading',
-          """,
-              """  'livestreamDescription',
-            'livestreamEnabled',
-            'livestreamUrl',
-            'livestreamHeading',
-            'livestreamPostEventMode',
-            'livestreamPreEventMessage',
-          """,
+              lambda text: after(
+                  after(
+                      before(
+                          before(
+                              text,
+                              "  'livestreamEnabled',\n",
+                              "  'livestreamDescription',\n",
+                          ),
+                          "                    livestreamEnabled: checkboxInputSchema.optional(),\n",
+                          "                    livestreamDescription: formTextSchema.optional(),\n",
+                      ),
+                      "  'livestreamHeading',\n",
+                      "  'livestreamPostEventMode',\n  'livestreamPreEventMessage',\n",
+                  ),
+                  "                    livestreamHeading: formTextSchema.optional(),\n",
+                  "                    livestreamPostEventMode: formTextSchema.optional(),\n"
+                  "                    livestreamPreEventMessage: formTextSchema.optional(),\n",
+              ),
           )
 
-          replace(
-              'src/modules/invitations/invitation-editor.schema.ts',
-              """                    latitude: formTextSchema.optional(),
-                        livestreamEnabled: checkboxInputSchema.optional(),
-                        livestreamHeading: formTextSchema.optional(),
-                        livestreamUrl: formTextSchema.optional(),
-          """,
-              """                    latitude: formTextSchema.optional(),
-                        livestreamDescription: formTextSchema.optional(),
-                        livestreamEnabled: checkboxInputSchema.optional(),
-                        livestreamHeading: formTextSchema.optional(),
-                        livestreamPostEventMode: formTextSchema.optional(),
-                        livestreamPreEventMessage: formTextSchema.optional(),
-                        livestreamUrl: formTextSchema.optional(),
-          """,
-          )
-
-          replace(
+          edit(
               'src/modules/invitations/invitation-editor-local-state.ts',
-              """        latitude: event.latitude?.toString() ?? '',
-                livestreamEnabled: event.livestreamEnabled === true,
-                livestreamHeading: event.livestreamHeading ?? '',
-                livestreamUrl: event.livestreamUrl ?? '',
-          """,
-              """        latitude: event.latitude?.toString() ?? '',
-                livestreamDescription: event.livestreamDescription ?? '',
-                livestreamEnabled: event.livestreamEnabled === true,
-                livestreamHeading: event.livestreamHeading ?? '',
-                livestreamPostEventMode: event.livestreamPostEventMode ?? 'recording',
-                livestreamPreEventMessage: event.livestreamPreEventMessage ?? '',
-                livestreamUrl: event.livestreamUrl ?? '',
-          """,
+              lambda text: after(
+                  after(
+                      before(
+                          text,
+                          "        livestreamEnabled: event.livestreamEnabled === true,\n",
+                          "        livestreamDescription: event.livestreamDescription ?? '',\n",
+                      ),
+                      "        livestreamHeading: event.livestreamHeading ?? '',\n",
+                      "        livestreamPostEventMode: event.livestreamPostEventMode ?? 'recording',\n"
+                      "        livestreamPreEventMessage: event.livestreamPreEventMessage ?? '',\n",
+                  ),
+                  "        livestreamUrl: event.livestreamUrl ?? '',\n",
+                  "",
+              ),
           )
 
-          replace(
+          edit(
               'src/modules/invitations/invitation-editor.service.ts',
-              """      latitude: normalizeOptionalCoordinate(event.latitude),
-                  livestreamEnabled: event.livestreamEnabled === true,
-                  livestreamHeading: normalizeOptionalText(event.livestreamHeading),
-                  livestreamUrl: normalizeOptionalText(event.livestreamUrl),
-          """,
-              """      latitude: normalizeOptionalCoordinate(event.latitude),
-                  livestreamDescription: normalizeOptionalText(event.livestreamDescription),
-                  livestreamEnabled: event.livestreamEnabled === true,
-                  livestreamHeading: normalizeOptionalText(event.livestreamHeading),
-                  livestreamPostEventMode:
-                    event.livestreamPostEventMode === 'hide' ? 'hide' : 'recording',
-                  livestreamPreEventMessage: normalizeOptionalText(event.livestreamPreEventMessage),
-                  livestreamUrl: normalizeOptionalText(event.livestreamUrl),
-          """,
+              lambda text: after(
+                  after(
+                      before(
+                          text,
+                          "      livestreamEnabled: event.livestreamEnabled === true,\n",
+                          "      livestreamDescription: normalizeOptionalText(event.livestreamDescription),\n",
+                      ),
+                      "      livestreamHeading: normalizeOptionalText(event.livestreamHeading),\n",
+                      "      livestreamPostEventMode:\n"
+                      "        event.livestreamPostEventMode === 'hide' ? 'hide' : 'recording',\n"
+                      "      livestreamPreEventMessage: normalizeOptionalText(event.livestreamPreEventMessage),\n",
+                  ),
+                  "      livestreamUrl: normalizeOptionalText(event.livestreamUrl),\n",
+                  "",
+              ),
           )
 
-          replace(
-              'src/modules/invitation-templates/invitation-view-model.ts',
-              """  latitude?: number | null;
-            livestreamEnabled?: boolean;
-            livestreamHeading?: string | null;
-            livestreamUrl?: string | null;
-          """,
-              """  latitude?: number | null;
-            livestreamDescription?: string | null;
-            livestreamEnabled?: boolean;
-            livestreamHeading?: string | null;
-            livestreamPostEventMode?: 'hide' | 'recording';
-            livestreamPreEventMessage?: string | null;
-            livestreamUrl?: string | null;
-          """,
-          )
+          def patch_view_model(text):
+              text = before(
+                  text,
+                  "  livestreamEnabled?: boolean;\n",
+                  "  livestreamDescription?: string | null;\n",
+              )
+              text = after(
+                  text,
+                  "  livestreamHeading?: string | null;\n",
+                  "  livestreamPostEventMode?: 'hide' | 'recording';\n"
+                  "  livestreamPreEventMessage?: string | null;\n",
+              )
+              text = before(
+                  text,
+                  "    livestreamEnabled: event.livestreamEnabled === true,\n",
+                  "    livestreamDescription: event.livestreamDescription ?? null,\n",
+              )
+              text = after(
+                  text,
+                  "    livestreamHeading: event.livestreamHeading ?? null,\n",
+                  "    livestreamPostEventMode: event.livestreamPostEventMode ?? 'recording',\n"
+                  "    livestreamPreEventMessage: event.livestreamPreEventMessage ?? null,\n",
+              )
+              text = before(
+                  text,
+                  "    livestreamEnabled: false,\n",
+                  "    livestreamDescription: null,\n",
+              )
+              return after(
+                  text,
+                  "    livestreamHeading: null,\n",
+                  "    livestreamPostEventMode: 'recording',\n"
+                  "    livestreamPreEventMessage: null,\n",
+              )
 
-          replace(
-              'src/modules/invitation-templates/invitation-view-model.ts',
-              """    latitude: event.latitude ?? null,
-                livestreamEnabled: event.livestreamEnabled === true,
-                livestreamHeading: event.livestreamHeading ?? null,
-                livestreamUrl: getSafeHttpsHref(event.livestreamUrl),
-          """,
-              """    latitude: event.latitude ?? null,
-                livestreamDescription: event.livestreamDescription ?? null,
-                livestreamEnabled: event.livestreamEnabled === true,
-                livestreamHeading: event.livestreamHeading ?? null,
-                livestreamPostEventMode: event.livestreamPostEventMode ?? 'recording',
-                livestreamPreEventMessage: event.livestreamPreEventMessage ?? null,
-                livestreamUrl: getSafeHttpsHref(event.livestreamUrl),
-          """,
-          )
+          edit('src/modules/invitation-templates/invitation-view-model.ts', patch_view_model)
 
-          replace(
-              'src/modules/invitation-templates/invitation-view-model.ts',
-              """    latitude: null,
-                livestreamEnabled: false,
-                livestreamHeading: null,
-                livestreamUrl: null,
-          """,
-              """    latitude: null,
-                livestreamDescription: null,
-                livestreamEnabled: false,
-                livestreamHeading: null,
-                livestreamPostEventMode: 'recording',
-                livestreamPreEventMessage: null,
-                livestreamUrl: null,
-          """,
-          )
+          def patch_editor_component(text):
+              if 'livestreamPreEventMessage: change.currentTarget.value' in text:
+                  return text
+              start = text.find("placeholder={`Siaran langsung ${event.title || 'acara'}`}")
+              if start < 0:
+                  raise SystemExit('Livestream heading anchor missing')
+              end_marker = '            </label>'
+              end = text.find(end_marker, start)
+              if end < 0:
+                  raise SystemExit('Livestream heading label end missing')
+              end += len(end_marker)
+              addition = """
+              <label className="text-seraya-text-primary space-y-2 text-sm font-semibold sm:col-span-2">
+                Pesan sebelum acara (opsional)
+                <textarea
+                  className="bg-seraya-surface border-seraya-border-default min-h-24 w-full rounded-[var(--seraya-radius-md)] border px-3.5 py-3 font-normal leading-6"
+                  onChange={(change) =>
+                    onChange({
+                      ...event,
+                      livestreamPreEventMessage: change.currentTarget.value,
+                    })
+                  }
+                  placeholder="Siaran akan dibuka menjelang acara dimulai."
+                  value={event.livestreamPreEventMessage ?? ''}
+                />
+              </label>
+              <label className="text-seraya-text-primary space-y-2 text-sm font-semibold sm:col-span-2">
+                Deskripsi siaran (opsional)
+                <textarea
+                  className="bg-seraya-surface border-seraya-border-default min-h-24 w-full rounded-[var(--seraya-radius-md)] border px-3.5 py-3 font-normal leading-6"
+                  onChange={(change) =>
+                    onChange({
+                      ...event,
+                      livestreamDescription: change.currentTarget.value,
+                    })
+                  }
+                  placeholder="Saksikan momen kami dari mana pun Anda berada."
+                  value={event.livestreamDescription ?? ''}
+                />
+              </label>
+              <label className="text-seraya-text-primary space-y-2 text-sm font-semibold sm:col-span-2">
+                Setelah acara selesai
+                <select
+                  className="bg-seraya-surface border-seraya-border-default min-h-11 w-full rounded-[var(--seraya-radius-md)] border px-3.5 font-normal"
+                  onChange={(change) =>
+                    onChange({
+                      ...event,
+                      livestreamPostEventMode:
+                        change.currentTarget.value === 'hide' ? 'hide' : 'recording',
+                    })
+                  }
+                  value={event.livestreamPostEventMode ?? 'recording'}
+                >
+                  <option value="recording">Tampilkan sebagai rekaman</option>
+                  <option value="hide">Sembunyikan bagian siaran</option>
+                </select>
+              </label>"""
+              return text[:end] + addition + text[end:]
 
-          replace(
-              'src/components/projects/event-utility-editor-fields.tsx',
-              """            <label className=\"text-seraya-text-primary space-y-2 text-sm font-semibold sm:col-span-2\">
-                          Judul siaran (opsional)
-                          <input
-                            className=\"bg-seraya-surface border-seraya-border-default min-h-11 w-full rounded-[var(--seraya-radius-md)] border px-3.5 font-normal\"
-                            onChange={(change) =>
-                              onChange({ ...event, livestreamHeading: change.currentTarget.value })
-                            }
-                            placeholder={`Siaran langsung ${event.title || 'acara'}`}
-                            value={event.livestreamHeading ?? ''}
-                          />
-                        </label>
-          """,
-              """            <label className=\"text-seraya-text-primary space-y-2 text-sm font-semibold sm:col-span-2\">
-                          Judul siaran (opsional)
-                          <input
-                            className=\"bg-seraya-surface border-seraya-border-default min-h-11 w-full rounded-[var(--seraya-radius-md)] border px-3.5 font-normal\"
-                            onChange={(change) =>
-                              onChange({ ...event, livestreamHeading: change.currentTarget.value })
-                            }
-                            placeholder={`Siaran ${event.title || 'acara'}`}
-                            value={event.livestreamHeading ?? ''}
-                          />
-                        </label>
-                        <label className=\"text-seraya-text-primary space-y-2 text-sm font-semibold sm:col-span-2\">
-                          Pesan sebelum acara (opsional)
-                          <textarea
-                            className=\"bg-seraya-surface border-seraya-border-default min-h-24 w-full rounded-[var(--seraya-radius-md)] border px-3.5 py-3 font-normal leading-6\"
-                            onChange={(change) =>
-                              onChange({
-                                ...event,
-                                livestreamPreEventMessage: change.currentTarget.value,
-                              })
-                            }
-                            placeholder=\"Siaran akan dibuka menjelang acara dimulai.\"
-                            value={event.livestreamPreEventMessage ?? ''}
-                          />
-                        </label>
-                        <label className=\"text-seraya-text-primary space-y-2 text-sm font-semibold sm:col-span-2\">
-                          Deskripsi siaran (opsional)
-                          <textarea
-                            className=\"bg-seraya-surface border-seraya-border-default min-h-24 w-full rounded-[var(--seraya-radius-md)] border px-3.5 py-3 font-normal leading-6\"
-                            onChange={(change) =>
-                              onChange({
-                                ...event,
-                                livestreamDescription: change.currentTarget.value,
-                              })
-                            }
-                            placeholder=\"Saksikan momen kami dari mana pun Anda berada.\"
-                            value={event.livestreamDescription ?? ''}
-                          />
-                        </label>
-                        <label className=\"text-seraya-text-primary space-y-2 text-sm font-semibold sm:col-span-2\">
-                          Setelah acara selesai
-                          <select
-                            className=\"bg-seraya-surface border-seraya-border-default min-h-11 w-full rounded-[var(--seraya-radius-md)] border px-3.5 font-normal\"
-                            onChange={(change) =>
-                              onChange({
-                                ...event,
-                                livestreamPostEventMode:
-                                  change.currentTarget.value === 'hide' ? 'hide' : 'recording',
-                              })
-                            }
-                            value={event.livestreamPostEventMode ?? 'recording'}
-                          >
-                            <option value=\"recording\">Tampilkan sebagai rekaman</option>
-                            <option value=\"hide\">Sembunyikan bagian siaran</option>
-                          </select>
-                        </label>
-          """,
-          )
+          edit('src/components/projects/event-utility-editor-fields.tsx', patch_editor_component)
           PY
 
       - name: Format V4I files
