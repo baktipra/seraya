@@ -1,0 +1,58 @@
+name: RC1 Slice A published confidence implementation
+
+on:
+  push:
+    branches:
+      - feature/rc1-slice-a-published-confidence-post-publish-entry
+    paths:
+      - '.github/workflows/rc1-slice-a-apply.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  implement-published-confidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/rc1-slice-a-published-confidence-post-publish-entry
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Apply RC1 Slice A
+        run: python scripts/rc1-slice-a-apply.py
+      - name: Format focused files
+        run: |
+          npx prettier --write \
+            src/components/projects/project-overview-bootstrap.tsx \
+            src/components/projects/published-confidence.tsx \
+            src/components/workspace/compass-primitives.tsx \
+            tests/unit/published-confidence-rc1.test.tsx
+      - name: Validate RC1 Slice A
+        run: |
+          npx eslint \
+            src/components/projects/project-overview-bootstrap.tsx \
+            src/components/projects/published-confidence.tsx \
+            src/components/workspace/compass-primitives.tsx \
+            tests/unit/published-confidence-rc1.test.tsx
+          npm run typecheck
+          npx vitest run tests/unit/published-confidence-rc1.test.tsx
+          npm run build
+      - name: Commit validated source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            src/components/projects/project-overview-bootstrap.tsx \
+            src/components/projects/published-confidence.tsx \
+            src/components/workspace/compass-primitives.tsx \
+            tests/unit/published-confidence-rc1.test.tsx
+          git commit -m "SERAYA RC1: implement published confidence Slice A"
+          git push origin HEAD:feature/rc1-slice-a-published-confidence-post-publish-entry
