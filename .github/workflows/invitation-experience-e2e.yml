@@ -7,12 +7,17 @@ on:
       - 'package.json'
       - 'package-lock.json'
       - 'playwright.invitation-experience.config.ts'
+      - 'src/app/[slug]/**'
+      - 'src/app/api/invitations/[slug]/audio/**'
       - 'src/app/invitation-maturation-release.css'
       - 'src/app/invitation-opening-maturation-release.css'
       - 'src/app/invitation-media-release.css'
       - 'src/app/layout.tsx'
       - 'src/app/release-a-invitation-preview/**'
+      - 'src/components/invitation-audio-playback-control.*'
       - 'src/modules/invitation-templates/**'
+      - 'src/modules/media/invitation-audio-playback.*'
+      - 'src/modules/media/invitation-audio.repository.ts'
       - 'tests/e2e/invitation-experience.spec.ts'
       - 'tests/e2e/release-a-invitation-showroom.spec.ts'
       - 'tests/e2e/fixture-app/**'
@@ -24,12 +29,17 @@ on:
       - 'package.json'
       - 'package-lock.json'
       - 'playwright.invitation-experience.config.ts'
+      - 'src/app/[slug]/**'
+      - 'src/app/api/invitations/[slug]/audio/**'
       - 'src/app/invitation-maturation-release.css'
       - 'src/app/invitation-opening-maturation-release.css'
       - 'src/app/invitation-media-release.css'
       - 'src/app/layout.tsx'
       - 'src/app/release-a-invitation-preview/**'
+      - 'src/components/invitation-audio-playback-control.*'
       - 'src/modules/invitation-templates/**'
+      - 'src/modules/media/invitation-audio-playback.*'
+      - 'src/modules/media/invitation-audio.repository.ts'
       - 'tests/e2e/invitation-experience.spec.ts'
       - 'tests/e2e/release-a-invitation-showroom.spec.ts'
       - 'tests/e2e/fixture-app/**'
@@ -61,11 +71,17 @@ jobs:
             .github/workflows/invitation-experience-e2e.yml \
             package.json \
             playwright.invitation-experience.config.ts \
+            src/app/api/invitations/[slug]/audio/playback/route.ts \
             src/app/invitation-maturation-release.css \
             src/app/invitation-opening-maturation-release.css \
             src/app/invitation-media-release.css \
             src/app/layout.tsx \
             src/app/release-a-invitation-preview/page.tsx \
+            src/components/invitation-audio-playback-control.tsx \
+            src/components/invitation-audio-playback-control.module.css \
+            src/modules/media/invitation-audio-playback.types.ts \
+            src/modules/media/invitation-audio-playback.service.ts \
+            src/modules/media/invitation-audio.repository.ts \
             src/modules/invitation-templates/invitation-gallery-image.tsx \
             src/modules/invitation-templates/roselle/roselle-sections.tsx \
             src/modules/invitation-templates/aruna/aruna-template.tsx \
@@ -82,8 +98,13 @@ jobs:
         run: |
           npx eslint \
             playwright.invitation-experience.config.ts \
+            src/app/api/invitations/[slug]/audio/playback/route.ts \
             src/app/layout.tsx \
             src/app/release-a-invitation-preview/page.tsx \
+            src/components/invitation-audio-playback-control.tsx \
+            src/modules/media/invitation-audio-playback.types.ts \
+            src/modules/media/invitation-audio-playback.service.ts \
+            src/modules/media/invitation-audio.repository.ts \
             src/modules/invitation-templates/invitation-gallery-image.tsx \
             src/modules/invitation-templates/roselle/roselle-sections.tsx \
             src/modules/invitation-templates/aruna/aruna-template.tsx \
