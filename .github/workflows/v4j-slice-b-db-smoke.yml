@@ -8,7 +8,7 @@ on:
       - '.github/workflows/v4j-slice-b-db-smoke.yml'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   migration-smoke:
@@ -26,6 +26,11 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
+      - name: Add Slice B database contract
+        run: |
+          python scripts/v4j-slice-b-db-test.py
+          npx prettier --write tests/integration/supabase-foundation.test.ts
+          cp tests/integration/supabase-foundation.test.ts /tmp/supabase-foundation-product.test.ts
       - name: Adapt baseline PGlite citext shim
         run: |
           python <<'PY'
@@ -41,3 +46,11 @@ jobs:
           PY
       - name: Apply full migration chain in PGlite
         run: npx vitest run tests/integration/supabase-foundation.test.ts
+      - name: Commit validated database contract
+        run: |
+          cp /tmp/supabase-foundation-product.test.ts tests/integration/supabase-foundation.test.ts
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests/integration/supabase-foundation.test.ts
+          git commit -m "SERAYA V4J: cover invitation audio database lifecycle"
+          git push origin HEAD:feature/v4j-invitation-atmosphere-couple-identity-v1
