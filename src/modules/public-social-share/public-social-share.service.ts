@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { siteConfig } from '@/config/site';
+import { getActiveInvitationDraftForVerifiedProject } from '@/modules/invitations/invitation-draft.repository';
 import type { OwnedProject } from '@/modules/projects/project.repository';
 import { getCurrentPublishedInvitationForVerifiedProject } from '@/modules/publications/publication.service';
 
@@ -36,17 +37,27 @@ function selectPrimaryPublishedEvent(
 export async function getPublicSocialShareForVerifiedProject(
   project: OwnedProject,
 ): Promise<PublicSocialShareModel | null> {
-  const publication = await getCurrentPublishedInvitationForVerifiedProject(project);
+  const [publication, activeDraft] = await Promise.all([
+    getCurrentPublishedInvitationForVerifiedProject(project),
+    getActiveInvitationDraftForVerifiedProject(project),
+  ]);
   if (!publication) return null;
 
   const { draft } = publication.snapshot;
   const event = selectPrimaryPublishedEvent(draft.eventSchedule.events);
   if (!event) return null;
 
+  const activeDraftUpdatedAt = activeDraft ? Date.parse(activeDraft.updated_at) : Number.NaN;
+  const publishedAt = Date.parse(publication.published_at);
+
   return assertPublicShareModelIsPersonalDataFree({
     coupleLabel: `${draft.couple.personOne.displayName} & ${draft.couple.personTwo.displayName}`,
     eventDate: formatEventDate(event.date, publication.snapshot.project.timezone),
     eventTitle: event.title,
+    isSynchronized:
+      Number.isFinite(activeDraftUpdatedAt) && Number.isFinite(publishedAt)
+        ? activeDraftUpdatedAt <= publishedAt
+        : false,
     paletteKey: draft.paletteKey,
     publicUrl: createCanonicalPublicInvitationUrl(
       siteConfig.url,
