@@ -1,12 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const {
+  assertInvitationAudioReadyMock,
+  getActiveInvitationDraftMock,
   getCurrentPublishedMock,
   getOwnedProjectMock,
   getPaymentOverviewMock,
   publishSnapshotMock,
   requireCurrentUserMock,
 } = vi.hoisted(() => ({
+  assertInvitationAudioReadyMock: vi.fn(),
+  getActiveInvitationDraftMock: vi.fn(),
   getCurrentPublishedMock: vi.fn(),
   getOwnedProjectMock: vi.fn(),
   getPaymentOverviewMock: vi.fn(),
@@ -15,6 +19,12 @@ const {
 }));
 
 vi.mock('@/modules/auth/current-user', () => ({ requireCurrentUser: requireCurrentUserMock }));
+vi.mock('@/modules/invitations/invitation-draft.repository', () => ({
+  getActiveInvitationDraftForVerifiedProject: getActiveInvitationDraftMock,
+}));
+vi.mock('@/modules/media/invitation-audio.service', () => ({
+  assertInvitationAudioReadyForVerifiedProject: assertInvitationAudioReadyMock,
+}));
 vi.mock('@/modules/projects/project.repository', () => ({
   getOwnedProjectById: getOwnedProjectMock,
 }));
@@ -62,6 +72,12 @@ function snapshot(): PublishedInvitationSnapshot {
     slug: project.slug,
     snapshot: {
       draft: {
+        audio: {
+          assetId: null,
+          durationSeconds: null,
+          originalFileName: null,
+          rightsAcknowledged: false,
+        },
         closing: { enabled: false, message: null, signature: null },
         digitalGift: { accounts: [], enabled: false, heading: null, lead: null },
         couple: {
@@ -119,6 +135,10 @@ describe('publication service payment gate', () => {
   beforeEach(() => {
     requireCurrentUserMock.mockReset().mockResolvedValue({ id: project.account_id });
     getOwnedProjectMock.mockReset().mockResolvedValue(project);
+    getActiveInvitationDraftMock.mockReset().mockResolvedValue({
+      content: snapshot().snapshot.draft,
+    });
+    assertInvitationAudioReadyMock.mockReset().mockResolvedValue(undefined);
     getCurrentPublishedMock.mockReset().mockResolvedValue(null);
     publishSnapshotMock.mockReset().mockResolvedValue(snapshot());
     getPaymentOverviewMock.mockReset().mockResolvedValue({

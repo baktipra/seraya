@@ -322,6 +322,47 @@ const digitalGiftSchema = z
     }
   });
 
+const createDefaultInvitationAudio = () => ({
+  assetId: null,
+  durationSeconds: null,
+  originalFileName: null,
+  rightsAcknowledged: false,
+});
+
+const invitationAudioSchema = z
+  .object({
+    assetId: z.string().trim().uuid('ID audio tidak valid.').nullable(),
+    durationSeconds: z.number().int().min(1).max(600).nullable(),
+    originalFileName: nullableText(180, 'Nama file audio'),
+    rightsAcknowledged: z.boolean(),
+  })
+  .strict()
+  .superRefine((audio, context) => {
+    if (audio.assetId && !audio.rightsAcknowledged) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Audio memerlukan konfirmasi hak penggunaan.',
+        path: ['rightsAcknowledged'],
+      });
+    }
+
+    if (audio.assetId && (!audio.durationSeconds || !audio.originalFileName)) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Metadata audio belum lengkap.',
+        path: [audio.durationSeconds ? 'originalFileName' : 'durationSeconds'],
+      });
+    }
+
+    if (!audio.assetId && (audio.durationSeconds || audio.originalFileName)) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Metadata audio tidak boleh tersimpan tanpa asset.',
+        path: ['assetId'],
+      });
+    }
+  });
+
 const createDefaultInvitationOpening = () => ({
   message: null,
   quote: null,
@@ -377,6 +418,7 @@ const coupleIdentitySchema = z
 
 const invitationDraftContentBaseSchema = z
   .object({
+    audio: invitationAudioSchema.default(createDefaultInvitationAudio),
     closing: z
       .object({
         enabled: z.boolean(),

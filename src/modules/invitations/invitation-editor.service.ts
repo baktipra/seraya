@@ -2,6 +2,7 @@ import 'server-only';
 
 import { requireCurrentUser } from '@/modules/auth/current-user';
 import { resolveInvitationThemePaletteKey } from '@/modules/invitation-templates/core/theme-package.registry';
+import { assertInvitationAudioReadyForVerifiedProject } from '@/modules/media/invitation-audio.service';
 import { getOwnedProjectById, type OwnedProject } from '@/modules/projects/project.repository';
 
 import {
@@ -221,6 +222,11 @@ export async function saveInvitationEditorDraftForCurrentUser(
   if (!parsedContent.success) {
     throw new InvitationEditorValidationError(getInvitationEditorFieldErrors(parsedContent.error));
   }
+
+  await assertInvitationAudioReadyForVerifiedProject({
+    content: parsedContent.data,
+    project: editor.project,
+  });
 
   return updateActiveInvitationDraftForVerifiedProject({
     content: parsedContent.data,

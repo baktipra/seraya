@@ -1,6 +1,8 @@
 import 'server-only';
 
 import { requireCurrentUser } from '@/modules/auth/current-user';
+import { getActiveInvitationDraftForVerifiedProject } from '@/modules/invitations/invitation-draft.repository';
+import { assertInvitationAudioReadyForVerifiedProject } from '@/modules/media/invitation-audio.service';
 import { getPaymentOverviewForVerifiedProject } from '@/modules/payments/payment.service';
 import { getOwnedProjectById } from '@/modules/projects/project.repository';
 
@@ -30,6 +32,14 @@ export async function publishInvitationForCurrentUser(
 
   if (!paymentOverview.publishEligibility.allowed) {
     throw new PublicationPaymentRequiredError();
+  }
+
+  const activeDraft = await getActiveInvitationDraftForVerifiedProject(project);
+  if (activeDraft) {
+    await assertInvitationAudioReadyForVerifiedProject({
+      content: activeDraft.content,
+      project,
+    });
   }
 
   const previousSnapshot = await getCurrentPublishedInvitationForVerifiedProject(project);

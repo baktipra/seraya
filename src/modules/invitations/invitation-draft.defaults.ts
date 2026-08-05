@@ -24,6 +24,12 @@ export function createDefaultInvitationDraftContent(
   project: InvitationDraftProjectSource,
 ): InvitationDraftContent {
   return invitationDraftContentSchema.parse({
+    audio: {
+      assetId: null,
+      durationSeconds: null,
+      originalFileName: null,
+      rightsAcknowledged: false,
+    },
     closing: {
       enabled: false,
       message: null,
