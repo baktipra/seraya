@@ -3,28 +3,47 @@ name: V4J invitation atmosphere and identity validation
 on:
   pull_request:
     paths:
+      - 'package.json'
+      - 'package-lock.json'
+      - 'src/app/api/projects/[projectId]/audio/**'
+      - 'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx'
+      - 'src/components/projects/invitation-audio-manager.tsx'
       - 'src/components/projects/invitation-editor.tsx'
       - 'src/components/projects/invitation-editor-workspace.tsx'
       - 'src/modules/invitations/**'
       - 'src/modules/invitation-templates/**'
-      - 'src/modules/publications/__tests__/publication.service.test.ts'
+      - 'src/modules/media/invitation-audio.*'
+      - 'src/modules/publications/**'
+      - 'supabase/migrations/20260805002300_m0023_add_invitation_audio_media_foundation.sql'
       - 'tests/unit/invitation-atmosphere-identity-v4j.test.tsx'
+      - 'tests/unit/invitation-audio-media-v4j.test.ts'
+      - 'tests/integration/supabase-foundation.test.ts'
       - '.github/workflows/v4j-invitation-atmosphere-identity.yml'
   push:
     branches:
       - feature/v4j-invitation-atmosphere-couple-identity-v1
     paths:
+      - 'package.json'
+      - 'package-lock.json'
+      - 'src/app/api/projects/[projectId]/audio/**'
+      - 'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx'
+      - 'src/components/projects/invitation-audio-manager.tsx'
       - 'src/components/projects/invitation-editor.tsx'
       - 'src/components/projects/invitation-editor-workspace.tsx'
       - 'src/modules/invitations/**'
       - 'src/modules/invitation-templates/**'
-      - 'src/modules/publications/__tests__/publication.service.test.ts'
+      - 'src/modules/media/invitation-audio.*'
+      - 'src/modules/publications/**'
+      - 'supabase/migrations/20260805002300_m0023_add_invitation_audio_media_foundation.sql'
       - 'tests/unit/invitation-atmosphere-identity-v4j.test.tsx'
+      - 'tests/unit/invitation-audio-media-v4j.test.ts'
+      - 'tests/integration/supabase-foundation.test.ts'
       - '.github/workflows/v4j-invitation-atmosphere-identity.yml'
 
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -35,9 +54,15 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
-      - name: Check V4J Slice A formatting
+      - name: Check V4J formatting
         run: |
           npx prettier --check \
+            package.json \
+            src/app/api/projects/[projectId]/audio/reserve/route.ts \
+            src/app/api/projects/[projectId]/audio/finalize/route.ts \
+            src/app/api/projects/[projectId]/audio/remove/route.ts \
+            'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
+            src/components/projects/invitation-audio-manager.tsx \
             src/components/projects/invitation-editor.tsx \
             src/components/projects/invitation-editor-workspace.tsx \
             src/modules/invitations/invitation-draft.schema.ts \
@@ -51,11 +76,23 @@ jobs:
             src/modules/invitation-templates/roselle/roselle-template.tsx \
             src/modules/invitation-templates/aruna/aruna-template.tsx \
             src/modules/invitation-templates/laras/laras-template.tsx \
+            src/modules/media/invitation-audio.types.ts \
+            src/modules/media/invitation-audio.validation.ts \
+            src/modules/media/invitation-audio.repository.ts \
+            src/modules/media/invitation-audio.service.ts \
+            src/modules/publications/publication.service.ts \
             src/modules/publications/__tests__/publication.service.test.ts \
-            tests/unit/invitation-atmosphere-identity-v4j.test.tsx
-      - name: Lint V4J Slice A
+            tests/unit/invitation-atmosphere-identity-v4j.test.tsx \
+            tests/unit/invitation-audio-media-v4j.test.ts \
+            tests/integration/supabase-foundation.test.ts
+      - name: Lint V4J source
         run: |
           npx eslint \
+            src/app/api/projects/[projectId]/audio/reserve/route.ts \
+            src/app/api/projects/[projectId]/audio/finalize/route.ts \
+            src/app/api/projects/[projectId]/audio/remove/route.ts \
+            'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
+            src/components/projects/invitation-audio-manager.tsx \
             src/components/projects/invitation-editor.tsx \
             src/components/projects/invitation-editor-workspace.tsx \
             src/modules/invitations/invitation-draft.schema.ts \
@@ -68,11 +105,24 @@ jobs:
             src/modules/invitation-templates/roselle/roselle-template.tsx \
             src/modules/invitation-templates/aruna/aruna-template.tsx \
             src/modules/invitation-templates/laras/laras-template.tsx \
+            src/modules/media/invitation-audio.types.ts \
+            src/modules/media/invitation-audio.validation.ts \
+            src/modules/media/invitation-audio.repository.ts \
+            src/modules/media/invitation-audio.service.ts \
+            src/modules/publications/publication.service.ts \
             src/modules/publications/__tests__/publication.service.test.ts \
-            tests/unit/invitation-atmosphere-identity-v4j.test.tsx
+            tests/unit/invitation-atmosphere-identity-v4j.test.tsx \
+            tests/unit/invitation-audio-media-v4j.test.ts \
+            tests/integration/supabase-foundation.test.ts
       - name: Typecheck
         run: npm run typecheck
-      - name: Focused V4J Slice A tests
-        run: npx vitest run tests/unit/invitation-atmosphere-identity-v4j.test.tsx
+      - name: Focused V4J unit and publication tests
+        run: |
+          npx vitest run \
+            tests/unit/invitation-atmosphere-identity-v4j.test.tsx \
+            tests/unit/invitation-audio-media-v4j.test.ts \
+            src/modules/publications/__tests__/publication.service.test.ts
+      - name: Full migration-chain contracts
+        run: npx vitest run tests/integration/supabase-foundation.test.ts
       - name: Production build
         run: npm run build
