@@ -37,6 +37,7 @@ jobs:
         run: |
           node scripts/apply-v4h-editor-patches.mjs
           node scripts/apply-v4h-editor-fixes.mjs
+          node scripts/apply-v4h-final-source-fixes.mjs
 
       - name: Format V4H sources
         run: |
@@ -58,7 +59,7 @@ jobs:
         run: |
           git config user.name 'seraya-v4h-bot'
           git config user.email 'seraya-v4h-bot@users.noreply.github.com'
-          git add src tests scripts/apply-v4h-editor-patches.mjs scripts/apply-v4h-editor-fixes.mjs
+          git add src tests scripts/apply-v4h-editor-patches.mjs scripts/apply-v4h-editor-fixes.mjs scripts/apply-v4h-final-source-fixes.mjs
           if git diff --cached --quiet; then
             echo 'V4H editor integration is already applied.'
             exit 0
