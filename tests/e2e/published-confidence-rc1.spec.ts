@@ -21,18 +21,27 @@ for (const state of states) {
     const main = page.locator('main');
 
     await expect(confidence).toBeVisible();
-    await expect(confidence).toHaveAttribute('data-published-confidence-state', state.expectedState);
-    await expect(confidence.getByRole('heading', { name: state.expectedHeading })).toBeVisible();
+    await expect(confidence).toHaveAttribute(
+      'data-published-confidence-state',
+      state.expectedState,
+    );
+    await expect(
+      confidence.getByRole('heading', { name: state.expectedHeading }),
+    ).toBeVisible();
     await expect(confidence.getByText('Terbit', { exact: true })).toBeVisible();
     await expect(confidence.getByText('Tetap berlaku', { exact: true })).toBeVisible();
-    await expect(page.getByText('Operasional setelah terbit', { exact: true })).toBeVisible();
+    await expect(
+      page.getByText('Operasional setelah terbit', { exact: true }),
+    ).toBeVisible();
     await expect(main.getByRole('link')).toHaveCount(1);
     await expect(main.getByRole('link', { name: /Kelola tamu/ })).toHaveAttribute(
       'href',
       '/rc1-published-confidence/guests',
     );
 
-    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - window.innerWidth,
+    );
     expect(overflow).toBeLessThanOrEqual(1);
   });
 }
