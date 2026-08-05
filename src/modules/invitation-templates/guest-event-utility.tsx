@@ -325,7 +325,7 @@ export function GuestEventUtility({
     >
       <div className="mx-auto max-w-4xl">
         <p className="text-center text-[0.68rem] font-bold tracking-[0.2em] uppercase opacity-55">
-          Guest event utility
+          Jadwal & akses acara
         </p>
         <h2
           className="mt-3 text-center font-serif text-3xl leading-tight sm:text-5xl"

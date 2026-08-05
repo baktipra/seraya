@@ -23,6 +23,15 @@ const eventScheduleEventInputKeys = [
   'venueName',
   'venueAddress',
   'mapsUrl',
+  'countdownEnabled',
+  'arrivalNote',
+  'locationSource',
+  'placeId',
+  'latitude',
+  'longitude',
+  'livestreamEnabled',
+  'livestreamUrl',
+  'livestreamHeading',
 ] as const;
 
 const projectIdSchema = z.string().regex(databaseUuidShape, 'Project tidak valid.');

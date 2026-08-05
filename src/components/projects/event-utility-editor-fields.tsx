@@ -5,8 +5,6 @@ import { useEffect, useRef, useState } from 'react';
 import type { InvitationEditorFieldErrors } from '@/modules/invitations/invitation-editor.schema';
 import type { EventScheduleItemV1 } from '@/modules/invitations/invitation-draft.schema';
 
-import { FieldError } from './invitation-editor-fields';
-
 type LatLngValue = {
   lat(): number;
   lng(): number;
@@ -43,7 +41,7 @@ type GoogleMapsRuntime = {
   places: {
     Autocomplete: new (
       input: HTMLInputElement,
-      options: { fields: string[]; types: string[] },
+      options: { fields: string[] },
     ) => GoogleAutocomplete;
   };
 };
@@ -63,6 +61,20 @@ function fieldId(name: string) {
 
 function errorFor(errors: InvitationEditorFieldErrors | undefined, name: string) {
   return errors?.[name as keyof InvitationEditorFieldErrors];
+}
+
+function UtilityFieldError({ message, name }: { message?: string; name: string }) {
+  if (!message) return null;
+
+  return (
+    <p
+      className="text-seraya-status-error text-sm leading-6"
+      id={`${fieldId(name)}-error`}
+      role="alert"
+    >
+      {message}
+    </p>
+  );
 }
 
 function UtilityFieldError({ message, name }: { message?: string; name: string }) {
@@ -174,7 +186,6 @@ export function EventUtilityEditorFields({
         if (cancelled) return;
         autocomplete = new google.maps.places.Autocomplete(input, {
           fields: ['formatted_address', 'geometry', 'name', 'place_id', 'url'],
-          types: ['establishment', 'geocode'],
         });
         listener = autocomplete.addListener('place_changed', () => {
           const place = autocomplete?.getPlace();

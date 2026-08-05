@@ -246,7 +246,7 @@ export function getGuestEventMapEmbedHref(
   }
 
   const query =
-    event.placeId ??
+    (event.placeId ? `place_id:${event.placeId}` : null) ??
     (typeof event.latitude === 'number' && typeof event.longitude === 'number'
       ? `${event.latitude},${event.longitude}`
       : (event.address ?? event.venueName));
@@ -273,14 +273,19 @@ function compactCalendarDateTime(date: string, time: string) {
   return `${date.replaceAll('-', '')}T${time.replace(':', '')}00`;
 }
 
-function getCalendarEndTime(event: GuestEventUtilityEvent) {
+function getCalendarEnd(event: GuestEventUtilityEvent) {
   if (event.endTime) {
-    return event.endTime;
+    return { date: event.date, time: event.endTime };
   }
 
+  const [year, month, day] = event.date.split('-').map(Number);
   const [hour, minute] = event.startTime.split(':').map(Number);
-  const totalMinutes = (hour * 60 + minute + 240) % (24 * 60);
-  return `${String(Math.floor(totalMinutes / 60)).padStart(2, '0')}:${String(totalMinutes % 60).padStart(2, '0')}`;
+  const end = new Date(Date.UTC(year, month - 1, day, hour, minute + 240));
+
+  return {
+    date: end.toISOString().slice(0, 10),
+    time: end.toISOString().slice(11, 16),
+  };
 }
 
 function createCalendarDescription(event: GuestEventUtilityEvent) {
@@ -307,6 +312,7 @@ export function createGuestEventCalendarFile(
   for (const event of events) {
     const location = [event.venueName, event.address].filter(Boolean).join(', ');
     const description = createCalendarDescription(event);
+    const calendarEnd = getCalendarEnd(event);
 
     lines.push(
       'BEGIN:VEVENT',
@@ -316,7 +322,7 @@ export function createGuestEventCalendarFile(
         .replace(/[-:]/g, '')
         .replace(/\.\d{3}Z$/, 'Z')}`,
       `DTSTART;TZID=${escapeCalendarText(timeZone)}:${compactCalendarDateTime(event.date, event.startTime)}`,
-      `DTEND;TZID=${escapeCalendarText(timeZone)}:${compactCalendarDateTime(event.date, getCalendarEndTime(event))}`,
+      `DTEND;TZID=${escapeCalendarText(timeZone)}:${compactCalendarDateTime(calendarEnd.date, calendarEnd.time)}`,
       `SUMMARY:${escapeCalendarText(event.title)}`,
     );
 
@@ -343,7 +349,7 @@ export function getGoogleCalendarHref(event: GuestEventUtilityEvent, timeZone: s
   url.searchParams.set('text', event.title);
   url.searchParams.set(
     'dates',
-    `${compactCalendarDateTime(event.date, event.startTime)}/${compactCalendarDateTime(event.date, getCalendarEndTime(event))}`,
+    `${compactCalendarDateTime(event.date, event.startTime)}/${compactCalendarDateTime(getCalendarEnd(event).date, getCalendarEnd(event).time)}`,
   );
   url.searchParams.set('ctz', timeZone);
 
