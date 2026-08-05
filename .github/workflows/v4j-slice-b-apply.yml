@@ -1,0 +1,84 @@
+name: V4J Slice B audio media implementation
+
+on:
+  push:
+    branches:
+      - feature/v4j-invitation-atmosphere-couple-identity-v1
+    paths:
+      - '.github/workflows/v4j-slice-b-apply.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  implement-audio-foundation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/v4j-invitation-atmosphere-couple-identity-v1
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install baseline dependencies
+        run: npm ci
+
+      - name: Apply Slice B source changes
+        run: python scripts/v4j-slice-b-apply.py
+
+      - name: Install audio metadata parser
+        run: npm install music-metadata@latest --save-exact
+
+      - name: Format Slice B source
+        run: |
+          npx prettier --write \
+            package.json \
+            src/app/api/projects/[projectId]/audio/reserve/route.ts \
+            src/app/api/projects/[projectId]/audio/finalize/route.ts \
+            src/app/api/projects/[projectId]/audio/remove/route.ts \
+            'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
+            src/components/projects/invitation-audio-manager.tsx \
+            src/modules/invitations/invitation-draft.schema.ts \
+            src/modules/invitations/invitation-draft.defaults.ts \
+            src/modules/invitations/invitation-editor.service.ts \
+            src/modules/media/invitation-audio.types.ts \
+            src/modules/media/invitation-audio.validation.ts \
+            src/modules/media/invitation-audio.repository.ts \
+            src/modules/media/invitation-audio.service.ts \
+            src/modules/publications/publication.service.ts \
+            tests/unit/invitation-audio-media-v4j.test.ts
+
+      - name: Validate Slice B source
+        run: |
+          npx eslint \
+            src/app/api/projects/[projectId]/audio/reserve/route.ts \
+            src/app/api/projects/[projectId]/audio/finalize/route.ts \
+            src/app/api/projects/[projectId]/audio/remove/route.ts \
+            'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
+            src/components/projects/invitation-audio-manager.tsx \
+            src/modules/invitations/invitation-draft.schema.ts \
+            src/modules/invitations/invitation-draft.defaults.ts \
+            src/modules/invitations/invitation-editor.service.ts \
+            src/modules/media/invitation-audio.types.ts \
+            src/modules/media/invitation-audio.validation.ts \
+            src/modules/media/invitation-audio.repository.ts \
+            src/modules/media/invitation-audio.service.ts \
+            src/modules/publications/publication.service.ts \
+            tests/unit/invitation-audio-media-v4j.test.ts
+          npm run typecheck
+          npx vitest run tests/unit/invitation-audio-media-v4j.test.ts
+          npm run build
+
+      - name: Commit validated Slice B source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json src supabase/migrations/20260805002300_m0023_add_invitation_audio_media_foundation.sql tests/unit/invitation-audio-media-v4j.test.ts
+          git commit -m "SERAYA V4J: implement audio media foundation Slice B"
+          git push origin HEAD:feature/v4j-invitation-atmosphere-couple-identity-v1
