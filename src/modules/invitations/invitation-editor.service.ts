@@ -16,6 +16,7 @@ import {
 import {
   derivePrimaryEventCompatibility,
   invitationDraftContentSchema,
+  type EventScheduleV1,
 } from './invitation-draft.schema';
 import type { InvitationDraft } from './invitation-draft.types';
 
