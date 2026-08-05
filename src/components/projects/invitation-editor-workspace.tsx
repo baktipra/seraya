@@ -143,8 +143,15 @@ const fieldSectionMatchers: ReadonlyArray<{
     matches: (fieldName) => fieldName === 'templateKey' || fieldName === 'paletteKey',
     section: 'style',
   },
-  { matches: (fieldName) => fieldName.startsWith('hero.'), section: 'opening' },
-  { matches: (fieldName) => fieldName.startsWith('couple.'), section: 'couple' },
+  {
+    matches: (fieldName) => fieldName.startsWith('hero.') || fieldName.startsWith('opening.'),
+    section: 'opening',
+  },
+  {
+    matches: (fieldName) =>
+      fieldName.startsWith('couple.') || fieldName.startsWith('coupleIdentity.'),
+    section: 'couple',
+  },
   { matches: (fieldName) => fieldName.startsWith('story.'), section: 'story' },
   { matches: (fieldName) => fieldName.startsWith('eventSchedule.'), section: 'schedule' },
   { matches: (fieldName) => fieldName.startsWith('gallery.'), section: 'gallery' },

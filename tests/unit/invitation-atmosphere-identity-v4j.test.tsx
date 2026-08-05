@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
@@ -50,6 +52,21 @@ describe('V4J Slice A identity contract', () => {
         coupleIdentity: { ...content.coupleIdentity, weddingHashtag: 'Raka Nadia' },
       }),
     ).toThrow(/diawali #/i);
+  });
+
+  it('mounts the identity experience in the owner editor and all templates', () => {
+    const editorSource = readFileSync('src/components/projects/invitation-editor.tsx', 'utf8');
+    expect(editorSource).toContain('name="opening.treatment"');
+    expect(editorSource).toContain('name="coupleIdentity.monogram.enabled"');
+
+    for (const template of ['roselle', 'aruna', 'laras']) {
+      const source = readFileSync(
+        `src/modules/invitation-templates/${template}/${template}-template.tsx`,
+        'utf8',
+      );
+      expect(source).toContain('InvitationOpeningIdentity');
+      expect(source).toContain('InvitationIdentityFooter');
+    }
   });
 
   it('derives public-safe identity and presentation', () => {

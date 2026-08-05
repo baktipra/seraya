@@ -1,4 +1,8 @@
 import {
+  InvitationIdentityFooter,
+  InvitationOpeningIdentity,
+} from '../invitation-atmosphere-identity';
+import {
   getPersonalInvitationPresentationSlots,
   type InvitationTemplateProps,
 } from '../core/theme-renderer.types';
@@ -50,6 +54,7 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
       data-template="roselle"
     >
       <RoselleHero hero={invitation.hero} />
+      <InvitationOpeningIdentity invitation={invitation} template="roselle" />
       <a data-invitation-opening-action data-roselle-opening-action href={`#${openingTargetId}`}>
         <span>Buka undangan</span>
         <i aria-hidden="true" />
@@ -127,6 +132,7 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
             {genericResponseCopy}
           </p>
         ) : null}
+        <InvitationIdentityFooter invitation={invitation} template="roselle" />
         <RoselleClosing closing={invitation.closing} />
       </div>
       <a
