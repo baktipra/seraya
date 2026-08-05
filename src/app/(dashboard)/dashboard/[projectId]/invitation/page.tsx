@@ -1,9 +1,14 @@
+import type { Route } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { InvitationAudioManager } from '@/components/projects/invitation-audio-manager';
 import { InvitationEditor } from '@/components/projects/invitation-editor';
-import { InvitationStudioShell } from '@/components/projects/invitation-studio-shell';
+import {
+  InvitationStudioShell,
+  type InvitationStudioStatusTone,
+} from '@/components/projects/invitation-studio-shell';
+import { parseInvitationStudioMode } from '@/components/projects/invitation-studio.types';
 import {
   getInvitationEditorSectionStatuses,
   invitationEditorSections,
@@ -26,6 +31,7 @@ import { getInvitationReadinessForVerifiedProject } from '@/modules/readiness';
 
 type InvitationEditorPageProps = {
   params: Promise<{ projectId: string }>;
+  searchParams?: Promise<{ mode?: string | string[] }>;
 };
 
 type InvitationEditorScreen = {
@@ -39,6 +45,11 @@ type InvitationReadinessHandoffProps = {
   draft: OwnedInvitationEditor['draft'];
   projectId: string;
   readiness: InvitationEditorScreen['readiness'];
+};
+
+type InvitationStudioStatus = {
+  label: string;
+  tone: InvitationStudioStatusTone;
 };
 
 const readinessChapterOrder: readonly InvitationEditorSectionKey[] = [
@@ -72,6 +83,23 @@ function getDeferredGalleryImages(editor: OwnedInvitationEditor): InvitationGall
     id,
     src: `/dashboard/media/${id}`,
   }));
+}
+
+function getInvitationStudioStatus(
+  readiness: InvitationEditorScreen['readiness'],
+): InvitationStudioStatus {
+  switch (readiness.invitation.state) {
+    case 'published_with_unpublished_changes':
+      return { label: 'Perubahan belum diterbitkan', tone: 'warning' };
+    case 'published':
+      return { label: 'Undangan aktif', tone: 'success' };
+    case 'ready_to_publish':
+      return { label: 'Siap diterbitkan', tone: 'brand' };
+    case 'draft_ready_unactivated':
+      return { label: 'Draf siap ditinjau', tone: 'neutral' };
+    case 'draft_incomplete':
+      return { label: 'Draf belum lengkap', tone: 'neutral' };
+  }
 }
 
 function InvitationReadinessHandoff({
@@ -301,32 +329,45 @@ async function getInvitationEditorScreenOrNotFound(
   );
 }
 
-export default async function InvitationEditorPage({ params }: InvitationEditorPageProps) {
+export default async function InvitationEditorPage({
+  params,
+  searchParams,
+}: InvitationEditorPageProps) {
   const { projectId } = await params;
+  const query = await (searchParams ?? Promise.resolve<{ mode?: string | string[] }>({}));
   const screen = await getInvitationEditorScreenOrNotFound(projectId);
+  const studioStatus = getInvitationStudioStatus(screen.readiness);
 
   return (
     <WorkspacePage kind="studio" width="studio">
-      <InvitationStudioShell>
-        <InvitationReadinessHandoff
-          draft={screen.editor.draft}
-          projectId={screen.editor.project.id}
-          readiness={screen.readiness}
-        />
-        <InvitationAudioManager
-          initialAudio={screen.audio}
-          isPublished={screen.editor.project.status === 'published'}
-          projectId={screen.editor.project.id}
-        />
-        <InvitationEditor
-          draft={screen.editor.draft}
-          galleryImages={screen.galleryImages}
-          project={{
-            event_date_primary: screen.editor.project.event_date_primary,
-          }}
-          projectId={screen.editor.project.id}
-          readiness={screen.readiness}
-        />
+      <InvitationStudioShell
+        coupleLabel={screen.readiness.identity.coupleLabel}
+        initialMode={parseInvitationStudioMode(query.mode)}
+        previewHref={`/dashboard/${screen.editor.project.id}/preview` as Route}
+        statusLabel={studioStatus.label}
+        statusTone={studioStatus.tone}
+      >
+        <div className="grid min-w-0 gap-5 sm:gap-6" data-invitation-studio-legacy-content>
+          <InvitationReadinessHandoff
+            draft={screen.editor.draft}
+            projectId={screen.editor.project.id}
+            readiness={screen.readiness}
+          />
+          <InvitationAudioManager
+            initialAudio={screen.audio}
+            isPublished={screen.editor.project.status === 'published'}
+            projectId={screen.editor.project.id}
+          />
+          <InvitationEditor
+            draft={screen.editor.draft}
+            galleryImages={screen.galleryImages}
+            project={{
+              event_date_primary: screen.editor.project.event_date_primary,
+            }}
+            projectId={screen.editor.project.id}
+            readiness={screen.readiness}
+          />
+        </div>
       </InvitationStudioShell>
     </WorkspacePage>
   );
