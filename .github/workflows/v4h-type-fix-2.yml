@@ -95,15 +95,19 @@ jobs:
           );
 
           patch('src/modules/invitations/invitation-editor.service.ts', (source) =>
-            source.replace(
-              `          ? event.locationSource
-                        : null,`,
-              `          ? (event.locationSource as
-                            | 'google_place'
-                            | 'current_location'
-                            | 'manual_pin')
-                          : null,`,
-            ),
+            source
+              .replace(
+                `import {
+                  derivePrimaryEventCompatibility,
+                  invitationDraftContentSchema,
+                } from './invitation-draft.schema';`,
+                `import {
+                  derivePrimaryEventCompatibility,
+                  invitationDraftContentSchema,
+                  type EventScheduleV1,
+                } from './invitation-draft.schema';`,
+              )
+              .replace('  const eventSchedule = {', '  const eventSchedule: EventScheduleV1 = {'),
           );
 
           patch('src/modules/invitation-templates/guest-event-utility.tsx', (source) =>
