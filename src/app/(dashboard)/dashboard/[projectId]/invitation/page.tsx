@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
+import { InvitationAudioManager } from '@/components/projects/invitation-audio-manager';
 import { InvitationEditor } from '@/components/projects/invitation-editor';
 import { InvitationStudioShell } from '@/components/projects/invitation-studio-shell';
 import {
@@ -17,6 +18,8 @@ import {
   getInvitationEditorForVerifiedProject,
   type OwnedInvitationEditor,
 } from '@/modules/invitations/invitation-editor.service';
+import { getInvitationAudioSummaryForVerifiedProject } from '@/modules/media/invitation-audio.service';
+import type { InvitationAudioSummary } from '@/modules/media/invitation-audio.types';
 import type { InvitationGalleryImage } from '@/modules/media/media.types';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 import { getInvitationReadinessForVerifiedProject } from '@/modules/readiness';
@@ -26,6 +29,7 @@ type InvitationEditorPageProps = {
 };
 
 type InvitationEditorScreen = {
+  audio: InvitationAudioSummary | null;
   editor: OwnedInvitationEditor;
   galleryImages: InvitationGalleryImage[];
   readiness: Awaited<ReturnType<typeof getInvitationReadinessForVerifiedProject>>;
@@ -272,8 +276,13 @@ async function getInvitationEditorScreenOrNotFound(
         const readiness = await getInvitationReadinessForVerifiedProject(project, {
           draft: editor.draft,
         });
+        const audio = await getInvitationAudioSummaryForVerifiedProject({
+          configuration: editor.draft.content.audio,
+          project,
+        });
 
         return {
+          audio,
           editor,
           galleryImages: getDeferredGalleryImages(editor),
           readiness,
@@ -303,6 +312,11 @@ export default async function InvitationEditorPage({ params }: InvitationEditorP
           draft={screen.editor.draft}
           projectId={screen.editor.project.id}
           readiness={screen.readiness}
+        />
+        <InvitationAudioManager
+          initialAudio={screen.audio}
+          isPublished={screen.editor.project.status === 'published'}
+          projectId={screen.editor.project.id}
         />
         <InvitationEditor
           draft={screen.editor.draft}

@@ -2,6 +2,7 @@ import 'server-only';
 
 import { requireCurrentUser } from '@/modules/auth/current-user';
 import { resolveInvitationThemePaletteKey } from '@/modules/invitation-templates/core/theme-package.registry';
+import { assertInvitationAudioReadyForVerifiedProject } from '@/modules/media/invitation-audio.service';
 import { getOwnedProjectById, type OwnedProject } from '@/modules/projects/project.repository';
 
 import {
@@ -109,6 +110,13 @@ function applyEditorInputToActiveDraft(
     })),
   };
   const primaryCompatibility = derivePrimaryEventCompatibility(eventSchedule);
+  const coupleIdentity = input.coupleIdentity ?? {
+    monogram: { enabled: false, style: 'initials', text: '' },
+    shortName: '',
+    socialLinks: { instagram: '', tiktok: '', website: '' },
+    weddingHashtag: '',
+  };
+  const opening = input.opening ?? { message: '', quote: '', treatment: 'soft' };
   const paletteCandidate =
     input.paletteKey ??
     (input.templateKey === currentContent.templateKey ? currentContent.paletteKey : undefined);
@@ -119,6 +127,24 @@ function applyEditorInputToActiveDraft(
       enabled: input.closing.enabled,
       message: input.closing.message,
       signature: input.closing.signature,
+    },
+    coupleIdentity: {
+      monogram: {
+        enabled: coupleIdentity.monogram.enabled,
+        style:
+          coupleIdentity.monogram.style === 'joined_initials' ||
+          coupleIdentity.monogram.style === 'wordmark'
+            ? coupleIdentity.monogram.style
+            : 'initials',
+        text: coupleIdentity.monogram.text,
+      },
+      shortName: coupleIdentity.shortName,
+      socialLinks: {
+        instagram: coupleIdentity.socialLinks.instagram,
+        tiktok: coupleIdentity.socialLinks.tiktok,
+        website: coupleIdentity.socialLinks.website,
+      },
+      weddingHashtag: coupleIdentity.weddingHashtag,
     },
     digitalGift: {
       accounts: input.digitalGift.accounts.map((account) => ({
@@ -159,6 +185,14 @@ function applyEditorInputToActiveDraft(
     // timezone, gallery membership, or schema-level metadata.
     meta: currentContent.meta,
     gallery: currentContent.gallery,
+    opening: {
+      message: opening.message,
+      quote: opening.quote,
+      treatment:
+        opening.treatment === 'editorial' || opening.treatment === 'ceremonial'
+          ? opening.treatment
+          : 'soft',
+    },
     rsvp: {
       enabled: input.rsvp.enabled,
       heading: input.rsvp.heading,
@@ -188,6 +222,11 @@ export async function saveInvitationEditorDraftForCurrentUser(
   if (!parsedContent.success) {
     throw new InvitationEditorValidationError(getInvitationEditorFieldErrors(parsedContent.error));
   }
+
+  await assertInvitationAudioReadyForVerifiedProject({
+    content: parsedContent.data,
+    project: editor.project,
+  });
 
   return updateActiveInvitationDraftForVerifiedProject({
     content: parsedContent.data,

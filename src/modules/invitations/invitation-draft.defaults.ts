@@ -24,6 +24,12 @@ export function createDefaultInvitationDraftContent(
   project: InvitationDraftProjectSource,
 ): InvitationDraftContent {
   return invitationDraftContentSchema.parse({
+    audio: {
+      assetId: null,
+      durationSeconds: null,
+      originalFileName: null,
+      rightsAcknowledged: false,
+    },
     closing: {
       enabled: false,
       message: null,
@@ -46,6 +52,20 @@ export function createDefaultInvitationDraftContent(
         fullName: null,
         parentLine: null,
       },
+    },
+    coupleIdentity: {
+      monogram: {
+        enabled: false,
+        style: 'initials',
+        text: null,
+      },
+      shortName: null,
+      socialLinks: {
+        instagram: null,
+        tiktok: null,
+        website: null,
+      },
+      weddingHashtag: null,
     },
     eventSchedule: {
       events: [
@@ -109,6 +129,11 @@ export function createDefaultInvitationDraftContent(
     meta: {
       locale: 'id-ID',
       timezone: project.default_timezone,
+    },
+    opening: {
+      message: null,
+      quote: null,
+      treatment: 'soft',
     },
     rsvp: {
       enabled: true,

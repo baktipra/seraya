@@ -103,6 +103,29 @@ function nullableHttpsUrl(label: string) {
   );
 }
 
+function nullableProviderProfileUrl(label: string, allowedHosts: readonly string[]) {
+  return nullableHttpsUrl(label).refine((value) => {
+    if (value === null) {
+      return true;
+    }
+
+    try {
+      return allowedHosts.includes(new URL(value).hostname.toLowerCase());
+    } catch {
+      return false;
+    }
+  }, `${label} harus menggunakan domain resmi.`);
+}
+
+const nullableInstagramUrl = nullableProviderProfileUrl('Profil Instagram', [
+  'instagram.com',
+  'www.instagram.com',
+]);
+const nullableTikTokUrl = nullableProviderProfileUrl('Profil TikTok', [
+  'tiktok.com',
+  'www.tiktok.com',
+]);
+
 const nullableMapUrl = nullableHttpsUrl('Link peta');
 const nullableLivestreamUrl = nullableHttpsUrl('Link YouTube');
 
@@ -299,8 +322,103 @@ const digitalGiftSchema = z
     }
   });
 
+const createDefaultInvitationAudio = () => ({
+  assetId: null,
+  durationSeconds: null,
+  originalFileName: null,
+  rightsAcknowledged: false,
+});
+
+const invitationAudioSchema = z
+  .object({
+    assetId: z.string().trim().uuid('ID audio tidak valid.').nullable(),
+    durationSeconds: z.number().int().min(1).max(600).nullable(),
+    originalFileName: nullableText(180, 'Nama file audio'),
+    rightsAcknowledged: z.boolean(),
+  })
+  .strict()
+  .superRefine((audio, context) => {
+    if (audio.assetId && !audio.rightsAcknowledged) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Audio memerlukan konfirmasi hak penggunaan.',
+        path: ['rightsAcknowledged'],
+      });
+    }
+
+    if (audio.assetId && (!audio.durationSeconds || !audio.originalFileName)) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Metadata audio belum lengkap.',
+        path: [audio.durationSeconds ? 'originalFileName' : 'durationSeconds'],
+      });
+    }
+
+    if (!audio.assetId && (audio.durationSeconds || audio.originalFileName)) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Metadata audio tidak boleh tersimpan tanpa asset.',
+        path: ['assetId'],
+      });
+    }
+  });
+
+const createDefaultInvitationOpening = () => ({
+  message: null,
+  quote: null,
+  treatment: 'soft' as const,
+});
+
+const invitationOpeningSchema = z
+  .object({
+    message: nullableText(360, 'Pesan pembuka'),
+    quote: nullableText(360, 'Kutipan pembuka'),
+    treatment: z.enum(['soft', 'editorial', 'ceremonial']),
+  })
+  .strict();
+
+const createDefaultCoupleIdentity = () => ({
+  monogram: {
+    enabled: false,
+    style: 'initials' as const,
+    text: null,
+  },
+  shortName: null,
+  socialLinks: {
+    instagram: null,
+    tiktok: null,
+    website: null,
+  },
+  weddingHashtag: null,
+});
+
+const coupleIdentitySchema = z
+  .object({
+    monogram: z
+      .object({
+        enabled: z.boolean(),
+        style: z.enum(['initials', 'joined_initials', 'wordmark']),
+        text: nullableText(32, 'Teks monogram'),
+      })
+      .strict(),
+    shortName: nullableText(100, 'Nama singkat pasangan'),
+    socialLinks: z
+      .object({
+        instagram: nullableInstagramUrl,
+        tiktok: nullableTikTokUrl,
+        website: nullableHttpsUrl('Website pasangan'),
+      })
+      .strict(),
+    weddingHashtag: nullableText(80, 'Wedding hashtag').refine(
+      (value) => value === null || /^#[A-Za-z0-9_]+$/.test(value),
+      'Wedding hashtag harus diawali # dan hanya berisi huruf, angka, atau garis bawah.',
+    ),
+  })
+  .strict();
+
 const invitationDraftContentBaseSchema = z
   .object({
+    audio: invitationAudioSchema.default(createDefaultInvitationAudio),
     closing: z
       .object({
         enabled: z.boolean(),
@@ -318,6 +436,7 @@ const invitationDraftContentBaseSchema = z
         personTwo: invitationPersonSchema,
       })
       .strict(),
+    coupleIdentity: coupleIdentitySchema.default(createDefaultCoupleIdentity),
     events: z
       .object({
         ceremony: invitationEventPartSchema,
@@ -353,6 +472,7 @@ const invitationDraftContentBaseSchema = z
         timezone: requiredText(100, 'Zona waktu'),
       })
       .strict(),
+    opening: invitationOpeningSchema.default(createDefaultInvitationOpening),
     rsvp: z
       .object({
         enabled: z.boolean(),

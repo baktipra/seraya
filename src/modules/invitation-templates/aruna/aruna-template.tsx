@@ -1,4 +1,8 @@
 import { DigitalGiftCopyButton } from '../digital-gift-copy-button';
+import {
+  InvitationIdentityFooter,
+  InvitationOpeningIdentity,
+} from '../invitation-atmosphere-identity';
 import { InvitationGalleryImage } from '../invitation-gallery-image';
 import {
   getPersonalInvitationPresentationSlots,
@@ -111,6 +115,8 @@ export function ArunaTemplate({ invitation, renderContext }: InvitationTemplateP
           </span>
         </div>
       </header>
+
+      <InvitationOpeningIdentity invitation={invitation} template="aruna" />
 
       <a data-aruna-opening-action data-invitation-opening-action href={`#${openingTargetId}`}>
         <span>Buka undangan</span>
@@ -333,6 +339,8 @@ export function ArunaTemplate({ invitation, renderContext }: InvitationTemplateP
             {genericResponseCopy}
           </p>
         ) : null}
+
+        <InvitationIdentityFooter invitation={invitation} template="aruna" />
 
         {invitation.closing ? (
           <section

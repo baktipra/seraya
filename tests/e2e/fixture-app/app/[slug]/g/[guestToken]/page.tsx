@@ -64,6 +64,7 @@ export default async function PersonalFixturePage({
   return (
     <main className="bg-seraya-ivory min-h-screen px-0 py-0 sm:px-6 sm:py-8">
       <InvitationTemplateRenderer
+        audioPlayback={{ durationSeconds: 1, requestUrl: '/fixture-audio' }}
         invitation={createFixtureInvitation(templateKey)}
         personalSlots={{
           greeting: <PersonalGuestGreeting displayName="Tamu Browser" />,

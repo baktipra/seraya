@@ -1,4 +1,8 @@
 import { DigitalGiftCopyButton } from '../digital-gift-copy-button';
+import {
+  InvitationIdentityFooter,
+  InvitationOpeningIdentity,
+} from '../invitation-atmosphere-identity';
 import { InvitationGalleryImage } from '../invitation-gallery-image';
 import {
   getPersonalInvitationPresentationSlots,
@@ -79,10 +83,12 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
       ? 'Mohon konfirmasikan kehadiran dan sampaikan ucapan terbaik Anda.'
       : 'Mohon konfirmasikan kehadiran Anda untuk membantu persiapan acara.'
     : 'Sampaikan doa dan ucapan terbaik Anda untuk kedua mempelai.';
-  const monogram = createLarasMonogram(
-    invitation.couple.personOne.displayName,
-    invitation.couple.personTwo.displayName,
-  );
+  const monogram =
+    invitation.identity?.monogram?.text ??
+    createLarasMonogram(
+      invitation.couple.personOne.displayName,
+      invitation.couple.personTwo.displayName,
+    );
   const openingTargetId = personalSlots?.greeting
     ? 'laras-personal-greeting'
     : 'laras-couple-title';
@@ -121,6 +127,8 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
           </p>
         ) : null}
       </header>
+
+      <InvitationOpeningIdentity invitation={invitation} showMonogram={false} template="laras" />
 
       <a data-invitation-opening-action data-laras-opening-action href={`#${openingTargetId}`}>
         <span>Buka undangan</span>
@@ -348,6 +356,8 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
             {genericResponseCopy}
           </p>
         ) : null}
+
+        <InvitationIdentityFooter invitation={invitation} template="laras" />
 
         {invitation.closing ? (
           <section

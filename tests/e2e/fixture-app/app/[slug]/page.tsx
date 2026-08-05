@@ -20,6 +20,7 @@ export default async function GenericFixturePage({ params }: GenericFixturePageP
   return (
     <main className="bg-seraya-ivory min-h-screen px-0 py-0 sm:px-6 sm:py-8">
       <InvitationTemplateRenderer
+        audioPlayback={{ durationSeconds: 1, requestUrl: '/fixture-audio' }}
         invitation={createFixtureInvitation(templateKey)}
         surface="generic"
         templateKey={templateKey}

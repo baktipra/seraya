@@ -1,0 +1,142 @@
+name: V4J invitation atmosphere and identity validation
+
+on:
+  pull_request:
+    paths:
+      - 'src/app/**/audio/**'
+      - 'src/app/[slug]/**'
+      - 'src/app/(dashboard)/dashboard/[projectId]/preview/**'
+      - 'src/components/invitation-audio-playback-control.*'
+      - 'src/components/projects/invitation-audio-manager.tsx'
+      - 'src/components/projects/invitation-editor*.tsx'
+      - 'src/modules/invitations/**'
+      - 'src/modules/invitation-templates/**'
+      - 'src/modules/media/invitation-audio*'
+      - 'src/modules/publications/**'
+      - 'supabase/migrations/20260805002300_m0023_add_invitation_audio_media_foundation.sql'
+      - 'tests/unit/invitation-*-v4j.test.*'
+      - 'tests/integration/supabase-foundation.test.ts'
+      - '.github/workflows/v4j-invitation-atmosphere-identity.yml'
+  push:
+    branches:
+      - feature/v4j-invitation-atmosphere-couple-identity-v1
+    paths:
+      - 'src/app/**/audio/**'
+      - 'src/app/[slug]/**'
+      - 'src/app/(dashboard)/dashboard/[projectId]/preview/**'
+      - 'src/components/invitation-audio-playback-control.*'
+      - 'src/components/projects/invitation-audio-manager.tsx'
+      - 'src/components/projects/invitation-editor*.tsx'
+      - 'src/modules/invitations/**'
+      - 'src/modules/invitation-templates/**'
+      - 'src/modules/media/invitation-audio*'
+      - 'src/modules/publications/**'
+      - 'supabase/migrations/20260805002300_m0023_add_invitation_audio_media_foundation.sql'
+      - 'tests/unit/invitation-*-v4j.test.*'
+      - 'tests/integration/supabase-foundation.test.ts'
+      - '.github/workflows/v4j-invitation-atmosphere-identity.yml'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Check V4J formatting
+        run: |
+          npx prettier --check \
+            'src/app/api/invitations/[slug]/audio/playback/route.ts' \
+            'src/app/api/projects/[projectId]/audio/reserve/route.ts' \
+            'src/app/api/projects/[projectId]/audio/finalize/route.ts' \
+            'src/app/api/projects/[projectId]/audio/playback/route.ts' \
+            'src/app/api/projects/[projectId]/audio/remove/route.ts' \
+            'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
+            'src/app/(dashboard)/dashboard/[projectId]/preview/page.tsx' \
+            'src/app/[slug]/page.tsx' \
+            'src/app/[slug]/g/[guestToken]/page.tsx' \
+            src/components/invitation-audio-playback-control.tsx \
+            src/components/invitation-audio-playback-control.module.css \
+            src/components/projects/invitation-audio-manager.tsx \
+            src/components/projects/invitation-editor.tsx \
+            src/components/projects/invitation-editor-live-preview.tsx \
+            src/components/projects/invitation-editor-workspace.tsx \
+            src/modules/invitations/invitation-draft.schema.ts \
+            src/modules/invitations/invitation-draft.defaults.ts \
+            src/modules/invitations/invitation-editor-local-state.ts \
+            src/modules/invitations/invitation-editor.schema.ts \
+            src/modules/invitations/invitation-editor.service.ts \
+            src/modules/invitation-templates/invitation-template-renderer.tsx \
+            src/modules/invitation-templates/invitation-view-model.ts \
+            src/modules/invitation-templates/invitation-atmosphere-identity.tsx \
+            src/modules/invitation-templates/invitation-atmosphere-identity.module.css \
+            src/modules/invitation-templates/roselle/roselle-template.tsx \
+            src/modules/invitation-templates/aruna/aruna-template.tsx \
+            src/modules/invitation-templates/laras/laras-template.tsx \
+            src/modules/media/invitation-audio.types.ts \
+            src/modules/media/invitation-audio.validation.ts \
+            src/modules/media/invitation-audio.repository.ts \
+            src/modules/media/invitation-audio.service.ts \
+            src/modules/media/invitation-audio-playback.types.ts \
+            src/modules/media/invitation-audio-playback.service.ts \
+            src/modules/publications/publication.service.ts \
+            src/modules/publications/__tests__/publication.service.test.ts \
+            tests/unit/invitation-atmosphere-identity-v4j.test.tsx \
+            tests/unit/invitation-audio-media-v4j.test.ts \
+            tests/unit/invitation-audio-playback-v4j.test.ts \
+            tests/integration/supabase-foundation.test.ts
+      - name: Lint V4J source
+        run: |
+          npx eslint \
+            'src/app/api/invitations/[slug]/audio/playback/route.ts' \
+            'src/app/api/projects/[projectId]/audio/reserve/route.ts' \
+            'src/app/api/projects/[projectId]/audio/finalize/route.ts' \
+            'src/app/api/projects/[projectId]/audio/playback/route.ts' \
+            'src/app/api/projects/[projectId]/audio/remove/route.ts' \
+            'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
+            'src/app/(dashboard)/dashboard/[projectId]/preview/page.tsx' \
+            'src/app/[slug]/page.tsx' \
+            'src/app/[slug]/g/[guestToken]/page.tsx' \
+            src/components/invitation-audio-playback-control.tsx \
+            src/components/projects/invitation-audio-manager.tsx \
+            src/components/projects/invitation-editor.tsx \
+            src/components/projects/invitation-editor-live-preview.tsx \
+            src/components/projects/invitation-editor-workspace.tsx \
+            src/modules/invitations/invitation-draft.schema.ts \
+            src/modules/invitations/invitation-draft.defaults.ts \
+            src/modules/invitations/invitation-editor-local-state.ts \
+            src/modules/invitations/invitation-editor.schema.ts \
+            src/modules/invitations/invitation-editor.service.ts \
+            src/modules/invitation-templates/invitation-template-renderer.tsx \
+            src/modules/invitation-templates/invitation-view-model.ts \
+            src/modules/invitation-templates/invitation-atmosphere-identity.tsx \
+            src/modules/invitation-templates/roselle/roselle-template.tsx \
+            src/modules/invitation-templates/aruna/aruna-template.tsx \
+            src/modules/invitation-templates/laras/laras-template.tsx \
+            src/modules/media/invitation-audio.types.ts \
+            src/modules/media/invitation-audio.validation.ts \
+            src/modules/media/invitation-audio.repository.ts \
+            src/modules/media/invitation-audio.service.ts \
+            src/modules/media/invitation-audio-playback.types.ts \
+            src/modules/media/invitation-audio-playback.service.ts \
+            src/modules/publications/publication.service.ts \
+            src/modules/publications/__tests__/publication.service.test.ts \
+            tests/unit/invitation-atmosphere-identity-v4j.test.tsx \
+            tests/unit/invitation-audio-media-v4j.test.ts \
+            tests/unit/invitation-audio-playback-v4j.test.ts \
+            tests/integration/supabase-foundation.test.ts
+      - run: npm run typecheck
+      - name: Focused V4J contracts
+        run: |
+          npx vitest run \
+            tests/unit/invitation-atmosphere-identity-v4j.test.tsx \
+            tests/unit/invitation-audio-media-v4j.test.ts \
+            tests/unit/invitation-audio-playback-v4j.test.ts \
+            src/modules/publications/__tests__/publication.service.test.ts
+      - name: Full migration-chain contracts
+        run: npx vitest run tests/integration/supabase-foundation.test.ts
+      - run: npm run build

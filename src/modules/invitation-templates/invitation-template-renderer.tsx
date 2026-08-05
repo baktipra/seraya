@@ -1,4 +1,7 @@
-import { createElement } from 'react';
+import { createElement, Fragment } from 'react';
+
+import { InvitationAudioPlaybackControl } from '@/components/invitation-audio-playback-control';
+import type { InvitationAudioPlaybackCapability } from '@/modules/media/invitation-audio-playback.types';
 
 import {
   resolveInvitationThemePalette,
@@ -12,6 +15,7 @@ import { invitationTemplateRegistry } from './invitation-template.registry';
 import type { InvitationViewModel } from './invitation-view-model';
 
 type InvitationTemplateRendererProps = {
+  audioPlayback?: InvitationAudioPlaybackCapability;
   invitation: InvitationViewModel;
   paletteKey?: string;
   personalSlots?: PersonalInvitationPresentationSlotsV1;
@@ -39,6 +43,7 @@ function createRenderContext({
 
 /** Canonical renderer used by preview, generic, and personal invitation surfaces. */
 export function InvitationTemplateRenderer({
+  audioPlayback,
   invitation,
   paletteKey,
   personalSlots,
@@ -52,8 +57,19 @@ export function InvitationTemplateRenderer({
     templateKey,
   });
 
-  return createElement(invitationTemplateRegistry[templateKey], {
-    invitation,
-    renderContext,
-  });
+  return createElement(
+    Fragment,
+    null,
+    audioPlayback
+      ? createElement(InvitationAudioPlaybackControl, {
+          capability: audioPlayback,
+          surface,
+          templateKey,
+        })
+      : null,
+    createElement(invitationTemplateRegistry[templateKey], {
+      invitation,
+      renderContext,
+    }),
+  );
 }

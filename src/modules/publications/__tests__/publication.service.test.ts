@@ -1,12 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const {
+  assertInvitationAudioReadyMock,
+  getActiveInvitationDraftMock,
   getCurrentPublishedMock,
   getOwnedProjectMock,
   getPaymentOverviewMock,
   publishSnapshotMock,
   requireCurrentUserMock,
 } = vi.hoisted(() => ({
+  assertInvitationAudioReadyMock: vi.fn(),
+  getActiveInvitationDraftMock: vi.fn(),
   getCurrentPublishedMock: vi.fn(),
   getOwnedProjectMock: vi.fn(),
   getPaymentOverviewMock: vi.fn(),
@@ -15,6 +19,12 @@ const {
 }));
 
 vi.mock('@/modules/auth/current-user', () => ({ requireCurrentUser: requireCurrentUserMock }));
+vi.mock('@/modules/invitations/invitation-draft.repository', () => ({
+  getActiveInvitationDraftForVerifiedProject: getActiveInvitationDraftMock,
+}));
+vi.mock('@/modules/media/invitation-audio.service', () => ({
+  assertInvitationAudioReadyForVerifiedProject: assertInvitationAudioReadyMock,
+}));
 vi.mock('@/modules/projects/project.repository', () => ({
   getOwnedProjectById: getOwnedProjectMock,
 }));
@@ -62,11 +72,23 @@ function snapshot(): PublishedInvitationSnapshot {
     slug: project.slug,
     snapshot: {
       draft: {
+        audio: {
+          assetId: null,
+          durationSeconds: null,
+          originalFileName: null,
+          rightsAcknowledged: false,
+        },
         closing: { enabled: false, message: null, signature: null },
         digitalGift: { accounts: [], enabled: false, heading: null, lead: null },
         couple: {
           personOne: { displayName: 'Raka', fullName: null, parentLine: null },
           personTwo: { displayName: 'Nadia', fullName: null, parentLine: null },
+        },
+        coupleIdentity: {
+          monogram: { enabled: false, style: 'initials', text: null },
+          shortName: null,
+          socialLinks: { instagram: null, tiktok: null, website: null },
+          weddingHashtag: null,
         },
         eventSchedule: {
           events: [
@@ -92,6 +114,7 @@ function snapshot(): PublishedInvitationSnapshot {
         hero: { eyebrow: 'The Wedding Of', subtitle: null, title: 'Raka & Nadia' },
         location: { address: null, enabled: false, mapsUrl: null, venueName: null },
         meta: { locale: 'id-ID', timezone: 'Asia/Jakarta' },
+        opening: { message: null, quote: null, treatment: 'soft' },
         rsvp: { enabled: true, heading: null, lead: null },
         story: { body: null, enabled: false, heading: null },
         paletteKey: 'rose',
@@ -112,6 +135,10 @@ describe('publication service payment gate', () => {
   beforeEach(() => {
     requireCurrentUserMock.mockReset().mockResolvedValue({ id: project.account_id });
     getOwnedProjectMock.mockReset().mockResolvedValue(project);
+    getActiveInvitationDraftMock.mockReset().mockResolvedValue({
+      content: snapshot().snapshot.draft,
+    });
+    assertInvitationAudioReadyMock.mockReset().mockResolvedValue(undefined);
     getCurrentPublishedMock.mockReset().mockResolvedValue(null);
     publishSnapshotMock.mockReset().mockResolvedValue(snapshot());
     getPaymentOverviewMock.mockReset().mockResolvedValue({

@@ -36,6 +36,11 @@ import {
 import type { InvitationRendererProjectMetadata } from '@/modules/invitation-templates/invitation-view-model';
 import type { InvitationDraft } from '@/modules/invitations/invitation-draft.types';
 import type { InvitationEditorFieldErrors } from '@/modules/invitations/invitation-editor.schema';
+import {
+  INVITATION_AUDIO_CHANGED_EVENT,
+  type InvitationAudioChangedEventDetail,
+} from '@/modules/media/invitation-audio-playback.types';
+import type { InvitationAudioConfiguration } from '@/modules/media/invitation-audio.types';
 import type { InvitationGalleryImage } from '@/modules/media/media.types';
 import type { ProjectPublishEligibility } from '@/modules/payments/payment.types';
 import {
@@ -547,6 +552,68 @@ export function InvitationEditorActivePanel({
                 />
               </div>
             </div>
+
+            <div className="border-seraya-border-default mt-7 space-y-5 border-t pt-6">
+              <div>
+                <h3 className="text-seraya-text-primary text-base font-semibold">
+                  Suasana pembuka
+                </h3>
+                <p className="text-seraya-text-muted mt-1 text-sm leading-6">
+                  Atur pesan dan ritme pembuka tanpa mengubah identitas visual template.
+                </p>
+              </div>
+              <label className="grid gap-2 text-sm font-semibold">
+                Treatment pembuka
+                <select
+                  className="border-seraya-border-default bg-seraya-surface focus-visible:outline-seraya-focus-ring min-h-11 rounded-[var(--seraya-radius-md)] border px-3.5"
+                  name="opening.treatment"
+                  onChange={(event) =>
+                    updateLocalContent({
+                      field: 'treatment',
+                      type: 'opening-atmosphere',
+                      value: event.currentTarget.value,
+                    })
+                  }
+                  value={content.opening.treatment}
+                >
+                  <option value="soft">Lembut</option>
+                  <option value="editorial">Editorial</option>
+                  <option value="ceremonial">Seremonial</option>
+                </select>
+                <FieldError
+                  message={getError(fieldErrors, 'opening.treatment')}
+                  name="opening.treatment"
+                />
+              </label>
+              <EditorTextAreaField
+                error={getError(fieldErrors, 'opening.message')}
+                help="Muncul setelah sampul dan sebelum tamu memasuki isi undangan."
+                label="Pesan pembuka (opsional)"
+                name="opening.message"
+                onValueChange={(value) =>
+                  updateLocalContent({
+                    field: 'message',
+                    type: 'opening-atmosphere',
+                    value,
+                  })
+                }
+                value={content.opening.message}
+              />
+              <EditorTextAreaField
+                error={getError(fieldErrors, 'opening.quote')}
+                help="Gunakan satu kutipan singkat. Jangan menempelkan HTML atau lirik panjang."
+                label="Kutipan pembuka (opsional)"
+                name="opening.quote"
+                onValueChange={(value) =>
+                  updateLocalContent({
+                    field: 'quote',
+                    type: 'opening-atmosphere',
+                    value,
+                  })
+                }
+                value={content.opening.quote}
+              />
+            </div>
           </EditorSection>
         </InvitationWorkspacePanel>
       );
@@ -655,6 +722,150 @@ export function InvitationEditorActivePanel({
                   value={content.couple.personTwo.parentLine}
                 />
               </fieldset>
+            </div>
+
+            <div className="border-seraya-border-default mt-7 space-y-5 border-t pt-6">
+              <div>
+                <h3 className="text-seraya-text-primary text-base font-semibold">
+                  Identitas pasangan
+                </h3>
+                <p className="text-seraya-text-muted mt-1 text-sm leading-6">
+                  Identitas ini bersifat publik dan konsisten pada undangan generik maupun personal.
+                </p>
+              </div>
+              <EditorToggle
+                checked={content.coupleIdentity.monogram.enabled}
+                error={getError(fieldErrors, 'coupleIdentity.monogram.enabled')}
+                help="Bila teks dikosongkan, Seraya menurunkan monogram dari nama pasangan."
+                label="Tampilkan monogram pasangan"
+                name="coupleIdentity.monogram.enabled"
+                onToggle={(value) =>
+                  updateLocalContent({
+                    field: 'enabled',
+                    type: 'couple-monogram',
+                    value,
+                  })
+                }
+              />
+              <div
+                className="grid gap-5 sm:grid-cols-2"
+                hidden={!content.coupleIdentity.monogram.enabled}
+              >
+                <label className="grid gap-2 text-sm font-semibold">
+                  Gaya monogram
+                  <select
+                    className="border-seraya-border-default bg-seraya-surface focus-visible:outline-seraya-focus-ring min-h-11 rounded-[var(--seraya-radius-md)] border px-3.5"
+                    name="coupleIdentity.monogram.style"
+                    onChange={(event) =>
+                      updateLocalContent({
+                        field: 'style',
+                        type: 'couple-monogram',
+                        value: event.currentTarget.value,
+                      })
+                    }
+                    value={content.coupleIdentity.monogram.style}
+                  >
+                    <option value="initials">Inisial dengan ampersand</option>
+                    <option value="joined_initials">Inisial menyatu</option>
+                    <option value="wordmark">Wordmark</option>
+                  </select>
+                  <FieldError
+                    message={getError(fieldErrors, 'coupleIdentity.monogram.style')}
+                    name="coupleIdentity.monogram.style"
+                  />
+                </label>
+                <EditorTextField
+                  error={getError(fieldErrors, 'coupleIdentity.monogram.text')}
+                  help="Kosongkan untuk memakai hasil otomatis dari nama pasangan."
+                  label="Teks monogram (opsional)"
+                  name="coupleIdentity.monogram.text"
+                  onValueChange={(value) =>
+                    updateLocalContent({
+                      field: 'text',
+                      type: 'couple-monogram',
+                      value,
+                    })
+                  }
+                  value={content.coupleIdentity.monogram.text}
+                />
+              </div>
+              <div className="grid gap-5 sm:grid-cols-2">
+                <EditorTextField
+                  error={getError(fieldErrors, 'coupleIdentity.shortName')}
+                  label="Nama singkat pasangan (opsional)"
+                  name="coupleIdentity.shortName"
+                  onValueChange={(value) =>
+                    updateLocalContent({
+                      field: 'shortName',
+                      type: 'couple-identity',
+                      value,
+                    })
+                  }
+                  placeholder="Raka dan Nadia"
+                  value={content.coupleIdentity.shortName}
+                />
+                <EditorTextField
+                  error={getError(fieldErrors, 'coupleIdentity.weddingHashtag')}
+                  help="Contoh: #RakaNadia2027"
+                  label="Wedding hashtag (opsional)"
+                  name="coupleIdentity.weddingHashtag"
+                  onValueChange={(value) =>
+                    updateLocalContent({
+                      field: 'weddingHashtag',
+                      type: 'couple-identity',
+                      value,
+                    })
+                  }
+                  value={content.coupleIdentity.weddingHashtag}
+                />
+                <EditorTextField
+                  error={getError(fieldErrors, 'coupleIdentity.socialLinks.instagram')}
+                  label="Profil Instagram (opsional)"
+                  name="coupleIdentity.socialLinks.instagram"
+                  onValueChange={(value) =>
+                    updateLocalContent({
+                      field: 'instagram',
+                      type: 'couple-social',
+                      value,
+                    })
+                  }
+                  placeholder="https://www.instagram.com/..."
+                  type="url"
+                  value={content.coupleIdentity.socialLinks.instagram}
+                />
+                <EditorTextField
+                  error={getError(fieldErrors, 'coupleIdentity.socialLinks.tiktok')}
+                  label="Profil TikTok (opsional)"
+                  name="coupleIdentity.socialLinks.tiktok"
+                  onValueChange={(value) =>
+                    updateLocalContent({
+                      field: 'tiktok',
+                      type: 'couple-social',
+                      value,
+                    })
+                  }
+                  placeholder="https://www.tiktok.com/@..."
+                  type="url"
+                  value={content.coupleIdentity.socialLinks.tiktok}
+                />
+                <div className="sm:col-span-2">
+                  <EditorTextField
+                    error={getError(fieldErrors, 'coupleIdentity.socialLinks.website')}
+                    label="Website pasangan (opsional)"
+                    name="coupleIdentity.socialLinks.website"
+                    onValueChange={(value) =>
+                      updateLocalContent({
+                        field: 'website',
+                        type: 'couple-social',
+                        value,
+                      })
+                    }
+                    placeholder="https://..."
+                    type="url"
+                    value={content.coupleIdentity.socialLinks.website}
+                  />
+                </div>
+              </div>
             </div>
           </EditorSection>
         </InvitationWorkspacePanel>
@@ -1115,7 +1326,10 @@ export function InvitationEditor({
   const [hasSaved, setHasSaved] = useState(false);
   const [isLocalPreviewOpen, setIsLocalPreviewOpen] = useState(false);
   const [shouldMountDesktopPreview, setShouldMountDesktopPreview] = useState(false);
-  const [previewContent, setPreviewContent] = useState(draft.content);
+  const [previewAudio, setPreviewAudio] = useState<InvitationAudioConfiguration>(
+    draft.content.audio,
+  );
+  const [previewContent, setPreviewContent] = useState(content);
   const [isEditorInteractive, setIsEditorInteractive] = useState(false);
   const [activeSection, setActiveSection] = useState<InvitationEditorSectionKey>('style');
   const lastHandledSuccessState = useRef<InvitationEditorActionState | null>(null);
@@ -1300,6 +1514,31 @@ export function InvitationEditor({
 
     return () => window.clearTimeout(timeout);
   }, [content, isLocalPreviewOpen, shouldMountPreview]);
+
+  useEffect(() => {
+    const handleAudioChanged = (event: Event) => {
+      const detail = (event as CustomEvent<InvitationAudioChangedEventDetail>).detail;
+
+      setPreviewAudio(
+        detail.enabled && detail.durationSeconds
+          ? {
+              assetId: 'persisted-owner-audio',
+              durationSeconds: detail.durationSeconds,
+              originalFileName: 'Audio undangan',
+              rightsAcknowledged: true,
+            }
+          : {
+              assetId: null,
+              durationSeconds: null,
+              originalFileName: null,
+              rightsAcknowledged: false,
+            },
+      );
+    };
+
+    window.addEventListener(INVITATION_AUDIO_CHANGED_EVENT, handleAudioChanged);
+    return () => window.removeEventListener(INVITATION_AUDIO_CHANGED_EVENT, handleAudioChanged);
+  }, []);
 
   useEffect(() => {
     if (draft.updated_at === lastSyncedDraftUpdatedAt.current || isDirty) {
@@ -1628,12 +1867,14 @@ export function InvitationEditor({
             </form>
             {shouldMountPreview ? (
               <DeferredInvitationEditorLivePreview
+                audio={previewAudio}
                 content={previewContent}
                 galleryImages={galleryImages}
                 isDirty={isDirty}
                 isOpen={isLocalPreviewOpen}
                 onOpenChange={setIsLocalPreviewOpen}
                 project={project}
+                projectId={projectId}
               />
             ) : (
               <InvitationEditorDesktopPreviewPlaceholder />

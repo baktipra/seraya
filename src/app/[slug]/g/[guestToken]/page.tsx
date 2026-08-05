@@ -8,6 +8,7 @@ import {
   createInvitationViewModel,
   InvitationTemplateRenderer,
 } from '@/modules/invitation-templates';
+import { createInvitationAudioPlaybackCapability } from '@/modules/media/invitation-audio-playback.types';
 import { getPublicGalleryImagesForCurrentSnapshot } from '@/modules/media/public-media.service';
 import { getPersonalGuestInvitationByToken } from '@/modules/guest-links';
 import { getPersonalGuestbookEntryByToken } from '@/modules/guestbook';
@@ -86,6 +87,10 @@ export default async function PersonalGuestInvitationPage({
   return (
     <main className="bg-seraya-ivory min-h-screen px-0 py-0 sm:px-6 sm:py-8">
       <InvitationTemplateRenderer
+        audioPlayback={createInvitationAudioPlaybackCapability({
+          configuration: snapshot.draft.audio,
+          requestUrl: `/api/invitations/${encodeURIComponent(slug)}/audio/playback`,
+        })}
         invitation={invitation}
         paletteKey={snapshot.draft.paletteKey}
         personalSlots={{
