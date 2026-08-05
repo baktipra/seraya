@@ -88,9 +88,14 @@ function CountdownPanel({
   const [now, setNow] = useState<number | null>(null);
 
   useEffect(() => {
-    setNow(Date.now());
-    const timer = window.setInterval(() => setNow(Date.now()), 1_000);
-    return () => window.clearInterval(timer);
+    const updateNow = () => setNow(Date.now());
+    const initialTimer = window.setTimeout(updateNow, 0);
+    const intervalTimer = window.setInterval(updateNow, 1_000);
+
+    return () => {
+      window.clearTimeout(initialTimer);
+      window.clearInterval(intervalTimer);
+    };
   }, []);
 
   const state = now === null ? null : getGuestEventCountdownState(events, now, timeZone);
