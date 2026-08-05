@@ -34,7 +34,9 @@ jobs:
         run: npm ci
 
       - name: Apply deterministic source patches
-        run: node scripts/apply-v4h-editor-patches.mjs
+        run: |
+          node scripts/apply-v4h-editor-patches.mjs
+          node scripts/apply-v4h-editor-fixes.mjs
 
       - name: Format V4H sources
         run: |
@@ -49,13 +51,14 @@ jobs:
             src/modules/invitation-templates/guest-event-utility-core.ts \
             src/modules/invitation-templates/guest-event-utility.tsx \
             src/modules/invitation-templates/invitation-template-parity-boundary.tsx \
-            src/modules/invitation-templates/invitation-view-model.ts
+            src/modules/invitation-templates/invitation-view-model.ts \
+            tests/unit/guest-event-utility-v4h.test.ts
 
       - name: Commit editor integration
         run: |
           git config user.name 'seraya-v4h-bot'
           git config user.email 'seraya-v4h-bot@users.noreply.github.com'
-          git add src scripts/apply-v4h-editor-patches.mjs
+          git add src tests scripts/apply-v4h-editor-patches.mjs scripts/apply-v4h-editor-fixes.mjs
           if git diff --cached --quiet; then
             echo 'V4H editor integration is already applied.'
             exit 0
