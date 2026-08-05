@@ -13,6 +13,13 @@ const model: PublicSocialShareModel = {
   coupleLabel: 'Raka & Nadia',
   eventDate: '17 Agustus 2027',
   eventTitle: 'Akad Nikah',
+  galleryImages: [
+    {
+      alt: 'Foto pasangan 1',
+      id: '22222222-2222-4222-8222-222222222222',
+      src: '/media/22222222-2222-4222-8222-222222222222',
+    },
+  ],
   isSynchronized: true,
   paletteKey: 'rose',
   publicUrl: 'https://seraya.id/raka-nadia',
@@ -41,7 +48,7 @@ describe('V4I public social share safety contract', () => {
     expect(createPublicShareCopy(model)).toContain('https://seraya.id/raka-nadia');
     expect(createPublicShareCopy(model)).not.toContain('/g/');
     expect(createPublicShareFingerprint(model, options)).toBe(
-      'v4i-story-v1:11111111-1111-4111-8111-111111111111:3:roselle:rose:save_the_date:qr:venue:no-brand',
+      'v4i-story-v1:11111111-1111-4111-8111-111111111111:3:roselle:rose:no-photo:save_the_date:qr:venue:no-brand',
     );
   });
 
@@ -50,6 +57,24 @@ describe('V4I public social share safety contract', () => {
     expect(createPublicShareFingerprint({ ...model, isSynchronized: false }, options)).toBe(
       createPublicShareFingerprint(model, options),
     );
+  });
+
+  it('binds Story identity to an authorized published image ID', () => {
+    const options = publicShareRenderOptionsSchema.parse({
+      selectedImageId: '22222222-2222-4222-8222-222222222222',
+    });
+
+    expect(createPublicShareFingerprint(model, options)).toContain(
+      ':22222222-2222-4222-8222-222222222222:',
+    );
+  });
+
+  it('rejects arbitrary image URLs in render options', () => {
+    expect(() =>
+      publicShareRenderOptionsSchema.parse({
+        imageUrl: 'https://attacker.example/photo.jpg',
+      }),
+    ).toThrow();
   });
 
   it('rejects accidental personal invitation material', () => {
