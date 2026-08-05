@@ -102,8 +102,10 @@ export function InvitationStudioShell({
 
     if (nextIndex === null) return;
 
-    event.preventDefault();
     const nextMode = invitationStudioModes[nextIndex];
+    if (!nextMode) return;
+
+    event.preventDefault();
     tabRefs.current[nextIndex]?.focus();
     activateMode(nextMode.key, 'replace');
   };
