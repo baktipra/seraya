@@ -321,6 +321,8 @@ export function GuestEventUtility({
     return null;
   }
 
+  const timeZone = invitation.timezone ?? 'Asia/Jakarta';
+
   return (
     <section
       aria-labelledby="guest-event-utility-title"
