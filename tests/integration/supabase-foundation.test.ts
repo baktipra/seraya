@@ -85,7 +85,8 @@ async function executeMigrations(db: PGlite) {
     sql = sql
       .replace(/^create extension if not exists pgcrypto with schema extensions;\n/m, '')
       .replace(/^create extension if not exists citext with schema extensions;\n/m, '')
-      .replaceAll('extensions.citext', 'text');
+      .replaceAll('extensions.citext', 'text')
+      .replace(/\bcitext\b/g, 'text');
 
     await db.exec(sql);
   }
