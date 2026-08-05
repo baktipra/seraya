@@ -30,7 +30,6 @@ jobs:
         run: |
           python <<'PY'
           from pathlib import Path
-
           path = Path('scripts/v4j-slice-c-apply.py')
           content = path.read_text()
           old = '  const [previewContent, setPreviewContent] = useState(content);'
@@ -42,30 +41,7 @@ jobs:
       - name: Apply Slice C source changes
         run: python scripts/v4j-slice-c-apply.py
       - name: Apply focused React fixes
-        run: |
-          python <<'PY'
-          from pathlib import Path
-
-          preview = Path('src/components/projects/invitation-editor-live-preview.tsx')
-          preview_content = preview.read_text()
-          preview_content = preview_content.replace(
-              "  type InvitationAudioChangedEventDetail,\n",
-              "",
-              1,
-          )
-          preview.write_text(preview_content)
-
-          editor = Path('src/components/projects/invitation-editor.tsx')
-          editor_content = editor.read_text()
-          effect = """  useEffect(() => {
-    setPreviewAudio(draft.content.audio);
-  }, [draft.content.audio]);
-
-"""
-          if effect not in editor_content:
-              raise SystemExit('Preview audio synchronization effect was not found.')
-          editor.write_text(editor_content.replace(effect, '', 1))
-          PY
+        run: python scripts/v4j-slice-c-fix.py
       - name: Format Slice C source
         run: |
           npx prettier --write \
