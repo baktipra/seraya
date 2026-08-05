@@ -63,15 +63,6 @@ export function InvitationStudioShell({
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
   useEffect(() => {
-    setActiveMode(initialMode);
-  }, [initialMode]);
-
-  useEffect(() => {
-    const requestedMode = parseInvitationStudioMode(
-      new URL(window.location.href).searchParams.get('mode'),
-    );
-    setActiveMode(requestedMode);
-
     const handlePopState = () => {
       const mode = parseInvitationStudioMode(
         new URL(window.location.href).searchParams.get('mode'),
