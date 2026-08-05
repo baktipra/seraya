@@ -50,10 +50,19 @@ export function createDefaultInvitationDraftContent(
     eventSchedule: {
       events: [
         {
+          arrivalNote: null,
+          countdownEnabled: true,
           date: project.event_date_primary,
           endTime: null,
           id: randomUUID(),
+          latitude: null,
+          livestreamEnabled: false,
+          livestreamHeading: null,
+          livestreamUrl: null,
+          locationSource: null,
+          longitude: null,
           mapsUrl: null,
+          placeId: null,
           startTime: '08:00',
           title: 'Akad Nikah',
           venueAddress: null,
