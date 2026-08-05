@@ -25,12 +25,14 @@ function safeFileName(coupleLabel: string) {
 
 export function PublicSocialShareKit({ model, projectId }: PublicSocialShareKitProps) {
   const [cta, setCta] = useState<PublicShareCta>('open_invitation');
+  const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
   const [showQr, setShowQr] = useState(true);
   const [showVenue, setShowVenue] = useState(false);
   const [showSerayaBrand, setShowSerayaBrand] = useState(true);
   const [showSafeArea, setShowSafeArea] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [shareCopy, setShareCopy] = useState(() => createPublicShareCopy(model));
+  const selectedImage = model.galleryImages.find((image) => image.id === selectedImageId) ?? null;
 
   const storyUrl = useMemo(() => {
     const query = new URLSearchParams({
@@ -39,8 +41,9 @@ export function PublicSocialShareKit({ model, projectId }: PublicSocialShareKitP
       showSerayaBrand: showSerayaBrand ? '1' : '0',
       showVenue: showVenue ? '1' : '0',
     });
+    if (selectedImageId) query.set('selectedImageId', selectedImageId);
     return `/api/projects/${projectId}/public-share/story?${query.toString()}`;
-  }, [cta, projectId, showQr, showSerayaBrand, showVenue]);
+  }, [cta, projectId, selectedImageId, showQr, showSerayaBrand, showVenue]);
   const qrUrl = `/api/projects/${projectId}/public-share/qr`;
 
   async function copyText(value: string, successMessage: string) {
@@ -122,6 +125,35 @@ export function PublicSocialShareKit({ model, projectId }: PublicSocialShareKitP
                 : `Draft telah berubah setelah snapshot revisi ${model.revision}. Publish ulang agar Story dan QR memakai isi terbaru.`}
             </p>
           </div>
+
+          {model.galleryImages.length > 0 ? (
+            <label className="grid gap-2 text-sm font-medium">
+              Foto Story
+              <select
+                className="border-seraya-line bg-seraya-surface focus-visible:outline-seraya-focus-ring min-h-11 rounded-[var(--seraya-radius-sm)] border px-3"
+                onChange={(event) => setSelectedImageId(event.target.value || null)}
+                value={selectedImageId ?? ''}
+              >
+                <option value="">Tanpa foto</option>
+                {model.galleryImages.map((image) => (
+                  <option key={image.id} value={image.id}>
+                    {image.alt}
+                  </option>
+                ))}
+              </select>
+              <span className="text-seraya-text-muted text-xs font-normal leading-5">
+                Hanya foto yang sudah termasuk dalam versi undangan publik saat ini.
+              </span>
+              {selectedImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  alt={selectedImage.alt}
+                  className="border-seraya-line h-24 w-24 rounded-[var(--seraya-radius-md)] border object-cover"
+                  src={selectedImage.src}
+                />
+              ) : null}
+            </label>
+          ) : null}
 
           <label className="grid gap-2 text-sm font-medium">
             CTA Story
