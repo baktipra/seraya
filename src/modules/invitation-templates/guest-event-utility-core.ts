@@ -206,35 +206,35 @@ export function getYoutubeEmbedHref(value: string | null | undefined) {
 }
 
 export function getGuestEventRouteHref(event: GuestEventUtilityEvent) {
-  if (event.mapsHref) {
-    try {
-      if (new URL(event.mapsHref).protocol === 'https:') {
-        return event.mapsHref;
-      }
-    } catch {
-      // Continue to structured-location fallbacks.
-    }
-  }
-
   const coordinates =
     typeof event.latitude === 'number' && typeof event.longitude === 'number'
       ? `${event.latitude},${event.longitude}`
       : null;
   const destination = coordinates ?? event.address ?? event.venueName;
 
-  if (!destination) {
-    return null;
+  if (destination) {
+    const url = new URL('https://www.google.com/maps/dir/');
+    url.searchParams.set('api', '1');
+    url.searchParams.set('destination', destination);
+
+    if (event.placeId) {
+      url.searchParams.set('destination_place_id', event.placeId);
+    }
+
+    return url.toString();
   }
 
-  const url = new URL('https://www.google.com/maps/dir/');
-  url.searchParams.set('api', '1');
-  url.searchParams.set('destination', destination);
-
-  if (event.placeId) {
-    url.searchParams.set('destination_place_id', event.placeId);
+  if (event.mapsHref) {
+    try {
+      if (new URL(event.mapsHref).protocol === 'https:') {
+        return event.mapsHref;
+      }
+    } catch {
+      return null;
+    }
   }
 
-  return url.toString();
+  return null;
 }
 
 export function getGuestEventMapEmbedHref(
