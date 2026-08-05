@@ -1,0 +1,208 @@
+name: Apply V4H type compatibility repairs
+
+on:
+  push:
+    branches:
+      - feature/v4h-guest-event-utility-v1
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: ${{ !contains(github.event.head_commit.message, '[skip v4h type fix]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Apply compatibility repairs
+        run: |
+          node <<'NODE'
+          const { readFileSync, writeFileSync } = require('node:fs');
+
+          function patch(path, transform) {
+            const source = readFileSync(path, 'utf8');
+            const next = transform(source);
+            if (next === source) throw new Error(`No V4H type repair applied to ${path}`);
+            writeFileSync(path, next, 'utf8');
+          }
+
+          patch('src/modules/invitation-templates/invitation-view-model.ts', (source) => {
+            const replacements = new Map([
+              ['  arrivalNote: string | null;', '  arrivalNote?: string | null;'],
+              ['  countdownEnabled: boolean;', '  countdownEnabled?: boolean;'],
+              ['  date: string | null;', '  date?: string | null;'],
+              ['  endTime: string | null;', '  endTime?: string | null;'],
+              ['  id: string;', '  id?: string;'],
+              ['  latitude: number | null;', '  latitude?: number | null;'],
+              ['  livestreamEnabled: boolean;', '  livestreamEnabled?: boolean;'],
+              ['  livestreamHeading: string | null;', '  livestreamHeading?: string | null;'],
+              ['  livestreamUrl: string | null;', '  livestreamUrl?: string | null;'],
+              [
+                "  locationSource: 'current_location' | 'google_place' | 'manual_pin' | null;",
+                "  locationSource?: 'current_location' | 'google_place' | 'manual_pin' | null;",
+              ],
+              ['  longitude: number | null;', '  longitude?: number | null;'],
+              ['  placeId: string | null;', '  placeId?: string | null;'],
+              ['  startTime: string | null;', '  startTime?: string | null;'],
+              ['  timezone: string;', '  timezone?: string;'],
+            ]);
+
+            let next = source;
+            for (const [before, after] of replacements) {
+              if (!next.includes(before)) throw new Error(`Missing view-model anchor: ${before}`);
+              next = next.replace(before, after);
+            }
+            return next;
+          });
+
+          patch('src/modules/invitation-templates/guest-event-utility-core.ts', (source) => {
+            let next = source
+              .replaceAll(
+                "  const [year, month, day] = event.date.split('-').map(Number);",
+                "  const [year = 0, month = 1, day = 1] = event.date.split('-').map(Number);",
+              )
+              .replace(
+                "  const [year, month, day] = date.split('-').map(Number);",
+                "  const [year = 0, month = 1, day = 1] = date.split('-').map(Number);",
+              )
+              .replaceAll(
+                "  const [hour, minute] = event.startTime.split(':').map(Number);",
+                "  const [hour = 0, minute = 0] = event.startTime.split(':').map(Number);",
+              )
+              .replace(
+                "  const [hour, minute] = time.split(':').map(Number);",
+                "  const [hour = 0, minute = 0] = time.split(':').map(Number);",
+              )
+              .replace(
+                '    const calendarEnd = getCalendarEnd(event);\n    const calendarEnd = getCalendarEnd(event);',
+                '    const calendarEnd = getCalendarEnd(event);',
+              );
+
+            if (next === source) throw new Error('Core type anchors unavailable.');
+            return next;
+          });
+
+          patch('src/modules/invitations/invitation-editor.service.ts', (source) => {
+            let next = source.replace(
+              `  derivePrimaryEventCompatibility,
+              invitationDraftContentSchema,
+            } from './invitation-draft.schema';`,
+              `  derivePrimaryEventCompatibility,
+              invitationDraftContentSchema,
+              type EventScheduleItemV1,
+            } from './invitation-draft.schema';`,
+            );
+
+            next = next.replace(
+              `function normalizeOptionalText(value: string | undefined) {
+              const normalized = value?.trim() ?? '';
+              return normalized.length > 0 ? normalized : null;
+            }
+            `,
+              `function normalizeOptionalText(value: string | undefined) {
+              const normalized = value?.trim() ?? '';
+              return normalized.length > 0 ? normalized : null;
+            }
+
+            function normalizeLocationSource(
+              value: string | undefined,
+            ): EventScheduleItemV1['locationSource'] {
+              return value === 'google_place' ||
+                value === 'current_location' ||
+                value === 'manual_pin'
+                ? value
+                : null;
+            }
+            `,
+            );
+
+            next = next.replace(
+              `      locationSource:
+                    event.locationSource === 'google_place' ||
+                    event.locationSource === 'current_location' ||
+                    event.locationSource === 'manual_pin'
+                      ? event.locationSource
+                      : null,`,
+              `      locationSource: normalizeLocationSource(event.locationSource),`,
+            );
+
+            if (next === source) throw new Error('Editor service type anchors unavailable.');
+            return next;
+          });
+
+          patch('src/modules/invitation-templates/guest-event-utility.tsx', (source) => {
+            let next = source
+              .replace('    arrivalNote: item.arrivalNote,', '    arrivalNote: item.arrivalNote ?? null,')
+              .replace('    endTime: item.endTime,', '    endTime: item.endTime ?? null,')
+              .replace('    latitude: item.latitude,', '    latitude: item.latitude ?? null,')
+              .replace(
+                '    livestreamHeading: item.livestreamHeading,',
+                '    livestreamHeading: item.livestreamHeading ?? null,',
+              )
+              .replace(
+                '    livestreamUrl: item.livestreamUrl,',
+                '    livestreamUrl: item.livestreamUrl ?? null,',
+              )
+              .replace(
+                '    locationSource: item.locationSource,',
+                '    locationSource: item.locationSource ?? null,',
+              )
+              .replace('    longitude: item.longitude,', '    longitude: item.longitude ?? null,')
+              .replace('    placeId: item.placeId,', '    placeId: item.placeId ?? null,')
+              .replace(
+                `  if (events.length === 0) {
+                  return null;
+                }
+
+                return (`,
+                `  if (events.length === 0) {
+                  return null;
+                }
+
+                const timeZone = invitation.timezone ?? 'Asia/Jakarta';
+
+                return (`,
+              )
+              .replaceAll('timeZone={invitation.timezone}', 'timeZone={timeZone}')
+              .replace(
+                'onClick={() => downloadCalendar(events, invitation.timezone)}',
+                'onClick={() => downloadCalendar(events, timeZone)}',
+              );
+
+            if (next === source) throw new Error('Guest utility type anchors unavailable.');
+            return next;
+          });
+          NODE
+
+          npx prettier --write \
+            src/modules/invitation-templates/invitation-view-model.ts \
+            src/modules/invitation-templates/guest-event-utility-core.ts \
+            src/modules/invitation-templates/guest-event-utility.tsx \
+            src/modules/invitations/invitation-editor.service.ts
+
+      - name: Commit repairs
+        run: |
+          git config user.name 'seraya-v4h-bot'
+          git config user.email 'seraya-v4h-bot@users.noreply.github.com'
+          git add \
+            src/modules/invitation-templates/invitation-view-model.ts \
+            src/modules/invitation-templates/guest-event-utility-core.ts \
+            src/modules/invitation-templates/guest-event-utility.tsx \
+            src/modules/invitations/invitation-editor.service.ts
+          git commit -m 'SERAYA V4H: repair compatibility type contracts [skip v4h type fix]'
+          git push origin HEAD:feature/v4h-guest-event-utility-v1
