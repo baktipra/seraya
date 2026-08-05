@@ -23,7 +23,7 @@ const event: GuestEventUtilityEvent = {
   livestreamUrl: 'https://www.youtube.com/live/AbCdEf12345',
   locationSource: 'google_place',
   longitude: 106.816666,
-  mapsHref: null,
+  mapsHref: 'https://maps.google.com/?q=Gedung+Seraya',
   placeId: 'seraya-place-id',
   startTime: '08:00',
   title: 'Akad Nikah',
@@ -70,6 +70,7 @@ describe('V4H guest event utility', () => {
   it('builds route and Google Calendar handoffs from structured event data', () => {
     const route = new URL(getGuestEventRouteHref(event)!);
     expect(route.hostname).toBe('www.google.com');
+    expect(route.pathname).toBe('/maps/dir/');
     expect(route.searchParams.get('destination')).toBe('-6.2,106.816666');
     expect(route.searchParams.get('destination_place_id')).toBe('seraya-place-id');
 
@@ -77,5 +78,18 @@ describe('V4H guest event utility', () => {
     expect(calendar.hostname).toBe('calendar.google.com');
     expect(calendar.searchParams.get('ctz')).toBe('Asia/Jakarta');
     expect(calendar.searchParams.get('text')).toBe('Akad Nikah');
+  });
+
+  it('uses a valid manual maps link only when structured location is unavailable', () => {
+    expect(
+      getGuestEventRouteHref({
+        ...event,
+        address: null,
+        latitude: null,
+        longitude: null,
+        placeId: null,
+        venueName: null,
+      }),
+    ).toBe(event.mapsHref);
   });
 });
