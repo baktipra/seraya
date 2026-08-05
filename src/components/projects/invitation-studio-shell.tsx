@@ -2,13 +2,7 @@
 
 import type { Route } from 'next';
 import Link from 'next/link';
-import {
-  useEffect,
-  useRef,
-  useState,
-  type KeyboardEvent,
-  type ReactNode,
-} from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 
 import { InvitationStudioModePlaceholder } from './invitation-studio-mode-placeholder';
 import {
@@ -102,17 +96,13 @@ export function InvitationStudioShell({
     }
   };
 
-  const handleTabKeyDown = (
-    event: KeyboardEvent<HTMLButtonElement>,
-    currentIndex: number,
-  ) => {
+  const handleTabKeyDown = (event: KeyboardEvent<HTMLButtonElement>, currentIndex: number) => {
     let nextIndex: number | null = null;
 
     if (event.key === 'ArrowRight') {
       nextIndex = (currentIndex + 1) % invitationStudioModes.length;
     } else if (event.key === 'ArrowLeft') {
-      nextIndex =
-        (currentIndex - 1 + invitationStudioModes.length) % invitationStudioModes.length;
+      nextIndex = (currentIndex - 1 + invitationStudioModes.length) % invitationStudioModes.length;
     } else if (event.key === 'Home') {
       nextIndex = 0;
     } else if (event.key === 'End') {
@@ -204,10 +194,7 @@ export function InvitationStudioShell({
         </div>
 
         <div className={styles.headerActions}>
-          <span
-            className={styles.status}
-            data-invitation-studio-status-tone={statusTone}
-          >
+          <span className={styles.status} data-invitation-studio-status-tone={statusTone}>
             <span aria-hidden="true" className={styles.statusDot} />
             {statusLabel}
           </span>
