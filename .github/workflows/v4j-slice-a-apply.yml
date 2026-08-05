@@ -1,0 +1,1358 @@
+name: V4J temporary Slice A implementation
+
+on:
+  push:
+    branches:
+      - feature/v4j-invitation-atmosphere-couple-identity-v1
+    paths:
+      - '.github/workflows/v4j-slice-a-apply.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  implement:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/v4j-invitation-atmosphere-couple-identity-v1
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Apply Slice A
+        run: |
+          python <<'PY'
+          from pathlib import Path
+
+          def read(path):
+              return Path(path).read_text()
+
+          def write(path, content):
+              Path(path).parent.mkdir(parents=True, exist_ok=True)
+              Path(path).write_text(content)
+
+          def replace_once(path, old, new):
+              text = read(path)
+              if old not in text:
+                  raise SystemExit(f'Anchor missing in {path}: {old[:160]!r}')
+              write(path, text.replace(old, new, 1))
+
+          def insert_before(path, marker, addition):
+              replace_once(path, marker, addition + marker)
+
+          # Draft contract: backward-compatible, public-safe identity and opening defaults.
+          schema = 'src/modules/invitations/invitation-draft.schema.ts'
+          insert_before(
+              schema,
+              "const nullableMapUrl = nullableHttpsUrl('Link peta');\n",
+              """function nullableProviderProfileUrl(
+            label: string,
+            allowedHosts: readonly string[],
+          ) {
+            return nullableHttpsUrl(label).refine((value) => {
+              if (value === null) {
+                return true;
+              }
+
+              try {
+                return allowedHosts.includes(new URL(value).hostname.toLowerCase());
+              } catch {
+                return false;
+              }
+            }, `${label} harus menggunakan domain resmi.`);
+          }
+
+          const nullableInstagramUrl = nullableProviderProfileUrl('Profil Instagram', [
+            'instagram.com',
+            'www.instagram.com',
+          ]);
+          const nullableTikTokUrl = nullableProviderProfileUrl('Profil TikTok', [
+            'tiktok.com',
+            'www.tiktok.com',
+          ]);
+
+          """,
+          )
+          insert_before(
+              schema,
+              'const invitationDraftContentBaseSchema = z\n',
+              """const createDefaultInvitationOpening = () => ({
+            message: null,
+            quote: null,
+            treatment: 'soft' as const,
+          });
+
+          const invitationOpeningSchema = z
+            .object({
+              message: nullableText(360, 'Pesan pembuka'),
+              quote: nullableText(360, 'Kutipan pembuka'),
+              treatment: z.enum(['soft', 'editorial', 'ceremonial']),
+            })
+            .strict();
+
+          const createDefaultCoupleIdentity = () => ({
+            monogram: {
+              enabled: false,
+              style: 'initials' as const,
+              text: null,
+            },
+            shortName: null,
+            socialLinks: {
+              instagram: null,
+              tiktok: null,
+              website: null,
+            },
+            weddingHashtag: null,
+          });
+
+          const coupleIdentitySchema = z
+            .object({
+              monogram: z
+                .object({
+                  enabled: z.boolean(),
+                  style: z.enum(['initials', 'joined_initials', 'wordmark']),
+                  text: nullableText(32, 'Teks monogram'),
+                })
+                .strict(),
+              shortName: nullableText(100, 'Nama singkat pasangan'),
+              socialLinks: z
+                .object({
+                  instagram: nullableInstagramUrl,
+                  tiktok: nullableTikTokUrl,
+                  website: nullableHttpsUrl('Website pasangan'),
+                })
+                .strict(),
+              weddingHashtag: nullableText(80, 'Wedding hashtag').refine(
+                (value) => value === null || /^#[A-Za-z0-9_]+$/.test(value),
+                'Wedding hashtag harus diawali # dan hanya berisi huruf, angka, atau garis bawah.',
+              ),
+            })
+            .strict();
+
+          """,
+          )
+          replace_once(
+              schema,
+              '    events: z\n',
+              '    coupleIdentity: coupleIdentitySchema.default(createDefaultCoupleIdentity),\n    events: z\n',
+          )
+          replace_once(
+              schema,
+              '    rsvp: z\n',
+              '    opening: invitationOpeningSchema.default(createDefaultInvitationOpening),\n    rsvp: z\n',
+          )
+
+          defaults = 'src/modules/invitations/invitation-draft.defaults.ts'
+          replace_once(
+              defaults,
+              '    eventSchedule: {\n',
+              """    coupleIdentity: {
+              monogram: {
+                enabled: false,
+                style: 'initials',
+                text: null,
+              },
+              shortName: null,
+              socialLinks: {
+                instagram: null,
+                tiktok: null,
+                website: null,
+              },
+              weddingHashtag: null,
+            },
+            eventSchedule: {
+          """,
+          )
+          replace_once(
+              defaults,
+              '    rsvp: {\n',
+              """    opening: {
+              message: null,
+              quote: null,
+              treatment: 'soft',
+            },
+            rsvp: {
+          """,
+          )
+
+          local_state = 'src/modules/invitations/invitation-editor-local-state.ts'
+          replace_once(
+              local_state,
+              "type PersonField = keyof InvitationDraftContent['couple']['personOne'];\n",
+              """type PersonField = keyof InvitationDraftContent['couple']['personOne'];
+          type OpeningField = keyof InvitationDraftContent['opening'];
+          type CoupleIdentityField = 'shortName' | 'weddingHashtag';
+          type CoupleMonogramField = keyof InvitationDraftContent['coupleIdentity']['monogram'];
+          type CoupleSocialField = keyof InvitationDraftContent['coupleIdentity']['socialLinks'];
+          """,
+          )
+          replace_once(
+              local_state,
+              "  | { field: HeroField; type: 'hero'; value: string | null }\n",
+              """  | { field: HeroField; type: 'hero'; value: string | null }
+            | { field: OpeningField; type: 'opening-atmosphere'; value: string | null }
+          """,
+          )
+          replace_once(
+              local_state,
+              "  | {\n      field: StoryField;\n",
+              """  | {
+                field: CoupleIdentityField;
+                type: 'couple-identity';
+                value: string | null;
+              }
+            | {
+                field: CoupleMonogramField;
+                type: 'couple-monogram';
+                value: boolean | string | null;
+              }
+            | {
+                field: CoupleSocialField;
+                type: 'couple-social';
+                value: string | null;
+              }
+            | {
+                field: StoryField;
+          """,
+          )
+          replace_once(
+              local_state,
+              "    case 'person':\n",
+              """    case 'opening-atmosphere':
+                return {
+                  ...content,
+                  opening: { ...content.opening, [action.field]: action.value },
+                } as InvitationDraftContent;
+              case 'couple-identity':
+                return {
+                  ...content,
+                  coupleIdentity: { ...content.coupleIdentity, [action.field]: action.value },
+                } as InvitationDraftContent;
+              case 'couple-monogram':
+                return {
+                  ...content,
+                  coupleIdentity: {
+                    ...content.coupleIdentity,
+                    monogram: {
+                      ...content.coupleIdentity.monogram,
+                      [action.field]: action.value,
+                    },
+                  },
+                } as InvitationDraftContent;
+              case 'couple-social':
+                return {
+                  ...content,
+                  coupleIdentity: {
+                    ...content.coupleIdentity,
+                    socialLinks: {
+                      ...content.coupleIdentity.socialLinks,
+                      [action.field]: action.value,
+                    },
+                  },
+                } as InvitationDraftContent;
+              case 'person':
+          """,
+          )
+          replace_once(
+              local_state,
+              '    digitalGift: {\n',
+              """    coupleIdentity: {
+              monogram: {
+                enabled: content.coupleIdentity.monogram.enabled,
+                style: content.coupleIdentity.monogram.style,
+                text: content.coupleIdentity.monogram.text,
+              },
+              shortName: content.coupleIdentity.shortName,
+              socialLinks: {
+                instagram: content.coupleIdentity.socialLinks.instagram,
+                tiktok: content.coupleIdentity.socialLinks.tiktok,
+                website: content.coupleIdentity.socialLinks.website,
+              },
+              weddingHashtag: content.coupleIdentity.weddingHashtag,
+            },
+            digitalGift: {
+          """,
+          )
+          replace_once(
+              local_state,
+              '    rsvp: {\n',
+              """    opening: {
+              message: content.opening.message,
+              quote: content.opening.quote,
+              treatment: content.opening.treatment,
+            },
+            rsvp: {
+          """,
+          )
+
+          editor_schema = 'src/modules/invitations/invitation-editor.schema.ts'
+          replace_once(
+              editor_schema,
+              "  .union([z.literal('true'), z.literal(false)])\n  .transform((value) => value === 'true');\n",
+              """  .union([z.literal('true'), z.literal(true), z.literal(false)])
+            .transform((value) => value === 'true' || value === true);
+          """,
+          )
+          replace_once(
+              editor_schema,
+              "  'hero.subtitle',\n",
+              """  'hero.subtitle',
+            'opening.message',
+            'opening.quote',
+            'opening.treatment',
+          """,
+          )
+          replace_once(
+              editor_schema,
+              "  'couple.personTwo.parentLine',\n",
+              """  'couple.personTwo.parentLine',
+            'coupleIdentity.monogram.enabled',
+            'coupleIdentity.monogram.style',
+            'coupleIdentity.monogram.text',
+            'coupleIdentity.shortName',
+            'coupleIdentity.weddingHashtag',
+            'coupleIdentity.socialLinks.instagram',
+            'coupleIdentity.socialLinks.tiktok',
+            'coupleIdentity.socialLinks.website',
+          """,
+          )
+          replace_once(
+              editor_schema,
+              '        digitalGift: z\n',
+              """        coupleIdentity: z
+                  .object({
+                    monogram: z
+                      .object({
+                        enabled: checkboxInputSchema,
+                        style: formTextSchema,
+                        text: formTextSchema,
+                      })
+                      .strict(),
+                    shortName: formTextSchema,
+                    socialLinks: z
+                      .object({
+                        instagram: formTextSchema,
+                        tiktok: formTextSchema,
+                        website: formTextSchema,
+                      })
+                      .strict(),
+                    weddingHashtag: formTextSchema,
+                  })
+                  .strict()
+                  .default({
+                    monogram: { enabled: false, style: 'initials', text: '' },
+                    shortName: '',
+                    socialLinks: { instagram: '', tiktok: '', website: '' },
+                    weddingHashtag: '',
+                  }),
+                digitalGift: z
+          """,
+          )
+          replace_once(
+              editor_schema,
+              '        rsvp: z\n',
+              """        opening: z
+                  .object({
+                    message: formTextSchema,
+                    quote: formTextSchema,
+                    treatment: formTextSchema,
+                  })
+                  .strict()
+                  .default({ message: '', quote: '', treatment: 'soft' }),
+                rsvp: z
+          """,
+          )
+          replace_once(
+              editor_schema,
+              '      digitalGift: {\n',
+              """      coupleIdentity: {
+                monogram: {
+                  enabled: getCheckboxValue(formData, 'coupleIdentity.monogram.enabled'),
+                  style: getFormValue(formData, 'coupleIdentity.monogram.style'),
+                  text: getFormValue(formData, 'coupleIdentity.monogram.text'),
+                },
+                shortName: getFormValue(formData, 'coupleIdentity.shortName'),
+                socialLinks: {
+                  instagram: getFormValue(formData, 'coupleIdentity.socialLinks.instagram'),
+                  tiktok: getFormValue(formData, 'coupleIdentity.socialLinks.tiktok'),
+                  website: getFormValue(formData, 'coupleIdentity.socialLinks.website'),
+                },
+                weddingHashtag: getFormValue(formData, 'coupleIdentity.weddingHashtag'),
+              },
+              digitalGift: {
+          """,
+          )
+          replace_once(
+              editor_schema,
+              '      rsvp: {\n',
+              """      opening: {
+                message: getFormValue(formData, 'opening.message'),
+                quote: getFormValue(formData, 'opening.quote'),
+                treatment: getFormValue(formData, 'opening.treatment'),
+              },
+              rsvp: {
+          """,
+          )
+
+          editor_service = 'src/modules/invitations/invitation-editor.service.ts'
+          replace_once(
+              editor_service,
+              '    digitalGift: {\n',
+              """    coupleIdentity: {
+              monogram: {
+                enabled: input.coupleIdentity.monogram.enabled,
+                style:
+                  input.coupleIdentity.monogram.style === 'joined_initials' ||
+                  input.coupleIdentity.monogram.style === 'wordmark'
+                    ? input.coupleIdentity.monogram.style
+                    : 'initials',
+                text: input.coupleIdentity.monogram.text,
+              },
+              shortName: input.coupleIdentity.shortName,
+              socialLinks: {
+                instagram: input.coupleIdentity.socialLinks.instagram,
+                tiktok: input.coupleIdentity.socialLinks.tiktok,
+                website: input.coupleIdentity.socialLinks.website,
+              },
+              weddingHashtag: input.coupleIdentity.weddingHashtag,
+            },
+            digitalGift: {
+          """,
+          )
+          replace_once(
+              editor_service,
+              '    rsvp: {\n',
+              """    opening: {
+              message: input.opening.message,
+              quote: input.opening.quote,
+              treatment:
+                input.opening.treatment === 'editorial' ||
+                input.opening.treatment === 'ceremonial'
+                  ? input.opening.treatment
+                  : 'soft',
+            },
+            rsvp: {
+          """,
+          )
+
+          view_model = 'src/modules/invitation-templates/invitation-view-model.ts'
+          insert_before(
+              view_model,
+              'export type InvitationViewModel = {\n',
+              """export type InvitationOpeningViewModel = {
+            message: string | null;
+            quote: string | null;
+            treatment: 'soft' | 'editorial' | 'ceremonial';
+          };
+
+          export type InvitationIdentityViewModel = {
+            monogram: {
+              style: 'initials' | 'joined_initials' | 'wordmark';
+              text: string;
+            } | null;
+            shortName: string | null;
+            socialLinks: Array<{
+              href: string;
+              label: 'Instagram' | 'TikTok' | 'Website';
+              provider: 'instagram' | 'tiktok' | 'website';
+            }>;
+            weddingHashtag: string | null;
+          };
+
+          """,
+          )
+          replace_once(
+              view_model,
+              '  digitalGift: InvitationDigitalGiftViewModel | null;\n',
+              '  digitalGift: InvitationDigitalGiftViewModel | null;\n  identity: InvitationIdentityViewModel | null;\n',
+          )
+          replace_once(
+              view_model,
+              '  rsvp: {\n',
+              '  opening: InvitationOpeningViewModel | null;\n  rsvp: {\n',
+          )
+          insert_before(
+              view_model,
+              'function createScheduleItemViewModel(event: EventScheduleItemV1): InvitationScheduleItemViewModel {\n',
+              """function getInitial(value: string) {
+            return value.trim().charAt(0).toLocaleUpperCase('id-ID');
+          }
+
+          function createIdentityViewModel(
+            content: InvitationDraftContent,
+          ): InvitationIdentityViewModel | null {
+            const firstInitial = getInitial(content.couple.personOne.displayName);
+            const secondInitial = getInitial(content.couple.personTwo.displayName);
+            const fallbackText =
+              content.coupleIdentity.monogram.style === 'joined_initials'
+                ? `${firstInitial}${secondInitial}`
+                : content.coupleIdentity.monogram.style === 'wordmark'
+                  ? (content.coupleIdentity.shortName ??
+                    `${content.couple.personOne.displayName} · ${content.couple.personTwo.displayName}`)
+                  : `${firstInitial} & ${secondInitial}`;
+            const monogram = content.coupleIdentity.monogram.enabled
+              ? {
+                  style: content.coupleIdentity.monogram.style,
+                  text: content.coupleIdentity.monogram.text ?? fallbackText,
+                }
+              : null;
+            const socialCandidates = [
+              {
+                href: getSafeHttpsHref(content.coupleIdentity.socialLinks.instagram),
+                label: 'Instagram' as const,
+                provider: 'instagram' as const,
+              },
+              {
+                href: getSafeHttpsHref(content.coupleIdentity.socialLinks.tiktok),
+                label: 'TikTok' as const,
+                provider: 'tiktok' as const,
+              },
+              {
+                href: getSafeHttpsHref(content.coupleIdentity.socialLinks.website),
+                label: 'Website' as const,
+                provider: 'website' as const,
+              },
+            ];
+            const socialLinks = socialCandidates.filter(
+              (link): link is Omit<(typeof socialCandidates)[number], 'href'> & { href: string } =>
+                link.href !== null,
+            );
+            const hasIdentity = Boolean(
+              monogram ||
+                content.coupleIdentity.shortName ||
+                content.coupleIdentity.weddingHashtag ||
+                socialLinks.length > 0,
+            );
+
+            return hasIdentity
+              ? {
+                  monogram,
+                  shortName: content.coupleIdentity.shortName,
+                  socialLinks,
+                  weddingHashtag: content.coupleIdentity.weddingHashtag,
+                }
+              : null;
+          }
+
+          """,
+          )
+          replace_once(
+              view_model,
+              '  return {\n',
+              """  const identity = createIdentityViewModel(content);
+            const opening =
+              content.opening.message || content.opening.quote
+                ? {
+                    message: content.opening.message,
+                    quote: content.opening.quote,
+                    treatment: content.opening.treatment,
+                  }
+                : null;
+
+            return {
+          """,
+          )
+          replace_once(
+              view_model,
+              '    events,\n    gallery:',
+              '    events,\n    identity,\n    gallery:',
+          )
+          replace_once(
+              view_model,
+              '    rsvp: content.rsvp.enabled\n',
+              '    opening,\n    rsvp: content.rsvp.enabled\n',
+          )
+
+          write(
+              'src/modules/invitation-templates/invitation-atmosphere-identity.tsx',
+              r'''import type { InvitationViewModel } from './invitation-view-model';
+
+          import styles from './invitation-atmosphere-identity.module.css';
+
+          type InvitationIdentityTemplate = 'aruna' | 'laras' | 'roselle';
+
+          type InvitationAtmosphereIdentityProps = {
+            invitation: InvitationViewModel;
+            showMonogram?: boolean;
+            template: InvitationIdentityTemplate;
+          };
+
+          export function InvitationOpeningIdentity({
+            invitation,
+            showMonogram = true,
+            template,
+          }: InvitationAtmosphereIdentityProps) {
+            const monogram = showMonogram ? invitation.identity?.monogram : null;
+            const shortName = invitation.identity?.shortName ?? null;
+            const opening = invitation.opening;
+
+            if (!monogram && !shortName && !opening) {
+              return null;
+            }
+
+            return (
+              <section
+                aria-label="Suasana pembuka pasangan"
+                className={styles.opening}
+                data-invitation-identity-opening={template}
+                data-opening-treatment={opening?.treatment ?? 'soft'}
+                data-template={template}
+              >
+                {monogram ? (
+                  <p
+                    aria-label={`Monogram pasangan ${monogram.text}`}
+                    className={styles.monogram}
+                    data-monogram-style={monogram.style}
+                  >
+                    {monogram.text}
+                  </p>
+                ) : null}
+                {shortName ? <p className={styles.shortName}>{shortName}</p> : null}
+                {opening?.message ? <p className={styles.message}>{opening.message}</p> : null}
+                {opening?.quote ? <blockquote className={styles.quote}>{opening.quote}</blockquote> : null}
+              </section>
+            );
+          }
+
+          export function InvitationIdentityFooter({
+            invitation,
+            template,
+          }: Omit<InvitationAtmosphereIdentityProps, 'showMonogram'>) {
+            const identity = invitation.identity;
+
+            if (!identity?.weddingHashtag && identity?.socialLinks.length === 0) {
+              return null;
+            }
+
+            return (
+              <footer
+                aria-label="Identitas dan tautan pasangan"
+                className={styles.footer}
+                data-invitation-identity-footer={template}
+                data-template={template}
+              >
+                {identity.weddingHashtag ? (
+                  <p className={styles.hashtag}>{identity.weddingHashtag}</p>
+                ) : null}
+                {identity.socialLinks.length > 0 ? (
+                  <nav aria-label="Tautan pasangan" className={styles.socialLinks}>
+                    {identity.socialLinks.map((link) => (
+                      <a
+                        data-social-provider={link.provider}
+                        href={link.href}
+                        key={link.provider}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        {link.label}
+                      </a>
+                    ))}
+                  </nav>
+                ) : null}
+              </footer>
+            );
+          }
+          '''.replace('\n          ', '\n').lstrip(),
+          )
+          write(
+              'src/modules/invitation-templates/invitation-atmosphere-identity.module.css',
+              r'''.opening,
+          .footer {
+            box-sizing: border-box;
+            color: inherit;
+            margin-inline: auto;
+            text-align: center;
+          }
+
+          .opening {
+            display: grid;
+            gap: 0.75rem;
+            max-width: 44rem;
+            padding: clamp(1.5rem, 5vw, 3.5rem) clamp(1.25rem, 5vw, 3rem) 1rem;
+          }
+
+          .opening[data-opening-treatment='editorial'] {
+            text-align: left;
+          }
+
+          .opening[data-opening-treatment='ceremonial'] {
+            border-block: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+            margin-block: 1rem 0;
+          }
+
+          .monogram {
+            font-family: var(--invitation-font-display, serif);
+            font-size: clamp(2.25rem, 9vw, 5.5rem);
+            letter-spacing: 0.08em;
+            line-height: 0.9;
+            margin: 0;
+          }
+
+          .monogram[data-monogram-style='joined_initials'] {
+            letter-spacing: 0.16em;
+          }
+
+          .monogram[data-monogram-style='wordmark'] {
+            font-size: clamp(1.8rem, 7vw, 4rem);
+            letter-spacing: 0.02em;
+          }
+
+          .shortName,
+          .message,
+          .quote,
+          .hashtag {
+            margin: 0;
+          }
+
+          .shortName {
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+          }
+
+          .message {
+            font-size: clamp(1rem, 2.4vw, 1.2rem);
+            line-height: 1.75;
+          }
+
+          .quote {
+            font-family: var(--invitation-font-display, serif);
+            font-size: clamp(1.15rem, 3.4vw, 1.7rem);
+            font-style: italic;
+            line-height: 1.55;
+            opacity: 0.82;
+          }
+
+          .footer {
+            display: grid;
+            gap: 1rem;
+            max-width: 42rem;
+            padding: 1rem clamp(1.25rem, 5vw, 3rem) clamp(2.5rem, 7vw, 5rem);
+          }
+
+          .hashtag {
+            font-family: var(--invitation-font-display, serif);
+            font-size: clamp(1.2rem, 3vw, 1.6rem);
+          }
+
+          .socialLinks {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem 1.25rem;
+            justify-content: center;
+          }
+
+          .socialLinks a {
+            color: inherit;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-decoration: none;
+            text-transform: uppercase;
+          }
+
+          .socialLinks a:hover {
+            text-decoration: underline;
+            text-underline-offset: 0.3em;
+          }
+
+          .opening[data-template='roselle'] .monogram,
+          .footer[data-template='roselle'] .hashtag {
+            font-style: italic;
+          }
+
+          .opening[data-template='aruna'],
+          .footer[data-template='aruna'] {
+            border-left: 0.35rem solid currentColor;
+            text-align: left;
+          }
+
+          .opening[data-template='aruna'] .monogram {
+            font-family: inherit;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+          }
+
+          .footer[data-template='aruna'] .socialLinks {
+            justify-content: flex-start;
+          }
+
+          .opening[data-template='laras'],
+          .footer[data-template='laras'] {
+            letter-spacing: 0.02em;
+          }
+
+          .footer[data-template='laras'] {
+            border-top: 1px solid color-mix(in srgb, currentColor 24%, transparent);
+          }
+
+          @media (max-width: 38rem) {
+            .opening[data-template='aruna'],
+            .footer[data-template='aruna'] {
+              margin-inline: 1rem;
+            }
+          }
+          '''.replace('\n          ', '\n').lstrip(),
+          )
+
+          # Template-native placement.
+          roselle = 'src/modules/invitation-templates/roselle/roselle-template.tsx'
+          insert_before(
+              roselle,
+              "import {\n  getPersonalInvitationPresentationSlots,\n",
+              """import {
+            InvitationIdentityFooter,
+            InvitationOpeningIdentity,
+          } from '../invitation-atmosphere-identity';
+          """,
+          )
+          replace_once(
+              roselle,
+              '      <RoselleHero hero={invitation.hero} />\n',
+              """      <RoselleHero hero={invitation.hero} />
+            <InvitationOpeningIdentity invitation={invitation} template="roselle" />
+          """,
+          )
+          replace_once(
+              roselle,
+              '        <RoselleClosing closing={invitation.closing} />\n',
+              """        <InvitationIdentityFooter invitation={invitation} template="roselle" />
+                <RoselleClosing closing={invitation.closing} />
+          """,
+          )
+
+          aruna = 'src/modules/invitation-templates/aruna/aruna-template.tsx'
+          insert_before(
+              aruna,
+              "import { DigitalGiftCopyButton } from '../digital-gift-copy-button';\n",
+              """import {
+            InvitationIdentityFooter,
+            InvitationOpeningIdentity,
+          } from '../invitation-atmosphere-identity';
+          """,
+          )
+          replace_once(
+              aruna,
+              '      </header>\n\n      <a data-aruna-opening-action',
+              """      </header>
+
+            <InvitationOpeningIdentity invitation={invitation} template="aruna" />
+
+            <a data-aruna-opening-action""",
+          )
+          replace_once(
+              aruna,
+              '        {invitation.closing ? (\n',
+              """        <InvitationIdentityFooter invitation={invitation} template="aruna" />
+
+                {invitation.closing ? (
+          """,
+          )
+
+          laras = 'src/modules/invitation-templates/laras/laras-template.tsx'
+          insert_before(
+              laras,
+              "import { DigitalGiftCopyButton } from '../digital-gift-copy-button';\n",
+              """import {
+            InvitationIdentityFooter,
+            InvitationOpeningIdentity,
+          } from '../invitation-atmosphere-identity';
+          """,
+          )
+          replace_once(
+              laras,
+              "  const monogram = createLarasMonogram(\n    invitation.couple.personOne.displayName,\n    invitation.couple.personTwo.displayName,\n  );\n",
+              """  const monogram =
+            invitation.identity?.monogram?.text ??
+            createLarasMonogram(
+              invitation.couple.personOne.displayName,
+              invitation.couple.personTwo.displayName,
+            );
+          """,
+          )
+          replace_once(
+              laras,
+              '      </header>\n\n      <a data-invitation-opening-action',
+              """      </header>
+
+            <InvitationOpeningIdentity invitation={invitation} showMonogram={false} template="laras" />
+
+            <a data-invitation-opening-action""",
+          )
+          replace_once(
+              laras,
+              '        {invitation.closing ? (\n',
+              """        <InvitationIdentityFooter invitation={invitation} template="laras" />
+
+                {invitation.closing ? (
+          """,
+          )
+
+          # Editor controls live inside existing Pembuka and Mempelai chapters.
+          editor = 'src/components/projects/invitation-editor.tsx'
+          replace_once(
+              editor,
+              """                  value={content.hero.subtitle}
+                />
+              </div>
+            </div>
+          </EditorSection>
+          """,
+              """                  value={content.hero.subtitle}
+                />
+              </div>
+            </div>
+
+            <div className="border-seraya-border-default mt-7 space-y-5 border-t pt-6">
+              <div>
+                <h3 className="text-seraya-text-primary text-base font-semibold">
+                  Suasana pembuka
+                </h3>
+                <p className="text-seraya-text-muted mt-1 text-sm leading-6">
+                  Atur pesan dan ritme pembuka tanpa mengubah identitas visual template.
+                </p>
+              </div>
+              <label className="grid gap-2 text-sm font-semibold">
+                Treatment pembuka
+                <select
+                  className="border-seraya-border-default bg-seraya-surface focus-visible:outline-seraya-focus-ring min-h-11 rounded-[var(--seraya-radius-md)] border px-3.5"
+                  name="opening.treatment"
+                  onChange={(event) =>
+                    updateLocalContent({
+                      field: 'treatment',
+                      type: 'opening-atmosphere',
+                      value: event.currentTarget.value,
+                    })
+                  }
+                  value={content.opening.treatment}
+                >
+                  <option value="soft">Lembut</option>
+                  <option value="editorial">Editorial</option>
+                  <option value="ceremonial">Seremonial</option>
+                </select>
+                <FieldError
+                  message={getError(fieldErrors, 'opening.treatment')}
+                  name="opening.treatment"
+                />
+              </label>
+              <EditorTextAreaField
+                error={getError(fieldErrors, 'opening.message')}
+                help="Muncul setelah sampul dan sebelum tamu memasuki isi undangan."
+                label="Pesan pembuka (opsional)"
+                name="opening.message"
+                onValueChange={(value) =>
+                  updateLocalContent({ field: 'message', type: 'opening-atmosphere', value })
+                }
+                value={content.opening.message}
+              />
+              <EditorTextAreaField
+                error={getError(fieldErrors, 'opening.quote')}
+                help="Gunakan satu kutipan singkat. Jangan menempelkan HTML atau lirik panjang."
+                label="Kutipan pembuka (opsional)"
+                name="opening.quote"
+                onValueChange={(value) =>
+                  updateLocalContent({ field: 'quote', type: 'opening-atmosphere', value })
+                }
+                value={content.opening.quote}
+              />
+            </div>
+          </EditorSection>
+          """,
+          )
+          replace_once(
+              editor,
+              """                  value={content.couple.personTwo.parentLine}
+                />
+              </fieldset>
+            </div>
+          </EditorSection>
+          """,
+              """                  value={content.couple.personTwo.parentLine}
+                />
+              </fieldset>
+            </div>
+
+            <div className="border-seraya-border-default mt-7 space-y-5 border-t pt-6">
+              <div>
+                <h3 className="text-seraya-text-primary text-base font-semibold">
+                  Identitas pasangan
+                </h3>
+                <p className="text-seraya-text-muted mt-1 text-sm leading-6">
+                  Identitas ini bersifat publik dan konsisten pada undangan generik maupun personal.
+                </p>
+              </div>
+              <EditorToggle
+                checked={content.coupleIdentity.monogram.enabled}
+                help="Monogram tampil sebagai aksen pembuka. Bila teks kosong, Seraya menurunkannya dari nama pasangan."
+                label="Tampilkan monogram pasangan"
+                name="coupleIdentity.monogram.enabled"
+                onToggle={(value) =>
+                  updateLocalContent({ field: 'enabled', type: 'couple-monogram', value })
+                }
+              />
+              <div className="grid gap-5 sm:grid-cols-2" hidden={!content.coupleIdentity.monogram.enabled}>
+                <label className="grid gap-2 text-sm font-semibold">
+                  Gaya monogram
+                  <select
+                    className="border-seraya-border-default bg-seraya-surface focus-visible:outline-seraya-focus-ring min-h-11 rounded-[var(--seraya-radius-md)] border px-3.5"
+                    name="coupleIdentity.monogram.style"
+                    onChange={(event) =>
+                      updateLocalContent({
+                        field: 'style',
+                        type: 'couple-monogram',
+                        value: event.currentTarget.value,
+                      })
+                    }
+                    value={content.coupleIdentity.monogram.style}
+                  >
+                    <option value="initials">Inisial dengan ampersand</option>
+                    <option value="joined_initials">Inisial menyatu</option>
+                    <option value="wordmark">Wordmark</option>
+                  </select>
+                  <FieldError
+                    message={getError(fieldErrors, 'coupleIdentity.monogram.style')}
+                    name="coupleIdentity.monogram.style"
+                  />
+                </label>
+                <EditorTextField
+                  error={getError(fieldErrors, 'coupleIdentity.monogram.text')}
+                  help="Kosongkan untuk memakai hasil otomatis dari nama pasangan."
+                  label="Teks monogram (opsional)"
+                  name="coupleIdentity.monogram.text"
+                  onValueChange={(value) =>
+                    updateLocalContent({ field: 'text', type: 'couple-monogram', value })
+                  }
+                  value={content.coupleIdentity.monogram.text}
+                />
+              </div>
+              <div className="grid gap-5 sm:grid-cols-2">
+                <EditorTextField
+                  error={getError(fieldErrors, 'coupleIdentity.shortName')}
+                  label="Nama singkat pasangan (opsional)"
+                  name="coupleIdentity.shortName"
+                  onValueChange={(value) =>
+                    updateLocalContent({ field: 'shortName', type: 'couple-identity', value })
+                  }
+                  placeholder="Raka dan Nadia"
+                  value={content.coupleIdentity.shortName}
+                />
+                <EditorTextField
+                  error={getError(fieldErrors, 'coupleIdentity.weddingHashtag')}
+                  help="Contoh: #RakaNadia2027"
+                  label="Wedding hashtag (opsional)"
+                  name="coupleIdentity.weddingHashtag"
+                  onValueChange={(value) =>
+                    updateLocalContent({ field: 'weddingHashtag', type: 'couple-identity', value })
+                  }
+                  value={content.coupleIdentity.weddingHashtag}
+                />
+                <EditorTextField
+                  error={getError(fieldErrors, 'coupleIdentity.socialLinks.instagram')}
+                  label="Profil Instagram (opsional)"
+                  name="coupleIdentity.socialLinks.instagram"
+                  onValueChange={(value) =>
+                    updateLocalContent({ field: 'instagram', type: 'couple-social', value })
+                  }
+                  placeholder="https://www.instagram.com/..."
+                  type="url"
+                  value={content.coupleIdentity.socialLinks.instagram}
+                />
+                <EditorTextField
+                  error={getError(fieldErrors, 'coupleIdentity.socialLinks.tiktok')}
+                  label="Profil TikTok (opsional)"
+                  name="coupleIdentity.socialLinks.tiktok"
+                  onValueChange={(value) =>
+                    updateLocalContent({ field: 'tiktok', type: 'couple-social', value })
+                  }
+                  placeholder="https://www.tiktok.com/@..."
+                  type="url"
+                  value={content.coupleIdentity.socialLinks.tiktok}
+                />
+                <div className="sm:col-span-2">
+                  <EditorTextField
+                    error={getError(fieldErrors, 'coupleIdentity.socialLinks.website')}
+                    label="Website pasangan (opsional)"
+                    name="coupleIdentity.socialLinks.website"
+                    onValueChange={(value) =>
+                      updateLocalContent({ field: 'website', type: 'couple-social', value })
+                    }
+                    placeholder="https://..."
+                    type="url"
+                    value={content.coupleIdentity.socialLinks.website}
+                  />
+                </div>
+              </div>
+            </div>
+          </EditorSection>
+          """,
+          )
+
+          workspace = 'src/components/projects/invitation-editor-workspace.tsx'
+          replace_once(
+              workspace,
+              "  { matches: (fieldName) => fieldName.startsWith('hero.'), section: 'opening' },\n",
+              """  {
+            matches: (fieldName) => fieldName.startsWith('hero.') || fieldName.startsWith('opening.'),
+            section: 'opening',
+          },
+          """,
+          )
+          replace_once(
+              workspace,
+              "  { matches: (fieldName) => fieldName.startsWith('couple.'), section: 'couple' },\n",
+              """  {
+            matches: (fieldName) =>
+              fieldName.startsWith('couple.') || fieldName.startsWith('coupleIdentity.'),
+            section: 'couple',
+          },
+          """,
+          )
+
+          write(
+              'tests/unit/invitation-atmosphere-identity-v4j.test.tsx',
+              r'''import { renderToStaticMarkup } from 'react-dom/server';
+          import { describe, expect, it } from 'vitest';
+
+          import {
+            InvitationIdentityFooter,
+            InvitationOpeningIdentity,
+          } from '@/modules/invitation-templates/invitation-atmosphere-identity';
+          import { createInvitationViewModel } from '@/modules/invitation-templates/invitation-view-model';
+          import { createDefaultInvitationDraftContent } from '@/modules/invitations/invitation-draft.defaults';
+          import { invitationDraftContentSchema } from '@/modules/invitations/invitation-draft.schema';
+
+          const project = {
+            default_timezone: 'Asia/Jakarta',
+            event_date_primary: '2027-08-17',
+            person_one_name: 'Raka',
+            person_two_name: 'Nadia',
+          };
+
+          describe('V4J Slice A invitation atmosphere and couple identity', () => {
+            it('keeps V4I documents compatible with disabled identity defaults', () => {
+              const legacy = structuredClone(createDefaultInvitationDraftContent(project)) as Record<
+                string,
+                unknown
+              >;
+              delete legacy.opening;
+              delete legacy.coupleIdentity;
+
+              const parsed = invitationDraftContentSchema.parse(legacy);
+              expect(parsed.opening).toEqual({ message: null, quote: null, treatment: 'soft' });
+              expect(parsed.coupleIdentity.monogram.enabled).toBe(false);
+              expect(parsed.coupleIdentity.socialLinks).toEqual({
+                instagram: null,
+                tiktok: null,
+                website: null,
+              });
+            });
+
+            it('rejects unsafe social providers and malformed hashtags', () => {
+              const content = createDefaultInvitationDraftContent(project);
+              expect(() =>
+                invitationDraftContentSchema.parse({
+                  ...content,
+                  coupleIdentity: {
+                    ...content.coupleIdentity,
+                    socialLinks: {
+                      ...content.coupleIdentity.socialLinks,
+                      instagram: 'https://instagram.attacker.example/raka',
+                    },
+                  },
+                }),
+              ).toThrow(/domain resmi/i);
+
+              expect(() =>
+                invitationDraftContentSchema.parse({
+                  ...content,
+                  coupleIdentity: {
+                    ...content.coupleIdentity,
+                    weddingHashtag: 'Raka Nadia',
+                  },
+                }),
+              ).toThrow(/diawali #/i);
+            });
+
+            it('derives a public-safe identity view model and template-native composition', () => {
+              const content = invitationDraftContentSchema.parse({
+                ...createDefaultInvitationDraftContent(project),
+                coupleIdentity: {
+                  monogram: { enabled: true, style: 'initials', text: null },
+                  shortName: 'Raka dan Nadia',
+                  socialLinks: {
+                    instagram: 'https://www.instagram.com/rakanadia',
+                    tiktok: null,
+                    website: 'https://rakanadia.example',
+                  },
+                  weddingHashtag: '#RakaNadia2027',
+                },
+                opening: {
+                  message: 'Dengan hangat kami menyambut Anda.',
+                  quote: 'Dua cerita, satu perjalanan.',
+                  treatment: 'editorial',
+                },
+              });
+              const invitation = createInvitationViewModel({
+                draft: { content },
+                project: { event_date_primary: project.event_date_primary },
+              });
+
+              expect(invitation.identity?.monogram?.text).toBe('R & N');
+              expect(invitation.identity?.socialLinks.map((link) => link.provider)).toEqual([
+                'instagram',
+                'website',
+              ]);
+
+              const openingMarkup = renderToStaticMarkup(
+                <InvitationOpeningIdentity invitation={invitation} template="roselle" />,
+              );
+              const footerMarkup = renderToStaticMarkup(
+                <InvitationIdentityFooter invitation={invitation} template="aruna" />,
+              );
+
+              expect(openingMarkup).toContain('data-opening-treatment="editorial"');
+              expect(openingMarkup).toContain('Dengan hangat kami menyambut Anda.');
+              expect(footerMarkup).toContain('#RakaNadia2027');
+              expect(footerMarkup).toContain('rel="noopener noreferrer"');
+            });
+          });
+          '''.replace('\n          ', '\n').lstrip(),
+          )
+
+          write(
+              '.github/workflows/v4j-invitation-atmosphere-identity.yml',
+              r'''name: V4J invitation atmosphere and identity validation
+
+          on:
+            pull_request:
+              paths:
+                - 'src/components/projects/invitation-editor.tsx'
+                - 'src/components/projects/invitation-editor-workspace.tsx'
+                - 'src/modules/invitations/**'
+                - 'src/modules/invitation-templates/**'
+                - 'tests/unit/invitation-atmosphere-identity-v4j.test.tsx'
+                - '.github/workflows/v4j-invitation-atmosphere-identity.yml'
+            push:
+              branches:
+                - feature/v4j-invitation-atmosphere-couple-identity-v1
+              paths:
+                - 'src/components/projects/invitation-editor.tsx'
+                - 'src/components/projects/invitation-editor-workspace.tsx'
+                - 'src/modules/invitations/**'
+                - 'src/modules/invitation-templates/**'
+                - 'tests/unit/invitation-atmosphere-identity-v4j.test.tsx'
+                - '.github/workflows/v4j-invitation-atmosphere-identity.yml'
+
+          jobs:
+            validate:
+              runs-on: ubuntu-latest
+              steps:
+                - name: Check out repository
+                  uses: actions/checkout@v4
+                - name: Set up Node
+                  uses: actions/setup-node@v4
+                  with:
+                    node-version: 22
+                    cache: npm
+                - name: Install dependencies
+                  run: npm ci
+                - name: Check V4J Slice A formatting
+                  run: |
+                    npx prettier --check \
+                      src/components/projects/invitation-editor.tsx \
+                      src/components/projects/invitation-editor-workspace.tsx \
+                      src/modules/invitations/invitation-draft.schema.ts \
+                      src/modules/invitations/invitation-draft.defaults.ts \
+                      src/modules/invitations/invitation-editor-local-state.ts \
+                      src/modules/invitations/invitation-editor.schema.ts \
+                      src/modules/invitations/invitation-editor.service.ts \
+                      src/modules/invitation-templates/invitation-view-model.ts \
+                      src/modules/invitation-templates/invitation-atmosphere-identity.tsx \
+                      src/modules/invitation-templates/invitation-atmosphere-identity.module.css \
+                      src/modules/invitation-templates/roselle/roselle-template.tsx \
+                      src/modules/invitation-templates/aruna/aruna-template.tsx \
+                      src/modules/invitation-templates/laras/laras-template.tsx \
+                      tests/unit/invitation-atmosphere-identity-v4j.test.tsx
+                - name: Lint V4J Slice A
+                  run: |
+                    npx eslint \
+                      src/components/projects/invitation-editor.tsx \
+                      src/components/projects/invitation-editor-workspace.tsx \
+                      src/modules/invitations/invitation-draft.schema.ts \
+                      src/modules/invitations/invitation-draft.defaults.ts \
+                      src/modules/invitations/invitation-editor-local-state.ts \
+                      src/modules/invitations/invitation-editor.schema.ts \
+                      src/modules/invitations/invitation-editor.service.ts \
+                      src/modules/invitation-templates/invitation-view-model.ts \
+                      src/modules/invitation-templates/invitation-atmosphere-identity.tsx \
+                      src/modules/invitation-templates/roselle/roselle-template.tsx \
+                      src/modules/invitation-templates/aruna/aruna-template.tsx \
+                      src/modules/invitation-templates/laras/laras-template.tsx \
+                      tests/unit/invitation-atmosphere-identity-v4j.test.tsx
+                - name: Typecheck
+                  run: npm run typecheck
+                - name: Focused V4J Slice A tests
+                  run: npx vitest run tests/unit/invitation-atmosphere-identity-v4j.test.tsx
+                - name: Production build
+                  run: npm run build
+          '''.replace('\n          ', '\n').lstrip(),
+          )
+          PY
+
+      - name: Format Slice A
+        run: |
+          npx prettier --write \
+            src/components/projects/invitation-editor.tsx \
+            src/components/projects/invitation-editor-workspace.tsx \
+            src/modules/invitations/invitation-draft.schema.ts \
+            src/modules/invitations/invitation-draft.defaults.ts \
+            src/modules/invitations/invitation-editor-local-state.ts \
+            src/modules/invitations/invitation-editor.schema.ts \
+            src/modules/invitations/invitation-editor.service.ts \
+            src/modules/invitation-templates/invitation-view-model.ts \
+            src/modules/invitation-templates/invitation-atmosphere-identity.tsx \
+            src/modules/invitation-templates/invitation-atmosphere-identity.module.css \
+            src/modules/invitation-templates/roselle/roselle-template.tsx \
+            src/modules/invitation-templates/aruna/aruna-template.tsx \
+            src/modules/invitation-templates/laras/laras-template.tsx \
+            tests/unit/invitation-atmosphere-identity-v4j.test.tsx \
+            .github/workflows/v4j-invitation-atmosphere-identity.yml
+
+      - name: Validate Slice A
+        run: |
+          npx eslint \
+            src/components/projects/invitation-editor.tsx \
+            src/components/projects/invitation-editor-workspace.tsx \
+            src/modules/invitations/invitation-draft.schema.ts \
+            src/modules/invitations/invitation-draft.defaults.ts \
+            src/modules/invitations/invitation-editor-local-state.ts \
+            src/modules/invitations/invitation-editor.schema.ts \
+            src/modules/invitations/invitation-editor.service.ts \
+            src/modules/invitation-templates/invitation-view-model.ts \
+            src/modules/invitation-templates/invitation-atmosphere-identity.tsx \
+            src/modules/invitation-templates/roselle/roselle-template.tsx \
+            src/modules/invitation-templates/aruna/aruna-template.tsx \
+            src/modules/invitation-templates/laras/laras-template.tsx \
+            tests/unit/invitation-atmosphere-identity-v4j.test.tsx
+          npm run typecheck
+          npx vitest run tests/unit/invitation-atmosphere-identity-v4j.test.tsx
+          npm run build
+
+      - name: Commit Slice A
+        run: |
+          rm .github/workflows/v4j-slice-a-apply.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src tests .github/workflows/v4j-invitation-atmosphere-identity.yml .github/workflows/v4j-slice-a-apply.yml
+          git commit -m "SERAYA V4J: implement couple identity and opening foundation"
+          git push origin HEAD:feature/v4j-invitation-atmosphere-couple-identity-v1
