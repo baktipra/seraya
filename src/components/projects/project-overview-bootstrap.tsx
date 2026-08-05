@@ -13,6 +13,7 @@ import {
   CompassProgressStrip,
   CompassWorkspace,
 } from '@/components/workspace/compass-primitives';
+import { PublishedConfidence } from '@/components/projects/published-confidence';
 import { Badge } from '@/design-system';
 import type { WeddingReadinessV1 } from '@/modules/readiness';
 import { deriveProjectCompassNextStep } from '@/modules/readiness/project-compass';
@@ -38,15 +39,16 @@ function getStatus(readiness: WeddingReadinessV1) {
     return {
       badge: 'Perubahan belum diterbitkan',
       badgeVariant: 'warning' as const,
-      description: 'Tamu masih melihat versi undangan sebelumnya.',
+      description:
+        'Undangan tetap aktif. Tamu masih melihat versi terbit sebelumnya sampai Anda menerbitkan ulang.',
     };
   }
 
   if (readiness.invitation.hasPublishedSnapshot) {
     return {
-      badge: 'Sudah dipublikasikan',
+      badge: 'Terbit',
       badgeVariant: 'success' as const,
-      description: 'Link Publik sudah menampilkan versi terbaru undangan.',
+      description: 'Undangan aktif. Tamu melihat versi undangan yang terakhir diterbitkan.',
     };
   }
 
@@ -183,9 +185,18 @@ export function ProjectOverviewBootstrap({ projectId, readiness }: ProjectOvervi
         titleId="owner-workspace-overview-title"
       />
 
+      {readiness.invitation.hasPublishedSnapshot ? (
+        <PublishedConfidence hasUnpublishedChanges={readiness.invitation.hasUnpublishedChanges} />
+      ) : null}
+
       <CompassFocus
         actionLabel={nextStep.label}
         description={nextStep.description}
+        eyebrow={
+          readiness.invitation.hasPublishedSnapshot
+            ? 'Operasional setelah terbit'
+            : 'Fokus berikutnya'
+        }
         href={nextStep.href}
         title={nextStep.label}
         titleId="workspace-next-step-title"
@@ -207,11 +218,7 @@ export function ProjectOverviewBootstrap({ projectId, readiness }: ProjectOvervi
           label="Siap dibagikan"
           value={`${readiness.guests.readyToDistributeCount ?? 0} tamu`}
         />
-        <CompassProgressItem
-          href={responseHref}
-          label="Respons masuk"
-          value={responseProgress}
-        />
+        <CompassProgressItem href={responseHref} label="Respons masuk" value={responseProgress} />
       </CompassProgressStrip>
 
       {attentionItems.length ? (

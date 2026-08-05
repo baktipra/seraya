@@ -73,12 +73,14 @@ export function CompassHeader({
 export function CompassFocus({
   actionLabel,
   description,
+  eyebrow = 'Fokus berikutnya',
   href,
   title,
   titleId,
 }: {
   actionLabel: string;
   description: ReactNode;
+  eyebrow?: string;
   href: Route;
   title: ReactNode;
   titleId: string;
@@ -91,7 +93,7 @@ export function CompassFocus({
     >
       <div className="grid min-w-0 gap-6 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
         <div className="min-w-0">
-          <p className="text-seraya-action-primary text-xs font-semibold">Fokus berikutnya</p>
+          <p className="text-seraya-action-primary text-xs font-semibold">{eyebrow}</p>
           <h2 className="seraya-heading-lg mt-2 max-w-2xl" id={titleId}>
             {title}
           </h2>
@@ -191,7 +193,7 @@ export function CompassAttentionList({
         title="Butuh perhatian Anda"
         titleId={titleId}
       />
-      <ul className="border-seraya-border-subtle bg-seraya-surface mt-4 min-w-0 divide-y divide-seraya-border-subtle overflow-hidden rounded-[var(--seraya-radius-xl)] border shadow-[var(--seraya-shadow-level-1)]">
+      <ul className="border-seraya-border-subtle bg-seraya-surface divide-seraya-border-subtle mt-4 min-w-0 divide-y overflow-hidden rounded-[var(--seraya-radius-xl)] border shadow-[var(--seraya-shadow-level-1)]">
         {children}
       </ul>
     </section>
