@@ -1,0 +1,78 @@
+name: V4J invitation atmosphere and identity validation
+
+on:
+  pull_request:
+    paths:
+      - 'src/components/projects/invitation-editor.tsx'
+      - 'src/components/projects/invitation-editor-workspace.tsx'
+      - 'src/modules/invitations/**'
+      - 'src/modules/invitation-templates/**'
+      - 'src/modules/publications/__tests__/publication.service.test.ts'
+      - 'tests/unit/invitation-atmosphere-identity-v4j.test.tsx'
+      - '.github/workflows/v4j-invitation-atmosphere-identity.yml'
+  push:
+    branches:
+      - feature/v4j-invitation-atmosphere-couple-identity-v1
+    paths:
+      - 'src/components/projects/invitation-editor.tsx'
+      - 'src/components/projects/invitation-editor-workspace.tsx'
+      - 'src/modules/invitations/**'
+      - 'src/modules/invitation-templates/**'
+      - 'src/modules/publications/__tests__/publication.service.test.ts'
+      - 'tests/unit/invitation-atmosphere-identity-v4j.test.tsx'
+      - '.github/workflows/v4j-invitation-atmosphere-identity.yml'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Check V4J Slice A formatting
+        run: |
+          npx prettier --check \
+            src/components/projects/invitation-editor.tsx \
+            src/components/projects/invitation-editor-workspace.tsx \
+            src/modules/invitations/invitation-draft.schema.ts \
+            src/modules/invitations/invitation-draft.defaults.ts \
+            src/modules/invitations/invitation-editor-local-state.ts \
+            src/modules/invitations/invitation-editor.schema.ts \
+            src/modules/invitations/invitation-editor.service.ts \
+            src/modules/invitation-templates/invitation-view-model.ts \
+            src/modules/invitation-templates/invitation-atmosphere-identity.tsx \
+            src/modules/invitation-templates/invitation-atmosphere-identity.module.css \
+            src/modules/invitation-templates/roselle/roselle-template.tsx \
+            src/modules/invitation-templates/aruna/aruna-template.tsx \
+            src/modules/invitation-templates/laras/laras-template.tsx \
+            src/modules/publications/__tests__/publication.service.test.ts \
+            tests/unit/invitation-atmosphere-identity-v4j.test.tsx
+      - name: Lint V4J Slice A
+        run: |
+          npx eslint \
+            src/components/projects/invitation-editor.tsx \
+            src/components/projects/invitation-editor-workspace.tsx \
+            src/modules/invitations/invitation-draft.schema.ts \
+            src/modules/invitations/invitation-draft.defaults.ts \
+            src/modules/invitations/invitation-editor-local-state.ts \
+            src/modules/invitations/invitation-editor.schema.ts \
+            src/modules/invitations/invitation-editor.service.ts \
+            src/modules/invitation-templates/invitation-view-model.ts \
+            src/modules/invitation-templates/invitation-atmosphere-identity.tsx \
+            src/modules/invitation-templates/roselle/roselle-template.tsx \
+            src/modules/invitation-templates/aruna/aruna-template.tsx \
+            src/modules/invitation-templates/laras/laras-template.tsx \
+            src/modules/publications/__tests__/publication.service.test.ts \
+            tests/unit/invitation-atmosphere-identity-v4j.test.tsx
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Focused V4J Slice A tests
+        run: npx vitest run tests/unit/invitation-atmosphere-identity-v4j.test.tsx
+      - name: Production build
+        run: npm run build
