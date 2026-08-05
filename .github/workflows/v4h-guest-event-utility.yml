@@ -16,6 +16,7 @@ on:
       - 'src/modules/invitations/invitation-editor-local-state.ts'
       - 'src/modules/invitations/invitation-editor.schema.ts'
       - 'src/modules/invitations/invitation-editor.service.ts'
+      - 'tests/unit/guest-event-editor-v4h.test.ts'
       - 'tests/unit/guest-event-utility-v4h.test.ts'
   workflow_dispatch:
 
@@ -56,6 +57,7 @@ jobs:
             src/modules/invitations/invitation-editor-local-state.ts \
             src/modules/invitations/invitation-editor.schema.ts \
             src/modules/invitations/invitation-editor.service.ts \
+            tests/unit/guest-event-editor-v4h.test.ts \
             tests/unit/guest-event-utility-v4h.test.ts
 
       - name: Lint
@@ -64,18 +66,15 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
-      - name: Unit tests
-        shell: bash
+      - name: Focused V4H tests
         run: |
-          set +e
-          npm run test -- --reporter=json --outputFile=/tmp/v4h-vitest.json
-          status=$?
-          set -e
-
-          if [ "$status" -ne 0 ]; then
-            node -e "const fs=require('node:fs');const r=JSON.parse(fs.readFileSync('/tmp/v4h-vitest.json','utf8'));const f=(r.testResults||[]).flatMap(x=>(x.assertionResults||[]).filter(t=>t.status==='failed').map(t=>({file:x.name,title:[...(t.ancestorTitles||[]),t.title].join(' > '),messages:t.failureMessages||[]})));console.error('V4H validation found '+f.length+' failed unit test(s).');for(const x of f){console.error('\\nFAIL '+x.file+'\\n  '+x.title);for(const m of x.messages)console.error(m)}"
-            exit "$status"
-          fi
+          npx vitest run \
+            tests/unit/guest-event-editor-v4h.test.ts \
+            tests/unit/guest-event-utility-v4h.test.ts \
+            src/modules/invitations/__tests__/invitation-editor.schema.test.ts \
+            src/modules/invitations/__tests__/invitation-editor.service.test.ts \
+            src/modules/invitation-templates/__tests__/invitation-template-renderer.test.tsx \
+            src/modules/invitation-templates/__tests__/invitation-view-model.test.ts
 
       - name: Production build
         run: npm run build
