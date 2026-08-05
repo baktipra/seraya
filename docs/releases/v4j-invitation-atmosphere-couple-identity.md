@@ -3,6 +3,7 @@
 Status: Implementation in progress
 Baseline: V4I merge `2418a307f013aa941b854feaf9c8b642c95d1642`
 Branch: `feature/v4j-invitation-atmosphere-couple-identity-v1`
+PR: `#81`
 
 ## Slice A — Couple Identity & Opening Foundation
 
@@ -48,4 +49,4 @@ Status: Pending
 - preview, generic, and personal parity;
 - graceful unavailable-audio fallback.
 
-V4J remains a draft release until Slice B and Slice C are completed and validated.
+V4J remains a draft release until Slice B and Slice C are completed and validated. Slice A is not merged or deployed independently.
