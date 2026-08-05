@@ -7,12 +7,27 @@ async function update(path, transform) {
   await writeFile(path, next, 'utf8');
 }
 
-await update('src/components/projects/event-utility-editor-fields.tsx', (source) =>
-  source
+await update('src/components/projects/event-utility-editor-fields.tsx', (source) => {
+  let next = source
     .replace("\nimport { FieldError } from './invitation-editor-fields';\n", '\n')
     .replace('options: { fields: string[]; types: string[] },', 'options: { fields: string[] },')
-    .replace("          types: ['establishment', 'geocode'],\n", ''),
-);
+    .replace("          types: ['establishment', 'geocode'],\n", '');
+
+  const helperMarker = 'function UtilityFieldError';
+  const firstHelper = next.indexOf(helperMarker);
+  const duplicateHelper =
+    firstHelper >= 0 ? next.indexOf(helperMarker, firstHelper + helperMarker.length) : -1;
+
+  if (duplicateHelper >= 0) {
+    const loadMapsStart = next.indexOf('\n\nfunction loadGoogleMaps', duplicateHelper);
+    if (loadMapsStart < 0) {
+      throw new Error('Unable to remove duplicate V4H field-error helper.');
+    }
+    next = `${next.slice(0, duplicateHelper)}${next.slice(loadMapsStart + 2)}`;
+  }
+
+  return next;
+});
 
 await update('src/modules/invitations/invitation-editor.schema.ts', (source) =>
   source.replace(
