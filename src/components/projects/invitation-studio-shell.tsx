@@ -117,54 +117,48 @@ export function InvitationStudioShell({
     activateMode(nextMode.key, 'replace');
   };
 
-  const contentNode =
-    content ??
-    children ?? (
-      <InvitationStudioModePlaceholder
-        description="Belum ada editor yang tersedia untuk undangan ini."
-        eyebrow="Isi undangan"
-        title="Mulai susun undangan kalian."
-      />
-    );
-  const designNode =
-    design ?? (
-      <InvitationStudioModePlaceholder
-        description="Template dan palet tetap dapat diubah dari editor Isi selama kontrol desain dipindahkan ke ruang ini pada tahap berikutnya."
-        eyebrow="Fondasi mode Desain"
-        title="Ruang desain sudah memiliki tempat yang jelas."
-      />
-    );
-  const mediaNode =
-    media ?? (
-      <InvitationStudioModePlaceholder
-        description="Galeri dan audio tetap aman pada alur lama sampai keduanya dipindahkan ke workspace media khusus."
-        eyebrow="Fondasi mode Media"
-        title="Foto dan audio akan dikelola tanpa bercampur dengan form teks."
-      />
-    );
-  const previewNode =
-    preview ?? (
-      <InvitationStudioModePlaceholder
-        action={
-          previewHref ? (
-            <Link className={styles.placeholderAction} href={previewHref}>
-              Buka preview tersimpan
-            </Link>
-          ) : undefined
-        }
-        description="Preview khusus akan menyatukan tampilan umum, simulasi personal, serta perangkat mobile dan desktop."
-        eyebrow="Fondasi mode Preview"
-        title="Periksa hasil tanpa gangguan form editor."
-      />
-    );
-  const publishNode =
-    publish ?? (
-      <InvitationStudioModePlaceholder
-        description="Kesiapan, pembayaran, status versi, dan kontrol terbit tetap menggunakan authority lama sampai mode ini diaktifkan penuh."
-        eyebrow="Fondasi mode Terbitkan"
-        title="Keputusan publikasi akan mempunyai ruang tersendiri."
-      />
-    );
+  const contentNode = content ?? children ?? (
+    <InvitationStudioModePlaceholder
+      description="Belum ada editor yang tersedia untuk undangan ini."
+      eyebrow="Isi undangan"
+      title="Mulai susun undangan kalian."
+    />
+  );
+  const designNode = design ?? (
+    <InvitationStudioModePlaceholder
+      description="Template dan palet tetap dapat diubah dari editor Isi selama kontrol desain dipindahkan ke ruang ini pada tahap berikutnya."
+      eyebrow="Fondasi mode Desain"
+      title="Ruang desain sudah memiliki tempat yang jelas."
+    />
+  );
+  const mediaNode = media ?? (
+    <InvitationStudioModePlaceholder
+      description="Galeri dan audio tetap aman pada alur lama sampai keduanya dipindahkan ke workspace media khusus."
+      eyebrow="Fondasi mode Media"
+      title="Foto dan audio akan dikelola tanpa bercampur dengan form teks."
+    />
+  );
+  const previewNode = preview ?? (
+    <InvitationStudioModePlaceholder
+      action={
+        previewHref ? (
+          <Link className={styles.placeholderAction} href={previewHref}>
+            Buka preview tersimpan
+          </Link>
+        ) : undefined
+      }
+      description="Preview khusus akan menyatukan tampilan umum, simulasi personal, serta perangkat mobile dan desktop."
+      eyebrow="Fondasi mode Preview"
+      title="Periksa hasil tanpa gangguan form editor."
+    />
+  );
+  const publishNode = publish ?? (
+    <InvitationStudioModePlaceholder
+      description="Kesiapan, pembayaran, status versi, dan kontrol terbit tetap menggunakan authority lama sampai mode ini diaktifkan penuh."
+      eyebrow="Fondasi mode Terbitkan"
+      title="Keputusan publikasi akan mempunyai ruang tersendiri."
+    />
+  );
 
   const panels: ReadonlyArray<{ mode: InvitationStudioMode; node: ReactNode }> = [
     { mode: 'content', node: contentNode },
@@ -188,9 +182,7 @@ export function InvitationStudioShell({
           <h1 className={styles.title} id="invitation-studio-title">
             {coupleLabel}
           </h1>
-          <p className={styles.modeContext}>
-            Mode {getInvitationStudioModeLabel(activeMode)}
-          </p>
+          <p className={styles.modeContext}>Mode {getInvitationStudioModeLabel(activeMode)}</p>
         </div>
 
         <div className={styles.headerActions}>
