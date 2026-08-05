@@ -1,0 +1,72 @@
+name: Apply V4H countdown lint repair
+
+on:
+  push:
+    branches:
+      - feature/v4h-guest-event-utility-v1
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: ${{ !contains(github.event.head_commit.message, '[skip v4h source fix]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Repair countdown subscription
+        run: |
+          node <<'NODE'
+          const { readFileSync, writeFileSync } = require('node:fs');
+          const path = 'src/modules/invitation-templates/guest-event-utility.tsx';
+          const source = readFileSync(path, 'utf8');
+          const before = `  useEffect(() => {
+              setNow(Date.now());
+              const timer = window.setInterval(() => setNow(Date.now()), 1_000);
+              return () => window.clearInterval(timer);
+            }, []);`;
+          const fallbackBefore = `  useEffect(() => {
+            setNow(Date.now());
+            const timer = window.setInterval(() => setNow(Date.now()), 1_000);
+            return () => window.clearInterval(timer);
+          }, []);`;
+          const after = `  useEffect(() => {
+            const updateNow = () => setNow(Date.now());
+            const initialTimer = window.setTimeout(updateNow, 0);
+            const intervalTimer = window.setInterval(updateNow, 1_000);
+
+            return () => {
+              window.clearTimeout(initialTimer);
+              window.clearInterval(intervalTimer);
+            };
+          }, []);`;
+          const anchor = source.includes(before) ? before : fallbackBefore;
+          if (!source.includes(anchor)) {
+            throw new Error('Countdown effect anchor unavailable.');
+          }
+          writeFileSync(path, source.replace(anchor, after), 'utf8');
+          NODE
+          npx prettier --write src/modules/invitation-templates/guest-event-utility.tsx
+
+      - name: Commit repair
+        run: |
+          git config user.name 'seraya-v4h-bot'
+          git config user.email 'seraya-v4h-bot@users.noreply.github.com'
+          git add src/modules/invitation-templates/guest-event-utility.tsx
+          git commit -m 'SERAYA V4H: repair countdown subscription [skip v4h source fix]'
+          git push origin HEAD:feature/v4h-guest-event-utility-v1
