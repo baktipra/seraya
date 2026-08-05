@@ -32,6 +32,9 @@ jobs:
       - name: Apply Slice B source changes
         run: python scripts/v4j-slice-b-apply.py
 
+      - name: Apply focused validation fixes
+        run: python scripts/v4j-slice-b-fix.py
+
       - name: Install audio metadata parser
         run: npm install music-metadata@latest --save-exact
 
@@ -52,6 +55,7 @@ jobs:
             src/modules/media/invitation-audio.repository.ts \
             src/modules/media/invitation-audio.service.ts \
             src/modules/publications/publication.service.ts \
+            src/modules/publications/__tests__/publication.service.test.ts \
             tests/unit/invitation-audio-media-v4j.test.ts
 
       - name: Validate Slice B source
@@ -70,9 +74,12 @@ jobs:
             src/modules/media/invitation-audio.repository.ts \
             src/modules/media/invitation-audio.service.ts \
             src/modules/publications/publication.service.ts \
+            src/modules/publications/__tests__/publication.service.test.ts \
             tests/unit/invitation-audio-media-v4j.test.ts
           npm run typecheck
-          npx vitest run tests/unit/invitation-audio-media-v4j.test.ts
+          npx vitest run \
+            tests/unit/invitation-audio-media-v4j.test.ts \
+            src/modules/publications/__tests__/publication.service.test.ts
           npm run build
 
       - name: Commit validated Slice B source
