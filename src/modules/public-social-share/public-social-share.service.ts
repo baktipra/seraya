@@ -2,6 +2,7 @@ import 'server-only';
 
 import { siteConfig } from '@/config/site';
 import { getActiveInvitationDraftForVerifiedProject } from '@/modules/invitations/invitation-draft.repository';
+import { getPublicGalleryImagesForCurrentSnapshot } from '@/modules/media/public-media.service';
 import type { OwnedProject } from '@/modules/projects/project.repository';
 import { getCurrentPublishedInvitationForVerifiedProject } from '@/modules/publications/publication.service';
 
@@ -47,6 +48,9 @@ export async function getPublicSocialShareForVerifiedProject(
   const event = selectPrimaryPublishedEvent(draft.eventSchedule.events);
   if (!event) return null;
 
+  const galleryImages = await getPublicGalleryImagesForCurrentSnapshot(
+    draft.gallery.enabled ? draft.gallery.imageIds : [],
+  );
   const activeDraftUpdatedAt = activeDraft ? Date.parse(activeDraft.updated_at) : Number.NaN;
   const publishedAt = Date.parse(publication.published_at);
 
@@ -54,6 +58,7 @@ export async function getPublicSocialShareForVerifiedProject(
     coupleLabel: `${draft.couple.personOne.displayName} & ${draft.couple.personTwo.displayName}`,
     eventDate: formatEventDate(event.date, publication.snapshot.project.timezone),
     eventTitle: event.title,
+    galleryImages,
     isSynchronized:
       Number.isFinite(activeDraftUpdatedAt) && Number.isFinite(publishedAt)
         ? activeDraftUpdatedAt <= publishedAt
