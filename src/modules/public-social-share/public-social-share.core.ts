@@ -26,6 +26,7 @@ export type PublicSocialShareModel = Readonly<{
   coupleLabel: string;
   eventDate: string;
   eventTitle: string;
+  isSynchronized: boolean;
   paletteKey: string;
   publicUrl: string;
   revision: number;
