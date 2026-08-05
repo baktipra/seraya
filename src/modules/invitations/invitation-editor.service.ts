@@ -87,8 +87,11 @@ function applyEditorInputToActiveDraft(
       endTime: event.endTime,
       id: event.id,
       latitude: normalizeOptionalCoordinate(event.latitude),
+      livestreamDescription: normalizeOptionalText(event.livestreamDescription),
       livestreamEnabled: event.livestreamEnabled === true,
       livestreamHeading: normalizeOptionalText(event.livestreamHeading),
+      livestreamPostEventMode: event.livestreamPostEventMode === 'hide' ? 'hide' : 'recording',
+      livestreamPreEventMessage: normalizeOptionalText(event.livestreamPreEventMessage),
       livestreamUrl: normalizeOptionalText(event.livestreamUrl),
       locationSource:
         event.locationSource === 'google_place' ||

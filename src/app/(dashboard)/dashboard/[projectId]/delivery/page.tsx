@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { NativeGuestDeliveryCenter } from '@/components/projects/native-guest-delivery-center';
+import { PublicSocialShareKit } from '@/components/projects/public-social-share-kit';
 import {
   OperationalDataSurface,
   OperationalEmptyState,
@@ -22,7 +23,7 @@ import { deriveDeliveryDistribution } from '@/modules/delivery/delivery-distribu
 import { getGuestDistributionCenterForVerifiedProject } from '@/modules/delivery/delivery-handoff.service';
 import { deriveDeliveryReadiness } from '@/modules/delivery/delivery-readiness';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
-import { getCurrentPublishedInvitationForVerifiedProject } from '@/modules/publications/publication.service';
+import { getPublicSocialShareForVerifiedProject } from '@/modules/public-social-share/public-social-share.service';
 
 type DeliveryCenterPageProps = {
   params: Promise<{ projectId: string }>;
@@ -33,6 +34,7 @@ type DeliveryScreen =
   | {
       kind: 'delivery';
       deliveryCenter: Awaited<ReturnType<typeof getGuestDistributionCenterForVerifiedProject>>;
+      publicShare: NonNullable<Awaited<ReturnType<typeof getPublicSocialShareForVerifiedProject>>>;
     };
 
 export const dynamic = 'force-dynamic';
@@ -43,7 +45,7 @@ function DeliveryBlockedState({ projectId }: { projectId: string }) {
   return (
     <OperationalWorkspace labelledBy="delivery-blocked-title">
       <OperationalHeader
-        description="Terbitkan versi undangan yang sudah kalian setujui sebelum menyiapkan pembagian manual untuk tamu."
+        description="Terbitkan versi undangan yang sudah kalian setujui sebelum menyiapkan pembagian manual untuk tamu atau membuat aset publik."
         eyebrow="Bagikan"
         title="Bagikan tersedia setelah undangan diterbitkan"
         titleId="delivery-blocked-title"
@@ -72,11 +74,12 @@ async function getDeliveryScreenOrNotFound(projectId: string): Promise<DeliveryS
     async () => {
       try {
         const project = await getOwnedProjectContextForRequest(projectId);
-        const publication = await getCurrentPublishedInvitationForVerifiedProject(project);
-        if (!publication) return { kind: 'blocked' };
+        const publicShare = await getPublicSocialShareForVerifiedProject(project);
+        if (!publicShare) return { kind: 'blocked' };
         return {
           deliveryCenter: await getGuestDistributionCenterForVerifiedProject(project),
           kind: 'delivery',
+          publicShare,
         };
       } catch (error) {
         if (error instanceof ProjectAccessDeniedError) notFound();
@@ -98,10 +101,11 @@ export default async function DeliveryCenterPage({ params }: DeliveryCenterPageP
     );
   }
 
-  const { deliveryCenter } = screen;
+  const { deliveryCenter, publicShare } = screen;
 
   return (
     <WorkspacePage kind="delivery" width="operations">
+      <PublicSocialShareKit model={publicShare} projectId={deliveryCenter.project.id} />
       <NativeGuestDeliveryCenter
         copyWhatsAppNumbersAction={copySelectedDeliveryWhatsAppNumbersAction.bind(null, {
           projectId: deliveryCenter.project.id,

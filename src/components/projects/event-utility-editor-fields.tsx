@@ -473,6 +473,51 @@ export function EventUtilityEditorFields({
                 value={event.livestreamHeading ?? ''}
               />
             </label>
+            <label className="text-seraya-text-primary space-y-2 text-sm font-semibold sm:col-span-2">
+              Pesan sebelum acara (opsional)
+              <textarea
+                className="bg-seraya-surface border-seraya-border-default min-h-24 w-full rounded-[var(--seraya-radius-md)] border px-3.5 py-3 leading-6 font-normal"
+                onChange={(change) =>
+                  onChange({
+                    ...event,
+                    livestreamPreEventMessage: change.currentTarget.value,
+                  })
+                }
+                placeholder="Siaran akan dibuka menjelang acara dimulai."
+                value={event.livestreamPreEventMessage ?? ''}
+              />
+            </label>
+            <label className="text-seraya-text-primary space-y-2 text-sm font-semibold sm:col-span-2">
+              Deskripsi siaran (opsional)
+              <textarea
+                className="bg-seraya-surface border-seraya-border-default min-h-24 w-full rounded-[var(--seraya-radius-md)] border px-3.5 py-3 leading-6 font-normal"
+                onChange={(change) =>
+                  onChange({
+                    ...event,
+                    livestreamDescription: change.currentTarget.value,
+                  })
+                }
+                placeholder="Saksikan momen kami dari mana pun Anda berada."
+                value={event.livestreamDescription ?? ''}
+              />
+            </label>
+            <label className="text-seraya-text-primary space-y-2 text-sm font-semibold sm:col-span-2">
+              Setelah acara selesai
+              <select
+                className="bg-seraya-surface border-seraya-border-default min-h-11 w-full rounded-[var(--seraya-radius-md)] border px-3.5 font-normal"
+                onChange={(change) =>
+                  onChange({
+                    ...event,
+                    livestreamPostEventMode:
+                      change.currentTarget.value === 'hide' ? 'hide' : 'recording',
+                  })
+                }
+                value={event.livestreamPostEventMode ?? 'recording'}
+              >
+                <option value="recording">Tampilkan sebagai rekaman</option>
+                <option value="hide">Sembunyikan bagian siaran</option>
+              </select>
+            </label>
           </div>
         ) : null}
       </div>

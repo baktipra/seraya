@@ -23,8 +23,11 @@ export type InvitationScheduleItemViewModel = {
   endTime?: string | null;
   id?: string;
   latitude?: number | null;
+  livestreamDescription?: string | null;
   livestreamEnabled?: boolean;
   livestreamHeading?: string | null;
+  livestreamPostEventMode?: 'hide' | 'recording';
+  livestreamPreEventMessage?: string | null;
   livestreamUrl?: string | null;
   locationSource?: 'current_location' | 'google_place' | 'manual_pin' | null;
   longitude?: number | null;
@@ -136,8 +139,11 @@ function createScheduleItemViewModel(event: EventScheduleItemV1): InvitationSche
     endTime: event.endTime,
     id: event.id,
     latitude: event.latitude ?? null,
+    livestreamDescription: event.livestreamDescription ?? null,
     livestreamEnabled: event.livestreamEnabled === true,
     livestreamHeading: event.livestreamHeading ?? null,
+    livestreamPostEventMode: event.livestreamPostEventMode ?? 'recording',
+    livestreamPreEventMessage: event.livestreamPreEventMessage ?? null,
     livestreamUrl: getSafeHttpsHref(event.livestreamUrl),
     locationSource: event.locationSource ?? null,
     longitude: event.longitude ?? null,
@@ -167,8 +173,11 @@ function createLegacyEventPartViewModel(
     endTime: part.endTime,
     id,
     latitude: null,
+    livestreamDescription: null,
     livestreamEnabled: false,
     livestreamHeading: null,
+    livestreamPostEventMode: 'recording',
+    livestreamPreEventMessage: null,
     livestreamUrl: null,
     locationSource: null,
     longitude: null,

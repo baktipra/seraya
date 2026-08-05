@@ -10,6 +10,7 @@ import {
   getGuestEventCountdownState,
   getGuestEventMapEmbedHref,
   getGuestEventRouteHref,
+  getRemoteAttendancePresentation,
   getYoutubeEmbedHref,
   type GuestEventUtilityEvent,
 } from './guest-event-utility-core';
@@ -41,8 +42,11 @@ function toUtilityEvent(item: InvitationScheduleItemViewModel): GuestEventUtilit
     endTime: item.endTime ?? null,
     id: item.id,
     latitude: item.latitude ?? null,
+    livestreamDescription: item.livestreamDescription ?? null,
     livestreamEnabled: item.livestreamEnabled,
     livestreamHeading: item.livestreamHeading ?? null,
+    livestreamPostEventMode: item.livestreamPostEventMode ?? 'recording',
+    livestreamPreEventMessage: item.livestreamPreEventMessage ?? null,
     livestreamUrl: item.livestreamUrl ?? null,
     locationSource: item.locationSource ?? null,
     longitude: item.longitude ?? null,
@@ -142,6 +146,100 @@ function CountdownPanel({
   );
 }
 
+function RemoteAttendance({
+  event,
+  templateKey,
+  timeZone,
+}: {
+  event: GuestEventUtilityEvent;
+  templateKey: InvitationTemplateKey;
+  timeZone: string;
+}) {
+  const [now, setNow] = useState<number | null>(null);
+  const [livestreamOpen, setLivestreamOpen] = useState(false);
+
+  useEffect(() => {
+    const updateNow = () => setNow(Date.now());
+    const initialTimer = window.setTimeout(updateNow, 0);
+    const intervalTimer = window.setInterval(updateNow, 30_000);
+
+    return () => {
+      window.clearTimeout(initialTimer);
+      window.clearInterval(intervalTimer);
+    };
+  }, []);
+
+  if (now === null) return null;
+
+  const presentation = getRemoteAttendancePresentation(event, now, timeZone);
+  if (presentation.phase === 'hidden') return null;
+
+  const youtubeEmbedHref = getYoutubeEmbedHref(event.livestreamUrl);
+  const canEmbed = presentation.phase !== 'before' && Boolean(youtubeEmbedHref);
+
+  return (
+    <section
+      className="mt-5 rounded-2xl border border-current/15 p-4"
+      data-event-livestream
+      data-remote-attendance-phase={presentation.phase}
+    >
+      <p className="text-[0.62rem] font-bold tracking-[0.15em] uppercase opacity-55">
+        {presentation.phase === 'before'
+          ? 'Hadir dari jarak jauh'
+          : presentation.phase === 'live'
+            ? 'Siaran tersedia sekarang'
+            : 'Rekaman acara'}
+      </p>
+      <h4 className="mt-2 font-serif text-xl leading-tight">{presentation.heading}</h4>
+      {presentation.description ? (
+        <p className="mt-2 text-sm leading-6 opacity-72">{presentation.description}</p>
+      ) : null}
+      <div className="mt-4 flex flex-wrap gap-2">
+        {presentation.phase === 'before' ? (
+          <a
+            className={`inline-flex min-h-11 items-center rounded-full px-4 text-sm font-semibold ${accentClassByTemplate[templateKey]}`}
+            href={getGoogleCalendarHref(event, timeZone)}
+            rel="noreferrer"
+            target="_blank"
+          >
+            Ingatkan saya
+          </a>
+        ) : null}
+        {canEmbed ? (
+          <button
+            aria-expanded={livestreamOpen}
+            className={`min-h-11 rounded-full px-4 text-sm font-semibold ${accentClassByTemplate[templateKey]}`}
+            onClick={() => setLivestreamOpen((open) => !open)}
+            type="button"
+          >
+            {livestreamOpen ? 'Tutup video' : presentation.actionLabel}
+          </button>
+        ) : null}
+        <a
+          className="inline-flex min-h-11 items-center rounded-full border border-current/25 px-4 text-sm font-semibold"
+          href={presentation.watchHref}
+          rel="noreferrer"
+          target="_blank"
+        >
+          Buka di YouTube
+        </a>
+      </div>
+      {livestreamOpen && youtubeEmbedHref ? (
+        <div className="mt-4 aspect-video overflow-hidden rounded-2xl bg-black">
+          <iframe
+            allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            className="h-full w-full border-0"
+            loading="lazy"
+            src={youtubeEmbedHref}
+            title={presentation.heading}
+          />
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
 function EventUtilityCard({
   event,
   index,
@@ -154,15 +252,11 @@ function EventUtilityCard({
   timeZone: string;
 }) {
   const [mapOpen, setMapOpen] = useState(false);
-  const [livestreamOpen, setLivestreamOpen] = useState(false);
   const routeHref = getGuestEventRouteHref(event);
   const mapEmbedHref = getGuestEventMapEmbedHref(
     event,
     process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
   );
-  const youtubeEmbedHref = event.livestreamEnabled
-    ? getYoutubeEmbedHref(event.livestreamUrl)
-    : null;
 
   return (
     <article
@@ -256,48 +350,7 @@ function EventUtilityCard({
         </div>
       ) : null}
 
-      {event.livestreamEnabled && event.livestreamUrl ? (
-        <section className="mt-5 rounded-2xl border border-current/15 p-4" data-event-livestream>
-          <p className="text-[0.62rem] font-bold tracking-[0.15em] uppercase opacity-55">
-            Hadir dari jarak jauh
-          </p>
-          <h4 className="mt-2 font-serif text-xl leading-tight">
-            {event.livestreamHeading ?? `Siaran langsung ${event.title}`}
-          </h4>
-          <div className="mt-4 flex flex-wrap gap-2">
-            {youtubeEmbedHref ? (
-              <button
-                aria-expanded={livestreamOpen}
-                className={`min-h-11 rounded-full px-4 text-sm font-semibold ${accentClassByTemplate[templateKey]}`}
-                onClick={() => setLivestreamOpen((open) => !open)}
-                type="button"
-              >
-                {livestreamOpen ? 'Tutup siaran' : 'Tonton siaran'}
-              </button>
-            ) : null}
-            <a
-              className="inline-flex min-h-11 items-center rounded-full border border-current/25 px-4 text-sm font-semibold"
-              href={event.livestreamUrl}
-              rel="noreferrer"
-              target="_blank"
-            >
-              Buka di YouTube
-            </a>
-          </div>
-          {livestreamOpen && youtubeEmbedHref ? (
-            <div className="mt-4 aspect-video overflow-hidden rounded-2xl bg-black">
-              <iframe
-                allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                className="h-full w-full border-0"
-                loading="lazy"
-                src={youtubeEmbedHref}
-                title={event.livestreamHeading ?? `Siaran langsung ${event.title}`}
-              />
-            </div>
-          ) : null}
-        </section>
-      ) : null}
+      <RemoteAttendance event={event} templateKey={templateKey} timeZone={timeZone} />
     </article>
   );
 }
@@ -327,7 +380,7 @@ export function GuestEventUtility({
     <section
       aria-labelledby="guest-event-utility-title"
       className={`mx-auto my-0 w-full max-w-[72rem] border-x border-t px-4 py-10 sm:rounded-[2rem] sm:border sm:px-7 sm:py-12 ${shellClassByTemplate[templateKey]}`}
-      data-guest-event-utility="v4h"
+      data-guest-event-utility="v4i"
       data-template-key={templateKey}
     >
       <div className="mx-auto max-w-4xl">
@@ -341,7 +394,8 @@ export function GuestEventUtility({
           Jadwal yang mudah disimpan dan ditemukan
         </h2>
         <p className="mx-auto mt-4 max-w-2xl text-center text-sm leading-7 opacity-72 sm:text-base">
-          Simpan acara ke kalender, buka rute, baca petunjuk kedatangan, atau ikuti siaran langsung.
+          Simpan acara ke kalender, buka rute, baca petunjuk kedatangan, atau ikuti acara dari jarak
+          jauh.
         </p>
 
         <div className="mt-8">
