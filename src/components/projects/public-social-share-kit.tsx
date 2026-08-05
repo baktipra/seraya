@@ -103,11 +103,23 @@ export function PublicSocialShareKit({ model, projectId }: PublicSocialShareKitP
             </p>
           </div>
 
-          <div className="border-seraya-line bg-seraya-canvas rounded-[var(--seraya-radius-md)] border p-4">
-            <p className="text-seraya-text text-sm font-semibold">Versi publik siap dibagikan</p>
+          <div
+            className={`rounded-[var(--seraya-radius-md)] border p-4 ${
+              model.isSynchronized
+                ? 'border-seraya-line bg-seraya-canvas'
+                : 'border-seraya-status-warning/40 bg-seraya-status-warning/10'
+            }`}
+            data-public-share-sync={model.isSynchronized ? 'synchronized' : 'draft-newer'}
+          >
+            <p className="text-seraya-text text-sm font-semibold">
+              {model.isSynchronized
+                ? 'Versi publik siap dibagikan'
+                : 'Aset publik masih mengikuti versi terakhir yang diterbitkan'}
+            </p>
             <p className="text-seraya-text-muted mt-1 text-xs leading-5">
-              Snapshot revisi {model.revision}. Story akan mengikuti isi yang terakhir diterbitkan,
-              bukan perubahan draft yang belum dipublish.
+              {model.isSynchronized
+                ? `Snapshot revisi ${model.revision} sudah sinkron dengan draft saat ini.`
+                : `Draft telah berubah setelah snapshot revisi ${model.revision}. Publish ulang agar Story dan QR memakai isi terbaru.`}
             </p>
           </div>
 
