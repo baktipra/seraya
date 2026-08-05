@@ -1,3 +1,5 @@
+import type { Route } from 'next';
+
 import { InvitationStudioModePlaceholder } from '../../../../../src/components/projects/invitation-studio-mode-placeholder';
 import { InvitationStudioShell } from '../../../../../src/components/projects/invitation-studio-shell';
 import { parseInvitationStudioMode } from '../../../../../src/components/projects/invitation-studio.types';
@@ -39,7 +41,7 @@ export default async function InvitationStudioSliceAFixturePage({
           initialMode={parseInvitationStudioMode(query.mode)}
           media={<FixturePanel label="Media" />}
           preview={<FixturePanel label="Preview" />}
-          previewHref="/invitation-studio-slice-a"
+          previewHref={'/invitation-studio-slice-a' as Route}
           publish={<FixturePanel label="Terbitkan" />}
           statusLabel="Undangan aktif"
           statusTone="success"
