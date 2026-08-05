@@ -14,6 +14,7 @@ export type PublicShareCta = (typeof PUBLIC_SHARE_CTA_OPTIONS)[number];
 export const publicShareRenderOptionsSchema = z
   .object({
     cta: z.enum(PUBLIC_SHARE_CTA_OPTIONS).default('open_invitation'),
+    selectedImageId: z.string().uuid().nullable().default(null),
     showQr: z.boolean().default(true),
     showSerayaBrand: z.boolean().default(true),
     showVenue: z.boolean().default(false),
@@ -26,6 +27,7 @@ export type PublicSocialShareModel = Readonly<{
   coupleLabel: string;
   eventDate: string;
   eventTitle: string;
+  galleryImages: ReadonlyArray<Readonly<{ alt: string; id: string; src: string }>>;
   isSynchronized: boolean;
   paletteKey: string;
   publicUrl: string;
@@ -65,6 +67,7 @@ export function createPublicShareFingerprint(
     String(model.revision),
     model.templateKey,
     model.paletteKey,
+    options.selectedImageId ?? 'no-photo',
     options.cta,
     options.showQr ? 'qr' : 'no-qr',
     options.showVenue ? 'venue' : 'no-venue',
