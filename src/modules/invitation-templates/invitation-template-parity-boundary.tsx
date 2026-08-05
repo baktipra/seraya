@@ -1,10 +1,11 @@
-import type { InvitationTemplateId } from './invitation-template.types';
+import { GuestEventUtility } from './guest-event-utility';
+import { getInvitationTemplateParityDescriptor } from './invitation-template-parity';
 import type {
   InvitationTemplateComponent,
+  InvitationTemplateId,
   InvitationTemplateProps,
   InvitationTemplateRenderContextV1,
 } from './invitation-template.types';
-import { getInvitationTemplateParityDescriptor } from './invitation-template-parity';
 
 import styles from './invitation-template-parity-boundary.module.css';
 
@@ -24,9 +25,10 @@ function getParitySafeRenderContext(
 /**
  * Collection-level guardrail shared by every guest template.
  *
- * It never owns art direction or invitation content. It strips accidental
- * personal slots from non-personal surfaces and supplies only neutral layout
- * resilience that should be identical across the collection.
+ * It strips accidental personal slots from non-personal surfaces and composes
+ * the public-safe V4H utility layer after each template-owned invitation
+ * journey. No guest identity, token, RSVP state, or delivery data crosses this
+ * boundary.
  */
 export function createInvitationTemplateParityBoundary(
   templateId: InvitationTemplateId,
@@ -49,6 +51,7 @@ export function createInvitationTemplateParityBoundary(
         data-surface={renderContext.surface}
       >
         <Template invitation={invitation} renderContext={paritySafeRenderContext} />
+        <GuestEventUtility invitation={invitation} templateKey={templateId} />
       </div>
     );
   };

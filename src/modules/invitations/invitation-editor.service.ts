@@ -16,6 +16,7 @@ import {
 import {
   derivePrimaryEventCompatibility,
   invitationDraftContentSchema,
+  type EventScheduleV1,
 } from './invitation-draft.schema';
 import type { InvitationDraft } from './invitation-draft.types';
 
@@ -64,16 +65,40 @@ export async function getInvitationEditorForCurrentUser(
   return getInvitationEditorForVerifiedProject(project);
 }
 
+function normalizeOptionalCoordinate(value: string | undefined) {
+  const normalized = value?.trim() ?? '';
+  return normalized.length > 0 ? Number(normalized) : null;
+}
+
+function normalizeOptionalText(value: string | undefined) {
+  const normalized = value?.trim() ?? '';
+  return normalized.length > 0 ? normalized : null;
+}
+
 function applyEditorInputToActiveDraft(
   currentContent: InvitationDraft['content'],
   input: InvitationEditorFormInput['content'],
 ) {
-  const eventSchedule = {
+  const eventSchedule: EventScheduleV1 = {
     events: input.eventSchedule.events.map((event) => ({
+      arrivalNote: normalizeOptionalText(event.arrivalNote),
+      countdownEnabled: event.countdownEnabled !== false,
       date: event.date,
       endTime: event.endTime,
       id: event.id,
+      latitude: normalizeOptionalCoordinate(event.latitude),
+      livestreamEnabled: event.livestreamEnabled === true,
+      livestreamHeading: normalizeOptionalText(event.livestreamHeading),
+      livestreamUrl: normalizeOptionalText(event.livestreamUrl),
+      locationSource:
+        event.locationSource === 'google_place' ||
+        event.locationSource === 'current_location' ||
+        event.locationSource === 'manual_pin'
+          ? event.locationSource
+          : null,
+      longitude: normalizeOptionalCoordinate(event.longitude),
       mapsUrl: event.mapsUrl,
+      placeId: normalizeOptionalText(event.placeId),
       startTime: event.startTime,
       title: event.title,
       venueAddress: event.venueAddress,

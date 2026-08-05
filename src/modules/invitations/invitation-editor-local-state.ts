@@ -55,11 +55,6 @@ export type InvitationEditorLocalAction =
       value: boolean | string | null;
     };
 
-/**
- * Browser-only invitation state. It deliberately mirrors the draft document
- * while keeping gallery membership, legacy compatibility fields, and metadata
- * outside the editable action surface.
- */
 export function invitationEditorLocalContentReducer(
   content: InvitationDraftContent,
   action: InvitationEditorLocalAction,
@@ -124,11 +119,6 @@ export function invitationEditorLocalContentReducer(
   }
 }
 
-/**
- * Creates the strict browser submission payload used when only the active
- * editor chapter is mounted. Gallery membership, compatibility mirrors, and
- * metadata are deliberately excluded and remain server-owned.
- */
 export function createInvitationEditorSubmissionPayload(content: InvitationDraftContent) {
   return {
     closing: {
@@ -161,10 +151,19 @@ export function createInvitationEditorSubmissionPayload(content: InvitationDraft
     },
     eventSchedule: {
       events: content.eventSchedule.events.map((event) => ({
+        arrivalNote: event.arrivalNote ?? '',
+        countdownEnabled: event.countdownEnabled !== false,
         date: event.date,
         endTime: event.endTime,
         id: event.id,
+        latitude: event.latitude?.toString() ?? '',
+        livestreamEnabled: event.livestreamEnabled === true,
+        livestreamHeading: event.livestreamHeading ?? '',
+        livestreamUrl: event.livestreamUrl ?? '',
+        locationSource: event.locationSource ?? '',
+        longitude: event.longitude?.toString() ?? '',
         mapsUrl: event.mapsUrl,
+        placeId: event.placeId ?? '',
         startTime: event.startTime,
         title: event.title,
         venueAddress: event.venueAddress,
@@ -191,10 +190,6 @@ export function createInvitationEditorSubmissionPayload(content: InvitationDraft
   };
 }
 
-/**
- * Client-safe bridge into the shared template view model. The only media it
- * can expose are render-safe URLs supplied by the owner-authorized server load.
- */
 export function createInvitationEditorPreviewViewModel(input: {
   content: InvitationDraftContent;
   galleryImages: InvitationGalleryImage[];

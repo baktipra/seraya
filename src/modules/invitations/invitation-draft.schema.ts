@@ -19,6 +19,7 @@ export const INVITATION_DRAFT_SCHEMA_VERSION = 1 as const;
 const htmlTagPattern = /<\/?[a-z][^>]*>|<!--[\s\S]*?-->|<!doctype\s+html[^>]*>/i;
 const dateOnlyPattern = /^\d{4}-\d{2}-\d{2}$/;
 const timePattern = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
+const youtubeVideoIdPattern = /^[A-Za-z0-9_-]{6,15}$/;
 const legacyEventScheduleItemId = '00000000-0000-4000-8000-000000000001';
 
 function isIsoDateOnly(value: string) {
@@ -76,29 +77,63 @@ function nullableTime(label: string) {
   );
 }
 
-const nullableHttpsUrl = z.preprocess(
-  (value) => {
-    if (typeof value !== 'string') {
-      return value;
+function nullableHttpsUrl(label: string) {
+  return z.preprocess(
+    (value) => {
+      if (typeof value !== 'string') {
+        return value;
+      }
+
+      const normalized = value.trim();
+      return normalized.length === 0 ? null : normalized;
+    },
+    z
+      .string()
+      .max(2048, `${label} maksimal 2048 karakter.`)
+      .refine(hasNoRawHtml, `${label} tidak boleh berisi HTML.`)
+      .url(`${label} harus berupa URL yang valid.`)
+      .refine((value) => {
+        try {
+          return new URL(value).protocol === 'https:';
+        } catch {
+          return false;
+        }
+      }, `${label} harus memakai HTTPS.`)
+      .nullable(),
+  );
+}
+
+const nullableMapUrl = nullableHttpsUrl('Link peta');
+const nullableLivestreamUrl = nullableHttpsUrl('Link YouTube');
+
+function getYoutubeVideoId(value: string | null | undefined) {
+  if (!value) {
+    return null;
+  }
+
+  try {
+    const url = new URL(value);
+    const host = url.hostname.toLowerCase().replace(/^www\./, '');
+    let candidate: string | null = null;
+
+    if (host === 'youtu.be') {
+      candidate = url.pathname.split('/').filter(Boolean)[0] ?? null;
+    } else if (host === 'youtube.com' || host.endsWith('.youtube.com')) {
+      if (url.pathname === '/watch') {
+        candidate = url.searchParams.get('v');
+      } else {
+        const segments = url.pathname.split('/').filter(Boolean);
+        candidate = ['embed', 'live', 'shorts'].includes(segments[0] ?? '')
+          ? (segments[1] ?? null)
+          : null;
+      }
     }
 
-    const normalized = value.trim();
-    return normalized.length === 0 ? null : normalized;
-  },
-  z
-    .string()
-    .max(2048, 'Link peta maksimal 2048 karakter.')
-    .refine(hasNoRawHtml, 'Link peta tidak boleh berisi HTML.')
-    .url('Link peta harus berupa URL yang valid.')
-    .refine((value) => {
-      try {
-        return new URL(value).protocol === 'https:';
-      } catch {
-        return false;
-      }
-    }, 'Link peta harus memakai HTTPS.')
-    .nullable(),
-);
+    return candidate && youtubeVideoIdPattern.test(candidate) ? candidate : null;
+  } catch {
+    return null;
+  }
+}
 
 const invitationEventPartSchema = z
   .object({
@@ -112,13 +147,25 @@ const invitationEventPartSchema = z
 
 const eventScheduleItemSchema = z
   .object({
+    arrivalNote: nullableText(600, 'Petunjuk kedatangan').optional(),
+    countdownEnabled: z.boolean().optional(),
     date: z
       .string()
       .trim()
       .refine(isIsoDateOnly, 'Tanggal acara harus memakai format YYYY-MM-DD yang valid.'),
     endTime: nullableTime('Waktu selesai'),
     id: z.string().trim().uuid('ID acara tidak valid.'),
-    mapsUrl: nullableHttpsUrl,
+    latitude: z.number().finite().min(-90).max(90).nullable().optional(),
+    livestreamEnabled: z.boolean().optional(),
+    livestreamHeading: nullableText(160, 'Judul siaran langsung').optional(),
+    livestreamUrl: nullableLivestreamUrl.optional(),
+    locationSource: z
+      .enum(['google_place', 'current_location', 'manual_pin'])
+      .nullable()
+      .optional(),
+    longitude: z.number().finite().min(-180).max(180).nullable().optional(),
+    mapsUrl: nullableMapUrl,
+    placeId: nullableText(240, 'Place ID').optional(),
     startTime: z.string().trim().regex(timePattern, 'Waktu mulai harus memakai format HH:mm.'),
     title: requiredText(80, 'Nama acara'),
     venueAddress: nullableText(280, 'Alamat tempat'),
@@ -131,6 +178,41 @@ const eventScheduleItemSchema = z
         code: 'custom',
         message: 'Waktu selesai tidak boleh lebih awal dari waktu mulai.',
         path: ['endTime'],
+      });
+    }
+
+    const hasLatitude = typeof event.latitude === 'number';
+    const hasLongitude = typeof event.longitude === 'number';
+
+    if (hasLatitude !== hasLongitude) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Koordinat lokasi harus memiliki latitude dan longitude.',
+        path: [hasLatitude ? 'longitude' : 'latitude'],
+      });
+    }
+
+    if (event.locationSource && (!hasLatitude || !hasLongitude)) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Sumber lokasi terstruktur memerlukan koordinat yang lengkap.',
+        path: ['locationSource'],
+      });
+    }
+
+    if (event.livestreamEnabled && !event.livestreamUrl) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Tambahkan link YouTube ketika siaran langsung diaktifkan.',
+        path: ['livestreamUrl'],
+      });
+    }
+
+    if (event.livestreamUrl && !getYoutubeVideoId(event.livestreamUrl)) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Gunakan link video, live, Shorts, atau embed YouTube yang valid.',
+        path: ['livestreamUrl'],
       });
     }
   });
@@ -258,7 +340,7 @@ const invitationDraftContentBaseSchema = z
       .object({
         address: nullableText(800, 'Alamat acara'),
         enabled: z.boolean(),
-        mapsUrl: nullableHttpsUrl,
+        mapsUrl: nullableMapUrl,
         venueName: nullableText(200, 'Nama lokasi'),
       })
       .strict(),

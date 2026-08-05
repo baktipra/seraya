@@ -16,8 +16,21 @@ export type InvitationPersonViewModel = {
 
 export type InvitationScheduleItemViewModel = {
   address: string | null;
+  arrivalNote?: string | null;
+  countdownEnabled?: boolean;
+  date?: string | null;
   dateLabel: string | null;
+  endTime?: string | null;
+  id?: string;
+  latitude?: number | null;
+  livestreamEnabled?: boolean;
+  livestreamHeading?: string | null;
+  livestreamUrl?: string | null;
+  locationSource?: 'current_location' | 'google_place' | 'manual_pin' | null;
+  longitude?: number | null;
   mapsHref: string | null;
+  placeId?: string | null;
+  startTime?: string | null;
   timeLabel: string | null;
   title: string | null;
   venueName: string | null;
@@ -77,6 +90,7 @@ export type InvitationViewModel = {
     body: string | null;
     heading: string | null;
   } | null;
+  timezone?: string;
 };
 
 export type InvitationRendererProjectMetadata = {
@@ -100,7 +114,7 @@ function formatTimeRange(startTime: string | null, endTime: string | null) {
   return formattedStartTime ?? formattedEndTime;
 }
 
-function getSafeHttpsHref(value: string | null) {
+function getSafeHttpsHref(value: string | null | undefined) {
   if (!value) {
     return null;
   }
@@ -115,8 +129,21 @@ function getSafeHttpsHref(value: string | null) {
 function createScheduleItemViewModel(event: EventScheduleItemV1): InvitationScheduleItemViewModel {
   return {
     address: event.venueAddress,
+    arrivalNote: event.arrivalNote ?? null,
+    countdownEnabled: event.countdownEnabled !== false,
+    date: event.date,
     dateLabel: formatInvitationDate(event.date),
+    endTime: event.endTime,
+    id: event.id,
+    latitude: event.latitude ?? null,
+    livestreamEnabled: event.livestreamEnabled === true,
+    livestreamHeading: event.livestreamHeading ?? null,
+    livestreamUrl: getSafeHttpsHref(event.livestreamUrl),
+    locationSource: event.locationSource ?? null,
+    longitude: event.longitude ?? null,
     mapsHref: getSafeHttpsHref(event.mapsUrl),
+    placeId: event.placeId ?? null,
+    startTime: event.startTime,
     timeLabel: formatTimeRange(event.startTime, event.endTime),
     title: event.title,
     venueName: event.venueName,
@@ -125,6 +152,7 @@ function createScheduleItemViewModel(event: EventScheduleItemV1): InvitationSche
 
 function createLegacyEventPartViewModel(
   part: InvitationDraftContent['events']['ceremony'],
+  id: string,
 ): InvitationScheduleItemViewModel | null {
   if (!part.enabled || (!part.title && !part.date && !part.startTime && !part.endTime)) {
     return null;
@@ -132,8 +160,21 @@ function createLegacyEventPartViewModel(
 
   return {
     address: null,
+    arrivalNote: null,
+    countdownEnabled: true,
+    date: part.date,
     dateLabel: formatInvitationDate(part.date),
+    endTime: part.endTime,
+    id,
+    latitude: null,
+    livestreamEnabled: false,
+    livestreamHeading: null,
+    livestreamUrl: null,
+    locationSource: null,
+    longitude: null,
     mapsHref: null,
+    placeId: null,
+    startTime: part.startTime,
     timeLabel: formatTimeRange(part.startTime, part.endTime),
     title: part.title,
     venueName: null,
@@ -157,7 +198,8 @@ function createLegacyLocationViewModel(content: InvitationDraftContent) {
 
 /**
  * The sole data mapping boundary between validated invitation content and visual
- * templates. It accepts no database client and exposes plain React text only.
+ * templates. It accepts no database client, exposes public invitation content
+ * only, and never includes guest names, tokens, RSVP state, or delivery data.
  */
 export function createInvitationViewModel({
   draft,
@@ -170,8 +212,11 @@ export function createInvitationViewModel({
   const modernPrimaryDate = content.eventSchedule.events[0]?.date ?? null;
   const primaryDate = isLegacySchedule ? legacyPrimaryDate : modernPrimaryDate;
   const primaryDateLabel = formatInvitationDate(primaryDate);
-  const legacyCeremony = createLegacyEventPartViewModel(content.events.ceremony);
-  const legacyReception = createLegacyEventPartViewModel(content.events.reception);
+  const legacyCeremony = createLegacyEventPartViewModel(content.events.ceremony, 'legacy-ceremony');
+  const legacyReception = createLegacyEventPartViewModel(
+    content.events.reception,
+    'legacy-reception',
+  );
   const legacyItems = [legacyCeremony, legacyReception].filter(
     (event): event is InvitationScheduleItemViewModel => event !== null,
   );
@@ -251,5 +296,6 @@ export function createInvitationViewModel({
             heading: content.story.heading,
           }
         : null,
+    timezone: content.meta.timezone,
   } satisfies InvitationViewModel;
 }
