@@ -47,6 +47,20 @@ export function createDefaultInvitationDraftContent(
         parentLine: null,
       },
     },
+    coupleIdentity: {
+      monogram: {
+        enabled: false,
+        style: 'initials',
+        text: null,
+      },
+      shortName: null,
+      socialLinks: {
+        instagram: null,
+        tiktok: null,
+        website: null,
+      },
+      weddingHashtag: null,
+    },
     eventSchedule: {
       events: [
         {
@@ -109,6 +123,11 @@ export function createDefaultInvitationDraftContent(
     meta: {
       locale: 'id-ID',
       timezone: project.default_timezone,
+    },
+    opening: {
+      message: null,
+      quote: null,
+      treatment: 'soft',
     },
     rsvp: {
       enabled: true,

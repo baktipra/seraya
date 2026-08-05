@@ -68,6 +68,12 @@ function snapshot(): PublishedInvitationSnapshot {
           personOne: { displayName: 'Raka', fullName: null, parentLine: null },
           personTwo: { displayName: 'Nadia', fullName: null, parentLine: null },
         },
+        coupleIdentity: {
+          monogram: { enabled: false, style: 'initials', text: null },
+          shortName: null,
+          socialLinks: { instagram: null, tiktok: null, website: null },
+          weddingHashtag: null,
+        },
         eventSchedule: {
           events: [
             {
@@ -92,6 +98,7 @@ function snapshot(): PublishedInvitationSnapshot {
         hero: { eyebrow: 'The Wedding Of', subtitle: null, title: 'Raka & Nadia' },
         location: { address: null, enabled: false, mapsUrl: null, venueName: null },
         meta: { locale: 'id-ID', timezone: 'Asia/Jakarta' },
+        opening: { message: null, quote: null, treatment: 'soft' },
         rsvp: { enabled: true, heading: null, lead: null },
         story: { body: null, enabled: false, heading: null },
         paletteKey: 'rose',

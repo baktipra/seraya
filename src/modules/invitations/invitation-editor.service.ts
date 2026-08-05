@@ -109,6 +109,13 @@ function applyEditorInputToActiveDraft(
     })),
   };
   const primaryCompatibility = derivePrimaryEventCompatibility(eventSchedule);
+  const coupleIdentity = input.coupleIdentity ?? {
+    monogram: { enabled: false, style: 'initials', text: '' },
+    shortName: '',
+    socialLinks: { instagram: '', tiktok: '', website: '' },
+    weddingHashtag: '',
+  };
+  const opening = input.opening ?? { message: '', quote: '', treatment: 'soft' };
   const paletteCandidate =
     input.paletteKey ??
     (input.templateKey === currentContent.templateKey ? currentContent.paletteKey : undefined);
@@ -119,6 +126,24 @@ function applyEditorInputToActiveDraft(
       enabled: input.closing.enabled,
       message: input.closing.message,
       signature: input.closing.signature,
+    },
+    coupleIdentity: {
+      monogram: {
+        enabled: coupleIdentity.monogram.enabled,
+        style:
+          coupleIdentity.monogram.style === 'joined_initials' ||
+          coupleIdentity.monogram.style === 'wordmark'
+            ? coupleIdentity.monogram.style
+            : 'initials',
+        text: coupleIdentity.monogram.text,
+      },
+      shortName: coupleIdentity.shortName,
+      socialLinks: {
+        instagram: coupleIdentity.socialLinks.instagram,
+        tiktok: coupleIdentity.socialLinks.tiktok,
+        website: coupleIdentity.socialLinks.website,
+      },
+      weddingHashtag: coupleIdentity.weddingHashtag,
     },
     digitalGift: {
       accounts: input.digitalGift.accounts.map((account) => ({
@@ -159,6 +184,14 @@ function applyEditorInputToActiveDraft(
     // timezone, gallery membership, or schema-level metadata.
     meta: currentContent.meta,
     gallery: currentContent.gallery,
+    opening: {
+      message: opening.message,
+      quote: opening.quote,
+      treatment:
+        opening.treatment === 'editorial' || opening.treatment === 'ceremonial'
+          ? opening.treatment
+          : 'soft',
+    },
     rsvp: {
       enabled: input.rsvp.enabled,
       heading: input.rsvp.heading,

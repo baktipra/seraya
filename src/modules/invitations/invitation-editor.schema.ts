@@ -40,8 +40,8 @@ const eventScheduleEventInputKeys = [
 const projectIdSchema = z.string().regex(databaseUuidShape, 'Project tidak valid.');
 const formTextSchema = z.string();
 const checkboxInputSchema = z
-  .union([z.literal('true'), z.literal(false)])
-  .transform((value) => value === 'true');
+  .union([z.literal('true'), z.literal(true), z.literal(false)])
+  .transform((value) => value === 'true' || value === true);
 
 const baseEditorFormFieldNames = [
   'projectId',
@@ -50,12 +50,23 @@ const baseEditorFormFieldNames = [
   'hero.eyebrow',
   'hero.title',
   'hero.subtitle',
+  'opening.message',
+  'opening.quote',
+  'opening.treatment',
   'couple.personOne.displayName',
   'couple.personOne.fullName',
   'couple.personOne.parentLine',
   'couple.personTwo.displayName',
   'couple.personTwo.fullName',
   'couple.personTwo.parentLine',
+  'coupleIdentity.monogram.enabled',
+  'coupleIdentity.monogram.style',
+  'coupleIdentity.monogram.text',
+  'coupleIdentity.shortName',
+  'coupleIdentity.weddingHashtag',
+  'coupleIdentity.socialLinks.instagram',
+  'coupleIdentity.socialLinks.tiktok',
+  'coupleIdentity.socialLinks.website',
   'story.enabled',
   'story.heading',
   'story.body',
@@ -120,6 +131,33 @@ const invitationEditorFormSchema = z
               .strict(),
           })
           .strict(),
+        coupleIdentity: z
+          .object({
+            monogram: z
+              .object({
+                enabled: checkboxInputSchema,
+                style: formTextSchema,
+                text: formTextSchema,
+              })
+              .strict(),
+            shortName: formTextSchema,
+            socialLinks: z
+              .object({
+                instagram: formTextSchema,
+                tiktok: formTextSchema,
+                website: formTextSchema,
+              })
+              .strict(),
+            weddingHashtag: formTextSchema,
+          })
+          .strict()
+          .optional()
+          .default({
+            monogram: { enabled: false, style: 'initials', text: '' },
+            shortName: '',
+            socialLinks: { instagram: '', tiktok: '', website: '' },
+            weddingHashtag: '',
+          }),
         digitalGift: z
           .object({
             accounts: z
@@ -179,6 +217,15 @@ const invitationEditorFormSchema = z
             title: formTextSchema,
           })
           .strict(),
+        opening: z
+          .object({
+            message: formTextSchema,
+            quote: formTextSchema,
+            treatment: formTextSchema,
+          })
+          .strict()
+          .optional()
+          .default({ message: '', quote: '', treatment: 'soft' }),
         rsvp: z
           .object({
             enabled: checkboxInputSchema,
@@ -213,7 +260,14 @@ const invitationEditorFormSchema = z
     }
   });
 
-export type InvitationEditorFormInput = z.output<typeof invitationEditorFormSchema>;
+type ParsedInvitationEditorFormInput = z.output<typeof invitationEditorFormSchema>;
+
+export type InvitationEditorFormInput = Omit<ParsedInvitationEditorFormInput, 'content'> & {
+  content: Omit<ParsedInvitationEditorFormInput['content'], 'coupleIdentity' | 'opening'> & {
+    coupleIdentity?: ParsedInvitationEditorFormInput['content']['coupleIdentity'];
+    opening?: ParsedInvitationEditorFormInput['content']['opening'];
+  };
+};
 
 export type InvitationEditorFieldErrors = Partial<Record<EditorFieldErrorName | 'form', string>>;
 

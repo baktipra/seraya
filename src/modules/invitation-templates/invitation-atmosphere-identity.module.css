@@ -1,0 +1,137 @@
+.opening,
+.footer {
+  box-sizing: border-box;
+  color: inherit;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.opening {
+  display: grid;
+  gap: 0.75rem;
+  max-width: 44rem;
+  padding: clamp(1.5rem, 5vw, 3.5rem) clamp(1.25rem, 5vw, 3rem) 1rem;
+}
+
+.opening[data-opening-treatment='editorial'] {
+  text-align: left;
+}
+
+.opening[data-opening-treatment='ceremonial'] {
+  border-block: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+  margin-block: 1rem 0;
+}
+
+.monogram {
+  font-family: var(--invitation-font-display, serif);
+  font-size: clamp(2.25rem, 9vw, 5.5rem);
+  letter-spacing: 0.08em;
+  line-height: 0.9;
+  margin: 0;
+}
+
+.monogram[data-monogram-style='joined_initials'] {
+  letter-spacing: 0.16em;
+}
+
+.monogram[data-monogram-style='wordmark'] {
+  font-size: clamp(1.8rem, 7vw, 4rem);
+  letter-spacing: 0.02em;
+}
+
+.shortName,
+.message,
+.quote,
+.hashtag {
+  margin: 0;
+}
+
+.shortName {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.message {
+  font-size: clamp(1rem, 2.4vw, 1.2rem);
+  line-height: 1.75;
+}
+
+.quote {
+  font-family: var(--invitation-font-display, serif);
+  font-size: clamp(1.15rem, 3.4vw, 1.7rem);
+  font-style: italic;
+  line-height: 1.55;
+  opacity: 0.82;
+}
+
+.footer {
+  display: grid;
+  gap: 1rem;
+  max-width: 42rem;
+  padding: 1rem clamp(1.25rem, 5vw, 3rem) clamp(2.5rem, 7vw, 5rem);
+}
+
+.hashtag {
+  font-family: var(--invitation-font-display, serif);
+  font-size: clamp(1.2rem, 3vw, 1.6rem);
+}
+
+.socialLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  justify-content: center;
+}
+
+.socialLinks a {
+  color: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.socialLinks a:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.3em;
+}
+
+.opening[data-template='roselle'] .monogram,
+.footer[data-template='roselle'] .hashtag {
+  font-style: italic;
+}
+
+.opening[data-template='aruna'],
+.footer[data-template='aruna'] {
+  border-left: 0.35rem solid currentColor;
+  text-align: left;
+}
+
+.opening[data-template='aruna'] .monogram {
+  font-family: inherit;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.footer[data-template='aruna'] .socialLinks {
+  justify-content: flex-start;
+}
+
+.opening[data-template='laras'],
+.footer[data-template='laras'] {
+  letter-spacing: 0.02em;
+}
+
+.footer[data-template='laras'] {
+  border-top: 1px solid color-mix(in srgb, currentColor 24%, transparent);
+}
+
+@media (max-width: 38rem) {
+  .opening[data-template='aruna'],
+  .footer[data-template='aruna'] {
+    margin-inline: 1rem;
+  }
+}

@@ -60,6 +60,26 @@ export type InvitationDigitalGiftViewModel = {
   lead: string | null;
 };
 
+export type InvitationOpeningViewModel = {
+  message: string | null;
+  quote: string | null;
+  treatment: 'soft' | 'editorial' | 'ceremonial';
+};
+
+export type InvitationIdentityViewModel = {
+  monogram: {
+    style: 'initials' | 'joined_initials' | 'wordmark';
+    text: string;
+  } | null;
+  shortName: string | null;
+  socialLinks: Array<{
+    href: string;
+    label: 'Instagram' | 'TikTok' | 'Website';
+    provider: 'instagram' | 'tiktok' | 'website';
+  }>;
+  weddingHashtag: string | null;
+};
+
 export type InvitationViewModel = {
   closing: {
     message: string | null;
@@ -70,6 +90,7 @@ export type InvitationViewModel = {
     personTwo: InvitationPersonViewModel;
   };
   digitalGift: InvitationDigitalGiftViewModel | null;
+  identity?: InvitationIdentityViewModel | null;
   events: {
     items: InvitationScheduleItemViewModel[];
     primaryDateLabel: string | null;
@@ -85,6 +106,7 @@ export type InvitationViewModel = {
   // This remains only for a legacy normalized document, preserving its old
   // separate location presentation until that owner explicitly saves again.
   location: InvitationLocationViewModel | null;
+  opening?: InvitationOpeningViewModel | null;
   rsvp: {
     heading: string;
     lead: string;
@@ -127,6 +149,60 @@ function getSafeHttpsHref(value: string | null | undefined) {
   } catch {
     return null;
   }
+}
+
+function getInitial(value: string) {
+  return value.trim().charAt(0).toLocaleUpperCase('id-ID');
+}
+
+function createIdentityViewModel(
+  content: InvitationDraftContent,
+): InvitationIdentityViewModel | null {
+  const firstInitial = getInitial(content.couple.personOne.displayName);
+  const secondInitial = getInitial(content.couple.personTwo.displayName);
+  const fallbackText =
+    content.coupleIdentity.monogram.style === 'joined_initials'
+      ? `${firstInitial}${secondInitial}`
+      : content.coupleIdentity.monogram.style === 'wordmark'
+        ? (content.coupleIdentity.shortName ??
+          `${content.couple.personOne.displayName} · ${content.couple.personTwo.displayName}`)
+        : `${firstInitial} & ${secondInitial}`;
+  const monogram = content.coupleIdentity.monogram.enabled
+    ? {
+        style: content.coupleIdentity.monogram.style,
+        text: content.coupleIdentity.monogram.text ?? fallbackText,
+      }
+    : null;
+  const socialLinks: InvitationIdentityViewModel['socialLinks'] = [];
+  const instagram = getSafeHttpsHref(content.coupleIdentity.socialLinks.instagram);
+  const tiktok = getSafeHttpsHref(content.coupleIdentity.socialLinks.tiktok);
+  const website = getSafeHttpsHref(content.coupleIdentity.socialLinks.website);
+
+  if (instagram) {
+    socialLinks.push({ href: instagram, label: 'Instagram', provider: 'instagram' });
+  }
+  if (tiktok) {
+    socialLinks.push({ href: tiktok, label: 'TikTok', provider: 'tiktok' });
+  }
+  if (website) {
+    socialLinks.push({ href: website, label: 'Website', provider: 'website' });
+  }
+
+  const hasIdentity = Boolean(
+    monogram ||
+    content.coupleIdentity.shortName ||
+    content.coupleIdentity.weddingHashtag ||
+    socialLinks.length > 0,
+  );
+
+  return hasIdentity
+    ? {
+        monogram,
+        shortName: content.coupleIdentity.shortName,
+        socialLinks,
+        weddingHashtag: content.coupleIdentity.weddingHashtag,
+      }
+    : null;
 }
 
 function createScheduleItemViewModel(event: EventScheduleItemV1): InvitationScheduleItemViewModel {
@@ -243,6 +319,16 @@ export function createInvitationViewModel({
         primaryDateLabel,
       };
 
+  const identity = createIdentityViewModel(content);
+  const opening =
+    content.opening.message || content.opening.quote
+      ? {
+          message: content.opening.message,
+          quote: content.opening.quote,
+          treatment: content.opening.treatment,
+        }
+      : null;
+
   return {
     closing:
       content.closing.enabled && (content.closing.message || content.closing.signature)
@@ -277,6 +363,7 @@ export function createInvitationViewModel({
           }
         : null,
     events,
+    identity,
     gallery:
       content.gallery.enabled && galleryImages.length > 0
         ? {
@@ -292,6 +379,7 @@ export function createInvitationViewModel({
         `${content.couple.personOne.displayName} & ${content.couple.personTwo.displayName}`,
     },
     location: isLegacySchedule ? createLegacyLocationViewModel(content) : null,
+    opening,
     rsvp: content.rsvp.enabled
       ? {
           heading: content.rsvp.heading ?? 'Konfirmasi Kehadiran',

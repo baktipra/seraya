@@ -10,6 +10,10 @@ import type { InvitationDraftContent } from './invitation-draft.schema';
 
 type HeroField = keyof InvitationDraftContent['hero'];
 type PersonField = keyof InvitationDraftContent['couple']['personOne'];
+type OpeningField = keyof InvitationDraftContent['opening'];
+type CoupleIdentityField = 'shortName' | 'weddingHashtag';
+type CoupleMonogramField = keyof InvitationDraftContent['coupleIdentity']['monogram'];
+type CoupleSocialField = keyof InvitationDraftContent['coupleIdentity']['socialLinks'];
 type StoryField = keyof InvitationDraftContent['story'];
 type RsvpField = keyof InvitationDraftContent['rsvp'];
 type DigitalGiftField = Exclude<keyof InvitationDraftContent['digitalGift'], 'accounts'>;
@@ -20,10 +24,26 @@ export type InvitationEditorLocalAction =
   | { paletteKey: string; type: 'palette' }
   | { templateKey: InvitationTemplateKey; type: 'template' }
   | { field: HeroField; type: 'hero'; value: string | null }
+  | { field: OpeningField; type: 'opening-atmosphere'; value: string | null }
   | {
       field: PersonField;
       person: 'personOne' | 'personTwo';
       type: 'person';
+      value: string | null;
+    }
+  | {
+      field: CoupleIdentityField;
+      type: 'couple-identity';
+      value: string | null;
+    }
+  | {
+      field: CoupleMonogramField;
+      type: 'couple-monogram';
+      value: boolean | string | null;
+    }
+  | {
+      field: CoupleSocialField;
+      type: 'couple-social';
       value: string | null;
     }
   | {
@@ -74,6 +94,38 @@ export function invitationEditorLocalContentReducer(
       return {
         ...content,
         hero: { ...content.hero, [action.field]: action.value },
+      } as InvitationDraftContent;
+    case 'opening-atmosphere':
+      return {
+        ...content,
+        opening: { ...content.opening, [action.field]: action.value },
+      } as InvitationDraftContent;
+    case 'couple-identity':
+      return {
+        ...content,
+        coupleIdentity: { ...content.coupleIdentity, [action.field]: action.value },
+      } as InvitationDraftContent;
+    case 'couple-monogram':
+      return {
+        ...content,
+        coupleIdentity: {
+          ...content.coupleIdentity,
+          monogram: {
+            ...content.coupleIdentity.monogram,
+            [action.field]: action.value,
+          },
+        },
+      } as InvitationDraftContent;
+    case 'couple-social':
+      return {
+        ...content,
+        coupleIdentity: {
+          ...content.coupleIdentity,
+          socialLinks: {
+            ...content.coupleIdentity.socialLinks,
+            [action.field]: action.value,
+          },
+        },
       } as InvitationDraftContent;
     case 'person':
       return {
@@ -138,6 +190,20 @@ export function createInvitationEditorSubmissionPayload(content: InvitationDraft
         parentLine: content.couple.personTwo.parentLine,
       },
     },
+    coupleIdentity: {
+      monogram: {
+        enabled: content.coupleIdentity.monogram.enabled,
+        style: content.coupleIdentity.monogram.style,
+        text: content.coupleIdentity.monogram.text,
+      },
+      shortName: content.coupleIdentity.shortName,
+      socialLinks: {
+        instagram: content.coupleIdentity.socialLinks.instagram,
+        tiktok: content.coupleIdentity.socialLinks.tiktok,
+        website: content.coupleIdentity.socialLinks.website,
+      },
+      weddingHashtag: content.coupleIdentity.weddingHashtag,
+    },
     digitalGift: {
       accounts: content.digitalGift.accounts.map((account) => ({
         accountHolder: account.accountHolder,
@@ -177,6 +243,11 @@ export function createInvitationEditorSubmissionPayload(content: InvitationDraft
       eyebrow: content.hero.eyebrow,
       subtitle: content.hero.subtitle,
       title: content.hero.title,
+    },
+    opening: {
+      message: content.opening.message,
+      quote: content.opening.quote,
+      treatment: content.opening.treatment,
     },
     rsvp: {
       enabled: content.rsvp.enabled,
