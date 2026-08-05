@@ -6,8 +6,11 @@ export type GuestEventUtilityEvent = {
   endTime: string | null;
   id: string;
   latitude?: number | null;
+  livestreamDescription?: string | null;
   livestreamEnabled?: boolean;
   livestreamHeading?: string | null;
+  livestreamPostEventMode?: 'hide' | 'recording';
+  livestreamPreEventMessage?: string | null;
   livestreamUrl?: string | null;
   locationSource?: 'current_location' | 'google_place' | 'manual_pin' | null;
   longitude?: number | null;
@@ -29,6 +32,16 @@ export type GuestEventCountdownState = {
     seconds: number;
   };
 };
+
+export type RemoteAttendancePresentation =
+  | { phase: 'hidden' }
+  | {
+      actionLabel: string;
+      description: string | null;
+      heading: string;
+      phase: 'before' | 'live' | 'recording';
+      watchHref: string;
+    };
 
 const youtubeVideoIdPattern = /^[A-Za-z0-9_-]{6,15}$/;
 const compactDatePattern = /^\d{4}-\d{2}-\d{2}$/;
@@ -205,6 +218,60 @@ export function getYoutubeEmbedHref(value: string | null | undefined) {
     : null;
 }
 
+export function getYoutubeWatchHref(value: string | null | undefined) {
+  const videoId = parseYoutubeVideoId(value);
+  return videoId ? `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}` : null;
+}
+
+export function getRemoteAttendancePresentation(
+  event: GuestEventUtilityEvent,
+  now: number,
+  timeZone: string,
+): RemoteAttendancePresentation {
+  if (!event.livestreamEnabled) return { phase: 'hidden' };
+  const watchHref = getYoutubeWatchHref(event.livestreamUrl);
+  const range = getGuestEventEpochRange(event, timeZone);
+  if (!watchHref || !range) return { phase: 'hidden' };
+
+  const heading = event.livestreamHeading ?? `Siaran ${event.title}`;
+
+  if (now < range.start) {
+    return {
+      actionLabel: 'Buka di YouTube',
+      description:
+        event.livestreamPreEventMessage ??
+        'Siaran akan tersedia menjelang waktu acara. Simpan jadwal agar tidak terlewat.',
+      heading,
+      phase: 'before',
+      watchHref,
+    };
+  }
+
+  if (now < range.end) {
+    return {
+      actionLabel: 'Tonton siaran langsung',
+      description:
+        event.livestreamDescription ??
+        'Siaran acara tersedia. Status ini mengikuti jadwal undangan, bukan pemeriksaan status YouTube.',
+      heading,
+      phase: 'live',
+      watchHref,
+    };
+  }
+
+  if (event.livestreamPostEventMode === 'hide') return { phase: 'hidden' };
+
+  return {
+    actionLabel: 'Tonton rekaman acara',
+    description:
+      event.livestreamDescription ??
+      'Acara telah selesai. Rekaman dapat ditonton apabila video masih tersedia di YouTube.',
+    heading,
+    phase: 'recording',
+    watchHref,
+  };
+}
+
 export function getGuestEventRouteHref(event: GuestEventUtilityEvent) {
   const coordinates =
     typeof event.latitude === 'number' && typeof event.longitude === 'number'
@@ -289,9 +356,14 @@ function getCalendarEnd(event: GuestEventUtilityEvent) {
 }
 
 function createCalendarDescription(event: GuestEventUtilityEvent) {
+  const livestreamHref = event.livestreamEnabled
+    ? getYoutubeWatchHref(event.livestreamUrl)
+    : null;
+
   return [
     event.arrivalNote,
     getGuestEventRouteHref(event) ? `Rute: ${getGuestEventRouteHref(event)}` : null,
+    livestreamHref ? `Siaran daring: ${livestreamHref}` : null,
   ]
     .filter((value): value is string => Boolean(value))
     .join('\n');
