@@ -1,7 +1,9 @@
 import { ImageResponse } from 'next/og';
 import QRCode from 'qrcode';
+import { ZodError } from 'zod';
 
 import { AuthenticationRequiredError, requireCurrentUser } from '@/modules/auth/current-user';
+import { getPublicPublishedMediaBinary } from '@/modules/media/public-media.service';
 import { getOwnedProjectById } from '@/modules/projects/project.repository';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 import {
@@ -62,10 +64,26 @@ export async function GET(
     const search = new URL(request.url).searchParams;
     const options = publicShareRenderOptionsSchema.parse({
       cta: search.get('cta') ?? 'open_invitation',
+      selectedImageId: search.get('selectedImageId'),
       showQr: parseBoolean(search.get('showQr'), true),
       showSerayaBrand: parseBoolean(search.get('showSerayaBrand'), true),
       showVenue: parseBoolean(search.get('showVenue'), false),
     });
+    const selectedImage = options.selectedImageId
+      ? model.galleryImages.find((image) => image.id === options.selectedImageId)
+      : null;
+    if (options.selectedImageId && !selectedImage) return unavailable(404);
+
+    const selectedMedia = selectedImage
+      ? await getPublicPublishedMediaBinary(selectedImage.id)
+      : null;
+    if (selectedImage && !selectedMedia) return unavailable(404);
+
+    const photoDataUrl = selectedMedia
+      ? `data:${selectedMedia.asset.mime_type};base64,${Buffer.from(
+          await selectedMedia.bytes.arrayBuffer(),
+        ).toString('base64')}`
+      : null;
     const theme = TEMPLATE_STYLE[model.templateKey];
     const qrDataUrl = options.showQr
       ? await QRCode.toDataURL(model.publicUrl, {
@@ -92,6 +110,36 @@ export async function GET(
           width: '100%',
         }}
       >
+        {photoDataUrl ? (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              alt=""
+              src={photoDataUrl}
+              style={{
+                height: 760,
+                left: 64,
+                objectFit: 'cover',
+                opacity: model.templateKey === 'laras' ? 0.5 : 0.38,
+                position: 'absolute',
+                top: 64,
+                width: 952,
+              }}
+            />
+            <div
+              style={{
+                background: theme.background,
+                display: 'flex',
+                height: 760,
+                left: 64,
+                opacity: model.templateKey === 'aruna' ? 0.7 : 0.62,
+                position: 'absolute',
+                top: 64,
+                width: 952,
+              }}
+            />
+          </>
+        ) : null}
         <div
           style={{
             border: `2px solid ${theme.accent}`,
@@ -269,6 +317,7 @@ export async function GET(
   } catch (error) {
     if (error instanceof AuthenticationRequiredError) return unavailable(401);
     if (error instanceof ProjectAccessDeniedError) return unavailable(404);
+    if (error instanceof ZodError) return unavailable(400);
     throw error;
   }
 }
