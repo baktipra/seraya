@@ -65,7 +65,37 @@ jobs:
         run: npm run typecheck
 
       - name: Unit tests
-        run: npm run test
+        shell: bash
+        run: |
+          set +e
+          npm run test -- --reporter=json --outputFile=/tmp/v4h-vitest.json
+          status=$?
+          set -e
+
+          if [ "$status" -ne 0 ]; then
+            node <<'NODE'
+            const { readFileSync } = require('node:fs');
+            const report = JSON.parse(readFileSync('/tmp/v4h-vitest.json', 'utf8'));
+            const failed = (report.testResults ?? []).flatMap((file) =>
+              (file.assertionResults ?? [])
+                .filter((test) => test.status === 'failed')
+                .map((test) => ({
+                  file: file.name,
+                  messages: test.failureMessages ?? [],
+                  title: [...(test.ancestorTitles ?? []), test.title].join(' > '),
+                })),
+            );
+
+            console.error(`V4H validation found ${failed.length} failed unit test(s).`);
+            for (const failure of failed) {
+              console.error(`\nFAIL ${failure.file}\n  ${failure.title}`);
+              for (const message of failure.messages) {
+                console.error(message);
+              }
+            }
+            NODE
+            exit "$status"
+          fi
 
       - name: Production build
         run: npm run build
