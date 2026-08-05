@@ -1,8 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
-import { createDefaultInvitationDraftContent } from '@/modules/invitations/invitation-draft.defaults';
-import { invitationDraftContentSchema } from '@/modules/invitations/invitation-draft.schema';
-import { createInvitationEditorSubmissionPayload } from '@/modules/invitations/invitation-editor-local-state';
+import {
+  createDefaultInvitationDraftContent,
+} from '@/modules/invitations/invitation-draft.defaults';
+import {
+  invitationDraftContentSchema,
+} from '@/modules/invitations/invitation-draft.schema';
+import {
+  createInvitationEditorSubmissionPayload,
+} from '@/modules/invitations/invitation-editor-local-state';
 
 const project = {
   default_timezone: 'Asia/Jakarta',
@@ -50,7 +56,9 @@ describe('V4H guest event editor contract', () => {
       },
     };
 
-    expect(createInvitationEditorSubmissionPayload(nextContent).eventSchedule.events[0]).toMatchObject({
+    expect(
+      createInvitationEditorSubmissionPayload(nextContent).eventSchedule.events[0],
+    ).toMatchObject({
       arrivalNote: 'Masuk melalui gerbang selatan.',
       countdownEnabled: true,
       latitude: '-6.2',
