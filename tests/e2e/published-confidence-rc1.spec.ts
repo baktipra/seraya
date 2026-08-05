@@ -25,14 +25,10 @@ for (const state of states) {
       'data-published-confidence-state',
       state.expectedState,
     );
-    await expect(
-      confidence.getByRole('heading', { name: state.expectedHeading }),
-    ).toBeVisible();
+    await expect(confidence.getByRole('heading', { name: state.expectedHeading })).toBeVisible();
     await expect(confidence.getByText('Terbit', { exact: true })).toBeVisible();
     await expect(confidence.getByText('Tetap berlaku', { exact: true })).toBeVisible();
-    await expect(
-      page.getByText('Operasional setelah terbit', { exact: true }),
-    ).toBeVisible();
+    await expect(page.getByText('Operasional setelah terbit', { exact: true })).toBeVisible();
     await expect(main.getByRole('link')).toHaveCount(1);
     await expect(main.getByRole('link', { name: /Kelola tamu/ })).toHaveAttribute(
       'href',
