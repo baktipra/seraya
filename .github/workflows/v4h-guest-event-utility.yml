@@ -1,0 +1,71 @@
+name: V4H guest event utility validation
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/v4h-guest-event-utility.yml'
+      - 'docs/V4H_GUEST_EVENT_UTILITY.md'
+      - 'src/components/projects/event-utility-editor-fields.tsx'
+      - 'src/components/projects/invitation-editor-fields.tsx'
+      - 'src/modules/invitation-templates/guest-event-utility-core.ts'
+      - 'src/modules/invitation-templates/guest-event-utility.tsx'
+      - 'src/modules/invitation-templates/invitation-template-parity-boundary.tsx'
+      - 'src/modules/invitation-templates/invitation-view-model.ts'
+      - 'src/modules/invitations/invitation-draft.defaults.ts'
+      - 'src/modules/invitations/invitation-draft.schema.ts'
+      - 'src/modules/invitations/invitation-editor-local-state.ts'
+      - 'src/modules/invitations/invitation-editor.schema.ts'
+      - 'src/modules/invitations/invitation-editor.service.ts'
+      - 'tests/unit/guest-event-utility-v4h.test.ts'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check V4H formatting
+        run: |
+          npx prettier --check \
+            .github/workflows/v4h-guest-event-utility.yml \
+            docs/V4H_GUEST_EVENT_UTILITY.md \
+            src/components/projects/event-utility-editor-fields.tsx \
+            src/components/projects/invitation-editor-fields.tsx \
+            src/modules/invitation-templates/guest-event-utility-core.ts \
+            src/modules/invitation-templates/guest-event-utility.tsx \
+            src/modules/invitation-templates/invitation-template-parity-boundary.tsx \
+            src/modules/invitation-templates/invitation-view-model.ts \
+            src/modules/invitations/invitation-draft.defaults.ts \
+            src/modules/invitations/invitation-draft.schema.ts \
+            src/modules/invitations/invitation-editor-local-state.ts \
+            src/modules/invitations/invitation-editor.schema.ts \
+            src/modules/invitations/invitation-editor.service.ts \
+            tests/unit/guest-event-utility-v4h.test.ts
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm run test
+
+      - name: Production build
+        run: npm run build
