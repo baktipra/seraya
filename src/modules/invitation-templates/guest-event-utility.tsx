@@ -3,10 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import type { InvitationTemplateKey } from './invitation-template.keys';
-import type {
-  InvitationScheduleItemViewModel,
-  InvitationViewModel,
-} from './invitation-view-model';
+import type { InvitationScheduleItemViewModel, InvitationViewModel } from './invitation-view-model';
 import {
   createGuestEventCalendarFile,
   getGoogleCalendarHref,
@@ -18,8 +15,7 @@ import {
 } from './guest-event-utility-core';
 
 const shellClassByTemplate: Record<InvitationTemplateKey, string> = {
-  aruna:
-    'border-black/15 bg-[#f7f5ee] text-[#252a27] shadow-[0_24px_70px_rgb(37_42_39_/_0.12)]',
+  aruna: 'border-black/15 bg-[#f7f5ee] text-[#252a27] shadow-[0_24px_70px_rgb(37_42_39_/_0.12)]',
   laras:
     'border-[#d7b982]/35 bg-[#201f26] text-[#f4ead8] shadow-[0_24px_70px_rgb(18_15_22_/_0.35)]',
   roselle:
@@ -164,7 +160,10 @@ function EventUtilityCard({
     : null;
 
   return (
-    <article className="rounded-[1.35rem] border border-current/15 p-4 sm:p-6" data-event-utility-item>
+    <article
+      className="rounded-[1.35rem] border border-current/15 p-4 sm:p-6"
+      data-event-utility-item
+    >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-[0.65rem] font-bold tracking-[0.16em] uppercase opacity-55">
@@ -178,7 +177,9 @@ function EventUtilityCard({
           {event.venueName || event.address ? (
             <div className="mt-4 text-sm leading-6">
               {event.venueName ? <p className="font-semibold">{event.venueName}</p> : null}
-              {event.address ? <p className="whitespace-pre-line opacity-72">{event.address}</p> : null}
+              {event.address ? (
+                <p className="whitespace-pre-line opacity-72">{event.address}</p>
+              ) : null}
             </div>
           ) : null}
         </div>
@@ -206,7 +207,9 @@ function EventUtilityCard({
           <p className="text-[0.62rem] font-bold tracking-[0.15em] uppercase opacity-55">
             Petunjuk kedatangan
           </p>
-          <p className="mt-2 whitespace-pre-line text-sm leading-6 opacity-78">{event.arrivalNote}</p>
+          <p className="mt-2 text-sm leading-6 whitespace-pre-line opacity-78">
+            {event.arrivalNote}
+          </p>
         </div>
       ) : null}
 
@@ -324,7 +327,10 @@ export function GuestEventUtility({
         <p className="text-center text-[0.68rem] font-bold tracking-[0.2em] uppercase opacity-55">
           Guest event utility
         </p>
-        <h2 className="mt-3 text-center font-serif text-3xl leading-tight sm:text-5xl" id="guest-event-utility-title">
+        <h2
+          className="mt-3 text-center font-serif text-3xl leading-tight sm:text-5xl"
+          id="guest-event-utility-title"
+        >
           Jadwal yang mudah disimpan dan ditemukan
         </h2>
         <p className="mx-auto mt-4 max-w-2xl text-center text-sm leading-7 opacity-72 sm:text-base">
@@ -332,7 +338,11 @@ export function GuestEventUtility({
         </p>
 
         <div className="mt-8">
-          <CountdownPanel events={events} templateKey={templateKey} timeZone={invitation.timezone} />
+          <CountdownPanel
+            events={events}
+            templateKey={templateKey}
+            timeZone={invitation.timezone}
+          />
         </div>
 
         <div className="mt-6 grid gap-4">

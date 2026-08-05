@@ -133,10 +133,19 @@ const invitationEditorFormSchema = z
               .array(
                 z
                   .object({
+                    arrivalNote: formTextSchema.optional(),
+                    countdownEnabled: checkboxInputSchema.optional(),
                     date: formTextSchema,
                     endTime: formTextSchema,
                     id: z.string().regex(databaseUuidShape, 'ID acara tidak valid.'),
+                    latitude: formTextSchema.optional(),
+                    livestreamEnabled: checkboxInputSchema.optional(),
+                    livestreamHeading: formTextSchema.optional(),
+                    livestreamUrl: formTextSchema.optional(),
+                    locationSource: formTextSchema.optional(),
+                    longitude: formTextSchema.optional(),
                     mapsUrl: formTextSchema,
+                    placeId: formTextSchema.optional(),
                     startTime: formTextSchema,
                     title: formTextSchema,
                     venueAddress: formTextSchema,

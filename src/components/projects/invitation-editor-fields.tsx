@@ -11,6 +11,8 @@ import {
 import type { ThemePaletteDescriptor } from '@/modules/invitation-templates/core/theme-package.types';
 import type { InvitationDraft } from '@/modules/invitations/invitation-draft.types';
 
+import { EventUtilityEditorFields } from './event-utility-editor-fields';
+
 type EditorFieldProps = {
   autoComplete?: string;
   error?: string;
@@ -293,10 +295,19 @@ export function createDigitalGiftAccountId() {
 
 export function createEventScheduleItem(): EventScheduleEditorValue {
   return {
+    arrivalNote: null,
+    countdownEnabled: true,
     date: '',
     endTime: null,
     id: createLocalUuid(),
+    latitude: null,
+    livestreamEnabled: false,
+    livestreamHeading: null,
+    livestreamUrl: null,
+    locationSource: null,
+    longitude: null,
     mapsUrl: null,
+    placeId: null,
     startTime: '',
     title: '',
     venueAddress: null,
@@ -441,6 +452,12 @@ export function EditorScheduleEventCard({
             value={event.mapsUrl}
           />
         </div>
+        <EventUtilityEditorFields
+          errors={errors}
+          event={event}
+          eventPrefix={eventPrefix}
+          onChange={onChange}
+        />
       </div>
     </fieldset>
   );

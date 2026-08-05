@@ -249,7 +249,7 @@ export function getGuestEventMapEmbedHref(
     event.placeId ??
     (typeof event.latitude === 'number' && typeof event.longitude === 'number'
       ? `${event.latitude},${event.longitude}`
-      : event.address ?? event.venueName);
+      : (event.address ?? event.venueName));
 
   if (!query) {
     return null;
@@ -284,7 +284,10 @@ function getCalendarEndTime(event: GuestEventUtilityEvent) {
 }
 
 function createCalendarDescription(event: GuestEventUtilityEvent) {
-  return [event.arrivalNote, getGuestEventRouteHref(event) ? `Rute: ${getGuestEventRouteHref(event)}` : null]
+  return [
+    event.arrivalNote,
+    getGuestEventRouteHref(event) ? `Rute: ${getGuestEventRouteHref(event)}` : null,
+  ]
     .filter((value): value is string => Boolean(value))
     .join('\n');
 }
@@ -308,7 +311,10 @@ export function createGuestEventCalendarFile(
     lines.push(
       'BEGIN:VEVENT',
       `UID:${escapeCalendarText(event.id)}@seraya`,
-      `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z')}`,
+      `DTSTAMP:${new Date()
+        .toISOString()
+        .replace(/[-:]/g, '')
+        .replace(/\.\d{3}Z$/, 'Z')}`,
       `DTSTART;TZID=${escapeCalendarText(timeZone)}:${compactCalendarDateTime(event.date, event.startTime)}`,
       `DTEND;TZID=${escapeCalendarText(timeZone)}:${compactCalendarDateTime(event.date, getCalendarEndTime(event))}`,
       `SUMMARY:${escapeCalendarText(event.title)}`,
