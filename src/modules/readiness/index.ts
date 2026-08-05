@@ -18,3 +18,9 @@ export {
   getInvitationConfidenceStatus,
 } from './invitation-confidence';
 export type { InvitationConfidenceItem, InvitationConfidenceStatus } from './invitation-confidence';
+
+export { deriveGuestControlConfidence } from './guest-control-confidence';
+export type {
+  GuestControlConfidenceState,
+  GuestControlConfidenceSummary,
+} from './guest-control-confidence';

@@ -13,10 +13,12 @@ import {
   CompassProgressStrip,
   CompassWorkspace,
 } from '@/components/workspace/compass-primitives';
-import { PublishedConfidence } from '@/components/projects/published-confidence';
 import { Badge } from '@/design-system';
 import type { WeddingReadinessV1 } from '@/modules/readiness';
 import { deriveProjectCompassNextStep } from '@/modules/readiness/project-compass';
+
+import { GuestControlConfidence } from './guest-control-confidence';
+import { PublishedConfidence } from './published-confidence';
 
 type ProjectOverviewBootstrapProps = { projectId: string; readiness: WeddingReadinessV1 };
 type AttentionKey =
@@ -186,7 +188,10 @@ export function ProjectOverviewBootstrap({ projectId, readiness }: ProjectOvervi
       />
 
       {readiness.invitation.hasPublishedSnapshot ? (
-        <PublishedConfidence hasUnpublishedChanges={readiness.invitation.hasUnpublishedChanges} />
+        <>
+          <PublishedConfidence hasUnpublishedChanges={readiness.invitation.hasUnpublishedChanges} />
+          <GuestControlConfidence guests={readiness.guests} projectId={projectId} />
+        </>
       ) : null}
 
       <CompassFocus
