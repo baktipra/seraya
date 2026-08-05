@@ -63,8 +63,8 @@ function resolveZonedDateTime(date: string, time: string, timeZone: string) {
     return null;
   }
 
-  const [year, month, day] = date.split('-').map(Number);
-  const [hour, minute] = time.split(':').map(Number);
+  const [year = 0, month = 1, day = 1] = date.split('-').map(Number);
+  const [hour = 0, minute = 0] = time.split(':').map(Number);
 
   if ([year, month, day, hour, minute].some((value) => !Number.isFinite(value))) {
     return null;
@@ -278,8 +278,8 @@ function getCalendarEnd(event: GuestEventUtilityEvent) {
     return { date: event.date, time: event.endTime };
   }
 
-  const [year, month, day] = event.date.split('-').map(Number);
-  const [hour, minute] = event.startTime.split(':').map(Number);
+  const [year = 0, month = 1, day = 1] = event.date.split('-').map(Number);
+  const [hour = 0, minute = 0] = event.startTime.split(':').map(Number);
   const end = new Date(Date.UTC(year, month - 1, day, hour, minute + 240));
 
   return {
@@ -312,7 +312,6 @@ export function createGuestEventCalendarFile(
   for (const event of events) {
     const location = [event.venueName, event.address].filter(Boolean).join(', ');
     const description = createCalendarDescription(event);
-    const calendarEnd = getCalendarEnd(event);
     const calendarEnd = getCalendarEnd(event);
 
     lines.push(

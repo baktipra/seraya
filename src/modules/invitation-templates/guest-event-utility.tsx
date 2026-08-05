@@ -35,19 +35,19 @@ function toUtilityEvent(item: InvitationScheduleItemViewModel): GuestEventUtilit
 
   return {
     address: item.address,
-    arrivalNote: item.arrivalNote,
+    arrivalNote: item.arrivalNote ?? null,
     countdownEnabled: item.countdownEnabled,
     date: item.date,
-    endTime: item.endTime,
+    endTime: item.endTime ?? null,
     id: item.id,
-    latitude: item.latitude,
+    latitude: item.latitude ?? null,
     livestreamEnabled: item.livestreamEnabled,
-    livestreamHeading: item.livestreamHeading,
-    livestreamUrl: item.livestreamUrl,
-    locationSource: item.locationSource,
-    longitude: item.longitude,
+    livestreamHeading: item.livestreamHeading ?? null,
+    livestreamUrl: item.livestreamUrl ?? null,
+    locationSource: item.locationSource ?? null,
+    longitude: item.longitude ?? null,
     mapsHref: item.mapsHref,
-    placeId: item.placeId,
+    placeId: item.placeId ?? null,
     startTime: item.startTime,
     title: item.title,
     venueName: item.venueName,
@@ -343,11 +343,7 @@ export function GuestEventUtility({
         </p>
 
         <div className="mt-8">
-          <CountdownPanel
-            events={events}
-            templateKey={templateKey}
-            timeZone={invitation.timezone}
-          />
+          <CountdownPanel events={events} templateKey={templateKey} timeZone={timeZone} />
         </div>
 
         <div className="mt-6 grid gap-4">
@@ -357,7 +353,7 @@ export function GuestEventUtility({
               index={index}
               key={event.id}
               templateKey={templateKey}
-              timeZone={invitation.timezone}
+              timeZone={timeZone}
             />
           ))}
         </div>
@@ -366,7 +362,7 @@ export function GuestEventUtility({
           <div className="mt-6 text-center">
             <button
               className={`min-h-12 rounded-full px-6 text-sm font-semibold ${accentClassByTemplate[templateKey]}`}
-              onClick={() => downloadCalendar(events, invitation.timezone)}
+              onClick={() => downloadCalendar(events, timeZone)}
               type="button"
             >
               Tambahkan seluruh rangkaian

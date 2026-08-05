@@ -16,21 +16,21 @@ export type InvitationPersonViewModel = {
 
 export type InvitationScheduleItemViewModel = {
   address: string | null;
-  arrivalNote: string | null;
-  countdownEnabled: boolean;
-  date: string | null;
+  arrivalNote?: string | null;
+  countdownEnabled?: boolean;
+  date?: string | null;
   dateLabel: string | null;
-  endTime: string | null;
-  id: string;
-  latitude: number | null;
-  livestreamEnabled: boolean;
-  livestreamHeading: string | null;
-  livestreamUrl: string | null;
-  locationSource: 'current_location' | 'google_place' | 'manual_pin' | null;
-  longitude: number | null;
+  endTime?: string | null;
+  id?: string;
+  latitude?: number | null;
+  livestreamEnabled?: boolean;
+  livestreamHeading?: string | null;
+  livestreamUrl?: string | null;
+  locationSource?: 'current_location' | 'google_place' | 'manual_pin' | null;
+  longitude?: number | null;
   mapsHref: string | null;
-  placeId: string | null;
-  startTime: string | null;
+  placeId?: string | null;
+  startTime?: string | null;
   timeLabel: string | null;
   title: string | null;
   venueName: string | null;
@@ -90,7 +90,7 @@ export type InvitationViewModel = {
     body: string | null;
     heading: string | null;
   } | null;
-  timezone: string;
+  timezone?: string;
 };
 
 export type InvitationRendererProjectMetadata = {

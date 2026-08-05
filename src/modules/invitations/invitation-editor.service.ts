@@ -78,7 +78,7 @@ function applyEditorInputToActiveDraft(
   currentContent: InvitationDraft['content'],
   input: InvitationEditorFormInput['content'],
 ) {
-  const eventSchedule = {
+  const eventSchedule: EventScheduleV1 = {
     events: input.eventSchedule.events.map((event) => ({
       arrivalNote: normalizeOptionalText(event.arrivalNote),
       countdownEnabled: event.countdownEnabled !== false,
