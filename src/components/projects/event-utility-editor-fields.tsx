@@ -65,6 +65,20 @@ function errorFor(errors: InvitationEditorFieldErrors | undefined, name: string)
   return errors?.[name as keyof InvitationEditorFieldErrors];
 }
 
+function UtilityFieldError({ message, name }: { message?: string; name: string }) {
+  if (!message) return null;
+
+  return (
+    <p
+      className="text-seraya-status-error text-sm leading-6"
+      id={`${fieldId(name)}-error`}
+      role="alert"
+    >
+      {message}
+    </p>
+  );
+}
+
 function loadGoogleMaps() {
   const runtime = globalThis as GoogleGlobal;
 
@@ -199,7 +213,10 @@ export function EventUtilityEditorFields({
       .then((google) => {
         if (cancelled || !mapElementRef.current) return;
         const map = new google.maps.Map(mapElementRef.current, {
-          center: pinDraft,
+          center: {
+            lat: event.latitude ?? defaultMapCenter.lat,
+            lng: event.longitude ?? defaultMapCenter.lng,
+          },
           mapTypeControl: false,
           streetViewControl: false,
           zoom: event.latitude == null ? 11 : 17,
@@ -217,7 +234,7 @@ export function EventUtilityEditorFields({
       listener?.remove();
       mapRef.current = null;
     };
-  }, [event.latitude, mapOpen, pinDraft]);
+  }, [event.latitude, event.longitude, mapOpen]);
 
   const useCurrentLocation = () => {
     if (!navigator.geolocation) {
@@ -405,7 +422,7 @@ export function EventUtilityEditorFields({
             placeholder="Contoh: Masuk melalui gerbang selatan, parkir di basement B1."
             value={event.arrivalNote ?? ''}
           />
-          <FieldError
+          <UtilityFieldError
             message={errorFor(errors, `${prefix}.arrivalNote`)}
             name={`${prefix}.arrivalNote`}
           />
@@ -443,7 +460,7 @@ export function EventUtilityEditorFields({
                 type="url"
                 value={event.livestreamUrl ?? ''}
               />
-              <FieldError
+              <UtilityFieldError
                 message={errorFor(errors, `${prefix}.livestreamUrl`)}
                 name={`${prefix}.livestreamUrl`}
               />

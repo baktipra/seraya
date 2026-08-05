@@ -33,12 +33,8 @@ const event: GuestEventUtilityEvent = {
 describe('V4H guest event utility', () => {
   it('normalizes supported YouTube URL shapes without accepting unrelated hosts', () => {
     expect(parseYoutubeVideoId('https://youtu.be/AbCdEf12345')).toBe('AbCdEf12345');
-    expect(parseYoutubeVideoId('https://www.youtube.com/watch?v=AbCdEf12345')).toBe(
-      'AbCdEf12345',
-    );
-    expect(parseYoutubeVideoId('https://www.youtube.com/live/AbCdEf12345')).toBe(
-      'AbCdEf12345',
-    );
+    expect(parseYoutubeVideoId('https://www.youtube.com/watch?v=AbCdEf12345')).toBe('AbCdEf12345');
+    expect(parseYoutubeVideoId('https://www.youtube.com/live/AbCdEf12345')).toBe('AbCdEf12345');
     expect(getYoutubeEmbedHref(event.livestreamUrl)).toBe(
       'https://www.youtube-nocookie.com/embed/AbCdEf12345?rel=0',
     );
