@@ -1,0 +1,30 @@
+name: V4J Slice B migration smoke
+
+on:
+  push:
+    branches:
+      - feature/v4j-invitation-atmosphere-couple-identity-v1
+    paths:
+      - '.github/workflows/v4j-slice-b-db-smoke.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  migration-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/v4j-invitation-atmosphere-couple-identity-v1
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Apply full migration chain in PGlite
+        run: npx vitest run tests/integration/supabase-foundation.test.ts
