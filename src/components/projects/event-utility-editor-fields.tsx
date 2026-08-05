@@ -77,20 +77,6 @@ function UtilityFieldError({ message, name }: { message?: string; name: string }
   );
 }
 
-function UtilityFieldError({ message, name }: { message?: string; name: string }) {
-  if (!message) return null;
-
-  return (
-    <p
-      className="text-seraya-status-error text-sm leading-6"
-      id={`${fieldId(name)}-error`}
-      role="alert"
-    >
-      {message}
-    </p>
-  );
-}
-
 function loadGoogleMaps() {
   const runtime = globalThis as GoogleGlobal;
 

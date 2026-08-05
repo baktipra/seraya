@@ -313,6 +313,7 @@ export function createGuestEventCalendarFile(
     const location = [event.venueName, event.address].filter(Boolean).join(', ');
     const description = createCalendarDescription(event);
     const calendarEnd = getCalendarEnd(event);
+    const calendarEnd = getCalendarEnd(event);
 
     lines.push(
       'BEGIN:VEVENT',
