@@ -1,4 +1,4 @@
-name: V4I public social share validation
+name: V4I remote attendance and public social share validation
 
 on:
   pull_request:
@@ -8,9 +8,19 @@ on:
       - 'package-lock.json'
       - 'src/app/(dashboard)/dashboard/[projectId]/delivery/page.tsx'
       - 'src/app/api/projects/[projectId]/public-share/**'
+      - 'src/components/projects/event-utility-editor-fields.tsx'
       - 'src/components/projects/public-social-share-kit.tsx'
+      - 'src/modules/invitation-templates/guest-event-utility-core.ts'
+      - 'src/modules/invitation-templates/guest-event-utility.tsx'
+      - 'src/modules/invitation-templates/invitation-view-model.ts'
+      - 'src/modules/invitations/invitation-draft.defaults.ts'
+      - 'src/modules/invitations/invitation-draft.schema.ts'
+      - 'src/modules/invitations/invitation-editor-local-state.ts'
+      - 'src/modules/invitations/invitation-editor.schema.ts'
+      - 'src/modules/invitations/invitation-editor.service.ts'
       - 'src/modules/public-social-share/**'
       - 'tests/unit/public-social-share-v4i.test.ts'
+      - 'tests/unit/remote-attendance-v4i.test.ts'
   workflow_dispatch:
 
 permissions:
@@ -40,10 +50,20 @@ jobs:
             'src/app/(dashboard)/dashboard/[projectId]/delivery/page.tsx' \
             'src/app/api/projects/[projectId]/public-share/qr/route.ts' \
             'src/app/api/projects/[projectId]/public-share/story/route.tsx' \
+            src/components/projects/event-utility-editor-fields.tsx \
             src/components/projects/public-social-share-kit.tsx \
+            src/modules/invitation-templates/guest-event-utility-core.ts \
+            src/modules/invitation-templates/guest-event-utility.tsx \
+            src/modules/invitation-templates/invitation-view-model.ts \
+            src/modules/invitations/invitation-draft.defaults.ts \
+            src/modules/invitations/invitation-draft.schema.ts \
+            src/modules/invitations/invitation-editor-local-state.ts \
+            src/modules/invitations/invitation-editor.schema.ts \
+            src/modules/invitations/invitation-editor.service.ts \
             src/modules/public-social-share/public-social-share.core.ts \
             src/modules/public-social-share/public-social-share.service.ts \
-            tests/unit/public-social-share-v4i.test.ts
+            tests/unit/public-social-share-v4i.test.ts \
+            tests/unit/remote-attendance-v4i.test.ts
 
       - name: Lint
         run: npm run lint
@@ -52,7 +72,10 @@ jobs:
         run: npm run typecheck
 
       - name: Focused V4I tests
-        run: npx vitest run tests/unit/public-social-share-v4i.test.ts
+        run: |
+          npx vitest run \
+            tests/unit/public-social-share-v4i.test.ts \
+            tests/unit/remote-attendance-v4i.test.ts
 
       - name: Production build
         run: npm run build
