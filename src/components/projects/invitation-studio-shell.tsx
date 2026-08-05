@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from 'react';
 
+import { InvitationStudioModePlaceholder } from './invitation-studio-mode-placeholder';
 import {
   getInvitationStudioModeLabel,
   invitationStudioModes,
@@ -21,16 +22,17 @@ import styles from './invitation-studio-shell.module.css';
 export type InvitationStudioStatusTone = 'brand' | 'neutral' | 'success' | 'warning';
 
 export interface InvitationStudioShellProps {
-  content: ReactNode;
-  coupleLabel: string;
-  design: ReactNode;
-  initialMode: InvitationStudioMode;
-  media: ReactNode;
-  preview: ReactNode;
-  previewHref: Route;
-  publish: ReactNode;
-  statusLabel: string;
-  statusTone: InvitationStudioStatusTone;
+  children?: ReactNode;
+  content?: ReactNode;
+  coupleLabel?: string;
+  design?: ReactNode;
+  initialMode?: InvitationStudioMode;
+  media?: ReactNode;
+  preview?: ReactNode;
+  previewHref?: Route;
+  publish?: ReactNode;
+  statusLabel?: string;
+  statusTone?: InvitationStudioStatusTone;
 }
 
 type HistoryMode = 'push' | 'replace';
@@ -46,19 +48,21 @@ function getModeUrl(mode: InvitationStudioMode) {
  *
  * Every mode is an explicit named slot. Inactive slots stay mounted so the
  * legacy editor can retain its local React state while later slices migrate
- * controls into their canonical modes.
+ * controls into their canonical modes. Optional legacy children keep the
+ * current route behavior intact during this first structural pass.
  */
 export function InvitationStudioShell({
+  children,
   content,
-  coupleLabel,
+  coupleLabel = 'Undangan kalian',
   design,
-  initialMode,
+  initialMode = 'content',
   media,
   preview,
   previewHref,
   publish,
-  statusLabel,
-  statusTone,
+  statusLabel = 'Draf pribadi',
+  statusTone = 'neutral',
 }: InvitationStudioShellProps) {
   const [activeMode, setActiveMode] = useState<InvitationStudioMode>(initialMode);
   const [announcement, setAnnouncement] = useState('');
@@ -69,6 +73,11 @@ export function InvitationStudioShell({
   }, [initialMode]);
 
   useEffect(() => {
+    const requestedMode = parseInvitationStudioMode(
+      new URL(window.location.href).searchParams.get('mode'),
+    );
+    setActiveMode(requestedMode);
+
     const handlePopState = () => {
       const mode = parseInvitationStudioMode(
         new URL(window.location.href).searchParams.get('mode'),
@@ -118,12 +127,61 @@ export function InvitationStudioShell({
     activateMode(nextMode.key, 'replace');
   };
 
+  const contentNode =
+    content ??
+    children ?? (
+      <InvitationStudioModePlaceholder
+        description="Belum ada editor yang tersedia untuk undangan ini."
+        eyebrow="Isi undangan"
+        title="Mulai susun undangan kalian."
+      />
+    );
+  const designNode =
+    design ?? (
+      <InvitationStudioModePlaceholder
+        description="Template dan palet tetap dapat diubah dari editor Isi selama kontrol desain dipindahkan ke ruang ini pada tahap berikutnya."
+        eyebrow="Fondasi mode Desain"
+        title="Ruang desain sudah memiliki tempat yang jelas."
+      />
+    );
+  const mediaNode =
+    media ?? (
+      <InvitationStudioModePlaceholder
+        description="Galeri dan audio tetap aman pada alur lama sampai keduanya dipindahkan ke workspace media khusus."
+        eyebrow="Fondasi mode Media"
+        title="Foto dan audio akan dikelola tanpa bercampur dengan form teks."
+      />
+    );
+  const previewNode =
+    preview ?? (
+      <InvitationStudioModePlaceholder
+        action={
+          previewHref ? (
+            <Link className={styles.placeholderAction} href={previewHref}>
+              Buka preview tersimpan
+            </Link>
+          ) : undefined
+        }
+        description="Preview khusus akan menyatukan tampilan umum, simulasi personal, serta perangkat mobile dan desktop."
+        eyebrow="Fondasi mode Preview"
+        title="Periksa hasil tanpa gangguan form editor."
+      />
+    );
+  const publishNode =
+    publish ?? (
+      <InvitationStudioModePlaceholder
+        description="Kesiapan, pembayaran, status versi, dan kontrol terbit tetap menggunakan authority lama sampai mode ini diaktifkan penuh."
+        eyebrow="Fondasi mode Terbitkan"
+        title="Keputusan publikasi akan mempunyai ruang tersendiri."
+      />
+    );
+
   const panels: ReadonlyArray<{ mode: InvitationStudioMode; node: ReactNode }> = [
-    { mode: 'content', node: content },
-    { mode: 'design', node: design },
-    { mode: 'media', node: media },
-    { mode: 'preview', node: preview },
-    { mode: 'publish', node: publish },
+    { mode: 'content', node: contentNode },
+    { mode: 'design', node: designNode },
+    { mode: 'media', node: mediaNode },
+    { mode: 'preview', node: previewNode },
+    { mode: 'publish', node: publishNode },
   ];
 
   return (
@@ -153,9 +211,11 @@ export function InvitationStudioShell({
             <span aria-hidden="true" className={styles.statusDot} />
             {statusLabel}
           </span>
-          <Link className={styles.previewLink} href={previewHref}>
-            Preview tersimpan
-          </Link>
+          {previewHref ? (
+            <Link className={styles.previewLink} href={previewHref}>
+              Preview tersimpan
+            </Link>
+          ) : null}
         </div>
       </header>
 
