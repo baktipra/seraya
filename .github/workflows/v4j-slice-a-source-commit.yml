@@ -1,0 +1,90 @@
+name: V4J validated Slice A source commit
+
+on:
+  push:
+    branches:
+      - feature/v4j-invitation-atmosphere-couple-identity-v1
+    paths:
+      - '.github/workflows/v4j-slice-a-source-commit.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  commit-source:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/v4j-invitation-atmosphere-couple-identity-v1
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Reapply validated structural implementation
+        run: |
+          python <<'PY'
+          from pathlib import Path
+
+          workflow = Path('.github/workflows/v4j-slice-a-ui-v4.yml').read_text().splitlines()
+          step_index = next(
+              index
+              for index, line in enumerate(workflow)
+              if line.strip() == '- name: Apply structural owner UI and templates'
+          )
+          run_index = next(
+              index
+              for index in range(step_index + 1, len(workflow))
+              if workflow[index].strip() == 'run: |'
+          )
+          end_index = next(
+              index
+              for index in range(run_index + 1, len(workflow))
+              if workflow[index].strip() == '- name: Format Slice A UI'
+          )
+          body = workflow[run_index + 1 : end_index]
+          indentation = min(len(line) - len(line.lstrip()) for line in body if line.strip())
+          Path('/tmp/v4j-apply-structural-ui.sh').write_text(
+              '\n'.join(line[indentation:] if line.strip() else '' for line in body) + '\n'
+          )
+          PY
+          bash /tmp/v4j-apply-structural-ui.sh
+          git checkout -- .github/workflows/v4j-invitation-atmosphere-identity.yml
+
+      - name: Format source files
+        run: |
+          npx prettier --write \
+            src/components/projects/invitation-editor.tsx \
+            src/components/projects/invitation-editor-workspace.tsx \
+            src/modules/invitation-templates/roselle/roselle-template.tsx \
+            src/modules/invitation-templates/aruna/aruna-template.tsx \
+            src/modules/invitation-templates/laras/laras-template.tsx \
+            tests/unit/invitation-atmosphere-identity-v4j.test.tsx
+
+      - name: Validate source files
+        run: |
+          npx eslint \
+            src/components/projects/invitation-editor.tsx \
+            src/components/projects/invitation-editor-workspace.tsx \
+            src/modules/invitation-templates/roselle/roselle-template.tsx \
+            src/modules/invitation-templates/aruna/aruna-template.tsx \
+            src/modules/invitation-templates/laras/laras-template.tsx \
+            tests/unit/invitation-atmosphere-identity-v4j.test.tsx
+          npm run typecheck
+          npx vitest run tests/unit/invitation-atmosphere-identity-v4j.test.tsx
+          npm run build
+
+      - name: Commit only validated source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src tests
+          git commit -m "SERAYA V4J: complete couple identity and opening Slice A"
+          git push origin HEAD:feature/v4j-invitation-atmosphere-couple-identity-v1
