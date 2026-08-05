@@ -35,8 +35,8 @@ function UtilityFieldError({ message, name }: { message?: string; name: string }
   },
   {
     name: 'use local field error renderer',
-    before: '<FieldError ',
-    after: '<UtilityFieldError ',
+    before: '<FieldError',
+    after: '<UtilityFieldError',
     replaceAll: true,
   },
   {
