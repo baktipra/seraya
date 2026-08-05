@@ -26,12 +26,7 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
-      - name: Add Slice B database contract
-        run: |
-          python scripts/v4j-slice-b-db-test.py
-          npx prettier --write tests/integration/supabase-foundation.test.ts
-          cp tests/integration/supabase-foundation.test.ts /tmp/supabase-foundation-product.test.ts
-      - name: Adapt baseline PGlite citext shim
+      - name: Repair PGlite citext compatibility
         run: |
           python <<'PY'
           from pathlib import Path
@@ -44,13 +39,13 @@ jobs:
               raise SystemExit('PGlite citext shim anchor missing.')
           path.write_text(content.replace(old, new, 1))
           PY
+          npx prettier --write tests/integration/supabase-foundation.test.ts
       - name: Apply full migration chain in PGlite
         run: npx vitest run tests/integration/supabase-foundation.test.ts
-      - name: Commit validated database contract
+      - name: Commit validated harness repair
         run: |
-          cp /tmp/supabase-foundation-product.test.ts tests/integration/supabase-foundation.test.ts
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add tests/integration/supabase-foundation.test.ts
-          git commit -m "SERAYA V4J: cover invitation audio database lifecycle"
+          git commit -m "SERAYA: repair PGlite citext migration harness"
           git push origin HEAD:feature/v4j-invitation-atmosphere-couple-identity-v1
