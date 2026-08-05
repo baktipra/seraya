@@ -73,27 +73,7 @@ jobs:
           set -e
 
           if [ "$status" -ne 0 ]; then
-            node <<'NODE'
-            const { readFileSync } = require('node:fs');
-            const report = JSON.parse(readFileSync('/tmp/v4h-vitest.json', 'utf8'));
-            const failed = (report.testResults ?? []).flatMap((file) =>
-              (file.assertionResults ?? [])
-                .filter((test) => test.status === 'failed')
-                .map((test) => ({
-                  file: file.name,
-                  messages: test.failureMessages ?? [],
-                  title: [...(test.ancestorTitles ?? []), test.title].join(' > '),
-                })),
-            );
-
-            console.error(`V4H validation found ${failed.length} failed unit test(s).`);
-            for (const failure of failed) {
-              console.error(`\nFAIL ${failure.file}\n  ${failure.title}`);
-              for (const message of failure.messages) {
-                console.error(message);
-              }
-            }
-            NODE
+            node -e "const fs=require('node:fs');const r=JSON.parse(fs.readFileSync('/tmp/v4h-vitest.json','utf8'));const f=(r.testResults||[]).flatMap(x=>(x.assertionResults||[]).filter(t=>t.status==='failed').map(t=>({file:x.name,title:[...(t.ancestorTitles||[]),t.title].join(' > '),messages:t.failureMessages||[]})));console.error('V4H validation found '+f.length+' failed unit test(s).');for(const x of f){console.error('\\nFAIL '+x.file+'\\n  '+x.title);for(const m of x.messages)console.error(m)}"
             exit "$status"
           fi
 
