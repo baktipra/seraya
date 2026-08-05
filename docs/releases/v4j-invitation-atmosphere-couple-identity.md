@@ -25,12 +25,9 @@ Delivered:
 
 Validation evidence:
 
-- formatting passed;
-- ESLint passed;
-- TypeScript passed;
-- four focused Slice A tests passed;
-- production build passed;
-- cross-template invitation browser regression passed.
+- core contract workflow run `30985717410` passed formatting, ESLint, TypeScript, focused tests, and production build;
+- validated source workflow run `30986694927` passed ESLint, TypeScript, four focused Slice A tests, and production build;
+- browser smoke workflow run `30986982211` passed the focused contract, production build, Chromium setup, and cross-template invitation experience regression.
 
 ## Slice B — Audio Media Foundation
 
