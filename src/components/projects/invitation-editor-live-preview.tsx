@@ -8,6 +8,8 @@ import { InvitationTemplateRenderer } from '@/modules/invitation-templates';
 import type { InvitationRendererProjectMetadata } from '@/modules/invitation-templates/invitation-view-model';
 import { createInvitationEditorPreviewViewModel } from '@/modules/invitations/invitation-editor-local-state';
 import type { InvitationDraftContent } from '@/modules/invitations/invitation-draft.schema';
+import { createInvitationAudioPlaybackCapability } from '@/modules/media/invitation-audio-playback.types';
+import type { InvitationAudioConfiguration } from '@/modules/media/invitation-audio.types';
 import type { InvitationGalleryImage } from '@/modules/media/media.types';
 
 import { useInvitationEditorContextualSaveAction } from './invitation-editor-contextual-actions';
@@ -87,21 +89,25 @@ function isPreviewTargetAvailable(
 }
 
 export type InvitationEditorLivePreviewProps = {
+  audio: InvitationAudioConfiguration;
   content: InvitationDraftContent;
   galleryImages: InvitationGalleryImage[];
   isDirty: boolean;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   project: InvitationRendererProjectMetadata;
+  projectId: string;
 };
 
 export const InvitationEditorLivePreview = memo(function InvitationEditorLivePreview({
+  audio,
   content,
   galleryImages,
   isDirty,
   isOpen,
   onOpenChange,
   project,
+  projectId,
 }: InvitationEditorLivePreviewProps) {
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const overlayRef = useRef<HTMLElement | null>(null);
@@ -422,6 +428,10 @@ export const InvitationEditorLivePreview = memo(function InvitationEditorLivePre
             tabIndex={0}
           >
             <InvitationTemplateRenderer
+              audioPlayback={createInvitationAudioPlaybackCapability({
+                configuration: audio,
+                requestUrl: `/api/projects/${encodeURIComponent(projectId)}/audio/playback`,
+              })}
               invitation={invitation}
               paletteKey={content.paletteKey}
               surface="preview"

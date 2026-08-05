@@ -36,6 +36,11 @@ import {
 import type { InvitationRendererProjectMetadata } from '@/modules/invitation-templates/invitation-view-model';
 import type { InvitationDraft } from '@/modules/invitations/invitation-draft.types';
 import type { InvitationEditorFieldErrors } from '@/modules/invitations/invitation-editor.schema';
+import {
+  INVITATION_AUDIO_CHANGED_EVENT,
+  type InvitationAudioChangedEventDetail,
+} from '@/modules/media/invitation-audio-playback.types';
+import type { InvitationAudioConfiguration } from '@/modules/media/invitation-audio.types';
 import type { InvitationGalleryImage } from '@/modules/media/media.types';
 import type { ProjectPublishEligibility } from '@/modules/payments/payment.types';
 import {
@@ -1321,7 +1326,10 @@ export function InvitationEditor({
   const [hasSaved, setHasSaved] = useState(false);
   const [isLocalPreviewOpen, setIsLocalPreviewOpen] = useState(false);
   const [shouldMountDesktopPreview, setShouldMountDesktopPreview] = useState(false);
-  const [previewContent, setPreviewContent] = useState(draft.content);
+  const [previewAudio, setPreviewAudio] = useState<InvitationAudioConfiguration>(
+    draft.content.audio,
+  );
+  const [previewContent, setPreviewContent] = useState(content);
   const [isEditorInteractive, setIsEditorInteractive] = useState(false);
   const [activeSection, setActiveSection] = useState<InvitationEditorSectionKey>('style');
   const lastHandledSuccessState = useRef<InvitationEditorActionState | null>(null);
@@ -1506,6 +1514,31 @@ export function InvitationEditor({
 
     return () => window.clearTimeout(timeout);
   }, [content, isLocalPreviewOpen, shouldMountPreview]);
+
+  useEffect(() => {
+    const handleAudioChanged = (event: Event) => {
+      const detail = (event as CustomEvent<InvitationAudioChangedEventDetail>).detail;
+
+      setPreviewAudio(
+        detail.enabled && detail.durationSeconds
+          ? {
+              assetId: 'persisted-owner-audio',
+              durationSeconds: detail.durationSeconds,
+              originalFileName: 'Audio undangan',
+              rightsAcknowledged: true,
+            }
+          : {
+              assetId: null,
+              durationSeconds: null,
+              originalFileName: null,
+              rightsAcknowledged: false,
+            },
+      );
+    };
+
+    window.addEventListener(INVITATION_AUDIO_CHANGED_EVENT, handleAudioChanged);
+    return () => window.removeEventListener(INVITATION_AUDIO_CHANGED_EVENT, handleAudioChanged);
+  }, []);
 
   useEffect(() => {
     if (draft.updated_at === lastSyncedDraftUpdatedAt.current || isDirty) {
@@ -1834,12 +1867,14 @@ export function InvitationEditor({
             </form>
             {shouldMountPreview ? (
               <DeferredInvitationEditorLivePreview
+                audio={previewAudio}
                 content={previewContent}
                 galleryImages={galleryImages}
                 isDirty={isDirty}
                 isOpen={isLocalPreviewOpen}
                 onOpenChange={setIsLocalPreviewOpen}
                 project={project}
+                projectId={projectId}
               />
             ) : (
               <InvitationEditorDesktopPreviewPlaceholder />

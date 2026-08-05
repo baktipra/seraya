@@ -5,6 +5,7 @@ import {
   createInvitationViewModel,
   InvitationTemplateRenderer,
 } from '@/modules/invitation-templates';
+import { createInvitationAudioPlaybackCapability } from '@/modules/media/invitation-audio-playback.types';
 import { getPublicGalleryImagesForCurrentSnapshot } from '@/modules/media/public-media.service';
 import { getPublicInvitationBySlug } from '@/modules/publications/public-invitation.service';
 
@@ -70,6 +71,10 @@ export default async function PublicInvitationPage({ params }: PublicInvitationP
   return (
     <main className="bg-seraya-ivory min-h-screen px-0 py-0 sm:px-6 sm:py-8">
       <InvitationTemplateRenderer
+        audioPlayback={createInvitationAudioPlaybackCapability({
+          configuration: snapshot.draft.audio,
+          requestUrl: `/api/invitations/${encodeURIComponent(slug)}/audio/playback`,
+        })}
         invitation={invitation}
         paletteKey={snapshot.draft.paletteKey}
         surface="generic"

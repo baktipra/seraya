@@ -12,6 +12,10 @@ import {
   useToast,
 } from '@/design-system';
 import {
+  INVITATION_AUDIO_CHANGED_EVENT,
+  type InvitationAudioChangedEventDetail,
+} from '@/modules/media/invitation-audio-playback.types';
+import {
   MAX_INVITATION_AUDIO_BYTES,
   SUPPORTED_INVITATION_AUDIO_MIME_TYPES,
   type InvitationAudioMimeType,
@@ -34,6 +38,12 @@ type FinalizeResponse = {
   audio?: InvitationAudioSummary;
   message?: string;
 };
+
+function announceAudioChange(detail: InvitationAudioChangedEventDetail) {
+  window.dispatchEvent(
+    new CustomEvent<InvitationAudioChangedEventDetail>(INVITATION_AUDIO_CHANGED_EVENT, { detail }),
+  );
+}
 
 async function readJson<T>(response: Response): Promise<T> {
   return (await response.json()) as T;
@@ -159,6 +169,10 @@ export function InvitationAudioManager({
       }
 
       setAudio(finalized.audio);
+      announceAudioChange({
+        durationSeconds: finalized.audio.durationSeconds,
+        enabled: true,
+      });
       toast({
         title: audio ? 'Audio undangan sudah diganti.' : 'Audio undangan sudah disiapkan.',
         variant: 'success',
@@ -195,6 +209,7 @@ export function InvitationAudioManager({
       }
 
       setAudio(null);
+      announceAudioChange({ durationSeconds: null, enabled: false });
       toast({ title: 'Audio dihapus dari draf undangan.', variant: 'success' });
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Audio tidak dapat dihapus.');
@@ -207,15 +222,15 @@ export function InvitationAudioManager({
     <Card
       aria-labelledby="invitation-audio-title"
       className="mb-5 overflow-hidden sm:mb-6"
-      data-v4j-audio-foundation="slice-b"
+      data-v4j-audio-foundation="slice-c"
     >
       <CardHeader className="bg-seraya-brand-soft pb-6">
         <CardTitle className="seraya-display-md" id="invitation-audio-title">
           Audio undangan
         </CardTitle>
         <CardDescription className="max-w-2xl text-base leading-7">
-          Siapkan satu audio MP3 atau M4A untuk suasana undangan. Audio tidak diputar otomatis;
-          kontrol tamu akan ditambahkan pada tahap berikutnya.
+          Siapkan satu audio MP3 atau M4A untuk suasana undangan. Audio tidak diputar otomatis; tamu
+          memulainya sendiri melalui kontrol musik yang selalu tersedia.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-5 pt-6">

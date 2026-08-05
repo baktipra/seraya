@@ -111,6 +111,44 @@ export async function getReadyInvitationAudioAssetForVerifiedProject(
   return data ? mapInvitationAudioAsset(data) : null;
 }
 
+export async function getReadyInvitationAudioAssetForProjectIdWithAdmin(
+  projectId: string,
+  assetId: string,
+): Promise<InvitationAudioMediaAsset | null> {
+  const supabase = createAdminSupabaseClient();
+  const { data, error } = await supabase
+    .from('media_assets')
+    .select(invitationAudioSelect)
+    .eq('id', assetId)
+    .eq('project_id', projectId)
+    .eq('media_kind', INVITATION_AUDIO_MEDIA_KIND)
+    .eq('status', 'ready')
+    .is('deleted_at', null)
+    .maybeSingle();
+
+  if (error) {
+    throw new InvitationAudioRepositoryError();
+  }
+
+  return data ? mapInvitationAudioAsset(data) : null;
+}
+
+export async function createSignedInvitationAudioPlaybackUrl(
+  asset: InvitationAudioMediaAsset,
+  expiresInSeconds: number,
+): Promise<string> {
+  const supabase = createAdminSupabaseClient();
+  const { data, error } = await supabase.storage
+    .from(asset.storage_bucket)
+    .createSignedUrl(asset.storage_path, expiresInSeconds);
+
+  if (error || !data?.signedUrl) {
+    throw new InvitationAudioRepositoryError();
+  }
+
+  return data.signedUrl;
+}
+
 export async function createSignedInvitationAudioUploadUrl(
   asset: InvitationAudioMediaAsset,
 ): Promise<string> {

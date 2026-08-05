@@ -14,6 +14,7 @@ import {
   getOwnedProjectPrivateInvitationDraftForVerifiedProject,
   type OwnedProjectPrivateInvitationDraft,
 } from '@/modules/invitations/invitation-draft.service';
+import { createInvitationAudioPlaybackCapability } from '@/modules/media/invitation-audio-playback.types';
 import { getPrivateGalleryImagesForVerifiedProject } from '@/modules/media/media.service';
 import type { InvitationGalleryImage } from '@/modules/media/media.types';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
@@ -206,6 +207,10 @@ export default async function InvitationPreviewPage({
         data-review-surface={surface}
       >
         <InvitationTemplateRenderer
+          audioPlayback={createInvitationAudioPlaybackCapability({
+            configuration: privateDraft.draft.content.audio,
+            requestUrl: `/api/projects/${encodeURIComponent(projectId)}/audio/playback`,
+          })}
           invitation={invitation}
           paletteKey={privateDraft.draft.content.paletteKey}
           personalSlots={personalSlots}
