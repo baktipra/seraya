@@ -1,0 +1,321 @@
+name: V4I temporary published Story photo patch
+
+on:
+  push:
+    branches:
+      - feature/v4i-remote-attendance-public-social-share-v1
+    paths:
+      - '.github/workflows/v4i-story-photo-patch.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/v4i-remote-attendance-public-social-share-v1
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Apply published gallery photo boundary
+        run: |
+          python <<'PY'
+          from pathlib import Path
+
+          def replace(path, old, new):
+              file = Path(path)
+              text = file.read_text()
+              if old not in text:
+                  raise SystemExit(f'Anchor missing in {path}: {old[:120]!r}')
+              file.write_text(text.replace(old, new, 1))
+
+          replace(
+              'src/modules/public-social-share/public-social-share.core.ts',
+              """    cta: z.enum(PUBLIC_SHARE_CTA_OPTIONS).default('open_invitation'),
+              showQr: z.boolean().default(true),
+          """,
+              """    cta: z.enum(PUBLIC_SHARE_CTA_OPTIONS).default('open_invitation'),
+              selectedImageId: z.string().uuid().nullable().default(null),
+              showQr: z.boolean().default(true),
+          """,
+          )
+          replace(
+              'src/modules/public-social-share/public-social-share.core.ts',
+              """  eventTitle: string;
+            isSynchronized: boolean;
+          """,
+              """  eventTitle: string;
+            galleryImages: ReadonlyArray<Readonly<{ alt: string; id: string; src: string }>>;
+            isSynchronized: boolean;
+          """,
+          )
+          replace(
+              'src/modules/public-social-share/public-social-share.core.ts',
+              """    model.paletteKey,
+              options.cta,
+          """,
+              """    model.paletteKey,
+              options.selectedImageId ?? 'no-photo',
+              options.cta,
+          """,
+          )
+
+          replace(
+              'src/modules/public-social-share/public-social-share.service.ts',
+              """import { getActiveInvitationDraftForVerifiedProject } from '@/modules/invitations/invitation-draft.repository';
+          """,
+              """import { getActiveInvitationDraftForVerifiedProject } from '@/modules/invitations/invitation-draft.repository';
+              import { getPublicGalleryImagesForCurrentSnapshot } from '@/modules/media/public-media.service';
+          """,
+          )
+          replace(
+              'src/modules/public-social-share/public-social-share.service.ts',
+              """  const activeDraftUpdatedAt = activeDraft ? Date.parse(activeDraft.updated_at) : Number.NaN;
+          """,
+              """  const galleryImages = await getPublicGalleryImagesForCurrentSnapshot(
+                draft.gallery.enabled ? draft.gallery.imageIds : [],
+              );
+              const activeDraftUpdatedAt = activeDraft ? Date.parse(activeDraft.updated_at) : Number.NaN;
+          """,
+          )
+          replace(
+              'src/modules/public-social-share/public-social-share.service.ts',
+              """    eventTitle: event.title,
+                isSynchronized:
+          """,
+              """    eventTitle: event.title,
+                galleryImages,
+                isSynchronized:
+          """,
+          )
+
+          replace(
+              'src/app/api/projects/[projectId]/public-share/story/route.tsx',
+              """import { AuthenticationRequiredError, requireCurrentUser } from '@/modules/auth/current-user';
+          """,
+              """import { AuthenticationRequiredError, requireCurrentUser } from '@/modules/auth/current-user';
+              import { getPublicPublishedMediaBinary } from '@/modules/media/public-media.service';
+          """,
+          )
+          replace(
+              'src/app/api/projects/[projectId]/public-share/story/route.tsx',
+              """    const options = publicShareRenderOptionsSchema.parse({
+                  cta: search.get('cta') ?? 'open_invitation',
+                  showQr: parseBoolean(search.get('showQr'), true),
+          """,
+              """    const options = publicShareRenderOptionsSchema.parse({
+                  cta: search.get('cta') ?? 'open_invitation',
+                  selectedImageId: search.get('selectedImageId'),
+                  showQr: parseBoolean(search.get('showQr'), true),
+          """,
+          )
+          replace(
+              'src/app/api/projects/[projectId]/public-share/story/route.tsx',
+              """    const theme = TEMPLATE_STYLE[model.templateKey];
+                const qrDataUrl = options.showQr
+          """,
+              """    const selectedImage = options.selectedImageId
+                  ? model.galleryImages.find((image) => image.id === options.selectedImageId)
+                  : null;
+                if (options.selectedImageId && !selectedImage) return unavailable(404);
+
+                const selectedMedia = selectedImage
+                  ? await getPublicPublishedMediaBinary(selectedImage.id)
+                  : null;
+                if (selectedImage && !selectedMedia) return unavailable(404);
+
+                const photoDataUrl = selectedMedia
+                  ? `data:${selectedMedia.asset.mime_type};base64,${Buffer.from(
+                      await selectedMedia.bytes.arrayBuffer(),
+                    ).toString('base64')}`
+                  : null;
+                const theme = TEMPLATE_STYLE[model.templateKey];
+                const qrDataUrl = options.showQr
+          """,
+          )
+          replace(
+              'src/app/api/projects/[projectId]/public-share/story/route.tsx',
+              """      >
+                <div
+                  style={{
+                    border: `2px solid ${theme.accent}`,
+          """,
+              """      >
+                {photoDataUrl ? (
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      alt=""
+                      src={photoDataUrl}
+                      style={{
+                        height: 760,
+                        left: 64,
+                        objectFit: 'cover',
+                        opacity: model.templateKey === 'laras' ? 0.5 : 0.38,
+                        position: 'absolute',
+                        top: 64,
+                        width: 952,
+                      }}
+                    />
+                    <div
+                      style={{
+                        background: theme.background,
+                        display: 'flex',
+                        height: 760,
+                        left: 64,
+                        opacity: model.templateKey === 'aruna' ? 0.7 : 0.62,
+                        position: 'absolute',
+                        top: 64,
+                        width: 952,
+                      }}
+                    />
+                  </>
+                ) : null}
+                <div
+                  style={{
+                    border: `2px solid ${theme.accent}`,
+          """,
+          )
+
+          replace(
+              'src/components/projects/public-social-share-kit.tsx',
+              """  const [cta, setCta] = useState<PublicShareCta>('open_invitation');
+            const [showQr, setShowQr] = useState(true);
+          """,
+              """  const [cta, setCta] = useState<PublicShareCta>('open_invitation');
+            const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
+            const [showQr, setShowQr] = useState(true);
+          """,
+          )
+          replace(
+              'src/components/projects/public-social-share-kit.tsx',
+              """    const query = new URLSearchParams({
+                  cta,
+                  showQr: showQr ? '1' : '0',
+          """,
+              """    const query = new URLSearchParams({
+                  cta,
+                  showQr: showQr ? '1' : '0',
+          """,
+          )
+          replace(
+              'src/components/projects/public-social-share-kit.tsx',
+              """      showVenue: showVenue ? '1' : '0',
+                });
+                return `/api/projects/${projectId}/public-share/story?${query.toString()}`;
+              }, [cta, projectId, showQr, showSerayaBrand, showVenue]);
+          """,
+              """      showVenue: showVenue ? '1' : '0',
+                });
+                if (selectedImageId) query.set('selectedImageId', selectedImageId);
+                return `/api/projects/${projectId}/public-share/story?${query.toString()}`;
+              }, [cta, projectId, selectedImageId, showQr, showSerayaBrand, showVenue]);
+          """,
+          )
+          replace(
+              'src/components/projects/public-social-share-kit.tsx',
+              """          <label className="grid gap-2 text-sm font-medium">
+                        CTA Story
+          """,
+              """          {model.galleryImages.length > 0 ? (
+                        <label className="grid gap-2 text-sm font-medium">
+                          Foto Story
+                          <select
+                            className="border-seraya-line bg-seraya-surface focus-visible:outline-seraya-focus-ring min-h-11 rounded-[var(--seraya-radius-sm)] border px-3"
+                            onChange={(event) => setSelectedImageId(event.target.value || null)}
+                            value={selectedImageId ?? ''}
+                          >
+                            <option value="">Tanpa foto</option>
+                            {model.galleryImages.map((image) => (
+                              <option key={image.id} value={image.id}>
+                                {image.alt}
+                              </option>
+                            ))}
+                          </select>
+                          <span className="text-seraya-text-muted text-xs font-normal leading-5">
+                            Hanya foto yang sudah termasuk dalam versi undangan publik saat ini.
+                          </span>
+                        </label>
+                      ) : null}
+
+                      <label className="grid gap-2 text-sm font-medium">
+                        CTA Story
+          """,
+          )
+
+          replace(
+              'tests/unit/public-social-share-v4i.test.ts',
+              """  eventTitle: 'Akad Nikah',
+            isSynchronized: true,
+          """,
+              """  eventTitle: 'Akad Nikah',
+            galleryImages: [
+              {
+                alt: 'Foto pasangan 1',
+                id: '22222222-2222-4222-8222-222222222222',
+                src: '/media/22222222-2222-4222-8222-222222222222',
+              },
+            ],
+            isSynchronized: true,
+          """,
+          )
+          replace(
+              'tests/unit/public-social-share-v4i.test.ts',
+              """      'v4i-story-v1:11111111-1111-4111-8111-111111111111:3:roselle:rose:save_the_date:qr:venue:no-brand',
+          """,
+              """      'v4i-story-v1:11111111-1111-4111-8111-111111111111:3:roselle:rose:no-photo:save_the_date:qr:venue:no-brand',
+          """,
+          )
+          replace(
+              'tests/unit/public-social-share-v4i.test.ts',
+              """  it('rejects accidental personal invitation material', () => {
+          """,
+              """  it('binds Story identity to an authorized published image ID', () => {
+                const options = publicShareRenderOptionsSchema.parse({
+                  selectedImageId: '22222222-2222-4222-8222-222222222222',
+                });
+                expect(createPublicShareFingerprint(model, options)).toContain(
+                  ':22222222-2222-4222-8222-222222222222:',
+                );
+              });
+
+              it('rejects arbitrary image URLs in render options', () => {
+                expect(() =>
+                  publicShareRenderOptionsSchema.parse({
+                    imageUrl: 'https://attacker.example/photo.jpg',
+                  }),
+                ).toThrow();
+              });
+
+              it('rejects accidental personal invitation material', () => {
+          """,
+          )
+          PY
+
+      - name: Format V4I photo files
+        run: |
+          npx prettier --write \
+            src/modules/public-social-share/public-social-share.core.ts \
+            src/modules/public-social-share/public-social-share.service.ts \
+            'src/app/api/projects/[projectId]/public-share/story/route.tsx' \
+            src/components/projects/public-social-share-kit.tsx \
+            tests/unit/public-social-share-v4i.test.ts
+
+      - name: Commit product changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src tests
+          git commit -m "SERAYA V4I: add published-gallery Story photo selection"
+          git push origin HEAD:feature/v4i-remote-attendance-public-social-share-v1
