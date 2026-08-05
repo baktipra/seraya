@@ -1,0 +1,79 @@
+name: RC1 published confidence validation
+
+on:
+  pull_request:
+    paths:
+      - 'src/components/projects/project-overview-bootstrap.tsx'
+      - 'src/components/projects/published-confidence.tsx'
+      - 'src/components/workspace/compass-primitives.tsx'
+      - 'tests/unit/published-confidence-rc1.test.tsx'
+      - 'tests/e2e/published-confidence-rc1.spec.ts'
+      - 'tests/e2e/fixture-app/app/rc1-published-confidence/**'
+      - 'playwright.rc1.config.ts'
+      - '.github/workflows/rc1-published-confidence.yml'
+  push:
+    branches:
+      - feature/rc1-slice-a-published-confidence-post-publish-entry
+    paths:
+      - 'src/components/projects/project-overview-bootstrap.tsx'
+      - 'src/components/projects/published-confidence.tsx'
+      - 'src/components/workspace/compass-primitives.tsx'
+      - 'tests/unit/published-confidence-rc1.test.tsx'
+      - 'tests/e2e/published-confidence-rc1.spec.ts'
+      - 'tests/e2e/fixture-app/app/rc1-published-confidence/**'
+      - 'playwright.rc1.config.ts'
+      - '.github/workflows/rc1-published-confidence.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Check focused formatting
+        run: |
+          npx prettier --check \
+            src/components/projects/project-overview-bootstrap.tsx \
+            src/components/projects/published-confidence.tsx \
+            src/components/workspace/compass-primitives.tsx \
+            tests/unit/published-confidence-rc1.test.tsx \
+            tests/e2e/published-confidence-rc1.spec.ts \
+            tests/e2e/fixture-app/app/rc1-published-confidence/page.tsx \
+            playwright.rc1.config.ts \
+            .github/workflows/rc1-published-confidence.yml
+      - name: Lint focused source
+        run: |
+          npx eslint \
+            src/components/projects/project-overview-bootstrap.tsx \
+            src/components/projects/published-confidence.tsx \
+            src/components/workspace/compass-primitives.tsx \
+            tests/unit/published-confidence-rc1.test.tsx \
+            tests/e2e/published-confidence-rc1.spec.ts \
+            tests/e2e/fixture-app/app/rc1-published-confidence/page.tsx \
+            playwright.rc1.config.ts
+      - run: npm run typecheck
+      - name: Run focused contracts
+        run: npx vitest run tests/unit/published-confidence-rc1.test.tsx
+      - run: npm run build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run desktop and mobile Ringkasan smoke
+        run: npx playwright test --config=playwright.rc1.config.ts
+      - name: Upload Playwright evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rc1-published-confidence-playwright-report
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+          retention-days: 7
