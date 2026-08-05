@@ -356,9 +356,7 @@ function getCalendarEnd(event: GuestEventUtilityEvent) {
 }
 
 function createCalendarDescription(event: GuestEventUtilityEvent) {
-  const livestreamHref = event.livestreamEnabled
-    ? getYoutubeWatchHref(event.livestreamUrl)
-    : null;
+  const livestreamHref = event.livestreamEnabled ? getYoutubeWatchHref(event.livestreamUrl) : null;
 
   return [
     event.arrivalNote,

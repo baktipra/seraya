@@ -132,7 +132,12 @@ export function PublicSocialShareKit({ model, projectId }: PublicSocialShareKitP
               ['show-qr', 'Tampilkan QR', showQr, setShowQr],
               ['show-venue', 'Tampilkan venue', showVenue, setShowVenue],
               ['show-brand', 'Tampilkan branding Seraya', showSerayaBrand, setShowSerayaBrand],
-              ['show-safe-area', 'Tampilkan panduan safe area pada preview', showSafeArea, setShowSafeArea],
+              [
+                'show-safe-area',
+                'Tampilkan panduan safe area pada preview',
+                showSafeArea,
+                setShowSafeArea,
+              ],
             ].map(([id, label, checked, setter]) => (
               <label key={String(id)} className="flex min-h-11 items-center gap-3 text-sm">
                 <input

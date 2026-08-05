@@ -1,9 +1,6 @@
 import QRCode from 'qrcode';
 
-import {
-  AuthenticationRequiredError,
-  requireCurrentUser,
-} from '@/modules/auth/current-user';
+import { AuthenticationRequiredError, requireCurrentUser } from '@/modules/auth/current-user';
 import { getOwnedProjectById } from '@/modules/projects/project.repository';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 import { getPublicSocialShareForVerifiedProject } from '@/modules/public-social-share/public-social-share.service';

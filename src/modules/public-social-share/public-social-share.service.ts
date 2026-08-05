@@ -48,7 +48,10 @@ export async function getPublicSocialShareForVerifiedProject(
     eventDate: formatEventDate(event.date, publication.snapshot.project.timezone),
     eventTitle: event.title,
     paletteKey: draft.paletteKey,
-    publicUrl: createCanonicalPublicInvitationUrl(siteConfig.url, publication.snapshot.project.slug),
+    publicUrl: createCanonicalPublicInvitationUrl(
+      siteConfig.url,
+      publication.snapshot.project.slug,
+    ),
     revision: publication.revision,
     snapshotId: publication.id,
     templateKey: draft.templateKey,

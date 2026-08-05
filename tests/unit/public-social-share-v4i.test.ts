@@ -24,9 +24,9 @@ const model: PublicSocialShareModel = {
 
 describe('V4I public social share safety contract', () => {
   it('builds only the canonical generic invitation URL', () => {
-    expect(createCanonicalPublicInvitationUrl('https://seraya.id/dashboard?x=1#owner', 'raka-nadia')).toBe(
-      'https://seraya.id/raka-nadia',
-    );
+    expect(
+      createCanonicalPublicInvitationUrl('https://seraya.id/dashboard?x=1#owner', 'raka-nadia'),
+    ).toBe('https://seraya.id/raka-nadia');
   });
 
   it('keeps copy and fingerprints deterministic and public-safe', () => {

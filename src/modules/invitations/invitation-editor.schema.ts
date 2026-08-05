@@ -29,9 +29,12 @@ const eventScheduleEventInputKeys = [
   'placeId',
   'latitude',
   'longitude',
+  'livestreamDescription',
   'livestreamEnabled',
   'livestreamUrl',
   'livestreamHeading',
+  'livestreamPostEventMode',
+  'livestreamPreEventMessage',
 ] as const;
 
 const projectIdSchema = z.string().regex(databaseUuidShape, 'Project tidak valid.');
@@ -148,8 +151,11 @@ const invitationEditorFormSchema = z
                     endTime: formTextSchema,
                     id: z.string().regex(databaseUuidShape, 'ID acara tidak valid.'),
                     latitude: formTextSchema.optional(),
+                    livestreamDescription: formTextSchema.optional(),
                     livestreamEnabled: checkboxInputSchema.optional(),
                     livestreamHeading: formTextSchema.optional(),
+                    livestreamPostEventMode: formTextSchema.optional(),
+                    livestreamPreEventMessage: formTextSchema.optional(),
                     livestreamUrl: formTextSchema.optional(),
                     locationSource: formTextSchema.optional(),
                     longitude: formTextSchema.optional(),

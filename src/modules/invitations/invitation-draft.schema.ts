@@ -156,8 +156,11 @@ const eventScheduleItemSchema = z
     endTime: nullableTime('Waktu selesai'),
     id: z.string().trim().uuid('ID acara tidak valid.'),
     latitude: z.number().finite().min(-90).max(90).nullable().optional(),
+    livestreamDescription: nullableText(600, 'Deskripsi siaran').optional(),
     livestreamEnabled: z.boolean().optional(),
     livestreamHeading: nullableText(160, 'Judul siaran langsung').optional(),
+    livestreamPostEventMode: z.enum(['hide', 'recording']).optional(),
+    livestreamPreEventMessage: nullableText(600, 'Pesan sebelum siaran').optional(),
     livestreamUrl: nullableLivestreamUrl.optional(),
     locationSource: z
       .enum(['google_place', 'current_location', 'manual_pin'])

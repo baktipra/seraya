@@ -34,9 +34,7 @@ type DeliveryScreen =
   | {
       kind: 'delivery';
       deliveryCenter: Awaited<ReturnType<typeof getGuestDistributionCenterForVerifiedProject>>;
-      publicShare: NonNullable<
-        Awaited<ReturnType<typeof getPublicSocialShareForVerifiedProject>>
-      >;
+      publicShare: NonNullable<Awaited<ReturnType<typeof getPublicSocialShareForVerifiedProject>>>;
     };
 
 export const dynamic = 'force-dynamic';
@@ -107,10 +105,7 @@ export default async function DeliveryCenterPage({ params }: DeliveryCenterPageP
 
   return (
     <WorkspacePage kind="delivery" width="operations">
-      <PublicSocialShareKit
-        model={publicShare}
-        projectId={deliveryCenter.project.id}
-      />
+      <PublicSocialShareKit model={publicShare} projectId={deliveryCenter.project.id} />
       <NativeGuestDeliveryCenter
         copyWhatsAppNumbersAction={copySelectedDeliveryWhatsAppNumbersAction.bind(null, {
           projectId: deliveryCenter.project.id,
