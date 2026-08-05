@@ -50,36 +50,84 @@ jobs:
       - name: Check V4J formatting
         run: |
           npx prettier --check \
-            src/app/api/invitations/[slug]/audio/playback/route.ts \
-            src/app/api/projects/[projectId]/audio \
+            'src/app/api/invitations/[slug]/audio/playback/route.ts' \
+            'src/app/api/projects/[projectId]/audio/reserve/route.ts' \
+            'src/app/api/projects/[projectId]/audio/finalize/route.ts' \
+            'src/app/api/projects/[projectId]/audio/playback/route.ts' \
+            'src/app/api/projects/[projectId]/audio/remove/route.ts' \
+            'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
             'src/app/(dashboard)/dashboard/[projectId]/preview/page.tsx' \
-            src/app/[slug] \
-            src/components/invitation-audio-playback-control.* \
+            'src/app/[slug]/page.tsx' \
+            'src/app/[slug]/g/[guestToken]/page.tsx' \
+            src/components/invitation-audio-playback-control.tsx \
+            src/components/invitation-audio-playback-control.module.css \
             src/components/projects/invitation-audio-manager.tsx \
-            src/components/projects/invitation-editor*.tsx \
-            src/modules/invitations \
-            src/modules/invitation-templates \
-            src/modules/media/invitation-audio* \
+            src/components/projects/invitation-editor.tsx \
+            src/components/projects/invitation-editor-live-preview.tsx \
+            src/components/projects/invitation-editor-workspace.tsx \
+            src/modules/invitations/invitation-draft.schema.ts \
+            src/modules/invitations/invitation-draft.defaults.ts \
+            src/modules/invitations/invitation-editor-local-state.ts \
+            src/modules/invitations/invitation-editor.schema.ts \
+            src/modules/invitations/invitation-editor.service.ts \
+            src/modules/invitation-templates/invitation-template-renderer.tsx \
+            src/modules/invitation-templates/invitation-view-model.ts \
+            src/modules/invitation-templates/invitation-atmosphere-identity.tsx \
+            src/modules/invitation-templates/invitation-atmosphere-identity.module.css \
+            src/modules/invitation-templates/roselle/roselle-template.tsx \
+            src/modules/invitation-templates/aruna/aruna-template.tsx \
+            src/modules/invitation-templates/laras/laras-template.tsx \
+            src/modules/media/invitation-audio.types.ts \
+            src/modules/media/invitation-audio.validation.ts \
+            src/modules/media/invitation-audio.repository.ts \
+            src/modules/media/invitation-audio.service.ts \
+            src/modules/media/invitation-audio-playback.types.ts \
+            src/modules/media/invitation-audio-playback.service.ts \
             src/modules/publications/publication.service.ts \
             src/modules/publications/__tests__/publication.service.test.ts \
-            tests/unit/invitation-*-v4j.test.* \
+            tests/unit/invitation-atmosphere-identity-v4j.test.tsx \
+            tests/unit/invitation-audio-media-v4j.test.ts \
+            tests/unit/invitation-audio-playback-v4j.test.ts \
             tests/integration/supabase-foundation.test.ts
       - name: Lint V4J source
         run: |
           npx eslint \
-            src/app/api/invitations/[slug]/audio/playback/route.ts \
-            src/app/api/projects/[projectId]/audio \
+            'src/app/api/invitations/[slug]/audio/playback/route.ts' \
+            'src/app/api/projects/[projectId]/audio/reserve/route.ts' \
+            'src/app/api/projects/[projectId]/audio/finalize/route.ts' \
+            'src/app/api/projects/[projectId]/audio/playback/route.ts' \
+            'src/app/api/projects/[projectId]/audio/remove/route.ts' \
+            'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
             'src/app/(dashboard)/dashboard/[projectId]/preview/page.tsx' \
-            src/app/[slug] \
+            'src/app/[slug]/page.tsx' \
+            'src/app/[slug]/g/[guestToken]/page.tsx' \
             src/components/invitation-audio-playback-control.tsx \
             src/components/projects/invitation-audio-manager.tsx \
-            src/components/projects/invitation-editor*.tsx \
-            src/modules/invitations \
-            src/modules/invitation-templates \
-            src/modules/media/invitation-audio* \
+            src/components/projects/invitation-editor.tsx \
+            src/components/projects/invitation-editor-live-preview.tsx \
+            src/components/projects/invitation-editor-workspace.tsx \
+            src/modules/invitations/invitation-draft.schema.ts \
+            src/modules/invitations/invitation-draft.defaults.ts \
+            src/modules/invitations/invitation-editor-local-state.ts \
+            src/modules/invitations/invitation-editor.schema.ts \
+            src/modules/invitations/invitation-editor.service.ts \
+            src/modules/invitation-templates/invitation-template-renderer.tsx \
+            src/modules/invitation-templates/invitation-view-model.ts \
+            src/modules/invitation-templates/invitation-atmosphere-identity.tsx \
+            src/modules/invitation-templates/roselle/roselle-template.tsx \
+            src/modules/invitation-templates/aruna/aruna-template.tsx \
+            src/modules/invitation-templates/laras/laras-template.tsx \
+            src/modules/media/invitation-audio.types.ts \
+            src/modules/media/invitation-audio.validation.ts \
+            src/modules/media/invitation-audio.repository.ts \
+            src/modules/media/invitation-audio.service.ts \
+            src/modules/media/invitation-audio-playback.types.ts \
+            src/modules/media/invitation-audio-playback.service.ts \
             src/modules/publications/publication.service.ts \
             src/modules/publications/__tests__/publication.service.test.ts \
-            tests/unit/invitation-*-v4j.test.* \
+            tests/unit/invitation-atmosphere-identity-v4j.test.tsx \
+            tests/unit/invitation-audio-media-v4j.test.ts \
+            tests/unit/invitation-audio-playback-v4j.test.ts \
             tests/integration/supabase-foundation.test.ts
       - run: npm run typecheck
       - name: Focused V4J contracts
