@@ -1,5 +1,6 @@
 import { InvitationStudioModePlaceholder } from '../../../../../src/components/projects/invitation-studio-mode-placeholder';
 import { InvitationStudioShell } from '../../../../../src/components/projects/invitation-studio-shell';
+import { parseInvitationStudioMode } from '../../../../../src/components/projects/invitation-studio.types';
 
 function FixturePanel({ label }: { label: string }) {
   return (
@@ -15,7 +16,13 @@ function FixturePanel({ label }: { label: string }) {
   );
 }
 
-export default function InvitationStudioSliceAFixturePage() {
+export default async function InvitationStudioSliceAFixturePage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ mode?: string | string[] }>;
+}) {
+  const query = await (searchParams ?? Promise.resolve<{ mode?: string | string[] }>({}));
+
   return (
     <main className="bg-seraya-canvas min-h-screen px-0 py-6 sm:px-6 lg:px-10">
       <div className="mx-auto w-full max-w-[92rem]">
@@ -29,7 +36,7 @@ export default function InvitationStudioSliceAFixturePage() {
               title="Pilih arah visual undangan."
             />
           }
-          initialMode="content"
+          initialMode={parseInvitationStudioMode(query.mode)}
           media={<FixturePanel label="Media" />}
           preview={<FixturePanel label="Preview" />}
           previewHref="/invitation-studio-slice-a"
