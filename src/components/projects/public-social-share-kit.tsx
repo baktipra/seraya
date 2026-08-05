@@ -141,7 +141,7 @@ export function PublicSocialShareKit({ model, projectId }: PublicSocialShareKitP
                   </option>
                 ))}
               </select>
-              <span className="text-seraya-text-muted text-xs font-normal leading-5">
+              <span className="text-seraya-text-muted text-xs leading-5 font-normal">
                 Hanya foto yang sudah termasuk dalam versi undangan publik saat ini.
               </span>
               {selectedImage ? (
