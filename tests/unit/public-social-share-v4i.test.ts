@@ -13,6 +13,7 @@ const model: PublicSocialShareModel = {
   coupleLabel: 'Raka & Nadia',
   eventDate: '17 Agustus 2027',
   eventTitle: 'Akad Nikah',
+  isSynchronized: true,
   paletteKey: 'rose',
   publicUrl: 'https://seraya.id/raka-nadia',
   revision: 3,
@@ -41,6 +42,13 @@ describe('V4I public social share safety contract', () => {
     expect(createPublicShareCopy(model)).not.toContain('/g/');
     expect(createPublicShareFingerprint(model, options)).toBe(
       'v4i-story-v1:11111111-1111-4111-8111-111111111111:3:roselle:rose:save_the_date:qr:venue:no-brand',
+    );
+  });
+
+  it('keeps synchronization metadata separate from generated asset identity', () => {
+    const options = publicShareRenderOptionsSchema.parse({});
+    expect(createPublicShareFingerprint({ ...model, isSynchronized: false }, options)).toBe(
+      createPublicShareFingerprint(model, options),
     );
   });
 
