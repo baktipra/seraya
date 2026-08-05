@@ -49,7 +49,7 @@ jobs:
       - run: npm ci
       - name: Check focused formatting
         run: |
-          npx prettier --check \
+          npx prettier --write \
             'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
             src/components/projects/invitation-studio-shell.tsx \
             src/components/projects/invitation-studio-shell.module.css \
@@ -60,6 +60,7 @@ jobs:
             tests/e2e/fixture-app/app/invitation-studio-slice-a/page.tsx \
             playwright.invitation-studio-slice-a.config.ts \
             .github/workflows/invitation-studio-slice-a.yml
+          git diff --exit-code
       - name: Lint focused source
         run: |
           npx eslint \
