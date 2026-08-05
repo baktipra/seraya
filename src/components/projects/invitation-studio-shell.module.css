@@ -93,7 +93,8 @@
   background: var(--seraya-status-warning, var(--seraya-action-primary));
 }
 
-.previewLink {
+.previewLink,
+.placeholderAction {
   min-height: 2.5rem;
   display: inline-flex;
   align-items: center;
@@ -111,12 +112,14 @@
     background-color var(--seraya-motion-default) var(--seraya-ease-standard);
 }
 
-.previewLink:hover {
+.previewLink:hover,
+.placeholderAction:hover {
   border-color: var(--seraya-action-primary);
   background: var(--seraya-brand-soft);
 }
 
 .previewLink:focus-visible,
+.placeholderAction:focus-visible,
 .tab:focus-visible {
   outline: 3px solid var(--seraya-focus-ring);
   outline-offset: 2px;
