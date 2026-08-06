@@ -52,7 +52,9 @@ test.describe('Invitation Studio Slice B unified state and command authority', (
     await expect(saveState).toHaveAttribute('data-invitation-studio-save-state', 'error');
     await expect(saveAction).toHaveText('Coba simpan lagi');
     await expect(input).toHaveValue('Gagal disimpan tetapi tetap aman');
-    await expect(page.getByRole('alert')).toContainText('Perubahan lokal tetap aman');
+    await expect(
+      page.getByText('Simulasi gagal menyimpan. Perubahan lokal tetap aman.', { exact: true }),
+    ).toBeVisible();
     await expect(saveAction).toHaveCount(1);
   });
 
