@@ -1,0 +1,405 @@
+.responsiveRoot {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  container-type: inline-size;
+}
+
+.responsiveRoot :global([data-invitation-studio-header]),
+.responsiveRoot :global([data-invitation-studio-canvas]),
+.responsiveRoot :global([data-invitation-studio-panel]),
+.responsiveRoot :global([data-invitation-studio-save-authority]),
+.responsiveRoot :global([data-invitation-studio-design-mode]),
+.responsiveRoot :global([data-invitation-studio-media-mode]),
+.responsiveRoot :global([data-invitation-studio-preview-mode]),
+.responsiveRoot :global([data-invitation-studio-publish-mode]) {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.responsiveRoot :global([data-invitation-studio-design-mode]),
+.responsiveRoot :global([data-invitation-studio-media-mode]),
+.responsiveRoot :global([data-invitation-studio-preview-mode]),
+.responsiveRoot :global([data-invitation-studio-publish-mode]) {
+  container-type: inline-size;
+  overflow-wrap: anywhere;
+}
+
+.responsiveRoot :global([data-invitation-studio-mode-navigation]) {
+  overscroll-behavior-inline: contain;
+  scroll-padding-inline: 0.75rem;
+  scroll-snap-type: x proximity;
+}
+
+.responsiveRoot :global([data-invitation-studio-mode]) {
+  scroll-margin-inline: 0.75rem;
+  scroll-snap-align: center;
+}
+
+.responsiveRoot :global([data-invitation-studio-status-tone]) {
+  max-width: 100%;
+  white-space: normal;
+}
+
+.responsiveRoot :global([data-invitation-studio-save-authority]) {
+  overflow-wrap: anywhere;
+}
+
+.responsiveRoot :global([data-invitation-studio-panel='content']) {
+  container-type: inline-size;
+}
+
+.responsiveRoot :global([data-invitation-studio-panel='content'] form),
+.responsiveRoot :global([data-invitation-studio-panel='content'] fieldset),
+.responsiveRoot :global([data-invitation-studio-panel='content'] input),
+.responsiveRoot :global([data-invitation-studio-panel='content'] select),
+.responsiveRoot :global([data-invitation-studio-panel='content'] textarea) {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.responsiveRoot :global([data-invitation-editor-mobile-navigation]) {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-inline: 0 !important;
+  border-radius: var(--seraya-radius-md) !important;
+  padding-inline: 0.75rem !important;
+}
+
+.responsiveRoot :global([data-invitation-editor-mobile-section-strip]) {
+  max-width: 100%;
+  overscroll-behavior-inline: contain;
+  scroll-padding-inline: 0.25rem;
+}
+
+.responsiveRoot :global([data-invitation-editor-mobile-section-strip] > *) {
+  scroll-snap-align: start;
+}
+
+/* Design mode: local canvas width, not browser width, owns the split decision. */
+.responsiveRoot :global([data-invitation-studio-design-mode] > div:first-child),
+.responsiveRoot :global([data-invitation-studio-design-mode] > div:nth-child(2)),
+.responsiveRoot :global([data-invitation-studio-design-controls]),
+.responsiveRoot :global([data-invitation-studio-design-preview]) {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.responsiveRoot :global([data-invitation-studio-design-mode] > div:first-child) {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.responsiveRoot :global([data-invitation-studio-design-mode] > div:first-child > div:last-child) {
+  width: 100%;
+  min-width: 0;
+  margin-left: 0;
+}
+
+.responsiveRoot :global([data-invitation-studio-design-mode] > div:nth-child(2)) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.responsiveRoot :global([data-invitation-studio-design-preview]) {
+  position: static;
+  top: auto;
+}
+
+.responsiveRoot :global([aria-label='Ukuran preview desain']) {
+  width: 100%;
+  max-width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.responsiveRoot :global([aria-label='Ukuran preview desain'] button) {
+  min-width: 0;
+}
+
+.responsiveRoot :global([data-invitation-studio-design-preview] [data-preview-stage]) {
+  max-width: 100%;
+  padding-inline: clamp(0.5rem, 2cqi, 1.5rem);
+}
+
+.responsiveRoot :global([data-invitation-studio-design-preview] [data-preview-device]) {
+  max-width: 100%;
+}
+
+/* Media mode: summary and media tabs remain readable before they become compact rows. */
+.responsiveRoot :global([data-invitation-studio-media-mode] > header) {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.responsiveRoot :global([data-invitation-studio-media-mode] > header > dl) {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  margin-left: 0;
+}
+
+.responsiveRoot :global([data-invitation-studio-media-mode] > [role='tablist']) {
+  width: 100%;
+  max-width: 100%;
+}
+
+.responsiveRoot :global([data-invitation-studio-media-mode] [role='tabpanel']) {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.responsiveRoot :global([data-invitation-studio-media-mode] [role='tabpanel'] form),
+.responsiveRoot :global([data-invitation-studio-media-mode] [role='tabpanel'] img),
+.responsiveRoot :global([data-invitation-studio-media-mode] [role='tabpanel'] audio) {
+  max-width: 100%;
+}
+
+/* Preview mode: controls collapse by actual mode width and never push the canvas sideways. */
+.responsiveRoot :global([data-invitation-studio-preview-mode] > header),
+.responsiveRoot :global([data-invitation-studio-preview-mode] section > div:first-child) {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.responsiveRoot :global([data-invitation-studio-preview-mode] [role='radiogroup']) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.responsiveRoot :global([data-invitation-studio-preview-mode] section[aria-label='Kontrol pengalaman preview']) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.responsiveRoot :global([data-invitation-studio-preview-mode] [role='group']) {
+  width: 100%;
+  max-width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.responsiveRoot :global([data-invitation-studio-preview-mode] [role='group'] button) {
+  min-width: 0;
+}
+
+.responsiveRoot :global([data-invitation-studio-preview-mode] a[target='_blank']) {
+  width: 100%;
+}
+
+.responsiveRoot :global([data-invitation-studio-preview-mode] [data-preview-stage]) {
+  max-width: 100%;
+  padding-inline: clamp(0.5rem, 2cqi, 1.5rem);
+}
+
+.responsiveRoot :global([data-invitation-studio-preview-mode] [data-preview-device]) {
+  max-width: 100%;
+}
+
+/* Publish mode: one-column truth is the safe default; wider canvases progressively expand. */
+.responsiveRoot :global([data-invitation-studio-publish-mode] > header),
+.responsiveRoot :global([data-invitation-studio-publish-mode] > div:last-child > div:first-child > div:first-child) {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.responsiveRoot :global([data-invitation-studio-publish-mode] > header > span) {
+  margin-left: 0;
+}
+
+.responsiveRoot :global([data-publish-version-truth]),
+.responsiveRoot :global([data-invitation-studio-publish-mode] > div:last-child),
+.responsiveRoot :global([data-invitation-studio-publish-mode] ol) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.responsiveRoot :global([data-primary-publication-decision]) {
+  position: static;
+  top: auto;
+}
+
+.responsiveRoot :global([data-invitation-studio-publish-mode] li),
+.responsiveRoot :global([data-invitation-studio-publish-mode] li > *),
+.responsiveRoot :global([data-primary-publication-decision]) {
+  max-width: 100%;
+  min-width: 0;
+}
+
+@container (min-width: 40rem) {
+  .responsiveRoot :global([data-invitation-studio-design-mode] > div:first-child),
+  .responsiveRoot :global([data-invitation-studio-preview-mode] > header),
+  .responsiveRoot :global([data-invitation-studio-preview-mode] section > div:first-child),
+  .responsiveRoot :global([data-invitation-studio-publish-mode] > header),
+  .responsiveRoot
+    :global([data-invitation-studio-publish-mode] > div:last-child > div:first-child > div:first-child) {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .responsiveRoot :global([data-invitation-studio-design-mode] > div:first-child > div:last-child),
+  .responsiveRoot :global([data-invitation-studio-publish-mode] > header > span) {
+    width: auto;
+    margin-left: auto;
+  }
+
+  .responsiveRoot :global([aria-label='Ukuran preview desain']) {
+    width: auto;
+  }
+
+  .responsiveRoot :global([data-invitation-studio-preview-mode] section[aria-label='Kontrol pengalaman preview']) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .responsiveRoot :global([data-invitation-studio-preview-mode] a[target='_blank']) {
+    width: auto;
+  }
+
+  .responsiveRoot :global([data-publish-version-truth]) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@container (min-width: 45rem) {
+  .responsiveRoot :global([data-invitation-studio-media-mode] > header) {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .responsiveRoot :global([data-invitation-studio-media-mode] > header > dl) {
+    width: min(100%, 18rem);
+    margin-left: auto;
+  }
+
+  .responsiveRoot :global([data-invitation-studio-media-mode] > [role='tablist']) {
+    width: min(100%, 34rem);
+  }
+
+  .responsiveRoot :global([data-invitation-studio-publish-mode] ol) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container (min-width: 52rem) {
+  .responsiveRoot :global([data-invitation-studio-preview-mode] [role='radiogroup']) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@container (min-width: 68rem) {
+  .responsiveRoot :global([data-invitation-studio-design-mode] > div:nth-child(2)) {
+    grid-template-columns: minmax(20rem, 0.88fr) minmax(0, 1.45fr);
+    align-items: start;
+  }
+
+  .responsiveRoot :global([data-invitation-studio-design-preview]),
+  .responsiveRoot :global([data-primary-publication-decision]) {
+    position: sticky;
+    top: 5.5rem;
+  }
+
+  .responsiveRoot :global([data-invitation-studio-publish-mode] > div:last-child) {
+    grid-template-columns: minmax(0, 1.35fr) minmax(19rem, 0.65fr);
+  }
+
+  .responsiveRoot :global([data-invitation-studio-publish-mode] ol) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 48rem) and (max-width: 71.999rem) {
+  .responsiveRoot :global([data-invitation-studio-header]) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .responsiveRoot :global([data-invitation-studio-header] > div:last-child) {
+    justify-content: flex-start;
+  }
+
+  .responsiveRoot :global([data-invitation-studio-save-authority]) {
+    flex-basis: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 47.999rem) {
+  .responsiveRoot :global([data-invitation-studio-header]) {
+    gap: 0.85rem;
+    padding: max(1rem, env(safe-area-inset-top)) 1rem 1rem;
+  }
+
+  .responsiveRoot :global([data-invitation-studio-header] > div:last-child) {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .responsiveRoot :global([data-invitation-studio-status-tone]) {
+    width: fit-content;
+  }
+
+  .responsiveRoot :global([data-invitation-studio-save-authority]) {
+    width: 100%;
+    gap: 0.65rem;
+  }
+
+  .responsiveRoot :global([data-invitation-studio-save-action]) {
+    min-height: 3rem;
+  }
+
+  .responsiveRoot :global([data-invitation-studio-mode]) {
+    min-width: clamp(5.75rem, 25vw, 7rem);
+    min-height: 3.25rem;
+    padding-inline: 0.7rem;
+  }
+
+  .responsiveRoot :global([data-invitation-studio-canvas]) {
+    padding: 0.75rem 0.75rem max(0.9rem, env(safe-area-inset-bottom));
+  }
+
+  .responsiveRoot :global([data-invitation-studio-design-mode] > div:first-child),
+  .responsiveRoot :global([data-invitation-studio-media-mode] > header),
+  .responsiveRoot :global([data-invitation-studio-preview-mode] > header),
+  .responsiveRoot :global([data-invitation-studio-publish-mode] > header) {
+    padding: 1rem;
+  }
+
+  .responsiveRoot :global([data-invitation-studio-design-preview] [data-preview-stage]),
+  .responsiveRoot :global([data-invitation-studio-preview-mode] [data-preview-stage]) {
+    min-height: min(32rem, 72svh);
+  }
+
+  .responsiveRoot :global([data-invitation-studio-design-preview] [data-preview-device]),
+  .responsiveRoot :global([data-invitation-studio-preview-mode] [data-preview-device]) {
+    min-height: min(29rem, 66svh);
+  }
+}
+
+@media (max-width: 26.25rem) {
+  .responsiveRoot :global(#invitation-studio-title) {
+    font-size: 1.7rem;
+    line-height: 1.04;
+  }
+
+  .responsiveRoot :global([data-invitation-studio-mode]) {
+    min-width: 5.5rem;
+  }
+
+  .responsiveRoot :global([data-invitation-studio-media-mode] > header > dl) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (pointer: coarse) {
+  .responsiveRoot :global([data-invitation-studio-mode]),
+  .responsiveRoot :global([role='tab']),
+  .responsiveRoot :global([aria-label='Ukuran preview desain'] button),
+  .responsiveRoot :global([data-invitation-studio-preview-mode] [role='group'] button) {
+    min-height: 3rem;
+    touch-action: manipulation;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .responsiveRoot :global([data-invitation-studio-mode-navigation]) {
+    scroll-behavior: auto;
+  }
+}
