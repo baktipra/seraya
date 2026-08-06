@@ -2,7 +2,7 @@
 
 ## Status
 
-Implementation branch. Not merged, not deployed, and no Supabase migration.
+Implementation branch. Draft PR #85 is validation-only. Not merged, not deployed, and no Supabase migration.
 
 ## Product decision
 
