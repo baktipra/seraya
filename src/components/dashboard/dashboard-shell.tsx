@@ -38,12 +38,12 @@ export function DashboardShell({
   const greetingName = getDashboardGreetingName(displayName, email);
 
   return (
-    <div className="bg-seraya-canvas min-h-screen" data-dashboard-shell>
+    <div className="bg-seraya-canvas min-h-screen w-full" data-dashboard-shell data-dashboard-full-screen>
       <header
         className="border-seraya-border-subtle bg-seraya-surface/94 sticky top-0 z-[90] h-[var(--seraya-topbar-height)] border-b backdrop-blur-xl"
         data-dashboard-topbar
       >
-        <div className="mx-auto flex h-full max-w-[var(--seraya-shell-max)] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+        <div className="flex h-full w-full items-center justify-between gap-4 px-4 sm:px-6 lg:px-7 xl:px-8">
           <div className="flex min-w-0 items-center gap-3 sm:gap-5">
             <Link
               aria-label={`${siteConfig.name}, kembali ke semua undangan`}
@@ -63,15 +63,15 @@ export function DashboardShell({
       </header>
 
       <main
-        className="mx-auto max-w-[var(--seraya-shell-max)] min-w-0 px-4 py-6 pb-24 sm:px-6 sm:py-8 sm:pb-24 lg:px-8 lg:py-9"
+        className="w-full min-w-0 px-3 py-4 pb-24 sm:px-5 sm:py-5 sm:pb-24 lg:px-6 lg:py-6 xl:px-7"
         data-dashboard-main
       >
-        <div className={`mx-auto w-full ${isDashboardHome ? 'max-w-[76rem]' : ''}`}>
+        <div className="w-full min-w-0">
           {isDashboardHome ? (
             <>
               <section
                 aria-labelledby="dashboard-home-title"
-                className="border-seraya-border-subtle flex flex-col gap-7 border-b pb-10 sm:flex-row sm:items-end sm:justify-between lg:pb-12"
+                className="border-seraya-border-subtle flex flex-col gap-7 border-b pb-8 sm:flex-row sm:items-end sm:justify-between lg:pb-10"
               >
                 <div className="max-w-3xl">
                   <p className="seraya-eyebrow text-seraya-action-primary">Ruang undangan kalian</p>
@@ -99,7 +99,7 @@ export function DashboardShell({
                 </form>
               </section>
 
-              <section aria-labelledby="dashboard-active-projects-title" className="pt-10 lg:pt-12">
+              <section aria-labelledby="dashboard-active-projects-title" className="pt-8 lg:pt-10">
                 {hasActiveProject ? (
                   <div className="mb-5 flex items-end justify-between gap-4">
                     <div>
