@@ -1,0 +1,108 @@
+# Slice G permanent clean-head validation gate.
+name: Invitation Studio Slice G Responsive and Final Regression validation
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'src/components/projects/invitation-studio-shell.tsx'
+      - 'src/components/projects/invitation-studio-responsive-polish.module.css'
+      - 'tests/unit/invitation-studio-responsive-slice-g.test.tsx'
+      - 'tests/e2e/invitation-studio-responsive-slice-g.spec.ts'
+      - 'tests/e2e/fixture-app/app/invitation-studio-slice-g/**'
+      - 'playwright.invitation-studio-slice-g.config.ts'
+      - 'docs/INVITATION_STUDIO_SLICE_G_RESPONSIVE_POLISH.md'
+      - 'vercel.json'
+      - '.github/workflows/invitation-studio-slice-g.yml'
+  push:
+    branches:
+      - feature/invitation-studio-slice-g-responsive-polish
+    paths:
+      - 'src/components/projects/invitation-studio-shell.tsx'
+      - 'src/components/projects/invitation-studio-responsive-polish.module.css'
+      - 'tests/unit/invitation-studio-responsive-slice-g.test.tsx'
+      - 'tests/e2e/invitation-studio-responsive-slice-g.spec.ts'
+      - 'tests/e2e/fixture-app/app/invitation-studio-slice-g/**'
+      - 'playwright.invitation-studio-slice-g.config.ts'
+      - 'docs/INVITATION_STUDIO_SLICE_G_RESPONSIVE_POLISH.md'
+      - 'vercel.json'
+      - '.github/workflows/invitation-studio-slice-g.yml'
+
+concurrency:
+  group: invitation-studio-slice-g-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Check focused formatting
+        run: |
+          npx prettier --check \
+            src/components/projects/invitation-studio-shell.tsx \
+            src/components/projects/invitation-studio-responsive-polish.module.css \
+            tests/unit/invitation-studio-responsive-slice-g.test.tsx \
+            tests/e2e/invitation-studio-responsive-slice-g.spec.ts \
+            tests/e2e/fixture-app/app/invitation-studio-slice-g/page.tsx \
+            tests/e2e/fixture-app/app/invitation-studio-slice-g/fixture-client.tsx \
+            playwright.invitation-studio-slice-g.config.ts \
+            docs/INVITATION_STUDIO_SLICE_G_RESPONSIVE_POLISH.md \
+            vercel.json \
+            .github/workflows/invitation-studio-slice-g.yml
+      - name: Lint focused source
+        run: |
+          npx eslint \
+            src/components/projects/invitation-studio-shell.tsx \
+            tests/unit/invitation-studio-responsive-slice-g.test.tsx \
+            tests/e2e/invitation-studio-responsive-slice-g.spec.ts \
+            tests/e2e/fixture-app/app/invitation-studio-slice-g/page.tsx \
+            tests/e2e/fixture-app/app/invitation-studio-slice-g/fixture-client.tsx \
+            playwright.invitation-studio-slice-g.config.ts
+      - run: npm run typecheck
+      - name: Run Slice A through G and publication compatibility contracts
+        run: |
+          npx vitest run \
+            tests/unit/invitation-studio-structural-foundation-slice-a.test.tsx \
+            tests/unit/invitation-studio-unified-state-slice-b.test.ts \
+            tests/unit/invitation-studio-design-mode-slice-c.test.ts \
+            tests/unit/invitation-studio-media-mode-slice-d.test.ts \
+            tests/unit/invitation-studio-preview-mode-slice-e.test.ts \
+            tests/unit/invitation-studio-publish-mode-slice-f.test.ts \
+            tests/unit/invitation-studio-responsive-slice-g.test.tsx \
+            src/modules/publications/__tests__/published-invitation.schema.test.ts \
+            src/modules/publications/__tests__/publication.service.test.ts \
+            src/modules/payments/__tests__/payment-publish-policy.test.ts \
+            tests/server/dashboard-invitation-editor-route.test.tsx
+      - run: npm run build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run Slice A through F browser compatibility smoke
+        run: |
+          npx playwright test --config=playwright.invitation-studio-slice-a.config.ts
+          npx playwright test --config=playwright.invitation-studio-slice-b.config.ts
+          npx playwright test --config=playwright.invitation-studio-slice-c.config.ts
+          npx playwright test --config=playwright.invitation-studio-slice-d.config.ts
+          npx playwright test --config=playwright.invitation-studio-slice-e.config.ts
+          npx playwright test --config=playwright.invitation-studio-slice-f.config.ts
+      - name: Run desktop tablet and mobile Slice G regression
+        run: npx playwright test --config=playwright.invitation-studio-slice-g.config.ts
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: invitation-studio-slice-g-final-regression-report
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+          retention-days: 7
