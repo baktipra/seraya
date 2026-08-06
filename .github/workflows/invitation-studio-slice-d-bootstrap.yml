@@ -30,33 +30,14 @@ jobs:
           from pathlib import Path
           path = Path('tools/apply-invitation-studio-slice-d.py')
           content = path.read_text()
-          old = '''    content = replace_once(
-                  content,
-                  """      savePresentation,
-                  submissionPayload,
-                  updateLocalContent,
-          """,
-                  """      savePresentation,
-                  submissionPayload,
-                  synchronizeLocalContent,
-                  updateLocalContent,
-          """,
-                  label="provider value synchronize",
-              )'''
-          new = '''    content = content.replace(
-                  """      savePresentation,
-                  submissionPayload,
-                  updateLocalContent,
-          """,
-                  """      savePresentation,
-                  submissionPayload,
-                  synchronizeLocalContent,
-                  updateLocalContent,
-          """,
-                  1,
-              )'''
+          old = '''    if count != 1:
+                  raise RuntimeError(f"{label}: expected one match, found {count}")
+              return content.replace(old, new, 1)'''
+          new = '''    if count == 0 or (count != 1 and label != "provider value synchronize"):
+                  raise RuntimeError(f"{label}: expected one match, found {count}")
+              return content.replace(old, new, 1)'''
           if old not in content:
-              raise SystemExit('provider bootstrap target missing')
+              raise SystemExit('replace helper target missing')
           path.write_text(content.replace(old, new, 1))
           PY
       - name: Apply Slice D refactor
