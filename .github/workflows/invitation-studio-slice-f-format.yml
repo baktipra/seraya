@@ -1,0 +1,38 @@
+name: Format Invitation Studio Slice F fixtures
+
+on:
+  push:
+    branches:
+      - feature/invitation-studio-slice-f-publish-decision-authority
+    paths:
+      - '.github/workflows/invitation-studio-slice-f-format.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/invitation-studio-slice-f-publish-decision-authority
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Format Slice F browser files
+        run: |
+          npx prettier --write \
+            tests/e2e/invitation-studio-publish-mode-slice-f.spec.ts \
+            tests/e2e/fixture-app/app/invitation-studio-slice-f/fixture-client.tsx
+      - run: rm .github/workflows/invitation-studio-slice-f-format.yml
+      - name: Commit formatted closure files
+        run: |
+          git config user.name "seraya-release-bot"
+          git config user.email "88146860+baktipra@users.noreply.github.com"
+          git add -A
+          git commit -m "SERAYA Slice F.1: format validation fixtures"
+          git push origin HEAD:feature/invitation-studio-slice-f-publish-decision-authority
