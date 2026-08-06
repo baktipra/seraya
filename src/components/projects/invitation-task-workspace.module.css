@@ -3,7 +3,7 @@
   display: grid;
   min-width: 0;
   gap: 1.35rem;
-  font-family: var(--font-sans);
+  font-family: var(--font-ui);
 }
 
 .commandHeader {
