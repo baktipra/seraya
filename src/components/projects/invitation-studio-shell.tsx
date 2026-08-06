@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 
 import { InvitationStudioModePlaceholder } from './invitation-studio-mode-placeholder';
+import { useOptionalInvitationStudioState } from './invitation-studio-provider';
 import {
   getInvitationStudioModeLabel,
   invitationStudioModes,
@@ -38,12 +39,10 @@ function getModeUrl(mode: InvitationStudioMode) {
 }
 
 /**
- * Release Slice A structural owner for the invitation workspace.
+ * Structural owner for the invitation workspace.
  *
- * Every mode is an explicit named slot. Inactive slots stay mounted so the
- * legacy editor can retain its local React state while later slices migrate
- * controls into their canonical modes. Optional legacy children keep the
- * current route behavior intact during this first structural pass.
+ * Named mode slots stay mounted so local draft state survives mode changes.
+ * Slice B adds one optional save authority supplied by InvitationStudioProvider.
  */
 export function InvitationStudioShell({
   children,
@@ -58,6 +57,7 @@ export function InvitationStudioShell({
   statusLabel = 'Draf pribadi',
   statusTone = 'neutral',
 }: InvitationStudioShellProps) {
+  const studioState = useOptionalInvitationStudioState();
   const [activeMode, setActiveMode] = useState<InvitationStudioMode>(initialMode);
   const [announcement, setAnnouncement] = useState('');
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -167,7 +167,7 @@ export function InvitationStudioShell({
       className={styles.studio}
       data-invitation-studio
       data-invitation-studio-active-mode={activeMode}
-      data-invitation-studio-slice="structural-foundation-a"
+      data-invitation-studio-slice="unified-state-command-b"
     >
       <header className={styles.header} data-invitation-studio-header>
         <div className={styles.headerIdentity}>
@@ -183,6 +183,41 @@ export function InvitationStudioShell({
             <span aria-hidden="true" className={styles.statusDot} />
             {statusLabel}
           </span>
+
+          {studioState ? (
+            <div className={styles.saveAuthority} data-invitation-studio-save-authority>
+              <div
+                aria-atomic="true"
+                aria-live="polite"
+                className={styles.saveCopy}
+                data-invitation-studio-save-state={studioState.savePresentation.state}
+                id="invitation-studio-save-description"
+                role="status"
+              >
+                <span
+                  className={styles.saveLabel}
+                  data-invitation-studio-save-tone={studioState.savePresentation.tone}
+                >
+                  <span aria-hidden="true" className={styles.saveDot} />
+                  {studioState.savePresentation.label}
+                </span>
+                <span className={styles.saveDescription}>
+                  {studioState.savePresentation.description}
+                </span>
+              </div>
+              <button
+                aria-describedby="invitation-studio-save-description"
+                className={styles.saveButton}
+                data-invitation-studio-save-action
+                disabled={!studioState.canSave || studioState.isPending}
+                form={studioState.formId}
+                type="submit"
+              >
+                {studioState.savePresentation.actionLabel}
+              </button>
+            </div>
+          ) : null}
+
           {previewHref ? (
             <Link className={styles.previewLink} href={previewHref}>
               Preview tersimpan

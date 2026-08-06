@@ -1,0 +1,74 @@
+name: Invitation Studio Slice B unified state validation
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx'
+      - 'src/components/projects/invitation-editor.tsx'
+      - 'src/components/projects/invitation-studio-provider.tsx'
+      - 'src/components/projects/invitation-studio-shell.tsx'
+      - 'src/components/projects/invitation-studio-shell.module.css'
+      - 'tests/unit/invitation-studio-unified-state-slice-b.test.ts'
+      - 'tests/e2e/invitation-studio-unified-state-slice-b.spec.ts'
+      - 'tests/e2e/fixture-app/app/invitation-studio-slice-b/**'
+      - 'playwright.invitation-studio-slice-b.config.ts'
+      - '.github/workflows/invitation-studio-slice-b.yml'
+  push:
+    branches:
+      - feature/invitation-studio-slice-b-unified-state-command-authority
+    paths:
+      - 'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx'
+      - 'src/components/projects/invitation-editor.tsx'
+      - 'src/components/projects/invitation-studio-provider.tsx'
+      - 'src/components/projects/invitation-studio-shell.tsx'
+      - 'src/components/projects/invitation-studio-shell.module.css'
+      - 'tests/unit/invitation-studio-unified-state-slice-b.test.ts'
+      - 'tests/e2e/invitation-studio-unified-state-slice-b.spec.ts'
+      - 'tests/e2e/fixture-app/app/invitation-studio-slice-b/**'
+      - 'playwright.invitation-studio-slice-b.config.ts'
+      - '.github/workflows/invitation-studio-slice-b.yml'
+
+concurrency:
+  group: invitation-studio-slice-b-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Check focused formatting
+        run: |
+          npx prettier --check             'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx'             src/components/projects/invitation-editor.tsx             src/components/projects/invitation-studio-provider.tsx             src/components/projects/invitation-studio-shell.tsx             src/components/projects/invitation-studio-shell.module.css             tests/unit/invitation-studio-unified-state-slice-b.test.ts             tests/e2e/invitation-studio-unified-state-slice-b.spec.ts             tests/e2e/fixture-app/app/invitation-studio-slice-b/page.tsx             tests/e2e/fixture-app/app/invitation-studio-slice-b/fixture-client.tsx             playwright.invitation-studio-slice-b.config.ts             .github/workflows/invitation-studio-slice-b.yml
+      - name: Lint focused source
+        run: |
+          npx eslint             'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx'             src/components/projects/invitation-editor.tsx             src/components/projects/invitation-studio-provider.tsx             src/components/projects/invitation-studio-shell.tsx             tests/unit/invitation-studio-unified-state-slice-b.test.ts             tests/e2e/invitation-studio-unified-state-slice-b.spec.ts             tests/e2e/fixture-app/app/invitation-studio-slice-b/page.tsx             tests/e2e/fixture-app/app/invitation-studio-slice-b/fixture-client.tsx             playwright.invitation-studio-slice-b.config.ts
+      - run: npm run typecheck
+      - name: Run Slice A and Slice B unit contracts
+        run: |
+          npx vitest run             tests/unit/invitation-studio-structural-foundation-slice-a.test.tsx             tests/unit/invitation-studio-unified-state-slice-b.test.ts
+      - run: npm run build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run desktop and mobile state smoke
+        run: npx playwright test --config=playwright.invitation-studio-slice-b.config.ts
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: invitation-studio-slice-b-playwright-report
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+          retention-days: 7

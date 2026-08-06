@@ -73,7 +73,8 @@
   line-height: 1rem;
 }
 
-.statusDot {
+.statusDot,
+.saveDot {
   width: 0.45rem;
   height: 0.45rem;
   flex: 0 0 auto;
@@ -91,6 +92,83 @@
 
 .status[data-invitation-studio-status-tone='warning'] .statusDot {
   background: var(--seraya-status-warning, var(--seraya-action-primary));
+}
+
+.saveAuthority {
+  min-width: min(100%, 20rem);
+  display: flex;
+  flex: 1 1 20rem;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.625rem;
+}
+
+.saveCopy {
+  min-width: 0;
+  display: grid;
+  justify-items: end;
+  gap: 0.15rem;
+  text-align: right;
+}
+
+.saveLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--seraya-text-primary);
+  font-size: 0.8125rem;
+  font-weight: 750;
+  line-height: 1.1rem;
+}
+
+.saveLabel[data-invitation-studio-save-tone='success'] .saveDot {
+  background: var(--seraya-status-success);
+}
+
+.saveLabel[data-invitation-studio-save-tone='warning'] .saveDot {
+  background: var(--seraya-status-warning, var(--seraya-action-primary));
+}
+
+.saveLabel[data-invitation-studio-save-tone='error'] {
+  color: var(--seraya-status-error);
+}
+
+.saveLabel[data-invitation-studio-save-tone='error'] .saveDot {
+  background: var(--seraya-status-error);
+}
+
+.saveDescription {
+  max-width: 22rem;
+  color: var(--seraya-text-muted);
+  font-size: 0.6875rem;
+  line-height: 1rem;
+}
+
+.saveButton {
+  min-height: 2.75rem;
+  flex: 0 0 auto;
+  border: 1px solid var(--seraya-action-primary);
+  border-radius: var(--seraya-radius-sm);
+  padding: 0.55rem 1rem;
+  color: var(--seraya-text-inverse);
+  background: var(--seraya-action-primary);
+  font-size: 0.8125rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition:
+    border-color var(--seraya-motion-default) var(--seraya-ease-standard),
+    background-color var(--seraya-motion-default) var(--seraya-ease-standard),
+    opacity var(--seraya-motion-default) var(--seraya-ease-standard);
+}
+
+.saveButton:hover:not(:disabled) {
+  border-color: var(--seraya-action-primary-hover);
+  background: var(--seraya-action-primary-hover);
+}
+
+.saveButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
 }
 
 .previewLink,
@@ -120,6 +198,7 @@
 
 .previewLink:focus-visible,
 .placeholderAction:focus-visible,
+.saveButton:focus-visible,
 .tab:focus-visible {
   outline: 3px solid var(--seraya-focus-ring);
   outline-offset: 2px;
@@ -221,6 +300,7 @@
   }
 
   .headerActions {
+    flex: 1 1 40rem;
     justify-content: flex-end;
   }
 
@@ -234,6 +314,21 @@
   }
 }
 
+@media (max-width: 63.999rem) {
+  .saveAuthority {
+    order: 3;
+    flex-basis: 100%;
+    justify-content: space-between;
+    border-top: 1px solid var(--seraya-border-default);
+    padding-top: 0.75rem;
+  }
+
+  .saveCopy {
+    justify-items: start;
+    text-align: left;
+  }
+}
+
 @media (max-width: 47.999rem) {
   .studio {
     border-right: 0;
@@ -244,6 +339,21 @@
 
   .header {
     border-radius: 0;
+  }
+
+  .headerActions,
+  .saveAuthority {
+    width: 100%;
+  }
+
+  .saveAuthority {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .saveButton,
+  .previewLink {
+    width: 100%;
   }
 
   .canvas {
