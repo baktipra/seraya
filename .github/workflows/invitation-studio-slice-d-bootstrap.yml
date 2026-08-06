@@ -24,6 +24,41 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Repair one-time provider replacement
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('tools/apply-invitation-studio-slice-d.py')
+          content = path.read_text()
+          old = '''    content = replace_once(
+                  content,
+                  """      savePresentation,
+                  submissionPayload,
+                  updateLocalContent,
+          """,
+                  """      savePresentation,
+                  submissionPayload,
+                  synchronizeLocalContent,
+                  updateLocalContent,
+          """,
+                  label="provider value synchronize",
+              )'''
+          new = '''    content = content.replace(
+                  """      savePresentation,
+                  submissionPayload,
+                  updateLocalContent,
+          """,
+                  """      savePresentation,
+                  submissionPayload,
+                  synchronizeLocalContent,
+                  updateLocalContent,
+          """,
+                  1,
+              )'''
+          if old not in content:
+              raise SystemExit('provider bootstrap target missing')
+          path.write_text(content.replace(old, new, 1))
+          PY
       - name: Apply Slice D refactor
         run: python tools/apply-invitation-studio-slice-d.py
       - name: Remove one-time refactor script
