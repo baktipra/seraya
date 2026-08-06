@@ -42,6 +42,36 @@ jobs:
           PY
       - name: Apply Slice D refactor
         run: python tools/apply-invitation-studio-slice-d.py
+      - name: Preserve backward-compatible gallery input
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          schema_path = Path('src/modules/invitations/invitation-editor.schema.ts')
+          schema = schema_path.read_text()
+          old_schema = '''        gallery: z
+                    .object({
+                      enabled: checkboxInputSchema,
+                    })
+                    .strict(),'''
+          new_schema = '''        gallery: z
+                    .object({
+                      enabled: checkboxInputSchema,
+                    })
+                    .strict()
+                    .optional(),'''
+          if old_schema not in schema:
+              raise SystemExit('gallery schema compatibility target missing')
+          schema_path.write_text(schema.replace(old_schema, new_schema, 1))
+
+          service_path = Path('src/modules/invitations/invitation-editor.service.ts')
+          service = service_path.read_text()
+          old_service = '      enabled: input.gallery.enabled,\n'
+          new_service = '      enabled: input.gallery?.enabled ?? currentContent.gallery.enabled,\n'
+          if old_service not in service:
+              raise SystemExit('gallery service compatibility target missing')
+          service_path.write_text(service.replace(old_service, new_service, 1))
+          PY
       - name: Remove one-time refactor script
         run: rm tools/apply-invitation-studio-slice-d.py
       - name: Fix reorder repository import
