@@ -4,11 +4,14 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
+      - 'src/app/workspace-anatomy.css'
       - 'src/components/dashboard/dashboard-shell.tsx'
       - 'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx'
+      - 'src/components/projects/invitation-studio-media-mode.tsx'
       - 'src/components/projects/invitation-task-workspace.tsx'
       - 'src/components/projects/invitation-task-workspace.types.ts'
       - 'src/components/projects/invitation-task-workspace.module.css'
+      - 'tests/server/dashboard-invitation-editor-route.test.tsx'
       - 'tests/unit/owner-workspace-usability-reset-v1.test.ts'
       - 'tests/e2e/owner-workspace-usability-reset-v1.spec.ts'
       - 'tests/e2e/fixture-app/app/owner-workspace-usability-reset/**'
@@ -20,11 +23,14 @@ on:
     branches:
       - feature/owner-workspace-usability-reset-v1
     paths:
+      - 'src/app/workspace-anatomy.css'
       - 'src/components/dashboard/dashboard-shell.tsx'
       - 'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx'
+      - 'src/components/projects/invitation-studio-media-mode.tsx'
       - 'src/components/projects/invitation-task-workspace.tsx'
       - 'src/components/projects/invitation-task-workspace.types.ts'
       - 'src/components/projects/invitation-task-workspace.module.css'
+      - 'tests/server/dashboard-invitation-editor-route.test.tsx'
       - 'tests/unit/owner-workspace-usability-reset-v1.test.ts'
       - 'tests/e2e/owner-workspace-usability-reset-v1.spec.ts'
       - 'tests/e2e/fixture-app/app/owner-workspace-usability-reset/**'
@@ -54,11 +60,14 @@ jobs:
       - name: Check focused formatting
         run: |
           npx prettier --check \
+            src/app/workspace-anatomy.css \
             src/components/dashboard/dashboard-shell.tsx \
             'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
+            src/components/projects/invitation-studio-media-mode.tsx \
             src/components/projects/invitation-task-workspace.tsx \
             src/components/projects/invitation-task-workspace.types.ts \
             src/components/projects/invitation-task-workspace.module.css \
+            tests/server/dashboard-invitation-editor-route.test.tsx \
             tests/unit/owner-workspace-usability-reset-v1.test.ts \
             tests/e2e/owner-workspace-usability-reset-v1.spec.ts \
             tests/e2e/fixture-app/app/owner-workspace-usability-reset/page.tsx \
@@ -72,8 +81,10 @@ jobs:
           npx eslint \
             src/components/dashboard/dashboard-shell.tsx \
             'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
+            src/components/projects/invitation-studio-media-mode.tsx \
             src/components/projects/invitation-task-workspace.tsx \
             src/components/projects/invitation-task-workspace.types.ts \
+            tests/server/dashboard-invitation-editor-route.test.tsx \
             tests/unit/owner-workspace-usability-reset-v1.test.ts \
             tests/e2e/owner-workspace-usability-reset-v1.spec.ts \
             tests/e2e/fixture-app/app/owner-workspace-usability-reset/page.tsx \
@@ -100,6 +111,8 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Run desktop tablet and mobile usability reset smoke
         run: npx playwright test --config=playwright.owner-workspace-usability-reset.config.ts
+      - name: Run accepted Slice D media compatibility smoke
+        run: npx playwright test --config=playwright.invitation-studio-slice-d.config.ts
       - name: Run accepted Slice G responsive compatibility smoke
         run: npx playwright test --config=playwright.invitation-studio-slice-g.config.ts
       - name: Upload browser evidence
