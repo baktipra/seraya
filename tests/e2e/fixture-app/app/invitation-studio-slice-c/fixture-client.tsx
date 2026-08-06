@@ -34,11 +34,18 @@ function FixtureContentForm() {
       id={formId}
     >
       <input name="projectId" type="hidden" value="slice-c-project" />
-      <input data-slice-c-editor-payload name="editorPayload" type="hidden" value={submissionPayload} />
+      <input
+        data-slice-c-editor-payload
+        name="editorPayload"
+        type="hidden"
+        value={submissionPayload}
+      />
       <p className="text-seraya-text-muted text-xs font-bold tracking-[0.08em] uppercase">
         Mode Isi
       </p>
-      <h2 className="text-seraya-text-primary text-xl font-semibold">Konten tetap memakai draf yang sama.</h2>
+      <h2 className="text-seraya-text-primary text-xl font-semibold">
+        Konten tetap memakai draf yang sama.
+      </h2>
       <p className="text-seraya-text-secondary text-sm leading-6">
         Template aktif: <strong data-slice-c-content-template>{content.templateKey}</strong>
       </p>

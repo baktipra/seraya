@@ -1,7 +1,9 @@
 import { expect, test } from '@playwright/test';
 
 test.describe('Invitation Studio Slice C Design Mode', () => {
-  test('updates the exact renderer from one shared template and palette state', async ({ page }) => {
+  test('updates the exact renderer from one shared template and palette state', async ({
+    page,
+  }) => {
     await page.goto('/invitation-studio-slice-c?mode=design');
 
     const studio = page.locator('[data-invitation-studio]');
