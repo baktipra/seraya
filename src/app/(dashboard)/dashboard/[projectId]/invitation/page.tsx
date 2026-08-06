@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 
 import { InvitationAudioManager } from '@/components/projects/invitation-audio-manager';
 import { InvitationEditor } from '@/components/projects/invitation-editor';
+import { InvitationStudioDesignMode } from '@/components/projects/invitation-studio-design-mode';
 import { InvitationStudioProvider } from '@/components/projects/invitation-studio-provider';
 import {
   InvitationStudioShell,
@@ -103,6 +104,14 @@ function getInvitationStudioStatus(
   }
 }
 
+function getInvitationChapterHref(projectId: string, chapter: InvitationEditorSectionKey): Route {
+  return (
+    chapter === 'style'
+      ? `/dashboard/${projectId}/invitation?mode=design`
+      : `/dashboard/${projectId}/invitation?mode=content#bagian-${chapter}`
+  ) as Route;
+}
+
 function InvitationReadinessHandoff({
   draft,
   projectId,
@@ -197,7 +206,7 @@ function InvitationReadinessHandoff({
           {firstBlocker ? (
             <Link
               className="bg-seraya-action-primary text-seraya-text-inverse hover:bg-seraya-action-primary-hover focus-visible:outline-seraya-focus-ring inline-flex min-h-12 w-full items-center justify-center rounded-[var(--seraya-radius-md)] px-5 text-center text-sm font-semibold shadow-[0_8px_18px_rgb(142_75_82_/_0.16)] transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
-              href={`/dashboard/${projectId}/invitation?focus=${firstBlocker.key}#bagian-${firstBlocker.key}`}
+              href={getInvitationChapterHref(projectId, firstBlocker.key)}
               prefetch={false}
             >
               Lengkapi undangan
@@ -272,7 +281,7 @@ function InvitationReadinessHandoff({
               {needsAttention ? (
                 <Link
                   className="border-seraya-border-default bg-seraya-canvas hover:border-seraya-border-strong hover:bg-seraya-brand-soft/35 focus-visible:outline-seraya-focus-ring flex min-h-16 items-center gap-3 rounded-[var(--seraya-radius-md)] border px-3.5 py-3 transition-colors focus-visible:outline-3 focus-visible:outline-offset-2"
-                  href={`/dashboard/${projectId}/invitation?focus=${chapter.key}#bagian-${chapter.key}`}
+                  href={getInvitationChapterHref(projectId, chapter.key)}
                   prefetch={false}
                 >
                   {content}
@@ -347,6 +356,15 @@ export default async function InvitationEditorPage({
       >
         <InvitationStudioShell
           coupleLabel={screen.readiness.identity.coupleLabel}
+          design={
+            <InvitationStudioDesignMode
+              galleryImages={screen.galleryImages}
+              project={{
+                event_date_primary: screen.editor.project.event_date_primary,
+              }}
+              projectId={screen.editor.project.id}
+            />
+          }
           initialMode={parseInvitationStudioMode(query.mode)}
           previewHref={`/dashboard/${screen.editor.project.id}/preview` as Route}
           statusLabel={studioStatus.label}
@@ -365,10 +383,6 @@ export default async function InvitationEditorPage({
             />
             <InvitationEditor
               draft={screen.editor.draft}
-              galleryImages={screen.galleryImages}
-              project={{
-                event_date_primary: screen.editor.project.event_date_primary,
-              }}
               projectId={screen.editor.project.id}
               readiness={screen.readiness}
             />

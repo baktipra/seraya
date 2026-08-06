@@ -36,7 +36,8 @@ export function getInvitationStudioDesignTruth({
 }): InvitationStudioDesignTruth {
   if (actionStatus === 'error') {
     return {
-      description: 'Pilihan lokal tetap aman. Periksa pesan kesalahan lalu gunakan tombol simpan di header Studio.',
+      description:
+        'Pilihan lokal tetap aman. Periksa pesan kesalahan lalu gunakan tombol simpan di header Studio.',
       label: 'Gagal menyimpan',
       state: 'error',
       variant: 'warning',
@@ -172,11 +173,7 @@ export function InvitationStudioDesignMode({
               </h3>
               <p className={styles.previewDescription}>{truth.description}</p>
             </div>
-            <div
-              aria-label="Ukuran preview desain"
-              className={styles.viewportSwitch}
-              role="group"
-            >
+            <div aria-label="Ukuran preview desain" className={styles.viewportSwitch} role="group">
               <button
                 aria-pressed={viewport === 'mobile'}
                 className={styles.viewportButton}

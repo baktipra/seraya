@@ -1,6 +1,5 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -15,15 +14,8 @@ import {
 } from '@/design-system';
 import type { InvitationEditorActionState } from '@/modules/invitations/invitation-editor.action-state';
 import type { InvitationEditorLocalAction } from '@/modules/invitations/invitation-editor-local-state';
-import type { InvitationRendererProjectMetadata } from '@/modules/invitation-templates/invitation-view-model';
 import type { InvitationDraft } from '@/modules/invitations/invitation-draft.types';
 import type { InvitationEditorFieldErrors } from '@/modules/invitations/invitation-editor.schema';
-import {
-  INVITATION_AUDIO_CHANGED_EVENT,
-  type InvitationAudioChangedEventDetail,
-} from '@/modules/media/invitation-audio-playback.types';
-import type { InvitationAudioConfiguration } from '@/modules/media/invitation-audio.types';
-import type { InvitationGalleryImage } from '@/modules/media/media.types';
 import type { ProjectPublishEligibility } from '@/modules/payments/payment.types';
 import {
   getInvitationConfidenceChecklist,
@@ -41,7 +33,6 @@ import {
   EditorToggle,
   FieldError,
   getError,
-  InvitationTemplatePicker,
 } from './invitation-editor-fields';
 import {
   invitationStudioDirtyNavigationMessage,
@@ -52,82 +43,15 @@ import { PublishInvitationControls } from './publish-invitation-controls';
 import {
   getInvitationEditorErrorSections,
   getInvitationEditorSectionStatuses,
+  invitationContentStudioChapters,
   invitationEditorSections,
   InvitationWorkspaceNavigation,
   InvitationWorkspacePanel,
   type InvitationEditorSectionKey,
 } from './invitation-editor-workspace';
 
-const fallbackProjectMetadata: InvitationRendererProjectMetadata = {
-  event_date_primary: null,
-};
-
-function InvitationEditorPreviewLoading() {
-  return (
-    <>
-      <aside
-        aria-label="Pratinjau langsung sedang disiapkan"
-        className="bg-seraya-canvas fixed inset-0 z-[60] flex min-h-0 flex-col px-3 py-3 outline-none sm:px-5 sm:py-5 2xl:hidden"
-        data-local-preview-loading
-      >
-        <div className="border-seraya-border-default bg-seraya-surface mx-auto flex h-full w-full max-w-[30rem] items-center justify-center rounded-[var(--seraya-radius-lg)] border px-6 text-center shadow-[var(--seraya-shadow-float)]">
-          <div>
-            <p className="text-seraya-text-primary text-sm font-semibold">
-              Menyiapkan preview lokal…
-            </p>
-            <p className="text-seraya-text-muted mt-2 text-sm leading-6">
-              Editor tetap aman. Preview akan tampil setelah komponennya selesai dimuat.
-            </p>
-          </div>
-        </div>
-      </aside>
-      <aside
-        aria-label="Pratinjau langsung sedang disiapkan"
-        className="border-seraya-border-default bg-seraya-surface sticky top-24 hidden min-h-64 min-w-0 self-start rounded-[var(--seraya-radius-lg)] border p-5 shadow-[var(--seraya-shadow-soft)] 2xl:block"
-        data-local-preview-desktop
-        data-local-preview-loading
-      >
-        <p className="text-seraya-text-primary text-sm font-semibold">Menyiapkan preview lokal…</p>
-        <p className="text-seraya-text-muted mt-2 text-sm leading-6">
-          Preview dimuat setelah editor utama siap digunakan.
-        </p>
-      </aside>
-    </>
-  );
-}
-
-function InvitationEditorDesktopPreviewPlaceholder() {
-  return (
-    <aside
-      aria-label="Pratinjau langsung belum dimuat"
-      className="border-seraya-border-default bg-seraya-surface sticky top-24 hidden min-h-64 min-w-0 self-start rounded-[var(--seraya-radius-lg)] border p-5 shadow-[var(--seraya-shadow-soft)] 2xl:block"
-      data-local-preview-deferred
-      data-local-preview-desktop
-    >
-      <p className="text-seraya-text-primary text-sm font-semibold">
-        Preview lokal akan segera siap
-      </p>
-      <p className="text-seraya-text-muted mt-2 text-sm leading-6">
-        Editor utama diprioritaskan terlebih dahulu agar kalian dapat langsung mulai mengubah
-        undangan.
-      </p>
-    </aside>
-  );
-}
-
-const DeferredInvitationEditorLivePreview = dynamic(
-  () =>
-    import('./invitation-editor-live-preview').then((module) => module.InvitationEditorLivePreview),
-  {
-    loading: InvitationEditorPreviewLoading,
-    ssr: false,
-  },
-);
-
 export type InvitationEditorProps = {
   draft: InvitationDraft;
-  galleryImages?: InvitationGalleryImage[];
-  project?: InvitationRendererProjectMetadata;
   projectId: string;
   readiness?: Pick<WeddingReadinessV1, 'identity' | 'invitation'>;
 };
@@ -473,23 +397,6 @@ export function InvitationEditorActivePanel({
   updateLocalContent,
 }: InvitationEditorActivePanelProps) {
   switch (activeSection) {
-    case 'style':
-      return (
-        <InvitationWorkspacePanel active section="style">
-          <InvitationTemplatePicker
-            error={getError(fieldErrors, 'templateKey')}
-            onPaletteSelect={(paletteKey) => {
-              updateLocalContent({ paletteKey, type: 'palette' });
-            }}
-            onSelect={(templateKey) => {
-              updateLocalContent({ templateKey, type: 'template' });
-            }}
-            paletteError={getError(fieldErrors, 'paletteKey')}
-            selectedPaletteKey={content.paletteKey}
-            selectedTemplateKey={content.templateKey}
-          />
-        </InvitationWorkspacePanel>
-      );
     case 'opening':
       return (
         <InvitationWorkspacePanel active section="opening">
@@ -1276,13 +1183,7 @@ export function InvitationEditorActivePanel({
   }
 }
 
-export function InvitationEditor({
-  draft,
-  galleryImages = [],
-  project = fallbackProjectMetadata,
-  projectId,
-  readiness,
-}: InvitationEditorProps) {
+export function InvitationEditor({ draft, projectId, readiness }: InvitationEditorProps) {
   const {
     actionState: state,
     content,
@@ -1300,14 +1201,8 @@ export function InvitationEditor({
   const shouldShowPublishControl =
     workspaceReadiness.invitation.state === 'ready_to_publish' ||
     workspaceReadiness.invitation.state === 'published_with_unpublished_changes';
-  const [isLocalPreviewOpen, setIsLocalPreviewOpen] = useState(false);
-  const [shouldMountDesktopPreview, setShouldMountDesktopPreview] = useState(false);
-  const [previewAudio, setPreviewAudio] = useState<InvitationAudioConfiguration>(
-    draft.content.audio,
-  );
-  const [previewContent, setPreviewContent] = useState(content);
   const [isEditorInteractive, setIsEditorInteractive] = useState(false);
-  const [activeSection, setActiveSection] = useState<InvitationEditorSectionKey>('style');
+  const [activeSection, setActiveSection] = useState<InvitationEditorSectionKey>('opening');
   const editorRootRef = useRef<HTMLDivElement | null>(null);
   const errorSummaryRef = useRef<HTMLDivElement | null>(null);
   const workspaceStartRef = useRef<HTMLDivElement | null>(null);
@@ -1316,7 +1211,8 @@ export function InvitationEditor({
     [content, draft, state.fieldErrors],
   );
   const errorSections = useMemo(
-    () => getInvitationEditorErrorSections(state.fieldErrors),
+    () =>
+      getInvitationEditorErrorSections(state.fieldErrors).filter((section) => section !== 'style'),
     [state.fieldErrors],
   );
   const documentTruth = useMemo(
@@ -1338,13 +1234,6 @@ export function InvitationEditor({
       workspaceReadiness.invitation.hasUnpublishedChanges,
     ],
   );
-  const shouldMountPreview = isLocalPreviewOpen || shouldMountDesktopPreview;
-
-  const handleOpenLocalPreview = useCallback(() => {
-    setPreviewContent(content);
-    setIsLocalPreviewOpen(true);
-  }, [content]);
-
   const handleSectionSelect = useCallback((section: InvitationEditorSectionKey) => {
     setActiveSection(section);
 
@@ -1359,7 +1248,7 @@ export function InvitationEditor({
 
   useEffect(() => {
     const requestedSection = window.location.hash.replace('#bagian-', '');
-    const sectionExists = invitationEditorSections.some(
+    const sectionExists = invitationContentStudioChapters.some(
       (section) => section.key === requestedSection,
     );
 
@@ -1426,91 +1315,13 @@ export function InvitationEditor({
   }, []);
 
   useEffect(() => {
-    const desktopPreview = window.matchMedia('(min-width: 96rem)');
-    let idleHandle: number | null = null;
-    let timeoutHandle: ReturnType<typeof setTimeout> | null = null;
-
-    const cancelScheduledMount = () => {
-      if (idleHandle !== null && 'cancelIdleCallback' in window) {
-        window.cancelIdleCallback(idleHandle);
-      }
-      if (timeoutHandle !== null) {
-        globalThis.clearTimeout(timeoutHandle);
-      }
-      idleHandle = null;
-      timeoutHandle = null;
-    };
-
-    const scheduleMount = () => {
-      cancelScheduledMount();
-
-      if (!desktopPreview.matches) {
-        setShouldMountDesktopPreview(false);
-        return;
-      }
-
-      if ('requestIdleCallback' in window) {
-        idleHandle = window.requestIdleCallback(() => setShouldMountDesktopPreview(true), {
-          timeout: 1_200,
-        });
-      } else {
-        timeoutHandle = globalThis.setTimeout(() => setShouldMountDesktopPreview(true), 450);
-      }
-    };
-
-    scheduleMount();
-    desktopPreview.addEventListener('change', scheduleMount);
-
-    return () => {
-      cancelScheduledMount();
-      desktopPreview.removeEventListener('change', scheduleMount);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!shouldMountPreview) {
-      return;
-    }
-
-    const timeout = window.setTimeout(
-      () => setPreviewContent(content),
-      isLocalPreviewOpen ? 80 : 180,
-    );
-
-    return () => window.clearTimeout(timeout);
-  }, [content, isLocalPreviewOpen, shouldMountPreview]);
-
-  useEffect(() => {
-    const handleAudioChanged = (event: Event) => {
-      const detail = (event as CustomEvent<InvitationAudioChangedEventDetail>).detail;
-
-      setPreviewAudio(
-        detail.enabled && detail.durationSeconds
-          ? {
-              assetId: 'persisted-owner-audio',
-              durationSeconds: detail.durationSeconds,
-              originalFileName: 'Audio undangan',
-              rightsAcknowledged: true,
-            }
-          : {
-              assetId: null,
-              durationSeconds: null,
-              originalFileName: null,
-              rightsAcknowledged: false,
-            },
-      );
-    };
-
-    window.addEventListener(INVITATION_AUDIO_CHANGED_EVENT, handleAudioChanged);
-    return () => window.removeEventListener(INVITATION_AUDIO_CHANGED_EVENT, handleAudioChanged);
-  }, []);
-
-  useEffect(() => {
     if (state.status !== 'error') {
       return;
     }
 
-    const firstErrorSection = getInvitationEditorErrorSections(state.fieldErrors)[0];
+    const firstErrorSection = getInvitationEditorErrorSections(state.fieldErrors).find(
+      (section) => section !== 'style',
+    );
 
     const frame = window.requestAnimationFrame(() => {
       if (firstErrorSection) {
@@ -1605,8 +1416,8 @@ export function InvitationEditor({
                 Edit undangan
               </CardTitle>
               <CardDescription className="mt-1.5 max-w-2xl">
-                Template, detail pasangan, jadwal, lokasi, galeri, Amplop Digital, dan penutup
-                semuanya dikelola di sini.
+                Detail pasangan, jadwal, lokasi, galeri, Amplop Digital, dan penutup dikelola di
+                mode Isi. Template serta palet berada di mode Desain.
               </CardDescription>
             </div>
             <div className="flex shrink-0 flex-col gap-2 sm:items-start">
@@ -1660,11 +1471,12 @@ export function InvitationEditor({
 
         <CardContent className="max-w-full min-w-0 overflow-x-clip pt-5 sm:pt-6">
           <div
-            className="grid max-w-full min-w-0 scroll-mt-24 gap-4 lg:grid-cols-[14.5rem_minmax(0,1fr)] lg:items-start xl:gap-6 2xl:grid-cols-[14.5rem_minmax(26rem,1fr)_minmax(21rem,24.5rem)]"
+            className="grid max-w-full min-w-0 scroll-mt-24 gap-4 lg:grid-cols-[14.5rem_minmax(0,1fr)] lg:items-start xl:gap-6"
             ref={workspaceStartRef}
           >
             <InvitationWorkspaceNavigation
               activeSection={activeSection}
+              chapters={invitationContentStudioChapters}
               onSelect={handleSectionSelect}
               statuses={sectionStatuses}
             />
@@ -1729,39 +1541,14 @@ export function InvitationEditor({
                       {documentTruth.browser.description}
                     </p>
                   </div>
-                  <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-56">
-                    <Button
-                      aria-haspopup="dialog"
-                      className="2xl:hidden"
-                      data-local-preview-trigger
-                      onClick={handleOpenLocalPreview}
-                      size="lg"
-                      type="button"
-                      variant="secondary"
-                    >
-                      Preview lokal
-                    </Button>
-                    <p className="text-seraya-text-muted text-center text-xs leading-5">
-                      Simpan perubahan melalui satu kontrol utama di header Studio.
+                  <div className="w-full sm:w-auto sm:max-w-xs">
+                    <p className="border-seraya-border-default bg-seraya-canvas text-seraya-text-muted rounded-[var(--seraya-radius-md)] border px-3.5 py-3 text-center text-xs leading-5">
+                      Preview exact tersedia di mode Desain dan membaca perubahan lokal yang sama.
                     </p>
                   </div>
                 </div>
               </div>
             </form>
-            {shouldMountPreview ? (
-              <DeferredInvitationEditorLivePreview
-                audio={previewAudio}
-                content={previewContent}
-                galleryImages={galleryImages}
-                isDirty={isDirty}
-                isOpen={isLocalPreviewOpen}
-                onOpenChange={setIsLocalPreviewOpen}
-                project={project}
-                projectId={projectId}
-              />
-            ) : (
-              <InvitationEditorDesktopPreviewPlaceholder />
-            )}
           </div>
         </CardContent>
       </Card>

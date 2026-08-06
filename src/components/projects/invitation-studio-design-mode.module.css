@@ -198,8 +198,7 @@
   overflow: hidden;
   padding: clamp(0.75rem, 2.4vw, 1.5rem);
   background:
-    linear-gradient(135deg, rgb(250 246 241 / 0.92), rgb(239 225 220 / 0.72)),
-    var(--seraya-canvas);
+    linear-gradient(135deg, rgb(250 246 241 / 0.92), rgb(239 225 220 / 0.72)), var(--seraya-canvas);
 }
 
 .deviceShell {
@@ -320,22 +319,30 @@
   grid-template-columns: 1fr;
 }
 
-.previewCard[data-preview-viewport='desktop'] .deviceScreen :global([data-template='roselle'] [data-roselle-chapter='opening']) {
+.previewCard[data-preview-viewport='desktop']
+  .deviceScreen
+  :global([data-template='roselle'] [data-roselle-chapter='opening']) {
   min-height: min(82svh, 52rem);
   padding-right: clamp(2rem, 8vw, 5rem);
   padding-left: clamp(2rem, 8vw, 5rem);
 }
 
-.previewCard[data-preview-viewport='desktop'] .deviceScreen :global([data-template='roselle'] [data-roselle-chapter='opening'] h1) {
+.previewCard[data-preview-viewport='desktop']
+  .deviceScreen
+  :global([data-template='roselle'] [data-roselle-chapter='opening'] h1) {
   font-size: clamp(4rem, 11cqw, 7rem);
 }
 
-.previewCard[data-preview-viewport='desktop'] .deviceScreen :global([data-template='roselle'] [data-roselle-chapter]) {
+.previewCard[data-preview-viewport='desktop']
+  .deviceScreen
+  :global([data-template='roselle'] [data-roselle-chapter]) {
   padding-right: clamp(2rem, 8vw, 5rem);
   padding-left: clamp(2rem, 8vw, 5rem);
 }
 
-.previewCard[data-preview-viewport='desktop'] .deviceScreen :global([data-template='roselle'] [data-roselle-chapter] h2) {
+.previewCard[data-preview-viewport='desktop']
+  .deviceScreen
+  :global([data-template='roselle'] [data-roselle-chapter] h2) {
   font-size: clamp(3rem, 7cqw, 4.6rem);
 }
 
