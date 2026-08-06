@@ -148,7 +148,7 @@ export function InvitationStudioMediaMode({
           >
             <span
               className={[
-                'absolute top-1 size-4 rounded-full bg-white shadow-sm transition-transform',
+                'absolute top-1 left-0 size-4 rounded-full bg-white shadow-sm transition-transform',
                 content.gallery.enabled ? 'translate-x-6' : 'translate-x-1',
               ].join(' ')}
             />
