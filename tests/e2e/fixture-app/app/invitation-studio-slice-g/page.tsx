@@ -71,13 +71,11 @@ export default async function InvitationStudioSliceGFixturePage({
         ...content.rsvp,
         enabled: true,
         heading: 'Konfirmasi Kehadiran Keluarga dan Rombongan',
-        lead:
-          'Mohon konfirmasikan kehadiran agar kami dapat mempersiapkan penyambutan terbaik untuk Anda dan keluarga.',
+        lead: 'Mohon konfirmasikan kehadiran agar kami dapat mempersiapkan penyambutan terbaik untuk Anda dan keluarga.',
       },
       story: {
         ...content.story,
-        body:
-          'Perjalanan panjang kami tumbuh dari percakapan sederhana, pertemuan keluarga, dan keyakinan untuk berjalan bersama.',
+        body: 'Perjalanan panjang kami tumbuh dari percakapan sederhana, pertemuan keluarga, dan keyakinan untuk berjalan bersama.',
         enabled: true,
         heading: 'Cerita perjalanan kami menuju hari bahagia',
       },

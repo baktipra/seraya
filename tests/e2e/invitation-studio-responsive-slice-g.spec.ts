@@ -57,7 +57,9 @@ test.describe('Invitation Studio Slice G responsive polish', () => {
     await expect(page.locator('[data-primary-publication-decision]')).toHaveCount(1);
   });
 
-  test('keeps active mode navigation visible and preserves keyboard mode movement', async ({ page }) => {
+  test('keeps active mode navigation visible and preserves keyboard mode movement', async ({
+    page,
+  }) => {
     await openMode(page, 'publish');
 
     await expect
@@ -102,8 +104,12 @@ test.describe('Invitation Studio Slice G responsive polish', () => {
     );
     await expectNoDocumentOverflow(page);
 
-    const designDevice = page.locator('[data-invitation-studio-design-preview] [data-preview-device]');
-    const designStage = page.locator('[data-invitation-studio-design-preview] [data-preview-stage]');
+    const designDevice = page.locator(
+      '[data-invitation-studio-design-preview] [data-preview-device]',
+    );
+    const designStage = page.locator(
+      '[data-invitation-studio-design-preview] [data-preview-stage]',
+    );
     const designDeviceBox = await designDevice.boundingBox();
     const designStageBox = await designStage.boundingBox();
     expect(designDeviceBox?.width ?? 0).toBeLessThanOrEqual((designStageBox?.width ?? 0) + 1);
@@ -130,7 +136,9 @@ test.describe('Invitation Studio Slice G responsive polish', () => {
     await expectNoDocumentOverflow(page);
   });
 
-  test('preserves unsaved authority across mode switches and live viewport changes', async ({ page }) => {
+  test('preserves unsaved authority across mode switches and live viewport changes', async ({
+    page,
+  }) => {
     await openMode(page, 'design');
     await page.locator("input[name='templateKey']").nth(1).check();
     await expect(page.locator('[data-invitation-studio-save-action]')).toBeEnabled();

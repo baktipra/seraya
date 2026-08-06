@@ -165,7 +165,8 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
-.responsiveRoot :global([data-invitation-studio-preview-mode] section[aria-label='Kontrol pengalaman preview']) {
+.responsiveRoot
+  :global([data-invitation-studio-preview-mode] section[aria-label='Kontrol pengalaman preview']) {
   grid-template-columns: minmax(0, 1fr);
 }
 
@@ -195,7 +196,10 @@
 
 /* Publish mode: one-column truth is the safe default; wider canvases progressively expand. */
 .responsiveRoot :global([data-invitation-studio-publish-mode] > header),
-.responsiveRoot :global([data-invitation-studio-publish-mode] > div:last-child > div:first-child > div:first-child) {
+.responsiveRoot
+  :global(
+    [data-invitation-studio-publish-mode] > div:last-child > div:first-child > div:first-child
+  ) {
   flex-direction: column;
   align-items: stretch;
 }
@@ -228,7 +232,9 @@
   .responsiveRoot :global([data-invitation-studio-preview-mode] section > div:first-child),
   .responsiveRoot :global([data-invitation-studio-publish-mode] > header),
   .responsiveRoot
-    :global([data-invitation-studio-publish-mode] > div:last-child > div:first-child > div:first-child) {
+    :global(
+      [data-invitation-studio-publish-mode] > div:last-child > div:first-child > div:first-child
+    ) {
     flex-direction: row;
     align-items: flex-start;
   }
@@ -243,7 +249,10 @@
     width: auto;
   }
 
-  .responsiveRoot :global([data-invitation-studio-preview-mode] section[aria-label='Kontrol pengalaman preview']) {
+  .responsiveRoot
+    :global(
+      [data-invitation-studio-preview-mode] section[aria-label='Kontrol pengalaman preview']
+    ) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 

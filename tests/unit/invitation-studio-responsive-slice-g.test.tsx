@@ -45,7 +45,7 @@ describe('Invitation Studio Slice G responsive polish', () => {
   it('keeps active mode visibility and reduced-motion behavior inside the shell interaction contract', () => {
     const source = readFileSync('src/components/projects/invitation-studio-shell.tsx', 'utf8');
 
-    expect(source).toContain("activeTab.scrollIntoView({");
+    expect(source).toContain('activeTab.scrollIntoView({');
     expect(source).toContain("window.matchMedia('(prefers-reduced-motion: reduce)')");
     expect(source).toContain("inline: 'center'");
     expect(source).toContain('data-invitation-studio-responsive="slice-g"');
