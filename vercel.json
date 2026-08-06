@@ -7,7 +7,8 @@
       "feature/invitation-studio-slice-d-media-mode-asset-authority": false,
       "feature/invitation-studio-slice-e-preview-version-truth-authority": false,
       "feature/invitation-studio-slice-f-publish-decision-authority": false,
-      "feature/invitation-studio-slice-g-responsive-polish": false
+      "feature/invitation-studio-slice-g-responsive-polish": false,
+      "feature/owner-workspace-usability-reset-v1": false
     }
   }
 }
