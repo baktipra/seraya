@@ -9,6 +9,7 @@ on:
       - 'src/components/projects/invitation-studio-publish-mode.tsx'
       - 'src/components/projects/invitation-studio-publish-mode.module.css'
       - 'src/components/projects/publish-invitation-controls.tsx'
+      - 'tests/server/dashboard-invitation-editor-route.test.tsx'
       - 'tests/unit/invitation-studio-publish-mode-slice-f.test.ts'
       - 'tests/e2e/invitation-studio-publish-mode-slice-f.spec.ts'
       - 'tests/e2e/fixture-app/app/invitation-studio-slice-f/**'
@@ -23,6 +24,7 @@ on:
       - 'src/components/projects/invitation-studio-publish-mode.tsx'
       - 'src/components/projects/invitation-studio-publish-mode.module.css'
       - 'src/components/projects/publish-invitation-controls.tsx'
+      - 'tests/server/dashboard-invitation-editor-route.test.tsx'
       - 'tests/unit/invitation-studio-publish-mode-slice-f.test.ts'
       - 'tests/e2e/invitation-studio-publish-mode-slice-f.spec.ts'
       - 'tests/e2e/fixture-app/app/invitation-studio-slice-f/**'
@@ -55,6 +57,7 @@ jobs:
             src/components/projects/invitation-studio-publish-mode.tsx \
             src/components/projects/invitation-studio-publish-mode.module.css \
             src/components/projects/publish-invitation-controls.tsx \
+            tests/server/dashboard-invitation-editor-route.test.tsx \
             tests/unit/invitation-studio-publish-mode-slice-f.test.ts \
             tests/e2e/invitation-studio-publish-mode-slice-f.spec.ts \
             tests/e2e/fixture-app/app/invitation-studio-slice-f/page.tsx \
@@ -68,6 +71,7 @@ jobs:
             'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
             src/components/projects/invitation-studio-publish-mode.tsx \
             src/components/projects/publish-invitation-controls.tsx \
+            tests/server/dashboard-invitation-editor-route.test.tsx \
             tests/unit/invitation-studio-publish-mode-slice-f.test.ts \
             tests/e2e/invitation-studio-publish-mode-slice-f.spec.ts \
             tests/e2e/fixture-app/app/invitation-studio-slice-f/page.tsx \
