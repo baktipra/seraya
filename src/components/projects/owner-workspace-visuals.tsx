@@ -133,7 +133,16 @@ export function GuestRosterVisual(props: VisualProps) {
       <rect fill="var(--seraya-bg-brand-soft)" height="14" rx="7" width="96" x="38" y="32" />
       {[0, 1, 2].map((row) => (
         <g key={row} transform={`translate(38 ${64 + row * 34})`}>
-          <circle fill={row === 1 ? 'var(--seraya-bg-sage-soft)' : 'var(--seraya-bg-brand-soft)'} r="12" cx="12" cy="12" />
+          <circle
+            cx="12"
+            cy="12"
+            fill={
+              row === 1
+                ? 'color-mix(in srgb, var(--seraya-sage) 18%, var(--seraya-bg-surface))'
+                : 'var(--seraya-bg-brand-soft)'
+            }
+            r="12"
+          />
           <circle
             cx="12"
             cy="9"
@@ -151,7 +160,7 @@ export function GuestRosterVisual(props: VisualProps) {
           <rect fill="var(--seraya-bg-surface-subtle)" height="8" rx="4" width={92 - row * 8} x="36" y="4" />
           <rect fill="var(--seraya-bg-surface-subtle)" height="6" rx="3" width={58 + row * 7} x="36" y="17" />
           <rect
-            fill={row === 2 ? 'var(--seraya-bg-brand-soft)' : 'var(--seraya-bg-success-soft)'}
+            fill={row === 2 ? 'var(--seraya-bg-brand-soft)' : 'var(--seraya-status-success-soft)'}
             height="20"
             rx="10"
             width="68"
@@ -233,7 +242,7 @@ export function ResponseFlowVisual(props: VisualProps) {
       </g>
       <path
         d="M66 145h64l13 12v-12h31a12 12 0 0 0 12-12v-5H66Z"
-        fill="var(--seraya-bg-sage-soft)"
+        fill="color-mix(in srgb, var(--seraya-sage) 18%, var(--seraya-bg-surface))"
       />
       <path
         d="M84 136h72"
