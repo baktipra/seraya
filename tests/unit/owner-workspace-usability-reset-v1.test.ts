@@ -18,12 +18,22 @@ describe('Seraya Owner Workspace Usability Reset V1', () => {
     expect(parseInvitationWorkspaceTask(undefined, 'content')).toBeNull();
   });
 
-  it('recovers legacy content chapter hashes without creating a second draft route', () => {
+  it('recovers legacy content, style, and gallery chapter links', () => {
     expect(
       getInvitationWorkspaceTaskFromUrl(
         new URL('https://seraya.test/dashboard/project/invitation?mode=content#bagian-couple'),
       ),
     ).toBe('couple');
+    expect(
+      getInvitationWorkspaceTaskFromUrl(
+        new URL('https://seraya.test/dashboard/project/invitation?mode=content#bagian-style'),
+      ),
+    ).toBe('design');
+    expect(
+      getInvitationWorkspaceTaskFromUrl(
+        new URL('https://seraya.test/dashboard/project/invitation?mode=content#bagian-gallery'),
+      ),
+    ).toBe('media');
     expect(
       getInvitationWorkspaceTaskFromUrl(
         new URL('https://seraya.test/dashboard/project/invitation?task=schedule'),
