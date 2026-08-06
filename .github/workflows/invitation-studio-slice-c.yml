@@ -1,0 +1,97 @@
+name: Invitation Studio Slice C Design Mode validation
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx'
+      - 'src/components/projects/invitation-editor.tsx'
+      - 'src/components/projects/invitation-editor-workspace.tsx'
+      - 'src/components/projects/invitation-studio-design-mode.tsx'
+      - 'src/components/projects/invitation-studio-design-mode.module.css'
+      - 'tests/unit/invitation-studio-design-mode-slice-c.test.ts'
+      - 'tests/e2e/invitation-studio-design-mode-slice-c.spec.ts'
+      - 'tests/e2e/fixture-app/app/invitation-studio-slice-c/**'
+      - 'playwright.invitation-studio-slice-c.config.ts'
+      - '.github/workflows/invitation-studio-slice-c.yml'
+  push:
+    branches:
+      - feature/invitation-studio-slice-c-design-mode
+    paths:
+      - 'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx'
+      - 'src/components/projects/invitation-editor.tsx'
+      - 'src/components/projects/invitation-editor-workspace.tsx'
+      - 'src/components/projects/invitation-studio-design-mode.tsx'
+      - 'src/components/projects/invitation-studio-design-mode.module.css'
+      - 'tests/unit/invitation-studio-design-mode-slice-c.test.ts'
+      - 'tests/e2e/invitation-studio-design-mode-slice-c.spec.ts'
+      - 'tests/e2e/fixture-app/app/invitation-studio-slice-c/**'
+      - 'playwright.invitation-studio-slice-c.config.ts'
+      - '.github/workflows/invitation-studio-slice-c.yml'
+
+concurrency:
+  group: invitation-studio-slice-c-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Check focused formatting
+        run: |
+          npx prettier --check \
+            'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
+            src/components/projects/invitation-editor.tsx \
+            src/components/projects/invitation-editor-workspace.tsx \
+            src/components/projects/invitation-studio-design-mode.tsx \
+            src/components/projects/invitation-studio-design-mode.module.css \
+            tests/unit/invitation-studio-design-mode-slice-c.test.ts \
+            tests/e2e/invitation-studio-design-mode-slice-c.spec.ts \
+            tests/e2e/fixture-app/app/invitation-studio-slice-c/page.tsx \
+            tests/e2e/fixture-app/app/invitation-studio-slice-c/fixture-client.tsx \
+            playwright.invitation-studio-slice-c.config.ts \
+            .github/workflows/invitation-studio-slice-c.yml
+      - name: Lint focused source
+        run: |
+          npx eslint \
+            'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
+            src/components/projects/invitation-editor.tsx \
+            src/components/projects/invitation-editor-workspace.tsx \
+            src/components/projects/invitation-studio-design-mode.tsx \
+            tests/unit/invitation-studio-design-mode-slice-c.test.ts \
+            tests/e2e/invitation-studio-design-mode-slice-c.spec.ts \
+            tests/e2e/fixture-app/app/invitation-studio-slice-c/page.tsx \
+            tests/e2e/fixture-app/app/invitation-studio-slice-c/fixture-client.tsx \
+            playwright.invitation-studio-slice-c.config.ts
+      - run: npm run typecheck
+      - name: Run Slice A, B, and C unit contracts
+        run: |
+          npx vitest run \
+            tests/unit/invitation-studio-structural-foundation-slice-a.test.tsx \
+            tests/unit/invitation-studio-unified-state-slice-b.test.ts \
+            tests/unit/invitation-studio-design-mode-slice-c.test.ts
+      - run: npm run build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run desktop and mobile Design Mode smoke
+        run: npx playwright test --config=playwright.invitation-studio-slice-c.config.ts
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: invitation-studio-slice-c-playwright-report
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+          retention-days: 7
