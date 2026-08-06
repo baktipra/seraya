@@ -254,7 +254,8 @@
 
 .headerSaveHandoff {
   padding: 0.9rem 1rem;
-  border: 1px solid color-mix(in srgb, var(--seraya-action-primary) 28%, var(--seraya-border-default));
+  border: 1px solid
+    color-mix(in srgb, var(--seraya-action-primary) 28%, var(--seraya-border-default));
   border-radius: var(--seraya-radius-md);
   background: var(--seraya-brand-soft);
   color: var(--seraya-text-secondary);

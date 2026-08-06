@@ -233,16 +233,21 @@ export function InvitationStudioPublishMode({
               <p className={styles.eyebrow}>Kesiapan draf tersimpan</p>
               <h3>Periksa sumber penghambat sebelum menerbitkan.</h3>
             </div>
-            <strong>{readyCount} dari {chapters.length} bab siap</strong>
+            <strong>
+              {readyCount} dari {chapters.length} bab siap
+            </strong>
           </div>
 
           <ol className={styles.chapterGrid}>
             {chapters.map((chapter) => {
-              const needsAttention =
-                chapter.status === 'error' || chapter.status === 'incomplete';
+              const needsAttention = chapter.status === 'error' || chapter.status === 'incomplete';
               const content = (
                 <>
-                  <span className={styles.chapterIcon} data-status={chapter.status} aria-hidden="true">
+                  <span
+                    className={styles.chapterIcon}
+                    data-status={chapter.status}
+                    aria-hidden="true"
+                  >
                     {chapter.status === 'complete'
                       ? '✓'
                       : chapter.status === 'error'
@@ -252,7 +257,9 @@ export function InvitationStudioPublishMode({
                           : '○'}
                   </span>
                   <span>
-                    <strong>{chapter.number} · {chapter.studioLabel}</strong>
+                    <strong>
+                      {chapter.number} · {chapter.studioLabel}
+                    </strong>
                     <small>
                       {readinessStatusCopy[chapter.status]}
                       {chapter.optional ? ' · Opsional' : ' · Wajib'}
@@ -292,7 +299,10 @@ export function InvitationStudioPublishMode({
                 save authority.
               </div>
             ) : decision.kind === 'fix-readiness' && firstBlocker ? (
-              <Link className={styles.primaryLink} href={getInvitationChapterHref(projectId, firstBlocker.key)}>
+              <Link
+                className={styles.primaryLink}
+                href={getInvitationChapterHref(projectId, firstBlocker.key)}
+              >
                 Lengkapi {firstBlocker.studioLabel}
               </Link>
             ) : decision.kind === 'activate-payment' ? (

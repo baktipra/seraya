@@ -6,6 +6,7 @@ import { InvitationEditor } from '@/components/projects/invitation-editor';
 import { InvitationStudioDesignMode } from '@/components/projects/invitation-studio-design-mode';
 import { InvitationStudioMediaMode } from '@/components/projects/invitation-studio-media-mode';
 import { InvitationStudioPreviewMode } from '@/components/projects/invitation-studio-preview-mode';
+import { InvitationStudioPublishMode } from '@/components/projects/invitation-studio-publish-mode';
 import {
   parseInvitationStudioPreviewSurface,
   parseInvitationStudioPreviewVersion,
@@ -32,6 +33,7 @@ import {
   type OwnedInvitationEditor,
 } from '@/modules/invitations/invitation-editor.service';
 import { getInvitationAudioSummaryForVerifiedProject } from '@/modules/media/invitation-audio.service';
+import { getPaymentOverviewForVerifiedProject, type PaymentOverview } from '@/modules/payments';
 import type { InvitationAudioSummary } from '@/modules/media/invitation-audio.types';
 import type { InvitationGalleryImage } from '@/modules/media/media.types';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
@@ -55,6 +57,7 @@ type InvitationEditorScreen = {
   audio: InvitationAudioSummary | null;
   editor: OwnedInvitationEditor;
   galleryImages: InvitationGalleryImage[];
+  paymentOverview: PaymentOverview;
   publishedSnapshot: PublishedInvitationSnapshot | null;
   readiness: Awaited<ReturnType<typeof getInvitationReadinessForVerifiedProject>>;
 };
@@ -130,7 +133,7 @@ function getInvitationChapterHref(projectId: string, chapter: InvitationEditorSe
   ) as Route;
 }
 
-function InvitationReadinessHandoff({
+export function InvitationReadinessHandoff({
   draft,
   projectId,
   readiness,
@@ -332,11 +335,12 @@ async function getInvitationEditorScreenOrNotFound(
         const readiness = await getInvitationReadinessForVerifiedProject(project, {
           draft: editor.draft,
         });
-        const [audio, publishedSnapshot] = await Promise.all([
+        const [audio, paymentOverview, publishedSnapshot] = await Promise.all([
           getInvitationAudioSummaryForVerifiedProject({
             configuration: editor.draft.content.audio,
             project,
           }),
+          getPaymentOverviewForVerifiedProject(project),
           getCurrentPublishedInvitationForVerifiedProject(project),
         ]);
 
@@ -344,6 +348,7 @@ async function getInvitationEditorScreenOrNotFound(
           audio,
           editor,
           galleryImages: getDeferredGalleryImages(editor),
+          paymentOverview,
           publishedSnapshot,
           readiness,
         };
@@ -416,15 +421,19 @@ export default async function InvitationEditorPage({
               savedDraft={screen.editor.draft}
             />
           }
+          publish={
+            <InvitationStudioPublishMode
+              draft={screen.editor.draft}
+              paymentOverview={screen.paymentOverview}
+              projectId={screen.editor.project.id}
+              publishedSnapshot={screen.publishedSnapshot}
+              readiness={screen.readiness}
+            />
+          }
           statusLabel={studioStatus.label}
           statusTone={studioStatus.tone}
         >
-          <div className="grid min-w-0 gap-5 sm:gap-6" data-invitation-studio-legacy-content>
-            <InvitationReadinessHandoff
-              draft={screen.editor.draft}
-              projectId={screen.editor.project.id}
-              readiness={screen.readiness}
-            />
+          <div className="grid min-w-0 gap-5 sm:gap-6" data-invitation-studio-content-mode>
             <InvitationEditor
               draft={screen.editor.draft}
               projectId={screen.editor.project.id}
