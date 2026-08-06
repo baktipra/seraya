@@ -1,3 +1,4 @@
+# Slice F.1 permanent clean-head validation gate.
 name: Invitation Studio Slice F Publish Mode validation
 
 on:
