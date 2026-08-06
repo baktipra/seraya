@@ -2,7 +2,7 @@
 
 ## Status
 
-Implementation / validation in progress on:
+Implementation complete; formatted clean-head validation in progress on:
 
 `feature/invitation-studio-slice-g-responsive-polish`
 
