@@ -1,10 +1,10 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 const projectPath = '/owner-workspace-radical-simplicity-v2';
 const invitationPath = `${projectPath}?view=invitation`;
 
-async function expectNoDocumentOverflow() {
-  const overflow = await test.info().page.evaluate(() => ({
+async function expectNoDocumentOverflow(page: Page) {
+  const overflow = await page.evaluate(() => ({
     clientWidth: document.documentElement.clientWidth,
     scrollWidth: document.documentElement.scrollWidth,
   }));
@@ -30,7 +30,7 @@ test.describe('SERAYA Owner Workspace Radical Simplicity Reset V2', () => {
     await expect(workspace.locator('[data-canonical-thumbnail-template="roselle"]')).toBeVisible();
     await expect(workspace.getByText('Ringkasan', { exact: true })).toHaveCount(0);
     await expect(workspace.getByText('Bagikan', { exact: true })).toHaveCount(0);
-    await expectNoDocumentOverflow();
+    await expectNoDocumentOverflow(page);
   });
 
   test('owner workspace uses operational sans typography', async ({ page }) => {
@@ -67,7 +67,7 @@ test.describe('SERAYA Owner Workspace Radical Simplicity Reset V2', () => {
       recommendedTask!,
     );
     await expect(workspace.getByRole('button', { name: /Semua bagian/ })).toBeVisible();
-    await expectNoDocumentOverflow();
+    await expectNoDocumentOverflow(page);
   });
 
   test('task launcher remains scannable after returning from a single task', async ({ page }) => {
@@ -83,6 +83,6 @@ test.describe('SERAYA Owner Workspace Radical Simplicity Reset V2', () => {
     await expect(page.getByRole('heading', { name: 'Isi undangan' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Tampilan & media' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Selesaikan' })).toBeVisible();
-    await expectNoDocumentOverflow();
+    await expectNoDocumentOverflow(page);
   });
 });
