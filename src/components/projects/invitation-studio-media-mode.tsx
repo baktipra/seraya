@@ -39,7 +39,7 @@ export function InvitationStudioMediaMode({
   projectId,
 }: InvitationStudioMediaModeProps) {
   const router = useRouter();
-  const { synchronizeLocalContent } = useInvitationStudioState();
+  const { content, synchronizeLocalContent, updateLocalContent } = useInvitationStudioState();
   const [activeTab, setActiveTab] = useState<InvitationStudioMediaTab>(initialTab);
   const [audio, setAudio] = useState(initialAudio);
   const [images, setImages] = useState(initialImages);
@@ -86,14 +86,14 @@ export function InvitationStudioMediaMode({
     >
       <header className={styles.header}>
         <div className={styles.headerCopy}>
-          <p className={styles.eyebrow}>Mode Media</p>
+          <p className={styles.eyebrow}>Media undangan</p>
           <h2 className={styles.title} id="invitation-studio-media-title">
-            Kelola foto dan suasana audio di satu tempat.
+            Kelola galeri dan musik di satu tempat.
           </h2>
           <p className={styles.description}>
-            Upload, urutkan, ganti, atau hapus aset privat project. Operasi media disimpan langsung
-            setelah berhasil; pengaturan tampil undangan tetap mengikuti draf dan tombol simpan di
-            header Studio.
+            Upload, urutkan, ganti, atau hapus aset privat project. Operasi file disimpan langsung
+            setelah berhasil; pilihan apakah galeri tampil tetap mengikuti draf dan tombol Simpan
+            perubahan di header.
           </p>
         </div>
         <dl className={styles.summary} aria-label="Ringkasan media undangan">
@@ -102,11 +102,57 @@ export function InvitationStudioMediaMode({
             <dd data-media-gallery-summary>{summary.galleryLabel}</dd>
           </div>
           <div>
-            <dt>Audio</dt>
+            <dt>Musik</dt>
             <dd data-media-audio-summary>{summary.audioLabel}</dd>
           </div>
         </dl>
       </header>
+
+      <section
+        aria-labelledby="gallery-visibility-title"
+        className="border-seraya-border-default bg-seraya-surface flex flex-col gap-4 rounded-[var(--seraya-radius-lg)] border p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5"
+        data-media-gallery-visibility-control
+      >
+        <div className="min-w-0">
+          <h3 className="text-seraya-text-primary text-base font-semibold" id="gallery-visibility-title">
+            Tampilkan galeri pada undangan
+          </h3>
+          <p className="text-seraya-text-muted mt-1 max-w-2xl text-sm leading-6">
+            Foto tetap aman ketika galeri disembunyikan. Perubahan ini baru terlihat oleh tamu
+            setelah draf disimpan dan undangan diterbitkan atau diterbitkan ulang.
+          </p>
+        </div>
+        <button
+          aria-checked={content.gallery.enabled}
+          className={[
+            'focus-visible:outline-seraya-focus-ring inline-flex min-h-11 shrink-0 items-center gap-2.5 rounded-full border px-3.5 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-2',
+            content.gallery.enabled
+              ? 'border-seraya-action-primary bg-seraya-brand-soft text-seraya-action-primary'
+              : 'border-seraya-border-default bg-seraya-canvas text-seraya-text-secondary',
+          ].join(' ')}
+          onClick={() =>
+            updateLocalContent({ enabled: !content.gallery.enabled, type: 'gallery-visibility' })
+          }
+          role="switch"
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            className={[
+              'relative inline-flex h-6 w-11 rounded-full transition-colors',
+              content.gallery.enabled ? 'bg-seraya-action-primary' : 'bg-seraya-border-strong',
+            ].join(' ')}
+          >
+            <span
+              className={[
+                'absolute top-1 size-4 rounded-full bg-white shadow-sm transition-transform',
+                content.gallery.enabled ? 'translate-x-6' : 'translate-x-1',
+              ].join(' ')}
+            />
+          </span>
+          {content.gallery.enabled ? 'Ditampilkan' : 'Disembunyikan'}
+        </button>
+      </section>
 
       <div className={styles.tabList} aria-label="Jenis media" role="tablist">
         <button
@@ -132,7 +178,7 @@ export function InvitationStudioMediaMode({
           role="tab"
           type="button"
         >
-          <span>Audio</span>
+          <span>Musik</span>
           <small>{summary.audioLabel}</small>
         </button>
       </div>
@@ -169,9 +215,9 @@ export function InvitationStudioMediaMode({
         role="tabpanel"
       >
         <div className={styles.truthNote}>
-          <strong>Satu file audio aktif per undangan.</strong>
+          <strong>Satu file musik aktif per undangan.</strong>
           <span>
-            Audio tetap privat, tidak menerima URL eksternal, dan hanya diputar ketika tamu memilih
+            Musik tetap privat, tidak menerima URL eksternal, dan hanya diputar ketika tamu memilih
             kontrol musik.
           </span>
         </div>
