@@ -91,10 +91,7 @@
     max-width: var(--seraya-workspace-width-standard);
   }
 
-  [data-workspace-page][data-workspace-width='operations'] {
-    max-width: var(--seraya-workspace-width-operations);
-  }
-
+  [data-workspace-page][data-workspace-width='operations'],
   [data-workspace-page][data-workspace-width='studio'] {
     max-width: none;
   }
