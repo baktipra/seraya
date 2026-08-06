@@ -7,7 +7,7 @@ import {
   parseInvitationStudioPreviewViewport,
 } from '../../src/components/projects/invitation-studio-preview.types';
 
-// Final gate preserves distinct local, saved, and immutable published truth.
+// Final clean-head gate preserves distinct local, saved, and immutable published truth.
 describe('Invitation Studio Slice E Preview Mode', () => {
   it('parses canonical version, surface, and viewport query state', () => {
     expect(parseInvitationStudioPreviewVersion('local', true)).toBe('local');
