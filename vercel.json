@@ -2,7 +2,8 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "git": {
     "deploymentEnabled": {
-      "feature/invitation-studio-slice-b-unified-state-command-authority": false
+      "feature/invitation-studio-slice-b-unified-state-command-authority": false,
+      "feature/invitation-studio-slice-c-design-mode": false
     }
   }
 }
