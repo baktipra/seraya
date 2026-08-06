@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
+import type { ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -43,10 +44,10 @@ vi.mock('@/components/projects/invitation-editor', () => ({
   ),
 }));
 vi.mock('@/components/projects/invitation-studio-provider', () => ({
-  InvitationStudioProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  InvitationStudioProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
 }));
 vi.mock('@/components/projects/invitation-studio-shell', () => ({
-  InvitationStudioShell: ({ children }: { children: React.ReactNode }) => (
+  InvitationStudioShell: ({ children }: { children: ReactNode }) => (
     <section data-private-invitation-studio>{children}</section>
   ),
 }));
