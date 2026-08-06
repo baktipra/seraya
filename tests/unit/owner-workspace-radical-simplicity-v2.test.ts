@@ -20,7 +20,7 @@ describe('SERAYA Owner Workspace Radical Simplicity Reset V2', () => {
     expect(source).toContain('CanonicalInvitationThumbnail');
     expect(source).toContain('GuestRosterVisual');
     expect(source).toContain('ResponseFlowVisual');
-    expect(source.match(/<Link className=/g)).toHaveLength(3);
+    expect(source.match(/\$\{styles\.entry\}/g)).toHaveLength(3);
     expect(source).not.toContain('ProjectCompass');
     expect(source).not.toContain('AttentionQueue');
   });
