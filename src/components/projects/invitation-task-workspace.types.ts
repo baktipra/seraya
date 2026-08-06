@@ -71,13 +71,25 @@ export function parseInvitationWorkspaceTask(
 }
 
 export function getInvitationWorkspaceTaskFromUrl(url: URL): InvitationWorkspaceTask | null {
-  const parsed = parseInvitationWorkspaceTask(url.searchParams.get('task'), url.searchParams.get('mode'));
+  const parsed = parseInvitationWorkspaceTask(
+    url.searchParams.get('task'),
+    url.searchParams.get('mode'),
+  );
 
   if (parsed) {
     return parsed;
   }
 
   const legacySection = url.hash.replace('#bagian-', '');
+
+  if (legacySection === 'style') {
+    return 'design';
+  }
+
+  if (legacySection === 'gallery') {
+    return 'media';
+  }
+
   return invitationWorkspaceContentTasks.includes(legacySection as InvitationWorkspaceContentTask)
     ? (legacySection as InvitationWorkspaceContentTask)
     : null;
