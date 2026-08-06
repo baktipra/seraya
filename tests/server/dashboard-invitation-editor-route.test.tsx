@@ -27,28 +27,24 @@ const {
 }));
 
 vi.mock('next/navigation', () => ({ notFound: notFoundMock }));
-vi.mock('@/components/projects/invitation-editor', () => ({
-  InvitationEditor: ({
+vi.mock('@/components/projects/invitation-studio-provider', () => ({
+  InvitationStudioProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
+}));
+vi.mock('@/components/projects/invitation-task-workspace', () => ({
+  InvitationTaskWorkspace: ({
     draft,
     projectId,
   }: {
     draft: { content: { gallery: { imageIds: string[] } } };
     projectId: string;
   }) => (
-    <div
+    <section
       data-editor-gallery-count={draft.content.gallery.imageIds.length}
       data-editor-project-id={projectId}
+      data-private-invitation-task-workspace
     >
       Edit undangan
-    </div>
-  ),
-}));
-vi.mock('@/components/projects/invitation-studio-provider', () => ({
-  InvitationStudioProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
-}));
-vi.mock('@/components/projects/invitation-studio-shell', () => ({
-  InvitationStudioShell: ({ children }: { children: ReactNode }) => (
-    <section data-private-invitation-studio>{children}</section>
+    </section>
   ),
 }));
 vi.mock('@/modules/auth/dashboard-request-context', () => ({
@@ -159,6 +155,7 @@ describe('SRY-016 private invitation editor route', () => {
     expect(html).toContain('Edit undangan');
     expect(html).toContain(`data-editor-project-id="${project.id}"`);
     expect(html).toContain('data-editor-gallery-count="1"');
+    expect(html).toContain('data-private-invitation-task-workspace');
     expect(html).not.toContain('draft-private-id');
     expect(html).not.toContain(project.account_id);
   });
