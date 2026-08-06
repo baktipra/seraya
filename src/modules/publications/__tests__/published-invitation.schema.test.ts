@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { resolveInvitationThemePaletteKey } from '@/modules/invitation-templates/core/theme-package.registry';
 import { createDefaultInvitationDraftContent } from '@/modules/invitations/invitation-draft.defaults';
 
 import {
@@ -150,7 +151,11 @@ describe('published invitation snapshot contract', () => {
           slug: 'raka-nadia',
           snapshot: {
             ...createPayload(),
-            draft: { ...createPayload().draft, templateKey: templateId },
+            draft: {
+              ...createPayload().draft,
+              paletteKey: resolveInvitationThemePaletteKey(templateId, undefined),
+              templateKey: templateId,
+            },
           },
           template_id: templateId,
         }).template_id,

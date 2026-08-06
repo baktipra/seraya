@@ -216,12 +216,10 @@ export function InvitationStudioPreviewMode({
       : version === 'published' && publishedSnapshot
         ? publishedSnapshot.snapshot.draft
         : savedDraft.content;
-  const selectedProject = {
-    event_date_primary:
-      version === 'published' && publishedSnapshot
-        ? publishedSnapshot.snapshot.project.eventDatePrimary
-        : project.event_date_primary,
-  };
+  const selectedEventDatePrimary =
+    version === 'published' && publishedSnapshot
+      ? publishedSnapshot.snapshot.project.eventDatePrimary
+      : project.event_date_primary;
   const galleryImages = useMemo(
     () => getPreviewGalleryImages(selectedContent, version),
     [selectedContent, version],
@@ -231,9 +229,9 @@ export function InvitationStudioPreviewMode({
       createInvitationEditorPreviewViewModel({
         content: selectedContent,
         galleryImages,
-        project: selectedProject,
+        project: { event_date_primary: selectedEventDatePrimary },
       }),
-    [galleryImages, selectedContent, selectedProject.event_date_primary],
+    [galleryImages, selectedContent, selectedEventDatePrimary],
   );
   const personalSlots = surface === 'personal' ? createPreviewPersonalSlots(invitation) : undefined;
   const truth = getInvitationStudioPreviewTruth({
