@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
+import { CanonicalInvitationThumbnail } from '@/components/marketing/canonical-invitation-thumbnail';
+import { featuredThemes } from '@/components/marketing/theme-catalog';
 import type { InvitationDraft } from '@/modules/invitations/invitation-draft.types';
 import type { WeddingReadinessV1 } from '@/modules/readiness/wedding-readiness.types';
 
@@ -17,10 +19,12 @@ import type { InvitationStudioStatusTone } from './invitation-studio-shell';
 import {
   getInvitationWorkspaceTaskFromUrl,
   isInvitationWorkspaceContentTask,
+  invitationWorkspaceContentTasks,
   type InvitationWorkspaceContentTask,
   type InvitationWorkspaceTask,
 } from './invitation-task-workspace.types';
 import styles from './invitation-task-workspace.module.css';
+import { InvitationTaskGlyph } from './owner-workspace-visuals';
 
 type InvitationTaskWorkspaceProps = {
   coupleLabel: string;
@@ -111,7 +115,7 @@ const taskDefinitions: readonly TaskDefinition[] = [
     title: 'Tema & warna',
   },
   {
-    description: 'Periksa hasil lokal, tersimpan, dan versi untuk tamu.',
+    description: 'Periksa tampilan undangan sebelum dibagikan.',
     group: 'release',
     key: 'preview',
     number: '10',
@@ -128,28 +132,20 @@ const taskDefinitions: readonly TaskDefinition[] = [
 
 const groupCopy = {
   content: {
-    description: 'Lengkapi informasi yang akan dibaca tamu.',
+    description: 'Informasi yang dibaca tamu.',
     title: 'Isi undangan',
   },
   experience: {
-    description: 'Atur tampilan, foto, dan suasana undangan.',
+    description: 'Tampilan, foto, dan suasana.',
     title: 'Tampilan & media',
   },
   release: {
-    description: 'Periksa hasil dan putuskan kapan undangan siap tayang.',
-    title: 'Periksa & terbitkan',
+    description: 'Periksa hasil lalu tayangkan.',
+    title: 'Selesaikan',
   },
 } as const;
 
-const sectionTaskKeys = new Set<string>([
-  'couple',
-  'opening',
-  'schedule',
-  'story',
-  'gift',
-  'rsvp',
-  'closing',
-]);
+const sectionTaskKeys = new Set<string>(invitationWorkspaceContentTasks);
 
 function getTaskDefinition(task: InvitationWorkspaceTask) {
   return taskDefinitions.find((candidate) => candidate.key === task)!;
@@ -209,7 +205,7 @@ function getPublishState(readiness: InvitationTaskWorkspaceProps['readiness']): 
     case 'published':
       return { label: 'Sudah terbit', state: 'complete' };
     case 'published_with_unpublished_changes':
-      return { label: 'Perlu diterbitkan ulang', state: 'warning' };
+      return { label: 'Terbitkan perubahan', state: 'warning' };
     case 'ready_to_publish':
       return { label: 'Siap diterbitkan', state: 'complete' };
     case 'draft_ready_unactivated':
@@ -323,12 +319,7 @@ function SingleTaskEditor({
       />
 
       <div className={styles.editorFooter}>
-        <div>
-          <strong>Perubahan tetap berada di draf pribadi.</strong>
-          <span>
-            Gunakan tombol Simpan perubahan di bagian atas sebelum meninggalkan workspace.
-          </span>
-        </div>
+        <span>Perubahan tetap berada di draf pribadi sampai kalian menerbitkannya.</span>
       </div>
     </form>
   );
@@ -369,6 +360,27 @@ export function InvitationTaskWorkspace({
   const attentionCount = Object.values(sectionStatuses).filter(
     (status) => status === 'error' || status === 'incomplete',
   ).length;
+  const hasMedia =
+    studioState.content.gallery.imageIds.length > 0 || Boolean(studioState.content.audio.assetId);
+  const selectedTheme =
+    featuredThemes.find((theme) => theme.key === studioState.content.templateKey) ??
+    featuredThemes[0]!;
+  const selectedPalette =
+    selectedTheme.palettes.find((palette) => palette.key === studioState.content.paletteKey) ??
+    selectedTheme.palettes[0]!;
+  const recommendedTask =
+    invitationWorkspaceContentTasks.find((task) => {
+      const state = sectionStatuses[task];
+      return state === 'error' || state === 'incomplete';
+    }) ??
+    (sectionStatuses.style === 'error' || sectionStatuses.style === 'incomplete'
+      ? 'design'
+      : !hasMedia
+        ? 'media'
+        : readiness.invitation.state === 'published'
+          ? 'preview'
+          : 'publish');
+  const recommendedDefinition = getTaskDefinition(recommendedTask);
 
   useEffect(() => {
     const syncFromLocation = () => {
@@ -424,9 +436,6 @@ export function InvitationTaskWorkspace({
     }
 
     if (task === 'media') {
-      const hasMedia =
-        studioState.content.gallery.imageIds.length > 0 ||
-        Boolean(studioState.content.audio.assetId);
       return {
         label: hasMedia ? 'Media siap' : 'Belum ada media',
         state: hasMedia ? ('complete' as const) : ('neutral' as const),
@@ -475,11 +484,9 @@ export function InvitationTaskWorkspace({
       case 'closing':
         return content.closing.enabled ? 'Ditampilkan di akhir undangan' : 'Tidak ditampilkan';
       case 'design':
-        return `${content.templateKey || 'Template belum dipilih'} · ${
-          content.paletteKey || 'warna belum dipilih'
-        }`;
+        return `${selectedTheme.name} · ${selectedPalette.name}`;
       case 'preview':
-        return 'Mobile, desktop, generik, dan simulasi personal';
+        return 'Periksa tampilan untuk tamu';
       case 'publish':
         return statusLabel;
     }
@@ -493,13 +500,14 @@ export function InvitationTaskWorkspace({
       className={styles.workspace}
       data-invitation-task-workspace
       data-invitation-task-workspace-active={activeTask ?? 'launcher'}
+      data-owner-workspace-radical-simplicity="v2"
     >
       <header className={styles.commandHeader}>
         <div className={styles.commandIdentity}>
           {activeTask ? (
             <button className={styles.backButton} onClick={() => activateTask(null)} type="button">
               <span aria-hidden="true">←</span>
-              Kembali ke Undangan
+              Semua bagian
             </button>
           ) : (
             <p className={styles.eyebrow}>Undangan</p>
@@ -508,8 +516,7 @@ export function InvitationTaskWorkspace({
             {activeDefinition?.title ?? coupleLabel}
           </h1>
           <p className={styles.description}>
-            {activeDefinition?.description ??
-              'Pilih satu pekerjaan, selesaikan, lalu kembali ke daftar. Semua bagian tetap memakai satu draf yang sama.'}
+            {activeDefinition?.description ?? 'Pilih satu bagian untuk dikerjakan sekarang.'}
           </p>
         </div>
 
@@ -532,29 +539,49 @@ export function InvitationTaskWorkspace({
       </header>
 
       <section className={styles.launcher} hidden={activeTask !== null}>
-        <div className={styles.launcherSummary}>
-          <div>
-            <p className={styles.summaryEyebrow}>Progress undangan</p>
-            <h2>Kerjakan bagian yang paling penting sekarang.</h2>
-            <p>
-              Tidak perlu memahami struktur sistem. Buka satu pekerjaan, isi, simpan, lalu lanjutkan
-              ke pekerjaan berikutnya.
-            </p>
+        <div className={styles.launcherHero}>
+          <div className={styles.thumbnailPanel}>
+            <CanonicalInvitationThumbnail
+              className={styles.thumbnail}
+              paletteCanvas={selectedPalette.canvas}
+              paletteKey={selectedPalette.key}
+              paletteName={selectedPalette.name}
+              priority
+              templateKey={selectedTheme.key}
+              variant="showcase"
+            />
+            <div className={styles.thumbnailCaption}>
+              <strong>{selectedTheme.name}</strong>
+              <span>{selectedPalette.name}</span>
+            </div>
           </div>
-          <dl className={styles.metrics}>
-            <div>
-              <dt>Bagian siap</dt>
-              <dd>{readyCount}/9</dd>
+
+          <div className={styles.startPanel}>
+            <p className={styles.summaryEyebrow}>Lanjutkan di sini</p>
+            <span className={styles.recommendedIcon}>
+              <InvitationTaskGlyph className={styles.recommendedGlyph} task={recommendedTask} />
+            </span>
+            <h2>{recommendedDefinition.title}</h2>
+            <p>{recommendedDefinition.description}</p>
+            <button
+              className={styles.startButton}
+              data-recommended-task={recommendedTask}
+              onClick={() => activateTask(recommendedTask)}
+              type="button"
+            >
+              Buka {recommendedDefinition.title}
+              <span aria-hidden="true">→</span>
+            </button>
+            <div className={styles.progressBlock}>
+              <div className={styles.progressCopy}>
+                <span>{readyCount}/9 bagian siap</span>
+                <span>{attentionCount > 0 ? `${attentionCount} perlu perhatian` : 'Isi utama lengkap'}</span>
+              </div>
+              <span className={styles.progressTrack} aria-hidden="true">
+                <span style={{ width: `${Math.min(100, Math.round((readyCount / 9) * 100))}%` }} />
+              </span>
             </div>
-            <div>
-              <dt>Perlu perhatian</dt>
-              <dd>{attentionCount}</dd>
-            </div>
-            <div>
-              <dt>Status tayang</dt>
-              <dd>{publishState.label}</dd>
-            </div>
-          </dl>
+          </div>
         </div>
 
         {groups.map((group) => (
@@ -578,15 +605,16 @@ export function InvitationTaskWorkspace({
                       onClick={() => activateTask(task.key)}
                       type="button"
                     >
-                      <span className={styles.taskTopline}>
-                        <span className={styles.taskNumber}>{task.number}</span>
-                        <span className={styles.taskState}>{taskState.label}</span>
+                      <span className={styles.taskIcon} data-task={task.key}>
+                        <InvitationTaskGlyph className={styles.taskGlyph} task={task.key} />
                       </span>
-                      <span className={styles.taskTitle}>{task.title}</span>
-                      <span className={styles.taskSummary}>{getTaskSummary(task.key)}</span>
-                      <span className={styles.taskDescription}>{task.description}</span>
-                      <span className={styles.taskAction}>
-                        Buka <span aria-hidden="true">→</span>
+                      <span className={styles.taskBody}>
+                        <span className={styles.taskTitle}>{task.title}</span>
+                        <span className={styles.taskSummary}>{getTaskSummary(task.key)}</span>
+                      </span>
+                      <span className={styles.taskState}>{taskState.label}</span>
+                      <span className={styles.taskArrow} aria-hidden="true">
+                        →
                       </span>
                     </button>
                   );

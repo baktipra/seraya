@@ -25,6 +25,8 @@
   --seraya-bg-soft: var(--seraya-bg-surface-subtle);
   --seraya-bg-brand-soft: var(--seraya-rosewood-soft);
   --seraya-bg-brand-softer: #fbf5f6;
+  --seraya-bg-sage-soft: color-mix(in srgb, var(--seraya-sage) 18%, var(--seraya-bg-surface));
+  --seraya-bg-sand-soft: color-mix(in srgb, var(--seraya-sand) 72%, var(--seraya-bg-surface));
   --seraya-text-primary: var(--seraya-ink);
   --seraya-text-secondary: #625d58;
   --seraya-text-muted: var(--seraya-muted);
@@ -92,6 +94,7 @@
   --seraya-motion-default: 180ms;
   --seraya-motion-panel: 240ms;
   --seraya-motion-large: 320ms;
+  --seraya-motion-slow: var(--seraya-motion-large);
   --seraya-ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --seraya-ease-exit: cubic-bezier(0.4, 0, 1, 1);
 

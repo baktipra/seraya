@@ -9,11 +9,10 @@ import { beginWorkspaceTransition } from '@/lib/performance/workspace-performanc
 
 import {
   GuestsIcon,
-  HelpIcon,
+  HomeIcon,
   InvitationIcon,
-  OverviewIcon,
+  ResponseIcon,
   SettingsIcon,
-  ShareIcon,
 } from './dashboard-icons';
 
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
@@ -23,8 +22,7 @@ type ProjectNavigationItem = {
   href: Route;
   icon: IconComponent;
   label: string;
-  mobileLabel?: string;
-  performanceWorkspace: 'compass' | 'delivery' | 'guests' | 'responses' | 'studio';
+  performanceWorkspace: 'guests' | 'responses' | 'studio';
 };
 
 function getProjectNavigationItems(projectId: string): ProjectNavigationItem[] {
@@ -32,69 +30,54 @@ function getProjectNavigationItems(projectId: string): ProjectNavigationItem[] {
 
   return [
     {
-      href: base as Route,
-      icon: OverviewIcon,
-      label: 'Ringkasan',
-      mobileLabel: 'Ringkas',
-      performanceWorkspace: 'compass',
-    },
-    {
+      aliases: [`${base}/preview`, `${base}/billing`],
       href: `${base}/invitation` as Route,
       icon: InvitationIcon,
       label: 'Undangan',
       performanceWorkspace: 'studio',
     },
     {
+      aliases: [`${base}/delivery`, `${base}/follow-up`, `${base}/share`],
       href: `${base}/guests` as Route,
       icon: GuestsIcon,
       label: 'Tamu',
       performanceWorkspace: 'guests',
     },
     {
-      aliases: [`${base}/follow-up`, `${base}/share`],
-      href: `${base}/delivery` as Route,
-      icon: ShareIcon,
-      label: 'Bagikan',
-      performanceWorkspace: 'delivery',
-    },
-    {
       aliases: [`${base}/guestbook`],
       href: `${base}/rsvp` as Route,
-      icon: HelpIcon,
-      label: 'Respons Tamu',
-      mobileLabel: 'Respons',
+      icon: ResponseIcon,
+      label: 'Respons',
       performanceWorkspace: 'responses',
     },
   ];
 }
 
-function isCurrentProjectRoute(pathname: string, item: ProjectNavigationItem, projectId: string) {
-  const projectRoot = `/dashboard/${projectId}`;
-
+function isCurrentProjectRoute(pathname: string, item: ProjectNavigationItem) {
   if (item.aliases?.some((alias) => pathname.startsWith(alias))) {
     return true;
   }
 
-  return item.href === projectRoot ? pathname === projectRoot : pathname.startsWith(item.href);
+  return pathname.startsWith(String(item.href));
 }
 
 function getProjectRouteLabel(pathname: string, projectId: string) {
   const projectRoot = `/dashboard/${projectId}`;
-  if (pathname === projectRoot) return 'Ringkasan';
+  if (pathname === projectRoot) return 'Mulai';
 
   const segment = pathname.slice(projectRoot.length + 1).split('/')[0] ?? '';
   const labels: Record<string, string> = {
-    billing: 'Pembayaran',
-    delivery: 'Bagikan',
-    'follow-up': 'Bagikan',
+    billing: 'Undangan',
+    delivery: 'Tamu & Bagikan',
+    'follow-up': 'Tamu & Bagikan',
     gallery: 'Galeri',
-    guestbook: 'Respons Tamu',
+    guestbook: 'Respons',
     guests: 'Tamu',
     invitation: 'Undangan',
-    preview: 'Preview undangan',
-    rsvp: 'Respons Tamu',
+    preview: 'Undangan',
+    rsvp: 'Respons',
     settings: 'Pengaturan',
-    share: 'Bagikan',
+    share: 'Tamu & Bagikan',
   };
 
   return labels[segment] ?? 'Workspace proyek';
@@ -116,7 +99,6 @@ function ProjectNavigationLink({
   pending: boolean;
 }) {
   const Icon = item.icon;
-  const visualLabel = mode === 'mobile' ? (item.mobileLabel ?? item.label) : item.label;
 
   return (
     <Link
@@ -124,16 +106,16 @@ function ProjectNavigationLink({
       aria-current={active ? 'page' : undefined}
       className={
         mode === 'desktop'
-          ? `focus-visible:outline-seraya-focus-ring group relative flex min-h-11 items-center gap-3 rounded-[var(--seraya-radius-sm)] px-3 text-sm font-medium transition-[background-color,color,opacity] duration-[var(--seraya-motion-default)] ease-[var(--seraya-ease-standard)] focus-visible:outline-3 focus-visible:outline-offset-2 ${
+          ? `focus-visible:outline-seraya-focus-ring group relative flex min-h-12 items-center gap-3 rounded-[var(--seraya-radius-md)] px-3.5 text-sm font-semibold transition-[background-color,color,opacity] duration-[var(--seraya-motion-default)] ease-[var(--seraya-ease-standard)] focus-visible:outline-3 focus-visible:outline-offset-2 ${
               active
-                ? 'bg-seraya-brand-softer text-seraya-action-primary'
+                ? 'bg-seraya-text-primary text-seraya-text-inverse'
                 : pending
                   ? 'bg-seraya-surface-subtle text-seraya-action-primary'
                   : 'text-seraya-text-secondary hover:bg-seraya-surface-subtle hover:text-seraya-text-primary'
             }`
-          : `focus-visible:outline-seraya-focus-ring relative flex min-h-[4rem] min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[var(--seraya-radius-sm)] px-1 text-[0.625rem] font-medium transition-[background-color,color,opacity] duration-[var(--seraya-motion-default)] focus-visible:outline-3 focus-visible:outline-offset-2 ${
+          : `focus-visible:outline-seraya-focus-ring relative flex min-h-[4rem] min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[var(--seraya-radius-md)] px-2 text-[0.6875rem] font-semibold transition-[background-color,color,opacity] duration-[var(--seraya-motion-default)] focus-visible:outline-3 focus-visible:outline-offset-2 ${
               active
-                ? 'bg-seraya-brand-softer text-seraya-action-primary'
+                ? 'bg-seraya-text-primary text-seraya-text-inverse'
                 : pending
                   ? 'bg-seraya-surface-subtle text-seraya-action-primary'
                   : 'text-seraya-text-muted'
@@ -164,35 +146,20 @@ function ProjectNavigationLink({
       }}
       prefetch
     >
-      {active && mode === 'desktop' ? (
-        <span
-          aria-hidden="true"
-          className="bg-seraya-action-primary absolute inset-y-2 left-0 w-0.5 rounded-full"
-        />
-      ) : null}
       <span aria-hidden="true" className="grid size-6 shrink-0 place-items-center">
         {pending ? (
           <span className="border-seraya-action-primary/30 border-t-seraya-action-primary size-4 animate-spin rounded-full border-2" />
         ) : (
           <Icon
-            className={mode === 'desktop' ? 'size-[1.1rem]' : 'size-[1.15rem]'}
+            className={mode === 'desktop' ? 'size-[1.15rem]' : 'size-[1.2rem]'}
             focusable="false"
-            strokeWidth={1.7}
+            strokeWidth={1.8}
           />
         )}
       </span>
-      {mode === 'mobile' ? (
-        <>
-          <span className="sr-only">{item.label}</span>
-          <span aria-hidden="true" className="max-w-full truncate">
-            {visualLabel}
-          </span>
-        </>
-      ) : (
-        <span>{visualLabel}</span>
-      )}
+      <span>{item.label}</span>
       {mode === 'desktop' && pending ? (
-        <span aria-hidden="true" className="text-seraya-text-muted ml-auto text-xs">
+        <span aria-hidden="true" className="ml-auto text-xs opacity-65">
           Membuka…
         </span>
       ) : null}
@@ -215,6 +182,7 @@ export function ProjectNavigation({
   const [pendingHref, setPendingHref] = useState<string | null>(null);
   const [routeAnnouncement, setRouteAnnouncement] = useState('');
   const currentRouteLabel = getProjectRouteLabel(pathname, projectId);
+  const projectHomeHref = `/dashboard/${projectId}` as Route;
   const settingsHref = `/dashboard/${projectId}/settings` as Route;
   const settingsActive = pathname.startsWith(String(settingsHref));
 
@@ -239,55 +207,67 @@ export function ProjectNavigation({
   return (
     <>
       <div
-        className="border-seraya-border-subtle bg-seraya-surface/92 sticky top-[calc(var(--seraya-topbar-height)+0.5rem)] z-30 mb-5 flex min-w-0 items-center justify-between gap-4 rounded-[var(--seraya-radius-lg)] border px-3.5 py-3 shadow-[var(--seraya-shadow-level-1)] backdrop-blur-xl lg:hidden"
+        className="border-seraya-border-subtle bg-seraya-surface/96 sticky top-[calc(var(--seraya-topbar-height)+0.5rem)] z-30 mb-5 flex min-w-0 items-center justify-between gap-3 rounded-[var(--seraya-radius-md)] border px-2.5 py-2.5 shadow-[var(--seraya-shadow-level-1)] backdrop-blur-xl lg:hidden"
         data-project-mobile-context
       >
-        <div className="min-w-0">
-          <p className="text-seraya-text-muted truncate text-xs font-medium">{coupleLabel}</p>
-          <p className="text-seraya-text-primary mt-0.5 truncate text-sm font-semibold">
-            {currentRouteLabel}
-          </p>
-        </div>
-        <div className="flex shrink-0 items-center gap-1.5">
-          <span className="bg-seraya-surface-subtle text-seraya-text-secondary border-seraya-border-subtle hidden items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.6875rem] font-medium min-[430px]:inline-flex">
+        <Link
+          aria-label="Kembali ke halaman mulai proyek"
+          className="focus-visible:outline-seraya-focus-ring flex min-w-0 flex-1 items-center gap-2.5 rounded-[var(--seraya-radius-sm)] px-1.5 py-1 focus-visible:outline-3 focus-visible:outline-offset-2"
+          href={projectHomeHref}
+        >
+          <span className="bg-seraya-brand-softer text-seraya-action-primary grid size-9 shrink-0 place-items-center rounded-[var(--seraya-radius-sm)]">
+            <HomeIcon aria-hidden="true" className="size-4" strokeWidth={1.8} />
+          </span>
+          <span className="min-w-0">
+            <span className="text-seraya-text-muted block truncate text-[0.6875rem] font-medium">
+              {coupleLabel}
+            </span>
+            <span className="text-seraya-text-primary mt-0.5 block truncate text-sm font-semibold">
+              {currentRouteLabel}
+            </span>
+          </span>
+        </Link>
+        <Link
+          aria-label="Buka pengaturan proyek"
+          className={`focus-visible:outline-seraya-focus-ring grid size-10 shrink-0 place-items-center rounded-[var(--seraya-radius-sm)] transition-colors duration-[var(--seraya-motion-default)] focus-visible:outline-3 focus-visible:outline-offset-2 ${
+            settingsActive
+              ? 'bg-seraya-brand-softer text-seraya-action-primary'
+              : 'text-seraya-text-secondary hover:bg-seraya-surface-subtle hover:text-seraya-text-primary'
+          }`}
+          href={settingsHref}
+        >
+          <SettingsIcon aria-hidden="true" className="size-[1.1rem]" strokeWidth={1.7} />
+        </Link>
+      </div>
+
+      <aside className="border-seraya-border-subtle hidden min-w-0 border-r pr-5 lg:sticky lg:top-[calc(var(--seraya-topbar-height)+2rem)] lg:flex lg:h-[calc(100svh-var(--seraya-topbar-height)-4rem)] lg:w-[var(--seraya-project-rail-width)] lg:flex-col">
+        <Link
+          className="focus-visible:outline-seraya-focus-ring group border-seraya-border-subtle block border-b pb-5 focus-visible:outline-3 focus-visible:outline-offset-3"
+          data-project-start-link
+          href={projectHomeHref}
+        >
+          <span className="text-seraya-text-muted flex items-center gap-2 text-xs font-medium">
+            <HomeIcon aria-hidden="true" className="size-3.5" strokeWidth={1.8} />
+            Mulai
+          </span>
+          <span className="text-seraya-text-primary mt-2 block text-[1rem] leading-6 font-semibold tracking-[-0.015em] group-hover:text-seraya-action-primary">
+            {coupleLabel}
+          </span>
+          <span className="text-seraya-text-muted mt-2 flex items-center gap-2 text-xs leading-5">
             <span aria-hidden="true" className="bg-seraya-status-success size-1.5 rounded-full" />
             {statusLabel}
           </span>
-          <Link
-            aria-label="Buka pengaturan proyek"
-            className={`focus-visible:outline-seraya-focus-ring grid size-10 place-items-center rounded-[var(--seraya-radius-sm)] transition-colors duration-[var(--seraya-motion-default)] focus-visible:outline-3 focus-visible:outline-offset-2 ${
-              settingsActive
-                ? 'bg-seraya-brand-softer text-seraya-action-primary'
-                : 'text-seraya-text-secondary hover:bg-seraya-surface-subtle hover:text-seraya-text-primary'
-            }`}
-            href={settingsHref}
-          >
-            <SettingsIcon aria-hidden="true" className="size-[1.1rem]" strokeWidth={1.7} />
-          </Link>
-        </div>
-      </div>
-
-      <aside className="border-seraya-border-subtle hidden min-w-0 border-r pr-6 lg:sticky lg:top-[calc(var(--seraya-topbar-height)+2rem)] lg:flex lg:h-[calc(100svh-var(--seraya-topbar-height)-4rem)] lg:w-[var(--seraya-project-rail-width)] lg:flex-col">
-        <div className="border-seraya-border-subtle border-b pb-5">
-          <p className="text-seraya-text-muted text-xs font-medium">Workspace undangan</p>
-          <p className="text-seraya-text-primary mt-2 text-[1.05rem] leading-6 font-semibold tracking-[-0.02em]">
-            {coupleLabel}
-          </p>
-          <p className="text-seraya-text-muted mt-2 flex items-center gap-2 text-xs leading-5">
-            <span aria-hidden="true" className="bg-seraya-status-success size-1.5 rounded-full" />
-            {statusLabel}
-          </p>
-        </div>
+        </Link>
 
         <nav
           aria-busy={Boolean(pendingHref)}
           aria-label="Navigasi workspace"
-          className="mt-5 space-y-1"
+          className="mt-5 space-y-1.5"
           data-project-navigation-pending={Boolean(pendingHref) || undefined}
         >
           {items.map((item) => (
             <ProjectNavigationLink
-              active={isCurrentProjectRoute(pathname, item, projectId)}
+              active={isCurrentProjectRoute(pathname, item)}
               currentPathname={pathname}
               item={item}
               key={item.label}
@@ -330,13 +310,13 @@ export function ProjectNavigation({
       <nav
         aria-busy={Boolean(pendingHref)}
         aria-label="Navigasi workspace mobile"
-        className="border-seraya-border-subtle bg-seraya-surface/96 pointer-events-auto fixed inset-x-0 bottom-0 isolate z-[100] flex min-h-[var(--seraya-mobile-nav-clearance)] items-stretch gap-1 border-t px-2 pt-1.5 pb-[max(0.35rem,env(safe-area-inset-bottom))] shadow-[0_-8px_24px_rgb(31_29_27_/_0.06)] backdrop-blur-xl lg:hidden"
+        className="border-seraya-border-subtle bg-seraya-surface/96 pointer-events-auto fixed inset-x-0 bottom-0 isolate z-[100] flex min-h-[var(--seraya-mobile-nav-clearance)] items-stretch gap-1.5 border-t px-2 pt-1.5 pb-[max(0.35rem,env(safe-area-inset-bottom))] shadow-[0_-8px_24px_rgb(31_29_27_/_0.06)] backdrop-blur-xl lg:hidden"
         data-project-mobile-navigation
         data-project-navigation-pending={Boolean(pendingHref) || undefined}
       >
         {items.map((item) => (
           <ProjectNavigationLink
-            active={isCurrentProjectRoute(pathname, item, projectId)}
+            active={isCurrentProjectRoute(pathname, item)}
             currentPathname={pathname}
             item={item}
             key={item.label}

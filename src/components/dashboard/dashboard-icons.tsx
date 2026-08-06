@@ -29,6 +29,16 @@ export function OverviewIcon(props: IconProps) {
   );
 }
 
+export function HomeIcon(props: IconProps) {
+  return (
+    <IconFrame {...props}>
+      <path d="M4 11.5 12 5l8 6.5" />
+      <path d="M6.5 10.5V20h11v-9.5" />
+      <path d="M10 20v-5h4v5" />
+    </IconFrame>
+  );
+}
+
 export function InvitationIcon(props: IconProps) {
   return (
     <IconFrame {...props}>
@@ -44,6 +54,15 @@ export function GuestsIcon(props: IconProps) {
       <circle cx="9" cy="8" r="3" />
       <path d="M3.5 20a5.5 5.5 0 0 1 11 0" />
       <path d="M16 5.5a2.5 2.5 0 0 1 0 5M18 20a4.5 4.5 0 0 0-2.5-4" />
+    </IconFrame>
+  );
+}
+
+export function ResponseIcon(props: IconProps) {
+  return (
+    <IconFrame {...props}>
+      <path d="M4 5.5h16v11H9l-5 3.5Z" />
+      <path d="m8.5 11 2.2 2.2 4.8-5" />
     </IconFrame>
   );
 }

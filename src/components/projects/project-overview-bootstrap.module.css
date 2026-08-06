@@ -1,0 +1,392 @@
+.workspace {
+  display: grid;
+  min-width: 0;
+  gap: clamp(1.25rem, 2.5vw, 2rem);
+}
+
+.header {
+  display: flex;
+  min-width: 0;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 0.4rem 0.15rem 0.25rem;
+}
+
+.headerCopy {
+  min-width: 0;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--seraya-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.title {
+  max-width: 48rem;
+  margin: 0.55rem 0 0;
+  color: var(--seraya-text-primary);
+  font-size: clamp(2rem, 4vw, 3.6rem);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+}
+
+.description {
+  max-width: 42rem;
+  margin: 0.85rem 0 0;
+  color: var(--seraya-text-secondary);
+  font-size: 0.9375rem;
+  line-height: 1.65;
+}
+
+.status {
+  display: inline-flex;
+  min-height: 2.5rem;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid var(--seraya-border-subtle);
+  border-radius: 999px;
+  background: var(--seraya-bg-surface);
+  color: var(--seraya-text-secondary);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.status > span {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--seraya-action-primary);
+}
+
+.status[data-status-tone='success'] > span {
+  background: var(--seraya-status-success);
+}
+
+.entryGrid {
+  display: grid;
+  grid-template-areas:
+    'invitation guests'
+    'invitation responses';
+  grid-template-columns: minmax(0, 1.22fr) minmax(20rem, 0.78fr);
+  gap: 1rem;
+}
+
+.entry {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: clamp(1.15rem, 2vw, 1.6rem);
+  text-decoration: none;
+  transition:
+    transform var(--seraya-motion-default) var(--seraya-ease-standard),
+    box-shadow var(--seraya-motion-default) var(--seraya-ease-standard);
+}
+
+.entry:focus-visible {
+  outline: 3px solid var(--seraya-focus-ring);
+  outline-offset: 4px;
+}
+
+.entry:hover {
+  transform: translateY(-2px);
+}
+
+.invitationEntry {
+  grid-area: invitation;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(12rem, 0.62fr);
+  min-height: 31rem;
+  align-items: stretch;
+  background: var(--seraya-text-primary);
+  color: var(--seraya-text-inverse);
+  box-shadow: 0 20px 48px rgb(31 29 27 / 0.14);
+}
+
+.invitationCopy,
+.secondaryCopy {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.invitationCopy {
+  padding: clamp(1.5rem, 3vw, 2.7rem);
+}
+
+.entryKicker {
+  display: inline-flex;
+  min-height: 2rem;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.invitationEntry .entryKicker {
+  color: rgb(255 255 255 / 0.66);
+}
+
+.entryTitle {
+  margin: auto 0 0;
+  font-size: clamp(2rem, 4vw, 3.7rem);
+  font-weight: 700;
+  line-height: 0.98;
+  letter-spacing: -0.05em;
+}
+
+.entryDescription {
+  max-width: 31rem;
+  margin: 0.9rem 0 0;
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+.invitationEntry .entryDescription {
+  color: rgb(255 255 255 / 0.7);
+}
+
+.entryMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 1rem;
+  margin-top: 1.35rem;
+  color: rgb(255 255 255 / 0.62);
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.entryAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 1.4rem;
+  font-size: 0.8125rem;
+  font-weight: 800;
+}
+
+.entryAction span {
+  transition: transform var(--seraya-motion-default) var(--seraya-ease-standard);
+}
+
+.entry:hover .entryAction span {
+  transform: translateX(0.2rem);
+}
+
+.thumbnailStage {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  place-items: center;
+  padding: 1.5rem 1.35rem;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 70% 20%, rgb(255 255 255 / 0.16), transparent 36%),
+    linear-gradient(160deg, rgb(255 255 255 / 0.08), transparent 58%);
+}
+
+.thumbnailStage::before {
+  position: absolute;
+  width: 18rem;
+  height: 18rem;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: 999px;
+  content: '';
+}
+
+.thumbnail {
+  width: min(100%, 13.5rem);
+  aspect-ratio: 430 / 932;
+  border-radius: 0.9rem;
+  box-shadow: 0 28px 50px rgb(0 0 0 / 0.28);
+  transform: rotate(3deg);
+}
+
+.guestsEntry,
+.responsesEntry {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(9rem, 1.2fr);
+  min-height: 15rem;
+  align-items: center;
+  border: 1px solid transparent;
+}
+
+.guestsEntry {
+  grid-area: guests;
+  background: var(--seraya-bg-brand-soft);
+  color: var(--seraya-text-primary);
+}
+
+.responsesEntry {
+  grid-area: responses;
+  background: var(--seraya-bg-sage-soft);
+  color: var(--seraya-text-primary);
+}
+
+.secondaryCopy {
+  align-self: stretch;
+  justify-content: center;
+  padding: 1.35rem 0 1.35rem 1.45rem;
+}
+
+.secondaryCopy .entryKicker {
+  color: var(--seraya-text-muted);
+}
+
+.secondaryTitle {
+  margin: 0.75rem 0 0;
+  font-size: clamp(1.45rem, 2.4vw, 2.15rem);
+  font-weight: 700;
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+}
+
+.secondaryDescription {
+  margin: 0.65rem 0 0;
+  color: var(--seraya-text-secondary);
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.secondaryCopy .entryAction {
+  color: var(--seraya-action-primary);
+}
+
+.operationalVisual {
+  width: 100%;
+  min-width: 0;
+  align-self: center;
+}
+
+.summaryLine {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.95rem 0.15rem 0;
+  border-top: 1px solid var(--seraya-border-subtle);
+}
+
+.summaryFacts {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.2rem;
+  color: var(--seraya-text-muted);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.summaryFacts strong {
+  color: var(--seraya-text-primary);
+  font-weight: 750;
+}
+
+.deliveryLink {
+  display: inline-flex;
+  min-height: 2.5rem;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.45rem;
+  border-radius: var(--seraya-radius-sm);
+  color: var(--seraya-action-primary);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.deliveryLink:focus-visible {
+  outline: 3px solid var(--seraya-focus-ring);
+  outline-offset: 3px;
+}
+
+@media (max-width: 1180px) {
+  .entryGrid {
+    grid-template-areas:
+      'invitation invitation'
+      'guests responses';
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .invitationEntry {
+    min-height: 27rem;
+  }
+}
+
+@media (max-width: 760px) {
+  .header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .entryGrid {
+    grid-template-areas:
+      'invitation'
+      'guests'
+      'responses';
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .invitationEntry {
+    grid-template-columns: minmax(0, 1fr) minmax(8.5rem, 0.46fr);
+    min-height: 24rem;
+  }
+
+  .guestsEntry,
+  .responsesEntry {
+    min-height: 13.5rem;
+  }
+
+  .summaryLine {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 520px) {
+  .title {
+    font-size: 2.15rem;
+  }
+
+  .invitationEntry {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: auto;
+  }
+
+  .invitationCopy {
+    min-height: 19rem;
+  }
+
+  .thumbnailStage {
+    min-height: 18rem;
+  }
+
+  .thumbnail {
+    width: 9.5rem;
+  }
+
+  .guestsEntry,
+  .responsesEntry {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .secondaryCopy {
+    padding: 1.35rem 1.35rem 0;
+  }
+
+  .operationalVisual {
+    max-height: 11rem;
+  }
+}
