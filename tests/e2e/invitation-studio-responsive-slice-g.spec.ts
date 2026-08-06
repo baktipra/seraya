@@ -142,7 +142,7 @@ test.describe('Invitation Studio Slice G responsive polish', () => {
     await openMode(page, 'design');
     await page.locator("input[name='templateKey']").nth(1).check();
     await expect(page.locator('[data-invitation-studio-save-action]')).toBeEnabled();
-    await expect(page.locator('[data-invitation-studio-save-state="unsaved"]')).toBeVisible();
+    await expect(page.locator('[data-invitation-studio-save-state="dirty"]')).toBeVisible();
 
     for (const viewport of [
       { height: 900, width: 1024 },
