@@ -5,6 +5,12 @@ import { notFound } from 'next/navigation';
 import { InvitationEditor } from '@/components/projects/invitation-editor';
 import { InvitationStudioDesignMode } from '@/components/projects/invitation-studio-design-mode';
 import { InvitationStudioMediaMode } from '@/components/projects/invitation-studio-media-mode';
+import { InvitationStudioPreviewMode } from '@/components/projects/invitation-studio-preview-mode';
+import {
+  parseInvitationStudioPreviewSurface,
+  parseInvitationStudioPreviewVersion,
+  parseInvitationStudioPreviewViewport,
+} from '@/components/projects/invitation-studio-preview.types';
 import { InvitationStudioProvider } from '@/components/projects/invitation-studio-provider';
 import {
   InvitationStudioShell,
@@ -29,17 +35,27 @@ import { getInvitationAudioSummaryForVerifiedProject } from '@/modules/media/inv
 import type { InvitationAudioSummary } from '@/modules/media/invitation-audio.types';
 import type { InvitationGalleryImage } from '@/modules/media/media.types';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
+import { getCurrentPublishedInvitationForVerifiedProject } from '@/modules/publications/publication.repository';
+import type { PublishedInvitationSnapshot } from '@/modules/publications/publication.types';
 import { getInvitationReadinessForVerifiedProject } from '@/modules/readiness';
+
+type InvitationEditorSearchParams = {
+  mode?: string | string[];
+  surface?: string | string[];
+  version?: string | string[];
+  viewport?: string | string[];
+};
 
 type InvitationEditorPageProps = {
   params: Promise<{ projectId: string }>;
-  searchParams?: Promise<{ mode?: string | string[] }>;
+  searchParams?: Promise<InvitationEditorSearchParams>;
 };
 
 type InvitationEditorScreen = {
   audio: InvitationAudioSummary | null;
   editor: OwnedInvitationEditor;
   galleryImages: InvitationGalleryImage[];
+  publishedSnapshot: PublishedInvitationSnapshot | null;
   readiness: Awaited<ReturnType<typeof getInvitationReadinessForVerifiedProject>>;
 };
 
@@ -316,15 +332,19 @@ async function getInvitationEditorScreenOrNotFound(
         const readiness = await getInvitationReadinessForVerifiedProject(project, {
           draft: editor.draft,
         });
-        const audio = await getInvitationAudioSummaryForVerifiedProject({
-          configuration: editor.draft.content.audio,
-          project,
-        });
+        const [audio, publishedSnapshot] = await Promise.all([
+          getInvitationAudioSummaryForVerifiedProject({
+            configuration: editor.draft.content.audio,
+            project,
+          }),
+          getCurrentPublishedInvitationForVerifiedProject(project),
+        ]);
 
         return {
           audio,
           editor,
           galleryImages: getDeferredGalleryImages(editor),
+          publishedSnapshot,
           readiness,
         };
       } catch (error) {
@@ -346,9 +366,15 @@ export default async function InvitationEditorPage({
   searchParams,
 }: InvitationEditorPageProps) {
   const { projectId } = await params;
-  const query = await (searchParams ?? Promise.resolve<{ mode?: string | string[] }>({}));
+  const query = await (searchParams ?? Promise.resolve<InvitationEditorSearchParams>({}));
   const screen = await getInvitationEditorScreenOrNotFound(projectId);
   const studioStatus = getInvitationStudioStatus(screen.readiness);
+  const initialPreviewVersion = parseInvitationStudioPreviewVersion(
+    query.version,
+    Boolean(screen.publishedSnapshot),
+  );
+  const initialPreviewSurface = parseInvitationStudioPreviewSurface(query.surface);
+  const initialPreviewViewport = parseInvitationStudioPreviewViewport(query.viewport);
 
   return (
     <WorkspacePage kind="studio" width="studio">
@@ -376,7 +402,20 @@ export default async function InvitationEditorPage({
               projectId={screen.editor.project.id}
             />
           }
-          previewHref={`/dashboard/${screen.editor.project.id}/preview` as Route}
+          preview={
+            <InvitationStudioPreviewMode
+              initialSurface={initialPreviewSurface}
+              initialVersion={initialPreviewVersion}
+              initialViewport={initialPreviewViewport}
+              project={{
+                event_date_primary: screen.editor.project.event_date_primary,
+                id: screen.editor.project.id,
+              }}
+              publicationState={screen.readiness.invitation.state}
+              publishedSnapshot={screen.publishedSnapshot}
+              savedDraft={screen.editor.draft}
+            />
+          }
           statusLabel={studioStatus.label}
           statusTone={studioStatus.tone}
         >

@@ -244,8 +244,7 @@
   overflow: hidden;
   padding: clamp(0.75rem, 2.4vw, 1.5rem);
   background:
-    linear-gradient(135deg, rgb(250 246 241 / 0.92), rgb(239 225 220 / 0.72)),
-    var(--seraya-canvas);
+    linear-gradient(135deg, rgb(250 246 241 / 0.92), rgb(239 225 220 / 0.72)), var(--seraya-canvas);
 }
 
 .deviceShell {

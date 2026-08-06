@@ -10,7 +10,8 @@ import {
   type PersonalInvitationPresentationSlotsV1,
 } from '@/modules/invitation-templates';
 import { createInvitationEditorPreviewViewModel } from '@/modules/invitations/invitation-editor-local-state';
-import type { InvitationDraft, InvitationDraftContent } from '@/modules/invitations/invitation-draft.types';
+import type { InvitationDraftContent } from '@/modules/invitations/invitation-draft.schema';
+import type { InvitationDraft } from '@/modules/invitations/invitation-draft.types';
 import { createInvitationAudioPlaybackCapability } from '@/modules/media/invitation-audio-playback.types';
 import type { InvitationGalleryImage } from '@/modules/media/media.types';
 import type { PublishedInvitationSnapshot } from '@/modules/publications/publication.types';
