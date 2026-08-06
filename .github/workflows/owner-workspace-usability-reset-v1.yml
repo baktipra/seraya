@@ -1,0 +1,114 @@
+name: Owner Workspace Usability Reset V1 validation
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'src/components/dashboard/dashboard-shell.tsx'
+      - 'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx'
+      - 'src/components/projects/invitation-task-workspace.tsx'
+      - 'src/components/projects/invitation-task-workspace.types.ts'
+      - 'src/components/projects/invitation-task-workspace.module.css'
+      - 'tests/unit/owner-workspace-usability-reset-v1.test.ts'
+      - 'tests/e2e/owner-workspace-usability-reset-v1.spec.ts'
+      - 'tests/e2e/fixture-app/app/owner-workspace-usability-reset/**'
+      - 'playwright.owner-workspace-usability-reset.config.ts'
+      - 'docs/OWNER_WORKSPACE_USABILITY_RESET_V1.md'
+      - 'vercel.json'
+      - '.github/workflows/owner-workspace-usability-reset-v1.yml'
+  push:
+    branches:
+      - feature/owner-workspace-usability-reset-v1
+    paths:
+      - 'src/components/dashboard/dashboard-shell.tsx'
+      - 'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx'
+      - 'src/components/projects/invitation-task-workspace.tsx'
+      - 'src/components/projects/invitation-task-workspace.types.ts'
+      - 'src/components/projects/invitation-task-workspace.module.css'
+      - 'tests/unit/owner-workspace-usability-reset-v1.test.ts'
+      - 'tests/e2e/owner-workspace-usability-reset-v1.spec.ts'
+      - 'tests/e2e/fixture-app/app/owner-workspace-usability-reset/**'
+      - 'playwright.owner-workspace-usability-reset.config.ts'
+      - 'docs/OWNER_WORKSPACE_USABILITY_RESET_V1.md'
+      - 'vercel.json'
+      - '.github/workflows/owner-workspace-usability-reset-v1.yml'
+
+concurrency:
+  group: owner-workspace-usability-reset-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Check focused formatting
+        run: |
+          npx prettier --check \
+            src/components/dashboard/dashboard-shell.tsx \
+            'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
+            src/components/projects/invitation-task-workspace.tsx \
+            src/components/projects/invitation-task-workspace.types.ts \
+            src/components/projects/invitation-task-workspace.module.css \
+            tests/unit/owner-workspace-usability-reset-v1.test.ts \
+            tests/e2e/owner-workspace-usability-reset-v1.spec.ts \
+            tests/e2e/fixture-app/app/owner-workspace-usability-reset/page.tsx \
+            tests/e2e/fixture-app/app/owner-workspace-usability-reset/fixture-client.tsx \
+            playwright.owner-workspace-usability-reset.config.ts \
+            docs/OWNER_WORKSPACE_USABILITY_RESET_V1.md \
+            vercel.json \
+            .github/workflows/owner-workspace-usability-reset-v1.yml
+      - name: Lint focused source
+        run: |
+          npx eslint \
+            src/components/dashboard/dashboard-shell.tsx \
+            'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
+            src/components/projects/invitation-task-workspace.tsx \
+            src/components/projects/invitation-task-workspace.types.ts \
+            tests/unit/owner-workspace-usability-reset-v1.test.ts \
+            tests/e2e/owner-workspace-usability-reset-v1.spec.ts \
+            tests/e2e/fixture-app/app/owner-workspace-usability-reset/page.tsx \
+            tests/e2e/fixture-app/app/owner-workspace-usability-reset/fixture-client.tsx \
+            playwright.owner-workspace-usability-reset.config.ts
+      - run: npm run typecheck
+      - name: Run usability reset and Invitation Studio A-G compatibility contracts
+        run: |
+          npx vitest run \
+            tests/unit/owner-workspace-usability-reset-v1.test.ts \
+            tests/unit/invitation-studio-structural-foundation-slice-a.test.tsx \
+            tests/unit/invitation-studio-unified-state-slice-b.test.ts \
+            tests/unit/invitation-studio-design-mode-slice-c.test.ts \
+            tests/unit/invitation-studio-media-mode-slice-d.test.ts \
+            tests/unit/invitation-studio-preview-mode-slice-e.test.ts \
+            tests/unit/invitation-studio-publish-mode-slice-f.test.ts \
+            tests/unit/invitation-studio-responsive-slice-g.test.tsx \
+            src/modules/publications/__tests__/published-invitation.schema.test.ts \
+            src/modules/publications/__tests__/publication.service.test.ts \
+            src/modules/payments/__tests__/payment-publish-policy.test.ts \
+            tests/server/dashboard-invitation-editor-route.test.tsx
+      - run: npm run build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run desktop tablet and mobile usability reset smoke
+        run: npx playwright test --config=playwright.owner-workspace-usability-reset.config.ts
+      - name: Run accepted Slice G responsive compatibility smoke
+        run: npx playwright test --config=playwright.invitation-studio-slice-g.config.ts
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: owner-workspace-usability-reset-v1-report
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+          retention-days: 7
