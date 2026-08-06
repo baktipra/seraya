@@ -47,6 +47,17 @@ describe('Seraya Owner Workspace Usability Reset V1', () => {
     expect(source).toContain('data-invitation-single-task-form');
   });
 
+  it('keeps gallery visibility available inside the concrete media task', () => {
+    const source = readFileSync(
+      'src/components/projects/invitation-studio-media-mode.tsx',
+      'utf8',
+    );
+
+    expect(source).toContain('data-media-gallery-visibility-control');
+    expect(source).toContain("type: 'gallery-visibility'");
+    expect(source).toContain('role="switch"');
+  });
+
   it('removes the global centered shell cap from the owner dashboard', () => {
     const source = readFileSync('src/components/dashboard/dashboard-shell.tsx', 'utf8');
 
