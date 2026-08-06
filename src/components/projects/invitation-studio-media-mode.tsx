@@ -114,7 +114,10 @@ export function InvitationStudioMediaMode({
         data-media-gallery-visibility-control
       >
         <div className="min-w-0">
-          <h3 className="text-seraya-text-primary text-base font-semibold" id="gallery-visibility-title">
+          <h3
+            className="text-seraya-text-primary text-base font-semibold"
+            id="gallery-visibility-title"
+          >
             Tampilkan galeri pada undangan
           </h3>
           <p className="text-seraya-text-muted mt-1 max-w-2xl text-sm leading-6">
@@ -170,6 +173,7 @@ export function InvitationStudioMediaMode({
         </button>
         <button
           aria-controls="invitation-studio-media-audio-panel"
+          aria-label={`Audio · ${summary.audioLabel}`}
           aria-selected={activeTab === 'audio'}
           className={styles.tab}
           data-selected={activeTab === 'audio' || undefined}
