@@ -167,7 +167,8 @@ export function InvitationStudioShell({
       className={styles.studio}
       data-invitation-studio
       data-invitation-studio-active-mode={activeMode}
-      data-invitation-studio-slice="unified-state-command-b"
+      data-invitation-studio-slice="structural-foundation-a"
+      data-invitation-studio-state-authority="unified-state-command-b"
     >
       <header className={styles.header} data-invitation-studio-header>
         <div className={styles.headerIdentity}>
