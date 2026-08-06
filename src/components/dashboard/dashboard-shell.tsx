@@ -42,6 +42,7 @@ export function DashboardShell({
       className="bg-seraya-canvas min-h-screen w-full font-sans"
       data-dashboard-full-screen
       data-dashboard-shell
+      data-owner-workspace-navigation="three-intent"
       data-owner-workspace-typography="sans"
     >
       <header
