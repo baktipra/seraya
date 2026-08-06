@@ -1,0 +1,60 @@
+name: Apply Invitation Studio Slice C
+
+on:
+  push:
+    branches:
+      - feature/invitation-studio-slice-c-design-mode
+    paths:
+      - 'tools/apply-invitation-studio-slice-c.py'
+      - '.github/workflows/invitation-studio-slice-c-bootstrap.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/invitation-studio-slice-c-design-mode
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Apply Slice C refactor
+        run: python tools/apply-invitation-studio-slice-c.py
+      - name: Remove one-time refactor script
+        run: rm tools/apply-invitation-studio-slice-c.py
+      - name: Format touched files
+        run: |
+          npx prettier --write \
+            'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
+            src/components/projects/invitation-editor.tsx \
+            src/components/projects/invitation-editor-workspace.tsx \
+            src/components/projects/invitation-studio-design-mode.tsx \
+            src/components/projects/invitation-studio-design-mode.module.css
+      - name: Lint focused source
+        run: |
+          npx eslint \
+            'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
+            src/components/projects/invitation-editor.tsx \
+            src/components/projects/invitation-editor-workspace.tsx \
+            src/components/projects/invitation-studio-design-mode.tsx
+      - run: npm run typecheck
+      - name: Run prior Slice contracts
+        run: |
+          npx vitest run \
+            tests/unit/invitation-studio-structural-foundation-slice-a.test.tsx \
+            tests/unit/invitation-studio-unified-state-slice-b.test.ts
+      - run: npm run build
+      - name: Commit Slice C source implementation
+        run: |
+          git config user.name "seraya-release-bot"
+          git config user.email "88146860+baktipra@users.noreply.github.com"
+          git add -A
+          git diff --cached --stat
+          git commit -m "SERAYA Slice C: activate canonical Design Mode"
+          git push origin HEAD:feature/invitation-studio-slice-c-design-mode
