@@ -31,13 +31,13 @@ test.describe('Invitation Studio Slice F Publish Mode', () => {
     await page.getByRole('tab', { name: /^Terbitkan/ }).click();
     await expect(publishMode).toHaveAttribute('data-publish-decision', 'save-local');
     await expect(page.locator('[data-publish-header-save-handoff]')).toBeVisible();
-    await expect(
-      publishMode.locator('[aria-label="Kontrol penerbitan undangan"]'),
-    ).toHaveCount(0);
+    await expect(publishMode.locator('[aria-label="Kontrol penerbitan undangan"]')).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
   });
 
-  test('routes blocker, payment, and first publish through one decision surface', async ({ page }) => {
+  test('routes blocker, payment, and first publish through one decision surface', async ({
+    page,
+  }) => {
     await page.goto('/invitation-studio-slice-f?mode=publish&state=draft_incomplete');
 
     let publishMode = page.locator(publishModeSelector);
@@ -67,7 +67,9 @@ test.describe('Invitation Studio Slice F Publish Mode', () => {
     await expectNoHorizontalOverflow(page);
   });
 
-  test('keeps republish link truth and exposes the refreshed published revision', async ({ page }) => {
+  test('keeps republish link truth and exposes the refreshed published revision', async ({
+    page,
+  }) => {
     await page.goto(
       '/invitation-studio-slice-f?mode=publish&state=published_with_unpublished_changes&revision=3',
     );

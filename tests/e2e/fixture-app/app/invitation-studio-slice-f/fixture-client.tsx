@@ -80,7 +80,8 @@ export function InvitationStudioSliceFFixture() {
   const searchParams = useSearchParams();
   const readinessState = parseReadinessState(searchParams.get('state'));
   const revisionCandidate = Number(searchParams.get('revision') ?? '3');
-  const revision = Number.isInteger(revisionCandidate) && revisionCandidate > 0 ? revisionCandidate : 3;
+  const revision =
+    Number.isInteger(revisionCandidate) && revisionCandidate > 0 ? revisionCandidate : 3;
   const hasPublishedSnapshot =
     readinessState === 'published' || readinessState === 'published_with_unpublished_changes';
   const savedDraft = useMemo<InvitationDraft>(() => {
