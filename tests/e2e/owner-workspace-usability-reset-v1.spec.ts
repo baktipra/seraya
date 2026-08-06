@@ -5,9 +5,14 @@ test.describe('Seraya Owner Workspace Usability Reset V1', () => {
     await page.goto('/owner-workspace-usability-reset');
   });
 
-  test('opens as a full-width task launcher with one save authority', async ({ page }) => {
+  test('opens the real dashboard shell as a full-width task launcher with one save authority', async ({
+    page,
+  }) => {
+    const shell = page.locator('[data-dashboard-full-screen]');
     const workspace = page.locator('[data-invitation-task-workspace]');
 
+    await expect(shell).toBeVisible();
+    await expect(page.locator('[data-dashboard-topbar]')).toBeVisible();
     await expect(workspace).toHaveAttribute('data-invitation-task-workspace-active', 'launcher');
     await expect(page.locator('[data-workspace-task]')).toHaveCount(11);
     await expect(page.locator('[data-invitation-task-save-action]')).toHaveCount(1);
@@ -15,16 +20,23 @@ test.describe('Seraya Owner Workspace Usability Reset V1', () => {
     await expect(page.getByText('Tampilan & media', { exact: true })).toBeVisible();
     await expect(page.getByText('Periksa & terbitkan', { exact: true })).toBeVisible();
 
-    const dimensions = await workspace.evaluate((node) => {
-      const rect = node.getBoundingClientRect();
+    const dimensions = await page.evaluate(() => {
+      const shellNode = document.querySelector<HTMLElement>('[data-dashboard-full-screen]');
+      const mainNode = document.querySelector<HTMLElement>('[data-dashboard-main]');
+      const workspaceNode = document.querySelector<HTMLElement>('[data-invitation-task-workspace]');
+
       return {
         documentWidth: document.documentElement.scrollWidth,
+        mainWidth: mainNode?.getBoundingClientRect().width ?? 0,
+        shellWidth: shellNode?.getBoundingClientRect().width ?? 0,
         viewportWidth: document.documentElement.clientWidth,
-        workspaceWidth: rect.width,
+        workspaceWidth: workspaceNode?.getBoundingClientRect().width ?? 0,
       };
     });
 
     expect(dimensions.documentWidth).toBeLessThanOrEqual(dimensions.viewportWidth + 1);
+    expect(dimensions.shellWidth).toBeGreaterThanOrEqual(dimensions.viewportWidth - 1);
+    expect(dimensions.mainWidth).toBeGreaterThan(dimensions.viewportWidth * 0.96);
     expect(dimensions.workspaceWidth).toBeGreaterThan(dimensions.viewportWidth * 0.88);
   });
 
