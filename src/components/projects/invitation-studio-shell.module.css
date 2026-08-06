@@ -1,209 +1,372 @@
 .studio {
-  --studio-section-rail: 10rem;
-  --studio-preview: 18rem;
-  --studio-sticky-top: 5rem;
-
   width: 100%;
   min-width: 0;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  border: 1px solid var(--seraya-border-default);
+  border-radius: var(--seraya-radius-lg);
+  background: var(--seraya-surface);
+  box-shadow: var(--seraya-shadow-soft);
 }
 
-.studio :global([data-dashboard-width='wide']) {
-  width: 100%;
+.header {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border-bottom: 1px solid var(--seraya-border-default);
+  background: color-mix(in srgb, var(--seraya-surface) 92%, var(--seraya-brand-soft));
+  border-radius: var(--seraya-radius-lg) var(--seraya-radius-lg) 0 0;
+}
+
+.headerIdentity {
   min-width: 0;
 }
 
-.studio :global(section[aria-labelledby='invitation-editor-title']) {
-  width: 100%;
-  min-width: 0;
-  overflow: visible;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
+.eyebrow {
+  margin: 0;
+  color: var(--seraya-text-muted);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
-.studio :global(#invitation-editor-title) {
-  max-width: 44rem;
-  font-size: var(--seraya-type-page-title);
-  line-height: 0.98;
+.title {
+  margin: 0.4rem 0 0;
+  color: var(--seraya-text-primary);
+  font-family: var(--font-editorial);
+  font-size: clamp(1.8rem, 4vw, 2.7rem);
+  font-weight: 500;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
 }
 
-.studio :global([data-invitation-editor-desktop-navigation]) {
+.modeContext {
+  margin: 0.55rem 0 0;
+  color: var(--seraya-text-secondary);
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+}
+
+.headerActions {
   min-width: 0;
-  overflow-y: auto;
-  border-color: var(--seraya-border-default);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.status {
+  min-height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid var(--seraya-border-default);
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  color: var(--seraya-text-secondary);
+  background: var(--seraya-canvas);
+  font-size: 0.75rem;
+  font-weight: 650;
+  line-height: 1rem;
+}
+
+.statusDot,
+.saveDot {
+  width: 0.45rem;
+  height: 0.45rem;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: var(--seraya-text-muted);
+}
+
+.status[data-invitation-studio-status-tone='brand'] .statusDot {
+  background: var(--seraya-action-primary);
+}
+
+.status[data-invitation-studio-status-tone='success'] .statusDot {
+  background: var(--seraya-status-success);
+}
+
+.status[data-invitation-studio-status-tone='warning'] .statusDot {
+  background: var(--seraya-status-warning, var(--seraya-action-primary));
+}
+
+.saveAuthority {
+  min-width: min(100%, 20rem);
+  display: flex;
+  flex: 1 1 20rem;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.625rem;
+}
+
+.saveCopy {
+  min-width: 0;
+  display: grid;
+  justify-items: end;
+  gap: 0.15rem;
+  text-align: right;
+}
+
+.saveLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--seraya-text-primary);
+  font-size: 0.8125rem;
+  font-weight: 750;
+  line-height: 1.1rem;
+}
+
+.saveLabel[data-invitation-studio-save-tone='success'] .saveDot {
+  background: var(--seraya-status-success);
+}
+
+.saveLabel[data-invitation-studio-save-tone='warning'] .saveDot {
+  background: var(--seraya-status-warning, var(--seraya-action-primary));
+}
+
+.saveLabel[data-invitation-studio-save-tone='error'] {
+  color: var(--seraya-status-error);
+}
+
+.saveLabel[data-invitation-studio-save-tone='error'] .saveDot {
+  background: var(--seraya-status-error);
+}
+
+.saveDescription {
+  max-width: 22rem;
+  color: var(--seraya-text-muted);
+  font-size: 0.6875rem;
+  line-height: 1rem;
+}
+
+.saveButton {
+  min-height: 2.75rem;
+  flex: 0 0 auto;
+  border: 1px solid var(--seraya-action-primary);
+  border-radius: var(--seraya-radius-sm);
+  padding: 0.55rem 1rem;
+  color: var(--seraya-text-inverse);
+  background: var(--seraya-action-primary);
+  font-size: 0.8125rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition:
+    border-color var(--seraya-motion-default) var(--seraya-ease-standard),
+    background-color var(--seraya-motion-default) var(--seraya-ease-standard),
+    opacity var(--seraya-motion-default) var(--seraya-ease-standard);
+}
+
+.saveButton:hover:not(:disabled) {
+  border-color: var(--seraya-action-primary-hover);
+  background: var(--seraya-action-primary-hover);
+}
+
+.saveButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.previewLink,
+.placeholderAction {
+  min-height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--seraya-border-default);
+  border-radius: var(--seraya-radius-sm);
+  padding: 0.5rem 0.875rem;
+  color: var(--seraya-action-primary);
+  background: var(--seraya-surface);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+    border-color var(--seraya-motion-default) var(--seraya-ease-standard),
+    background-color var(--seraya-motion-default) var(--seraya-ease-standard);
+}
+
+.previewLink:hover,
+.placeholderAction:hover {
+  border-color: var(--seraya-action-primary);
+  background: var(--seraya-brand-soft);
+}
+
+.previewLink:focus-visible,
+.placeholderAction:focus-visible,
+.saveButton:focus-visible,
+.tab:focus-visible {
+  outline: 3px solid var(--seraya-focus-ring);
+  outline-offset: 2px;
+}
+
+.modeNavigation {
+  min-width: 0;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--seraya-border-default);
+  background: var(--seraya-canvas);
   scrollbar-width: thin;
 }
 
-.studio :global([data-invitation-editor-desktop-navigation] button) {
-  border-left: 2px solid transparent;
+.tabList {
+  width: max-content;
+  min-width: 100%;
+  display: flex;
+  align-items: stretch;
+  gap: 0.25rem;
+  padding: 0.5rem;
 }
 
-.studio :global([data-invitation-editor-desktop-navigation] button[aria-current='step']) {
-  border-left-color: var(--seraya-action-primary);
-}
-
-/* The editor form is the real middle pane. It remains a form element and is
-   never converted into anonymous grid children. */
-.studio :global([data-invitation-editor-desktop-navigation] + form) {
-  width: 100%;
-  min-width: 0;
-  margin: 0;
-}
-
-.studio :global([data-invitation-editor-panel]) {
-  width: 100%;
-  min-width: 0;
-}
-
-.studio :global([data-invitation-editor-panel] > section),
-.studio :global([data-invitation-editor-panel='style'] > fieldset) {
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-.studio :global([data-invitation-editor-panel] h2),
-.studio :global([data-invitation-editor-panel='style'] legend) {
-  font-family: var(--font-editorial);
-  font-size: clamp(2rem, 3vw, 2.5rem);
-  font-weight: 500;
-  line-height: 1;
-  letter-spacing: -0.025em;
-}
-
-.studio :global([data-invitation-editor-panel] h2 + p) {
-  max-width: 36rem;
-  font-size: 0.875rem;
-  line-height: 1.4rem;
-}
-
-/* Template gallery presentation remains local to the style panel. */
-.studio :global([data-invitation-editor-panel='style'] > fieldset > div:nth-child(2)) {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.8rem;
-}
-
-.studio :global([data-invitation-editor-panel='style'] > fieldset > div:nth-child(2) > label) {
+.tab {
   position: relative;
-  min-width: 0;
-  overflow: hidden;
-  border-radius: var(--seraya-radius-sm);
-  background: var(--seraya-surface);
-  box-shadow: none;
-}
-
-/* The existing final form child is the explicit save/preview command rail.
-   Publication remains in the readiness surface where its JSX is rendered. */
-.studio :global([data-invitation-editor-desktop-navigation] + form > div:last-child) {
-  z-index: 24;
-  width: 100%;
-  background: var(--seraya-sticky-surface);
-  backdrop-filter: blur(14px);
-}
-
-.studio :global([data-editor-publication-authority]) {
-  width: 100%;
-  max-width: 22rem;
-}
-
-.studio :global([data-editor-publication-authority] button) {
-  width: 100%;
-}
-
-.studio :global(aside[data-local-preview-desktop]:not([data-local-preview-overlay])) {
-  min-width: 0;
-  overflow: hidden;
-  border-left: 1px solid var(--seraya-border-default);
-  background: color-mix(in srgb, var(--seraya-brand-soft) 18%, transparent);
-  padding: 0.75rem 0 0.75rem 0.85rem;
-}
-
-.studio :global(aside[data-local-preview-desktop]:not([data-local-preview-overlay]) > div) {
-  height: 100%;
-  min-height: 0;
-  overflow: hidden;
+  min-width: 7.25rem;
+  min-height: 3.75rem;
+  display: grid;
+  align-content: center;
+  gap: 0.2rem;
   border: 0;
-  border-radius: 0;
+  border-radius: var(--seraya-radius-sm);
+  padding: 0.65rem 0.9rem;
+  color: var(--seraya-text-secondary);
   background: transparent;
-  box-shadow: none;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    color var(--seraya-motion-default) var(--seraya-ease-standard),
+    background-color var(--seraya-motion-default) var(--seraya-ease-standard);
 }
 
-@media (min-width: 1024px) {
-  .studio :global([data-invitation-editor-desktop-navigation]) {
-    position: sticky;
-    top: var(--studio-sticky-top);
-    max-height: calc(100svh - 6.5rem);
-    align-self: start;
+.tab:hover {
+  color: var(--seraya-text-primary);
+  background: var(--seraya-surface);
+}
+
+.tab[aria-selected='true'] {
+  color: var(--seraya-action-primary);
+  background: var(--seraya-brand-soft);
+}
+
+.tab[aria-selected='true']::after {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.25rem;
+  left: 0.75rem;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--seraya-action-primary);
+  content: '';
+}
+
+.tabLabel {
+  font-size: 0.875rem;
+  font-weight: 750;
+  line-height: 1.2rem;
+}
+
+.tabDescription {
+  max-width: 13rem;
+  color: var(--seraya-text-muted);
+  font-size: 0.6875rem;
+  line-height: 1rem;
+}
+
+.canvas {
+  width: 100%;
+  min-width: 0;
+  padding: clamp(0.75rem, 2vw, 1.5rem);
+  background: var(--seraya-canvas);
+  border-radius: 0 0 var(--seraya-radius-lg) var(--seraya-radius-lg);
+  overflow-x: clip;
+}
+
+.panel {
+  width: 100%;
+  min-width: 0;
+}
+
+.panel[hidden] {
+  display: none;
+}
+
+@media (min-width: 48rem) {
+  .header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
   }
 
-  .studio :global([data-invitation-editor-desktop-navigation] + form) {
-    padding-right: 0.25rem;
-    padding-left: 0.25rem;
+  .headerActions {
+    flex: 1 1 40rem;
+    justify-content: flex-end;
   }
 
-  .studio :global([data-invitation-editor-panel]),
-  .studio :global([data-invitation-editor-desktop-navigation]) {
-    scrollbar-width: thin;
+  .tabList {
+    width: 100%;
+  }
+
+  .tab {
+    flex: 1 1 0;
+    min-width: 0;
   }
 }
 
-@media (min-width: 1536px) {
+@media (max-width: 63.999rem) {
+  .saveAuthority {
+    order: 3;
+    flex-basis: 100%;
+    justify-content: space-between;
+    border-top: 1px solid var(--seraya-border-default);
+    padding-top: 0.75rem;
+  }
+
+  .saveCopy {
+    justify-items: start;
+    text-align: left;
+  }
+}
+
+@media (max-width: 47.999rem) {
   .studio {
-    width: calc(100% + clamp(0rem, (100vw - var(--seraya-shell-max)) / 2, 10rem));
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+    box-shadow: none;
   }
 
-  .studio :global([data-invitation-editor-desktop-navigation] + form) {
-    max-height: calc(100svh - 7.25rem);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    padding: 0 0.75rem 0.75rem;
-    scrollbar-gutter: stable;
+  .header {
+    border-radius: 0;
   }
 
-  .studio :global([data-invitation-editor-desktop-navigation] + form > div:last-child) {
-    bottom: 0;
-    margin-bottom: 0;
+  .headerActions,
+  .saveAuthority {
+    width: 100%;
   }
 
-  .studio :global(aside[data-local-preview-desktop]:not([data-local-preview-overlay])) {
-    position: sticky;
-    top: var(--studio-sticky-top);
-    display: block;
-    height: calc(100svh - 7.25rem);
-    max-height: calc(100svh - 7.25rem);
-    align-self: start;
-  }
-}
-
-@media (min-width: 1640px) {
-  .studio {
-    --studio-section-rail: 10.5rem;
-    --studio-preview: 18.5rem;
-  }
-}
-
-@media (max-width: 1023px) {
-  .studio :global(#invitation-editor-title) {
-    font-size: var(--seraya-type-page-title-mobile);
+  .saveAuthority {
+    align-items: stretch;
+    flex-direction: column;
   }
 
-  .studio :global([data-invitation-editor-panel='style'] > fieldset > div:nth-child(2)) {
-    grid-template-columns: 1fr;
+  .saveButton,
+  .previewLink {
+    width: 100%;
   }
 
-  .studio :global([data-invitation-editor-desktop-navigation] + form) {
-    padding-bottom: var(--seraya-mobile-safe-bottom);
-  }
-}
-
-@media (max-width: 639px) {
-  .studio :global([data-invitation-editor-panel] h2),
-  .studio :global([data-invitation-editor-panel='style'] legend) {
-    font-size: 2rem;
+  .canvas {
+    border-radius: 0;
   }
 
-  .studio :global([data-editor-publication-authority]) {
-    max-width: none;
+  .tabDescription {
+    display: none;
+  }
+
+  .tab {
+    min-width: 6rem;
+    min-height: 3rem;
+    text-align: center;
   }
 }

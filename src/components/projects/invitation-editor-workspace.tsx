@@ -124,6 +124,10 @@ export const invitationStudioChapters = canonicalInvitationEditorSectionKeys.map
   return chapter;
 });
 
+export const invitationContentStudioChapters = invitationStudioChapters.filter(
+  (chapter) => chapter.key !== 'style',
+);
+
 const sectionStatusCopy: Record<
   InvitationEditorSectionStatus | 'current',
   { label: string; symbol: string }
@@ -331,18 +335,24 @@ function SectionButton({
 
 export const InvitationWorkspaceNavigation = memo(function InvitationWorkspaceNavigation({
   activeSection,
+  chapters = invitationContentStudioChapters,
   onSelect,
   statuses,
 }: {
   activeSection: InvitationEditorSectionKey;
+  chapters?: readonly (typeof invitationEditorSections)[number][];
   onSelect: (section: InvitationEditorSectionKey) => void;
   statuses: InvitationEditorSectionStatuses;
 }) {
-  const activeIndex = invitationStudioChapters.findIndex(
-    (section) => section.key === activeSection,
-  );
-  const active = invitationStudioChapters[activeIndex] ?? invitationStudioChapters[0]!;
-  const progress = getInvitationEditorProgress(statuses);
+  const activeIndex = chapters.findIndex((section) => section.key === activeSection);
+  const active = chapters[activeIndex] ?? chapters[0]!;
+  const progressValues = chapters.map((chapter) => statuses[chapter.key]);
+  const progress = {
+    error: progressValues.filter((status) => status === 'error').length,
+    ready: progressValues.filter((status) => status === 'complete' || status === 'optional_off')
+      .length,
+    total: chapters.length,
+  };
   const progressCopy =
     progress.error > 0
       ? `${progress.ready} siap · ${progress.error} perlu diperbaiki`
@@ -360,7 +370,7 @@ export const InvitationWorkspaceNavigation = memo(function InvitationWorkspaceNa
         <div className="flex items-center justify-between gap-4">
           <div className="min-w-0">
             <p className="text-seraya-text-muted text-[0.68rem] font-bold tracking-[0.08em] uppercase">
-              Bagian {activeIndex + 1} dari {invitationStudioChapters.length}
+              Bagian {activeIndex + 1} dari {chapters.length}
             </p>
             <p className="text-seraya-text-primary mt-0.5 truncate text-sm font-semibold">
               {active.studioLabel}
@@ -376,7 +386,7 @@ export const InvitationWorkspaceNavigation = memo(function InvitationWorkspaceNa
           data-invitation-editor-mobile-section-strip
           role="list"
         >
-          {invitationStudioChapters.map((section) => {
+          {chapters.map((section) => {
             const current = section.key === activeSection;
 
             return (
@@ -397,7 +407,7 @@ export const InvitationWorkspaceNavigation = memo(function InvitationWorkspaceNa
             className="border-seraya-border-default text-seraya-text-primary focus-visible:outline-seraya-focus-ring min-h-11 rounded-[var(--seraya-radius-md)] border px-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-45"
             disabled={activeIndex === 0}
             onClick={() => {
-              const previous = invitationStudioChapters[activeIndex - 1];
+              const previous = chapters[activeIndex - 1];
               if (previous) onSelect(previous.key);
             }}
             type="button"
@@ -406,9 +416,9 @@ export const InvitationWorkspaceNavigation = memo(function InvitationWorkspaceNa
           </button>
           <button
             className="bg-seraya-brand-soft text-seraya-action-primary focus-visible:outline-seraya-focus-ring min-h-11 rounded-[var(--seraya-radius-md)] px-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-45"
-            disabled={activeIndex === invitationStudioChapters.length - 1}
+            disabled={activeIndex === chapters.length - 1}
             onClick={() => {
-              const next = invitationStudioChapters[activeIndex + 1];
+              const next = chapters[activeIndex + 1];
               if (next) onSelect(next.key);
             }}
             type="button"
@@ -428,14 +438,16 @@ export const InvitationWorkspaceNavigation = memo(function InvitationWorkspaceNa
           <p className="text-seraya-text-muted text-[0.68rem] font-bold tracking-[0.08em] uppercase">
             Studio undangan
           </p>
-          <p className="text-seraya-text-primary mt-1 text-sm font-semibold">9 bab perjalanan</p>
+          <p className="text-seraya-text-primary mt-1 text-sm font-semibold">
+            {chapters.length} bab isi
+          </p>
           <p className="text-seraya-text-muted mt-1 text-xs leading-5">{progressCopy}</p>
           <p className="text-seraya-text-muted mt-1 text-[0.7rem] leading-5">
             Status draf saat ini
           </p>
         </div>
         <ol className="mt-2 space-y-0.5">
-          {invitationStudioChapters.map((section) => {
+          {chapters.map((section) => {
             const current = section.key === activeSection;
 
             return (

@@ -1,0 +1,92 @@
+name: Invitation Studio Slice A structural validation
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx'
+      - 'src/components/projects/invitation-studio-shell.tsx'
+      - 'src/components/projects/invitation-studio-shell.module.css'
+      - 'src/components/projects/invitation-studio-mode-placeholder.tsx'
+      - 'src/components/projects/invitation-studio.types.ts'
+      - 'tests/unit/invitation-studio-structural-foundation-slice-a.test.tsx'
+      - 'tests/e2e/invitation-studio-structural-foundation-slice-a.spec.ts'
+      - 'tests/e2e/fixture-app/app/invitation-studio-slice-a/**'
+      - 'playwright.invitation-studio-slice-a.config.ts'
+      - '.github/workflows/invitation-studio-slice-a.yml'
+  push:
+    branches:
+      - feature/invitation-studio-slice-a-structural-foundation
+    paths:
+      - 'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx'
+      - 'src/components/projects/invitation-studio-shell.tsx'
+      - 'src/components/projects/invitation-studio-shell.module.css'
+      - 'src/components/projects/invitation-studio-mode-placeholder.tsx'
+      - 'src/components/projects/invitation-studio.types.ts'
+      - 'tests/unit/invitation-studio-structural-foundation-slice-a.test.tsx'
+      - 'tests/e2e/invitation-studio-structural-foundation-slice-a.spec.ts'
+      - 'tests/e2e/fixture-app/app/invitation-studio-slice-a/**'
+      - 'playwright.invitation-studio-slice-a.config.ts'
+      - '.github/workflows/invitation-studio-slice-a.yml'
+
+concurrency:
+  group: invitation-studio-slice-a-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Check focused formatting
+        run: |
+          npx prettier --write \
+            'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
+            src/components/projects/invitation-studio-shell.tsx \
+            src/components/projects/invitation-studio-shell.module.css \
+            src/components/projects/invitation-studio-mode-placeholder.tsx \
+            src/components/projects/invitation-studio.types.ts \
+            tests/unit/invitation-studio-structural-foundation-slice-a.test.tsx \
+            tests/e2e/invitation-studio-structural-foundation-slice-a.spec.ts \
+            tests/e2e/fixture-app/app/invitation-studio-slice-a/page.tsx \
+            playwright.invitation-studio-slice-a.config.ts \
+            .github/workflows/invitation-studio-slice-a.yml
+          git diff --exit-code
+      - name: Lint focused source
+        run: |
+          npx eslint \
+            'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
+            src/components/projects/invitation-studio-shell.tsx \
+            src/components/projects/invitation-studio-mode-placeholder.tsx \
+            src/components/projects/invitation-studio.types.ts \
+            tests/unit/invitation-studio-structural-foundation-slice-a.test.tsx \
+            tests/e2e/invitation-studio-structural-foundation-slice-a.spec.ts \
+            tests/e2e/fixture-app/app/invitation-studio-slice-a/page.tsx \
+            playwright.invitation-studio-slice-a.config.ts
+      - run: npm run typecheck
+      - name: Run structural unit contracts
+        run: npx vitest run tests/unit/invitation-studio-structural-foundation-slice-a.test.tsx
+      - run: npm run build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run desktop and mobile shell smoke
+        run: npx playwright test --config=playwright.invitation-studio-slice-a.config.ts
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: invitation-studio-slice-a-playwright-report
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+          retention-days: 7

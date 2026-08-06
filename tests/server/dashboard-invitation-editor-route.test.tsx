@@ -1,39 +1,54 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
+import type { ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createDefaultInvitationDraftContent } from '@/modules/invitations/invitation-draft.defaults';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 
-const { getEditorMock, getOwnedProjectContextMock, getReadinessMock, notFoundMock } = vi.hoisted(
-  () => ({
-    getEditorMock: vi.fn(),
-    getOwnedProjectContextMock: vi.fn(),
-    getReadinessMock: vi.fn(),
-    notFoundMock: vi.fn(),
-  }),
-);
+const {
+  getAudioMock,
+  getEditorMock,
+  getOwnedProjectContextMock,
+  getPaymentOverviewMock,
+  getPublishedSnapshotMock,
+  getReadinessMock,
+  notFoundMock,
+} = vi.hoisted(() => ({
+  getAudioMock: vi.fn(),
+  getEditorMock: vi.fn(),
+  getOwnedProjectContextMock: vi.fn(),
+  getPaymentOverviewMock: vi.fn(),
+  getPublishedSnapshotMock: vi.fn(),
+  getReadinessMock: vi.fn(),
+  notFoundMock: vi.fn(),
+}));
 
 vi.mock('next/navigation', () => ({ notFound: notFoundMock }));
 vi.mock('@/components/projects/invitation-editor', () => ({
   InvitationEditor: ({
-    galleryImages,
-    project,
+    draft,
     projectId,
   }: {
-    galleryImages: unknown[];
-    project: { event_date_primary: string | null };
+    draft: { content: { gallery: { imageIds: string[] } } };
     projectId: string;
   }) => (
     <div
-      data-editor-gallery-count={galleryImages.length}
-      data-editor-primary-date={project.event_date_primary}
+      data-editor-gallery-count={draft.content.gallery.imageIds.length}
       data-editor-project-id={projectId}
     >
       Edit undangan
     </div>
+  ),
+}));
+vi.mock('@/components/projects/invitation-studio-provider', () => ({
+  InvitationStudioProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
+}));
+vi.mock('@/components/projects/invitation-studio-shell', () => ({
+  InvitationStudioShell: ({ children }: { children: ReactNode }) => (
+    <section data-private-invitation-studio>{children}</section>
   ),
 }));
 vi.mock('@/modules/auth/dashboard-request-context', () => ({
@@ -46,6 +61,16 @@ vi.mock('@/modules/invitations/invitation-editor.service', () => ({
   InvitationEditorDraftUnavailableError: class InvitationEditorDraftUnavailableError extends Error {},
   getInvitationEditorForVerifiedProject: getEditorMock,
 }));
+vi.mock('@/modules/media/invitation-audio.service', () => ({
+  getInvitationAudioSummaryForVerifiedProject: getAudioMock,
+}));
+vi.mock('@/modules/payments', () => ({
+  getPaymentOverviewForVerifiedProject: getPaymentOverviewMock,
+}));
+vi.mock('@/modules/publications/publication.repository', () => ({
+  getCurrentPublishedInvitationForVerifiedProject: getPublishedSnapshotMock,
+}));
+
 import InvitationEditorPage, {
   dynamic,
   fetchCache,
@@ -81,19 +106,31 @@ const draft = {
   updated_at: '2026-06-20T00:00:00.000Z',
 };
 
+const readiness = {
+  identity: { coupleLabel: 'Raka & Nadia', templateKey: 'roselle' },
+  invitation: {
+    hasPublishedSnapshot: false,
+    hasUnpublishedChanges: false,
+    hasVerifiedActivation: false,
+    publishedSlug: null,
+    state: 'draft_incomplete',
+  },
+};
+
+const paymentOverview = {
+  configuration: null,
+  isConfigured: false,
+  payment: null,
+  publishEligibility: { allowed: false, reason: 'payment_required' },
+};
+
 describe('SRY-016 private invitation editor route', () => {
   beforeEach(() => {
+    getAudioMock.mockReset().mockResolvedValue(null);
     getEditorMock.mockReset();
-    getReadinessMock.mockReset().mockResolvedValue({
-      identity: { coupleLabel: 'Raka & Nadia', templateKey: 'roselle' },
-      invitation: {
-        hasPublishedSnapshot: false,
-        hasUnpublishedChanges: false,
-        hasVerifiedActivation: false,
-        publishedSlug: null,
-        state: 'draft_incomplete',
-      },
-    });
+    getPaymentOverviewMock.mockReset().mockResolvedValue(paymentOverview);
+    getPublishedSnapshotMock.mockReset().mockResolvedValue(null);
+    getReadinessMock.mockReset().mockResolvedValue(readiness);
     getOwnedProjectContextMock.mockReset().mockResolvedValue(project);
     notFoundMock.mockReset();
     notFoundMock.mockImplementation(() => {
@@ -113,10 +150,15 @@ describe('SRY-016 private invitation editor route', () => {
     expect(getOwnedProjectContextMock).toHaveBeenCalledWith(project.id);
     expect(getEditorMock).toHaveBeenCalledWith(project);
     expect(getReadinessMock).toHaveBeenCalledWith(project, { draft });
+    expect(getAudioMock).toHaveBeenCalledWith({
+      configuration: draft.content.audio,
+      project,
+    });
+    expect(getPaymentOverviewMock).toHaveBeenCalledWith(project);
+    expect(getPublishedSnapshotMock).toHaveBeenCalledWith(project);
     expect(html).toContain('Edit undangan');
     expect(html).toContain(`data-editor-project-id="${project.id}"`);
     expect(html).toContain('data-editor-gallery-count="1"');
-    expect(html).toContain(`data-editor-primary-date="${project.event_date_primary}"`);
     expect(html).not.toContain('draft-private-id');
     expect(html).not.toContain(project.account_id);
   });
@@ -137,7 +179,7 @@ describe('SRY-016 private invitation editor route', () => {
     ).rejects.toThrow('NEXT_NOT_FOUND');
   });
 
-  it('reuses the request-local verified project for editor and readiness composition', async () => {
+  it('reuses the request-local verified project for all private Studio composition', async () => {
     const source = await readFile(
       path.resolve(process.cwd(), 'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx'),
       'utf8',
@@ -146,6 +188,9 @@ describe('SRY-016 private invitation editor route', () => {
     expect(source).toContain('getOwnedProjectContextForRequest');
     expect(source).toContain('getInvitationEditorForVerifiedProject');
     expect(source).toContain('getInvitationReadinessForVerifiedProject(project, {');
+    expect(source).toContain('getInvitationAudioSummaryForVerifiedProject({');
+    expect(source).toContain('getPaymentOverviewForVerifiedProject(project)');
+    expect(source).toContain('getCurrentPublishedInvitationForVerifiedProject(project)');
     expect(source).toContain('draft: editor.draft');
     expect(source).toContain('getDeferredGalleryImages');
     expect(source).toContain('src: `/dashboard/media/${id}`');

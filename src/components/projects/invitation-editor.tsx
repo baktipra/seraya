@@ -1,17 +1,7 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import {
-  useActionState,
-  useCallback,
-  useEffect,
-  useMemo,
-  useReducer,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   Badge,
@@ -21,27 +11,11 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  useToast,
 } from '@/design-system';
-import {
-  initialInvitationEditorActionState,
-  type InvitationEditorActionState,
-} from '@/modules/invitations/invitation-editor.action-state';
-import { saveInvitationEditorAction } from '@/modules/invitations/invitation-editor.actions';
-import {
-  createInvitationEditorSubmissionPayload,
-  invitationEditorLocalContentReducer,
-  type InvitationEditorLocalAction,
-} from '@/modules/invitations/invitation-editor-local-state';
-import type { InvitationRendererProjectMetadata } from '@/modules/invitation-templates/invitation-view-model';
+import type { InvitationEditorActionState } from '@/modules/invitations/invitation-editor.action-state';
+import type { InvitationEditorLocalAction } from '@/modules/invitations/invitation-editor-local-state';
 import type { InvitationDraft } from '@/modules/invitations/invitation-draft.types';
 import type { InvitationEditorFieldErrors } from '@/modules/invitations/invitation-editor.schema';
-import {
-  INVITATION_AUDIO_CHANGED_EVENT,
-  type InvitationAudioChangedEventDetail,
-} from '@/modules/media/invitation-audio-playback.types';
-import type { InvitationAudioConfiguration } from '@/modules/media/invitation-audio.types';
-import type { InvitationGalleryImage } from '@/modules/media/media.types';
 import type { ProjectPublishEligibility } from '@/modules/payments/payment.types';
 import {
   getInvitationConfidenceChecklist,
@@ -59,88 +33,25 @@ import {
   EditorToggle,
   FieldError,
   getError,
-  InvitationTemplatePicker,
 } from './invitation-editor-fields';
+import {
+  invitationStudioDirtyNavigationMessage,
+  shouldConfirmInvitationStudioNavigation,
+  useInvitationStudioState,
+} from './invitation-studio-provider';
 import { PublishInvitationControls } from './publish-invitation-controls';
 import {
   getInvitationEditorErrorSections,
   getInvitationEditorSectionStatuses,
+  invitationContentStudioChapters,
   invitationEditorSections,
   InvitationWorkspaceNavigation,
   InvitationWorkspacePanel,
   type InvitationEditorSectionKey,
 } from './invitation-editor-workspace';
 
-const fallbackProjectMetadata: InvitationRendererProjectMetadata = {
-  event_date_primary: null,
-};
-
-function InvitationEditorPreviewLoading() {
-  return (
-    <>
-      <aside
-        aria-label="Pratinjau langsung sedang disiapkan"
-        className="bg-seraya-canvas fixed inset-0 z-[60] flex min-h-0 flex-col px-3 py-3 outline-none sm:px-5 sm:py-5 2xl:hidden"
-        data-local-preview-loading
-      >
-        <div className="border-seraya-border-default bg-seraya-surface mx-auto flex h-full w-full max-w-[30rem] items-center justify-center rounded-[var(--seraya-radius-lg)] border px-6 text-center shadow-[var(--seraya-shadow-float)]">
-          <div>
-            <p className="text-seraya-text-primary text-sm font-semibold">
-              Menyiapkan preview lokal…
-            </p>
-            <p className="text-seraya-text-muted mt-2 text-sm leading-6">
-              Editor tetap aman. Preview akan tampil setelah komponennya selesai dimuat.
-            </p>
-          </div>
-        </div>
-      </aside>
-      <aside
-        aria-label="Pratinjau langsung sedang disiapkan"
-        className="border-seraya-border-default bg-seraya-surface sticky top-24 hidden min-h-64 min-w-0 self-start rounded-[var(--seraya-radius-lg)] border p-5 shadow-[var(--seraya-shadow-soft)] 2xl:block"
-        data-local-preview-desktop
-        data-local-preview-loading
-      >
-        <p className="text-seraya-text-primary text-sm font-semibold">Menyiapkan preview lokal…</p>
-        <p className="text-seraya-text-muted mt-2 text-sm leading-6">
-          Preview dimuat setelah editor utama siap digunakan.
-        </p>
-      </aside>
-    </>
-  );
-}
-
-function InvitationEditorDesktopPreviewPlaceholder() {
-  return (
-    <aside
-      aria-label="Pratinjau langsung belum dimuat"
-      className="border-seraya-border-default bg-seraya-surface sticky top-24 hidden min-h-64 min-w-0 self-start rounded-[var(--seraya-radius-lg)] border p-5 shadow-[var(--seraya-shadow-soft)] 2xl:block"
-      data-local-preview-deferred
-      data-local-preview-desktop
-    >
-      <p className="text-seraya-text-primary text-sm font-semibold">
-        Preview lokal akan segera siap
-      </p>
-      <p className="text-seraya-text-muted mt-2 text-sm leading-6">
-        Editor utama diprioritaskan terlebih dahulu agar kalian dapat langsung mulai mengubah
-        undangan.
-      </p>
-    </aside>
-  );
-}
-
-const DeferredInvitationEditorLivePreview = dynamic(
-  () =>
-    import('./invitation-editor-live-preview').then((module) => module.InvitationEditorLivePreview),
-  {
-    loading: InvitationEditorPreviewLoading,
-    ssr: false,
-  },
-);
-
 export type InvitationEditorProps = {
   draft: InvitationDraft;
-  galleryImages?: InvitationGalleryImage[];
-  project?: InvitationRendererProjectMetadata;
   projectId: string;
   readiness?: Pick<WeddingReadinessV1, 'identity' | 'invitation'>;
 };
@@ -177,8 +88,7 @@ type InvitationEditorDocumentTruth = {
   saveActionLabel: string;
 };
 
-export const invitationEditorDirtyNavigationMessage =
-  'Perubahan undangan belum disimpan. Yakin ingin meninggalkan halaman ini?';
+export const invitationEditorDirtyNavigationMessage = invitationStudioDirtyNavigationMessage;
 const fallbackWorkspaceReadiness: Pick<WeddingReadinessV1, 'identity' | 'invitation'> = {
   identity: { coupleLabel: 'Undangan kalian', templateKey: null },
   invitation: {
@@ -469,16 +379,7 @@ function InvitationEditorDocumentTruthPanel({ truth }: { truth: InvitationEditor
   );
 }
 
-export function shouldConfirmInvitationEditorNavigation(currentHref: string, nextHref: string) {
-  const currentUrl = new URL(currentHref);
-  const nextUrl = new URL(nextHref, currentUrl);
-  const isSameDocumentHash =
-    nextUrl.pathname === currentUrl.pathname &&
-    nextUrl.search === currentUrl.search &&
-    nextUrl.hash.length > 0;
-
-  return !isSameDocumentHash;
-}
+export const shouldConfirmInvitationEditorNavigation = shouldConfirmInvitationStudioNavigation;
 
 export type InvitationEditorActivePanelProps = {
   activeSection: InvitationEditorSectionKey;
@@ -496,23 +397,6 @@ export function InvitationEditorActivePanel({
   updateLocalContent,
 }: InvitationEditorActivePanelProps) {
   switch (activeSection) {
-    case 'style':
-      return (
-        <InvitationWorkspacePanel active section="style">
-          <InvitationTemplatePicker
-            error={getError(fieldErrors, 'templateKey')}
-            onPaletteSelect={(paletteKey) => {
-              updateLocalContent({ paletteKey, type: 'palette' });
-            }}
-            onSelect={(templateKey) => {
-              updateLocalContent({ templateKey, type: 'template' });
-            }}
-            paletteError={getError(fieldErrors, 'paletteKey')}
-            selectedPaletteKey={content.paletteKey}
-            selectedTemplateKey={content.templateKey}
-          />
-        </InvitationWorkspacePanel>
-      );
     case 'opening':
       return (
         <InvitationWorkspacePanel active section="opening">
@@ -1005,26 +889,37 @@ export function InvitationEditorActivePanel({
       return (
         <InvitationWorkspacePanel active section="gallery">
           <EditorSection
-            description="Foto undangan dikelola di ruang galeri agar urutan dan proses upload tetap aman."
+            description="Atur apakah foto yang sudah disiapkan di mode Media akan tampil dalam perjalanan undangan."
             number="06"
             title="Galeri"
           >
-            <div className="border-seraya-border-default bg-seraya-surface rounded-[var(--seraya-radius-md)] border p-4 sm:p-5">
-              <p className="text-seraya-text-primary font-semibold">
-                {content.gallery.imageIds.length > 0
-                  ? `${content.gallery.imageIds.length} foto tersimpan`
-                  : 'Belum ada foto tersimpan'}
-              </p>
-              <p className="text-seraya-text-muted mt-1.5 max-w-xl text-sm leading-6">
-                Tambah, hapus, dan atur foto dari pengelola galeri. Kalian akan kembali ke bagian
-                ini tanpa mengubah draft undangan.
-              </p>
-              <Link
-                className="border-seraya-border-default bg-seraya-canvas text-seraya-text-primary hover:border-seraya-border-strong focus-visible:outline-seraya-focus-ring mt-4 inline-flex min-h-11 items-center justify-center rounded-[var(--seraya-radius-md)] border px-4 text-sm font-semibold focus-visible:outline-3 focus-visible:outline-offset-2"
-                href={`/dashboard/${projectId}/gallery`}
-              >
-                Kelola galeri
-              </Link>
+            <div className="space-y-5">
+              <EditorToggle
+                checked={content.gallery.enabled}
+                error={getError(fieldErrors, 'gallery.enabled')}
+                help="Aset foto tetap aman ketika galeri disembunyikan. Tamu hanya melihat galeri setelah draf disimpan dan undangan diterbitkan."
+                label="Tampilkan galeri foto"
+                name="gallery.enabled"
+                onToggle={(enabled) => updateLocalContent({ enabled, type: 'gallery-visibility' })}
+              />
+              <div className="border-seraya-border-default bg-seraya-surface rounded-[var(--seraya-radius-md)] border p-4 sm:p-5">
+                <p className="text-seraya-text-primary font-semibold">
+                  {content.gallery.imageIds.length > 0
+                    ? `${content.gallery.imageIds.length} foto siap digunakan`
+                    : 'Belum ada foto yang siap digunakan'}
+                </p>
+                <p className="text-seraya-text-muted mt-1.5 max-w-xl text-sm leading-6">
+                  Upload, urutan, penggantian, dan penghapusan aset dikelola di mode Media agar
+                  proses file tidak bercampur dengan penyusunan isi undangan.
+                </p>
+                <Link
+                  className="border-seraya-border-default bg-seraya-canvas text-seraya-text-primary hover:border-seraya-border-strong focus-visible:outline-seraya-focus-ring mt-4 inline-flex min-h-11 items-center justify-center rounded-[var(--seraya-radius-md)] border px-4 text-sm font-semibold focus-visible:outline-3 focus-visible:outline-offset-2"
+                  href={`/dashboard/${projectId}/invitation?mode=media`}
+                  prefetch={false}
+                >
+                  Buka mode Media
+                </Link>
+              </div>
             </div>
           </EditorSection>
         </InvitationWorkspacePanel>
@@ -1299,41 +1194,26 @@ export function InvitationEditorActivePanel({
   }
 }
 
-export function InvitationEditor({
-  draft,
-  galleryImages = [],
-  project = fallbackProjectMetadata,
-  projectId,
-  readiness,
-}: InvitationEditorProps) {
-  const router = useRouter();
-  const { toast } = useToast();
-  const [state, formAction, isPending] = useActionState(
-    saveInvitationEditorAction,
-    initialInvitationEditorActionState,
-  );
-  const [content, dispatchLocalContent] = useReducer(
-    invitationEditorLocalContentReducer,
-    draft.content,
-  );
+export function InvitationEditor({ draft, projectId, readiness }: InvitationEditorProps) {
+  const {
+    actionState: state,
+    content,
+    formAction,
+    formId,
+    hasSaved,
+    isDirty,
+    isPending,
+    submissionPayload,
+    updateLocalContent,
+  } = useInvitationStudioState();
   const workspaceReadiness = readiness ?? fallbackWorkspaceReadiness;
   const confidenceStatus = getInvitationConfidenceStatus(workspaceReadiness.invitation.state);
   const confidenceChecklist = useMemo(() => getInvitationConfidenceChecklist(draft), [draft]);
   const shouldShowPublishControl =
     workspaceReadiness.invitation.state === 'ready_to_publish' ||
     workspaceReadiness.invitation.state === 'published_with_unpublished_changes';
-  const [isDirty, setIsDirty] = useState(false);
-  const [hasSaved, setHasSaved] = useState(false);
-  const [isLocalPreviewOpen, setIsLocalPreviewOpen] = useState(false);
-  const [shouldMountDesktopPreview, setShouldMountDesktopPreview] = useState(false);
-  const [previewAudio, setPreviewAudio] = useState<InvitationAudioConfiguration>(
-    draft.content.audio,
-  );
-  const [previewContent, setPreviewContent] = useState(content);
   const [isEditorInteractive, setIsEditorInteractive] = useState(false);
-  const [activeSection, setActiveSection] = useState<InvitationEditorSectionKey>('style');
-  const lastHandledSuccessState = useRef<InvitationEditorActionState | null>(null);
-  const lastSyncedDraftUpdatedAt = useRef(draft.updated_at);
+  const [activeSection, setActiveSection] = useState<InvitationEditorSectionKey>('opening');
   const editorRootRef = useRef<HTMLDivElement | null>(null);
   const errorSummaryRef = useRef<HTMLDivElement | null>(null);
   const workspaceStartRef = useRef<HTMLDivElement | null>(null);
@@ -1342,7 +1222,8 @@ export function InvitationEditor({
     [content, draft, state.fieldErrors],
   );
   const errorSections = useMemo(
-    () => getInvitationEditorErrorSections(state.fieldErrors),
+    () =>
+      getInvitationEditorErrorSections(state.fieldErrors).filter((section) => section !== 'style'),
     [state.fieldErrors],
   );
   const documentTruth = useMemo(
@@ -1364,22 +1245,6 @@ export function InvitationEditor({
       workspaceReadiness.invitation.hasUnpublishedChanges,
     ],
   );
-  const submissionPayload = useMemo(
-    () => JSON.stringify(createInvitationEditorSubmissionPayload(content)),
-    [content],
-  );
-  const shouldMountPreview = isLocalPreviewOpen || shouldMountDesktopPreview;
-
-  const updateLocalContent = useCallback((action: InvitationEditorLocalAction) => {
-    dispatchLocalContent(action);
-    setIsDirty(true);
-  }, []);
-
-  const handleOpenLocalPreview = useCallback(() => {
-    setPreviewContent(content);
-    setIsLocalPreviewOpen(true);
-  }, [content]);
-
   const handleSectionSelect = useCallback((section: InvitationEditorSectionKey) => {
     setActiveSection(section);
 
@@ -1394,7 +1259,7 @@ export function InvitationEditor({
 
   useEffect(() => {
     const requestedSection = window.location.hash.replace('#bagian-', '');
-    const sectionExists = invitationEditorSections.some(
+    const sectionExists = invitationContentStudioChapters.some(
       (section) => section.key === requestedSection,
     );
 
@@ -1461,159 +1326,13 @@ export function InvitationEditor({
   }, []);
 
   useEffect(() => {
-    const desktopPreview = window.matchMedia('(min-width: 96rem)');
-    let idleHandle: number | null = null;
-    let timeoutHandle: ReturnType<typeof setTimeout> | null = null;
-
-    const cancelScheduledMount = () => {
-      if (idleHandle !== null && 'cancelIdleCallback' in window) {
-        window.cancelIdleCallback(idleHandle);
-      }
-      if (timeoutHandle !== null) {
-        globalThis.clearTimeout(timeoutHandle);
-      }
-      idleHandle = null;
-      timeoutHandle = null;
-    };
-
-    const scheduleMount = () => {
-      cancelScheduledMount();
-
-      if (!desktopPreview.matches) {
-        setShouldMountDesktopPreview(false);
-        return;
-      }
-
-      if ('requestIdleCallback' in window) {
-        idleHandle = window.requestIdleCallback(() => setShouldMountDesktopPreview(true), {
-          timeout: 1_200,
-        });
-      } else {
-        timeoutHandle = globalThis.setTimeout(() => setShouldMountDesktopPreview(true), 450);
-      }
-    };
-
-    scheduleMount();
-    desktopPreview.addEventListener('change', scheduleMount);
-
-    return () => {
-      cancelScheduledMount();
-      desktopPreview.removeEventListener('change', scheduleMount);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!shouldMountPreview) {
-      return;
-    }
-
-    const timeout = window.setTimeout(
-      () => setPreviewContent(content),
-      isLocalPreviewOpen ? 80 : 180,
-    );
-
-    return () => window.clearTimeout(timeout);
-  }, [content, isLocalPreviewOpen, shouldMountPreview]);
-
-  useEffect(() => {
-    const handleAudioChanged = (event: Event) => {
-      const detail = (event as CustomEvent<InvitationAudioChangedEventDetail>).detail;
-
-      setPreviewAudio(
-        detail.enabled && detail.durationSeconds
-          ? {
-              assetId: 'persisted-owner-audio',
-              durationSeconds: detail.durationSeconds,
-              originalFileName: 'Audio undangan',
-              rightsAcknowledged: true,
-            }
-          : {
-              assetId: null,
-              durationSeconds: null,
-              originalFileName: null,
-              rightsAcknowledged: false,
-            },
-      );
-    };
-
-    window.addEventListener(INVITATION_AUDIO_CHANGED_EVENT, handleAudioChanged);
-    return () => window.removeEventListener(INVITATION_AUDIO_CHANGED_EVENT, handleAudioChanged);
-  }, []);
-
-  useEffect(() => {
-    if (draft.updated_at === lastSyncedDraftUpdatedAt.current || isDirty) {
-      return;
-    }
-
-    lastSyncedDraftUpdatedAt.current = draft.updated_at;
-    dispatchLocalContent({ content: draft.content, type: 'replace' });
-  }, [draft.content, draft.updated_at, isDirty]);
-
-  useEffect(() => {
-    if (!isDirty) {
-      return;
-    }
-
-    const message = invitationEditorDirtyNavigationMessage;
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = message;
-    };
-    const handleDocumentClick = (event: MouseEvent) => {
-      const target = event.target;
-
-      if (!(target instanceof Element)) {
-        return;
-      }
-
-      const anchor = target.closest<HTMLAnchorElement>('a[href]');
-
-      if (!anchor || anchor.target === '_blank' || anchor.hasAttribute('download')) {
-        return;
-      }
-
-      if (
-        !shouldConfirmInvitationEditorNavigation(window.location.href, anchor.href) ||
-        window.confirm(message)
-      ) {
-        return;
-      }
-
-      event.preventDefault();
-      event.stopImmediatePropagation();
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    document.addEventListener('click', handleDocumentClick, true);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      document.removeEventListener('click', handleDocumentClick, true);
-    };
-  }, [isDirty]);
-
-  useEffect(() => {
-    if (state.status !== 'success' || !state.message || lastHandledSuccessState.current === state) {
-      return;
-    }
-
-    lastHandledSuccessState.current = state;
-    setHasSaved(true);
-    setIsDirty(false);
-    toast({
-      description: 'Draft terbaru siap dibuka di preview tersimpan.',
-      title: 'Tersimpan',
-      variant: 'success',
-    });
-    router.refresh();
-  }, [router, state, toast]);
-
-  useEffect(() => {
     if (state.status !== 'error') {
       return;
     }
 
-    const firstErrorSection = getInvitationEditorErrorSections(state.fieldErrors)[0];
+    const firstErrorSection = getInvitationEditorErrorSections(state.fieldErrors).find(
+      (section) => section !== 'style',
+    );
 
     const frame = window.requestAnimationFrame(() => {
       if (firstErrorSection) {
@@ -1708,8 +1427,8 @@ export function InvitationEditor({
                 Edit undangan
               </CardTitle>
               <CardDescription className="mt-1.5 max-w-2xl">
-                Template, detail pasangan, jadwal, lokasi, galeri, Amplop Digital, dan penutup
-                semuanya dikelola di sini.
+                Detail pasangan, jadwal, lokasi, galeri, Amplop Digital, dan penutup dikelola di
+                mode Isi. Template serta palet berada di mode Desain.
               </CardDescription>
             </div>
             <div className="flex shrink-0 flex-col gap-2 sm:items-start">
@@ -1763,15 +1482,16 @@ export function InvitationEditor({
 
         <CardContent className="max-w-full min-w-0 overflow-x-clip pt-5 sm:pt-6">
           <div
-            className="grid max-w-full min-w-0 scroll-mt-24 gap-4 lg:grid-cols-[14.5rem_minmax(0,1fr)] lg:items-start xl:gap-6 2xl:grid-cols-[14.5rem_minmax(26rem,1fr)_minmax(21rem,24.5rem)]"
+            className="grid max-w-full min-w-0 scroll-mt-24 gap-4 lg:grid-cols-[14.5rem_minmax(0,1fr)] lg:items-start xl:gap-6"
             ref={workspaceStartRef}
           >
             <InvitationWorkspaceNavigation
               activeSection={activeSection}
+              chapters={invitationContentStudioChapters}
               onSelect={handleSectionSelect}
               statuses={sectionStatuses}
             />
-            <form action={formAction} className="max-w-full min-w-0 space-y-5 pb-28 sm:pb-0">
+            <form action={formAction} className="max-w-full min-w-0 space-y-5" id={formId}>
               <input name="projectId" type="hidden" value={projectId} />
               <input name="editorPayload" type="hidden" value={submissionPayload} />
 
@@ -1814,7 +1534,10 @@ export function InvitationEditor({
                 updateLocalContent={updateLocalContent}
               />
 
-              <div className="border-seraya-border-default bg-seraya-surface sticky bottom-0 z-10 -mx-5 border-t px-5 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_-10px_20px_rgb(62_42_34_/_0.08)] sm:bottom-4 sm:mx-0 sm:rounded-[var(--seraya-radius-md)] sm:border sm:p-4 sm:shadow-[var(--seraya-shadow-float)]">
+              <div
+                className="border-seraya-border-default bg-seraya-surface rounded-[var(--seraya-radius-md)] border p-4"
+                data-invitation-editor-local-command-bridge
+              >
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div
                     aria-live="polite"
@@ -1829,56 +1552,14 @@ export function InvitationEditor({
                       {documentTruth.browser.description}
                     </p>
                   </div>
-                  <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-56">
-                    <div className="grid grid-cols-2 gap-2 2xl:grid-cols-1">
-                      <Button
-                        aria-haspopup="dialog"
-                        className="2xl:hidden"
-                        data-local-preview-trigger
-                        onClick={handleOpenLocalPreview}
-                        size="lg"
-                        type="button"
-                        variant="secondary"
-                      >
-                        Preview lokal
-                      </Button>
-                      <Button
-                        data-release-b-save-action="rb2"
-                        disabled={!isDirty && state.status !== 'error'}
-                        loading={isPending}
-                        size="lg"
-                        type="submit"
-                      >
-                        {documentTruth.saveActionLabel}
-                      </Button>
-                    </div>
-                    <Link
-                      className="text-seraya-action-primary focus-visible:outline-seraya-focus-ring inline-flex min-h-10 items-center justify-center rounded-[var(--seraya-radius-sm)] px-3 text-sm font-semibold underline-offset-4 hover:underline focus-visible:outline-3 focus-visible:outline-offset-3"
-                      href={`/dashboard/${projectId}/preview`}
-                    >
-                      Buka preview tersimpan
-                    </Link>
-                    <p className="text-seraya-text-muted text-center text-xs leading-5">
-                      Preview tersimpan tetap mengikuti draft dari server.
+                  <div className="w-full sm:w-auto sm:max-w-xs">
+                    <p className="border-seraya-border-default bg-seraya-canvas text-seraya-text-muted rounded-[var(--seraya-radius-md)] border px-3.5 py-3 text-center text-xs leading-5">
+                      Preview exact tersedia di mode Desain dan membaca perubahan lokal yang sama.
                     </p>
                   </div>
                 </div>
               </div>
             </form>
-            {shouldMountPreview ? (
-              <DeferredInvitationEditorLivePreview
-                audio={previewAudio}
-                content={previewContent}
-                galleryImages={galleryImages}
-                isDirty={isDirty}
-                isOpen={isLocalPreviewOpen}
-                onOpenChange={setIsLocalPreviewOpen}
-                project={project}
-                projectId={projectId}
-              />
-            ) : (
-              <InvitationEditorDesktopPreviewPlaceholder />
-            )}
           </div>
         </CardContent>
       </Card>

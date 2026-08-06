@@ -1,0 +1,108 @@
+# Slice F.1 permanent clean-head validation gate.
+name: Invitation Studio Slice F Publish Mode validation
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx'
+      - 'src/components/projects/invitation-studio-publish-mode.tsx'
+      - 'src/components/projects/invitation-studio-publish-mode.module.css'
+      - 'src/components/projects/publish-invitation-controls.tsx'
+      - 'tests/server/dashboard-invitation-editor-route.test.tsx'
+      - 'tests/unit/invitation-studio-publish-mode-slice-f.test.ts'
+      - 'tests/e2e/invitation-studio-publish-mode-slice-f.spec.ts'
+      - 'tests/e2e/fixture-app/app/invitation-studio-slice-f/**'
+      - 'playwright.invitation-studio-slice-f.config.ts'
+      - 'docs/INVITATION_STUDIO_SLICE_F_PUBLISH_DECISION_AUTHORITY.md'
+      - '.github/workflows/invitation-studio-slice-f.yml'
+  push:
+    branches:
+      - feature/invitation-studio-slice-f-publish-decision-authority
+    paths:
+      - 'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx'
+      - 'src/components/projects/invitation-studio-publish-mode.tsx'
+      - 'src/components/projects/invitation-studio-publish-mode.module.css'
+      - 'src/components/projects/publish-invitation-controls.tsx'
+      - 'tests/server/dashboard-invitation-editor-route.test.tsx'
+      - 'tests/unit/invitation-studio-publish-mode-slice-f.test.ts'
+      - 'tests/e2e/invitation-studio-publish-mode-slice-f.spec.ts'
+      - 'tests/e2e/fixture-app/app/invitation-studio-slice-f/**'
+      - 'playwright.invitation-studio-slice-f.config.ts'
+      - 'docs/INVITATION_STUDIO_SLICE_F_PUBLISH_DECISION_AUTHORITY.md'
+      - '.github/workflows/invitation-studio-slice-f.yml'
+
+concurrency:
+  group: invitation-studio-slice-f-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Check focused formatting
+        run: |
+          npx prettier --check \
+            'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
+            src/components/projects/invitation-studio-publish-mode.tsx \
+            src/components/projects/invitation-studio-publish-mode.module.css \
+            src/components/projects/publish-invitation-controls.tsx \
+            tests/server/dashboard-invitation-editor-route.test.tsx \
+            tests/unit/invitation-studio-publish-mode-slice-f.test.ts \
+            tests/e2e/invitation-studio-publish-mode-slice-f.spec.ts \
+            tests/e2e/fixture-app/app/invitation-studio-slice-f/page.tsx \
+            tests/e2e/fixture-app/app/invitation-studio-slice-f/fixture-client.tsx \
+            playwright.invitation-studio-slice-f.config.ts \
+            docs/INVITATION_STUDIO_SLICE_F_PUBLISH_DECISION_AUTHORITY.md \
+            .github/workflows/invitation-studio-slice-f.yml
+      - name: Lint focused source
+        run: |
+          npx eslint \
+            'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
+            src/components/projects/invitation-studio-publish-mode.tsx \
+            src/components/projects/publish-invitation-controls.tsx \
+            tests/server/dashboard-invitation-editor-route.test.tsx \
+            tests/unit/invitation-studio-publish-mode-slice-f.test.ts \
+            tests/e2e/invitation-studio-publish-mode-slice-f.spec.ts \
+            tests/e2e/fixture-app/app/invitation-studio-slice-f/page.tsx \
+            tests/e2e/fixture-app/app/invitation-studio-slice-f/fixture-client.tsx \
+            playwright.invitation-studio-slice-f.config.ts
+      - run: npm run typecheck
+      - name: Run Slice A through F and publication compatibility contracts
+        run: |
+          npx vitest run \
+            tests/unit/invitation-studio-structural-foundation-slice-a.test.tsx \
+            tests/unit/invitation-studio-unified-state-slice-b.test.ts \
+            tests/unit/invitation-studio-design-mode-slice-c.test.ts \
+            tests/unit/invitation-studio-media-mode-slice-d.test.ts \
+            tests/unit/invitation-studio-preview-mode-slice-e.test.ts \
+            tests/unit/invitation-studio-publish-mode-slice-f.test.ts \
+            src/modules/publications/__tests__/published-invitation.schema.test.ts \
+            src/modules/publications/__tests__/publication.service.test.ts \
+            src/modules/payments/__tests__/payment-publish-policy.test.ts \
+            tests/server/dashboard-invitation-editor-route.test.tsx
+      - run: npm run build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run desktop and mobile Publish Mode smoke
+        run: npx playwright test --config=playwright.invitation-studio-slice-f.config.ts
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: invitation-studio-slice-f-playwright-report
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+          retention-days: 7

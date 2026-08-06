@@ -56,6 +56,18 @@ export type InvitationEditorLocalAction =
       type: 'schedule';
     }
   | {
+      enabled: boolean;
+      type: 'gallery-visibility';
+    }
+  | {
+      imageIds: string[];
+      type: 'gallery-assets';
+    }
+  | {
+      audio: InvitationDraftContent['audio'];
+      type: 'audio-asset';
+    }
+  | {
       field: RsvpField;
       type: 'rsvp';
       value: boolean | string | null;
@@ -148,6 +160,21 @@ export function invitationEditorLocalContentReducer(
         ...content,
         eventSchedule: { events: action.events },
       };
+    case 'gallery-visibility':
+      return {
+        ...content,
+        gallery: { ...content.gallery, enabled: action.enabled },
+      };
+    case 'gallery-assets':
+      return {
+        ...content,
+        gallery: { ...content.gallery, imageIds: action.imageIds },
+      };
+    case 'audio-asset':
+      return {
+        ...content,
+        audio: action.audio,
+      };
     case 'rsvp':
       return {
         ...content,
@@ -238,6 +265,9 @@ export function createInvitationEditorSubmissionPayload(content: InvitationDraft
         venueAddress: event.venueAddress,
         venueName: event.venueName,
       })),
+    },
+    gallery: {
+      enabled: content.gallery.enabled,
     },
     hero: {
       eyebrow: content.hero.eyebrow,

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "git": {
+    "deploymentEnabled": {
+      "feature/invitation-studio-slice-b-unified-state-command-authority": false,
+      "feature/invitation-studio-slice-c-design-mode": false,
+      "feature/invitation-studio-slice-d-media-mode-asset-authority": false,
+      "feature/invitation-studio-slice-e-preview-version-truth-authority": false,
+      "feature/invitation-studio-slice-f-publish-decision-authority": false,
+      "feature/invitation-studio-slice-g-responsive-polish": false
+    }
+  }
+}
