@@ -1,0 +1,52 @@
+name: Apply Invitation Studio Slice B
+
+on:
+  push:
+    branches:
+      - feature/invitation-studio-slice-b-unified-state-command-authority
+    paths:
+      - 'tools/apply-invitation-studio-slice-b.py'
+      - '.github/workflows/invitation-studio-slice-b-bootstrap.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/invitation-studio-slice-b-unified-state-command-authority
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Apply Slice B refactor
+        run: python tools/apply-invitation-studio-slice-b.py
+      - name: Format touched files
+        run: |
+          npx prettier --write \
+            vercel.json \
+            'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
+            src/components/projects/invitation-editor.tsx \
+            src/components/projects/invitation-studio-provider.tsx \
+            src/components/projects/invitation-studio-shell.tsx \
+            src/components/projects/invitation-studio-shell.module.css \
+            tests/unit/invitation-studio-unified-state-slice-b.test.ts \
+            tests/e2e/invitation-studio-unified-state-slice-b.spec.ts \
+            tests/e2e/fixture-app/app/invitation-studio-slice-b/page.tsx \
+            tests/e2e/fixture-app/app/invitation-studio-slice-b/fixture-client.tsx \
+            playwright.invitation-studio-slice-b.config.ts \
+            .github/workflows/invitation-studio-slice-b.yml \
+            docs/INVITATION_STUDIO_SLICE_B_UNIFIED_STATE_COMMAND_AUTHORITY.md
+      - name: Commit Slice B implementation
+        run: |
+          git config user.name "seraya-release-bot"
+          git config user.email "88146860+baktipra@users.noreply.github.com"
+          git add -A
+          git diff --cached --stat
+          git commit -m "SERAYA Slice B: unify Studio state and save authority"
+          git push origin HEAD:feature/invitation-studio-slice-b-unified-state-command-authority
