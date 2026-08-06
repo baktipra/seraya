@@ -1,3 +1,4 @@
+import { DashboardShell } from '../../../../../src/components/dashboard/dashboard-shell';
 import { parseInvitationWorkspaceTask } from '../../../../../src/components/projects/invitation-task-workspace.types';
 import { createDefaultInvitationDraftContent } from '../../../../../src/modules/invitations/invitation-draft.defaults';
 import type { InvitationDraft } from '../../../../../src/modules/invitations/invitation-draft.types';
@@ -56,12 +57,16 @@ export default async function OwnerWorkspaceUsabilityResetFixturePage({
   };
 
   return (
-    <main className="bg-seraya-canvas min-h-screen w-full px-3 py-4 sm:px-5 lg:px-6">
+    <DashboardShell
+      displayName="Alya Prameswari"
+      email="alya@example.com"
+      hasActiveProject
+    >
       <OwnerWorkspaceUsabilityResetFixture
         initialTask={parseInvitationWorkspaceTask(query.task, query.mode)}
         readiness={readiness}
         savedDraft={savedDraft}
       />
-    </main>
+    </DashboardShell>
   );
 }
