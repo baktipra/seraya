@@ -1,0 +1,133 @@
+name: Invitation Studio Slice D Media Mode validation
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx'
+      - 'src/app/api/projects/[projectId]/gallery/reorder/route.ts'
+      - 'src/components/projects/gallery-manager.tsx'
+      - 'src/components/projects/invitation-audio-manager.tsx'
+      - 'src/components/projects/invitation-editor.tsx'
+      - 'src/components/projects/invitation-studio-media-mode.tsx'
+      - 'src/components/projects/invitation-studio-media-mode.module.css'
+      - 'src/components/projects/invitation-studio-provider.tsx'
+      - 'src/modules/invitations/invitation-editor-local-state.ts'
+      - 'src/modules/invitations/invitation-editor.schema.ts'
+      - 'src/modules/invitations/invitation-editor.service.ts'
+      - 'src/modules/media/media.service.ts'
+      - 'src/modules/media/media.validation.ts'
+      - 'tests/unit/invitation-studio-media-mode-slice-d.test.ts'
+      - 'tests/e2e/invitation-studio-media-mode-slice-d.spec.ts'
+      - 'tests/e2e/fixture-app/app/invitation-studio-slice-d/**'
+      - 'playwright.invitation-studio-slice-d.config.ts'
+      - '.github/workflows/invitation-studio-slice-d.yml'
+  push:
+    branches:
+      - feature/invitation-studio-slice-d-media-mode-asset-authority
+    paths:
+      - 'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx'
+      - 'src/app/api/projects/[projectId]/gallery/reorder/route.ts'
+      - 'src/components/projects/gallery-manager.tsx'
+      - 'src/components/projects/invitation-audio-manager.tsx'
+      - 'src/components/projects/invitation-editor.tsx'
+      - 'src/components/projects/invitation-studio-media-mode.tsx'
+      - 'src/components/projects/invitation-studio-media-mode.module.css'
+      - 'src/components/projects/invitation-studio-provider.tsx'
+      - 'src/modules/invitations/invitation-editor-local-state.ts'
+      - 'src/modules/invitations/invitation-editor.schema.ts'
+      - 'src/modules/invitations/invitation-editor.service.ts'
+      - 'src/modules/media/media.service.ts'
+      - 'src/modules/media/media.validation.ts'
+      - 'tests/unit/invitation-studio-media-mode-slice-d.test.ts'
+      - 'tests/e2e/invitation-studio-media-mode-slice-d.spec.ts'
+      - 'tests/e2e/fixture-app/app/invitation-studio-slice-d/**'
+      - 'playwright.invitation-studio-slice-d.config.ts'
+      - '.github/workflows/invitation-studio-slice-d.yml'
+
+concurrency:
+  group: invitation-studio-slice-d-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Check focused formatting
+        run: |
+          npx prettier --check \
+            'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
+            'src/app/api/projects/[projectId]/gallery/reorder/route.ts' \
+            src/components/projects/gallery-manager.tsx \
+            src/components/projects/invitation-audio-manager.tsx \
+            src/components/projects/invitation-editor.tsx \
+            src/components/projects/invitation-studio-media-mode.tsx \
+            src/components/projects/invitation-studio-media-mode.module.css \
+            src/components/projects/invitation-studio-provider.tsx \
+            src/modules/invitations/invitation-editor-local-state.ts \
+            src/modules/invitations/invitation-editor.schema.ts \
+            src/modules/invitations/invitation-editor.service.ts \
+            src/modules/media/media.service.ts \
+            src/modules/media/media.validation.ts \
+            tests/unit/invitation-studio-media-mode-slice-d.test.ts \
+            tests/e2e/invitation-studio-media-mode-slice-d.spec.ts \
+            tests/e2e/fixture-app/app/invitation-studio-slice-d/page.tsx \
+            tests/e2e/fixture-app/app/invitation-studio-slice-d/fixture-client.tsx \
+            playwright.invitation-studio-slice-d.config.ts \
+            .github/workflows/invitation-studio-slice-d.yml
+      - name: Lint focused source
+        run: |
+          npx eslint \
+            'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
+            'src/app/api/projects/[projectId]/gallery/reorder/route.ts' \
+            src/components/projects/gallery-manager.tsx \
+            src/components/projects/invitation-audio-manager.tsx \
+            src/components/projects/invitation-editor.tsx \
+            src/components/projects/invitation-studio-media-mode.tsx \
+            src/components/projects/invitation-studio-provider.tsx \
+            src/modules/invitations/invitation-editor-local-state.ts \
+            src/modules/invitations/invitation-editor.schema.ts \
+            src/modules/invitations/invitation-editor.service.ts \
+            src/modules/media/media.service.ts \
+            src/modules/media/media.validation.ts \
+            tests/unit/invitation-studio-media-mode-slice-d.test.ts \
+            tests/e2e/invitation-studio-media-mode-slice-d.spec.ts \
+            tests/e2e/fixture-app/app/invitation-studio-slice-d/page.tsx \
+            tests/e2e/fixture-app/app/invitation-studio-slice-d/fixture-client.tsx \
+            playwright.invitation-studio-slice-d.config.ts
+      - run: npm run typecheck
+      - name: Run Slice A through D and media compatibility contracts
+        run: |
+          npx vitest run \
+            tests/unit/invitation-studio-structural-foundation-slice-a.test.tsx \
+            tests/unit/invitation-studio-unified-state-slice-b.test.ts \
+            tests/unit/invitation-studio-design-mode-slice-c.test.ts \
+            tests/unit/invitation-studio-media-mode-slice-d.test.ts \
+            src/modules/invitations/__tests__/invitation-editor.service.test.ts \
+            src/modules/media/__tests__/media.service.test.ts \
+            src/modules/media/__tests__/media.validation.test.ts
+      - run: npm run build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run desktop and mobile Media Mode smoke
+        run: npx playwright test --config=playwright.invitation-studio-slice-d.config.ts
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: invitation-studio-slice-d-playwright-report
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+          retention-days: 7
