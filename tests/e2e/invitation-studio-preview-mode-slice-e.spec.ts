@@ -11,6 +11,7 @@ test.describe('Invitation Studio Slice E Preview Mode', () => {
     await page.goto('/invitation-studio-slice-e?mode=preview&version=local');
 
     const previewMode = page.locator(previewSelector);
+    const previewHeader = previewMode.locator(':scope > header');
     const renderer = getPreviewRenderer(page);
 
     await expect(previewMode).toHaveAttribute('data-preview-version', 'local');
@@ -27,7 +28,9 @@ test.describe('Invitation Studio Slice E Preview Mode', () => {
     await page.getByRole('tab', { name: /^Preview/ }).click();
     await expect(previewMode).toHaveAttribute('data-preview-version', 'local');
     await expect(renderer.getByText('Perubahan lokal Nadia & Raka')).toBeVisible();
-    await expect(page.getByText('Perubahan lokal belum tersimpan')).toBeVisible();
+    await expect(
+      previewHeader.getByText('Perubahan lokal belum tersimpan', { exact: true }),
+    ).toBeVisible();
 
     await page.getByRole('radio', { name: /Draf tersimpan/ }).click();
     await expect(previewMode).toHaveAttribute('data-preview-version', 'saved');
@@ -37,7 +40,7 @@ test.describe('Invitation Studio Slice E Preview Mode', () => {
     await page.getByRole('radio', { name: /Versi terbit/ }).click();
     await expect(previewMode).toHaveAttribute('data-preview-version', 'published');
     await expect(renderer.getByText('Versi terbit Nadia & Raka')).toBeVisible();
-    await expect(page.getByText('Versi terbit · Revisi 3')).toBeVisible();
+    await expect(previewHeader.getByText('Versi terbit · Revisi 3', { exact: true })).toBeVisible();
 
     await page.goBack();
     await expect(previewMode).toHaveAttribute('data-preview-version', 'saved');
@@ -56,10 +59,10 @@ test.describe('Invitation Studio Slice E Preview Mode', () => {
     await page.getByRole('button', { name: 'Simulasi personal' }).click();
     await expect(previewMode).toHaveAttribute('data-preview-surface', 'personal');
     await expect(page.locator('[data-invitation-preview-personal-slot="greeting"]')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Hadir' })).toBeDisabled();
-    await expect(page.getByRole('button', { name: 'Kirim ucapan' })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Hadir', exact: true })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Kirim ucapan', exact: true })).toBeDisabled();
 
-    await page.getByRole('button', { name: 'Desktop' }).click();
+    await page.getByRole('button', { name: 'Desktop', exact: true }).click();
     await expect(previewMode).toHaveAttribute('data-preview-viewport', 'desktop');
     await expect(page.locator('[data-preview-device="desktop"]')).toBeVisible();
     await expect(page).toHaveURL(/mode=preview/);
