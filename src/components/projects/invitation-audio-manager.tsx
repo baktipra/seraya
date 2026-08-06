@@ -23,8 +23,10 @@ import {
 } from '@/modules/media/invitation-audio.types';
 
 type InvitationAudioManagerProps = {
+  embedded?: boolean;
   initialAudio: InvitationAudioSummary | null;
   isPublished: boolean;
+  onAudioChange?: (audio: InvitationAudioSummary | null) => void;
   projectId: string;
 };
 
@@ -97,8 +99,10 @@ async function uploadDirectlyToSignedUrl(
 }
 
 export function InvitationAudioManager({
+  embedded = false,
   initialAudio,
   isPublished,
+  onAudioChange,
   projectId,
 }: InvitationAudioManagerProps) {
   const { toast } = useToast();
@@ -169,6 +173,7 @@ export function InvitationAudioManager({
       }
 
       setAudio(finalized.audio);
+      onAudioChange?.(finalized.audio);
       announceAudioChange({
         durationSeconds: finalized.audio.durationSeconds,
         enabled: true,
@@ -209,6 +214,7 @@ export function InvitationAudioManager({
       }
 
       setAudio(null);
+      onAudioChange?.(null);
       announceAudioChange({ durationSeconds: null, enabled: false });
       toast({ title: 'Audio dihapus dari draf undangan.', variant: 'success' });
     } catch (error) {
@@ -221,8 +227,9 @@ export function InvitationAudioManager({
   return (
     <Card
       aria-labelledby="invitation-audio-title"
-      className="mb-5 overflow-hidden sm:mb-6"
-      data-v4j-audio-foundation="slice-c"
+      className={embedded ? 'w-full overflow-hidden' : 'mb-5 overflow-hidden sm:mb-6'}
+      data-invitation-studio-audio-manager={embedded ? 'embedded' : 'standalone'}
+      data-v4j-audio-foundation="slice-d"
     >
       <CardHeader className="bg-seraya-brand-soft pb-6">
         <CardTitle className="seraya-display-md" id="invitation-audio-title">

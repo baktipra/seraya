@@ -180,11 +180,14 @@ function applyEditorInputToActiveDraft(
       subtitle: input.hero.subtitle,
       title: input.hero.title,
     },
-    // meta and gallery intentionally stay sourced from the verified active
-    // draft. The editor has no controls for them, so client input cannot mutate
-    // timezone, gallery membership, or schema-level metadata.
+    // Metadata and gallery membership stay sourced from the verified active
+    // draft. The editor may change only whether the existing gallery composition
+    // is shown; upload, removal, and ordering remain owner-only media operations.
     meta: currentContent.meta,
-    gallery: currentContent.gallery,
+    gallery: {
+      enabled: input.gallery?.enabled ?? currentContent.gallery.enabled,
+      imageIds: currentContent.gallery.imageIds,
+    },
     opening: {
       message: opening.message,
       quote: opening.quote,

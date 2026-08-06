@@ -19,8 +19,7 @@ export function getInvitationStudioMediaSummary(input: {
 }) {
   return {
     audioLabel: input.audio ? 'Audio siap' : 'Belum ada audio',
-    galleryLabel:
-      input.images.length > 0 ? `${input.images.length} foto aktif` : 'Belum ada foto',
+    galleryLabel: input.images.length > 0 ? `${input.images.length} foto aktif` : 'Belum ada foto',
   };
 }
 
@@ -44,7 +43,10 @@ export function InvitationStudioMediaMode({
   const [activeTab, setActiveTab] = useState<InvitationStudioMediaTab>(initialTab);
   const [audio, setAudio] = useState(initialAudio);
   const [images, setImages] = useState(initialImages);
-  const summary = useMemo(() => getInvitationStudioMediaSummary({ audio, images }), [audio, images]);
+  const summary = useMemo(
+    () => getInvitationStudioMediaSummary({ audio, images }),
+    [audio, images],
+  );
 
   function handleImagesChange(nextImages: InvitationGalleryImage[]) {
     setImages(nextImages);

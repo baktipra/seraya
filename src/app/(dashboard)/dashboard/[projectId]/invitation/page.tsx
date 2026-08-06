@@ -2,9 +2,9 @@ import type { Route } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-import { InvitationAudioManager } from '@/components/projects/invitation-audio-manager';
 import { InvitationEditor } from '@/components/projects/invitation-editor';
 import { InvitationStudioDesignMode } from '@/components/projects/invitation-studio-design-mode';
+import { InvitationStudioMediaMode } from '@/components/projects/invitation-studio-media-mode';
 import { InvitationStudioProvider } from '@/components/projects/invitation-studio-provider';
 import {
   InvitationStudioShell,
@@ -108,7 +108,9 @@ function getInvitationChapterHref(projectId: string, chapter: InvitationEditorSe
   return (
     chapter === 'style'
       ? `/dashboard/${projectId}/invitation?mode=design`
-      : `/dashboard/${projectId}/invitation?mode=content#bagian-${chapter}`
+      : chapter === 'gallery'
+        ? `/dashboard/${projectId}/invitation?mode=media`
+        : `/dashboard/${projectId}/invitation?mode=content#bagian-${chapter}`
   ) as Route;
 }
 
@@ -366,6 +368,14 @@ export default async function InvitationEditorPage({
             />
           }
           initialMode={parseInvitationStudioMode(query.mode)}
+          media={
+            <InvitationStudioMediaMode
+              initialAudio={screen.audio}
+              initialImages={screen.galleryImages}
+              isPublished={screen.editor.project.status === 'published'}
+              projectId={screen.editor.project.id}
+            />
+          }
           previewHref={`/dashboard/${screen.editor.project.id}/preview` as Route}
           statusLabel={studioStatus.label}
           statusTone={studioStatus.tone}
@@ -375,11 +385,6 @@ export default async function InvitationEditorPage({
               draft={screen.editor.draft}
               projectId={screen.editor.project.id}
               readiness={screen.readiness}
-            />
-            <InvitationAudioManager
-              initialAudio={screen.audio}
-              isPublished={screen.editor.project.status === 'published'}
-              projectId={screen.editor.project.id}
             />
             <InvitationEditor
               draft={screen.editor.draft}

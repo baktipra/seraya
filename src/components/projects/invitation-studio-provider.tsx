@@ -131,6 +131,7 @@ type InvitationStudioContextValue = {
   isPending: boolean;
   savePresentation: InvitationStudioSavePresentation;
   submissionPayload: string;
+  synchronizeLocalContent: (action: InvitationEditorLocalAction) => void;
   updateLocalContent: (action: InvitationEditorLocalAction) => void;
 };
 
@@ -192,6 +193,9 @@ export function InvitationStudioProvider({
   const updateLocalContent = useCallback((action: InvitationEditorLocalAction) => {
     dispatchLocalContent(action);
     setIsDirty(true);
+  }, []);
+  const synchronizeLocalContent = useCallback((action: InvitationEditorLocalAction) => {
+    dispatchLocalContent(action);
   }, []);
 
   const submissionPayload = useMemo(
@@ -275,6 +279,7 @@ export function InvitationStudioProvider({
       isPending,
       savePresentation,
       submissionPayload,
+      synchronizeLocalContent,
       updateLocalContent,
     }),
     [
@@ -288,6 +293,7 @@ export function InvitationStudioProvider({
       isPending,
       savePresentation,
       submissionPayload,
+      synchronizeLocalContent,
       updateLocalContent,
     ],
   );

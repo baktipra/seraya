@@ -3,10 +3,10 @@ import { NextResponse } from 'next/server';
 import { AuthenticationRequiredError } from '@/modules/auth/current-user';
 import {
   MediaGalleryOrderConflictError,
-  MediaRepositoryError,
   MediaUploadUnavailableError,
   reorderGalleryImagesForCurrentUser,
 } from '@/modules/media/media.service';
+import { MediaRepositoryError } from '@/modules/media/media.repository';
 import { galleryMediaOrderSchema } from '@/modules/media/media.validation';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 

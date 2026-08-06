@@ -889,26 +889,37 @@ export function InvitationEditorActivePanel({
       return (
         <InvitationWorkspacePanel active section="gallery">
           <EditorSection
-            description="Foto undangan dikelola di ruang galeri agar urutan dan proses upload tetap aman."
+            description="Atur apakah foto yang sudah disiapkan di mode Media akan tampil dalam perjalanan undangan."
             number="06"
             title="Galeri"
           >
-            <div className="border-seraya-border-default bg-seraya-surface rounded-[var(--seraya-radius-md)] border p-4 sm:p-5">
-              <p className="text-seraya-text-primary font-semibold">
-                {content.gallery.imageIds.length > 0
-                  ? `${content.gallery.imageIds.length} foto tersimpan`
-                  : 'Belum ada foto tersimpan'}
-              </p>
-              <p className="text-seraya-text-muted mt-1.5 max-w-xl text-sm leading-6">
-                Tambah, hapus, dan atur foto dari pengelola galeri. Kalian akan kembali ke bagian
-                ini tanpa mengubah draft undangan.
-              </p>
-              <Link
-                className="border-seraya-border-default bg-seraya-canvas text-seraya-text-primary hover:border-seraya-border-strong focus-visible:outline-seraya-focus-ring mt-4 inline-flex min-h-11 items-center justify-center rounded-[var(--seraya-radius-md)] border px-4 text-sm font-semibold focus-visible:outline-3 focus-visible:outline-offset-2"
-                href={`/dashboard/${projectId}/gallery`}
-              >
-                Kelola galeri
-              </Link>
+            <div className="space-y-5">
+              <EditorToggle
+                checked={content.gallery.enabled}
+                error={getError(fieldErrors, 'gallery.enabled')}
+                help="Aset foto tetap aman ketika galeri disembunyikan. Tamu hanya melihat galeri setelah draf disimpan dan undangan diterbitkan."
+                label="Tampilkan galeri foto"
+                name="gallery.enabled"
+                onToggle={(enabled) => updateLocalContent({ enabled, type: 'gallery-visibility' })}
+              />
+              <div className="border-seraya-border-default bg-seraya-surface rounded-[var(--seraya-radius-md)] border p-4 sm:p-5">
+                <p className="text-seraya-text-primary font-semibold">
+                  {content.gallery.imageIds.length > 0
+                    ? `${content.gallery.imageIds.length} foto siap digunakan`
+                    : 'Belum ada foto yang siap digunakan'}
+                </p>
+                <p className="text-seraya-text-muted mt-1.5 max-w-xl text-sm leading-6">
+                  Upload, urutan, penggantian, dan penghapusan aset dikelola di mode Media agar
+                  proses file tidak bercampur dengan penyusunan isi undangan.
+                </p>
+                <Link
+                  className="border-seraya-border-default bg-seraya-canvas text-seraya-text-primary hover:border-seraya-border-strong focus-visible:outline-seraya-focus-ring mt-4 inline-flex min-h-11 items-center justify-center rounded-[var(--seraya-radius-md)] border px-4 text-sm font-semibold focus-visible:outline-3 focus-visible:outline-offset-2"
+                  href={`/dashboard/${projectId}/invitation?mode=media`}
+                  prefetch={false}
+                >
+                  Buka mode Media
+                </Link>
+              </div>
             </div>
           </EditorSection>
         </InvitationWorkspacePanel>

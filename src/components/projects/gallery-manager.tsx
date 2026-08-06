@@ -20,9 +20,12 @@ import {
 } from '@/modules/media/media.types';
 
 type GalleryManagerProps = {
+  embedded?: boolean;
   initialImages: InvitationGalleryImage[];
   isPublished: boolean;
+  onImagesChange?: (images: InvitationGalleryImage[]) => void;
   projectId: string;
+  showProjectBackLink?: boolean;
 };
 
 type ReserveResponse = {
@@ -56,11 +59,19 @@ async function uploadDirectlyToSignedUrl(signedUploadUrl: string, file: File) {
   }
 }
 
-export function GalleryManager({ initialImages, isPublished, projectId }: GalleryManagerProps) {
+export function GalleryManager({
+  embedded = false,
+  initialImages,
+  isPublished,
+  onImagesChange,
+  projectId,
+  showProjectBackLink = true,
+}: GalleryManagerProps) {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [images, setImages] = useState(initialImages);
   const [isRemovingId, setIsRemovingId] = useState<string | null>(null);
+  const [isReorderingId, setIsReorderingId] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
 
@@ -119,7 +130,9 @@ export function GalleryManager({ initialImages, isPublished, projectId }: Galler
         throw new Error(finalized.message ?? 'Foto belum bisa diselesaikan. Coba unggah lagi.');
       }
 
-      setImages((current) => [...current, finalized.image as InvitationGalleryImage]);
+      const nextImages = [...images, finalized.image as InvitationGalleryImage];
+      setImages(nextImages);
+      onImagesChange?.(nextImages);
       toast({ title: 'Foto sudah ditambahkan ke galeri.', variant: 'success' });
     } catch (error) {
       const message =
@@ -152,7 +165,9 @@ export function GalleryManager({ initialImages, isPublished, projectId }: Galler
         throw new Error(payload.message ?? 'Foto tidak dapat dihapus dari galeri.');
       }
 
-      setImages((current) => current.filter((image) => image.id !== assetId));
+      const nextImages = images.filter((image) => image.id !== assetId);
+      setImages(nextImages);
+      onImagesChange?.(nextImages);
       toast({ title: 'Foto dihapus dari galeri draft.', variant: 'success' });
     } catch (error) {
       setUploadMessage(
@@ -163,8 +178,53 @@ export function GalleryManager({ initialImages, isPublished, projectId }: Galler
     }
   }
 
+  async function handleMove(index: number, direction: -1 | 1) {
+    const targetIndex = index + direction;
+
+    if (isReorderingId || targetIndex < 0 || targetIndex >= images.length) {
+      return;
+    }
+
+    const movedImage = images[index];
+    if (!movedImage) {
+      return;
+    }
+
+    const nextImages = [...images];
+    [nextImages[index], nextImages[targetIndex]] = [nextImages[targetIndex]!, nextImages[index]!];
+    setIsReorderingId(movedImage.id);
+    setUploadMessage(null);
+
+    try {
+      const response = await fetch(`/api/projects/${projectId}/gallery/reorder`, {
+        body: JSON.stringify({ imageIds: nextImages.map((image) => image.id) }),
+        headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+      });
+      const payload = await readJson<{ message?: string }>(response);
+
+      if (!response.ok) {
+        throw new Error(payload.message ?? 'Urutan foto belum dapat disimpan.');
+      }
+
+      setImages(nextImages);
+      onImagesChange?.(nextImages);
+      toast({ title: 'Urutan galeri diperbarui.', variant: 'success' });
+    } catch (error) {
+      setUploadMessage(
+        error instanceof Error ? error.message : 'Urutan foto belum dapat disimpan.',
+      );
+    } finally {
+      setIsReorderingId(null);
+    }
+  }
+
   return (
-    <Card aria-labelledby="gallery-manager-title" className="max-w-4xl overflow-hidden">
+    <Card
+      aria-labelledby="gallery-manager-title"
+      className={embedded ? 'w-full overflow-hidden' : 'max-w-4xl overflow-hidden'}
+      data-invitation-studio-gallery-manager={embedded ? 'embedded' : 'standalone'}
+    >
       <CardHeader className="bg-seraya-brand-soft pb-6 sm:pb-7">
         <CardTitle className="seraya-display-md" id="gallery-manager-title">
           Foto kalian
@@ -225,8 +285,8 @@ export function GalleryManager({ initialImages, isPublished, projectId }: Galler
 
         {images.length > 0 ? (
           <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {images.map((image) => (
-              <li className="space-y-2" key={image.id}>
+            {images.map((image, index) => (
+              <li className="space-y-2" data-gallery-image-id={image.id} key={image.id}>
                 <div className="border-seraya-border-default bg-seraya-soft aspect-[4/5] overflow-hidden rounded-[var(--seraya-radius-md)] border">
                   <img
                     alt={image.alt}
@@ -234,6 +294,30 @@ export function GalleryManager({ initialImages, isPublished, projectId }: Galler
                     loading="lazy"
                     src={image.src}
                   />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    aria-label={`Naikkan foto ${index + 1}`}
+                    disabled={index === 0 || isReorderingId !== null}
+                    loading={isReorderingId === image.id}
+                    onClick={() => handleMove(index, -1)}
+                    size="sm"
+                    type="button"
+                    variant="secondary"
+                  >
+                    Naikkan
+                  </Button>
+                  <Button
+                    aria-label={`Turunkan foto ${index + 1}`}
+                    disabled={index === images.length - 1 || isReorderingId !== null}
+                    loading={isReorderingId === image.id}
+                    onClick={() => handleMove(index, 1)}
+                    size="sm"
+                    type="button"
+                    variant="secondary"
+                  >
+                    Turunkan
+                  </Button>
                 </div>
                 <Button
                   fullWidth
@@ -257,14 +341,16 @@ export function GalleryManager({ initialImages, isPublished, projectId }: Galler
           </div>
         )}
 
-        <div className="border-seraya-border-default border-t pt-5">
-          <Link
-            className="text-seraya-action-primary focus-visible:outline-seraya-focus-ring rounded-[var(--seraya-radius-sm)] text-sm font-semibold underline-offset-4 hover:underline focus-visible:outline-3 focus-visible:outline-offset-3"
-            href={`/dashboard/${projectId}`}
-          >
-            ← Kembali ke project
-          </Link>
-        </div>
+        {showProjectBackLink ? (
+          <div className="border-seraya-border-default border-t pt-5">
+            <Link
+              className="text-seraya-action-primary focus-visible:outline-seraya-focus-ring rounded-[var(--seraya-radius-sm)] text-sm font-semibold underline-offset-4 hover:underline focus-visible:outline-3 focus-visible:outline-offset-3"
+              href={`/dashboard/${projectId}`}
+            >
+              ← Kembali ke project
+            </Link>
+          </div>
+        ) : null}
       </CardContent>
     </Card>
   );

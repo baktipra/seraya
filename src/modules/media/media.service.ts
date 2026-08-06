@@ -48,6 +48,21 @@ export class MediaUploadUnavailableError extends Error {
   }
 }
 
+export class MediaGalleryOrderConflictError extends Error {
+  constructor() {
+    super('The gallery order no longer matches the active draft.');
+    this.name = 'MediaGalleryOrderConflictError';
+  }
+}
+
+export function isGalleryOrderPermutation(currentIds: string[], nextIds: string[]) {
+  return (
+    currentIds.length === nextIds.length &&
+    new Set(nextIds).size === nextIds.length &&
+    currentIds.every((id) => nextIds.includes(id))
+  );
+}
+
 type GalleryMediaReservationInput = {
   mimeType: GalleryImageMimeType;
   sizeBytes: number;
@@ -199,6 +214,30 @@ export async function removeGalleryImageFromDraftForCurrentUser(input: {
     gallery: {
       enabled: remainingImageIds.length > 0,
       imageIds: remainingImageIds,
+    },
+  });
+
+  await updateInvitationDraftGalleryForVerifiedProject({ content, project });
+}
+
+/** Owner-only reorder. It accepts only an exact permutation of current draft IDs. */
+export async function reorderGalleryImagesForCurrentUser(input: {
+  imageIds: string[];
+  projectId: string;
+}): Promise<void> {
+  const user = await requireCurrentUser();
+  const project = await getOwnedProjectById(input.projectId, user.id);
+  const draft = requireActiveDraft(await getActiveInvitationDraftForVerifiedProject(project));
+
+  if (!isGalleryOrderPermutation(draft.content.gallery.imageIds, input.imageIds)) {
+    throw new MediaGalleryOrderConflictError();
+  }
+
+  const content = invitationDraftContentSchema.parse({
+    ...draft.content,
+    gallery: {
+      enabled: draft.content.gallery.enabled,
+      imageIds: input.imageIds,
     },
   });
 

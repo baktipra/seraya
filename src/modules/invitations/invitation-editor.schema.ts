@@ -70,6 +70,7 @@ const baseEditorFormFieldNames = [
   'story.enabled',
   'story.heading',
   'story.body',
+  'gallery.enabled',
   'rsvp.enabled',
   'rsvp.heading',
   'rsvp.lead',
@@ -210,6 +211,12 @@ const invitationEditorFormSchema = z
               .max(eventScheduleMaximum),
           })
           .strict(),
+        gallery: z
+          .object({
+            enabled: checkboxInputSchema,
+          })
+          .strict()
+          .optional(),
         hero: z
           .object({
             eyebrow: formTextSchema,
@@ -399,8 +406,8 @@ function getEventScheduleEventsFromFormData(formData: FormData) {
  * Browser field names are deliberately enumerated. The runtime editor submits
  * one strict JSON payload so non-visible chapters can stay unmounted; legacy
  * field-by-field submissions remain supported for the existing no-ambiguity
- * boundary. Gallery, metadata, compatibility mirrors, snapshots, and injected
- * fields cannot cross either path. Amplop Digital accounts use three exact
+ * boundary. Gallery membership, metadata, compatibility mirrors, snapshots, and injected
+ * fields cannot cross either path. Gallery visibility is the only gallery composition field accepted. Amplop Digital accounts use three exact
  * slots and schedule events use four exact slots.
  */
 export function parseInvitationEditorFormData(formData: FormData) {
@@ -479,6 +486,9 @@ export function parseInvitationEditorFormData(formData: FormData) {
       },
       eventSchedule: {
         events: getEventScheduleEventsFromFormData(formData),
+      },
+      gallery: {
+        enabled: getCheckboxValue(formData, 'gallery.enabled'),
       },
       hero: {
         eyebrow: getFormValue(formData, 'hero.eyebrow'),

@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import {
   MAX_GALLERY_IMAGE_BYTES,
+  MAX_GALLERY_IMAGES,
   SUPPORTED_GALLERY_IMAGE_MIME_TYPES,
   type GalleryImageMimeType,
 } from './media.types';
@@ -20,6 +21,11 @@ export const galleryMediaReservationSchema = z
   .strict();
 
 export const galleryMediaAssetIdSchema = z.string().uuid('Foto tidak valid.');
+
+export const galleryMediaOrderSchema = z
+  .array(galleryMediaAssetIdSchema)
+  .max(MAX_GALLERY_IMAGES, `Galeri undangan maksimal berisi ${MAX_GALLERY_IMAGES} foto.`)
+  .refine((imageIds) => new Set(imageIds).size === imageIds.length, 'Urutan foto tidak valid.');
 
 export class GalleryMediaValidationError extends Error {
   constructor(message: string) {
