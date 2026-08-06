@@ -3,7 +3,8 @@
   "git": {
     "deploymentEnabled": {
       "feature/invitation-studio-slice-b-unified-state-command-authority": false,
-      "feature/invitation-studio-slice-c-design-mode": false
+      "feature/invitation-studio-slice-c-design-mode": false,
+      "feature/invitation-studio-slice-d-media-mode-asset-authority": false
     }
   }
 }
