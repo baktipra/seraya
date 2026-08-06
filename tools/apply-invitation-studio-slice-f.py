@@ -1,5 +1,4 @@
 from pathlib import Path
-import re
 
 ROOT = Path(__file__).resolve().parents[1]
 PATH = ROOT / 'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx'
@@ -14,22 +13,10 @@ def replace_once(old: str, new: str, label: str) -> None:
     content = content.replace(old, new, 1)
 
 
-replace_once("import Link from 'next/link';\n", '', 'remove Link import')
 replace_once(
     "import { InvitationStudioPreviewMode } from '@/components/projects/invitation-studio-preview-mode';\n",
     "import { InvitationStudioPreviewMode } from '@/components/projects/invitation-studio-preview-mode';\nimport { InvitationStudioPublishMode } from '@/components/projects/invitation-studio-publish-mode';\n",
     'publish mode import',
-)
-replace_once(
-    """import {
-  getInvitationEditorSectionStatuses,
-  invitationEditorSections,
-  type InvitationEditorSectionKey,
-  type InvitationEditorSectionStatus,
-} from '@/components/projects/invitation-editor-workspace';
-""",
-    '',
-    'remove readiness workspace imports',
 )
 replace_once(
     "import { getInvitationAudioSummaryForVerifiedProject } from '@/modules/media/invitation-audio.service';\n",
@@ -46,16 +33,11 @@ replace_once(
 """,
     'screen payment overview',
 )
-
-content, count = re.subn(
-    r"\ntype InvitationReadinessHandoffProps = \{[\s\S]*?\nasync function getInvitationEditorScreenOrNotFound\(",
-    "\nasync function getInvitationEditorScreenOrNotFound(",
-    content,
-    count=1,
+replace_once(
+    'function InvitationReadinessHandoff({\n',
+    'export function InvitationReadinessHandoff({\n',
+    'preserve legacy compatibility export',
 )
-if count != 1:
-    raise RuntimeError(f'remove legacy readiness handoff: expected 1 match, found {count}')
-
 replace_once(
     """        const [audio, publishedSnapshot] = await Promise.all([
           getInvitationAudioSummaryForVerifiedProject({
