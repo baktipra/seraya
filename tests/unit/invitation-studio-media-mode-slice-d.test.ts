@@ -30,8 +30,9 @@ describe('Invitation Studio Slice D Media Mode', () => {
     expect(galleryMediaOrderSchema.safeParse([firstImageId, firstImageId]).success).toBe(false);
     expect(
       galleryMediaOrderSchema.safeParse(
-        Array.from({ length: 13 }, (_, index) =>
-          `${String(index + 1).padStart(8, '0')}-1111-4111-8111-111111111111`,
+        Array.from(
+          { length: 13 },
+          (_, index) => `${String(index + 1).padStart(8, '0')}-1111-4111-8111-111111111111`,
         ),
       ).success,
     ).toBe(false);
