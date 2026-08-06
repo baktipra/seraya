@@ -6,13 +6,14 @@ import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 
 
 import { InvitationStudioModePlaceholder } from './invitation-studio-mode-placeholder';
 import { useOptionalInvitationStudioState } from './invitation-studio-provider';
+import responsiveStyles from './invitation-studio-responsive-polish.module.css';
+import styles from './invitation-studio-shell.module.css';
 import {
   getInvitationStudioModeLabel,
   invitationStudioModes,
   parseInvitationStudioMode,
   type InvitationStudioMode,
 } from './invitation-studio.types';
-import styles from './invitation-studio-shell.module.css';
 
 export type InvitationStudioStatusTone = 'brand' | 'neutral' | 'success' | 'warning';
 
@@ -74,6 +75,36 @@ export function InvitationStudioShell({
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
+  useEffect(() => {
+    const activeIndex = invitationStudioModes.findIndex((mode) => mode.key === activeMode);
+    const activeTab = tabRefs.current[activeIndex];
+    if (!activeTab) return;
+
+    const navigation = activeTab.closest(
+      '[data-invitation-studio-mode-navigation]',
+    ) as HTMLElement | null;
+    if (!navigation) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      const tabRect = activeTab.getBoundingClientRect();
+      const navigationRect = navigation.getBoundingClientRect();
+      const edgePadding = 8;
+      const isOutsideViewport =
+        tabRect.left < navigationRect.left + edgePadding ||
+        tabRect.right > navigationRect.right - edgePadding;
+
+      if (!isOutsideViewport) return;
+
+      activeTab.scrollIntoView({
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+        block: 'nearest',
+        inline: 'center',
+      });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [activeMode]);
 
   const activateMode = (mode: InvitationStudioMode, historyMode: HistoryMode) => {
     setActiveMode(mode);
@@ -164,9 +195,10 @@ export function InvitationStudioShell({
   return (
     <section
       aria-labelledby="invitation-studio-title"
-      className={styles.studio}
+      className={[styles.studio, responsiveStyles.responsiveRoot].join(' ')}
       data-invitation-studio
       data-invitation-studio-active-mode={activeMode}
+      data-invitation-studio-responsive="slice-g"
       data-invitation-studio-slice="structural-foundation-a"
       data-invitation-studio-state-authority="unified-state-command-b"
     >
