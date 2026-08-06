@@ -141,7 +141,7 @@ const groupCopy = {
   },
 } as const;
 
-const sectionTaskKeys = new Set<InvitationWorkspaceTask>([
+const sectionTaskKeys = new Set<string>([
   'couple',
   'opening',
   'schedule',
@@ -164,6 +164,9 @@ function getTaskUrl(task: InvitationWorkspaceTask | null) {
     url.searchParams.set('task', task);
   } else {
     url.searchParams.delete('task');
+  }
+
+  if (task !== 'preview') {
     url.searchParams.delete('surface');
     url.searchParams.delete('version');
     url.searchParams.delete('viewport');
@@ -248,12 +251,10 @@ function SaveAuthority() {
 
 function SingleTaskEditor({
   activeSection,
-  draft,
   onTaskChange,
   projectId,
 }: {
   activeSection: InvitationWorkspaceContentTask;
-  draft: InvitationDraft;
   onTaskChange: (task: InvitationWorkspaceTask) => void;
   projectId: string;
 }) {
@@ -389,7 +390,10 @@ export function InvitationTaskWorkspace({
     return () => window.cancelAnimationFrame(frame);
   }, [activeTask]);
 
-  const activateTask = (task: InvitationWorkspaceTask | null, historyMode: 'push' | 'replace' = 'push') => {
+  const activateTask = (
+    task: InvitationWorkspaceTask | null,
+    historyMode: 'push' | 'replace' = 'push',
+  ) => {
     setActiveTask(task);
     if (isInvitationWorkspaceContentTask(task)) setActiveContentTask(task);
     setAnnouncement(task ? `${getTaskDefinition(task).title} dibuka.` : 'Daftar pekerjaan dibuka.');
@@ -421,7 +425,8 @@ export function InvitationTaskWorkspace({
 
     if (task === 'media') {
       const hasMedia =
-        studioState.content.gallery.imageIds.length > 0 || Boolean(studioState.content.audio.assetId);
+        studioState.content.gallery.imageIds.length > 0 ||
+        Boolean(studioState.content.audio.assetId);
       return {
         label: hasMedia ? 'Media siap' : 'Belum ada media',
         state: hasMedia ? ('complete' as const) : ('neutral' as const),
@@ -430,7 +435,9 @@ export function InvitationTaskWorkspace({
 
     if (task === 'preview') {
       return {
-        label: readiness.invitation.hasPublishedSnapshot ? 'Versi terbit tersedia' : 'Siap diperiksa',
+        label: readiness.invitation.hasPublishedSnapshot
+          ? 'Versi terbit tersedia'
+          : 'Siap diperiksa',
         state: readiness.invitation.hasPublishedSnapshot
           ? ('complete' as const)
           : ('neutral' as const),
@@ -490,11 +497,7 @@ export function InvitationTaskWorkspace({
       <header className={styles.commandHeader}>
         <div className={styles.commandIdentity}>
           {activeTask ? (
-            <button
-              className={styles.backButton}
-              onClick={() => activateTask(null)}
-              type="button"
-            >
+            <button className={styles.backButton} onClick={() => activateTask(null)} type="button">
               <span aria-hidden="true">←</span>
               Kembali ke Undangan
             </button>
@@ -597,7 +600,6 @@ export function InvitationTaskWorkspace({
         <section hidden={!activeTask || !isInvitationWorkspaceContentTask(activeTask)}>
           <SingleTaskEditor
             activeSection={activeContentTask}
-            draft={draft}
             onTaskChange={(task) => activateTask(task)}
             projectId={projectId}
           />
