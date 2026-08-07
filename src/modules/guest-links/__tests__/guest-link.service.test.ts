@@ -7,6 +7,7 @@ const {
   getActiveRecoverableLinkMock,
   getGuestMock,
   getOwnedProjectMock,
+  listLatestLinkStatesMock,
   replaceLinkMock,
   requireCurrentUserMock,
   revokeLinkMock,
@@ -15,6 +16,7 @@ const {
   getActiveRecoverableLinkMock: vi.fn(),
   getGuestMock: vi.fn(),
   getOwnedProjectMock: vi.fn(),
+  listLatestLinkStatesMock: vi.fn(),
   replaceLinkMock: vi.fn(),
   requireCurrentUserMock: vi.fn(),
   revokeLinkMock: vi.fn(),
@@ -32,6 +34,7 @@ vi.mock('../guest-link.repository', () => ({
   GuestLinkRepositoryError: class GuestLinkRepositoryError extends Error {},
   createPersonalGuestLinkIfNoneActiveWithCiphertextForVerifiedGuest: createIfNoneActiveLinkMock,
   getActiveRecoverableGuestLinkRecordForVerifiedGuest: getActiveRecoverableLinkMock,
+  listLatestGuestLinkStatesForVerifiedGuestIds: listLatestLinkStatesMock,
   replacePersonalGuestLinkWithCiphertextForVerifiedGuest: replaceLinkMock,
   revokePersonalGuestLinkForVerifiedGuest: revokeLinkMock,
 }));
@@ -80,6 +83,7 @@ describe('SRY-013 owner personal-link service ownership guard', () => {
     getActiveRecoverableLinkMock.mockReset();
     getGuestMock.mockReset();
     getOwnedProjectMock.mockReset();
+    listLatestLinkStatesMock.mockReset().mockResolvedValue([]);
     replaceLinkMock.mockReset();
     requireCurrentUserMock.mockReset();
     revokeLinkMock.mockReset();
@@ -130,6 +134,7 @@ describe('SRY-013 owner personal-link service ownership guard', () => {
       projectId: project.id,
     });
 
+    expect(listLatestLinkStatesMock).toHaveBeenCalledWith([guest.id]);
     expect(replaceLinkMock).toHaveBeenCalledWith(
       expect.objectContaining({
         guestId: guest.id,
@@ -142,6 +147,7 @@ describe('SRY-013 owner personal-link service ownership guard', () => {
       /^http:\/\/localhost:3000\/raka-nadia\/g\/[A-Za-z0-9_-]{43}$/,
     );
     expect(result.recipientWhatsAppPhoneE164).toBe('+6281234567890');
+    expect(result.previousLifecycleState).toBe('not_created');
   });
 
   it('shares the exact verified-guest re-access authority without repeating current-user lookup', async () => {

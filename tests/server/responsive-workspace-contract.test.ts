@@ -71,17 +71,27 @@ describe('responsive operational workspace contract', () => {
   });
 
   it('renders Tamu and Bagikan with explicit desktop data and mobile cards across their split graphs', async () => {
-    const [guestWrapper, guestWorkspace, guestData, deliveryWrapper, deliveryWorkspace, deliveryData] =
-      await Promise.all([
-        read('src/components/projects/native-guest-manager.tsx'),
-        read('src/components/projects/native-guest-manager-workspace.tsx'),
-        read('src/components/projects/native-guest-manager-data.tsx'),
-        read('src/components/projects/native-guest-delivery-center.tsx'),
-        read('src/components/projects/native-guest-delivery-center-workspace.tsx'),
-        read('src/components/projects/native-guest-delivery-center-data.tsx'),
-      ]);
+    const [
+      guestWrapper,
+      guestWorkspace,
+      guestData,
+      guestDesktopData,
+      guestMobileData,
+      deliveryWrapper,
+      deliveryWorkspace,
+      deliveryData,
+    ] = await Promise.all([
+      read('src/components/projects/native-guest-manager.tsx'),
+      read('src/components/projects/native-guest-manager-workspace.tsx'),
+      read('src/components/projects/native-guest-manager-data.tsx'),
+      read('src/components/projects/native-guest-manager-desktop-data.tsx'),
+      read('src/components/projects/native-guest-manager-mobile-data.tsx'),
+      read('src/components/projects/native-guest-delivery-center.tsx'),
+      read('src/components/projects/native-guest-delivery-center-workspace.tsx'),
+      read('src/components/projects/native-guest-delivery-center-data.tsx'),
+    ]);
     const sources = [
-      `${guestWrapper}\n${guestWorkspace}\n${guestData}`,
+      `${guestWrapper}\n${guestWorkspace}\n${guestData}\n${guestDesktopData}\n${guestMobileData}`,
       `${deliveryWrapper}\n${deliveryWorkspace}\n${deliveryData}`,
     ];
 

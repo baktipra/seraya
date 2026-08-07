@@ -61,7 +61,7 @@ describe('Slice G2 Aruna guest experience contract', () => {
 
   it('keeps the photo essay directional on desktop and single-column on narrow mobile', () => {
     expect(experienceStyles).toContain('grid-template-columns: repeat(12, minmax(0, 1fr))');
-    expect(experienceStyles).toContain('[data-aruna-photo-frame]:first-child');
+    expect(experienceStyles).toContain(':global([data-aruna-photo-frame]):first-child');
     expect(experienceStyles).toContain('@media (max-width: 36rem)');
     expect(experienceStyles).toContain('grid-template-columns: 1fr');
     expect(experienceStyles).toContain('aspect-ratio: 4 / 5');

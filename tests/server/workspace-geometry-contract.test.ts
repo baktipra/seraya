@@ -48,7 +48,7 @@ describe('canonical workspace geometry and anatomy', () => {
     expect(source).toContain('data-workspace-kind');
   });
 
-  it('keeps one token-owned V3 project rail and one content-slot gap', async () => {
+  it('keeps one token-owned V3 project rail with a flush content slot', async () => {
     const layout = await read('src/app/(dashboard)/dashboard/[projectId]/layout.tsx');
     const tokens = await read('src/app/design-tokens.css');
     const anatomy = await read('src/app/workspace-anatomy.css');
@@ -59,9 +59,10 @@ describe('canonical workspace geometry and anatomy', () => {
     expect(layout).not.toContain('lg:gap-8');
 
     expect(tokens).toContain('--seraya-project-rail-width: 15.5rem');
-    expect(tokens).toContain('--seraya-project-rail-gap: 2.5rem');
-    expect(anatomy).toContain('grid-template-columns: var(--seraya-project-rail-width)');
-    expect(anatomy).toContain('gap: var(--seraya-project-rail-gap)');
+    expect(anatomy).toContain(
+      'grid-template-columns: var(--seraya-project-rail-width) minmax(0, 1fr);',
+    );
+    expect(anatomy).toContain('gap: 0;');
   });
 
   it('assigns explicit widths and anatomy kinds to every canonical project workspace', async () => {

@@ -62,6 +62,8 @@ describe('RC3 Bagikan handoff composition', () => {
     expect(eventListMock).toHaveBeenCalledWith(project);
     expect(result.summary.readyToDistributeCount).toBe(1);
     expect(result.handoffSummary).toEqual({
+      awaitingRsvpCount: 1,
+      contactRecordedCount: 0,
       handoffPreparedCount: 1,
       readyForHandoffCount: 0,
     });

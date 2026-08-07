@@ -25,11 +25,25 @@ import {
 const projectId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 const guestId = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
 
-function linkFormData() {
+function createLinkFormData() {
   const formData = new FormData();
   formData.set('projectId', projectId);
   formData.set('guestId', guestId);
   formData.set('accountId', 'attacker-controlled');
+  formData.set('operation', 'create_or_replace');
+  formData.set('expectedLifecycleState', 'not_created');
+  formData.set('confirmActiveReplacement', 'false');
+  return formData;
+}
+
+function revokeLinkFormData() {
+  const formData = new FormData();
+  formData.set('projectId', projectId);
+  formData.set('guestId', guestId);
+  formData.set('accountId', 'attacker-controlled');
+  formData.set('operation', 'revoke');
+  formData.set('expectedLifecycleState', 'active_recoverable');
+  formData.set('confirmRevocation', 'true');
   return formData;
 }
 
@@ -40,7 +54,7 @@ describe('SRY-013 personal guest-link server actions', () => {
     revokeMock.mockReset();
   });
 
-  it('validates project and guest shape before a personal-link mutation', async () => {
+  it('validates project, guest, operation, and lifecycle shape before a personal-link mutation', async () => {
     const result = await createOrReplacePersonalGuestLinkAction(
       initialGuestLinkActionState,
       new FormData(),
@@ -55,33 +69,49 @@ describe('SRY-013 personal guest-link server actions', () => {
     const personalUrl = new URL(`/raka-nadia/g/${token}`, 'https://seraya.example').toString();
     createOrReplaceMock.mockResolvedValue({
       personalUrl,
+      previousLifecycleState: 'not_created',
       recipientWhatsAppPhoneE164: '+6281234567890',
     });
 
-    await expect(
-      createOrReplacePersonalGuestLinkAction(initialGuestLinkActionState, linkFormData()),
-    ).resolves.toEqual({
-      message: 'Tautan pribadi siap untuk disalin.',
+    const result = await createOrReplacePersonalGuestLinkAction(
+      initialGuestLinkActionState,
+      createLinkFormData(),
+    );
+
+    expect(result).toEqual({
+      message: 'Tautan pribadi berhasil dibuat.',
       personalUrl,
       recipientWhatsAppPhoneE164: '+6281234567890',
+      resultKey: expect.any(String),
       status: 'success',
     });
-
-    expect(createOrReplaceMock).toHaveBeenCalledWith({ guestId, projectId });
+    expect(createOrReplaceMock).toHaveBeenCalledWith({
+      confirmActiveReplacement: false,
+      expectedLifecycleState: 'not_created',
+      guestId,
+      projectId,
+    });
     expect(revalidatePathMock).toHaveBeenCalledWith(`/dashboard/${projectId}`);
+    expect(revalidatePathMock).toHaveBeenCalledWith(`/dashboard/${projectId}/delivery`);
+    expect(revalidatePathMock).toHaveBeenCalledWith(`/dashboard/${projectId}/follow-up`);
     expect(revalidatePathMock).toHaveBeenCalledWith(`/dashboard/${projectId}/guests`);
   });
 
-  it('revokes only through the verified project/guest server flow', async () => {
+  it('revokes only through the verified project/guest lifecycle command', async () => {
     revokeMock.mockResolvedValue(undefined);
 
     await expect(
-      revokePersonalGuestLinkAction(initialGuestLinkActionState, linkFormData()),
+      revokePersonalGuestLinkAction(initialGuestLinkActionState, revokeLinkFormData()),
     ).resolves.toEqual({
       message: 'Tautan pribadi sudah dinonaktifkan.',
       status: 'success',
     });
 
-    expect(revokeMock).toHaveBeenCalledWith({ guestId, projectId });
+    expect(revokeMock).toHaveBeenCalledWith({
+      confirmRevocation: true,
+      expectedLifecycleState: 'active_recoverable',
+      guestId,
+      projectId,
+    });
   });
 });

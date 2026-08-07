@@ -15,6 +15,10 @@ const marketingSource = readFileSync(
   join(process.cwd(), 'src/components/marketing/flagship-marketing.tsx'),
   'utf8',
 );
+const thumbnailSource = readFileSync(
+  join(process.cwd(), 'src/components/marketing/canonical-invitation-thumbnail.tsx'),
+  'utf8',
+);
 const templatesPageSource = readFileSync(join(process.cwd(), 'src/app/templates/page.tsx'), 'utf8');
 const showroomRouteSource = readFileSync(
   join(process.cwd(), 'src/app/templates/[templateKey]/demo/[surface]/page.tsx'),
@@ -71,11 +75,12 @@ describe('P0-B4 canonical invitation showroom contract', () => {
   });
 
   it('renders generic and personal showroom surfaces through the production template renderer', () => {
+    expect(showroomRouteSource).toContain("export const dynamic = 'force-dynamic';");
     expect(showroomRouteSource).toContain('InvitationTemplateRenderer');
     expect(showroomRouteSource).toContain(
       "const SHOWROOM_SURFACES = ['generic', 'personal'] as const",
     );
-    expect(showroomRouteSource).toContain('generateStaticParams');
+    expect(showroomRouteSource).not.toContain('generateStaticParams');
     expect(showroomRouteSource).toContain(
       'robots: { follow: false, index: false, noarchive: true }',
     );
@@ -94,15 +99,14 @@ describe('P0-B4 canonical invitation showroom contract', () => {
     expect(showroomFixtureSource).not.toContain('server action');
   });
 
-  it('replaces typography-only marketing covers with canonical renderer previews', () => {
-    expect(marketingSource).toContain('data-canonical-showroom-preview');
-    expect(marketingSource).toContain(
-      "src={`${getShowroomHref(collection, 'generic')}#showroom-invitation`}",
-    );
-    expect(marketingSource).toContain('Renderer asli');
-    expect(marketingSource).toContain('Kirana &amp; Arga');
-    expect(templatesPageSource).toContain('Satu isi undangan. Tiga cara menyambut tamu.');
-    expect(templatesPageSource).toContain('Buka demo umum');
-    expect(templatesPageSource).toContain('Simulasi personal');
+  it('uses static canonical captures on marketing surfaces while preserving the live showroom route', () => {
+    expect(marketingSource).toContain('CanonicalInvitationThumbnail');
+    expect(marketingSource).not.toContain('<iframe');
+    expect(thumbnailSource).toContain('data-canonical-thumbnail-source="static-canonical-capture"');
+    expect(thumbnailSource).toContain("STATIC_THUMBNAIL_VERSION = '2026-08-v1'");
+    expect(thumbnailSource).toContain('getCanonicalInvitationThumbnailAssetHref');
+    expect(templatesPageSource).toContain('Koleksi Tema Seraya');
+    expect(templatesPageSource).toContain('Showroom publik memakai renderer produksi yang sama');
+    expect(templatesPageSource).toContain('Gunakan tema');
   });
 });
