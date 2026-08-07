@@ -1,0 +1,74 @@
+name: Invitation Workspace Editorial Redesign V1 validation
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx'
+      - 'src/components/projects/invitation-task-workspace.tsx'
+      - 'src/components/projects/invitation-task-workspace.module.css'
+      - 'src/components/projects/invitation-task-workspace.types.ts'
+      - 'src/components/projects/invitation-studio-preview-rail.tsx'
+      - 'src/components/projects/invitation-studio-preview-rail.module.css'
+      - 'tests/unit/invitation-workspace-editorial-redesign-v1.test.ts'
+      - 'tests/e2e/invitation-workspace-editorial-redesign-v1.spec.ts'
+      - 'tests/e2e/fixture-app/app/invitation-workspace-editorial-redesign-v1/**'
+      - 'playwright.invitation-workspace-editorial-redesign-v1.config.ts'
+      - 'vercel.json'
+      - '.github/workflows/invitation-workspace-editorial-redesign-v1.yml'
+  push:
+    branches:
+      - feature/invitation-workspace-editorial-redesign-v1
+
+concurrency:
+  group: invitation-workspace-editorial-redesign-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Check focused formatting
+        run: |
+          npx prettier --check \
+            'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
+            src/components/projects/invitation-task-workspace.tsx \
+            src/components/projects/invitation-task-workspace.module.css \
+            src/components/projects/invitation-task-workspace.types.ts \
+            src/components/projects/invitation-studio-preview-rail.tsx \
+            src/components/projects/invitation-studio-preview-rail.module.css \
+            vercel.json \
+            .github/workflows/invitation-workspace-editorial-redesign-v1.yml
+      - name: Lint focused source
+        run: |
+          npx eslint \
+            'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
+            src/components/projects/invitation-task-workspace.tsx \
+            src/components/projects/invitation-task-workspace.types.ts \
+            src/components/projects/invitation-studio-preview-rail.tsx
+      - run: npm run typecheck
+      - name: Run Invitation Studio compatibility contracts
+        run: |
+          npx vitest run \
+            tests/unit/invitation-studio-structural-foundation-slice-a.test.tsx \
+            tests/unit/invitation-studio-unified-state-slice-b.test.ts \
+            tests/unit/invitation-studio-design-mode-slice-c.test.ts \
+            tests/unit/invitation-studio-media-mode-slice-d.test.ts \
+            tests/unit/invitation-studio-preview-mode-slice-e.test.ts \
+            tests/unit/invitation-studio-publish-mode-slice-f.test.ts \
+            tests/unit/invitation-studio-responsive-slice-g.test.tsx \
+            src/modules/publications/__tests__/published-invitation.schema.test.ts \
+            src/modules/publications/__tests__/publication.service.test.ts \
+            src/modules/payments/__tests__/payment-publish-policy.test.ts \
+            tests/server/dashboard-invitation-editor-route.test.tsx
+      - run: npm run build
