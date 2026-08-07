@@ -140,7 +140,9 @@ const contentSectionMap: Partial<
 };
 
 function getSectionDefinition(section: InvitationWorkspaceEditorialSection) {
-  return sectionDefinitions.find((candidate) => candidate.key === section) ?? sectionDefinitions[0]!;
+  return (
+    sectionDefinitions.find((candidate) => candidate.key === section) ?? sectionDefinitions[0]!
+  );
 }
 
 function getSectionStatus(
@@ -350,7 +352,11 @@ export function InvitationTaskWorkspace({
     const syncFromLocation = () => {
       const url = new URL(window.location.href);
       setActiveSection(getInvitationWorkspaceEditorialSectionFromUrl(url));
-      setUtility(url.searchParams.get('task') === 'publish' || url.searchParams.get('mode') === 'publish' ? 'publish' : null);
+      setUtility(
+        url.searchParams.get('task') === 'publish' || url.searchParams.get('mode') === 'publish'
+          ? 'publish'
+          : null,
+      );
     };
 
     window.addEventListener('popstate', syncFromLocation);
@@ -358,7 +364,9 @@ export function InvitationTaskWorkspace({
   }, []);
 
   useEffect(() => {
-    const frame = window.requestAnimationFrame(() => headingRef.current?.focus({ preventScroll: true }));
+    const frame = window.requestAnimationFrame(() =>
+      headingRef.current?.focus({ preventScroll: true }),
+    );
     return () => window.cancelAnimationFrame(frame);
   }, [activeSection, utility]);
 
@@ -478,9 +486,7 @@ export function InvitationTaskWorkspace({
           <span aria-hidden="true">△</span>
           <p>
             <strong>Ada perubahan yang belum diterbitkan.</strong>{' '}
-            <span>
-              Tamu masih melihat versi terbit sebelumnya sampai kalian menerbitkan ulang.
-            </span>
+            <span>Tamu masih melihat versi terbit sebelumnya sampai kalian menerbitkan ulang.</span>
           </p>
         </div>
       ) : null}
@@ -554,7 +560,11 @@ export function InvitationTaskWorkspace({
               <div>
                 <p>{activeDefinition.description}</p>
               </div>
-              <span>{getStatusLabel(getSectionStatus(activeSection, sectionStatuses, studioState.content))}</span>
+              <span>
+                {getStatusLabel(
+                  getSectionStatus(activeSection, sectionStatuses, studioState.content),
+                )}
+              </span>
             </div>
           ) : null}
           {renderEditor()}

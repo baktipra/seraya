@@ -64,7 +64,9 @@ export function isInvitationWorkspaceContentTask(
 export function isInvitationWorkspaceEditorialSection(
   value: string | null | undefined,
 ): value is InvitationWorkspaceEditorialSection {
-  return invitationWorkspaceEditorialSectionKeys.includes(value as InvitationWorkspaceEditorialSection);
+  return invitationWorkspaceEditorialSectionKeys.includes(
+    value as InvitationWorkspaceEditorialSection,
+  );
 }
 
 export function parseInvitationWorkspaceTask(
@@ -125,7 +127,9 @@ export function parseInvitationWorkspaceEditorialSection(
     return section;
   }
 
-  return getEditorialSectionForTask(parseInvitationWorkspaceTask(taskValue, legacyModeValue)) ?? 'theme';
+  return (
+    getEditorialSectionForTask(parseInvitationWorkspaceTask(taskValue, legacyModeValue)) ?? 'theme'
+  );
 }
 
 export function getInvitationWorkspaceTaskFromUrl(url: URL): InvitationWorkspaceTask | null {

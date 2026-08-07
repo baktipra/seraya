@@ -180,7 +180,9 @@ export function InvitationStudioPreviewRail({
       </dl>
 
       {!hasPublishedVersion ? (
-        <p className={styles.emptyPublished}>Belum ada versi terbit. Versi Tamu tersedia setelah undangan pertama kali diterbitkan.</p>
+        <p className={styles.emptyPublished}>
+          Belum ada versi terbit. Versi Tamu tersedia setelah undangan pertama kali diterbitkan.
+        </p>
       ) : null}
     </section>
   );
