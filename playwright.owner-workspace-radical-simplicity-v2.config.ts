@@ -14,7 +14,7 @@ export default defineConfig({
   },
   webServer: {
     command: 'npm exec next dev -- --hostname 127.0.0.1 --port 3114 tests/e2e/fixture-app',
-    url: 'http://127.0.0.1:3114/owner-workspace-radical-simplicity-v2',
+    url: 'http://127.0.0.1:3114/dashboard/editorial-v3',
     reuseExistingServer: false,
     timeout: 120_000,
   },

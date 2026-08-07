@@ -8,6 +8,7 @@ import { siteConfig } from '@/config/site';
 
 import { AccountMenu } from './account-menu';
 import { DashboardDesktopNavigation } from './dashboard-navigation';
+import styles from './dashboard-shell.module.css';
 
 export interface DashboardShellProps {
   children: ReactNode;
@@ -27,6 +28,25 @@ function getDashboardGreetingName(displayName?: string | null, email?: string | 
   return emailName || null;
 }
 
+function getProjectRouteLabel(pathname: string) {
+  const segment = pathname.split('/')[3] ?? '';
+  const labels: Record<string, string> = {
+    billing: 'Undangan',
+    delivery: 'Bagikan',
+    'follow-up': 'Respons Tamu',
+    gallery: 'Undangan',
+    guestbook: 'Respons Tamu',
+    guests: 'Tamu',
+    invitation: 'Undangan',
+    preview: 'Undangan',
+    rsvp: 'Respons Tamu',
+    settings: 'Pengaturan',
+    share: 'Bagikan',
+  };
+
+  return labels[segment] ?? 'Ringkasan';
+}
+
 export function DashboardShell({
   children,
   displayName,
@@ -35,14 +55,65 @@ export function DashboardShell({
 }: DashboardShellProps) {
   const pathname = usePathname();
   const isDashboardHome = pathname === '/dashboard';
+  const projectMatch = pathname.match(/^\/dashboard\/([^/]+)(?:\/.*)?$/);
+  const isProjectWorkspace = Boolean(projectMatch && projectMatch[1] !== 'new');
   const greetingName = getDashboardGreetingName(displayName, email);
+
+  if (isProjectWorkspace) {
+    const routeLabel = getProjectRouteLabel(pathname);
+
+    return (
+      <div
+        className={styles.projectShell}
+        data-dashboard-full-screen
+        data-dashboard-shell
+        data-owner-workspace-navigation="editorial-five-area"
+        data-owner-workspace-typography="editorial-operations"
+        data-project-workspace-route
+      >
+        <header className={styles.projectHeader} data-dashboard-topbar>
+          <div className={styles.brandPanel}>
+            <Link
+              aria-label={`${siteConfig.name}, kembali ke semua undangan`}
+              className={styles.brand}
+              href="/dashboard"
+            >
+              <span aria-hidden="true" className={styles.brandMark} />
+              <span>{siteConfig.name}</span>
+            </Link>
+          </div>
+
+          <div className={styles.projectHeaderMain}>
+            <Link
+              aria-label={`${siteConfig.name}, kembali ke semua undangan`}
+              className={styles.mobileBrand}
+              href="/dashboard"
+            >
+              <span aria-hidden="true" className={styles.mobileBrandMark} />
+              <span>{siteConfig.name}</span>
+            </Link>
+            <div className={styles.breadcrumb}>
+              <span>Workspace proyek</span>
+              <span aria-hidden="true">/</span>
+              <strong>{routeLabel}</strong>
+            </div>
+            <AccountMenu displayName={displayName} email={email} />
+          </div>
+        </header>
+
+        <main className={styles.projectMain} data-dashboard-main>
+          {children}
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div
       className="bg-seraya-canvas min-h-screen w-full font-sans"
       data-dashboard-full-screen
       data-dashboard-shell
-      data-owner-workspace-navigation="three-intent"
+      data-owner-workspace-navigation="collection"
       data-owner-workspace-typography="sans"
     >
       <header

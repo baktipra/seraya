@@ -1,4 +1,5 @@
 import { DashboardShell } from '@/components/dashboard/dashboard-shell';
+import { ProjectNavigation } from '@/components/dashboard/project-navigation';
 import { ProjectOverviewBootstrap } from '@/components/projects/project-overview-bootstrap';
 import { parseInvitationWorkspaceTask } from '@/components/projects/invitation-task-workspace.types';
 import { createDefaultInvitationDraftContent } from '@/modules/invitations/invitation-draft.defaults';
@@ -10,7 +11,7 @@ import type {
 
 import { OwnerWorkspaceUsabilityResetFixture } from '../owner-workspace-usability-reset/fixture-client';
 
-const projectId = 'owner-workspace-radical-simplicity-v2-fixture';
+const projectId = 'editorial-v3';
 
 const readiness: WeddingReadinessV1 = {
   identity: {
@@ -70,7 +71,7 @@ function createInvitationFixtureState() {
     },
     created_at: '2026-08-07T00:00:00.000Z',
     deleted_at: null,
-    id: 'radical-simplicity-v2-draft',
+    id: 'editorial-dashboard-v3-draft',
     project_id: projectId,
     schema_version: 1,
     updated_at: '2026-08-07T00:00:00.000Z',
@@ -83,7 +84,7 @@ function createInvitationFixtureState() {
   return { invitationReadiness, savedDraft };
 }
 
-type RadicalSimplicityFixturePageProps = {
+type EditorialDashboardFixturePageProps = {
   searchParams: Promise<{
     mode?: string | string[];
     task?: string | string[];
@@ -91,23 +92,32 @@ type RadicalSimplicityFixturePageProps = {
   }>;
 };
 
-export default async function RadicalSimplicityFixturePage({
+export default async function EditorialDashboardFixturePage({
   searchParams,
-}: RadicalSimplicityFixturePageProps) {
+}: EditorialDashboardFixturePageProps) {
   const query = await searchParams;
   const { invitationReadiness, savedDraft } = createInvitationFixtureState();
 
   return (
     <DashboardShell displayName="Bakti" email="bakti@example.com" hasActiveProject>
-      {query.view === 'invitation' ? (
-        <OwnerWorkspaceUsabilityResetFixture
-          initialTask={parseInvitationWorkspaceTask(query.task, query.mode)}
-          readiness={invitationReadiness}
-          savedDraft={savedDraft}
+      <div className="min-w-0" data-dashboard-width="wide" data-project-workspace-shell>
+        <ProjectNavigation
+          coupleLabel={readiness.identity.coupleLabel}
+          projectId={projectId}
+          statusLabel="Draf belum lengkap"
         />
-      ) : (
-        <ProjectOverviewBootstrap projectId={projectId} readiness={readiness} />
-      )}
+        <div className="min-w-0" data-project-workspace-main>
+          {query.view === 'invitation' ? (
+            <OwnerWorkspaceUsabilityResetFixture
+              initialTask={parseInvitationWorkspaceTask(query.task, query.mode)}
+              readiness={invitationReadiness}
+              savedDraft={savedDraft}
+            />
+          ) : (
+            <ProjectOverviewBootstrap projectId={projectId} readiness={readiness} />
+          )}
+        </div>
+      </div>
     </DashboardShell>
   );
 }

@@ -9,59 +9,65 @@ function read(path: string) {
   return readFileSync(join(root, path), 'utf8');
 }
 
-describe('SERAYA Owner Workspace Radical Simplicity Reset V2', () => {
-  it('reduces the project start page to three concrete owner destinations', () => {
-    const source = read('src/components/projects/project-overview-bootstrap.tsx');
-
-    expect(source).toContain('Mau mengerjakan apa sekarang?');
-    expect(source).toContain('Edit undangan');
-    expect(source).toContain('Kelola tamu');
-    expect(source).toContain('Lihat respons');
-    expect(source).toContain('CanonicalInvitationThumbnail');
-    expect(source).toContain('GuestRosterVisual');
-    expect(source).toContain('ResponseFlowVisual');
-    expect(source.match(/\$\{styles\.entry\}/g)).toHaveLength(3);
-    expect(source).not.toContain('ProjectCompass');
-    expect(source).not.toContain('AttentionQueue');
-  });
-
-  it('keeps only Undangan, Tamu, and Respons in primary project navigation', () => {
+describe('SERAYA Owner Workspace Editorial Dashboard V3', () => {
+  it('uses the supplied five-area project information architecture', () => {
     const source = read('src/components/dashboard/project-navigation.tsx');
     const labels = [...source.matchAll(/label: '([^']+)'/g)].map((match) => match[1]);
 
-    expect(labels).toEqual(['Undangan', 'Tamu', 'Respons']);
-    expect(source).toContain("aliases: [`${base}/delivery`, `${base}/follow-up`, `${base}/share`]");
-    expect(source).not.toContain("label: 'Ringkasan'");
-    expect(source).not.toContain("label: 'Bagikan'");
+    expect(labels).toEqual(['Ringkasan', 'Undangan', 'Tamu', 'Bagikan', 'Respons Tamu']);
+    expect(source).toContain('href: `${base}/delivery` as Route');
+    expect(source).toContain('aliases: [`${base}/guestbook`, `${base}/follow-up`]');
+    expect(source).toContain('data-project-sidebar');
+    expect(source).toContain('Buka navigasi proyek');
   });
 
-  it('uses sans typography for operational workspace and keeps serif only on the brand wordmark', () => {
+  it('keeps the collection shell simple and gives project routes the editorial shell', () => {
     const shell = read('src/components/dashboard/dashboard-shell.tsx');
-    const workspace = read('src/components/projects/invitation-task-workspace.module.css');
+    const shellStyles = read('src/components/dashboard/dashboard-shell.module.css');
+    const rootLayout = read('src/app/layout.tsx');
 
-    expect(shell).toContain('data-owner-workspace-typography="sans"');
-    expect(shell).toContain('className="bg-seraya-canvas min-h-screen w-full font-sans"');
-    expect(shell.match(/font-serif/g)).toHaveLength(1);
-    expect(workspace).toContain('font-family: var(--font-ui);');
-    expect(workspace).not.toContain('font-family: var(--font-editorial)');
+    expect(shell).toContain('data-owner-workspace-navigation="editorial-five-area"');
+    expect(shell).toContain('data-owner-workspace-typography="editorial-operations"');
+    expect(shell).toContain('data-project-workspace-route');
+    expect(shell).toContain('DashboardDesktopNavigation');
+    expect(shellStyles).toContain('background: #1f3d2b;');
+    expect(shellStyles).toContain('--seraya-bg-canvas: #faf6ee;');
+    expect(shellStyles).toContain('--seraya-action-secondary: #b8935f;');
+    expect(rootLayout).toContain("import { Fraunces, Geist } from 'next/font/google';");
+    expect(rootLayout).toContain("variable: '--font-fraunces'");
   });
 
-  it('replaces equal-weight generic cards with one recommended task and scannable visual rows', () => {
+  it('turns Ringkasan into a readiness-backed project status dashboard', () => {
+    const source = read('src/components/projects/project-overview-bootstrap.tsx');
+
+    expect(source).toContain('Selamat datang kembali');
+    expect(source).toContain('Status undangan');
+    expect(source).toContain('Tamu aktif');
+    expect(source).toContain('Respons masuk');
+    expect(source).toContain('Siap dibagikan');
+    expect(source).toContain('Perjalanan proyek');
+    expect(source).toContain('Langkah berikutnya');
+    expect(source).toContain('Buat proyek');
+    expect(source).toContain('Pilih tema');
+    expect(source).toContain('Lengkapi konten');
+    expect(source).toContain('Bagikan & pantau');
+    expect(source).not.toContain('CanonicalInvitationThumbnail');
+    expect(source).not.toContain('GuestRosterVisual');
+    expect(source).not.toContain('ResponseFlowVisual');
+  });
+
+  it('preserves one shared draft and one invitation save authority', () => {
     const source = read('src/components/projects/invitation-task-workspace.tsx');
-    const styles = read('src/components/projects/invitation-task-workspace.module.css');
 
-    expect(source).toContain('Lanjutkan di sini');
-    expect(source).toContain('data-recommended-task={recommendedTask}');
-    expect(source).toContain('CanonicalInvitationThumbnail');
-    expect(source).toContain('InvitationTaskGlyph');
+    expect(source.match(/function SaveAuthority\(/g)).toHaveLength(1);
+    expect(source.match(/data-invitation-task-save-action/g)).toHaveLength(1);
+    expect(source).toContain('useInvitationStudioState');
+    expect(source).toContain('form={studioState.formId}');
+    expect(source).toContain('InvitationEditorActivePanel');
     expect(source.match(/number: '\d{2}'/g)).toHaveLength(11);
-    expect(source).toContain('data-workspace-task={task.key}');
-    expect(styles).toContain('.taskGrid');
-    expect(styles).toContain('border-top: 1px solid var(--seraya-border-subtle);');
-    expect(styles).not.toContain('box-shadow: var(--seraya-shadow-level-1)');
   });
 
-  it('provides a distinct visual glyph for every canonical invitation task', () => {
+  it('preserves distinct visual glyphs for every invitation task', () => {
     const source = read('src/components/projects/owner-workspace-visuals.tsx');
     const tasks = [
       'couple',
@@ -80,34 +86,22 @@ describe('SERAYA Owner Workspace Radical Simplicity Reset V2', () => {
     for (const task of tasks) {
       expect(source).toContain(`case '${task}':`);
     }
-
-    expect(source).toContain('export function GuestRosterVisual');
-    expect(source).toContain('export function ResponseFlowVisual');
   });
 
-  it('preserves one shared draft and one save authority', () => {
-    const source = read('src/components/projects/invitation-task-workspace.tsx');
+  it('keeps project geometry flush, responsive, and isolated from production deployment', () => {
+    const anatomy = read('src/app/workspace-anatomy.css');
+    const navigationStyles = read('src/components/dashboard/project-navigation.module.css');
+    const overviewStyles = read('src/components/projects/project-overview-bootstrap.module.css');
+    const vercel = read('vercel.json');
 
-    expect(source.match(/function SaveAuthority\(/g)).toHaveLength(1);
-    expect(source.match(/data-invitation-task-save-action/g)).toHaveLength(1);
-    expect(source).toContain('useInvitationStudioState');
-    expect(source).toContain('form={studioState.formId}');
-    expect(source).toContain('InvitationEditorActivePanel');
-  });
-
-  it('keeps the full-screen shell and responsive no-overflow geometry', () => {
-    const shell = read('src/components/dashboard/dashboard-shell.tsx');
-    const projectStyles = read(
-      'src/components/projects/project-overview-bootstrap.module.css',
+    expect(anatomy).toContain(
+      'grid-template-columns: var(--seraya-project-rail-width) minmax(0, 1fr);',
     );
-    const taskStyles = read('src/components/projects/invitation-task-workspace.module.css');
-
-    expect(shell).toContain('data-dashboard-full-screen');
-    expect(shell).toContain('data-dashboard-main');
-    expect(projectStyles).toContain('@media (max-width: 760px)');
-    expect(projectStyles).toContain('@media (max-width: 520px)');
-    expect(taskStyles).toContain('@container (max-width: 70rem)');
-    expect(taskStyles).toContain('@container (max-width: 48rem)');
-    expect(taskStyles).toContain('@container (max-width: 32rem)');
+    expect(anatomy).toContain('gap: 0;');
+    expect(navigationStyles).toContain('@media (max-width: 1023px)');
+    expect(navigationStyles).toContain('.mobileDrawer');
+    expect(overviewStyles).toContain('@media (max-width: 900px)');
+    expect(overviewStyles).toContain('@media (max-width: 560px)');
+    expect(vercel).toContain('"feature/owner-workspace-editorial-dashboard-v3": false');
   });
 });

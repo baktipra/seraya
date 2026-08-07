@@ -13,16 +13,19 @@ import {
   InvitationIcon,
   ResponseIcon,
   SettingsIcon,
+  ShareIcon,
 } from './dashboard-icons';
+import styles from './project-navigation.module.css';
 
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
 type ProjectNavigationItem = {
   aliases?: string[];
+  exact?: boolean;
   href: Route;
   icon: IconComponent;
   label: string;
-  performanceWorkspace: 'guests' | 'responses' | 'studio';
+  performanceWorkspace: string;
 };
 
 function getProjectNavigationItems(projectId: string): ProjectNavigationItem[] {
@@ -30,54 +33,65 @@ function getProjectNavigationItems(projectId: string): ProjectNavigationItem[] {
 
   return [
     {
-      aliases: [`${base}/preview`, `${base}/billing`],
+      exact: true,
+      href: base as Route,
+      icon: HomeIcon,
+      label: 'Ringkasan',
+      performanceWorkspace: 'project-summary',
+    },
+    {
+      aliases: [`${base}/preview`, `${base}/billing`, `${base}/gallery`],
       href: `${base}/invitation` as Route,
       icon: InvitationIcon,
       label: 'Undangan',
       performanceWorkspace: 'studio',
     },
     {
-      aliases: [`${base}/delivery`, `${base}/follow-up`, `${base}/share`],
       href: `${base}/guests` as Route,
       icon: GuestsIcon,
       label: 'Tamu',
       performanceWorkspace: 'guests',
     },
     {
-      aliases: [`${base}/guestbook`],
+      aliases: [`${base}/share`],
+      href: `${base}/delivery` as Route,
+      icon: ShareIcon,
+      label: 'Bagikan',
+      performanceWorkspace: 'delivery',
+    },
+    {
+      aliases: [`${base}/guestbook`, `${base}/follow-up`],
       href: `${base}/rsvp` as Route,
       icon: ResponseIcon,
-      label: 'Respons',
+      label: 'Respons Tamu',
       performanceWorkspace: 'responses',
     },
   ];
 }
 
 function isCurrentProjectRoute(pathname: string, item: ProjectNavigationItem) {
-  if (item.aliases?.some((alias) => pathname.startsWith(alias))) {
-    return true;
-  }
-
+  if (item.exact) return pathname === String(item.href);
+  if (item.aliases?.some((alias) => pathname.startsWith(alias))) return true;
   return pathname.startsWith(String(item.href));
 }
 
 function getProjectRouteLabel(pathname: string, projectId: string) {
   const projectRoot = `/dashboard/${projectId}`;
-  if (pathname === projectRoot) return 'Mulai';
+  if (pathname === projectRoot) return 'Ringkasan';
 
   const segment = pathname.slice(projectRoot.length + 1).split('/')[0] ?? '';
   const labels: Record<string, string> = {
     billing: 'Undangan',
-    delivery: 'Tamu & Bagikan',
-    'follow-up': 'Tamu & Bagikan',
-    gallery: 'Galeri',
-    guestbook: 'Respons',
+    delivery: 'Bagikan',
+    'follow-up': 'Respons Tamu',
+    gallery: 'Undangan',
+    guestbook: 'Respons Tamu',
     guests: 'Tamu',
     invitation: 'Undangan',
     preview: 'Undangan',
-    rsvp: 'Respons',
+    rsvp: 'Respons Tamu',
     settings: 'Pengaturan',
-    share: 'Tamu & Bagikan',
+    share: 'Bagikan',
   };
 
   return labels[segment] ?? 'Workspace proyek';
@@ -87,14 +101,14 @@ function ProjectNavigationLink({
   active,
   currentPathname,
   item,
-  mode,
+  onNavigate,
   onTransitionStart,
   pending,
 }: {
   active: boolean;
   currentPathname: string;
   item: ProjectNavigationItem;
-  mode: 'desktop' | 'mobile';
+  onNavigate?: () => void;
   onTransitionStart: (item: ProjectNavigationItem) => void;
   pending: boolean;
 }) {
@@ -104,27 +118,13 @@ function ProjectNavigationLink({
     <Link
       aria-busy={pending || undefined}
       aria-current={active ? 'page' : undefined}
-      className={
-        mode === 'desktop'
-          ? `focus-visible:outline-seraya-focus-ring group relative flex min-h-12 items-center gap-3 rounded-[var(--seraya-radius-md)] px-3.5 text-sm font-semibold transition-[background-color,color,opacity] duration-[var(--seraya-motion-default)] ease-[var(--seraya-ease-standard)] focus-visible:outline-3 focus-visible:outline-offset-2 ${
-              active
-                ? 'bg-seraya-text-primary text-seraya-text-inverse'
-                : pending
-                  ? 'bg-seraya-surface-subtle text-seraya-action-primary'
-                  : 'text-seraya-text-secondary hover:bg-seraya-surface-subtle hover:text-seraya-text-primary'
-            }`
-          : `focus-visible:outline-seraya-focus-ring relative flex min-h-[4rem] min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[var(--seraya-radius-md)] px-2 text-[0.6875rem] font-semibold transition-[background-color,color,opacity] duration-[var(--seraya-motion-default)] focus-visible:outline-3 focus-visible:outline-offset-2 ${
-              active
-                ? 'bg-seraya-text-primary text-seraya-text-inverse'
-                : pending
-                  ? 'bg-seraya-surface-subtle text-seraya-action-primary'
-                  : 'text-seraya-text-muted'
-            }`
-      }
+      className={styles.navLink}
+      data-active={active || undefined}
       data-workspace-destination={item.performanceWorkspace}
       data-workspace-navigation-pending={pending || undefined}
       href={item.href}
       onClick={(event) => {
+        onNavigate?.();
         if (
           active ||
           event.defaultPrevented ||
@@ -146,24 +146,90 @@ function ProjectNavigationLink({
       }}
       prefetch
     >
-      <span aria-hidden="true" className="grid size-6 shrink-0 place-items-center">
+      <span aria-hidden="true" className={styles.navIcon}>
         {pending ? (
-          <span className="border-seraya-action-primary/30 border-t-seraya-action-primary size-4 animate-spin rounded-full border-2" />
+          <span className={styles.spinner} />
         ) : (
-          <Icon
-            className={mode === 'desktop' ? 'size-[1.15rem]' : 'size-[1.2rem]'}
-            focusable="false"
-            strokeWidth={1.8}
-          />
+          <Icon className={styles.icon} focusable="false" strokeWidth={1.7} />
         )}
       </span>
       <span>{item.label}</span>
-      {mode === 'desktop' && pending ? (
-        <span aria-hidden="true" className="ml-auto text-xs opacity-65">
-          Membuka…
-        </span>
-      ) : null}
+      {pending ? <span className={styles.pendingLabel}>Membuka…</span> : null}
     </Link>
+  );
+}
+
+function ProjectSidebar({
+  coupleLabel,
+  currentPathname,
+  items,
+  onNavigate,
+  onTransitionStart,
+  pendingHref,
+  projectId,
+  statusLabel,
+}: {
+  coupleLabel: string;
+  currentPathname: string;
+  items: ProjectNavigationItem[];
+  onNavigate?: () => void;
+  onTransitionStart: (item: ProjectNavigationItem) => void;
+  pendingHref: string | null;
+  projectId: string;
+  statusLabel: string;
+}) {
+  const settingsHref = `/dashboard/${projectId}/settings` as Route;
+  const settingsActive = currentPathname.startsWith(String(settingsHref));
+
+  return (
+    <div className={styles.sidebarInner}>
+      <div className={styles.projectCard}>
+        <span className={styles.projectLabel}>Proyek aktif</span>
+        <strong className={styles.projectName}>{coupleLabel}</strong>
+        <span className={styles.projectStatus}>
+          <span aria-hidden="true" />
+          {statusLabel}
+        </span>
+      </div>
+
+      <nav aria-label="Navigasi workspace" className={styles.navList}>
+        {items.map((item) => (
+          <ProjectNavigationLink
+            active={isCurrentProjectRoute(currentPathname, item)}
+            currentPathname={currentPathname}
+            item={item}
+            key={item.label}
+            onNavigate={onNavigate}
+            onTransitionStart={onTransitionStart}
+            pending={pendingHref === String(item.href)}
+          />
+        ))}
+      </nav>
+
+      <nav aria-label="Navigasi utilitas proyek" className={styles.utilityNav}>
+        <Link
+          aria-current={settingsActive ? 'page' : undefined}
+          className={styles.utilityLink}
+          data-active={settingsActive || undefined}
+          href={settingsHref}
+          onClick={() => onNavigate?.()}
+        >
+          <SettingsIcon aria-hidden="true" className={styles.icon} strokeWidth={1.7} />
+          Pengaturan
+        </Link>
+        <Link
+          className={styles.utilityLink}
+          href="/dashboard"
+          onClick={() => onNavigate?.()}
+          prefetch={false}
+        >
+          <span aria-hidden="true" className={styles.backGlyph}>
+            ←
+          </span>
+          Semua undangan
+        </Link>
+      </nav>
+    </div>
   );
 }
 
@@ -181,8 +247,8 @@ export function ProjectNavigation({
   const previousPathnameRef = useRef(pathname);
   const [pendingHref, setPendingHref] = useState<string | null>(null);
   const [routeAnnouncement, setRouteAnnouncement] = useState('');
+  const [mobileOpen, setMobileOpen] = useState(false);
   const currentRouteLabel = getProjectRouteLabel(pathname, projectId);
-  const projectHomeHref = `/dashboard/${projectId}` as Route;
   const settingsHref = `/dashboard/${projectId}/settings` as Route;
   const settingsActive = pathname.startsWith(String(settingsHref));
 
@@ -191,6 +257,7 @@ export function ProjectNavigation({
 
     previousPathnameRef.current = pathname;
     setPendingHref(null);
+    setMobileOpen(false);
     const focusFrame = window.requestAnimationFrame(() => {
       document.getElementById('project-workspace-content')?.focus({ preventScroll: true });
       setRouteAnnouncement(`Halaman ${getProjectRouteLabel(pathname, projectId)} dibuka.`);
@@ -199,6 +266,16 @@ export function ProjectNavigation({
     return () => window.cancelAnimationFrame(focusFrame);
   }, [pathname, projectId]);
 
+  useEffect(() => {
+    if (!mobileOpen) return undefined;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMobileOpen(false);
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [mobileOpen]);
+
   const startTransition = (item: ProjectNavigationItem) => {
     setPendingHref(String(item.href));
     setRouteAnnouncement(`Membuka halaman ${item.label}.`);
@@ -206,126 +283,75 @@ export function ProjectNavigation({
 
   return (
     <>
-      <div
-        className="border-seraya-border-subtle bg-seraya-surface/96 sticky top-[calc(var(--seraya-topbar-height)+0.5rem)] z-30 mb-5 flex min-w-0 items-center justify-between gap-3 rounded-[var(--seraya-radius-md)] border px-2.5 py-2.5 shadow-[var(--seraya-shadow-level-1)] backdrop-blur-xl lg:hidden"
-        data-project-mobile-context
-      >
-        <Link
-          aria-label="Kembali ke halaman mulai proyek"
-          className="focus-visible:outline-seraya-focus-ring flex min-w-0 flex-1 items-center gap-2.5 rounded-[var(--seraya-radius-sm)] px-1.5 py-1 focus-visible:outline-3 focus-visible:outline-offset-2"
-          href={projectHomeHref}
+      <div className={styles.mobileContext} data-project-mobile-context>
+        <button
+          aria-expanded={mobileOpen}
+          aria-label="Buka navigasi proyek"
+          className={styles.menuButton}
+          onClick={() => setMobileOpen(true)}
+          type="button"
         >
-          <span className="bg-seraya-brand-softer text-seraya-action-primary grid size-9 shrink-0 place-items-center rounded-[var(--seraya-radius-sm)]">
-            <HomeIcon aria-hidden="true" className="size-4" strokeWidth={1.8} />
-          </span>
-          <span className="min-w-0">
-            <span className="text-seraya-text-muted block truncate text-[0.6875rem] font-medium">
-              {coupleLabel}
-            </span>
-            <span className="text-seraya-text-primary mt-0.5 block truncate text-sm font-semibold">
-              {currentRouteLabel}
-            </span>
-          </span>
-        </Link>
+          <span aria-hidden="true">☰</span>
+        </button>
+        <div className={styles.mobileIdentity}>
+          <span>{coupleLabel}</span>
+          <strong>{currentRouteLabel}</strong>
+        </div>
         <Link
           aria-label="Buka pengaturan proyek"
-          className={`focus-visible:outline-seraya-focus-ring grid size-10 shrink-0 place-items-center rounded-[var(--seraya-radius-sm)] transition-colors duration-[var(--seraya-motion-default)] focus-visible:outline-3 focus-visible:outline-offset-2 ${
-            settingsActive
-              ? 'bg-seraya-brand-softer text-seraya-action-primary'
-              : 'text-seraya-text-secondary hover:bg-seraya-surface-subtle hover:text-seraya-text-primary'
-          }`}
+          className={styles.mobileSettings}
+          data-active={settingsActive || undefined}
           href={settingsHref}
         >
-          <SettingsIcon aria-hidden="true" className="size-[1.1rem]" strokeWidth={1.7} />
+          <SettingsIcon aria-hidden="true" className={styles.icon} strokeWidth={1.7} />
         </Link>
       </div>
 
-      <aside className="border-seraya-border-subtle hidden min-w-0 border-r pr-5 lg:sticky lg:top-[calc(var(--seraya-topbar-height)+2rem)] lg:flex lg:h-[calc(100svh-var(--seraya-topbar-height)-4rem)] lg:w-[var(--seraya-project-rail-width)] lg:flex-col">
-        <Link
-          className="focus-visible:outline-seraya-focus-ring group border-seraya-border-subtle block border-b pb-5 focus-visible:outline-3 focus-visible:outline-offset-3"
-          data-project-start-link
-          href={projectHomeHref}
-        >
-          <span className="text-seraya-text-muted flex items-center gap-2 text-xs font-medium">
-            <HomeIcon aria-hidden="true" className="size-3.5" strokeWidth={1.8} />
-            Mulai
-          </span>
-          <span className="text-seraya-text-primary mt-2 block text-[1rem] leading-6 font-semibold tracking-[-0.015em] group-hover:text-seraya-action-primary">
-            {coupleLabel}
-          </span>
-          <span className="text-seraya-text-muted mt-2 flex items-center gap-2 text-xs leading-5">
-            <span aria-hidden="true" className="bg-seraya-status-success size-1.5 rounded-full" />
-            {statusLabel}
-          </span>
-        </Link>
-
-        <nav
-          aria-busy={Boolean(pendingHref)}
-          aria-label="Navigasi workspace"
-          className="mt-5 space-y-1.5"
-          data-project-navigation-pending={Boolean(pendingHref) || undefined}
-        >
-          {items.map((item) => (
-            <ProjectNavigationLink
-              active={isCurrentProjectRoute(pathname, item)}
-              currentPathname={pathname}
-              item={item}
-              key={item.label}
-              mode="desktop"
-              onTransitionStart={startTransition}
-              pending={pendingHref === String(item.href)}
-            />
-          ))}
-        </nav>
-
-        <nav
-          aria-label="Navigasi utilitas proyek"
-          className="border-seraya-border-subtle mt-auto space-y-1 border-t pt-4"
-        >
-          <Link
-            aria-current={settingsActive ? 'page' : undefined}
-            className={`focus-visible:outline-seraya-focus-ring flex min-h-11 items-center gap-3 rounded-[var(--seraya-radius-sm)] px-3 text-sm font-medium transition-colors duration-[var(--seraya-motion-default)] focus-visible:outline-3 focus-visible:outline-offset-2 ${
-              settingsActive
-                ? 'bg-seraya-brand-softer text-seraya-action-primary'
-                : 'text-seraya-text-secondary hover:bg-seraya-surface-subtle hover:text-seraya-text-primary'
-            }`}
-            href={settingsHref}
-          >
-            <SettingsIcon aria-hidden="true" className="size-[1.1rem]" strokeWidth={1.7} />
-            Pengaturan
-          </Link>
-          <Link
-            className="text-seraya-text-secondary hover:bg-seraya-surface-subtle hover:text-seraya-text-primary focus-visible:outline-seraya-focus-ring flex min-h-11 items-center gap-3 rounded-[var(--seraya-radius-sm)] px-3 text-sm font-medium transition-colors duration-[var(--seraya-motion-default)] focus-visible:outline-3 focus-visible:outline-offset-2"
-            href="/dashboard"
-            prefetch={false}
-          >
-            <span aria-hidden="true" className="grid size-[1.1rem] place-items-center text-base">
-              ←
-            </span>
-            Semua undangan
-          </Link>
-        </nav>
+      <aside className={styles.desktopSidebar} data-project-sidebar>
+        <ProjectSidebar
+          coupleLabel={coupleLabel}
+          currentPathname={pathname}
+          items={items}
+          onTransitionStart={startTransition}
+          pendingHref={pendingHref}
+          projectId={projectId}
+          statusLabel={statusLabel}
+        />
       </aside>
 
-      <nav
-        aria-busy={Boolean(pendingHref)}
-        aria-label="Navigasi workspace mobile"
-        className="border-seraya-border-subtle bg-seraya-surface/96 pointer-events-auto fixed inset-x-0 bottom-0 isolate z-[100] flex min-h-[var(--seraya-mobile-nav-clearance)] items-stretch gap-1.5 border-t px-2 pt-1.5 pb-[max(0.35rem,env(safe-area-inset-bottom))] shadow-[0_-8px_24px_rgb(31_29_27_/_0.06)] backdrop-blur-xl lg:hidden"
-        data-project-mobile-navigation
-        data-project-navigation-pending={Boolean(pendingHref) || undefined}
-      >
-        {items.map((item) => (
-          <ProjectNavigationLink
-            active={isCurrentProjectRoute(pathname, item)}
-            currentPathname={pathname}
-            item={item}
-            key={item.label}
-            mode="mobile"
-            onTransitionStart={startTransition}
-            pending={pendingHref === String(item.href)}
+      {mobileOpen ? (
+        <div className={styles.mobileOverlay}>
+          <button
+            aria-label="Tutup navigasi proyek"
+            className={styles.mobileBackdrop}
+            onClick={() => setMobileOpen(false)}
+            type="button"
           />
-        ))}
-      </nav>
+          <aside aria-label="Navigasi proyek" className={styles.mobileDrawer}>
+            <div className={styles.mobileDrawerHead}>
+              <span className={styles.mobileDrawerBrand}>Seraya</span>
+              <button
+                aria-label="Tutup navigasi proyek"
+                className={styles.closeButton}
+                onClick={() => setMobileOpen(false)}
+                type="button"
+              >
+                ×
+              </button>
+            </div>
+            <ProjectSidebar
+              coupleLabel={coupleLabel}
+              currentPathname={pathname}
+              items={items}
+              onNavigate={() => setMobileOpen(false)}
+              onTransitionStart={startTransition}
+              pendingHref={pendingHref}
+              projectId={projectId}
+              statusLabel={statusLabel}
+            />
+          </aside>
+        </div>
+      ) : null}
 
       <p aria-atomic="true" aria-live="polite" className="sr-only" role="status">
         {routeAnnouncement}

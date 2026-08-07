@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 
-const projectPath = '/owner-workspace-radical-simplicity-v2';
+const projectPath = '/dashboard/editorial-v3';
 const invitationPath = `${projectPath}?view=invitation`;
 
 async function expectNoDocumentOverflow(page: Page) {
@@ -12,46 +12,66 @@ async function expectNoDocumentOverflow(page: Page) {
   expect(overflow.scrollWidth).toBeLessThanOrEqual(overflow.clientWidth + 1);
 }
 
-test.describe('SERAYA Owner Workspace Radical Simplicity Reset V2', () => {
-  test('project start presents exactly three clear owner choices', async ({ page }) => {
+test.describe('SERAYA Owner Workspace Editorial Dashboard V3', () => {
+  test('project root shows the five-area shell and readiness dashboard', async ({ page }) => {
     await page.goto(projectPath);
 
-    const workspace = page.locator('[data-owner-workspace-radical-simplicity="v2"]');
-    await expect(workspace).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Mau mengerjakan apa sekarang?' })).toBeVisible();
+    const shell = page.locator('[data-owner-workspace-navigation="editorial-five-area"]');
+    await expect(shell).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Selamat datang kembali, Nadia & Farhan' }),
+    ).toBeVisible();
 
-    const entryLinks = workspace.locator('a');
-    await expect(entryLinks).toHaveCount(4);
-    await expect(page.getByRole('link', { name: /Edit undangan/ })).toHaveCount(1);
-    await expect(page.getByRole('link', { name: /Kelola tamu/ })).toHaveCount(1);
-    await expect(page.getByRole('link', { name: /Lihat respons/ })).toHaveCount(1);
-    await expect(page.getByRole('link', { name: /Siapkan pembagian/ })).toHaveCount(1);
+    for (const label of ['Status undangan', 'Tamu aktif', 'Respons masuk', 'Siap dibagikan']) {
+      await expect(page.getByText(label, { exact: true })).toBeVisible();
+    }
 
-    await expect(workspace.locator('[data-canonical-thumbnail-template="roselle"]')).toBeVisible();
-    await expect(workspace.getByText('Ringkasan', { exact: true })).toHaveCount(0);
-    await expect(workspace.getByText('Bagikan', { exact: true })).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: 'Perjalanan proyek' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Langkah berikutnya' })).toBeVisible();
+
+    const sidebarLabels = await page.locator('[data-project-sidebar] a').allTextContents();
+    for (const label of ['Ringkasan', 'Undangan', 'Tamu', 'Bagikan', 'Respons Tamu']) {
+      expect(sidebarLabels.some((text) => text.includes(label))).toBe(true);
+    }
+
+    const viewport = page.viewportSize();
+    if (viewport && viewport.width >= 1024) {
+      await expect(page.locator('[data-project-sidebar]')).toBeVisible();
+    } else {
+      await expect(page.locator('[data-project-mobile-context]')).toBeVisible();
+      await page.getByRole('button', { name: 'Buka navigasi proyek' }).click();
+      const drawer = page.getByRole('complementary', { name: 'Navigasi proyek' });
+      await expect(drawer).toBeVisible();
+      await drawer.getByRole('button', { name: 'Tutup navigasi proyek' }).click();
+    }
+
     await expectNoDocumentOverflow(page);
   });
 
-  test('owner workspace uses operational sans typography', async ({ page }) => {
+  test('editorial hierarchy stays separate from operational typography', async ({ page }) => {
     await page.goto(projectPath);
 
-    const dashboard = page.locator('[data-owner-workspace-typography="sans"]');
-    await expect(dashboard).toBeVisible();
+    const shell = page.locator('[data-owner-workspace-typography="editorial-operations"]');
+    await expect(shell).toBeVisible();
 
-    const fontFamily = await dashboard.evaluate((element) => getComputedStyle(element).fontFamily);
-    expect(fontFamily.toLowerCase()).not.toContain('cormorant');
-    expect(fontFamily.toLowerCase()).not.toContain('baskerville');
-    expect(fontFamily.toLowerCase()).not.toContain('times new roman');
+    const titleFont = await page
+      .getByRole('heading', { name: 'Selamat datang kembali, Nadia & Farhan' })
+      .evaluate((element) => getComputedStyle(element).fontFamily);
+    const bodyFont = await shell.evaluate((element) => getComputedStyle(element).fontFamily);
+
+    expect(titleFont).not.toBe(bodyFont);
+    expect(bodyFont.toLowerCase()).not.toContain('fraunces');
+    expect(bodyFont.toLowerCase()).not.toContain('times new roman');
+    await expectNoDocumentOverflow(page);
   });
 
-  test('invitation launcher prioritizes one next task and keeps one save authority', async ({
+  test('invitation launcher still prioritizes one next task and one save authority', async ({
     page,
   }) => {
     await page.goto(invitationPath);
 
     const workspace = page.locator('[data-invitation-task-workspace]');
-    await expect(workspace).toHaveAttribute('data-owner-workspace-radical-simplicity', 'v2');
+    await expect(workspace).toBeVisible();
     await expect(page.getByText('Lanjutkan di sini', { exact: true })).toBeVisible();
     await expect(workspace.locator('[data-invitation-task-save-action]')).toHaveCount(1);
     await expect(workspace.locator('[data-workspace-task]')).toHaveCount(11);
