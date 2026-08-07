@@ -185,7 +185,7 @@ describe('SRY-030 invitation editor multi-event owner UI', () => {
     expect(initialHtml).toContain('name="projectId"');
     expect(initialHtml).toContain(`value="${project.id}"`);
     expect(initialHtml).toContain('name="editorPayload"');
-    expect(initialHtml).not.toContain('name="hero.title"');
+    expect(initialHtml).toContain('name="hero.title"');
     expect(allPanelsHtml).toContain(
       'Tampilkan bagian ini pada undangan setelah diterbitkan. Isi tetap tersimpan meskipun bagian ini belum ditampilkan.',
     );
