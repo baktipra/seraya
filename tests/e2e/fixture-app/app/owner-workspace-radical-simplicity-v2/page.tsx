@@ -1,7 +1,10 @@
 import { DashboardShell } from '@/components/dashboard/dashboard-shell';
 import { ProjectNavigation } from '@/components/dashboard/project-navigation';
 import { ProjectOverviewBootstrap } from '@/components/projects/project-overview-bootstrap';
-import { parseInvitationWorkspaceTask } from '@/components/projects/invitation-task-workspace.types';
+import {
+  parseInvitationWorkspaceEditorialSection,
+  parseInvitationWorkspaceTask,
+} from '@/components/projects/invitation-task-workspace.types';
 import { createDefaultInvitationDraftContent } from '@/modules/invitations/invitation-draft.defaults';
 import type { InvitationDraft } from '@/modules/invitations/invitation-draft.types';
 import type {
@@ -87,6 +90,7 @@ function createInvitationFixtureState() {
 type EditorialDashboardFixturePageProps = {
   searchParams: Promise<{
     mode?: string | string[];
+    section?: string | string[];
     task?: string | string[];
     view?: string;
   }>;
@@ -109,6 +113,11 @@ export default async function EditorialDashboardFixturePage({
         <div className="min-w-0" data-project-workspace-main>
           {query.view === 'invitation' ? (
             <OwnerWorkspaceUsabilityResetFixture
+              initialSection={parseInvitationWorkspaceEditorialSection(
+                query.section,
+                query.task,
+                query.mode,
+              )}
               initialTask={parseInvitationWorkspaceTask(query.task, query.mode)}
               readiness={invitationReadiness}
               savedDraft={savedDraft}
