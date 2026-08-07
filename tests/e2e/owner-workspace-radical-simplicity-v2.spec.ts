@@ -12,7 +12,7 @@ async function expectNoDocumentOverflow(page: Page) {
   expect(overflow.scrollWidth).toBeLessThanOrEqual(overflow.clientWidth + 1);
 }
 
-test.describe('SERAYA Owner Workspace Editorial Dashboard V3', () => {
+test.describe('SERAYA Owner Workspace Editorial Dashboard V3 + Invitation Workspace Editorial V1', () => {
   test('project root shows the five-area shell and readiness dashboard', async ({ page }) => {
     await page.goto(projectPath);
 
@@ -65,44 +65,100 @@ test.describe('SERAYA Owner Workspace Editorial Dashboard V3', () => {
     await expectNoDocumentOverflow(page);
   });
 
-  test('invitation launcher still prioritizes one next task and one save authority', async ({
+  test('Undangan opens directly as the eleven-section editor with a persistent preview', async ({
     page,
   }) => {
     await page.goto(invitationPath);
 
-    const workspace = page.locator('[data-invitation-task-workspace]');
+    const workspace = page.locator('[data-invitation-workspace-editorial="v1"]');
     await expect(workspace).toBeVisible();
-    await expect(page.getByText('Lanjutkan di sini', { exact: true })).toBeVisible();
-    await expect(workspace.locator('[data-invitation-task-save-action]')).toHaveCount(1);
-    await expect(workspace.locator('[data-workspace-task]')).toHaveCount(11);
-    await expect(workspace.locator('[data-workspace-task] svg')).toHaveCount(11);
+    await expect(workspace.locator('[data-workspace-task]')).toHaveCount(0);
+    await expect(page.getByText('Lanjutkan di sini', { exact: true })).toHaveCount(0);
 
-    const recommendedButton = workspace.locator('[data-recommended-task]');
-    const recommendedTask = await recommendedButton.getAttribute('data-recommended-task');
-    expect(recommendedTask).toBeTruthy();
+    const sectionRail = page.getByRole('navigation', { name: 'Bagian undangan' });
+    const labels = [
+      'Tema',
+      'Pasangan',
+      'Pembuka',
+      'Acara',
+      'Lokasi & Peta',
+      'Cerita',
+      'Galeri',
+      'Musik',
+      'Amplop Digital',
+      'RSVP',
+      'Penutup',
+    ];
+    await expect(sectionRail.getByRole('button')).toHaveCount(labels.length);
+    for (const label of labels) {
+      await expect(sectionRail.getByRole('button', { name: label, exact: true })).toBeVisible();
+    }
 
-    await recommendedButton.click();
-    await expect(workspace).toHaveAttribute(
-      'data-invitation-task-workspace-active',
-      recommendedTask!,
-    );
-    await expect(workspace.getByRole('button', { name: /Semua bagian/ })).toBeVisible();
+    await expect(workspace.locator('[data-invitation-editorial-editor]')).toBeVisible();
+    await expect(workspace.locator('[data-invitation-editorial-preview]')).toBeVisible();
+    await expect(page.getByRole('tab', { name: 'Draf' })).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByRole('tab', { name: 'Versi Tamu' })).toBeDisabled();
+    await expect(workspace.locator('[data-invitation-task-save-action]')).toHaveCount(0);
     await expectNoDocumentOverflow(page);
   });
 
-  test('task launcher remains scannable after returning from a single task', async ({ page }) => {
+  test('section switching preserves local editor state and uses one save authority', async ({ page }) => {
     await page.goto(invitationPath);
 
-    const workspace = page.locator('[data-invitation-task-workspace]');
-    await workspace.locator('[data-workspace-task="schedule"]').click();
-    await expect(workspace).toHaveAttribute('data-invitation-task-workspace-active', 'schedule');
+    const workspace = page.locator('[data-invitation-workspace-editorial="v1"]');
+    const sectionRail = page.getByRole('navigation', { name: 'Bagian undangan' });
 
-    await workspace.getByRole('button', { name: /Semua bagian/ }).click();
-    await expect(workspace).toHaveAttribute('data-invitation-task-workspace-active', 'launcher');
-    await expect(workspace.locator('[data-workspace-task]')).toHaveCount(11);
-    await expect(page.getByRole('heading', { name: 'Isi undangan' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Tampilan & media' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Selesaikan' })).toBeVisible();
+    await sectionRail.getByRole('button', { name: 'Pasangan', exact: true }).click();
+    await expect(workspace).toHaveAttribute('data-invitation-task-workspace-active', 'couple');
+    await expect(page.getByRole('heading', { name: 'Mempelai' })).toBeVisible();
+
+    const personOne = page.getByLabel('Nama yang tampil di undangan').first();
+    await personOne.fill('Nama Lokal Tetap');
+    await expect(workspace.locator('[data-invitation-task-save-action]')).toHaveCount(1);
+
+    await sectionRail.getByRole('button', { name: 'Penutup', exact: true }).click();
+    await expect(workspace).toHaveAttribute('data-invitation-task-workspace-active', 'closing');
+    await expect(page.getByRole('heading', { name: 'Penutup' })).toBeVisible();
+
+    await sectionRail.getByRole('button', { name: 'Pasangan', exact: true }).click();
+    await expect(personOne).toHaveValue('Nama Lokal Tetap');
+
+    const saveButton = workspace.locator('[data-invitation-task-save-action]');
+    await expect(saveButton).toHaveCount(1);
+    await saveButton.click();
+    await expect(page.getByText('Semua perubahan tersimpan', { exact: true })).toBeVisible();
+    await expectNoDocumentOverflow(page);
+  });
+
+  test('editorial rail stays usable across location, gallery, music and responsive owner navigation', async ({
+    page,
+  }) => {
+    await page.goto(invitationPath);
+
+    const workspace = page.locator('[data-invitation-workspace-editorial="v1"]');
+    const sectionRail = page.getByRole('navigation', { name: 'Bagian undangan' });
+
+    await sectionRail.getByRole('button', { name: 'Lokasi & Peta', exact: true }).click();
+    await expect(page.getByText('Lokasi mengikuti setiap acara.', { exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Rangkaian Acara' })).toBeVisible();
+
+    await sectionRail.getByRole('button', { name: 'Galeri', exact: true }).click();
+    await expect(workspace.locator('[data-fixture-task="galeri"]')).toBeVisible();
+
+    await sectionRail.getByRole('button', { name: 'Musik', exact: true }).click();
+    await expect(workspace.locator('[data-fixture-task="musik"]')).toBeVisible();
+
+    const viewport = page.viewportSize();
+    if (viewport && viewport.width < 1024) {
+      await page.getByRole('button', { name: 'Buka navigasi proyek' }).click();
+      const drawer = page.getByRole('complementary', { name: 'Navigasi proyek' });
+      await expect(drawer).toBeVisible();
+      await drawer.getByRole('button', { name: 'Tutup navigasi proyek' }).click();
+      await expect(drawer).toBeHidden();
+    } else {
+      await expect(page.locator('[data-project-sidebar]')).toBeVisible();
+    }
+
     await expectNoDocumentOverflow(page);
   });
 });
