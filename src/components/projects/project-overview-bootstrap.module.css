@@ -1,7 +1,10 @@
 .workspace {
   display: grid;
+  width: 100%;
+  max-width: 100%;
   min-width: 0;
   gap: 1.35rem;
+  overflow-x: hidden;
 }
 
 .pageHead {
@@ -38,6 +41,7 @@
 
 .statGrid {
   display: grid;
+  min-width: 0;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.75rem;
 }
@@ -98,6 +102,9 @@
 }
 
 .panel {
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
   padding: 1.2rem;
   border: 1px solid var(--seraya-border-subtle);
   border-radius: 1.1rem;
@@ -109,6 +116,7 @@
 
 .panelHead {
   display: flex;
+  min-width: 0;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
@@ -133,8 +141,12 @@
 
 .journey {
   display: grid;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   overflow-x: auto;
+  overscroll-behavior-inline: contain;
 }
 
 .journeyStep {
@@ -195,6 +207,7 @@
 
 .todoList {
   display: grid;
+  min-width: 0;
 }
 
 .todoRow {
@@ -264,7 +277,7 @@
   }
 
   .journey {
-    grid-template-columns: repeat(5, minmax(9.5rem, 1fr));
+    grid-template-columns: repeat(5, 9.5rem);
     padding-bottom: 0.3rem;
   }
 }
