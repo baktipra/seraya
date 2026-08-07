@@ -46,13 +46,15 @@ describe('RC1 Slice A published confidence foundation', () => {
     expect(markup).toContain('href="/dashboard/project-id/guests"');
   });
 
-  it('mounts confidence only for published projects and preserves the priority engine', () => {
+  it('preserves published truth in the editorial dashboard without inventing delivery state', () => {
     const source = readFileSync('src/components/projects/project-overview-bootstrap.tsx', 'utf8');
 
-    expect(source).toContain('readiness.invitation.hasPublishedSnapshot ? (');
-    expect(source).toContain('<PublishedConfidence');
-    expect(source).toContain('deriveProjectCompassNextStep(readiness, projectId)');
-    expect(source.match(/<CompassFocus/g)).toHaveLength(1);
+    expect(source).toContain("case 'published':");
+    expect(source).toContain("case 'published_with_unpublished_changes':");
+    expect(source).toContain('const published = readiness.invitation.hasPublishedSnapshot;');
+    expect(source).toContain('readiness.invitation.hasUnpublishedChanges');
+    expect(source).toContain("href: `${base}/invitation?task=publish` as Route");
+    expect(source).toContain("href: `${base}/guests` as Route");
     expect(source).not.toMatch(/terkirim|delivered|opened|dibaca/i);
   });
 });

@@ -94,7 +94,12 @@ describe('RB6 invitation editor chapter contracts', () => {
     const progress = workspace.getInvitationEditorProgress(statuses);
     const Navigation = workspace.InvitationWorkspaceNavigation;
     const html = renderToStaticMarkup(
-      <Navigation activeSection="style" onSelect={vi.fn()} statuses={statuses} />,
+      <Navigation
+        activeSection="style"
+        chapters={workspace.invitationStudioChapters}
+        onSelect={vi.fn()}
+        statuses={statuses}
+      />,
     );
 
     expect(statuses.schedule).toBe('error');

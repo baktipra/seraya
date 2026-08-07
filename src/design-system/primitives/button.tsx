@@ -15,7 +15,7 @@ export const buttonVariants = {
 } as const;
 
 export const buttonSizes = {
-  sm: 'min-h-[var(--seraya-control-height-compact)] gap-2 px-3 text-sm',
+  sm: 'min-h-[var(--seraya-touch-target)] gap-2 px-3 text-sm',
   md: 'min-h-[var(--seraya-control-height)] gap-2 px-4 text-sm',
   lg: 'min-h-[var(--seraya-control-height-large)] gap-2.5 px-5 text-base',
 } as const;

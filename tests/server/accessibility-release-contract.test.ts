@@ -22,10 +22,10 @@ describe('cross-workspace accessibility and interaction release contract', () =>
     expect(navigation).toContain('Halaman ${getProjectRouteLabel(pathname, projectId)} dibuka.');
   });
 
-  it('keeps full mobile navigation names available to assistive technology', async () => {
+  it('keeps full navigation names available to assistive technology', async () => {
     const navigation = await read('src/components/dashboard/project-navigation.tsx');
 
-    expect(navigation).toContain('<span className="sr-only">{item.label}</span>');
+    expect(navigation).toContain('<span>{item.label}</span>');
     expect(navigation).toContain('aria-hidden="true"');
     expect(navigation).toContain('focusable="false"');
   });

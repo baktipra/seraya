@@ -122,8 +122,10 @@ describe('RC2 guest control and link lifecycle confidence', () => {
     expect(repositorySource).toContain('createLatestGuestLinkLifecycleMap');
     expect(repositorySource).toContain('minimumQueryCount: 3');
     expect(repositorySource.match(/\.from\(/g)).toHaveLength(3);
-    expect(overviewSource).toContain('<GuestControlConfidence');
-    expect(overviewSource.match(/<CompassFocus/g)).toHaveLength(1);
+    expect(overviewSource).toContain('readiness.guests.activeGuestCount');
+    expect(overviewSource).toContain('readiness.guests.readyToDistributeCount');
+    expect(overviewSource).toContain("href: `${base}/guests` as Route");
+    expect(overviewSource).not.toContain('.from(');
     expect(tamuSource).toContain(
       'Publikasi ulang memperbarui isi undangan tanpa mengganti link aktif.',
     );
