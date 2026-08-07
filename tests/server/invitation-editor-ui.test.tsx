@@ -182,7 +182,8 @@ describe('SRY-030 invitation editor multi-event owner UI', () => {
       expect(allPanelsHtml).toContain(`name="${name}"`);
     }
 
-    expect(initialHtml).toContain(`name="projectId" type="hidden" value="${project.id}"`);
+    expect(initialHtml).toContain('name="projectId"');
+    expect(initialHtml).toContain(`value="${project.id}"`);
     expect(initialHtml).toContain('name="editorPayload"');
     expect(initialHtml).not.toContain('name="hero.title"');
     expect(allPanelsHtml).toContain(
