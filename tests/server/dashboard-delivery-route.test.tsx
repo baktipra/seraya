@@ -6,11 +6,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 
-const { getDeliveryCenterMock, getOwnedProjectContextMock, getPublicationMock, notFoundMock } =
+const { getDistributionCenterMock, getOwnedProjectContextMock, getPublicShareMock, notFoundMock } =
   vi.hoisted(() => ({
-    getDeliveryCenterMock: vi.fn(),
+    getDistributionCenterMock: vi.fn(),
     getOwnedProjectContextMock: vi.fn(),
-    getPublicationMock: vi.fn(),
+    getPublicShareMock: vi.fn(),
     notFoundMock: vi.fn(),
   }));
 
@@ -20,20 +20,39 @@ vi.mock('@/components/projects/native-guest-delivery-center', () => ({
     <div data-delivery-project-id={projectId}>{rows.length} rows</div>
   ),
 }));
+vi.mock('@/components/projects/public-social-share-kit', () => ({
+  PublicSocialShareKit: ({ projectId }: { projectId: string }) => (
+    <div data-public-share-project-id={projectId}>public share</div>
+  ),
+}));
 vi.mock('@/modules/auth/dashboard-request-context', () => ({
   getOwnedProjectContextForRequest: getOwnedProjectContextMock,
+}));
+vi.mock('@/modules/delivery/canonical-initial-contact.actions', () => ({
+  recordCanonicalInitialContactAction: vi.fn(),
+}));
+vi.mock('@/modules/delivery/canonical-initial-handoff.actions', () => ({
+  reaccessOrPrepareCanonicalInitialHandoffAction: vi.fn(),
 }));
 vi.mock('@/modules/delivery/delivery.actions', () => ({
   copySelectedDeliveryWhatsAppNumbersAction: vi.fn(),
   prepareMissingPersonalGuestLinksForDeliveryAction: vi.fn(),
   preparePersonalGuestLinkForDeliveryAction: vi.fn(),
-  reaccessPersonalGuestLinkForDeliveryAction: vi.fn(),
 }));
-vi.mock('@/modules/delivery/delivery.service', () => ({
-  getGuestDeliveryCenterForVerifiedProject: getDeliveryCenterMock,
+vi.mock('@/modules/delivery/delivery-distribution', () => ({
+  deriveDeliveryDistribution: vi.fn(() => ({ canRecordContact: false })),
 }));
-vi.mock('@/modules/publications/publication.service', () => ({
-  getCurrentPublishedInvitationForVerifiedProject: getPublicationMock,
+vi.mock('@/modules/delivery/delivery-handoff.service', () => ({
+  getGuestDistributionCenterForVerifiedProject: getDistributionCenterMock,
+}));
+vi.mock('@/modules/delivery/delivery-readiness', () => ({
+  deriveDeliveryReadiness: vi.fn(() => ({
+    canPrepareNewLink: false,
+    isReadyToDistribute: false,
+  })),
+}));
+vi.mock('@/modules/public-social-share/public-social-share.service', () => ({
+  getPublicSocialShareForVerifiedProject: getPublicShareMock,
 }));
 
 import DeliveryCenterPage, {
@@ -44,13 +63,13 @@ import DeliveryCenterPage, {
 
 const projectId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 const project = { id: projectId };
-const publication = { id: 'published-snapshot' };
+const publicShare = { slug: 'raka-nadia' };
 
 describe('SRY-031 private Delivery Center route', () => {
   beforeEach(() => {
-    getDeliveryCenterMock.mockReset();
+    getDistributionCenterMock.mockReset();
     getOwnedProjectContextMock.mockReset().mockResolvedValue(project);
-    getPublicationMock.mockReset().mockResolvedValue(publication);
+    getPublicShareMock.mockReset().mockResolvedValue(publicShare);
     notFoundMock.mockReset();
     notFoundMock.mockImplementation(() => {
       throw new Error('NEXT_NOT_FOUND');
@@ -58,28 +77,16 @@ describe('SRY-031 private Delivery Center route', () => {
   });
 
   it('is private dynamic no-store and renders only verified owner delivery data', async () => {
-    getDeliveryCenterMock.mockResolvedValue({
-      isPublished: true,
+    getDistributionCenterMock.mockResolvedValue({
+      handoffSummary: {},
       project,
       rows: [
         {
           displayName: 'Keluarga Budi',
-          groupLabel: null,
           guestId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
-          maskedWhatsAppNumber: '+62••••7890',
-          personalLinkReaccessState: 'recoverable',
-          personalLinkState: 'active',
-          rsvpStatus: 'pending',
-          whatsappAvailability: 'available',
         },
       ],
-      summary: {
-        activeGuestCount: 1,
-        needsLinkUpdateCount: 0,
-        needsWhatsAppCount: 0,
-        noPersonalInvitationCount: 0,
-        readyToDistributeCount: 1,
-      },
+      summary: { activeGuestCount: 1 },
     });
 
     const page = await DeliveryCenterPage({ params: Promise.resolve({ projectId }) });
@@ -89,25 +96,26 @@ describe('SRY-031 private Delivery Center route', () => {
     expect(revalidate).toBe(0);
     expect(fetchCache).toBe('force-no-store');
     expect(getOwnedProjectContextMock).toHaveBeenCalledWith(projectId);
-    expect(getPublicationMock).toHaveBeenCalledWith(project);
-    expect(getDeliveryCenterMock).toHaveBeenCalledWith(project);
+    expect(getPublicShareMock).toHaveBeenCalledWith(project);
+    expect(getDistributionCenterMock).toHaveBeenCalledWith(project);
+    expect(html).toContain(`data-public-share-project-id="${projectId}"`);
     expect(html).toContain(`data-delivery-project-id="${projectId}"`);
     expect(html).toContain('1 rows');
   });
 
-  it('keeps direct unpublished owner access blocked before any delivery or link-preparation read', async () => {
-    getPublicationMock.mockResolvedValue(null);
+  it('keeps direct unpublished owner access blocked before any delivery read', async () => {
+    getPublicShareMock.mockResolvedValue(null);
 
     const page = await DeliveryCenterPage({ params: Promise.resolve({ projectId }) });
     const html = renderToStaticMarkup(page);
 
     expect(html).toContain('Bagikan tersedia setelah undangan diterbitkan');
     expect(html).toContain(
-      'Terbitkan versi undangan yang sudah kalian setujui sebelum menyiapkan Undangan Pribadi untuk tamu.',
+      'Terbitkan versi undangan yang sudah kalian setujui sebelum menyiapkan pembagian manual untuk tamu atau membuat aset publik.',
     );
     expect(getOwnedProjectContextMock).toHaveBeenCalledWith(projectId);
-    expect(getPublicationMock).toHaveBeenCalledWith(project);
-    expect(getDeliveryCenterMock).not.toHaveBeenCalled();
+    expect(getPublicShareMock).toHaveBeenCalledWith(project);
+    expect(getDistributionCenterMock).not.toHaveBeenCalled();
   });
 
   it('uses generic unavailable behavior for foreign or soft-deleted projects', async () => {
@@ -116,19 +124,20 @@ describe('SRY-031 private Delivery Center route', () => {
     await expect(DeliveryCenterPage({ params: Promise.resolve({ projectId }) })).rejects.toThrow(
       'NEXT_NOT_FOUND',
     );
-    expect(getPublicationMock).not.toHaveBeenCalled();
-    expect(getDeliveryCenterMock).not.toHaveBeenCalled();
+    expect(getPublicShareMock).not.toHaveBeenCalled();
+    expect(getDistributionCenterMock).not.toHaveBeenCalled();
   });
 
-  it('uses one verified project plus the bounded publication gate without full readiness', async () => {
+  it('uses one verified project plus bounded public-share and distribution services', async () => {
     const source = await readFile(
       path.resolve(process.cwd(), 'src/app/(dashboard)/dashboard/[projectId]/delivery/page.tsx'),
       'utf8',
     );
 
     expect(source).toContain('getOwnedProjectContextForRequest');
-    expect(source).toContain('getCurrentPublishedInvitationForVerifiedProject');
-    expect(source).toContain('getGuestDeliveryCenterForVerifiedProject');
+    expect(source).toContain('getPublicSocialShareForVerifiedProject');
+    expect(source).toContain('getGuestDistributionCenterForVerifiedProject');
+    expect(source).toContain('PublicSocialShareKit');
     expect(source).not.toContain('getWeddingReadinessForRequest');
     expect(source).not.toContain('getWeddingReadinessForVerifiedProject');
     expect(source).not.toContain('createServerSupabaseClient');

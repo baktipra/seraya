@@ -62,14 +62,14 @@ describe('SRY-039 Project Compass surfaces', () => {
     ).toContain('Raka &amp; Nadia');
   });
 
-  it('renders Ringkasan as aggregate compass with one primary next step and no guest table or per-guest actions', () => {
+  it('renders Ringkasan as the editorial aggregate compass without guest-table actions', () => {
     const html = renderToStaticMarkup(
       <ProjectOverviewBootstrap projectId={projectId} readiness={readiness()} />,
     );
-    expect(html).toContain('Draft belum dipublikasikan');
-    expect(html).toContain('Fokus berikutnya');
-    expect(html).toContain('Lengkapi undangan');
-    expect(html).toContain('Progress singkat');
+    expect(html).toContain('Draf belum lengkap');
+    expect(html).toContain('Ringkasan kondisi proyek');
+    expect(html).toContain('Langkah berikutnya');
+    expect(html).toContain('Lengkapi isi undangan');
     expect(html).toContain('Tamu aktif');
     expect(html).not.toContain('<table');
     expect(html).not.toContain('Copy tautan');
@@ -77,7 +77,7 @@ describe('SRY-039 Project Compass surfaces', () => {
     expect(html).not.toContain('token_hash');
   });
 
-  it('routes attention to the correct workspace homes', () => {
+  it('routes editorial attention to the current V3 workspace handoffs', () => {
     const html = renderToStaticMarkup(
       <ProjectOverviewBootstrap
         projectId={projectId}
@@ -112,9 +112,11 @@ describe('SRY-039 Project Compass surfaces', () => {
       />,
     );
     expect(html).toContain(`href="/dashboard/${projectId}/invitation"`);
+    expect(html).toContain(`href="/dashboard/${projectId}/invitation?task=publish"`);
     expect(html).toContain(`href="/dashboard/${projectId}/guests"`);
-    expect(html).toContain(`href="/dashboard/${projectId}/delivery"`);
     expect(html).toContain(`href="/dashboard/${projectId}/rsvp"`);
-    expect(html).toContain('Butuh perhatian');
+    expect(html).toContain('Ada perubahan draf');
+    expect(html).toContain('Sinkronkan versi tamu');
+    expect(html).toContain('Siap dibagikan');
   });
 });

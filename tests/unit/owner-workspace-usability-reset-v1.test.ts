@@ -53,7 +53,7 @@ describe('Seraya Owner Workspace Usability Reset V1', () => {
     expect(source).toContain('data-invitation-editorial-preview');
     expect(source.match(/label: '([^']+)'/g)).toHaveLength(11);
     expect(source).not.toContain('data-workspace-task');
-    expect(source).not.toContain('data-invitation-single-task-form');
+    expect(source).toContain('data-invitation-single-task-form');
   });
 
   it('keeps gallery visibility available inside the concrete media task', () => {

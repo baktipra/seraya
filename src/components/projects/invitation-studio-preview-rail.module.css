@@ -128,6 +128,17 @@
   overscroll-behavior: contain;
 }
 
+.runtimePlaceholder {
+  display: grid;
+  min-height: 100%;
+  place-items: center;
+  padding: 1.5rem;
+  color: var(--seraya-text-muted);
+  font-size: 0.68rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
 .deviceHomeIndicator {
   position: absolute;
   z-index: 3;

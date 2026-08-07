@@ -36,10 +36,10 @@ describe('SRY-039 owner workspace navigation', () => {
     expect(html).toContain('for="login-email"');
   });
 
-  it('keeps the global dashboard nav as a project launcher', () => {
+  it('keeps the global dashboard nav focused on returning to the project collection', () => {
     const html = renderToStaticMarkup(<DashboardDesktopNavigation />);
     expect(html).toContain('Semua undangan');
-    expect(html).toContain('Buat undangan');
+    expect(html).not.toContain('Buat undangan');
   });
 
   it('keeps exactly the five canonical project workspaces', () => {

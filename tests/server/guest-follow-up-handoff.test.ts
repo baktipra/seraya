@@ -13,7 +13,7 @@ describe('Guest Follow-up Slice C manual handoff source contract', () => {
     expect(source).toContain('getCurrentPublishedInvitationForVerifiedProject');
     expect(source).toContain('reaccessPersonalGuestLinkForVerifiedGuest');
     expect(source).toContain("eventType: 'handoff_prepared'");
-    expect(source).toContain("sourceSurface: 'follow_up_center'");
+    expect(source).toContain("sourceSurface: input.sourceSurface ?? 'follow_up_center'");
     expect(source.indexOf('await appendGuestFollowUpEventForVerifiedProject')).toBeLessThan(
       source.lastIndexOf('return handoff'),
     );
