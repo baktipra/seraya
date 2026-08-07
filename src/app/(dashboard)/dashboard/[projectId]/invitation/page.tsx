@@ -2,17 +2,15 @@ import { notFound } from 'next/navigation';
 
 import { InvitationStudioDesignMode } from '@/components/projects/invitation-studio-design-mode';
 import { InvitationStudioMediaMode } from '@/components/projects/invitation-studio-media-mode';
-import { InvitationStudioPreviewMode } from '@/components/projects/invitation-studio-preview-mode';
+import { InvitationStudioPreviewRail } from '@/components/projects/invitation-studio-preview-rail';
 import { InvitationStudioPublishMode } from '@/components/projects/invitation-studio-publish-mode';
-import {
-  parseInvitationStudioPreviewSurface,
-  parseInvitationStudioPreviewVersion,
-  parseInvitationStudioPreviewViewport,
-} from '@/components/projects/invitation-studio-preview.types';
 import { InvitationStudioProvider } from '@/components/projects/invitation-studio-provider';
 import type { InvitationStudioStatusTone } from '@/components/projects/invitation-studio-shell';
 import { InvitationTaskWorkspace } from '@/components/projects/invitation-task-workspace';
-import { parseInvitationWorkspaceTask } from '@/components/projects/invitation-task-workspace.types';
+import {
+  parseInvitationWorkspaceEditorialSection,
+  parseInvitationWorkspaceTask,
+} from '@/components/projects/invitation-task-workspace.types';
 import { WorkspacePage } from '@/components/workspace/workspace-page';
 import { measureWorkspaceServerLoad } from '@/lib/performance/workspace-performance.server';
 import { getOwnedProjectContextForRequest } from '@/modules/auth/dashboard-request-context';
@@ -32,6 +30,7 @@ import { getInvitationReadinessForVerifiedProject } from '@/modules/readiness';
 
 type InvitationEditorSearchParams = {
   mode?: string | string[];
+  section?: string | string[];
   surface?: string | string[];
   task?: string | string[];
   version?: string | string[];
@@ -143,12 +142,11 @@ export default async function InvitationEditorPage({
   const screen = await getInvitationEditorScreenOrNotFound(projectId);
   const workspaceStatus = getInvitationStudioStatus(screen.readiness);
   const initialTask = parseInvitationWorkspaceTask(query.task, query.mode);
-  const initialPreviewVersion = parseInvitationStudioPreviewVersion(
-    query.version,
-    Boolean(screen.publishedSnapshot),
+  const initialSection = parseInvitationWorkspaceEditorialSection(
+    query.section,
+    query.task,
+    query.mode,
   );
-  const initialPreviewSurface = parseInvitationStudioPreviewSurface(query.surface);
-  const initialPreviewViewport = parseInvitationStudioPreviewViewport(query.viewport);
 
   return (
     <WorkspacePage kind="studio" width="studio">
@@ -157,7 +155,6 @@ export default async function InvitationEditorPage({
         projectId={screen.editor.project.id}
       >
         <InvitationTaskWorkspace
-          coupleLabel={screen.readiness.identity.coupleLabel}
           design={
             <InvitationStudioDesignMode
               galleryImages={screen.galleryImages}
@@ -168,27 +165,36 @@ export default async function InvitationEditorPage({
             />
           }
           draft={screen.editor.draft}
-          initialTask={initialTask}
-          media={
+          gallery={
             <InvitationStudioMediaMode
               initialAudio={screen.audio}
               initialImages={screen.galleryImages}
+              initialTab="gallery"
               isPublished={screen.editor.project.status === 'published'}
+              key="editorial-gallery"
+              projectId={screen.editor.project.id}
+            />
+          }
+          initialSection={initialSection}
+          initialTask={initialTask}
+          music={
+            <InvitationStudioMediaMode
+              initialAudio={screen.audio}
+              initialImages={screen.galleryImages}
+              initialTab="audio"
+              isPublished={screen.editor.project.status === 'published'}
+              key="editorial-music"
               projectId={screen.editor.project.id}
             />
           }
           preview={
-            <InvitationStudioPreviewMode
-              initialSurface={initialPreviewSurface}
-              initialVersion={initialPreviewVersion}
-              initialViewport={initialPreviewViewport}
+            <InvitationStudioPreviewRail
               project={{
                 event_date_primary: screen.editor.project.event_date_primary,
                 id: screen.editor.project.id,
               }}
               publicationState={screen.readiness.invitation.state}
               publishedSnapshot={screen.publishedSnapshot}
-              savedDraft={screen.editor.draft}
             />
           }
           projectId={screen.editor.project.id}
