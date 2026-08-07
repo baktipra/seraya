@@ -1,16 +1,15 @@
-name: Owner Workspace Radical Simplicity V2 validation
+name: Owner Workspace Editorial Dashboard V3 validation
 
 on:
   workflow_dispatch:
   pull_request:
     paths:
-      - 'src/app/design-tokens.css'
-      - 'src/app/(dashboard)/dashboard/[projectId]/page.tsx'
-      - 'src/components/dashboard/dashboard-icons.tsx'
-      - 'src/components/dashboard/dashboard-project-launcher.tsx'
+      - 'src/app/layout.tsx'
+      - 'src/app/workspace-anatomy.css'
       - 'src/components/dashboard/dashboard-shell.tsx'
+      - 'src/components/dashboard/dashboard-shell.module.css'
       - 'src/components/dashboard/project-navigation.tsx'
-      - 'src/components/projects/owner-workspace-visuals.tsx'
+      - 'src/components/dashboard/project-navigation.module.css'
       - 'src/components/projects/project-overview-bootstrap.tsx'
       - 'src/components/projects/project-overview-bootstrap.module.css'
       - 'src/components/projects/invitation-task-workspace.tsx'
@@ -18,21 +17,21 @@ on:
       - 'tests/unit/owner-workspace-radical-simplicity-v2.test.ts'
       - 'tests/e2e/owner-workspace-radical-simplicity-v2.spec.ts'
       - 'tests/e2e/fixture-app/app/owner-workspace-radical-simplicity-v2/**'
+      - 'tests/e2e/fixture-app/app/dashboard/editorial-v3/**'
       - 'playwright.owner-workspace-radical-simplicity-v2.config.ts'
-      - 'docs/OWNER_WORKSPACE_RADICAL_SIMPLICITY_V2.md'
+      - 'docs/OWNER_WORKSPACE_EDITORIAL_DASHBOARD_V3.md'
       - 'vercel.json'
       - '.github/workflows/owner-workspace-radical-simplicity-v2.yml'
   push:
     branches:
-      - feature/owner-workspace-radical-simplicity-v2
+      - feature/owner-workspace-editorial-dashboard-v3
     paths:
-      - 'src/app/design-tokens.css'
-      - 'src/app/(dashboard)/dashboard/[projectId]/page.tsx'
-      - 'src/components/dashboard/dashboard-icons.tsx'
-      - 'src/components/dashboard/dashboard-project-launcher.tsx'
+      - 'src/app/layout.tsx'
+      - 'src/app/workspace-anatomy.css'
       - 'src/components/dashboard/dashboard-shell.tsx'
+      - 'src/components/dashboard/dashboard-shell.module.css'
       - 'src/components/dashboard/project-navigation.tsx'
-      - 'src/components/projects/owner-workspace-visuals.tsx'
+      - 'src/components/dashboard/project-navigation.module.css'
       - 'src/components/projects/project-overview-bootstrap.tsx'
       - 'src/components/projects/project-overview-bootstrap.module.css'
       - 'src/components/projects/invitation-task-workspace.tsx'
@@ -40,13 +39,14 @@ on:
       - 'tests/unit/owner-workspace-radical-simplicity-v2.test.ts'
       - 'tests/e2e/owner-workspace-radical-simplicity-v2.spec.ts'
       - 'tests/e2e/fixture-app/app/owner-workspace-radical-simplicity-v2/**'
+      - 'tests/e2e/fixture-app/app/dashboard/editorial-v3/**'
       - 'playwright.owner-workspace-radical-simplicity-v2.config.ts'
-      - 'docs/OWNER_WORKSPACE_RADICAL_SIMPLICITY_V2.md'
+      - 'docs/OWNER_WORKSPACE_EDITORIAL_DASHBOARD_V3.md'
       - 'vercel.json'
       - '.github/workflows/owner-workspace-radical-simplicity-v2.yml'
 
 concurrency:
-  group: owner-workspace-radical-simplicity-${{ github.event.pull_request.number || github.ref }}
+  group: owner-workspace-editorial-dashboard-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -66,41 +66,36 @@ jobs:
       - name: Check focused formatting
         run: |
           npx prettier --check \
-            src/app/design-tokens.css \
-            'src/app/(dashboard)/dashboard/[projectId]/page.tsx' \
-            src/components/dashboard/dashboard-icons.tsx \
-            src/components/dashboard/dashboard-project-launcher.tsx \
+            src/app/layout.tsx \
+            src/app/workspace-anatomy.css \
             src/components/dashboard/dashboard-shell.tsx \
+            src/components/dashboard/dashboard-shell.module.css \
             src/components/dashboard/project-navigation.tsx \
-            src/components/projects/owner-workspace-visuals.tsx \
+            src/components/dashboard/project-navigation.module.css \
             src/components/projects/project-overview-bootstrap.tsx \
             src/components/projects/project-overview-bootstrap.module.css \
-            src/components/projects/invitation-task-workspace.tsx \
-            src/components/projects/invitation-task-workspace.module.css \
             tests/unit/owner-workspace-radical-simplicity-v2.test.ts \
             tests/e2e/owner-workspace-radical-simplicity-v2.spec.ts \
             tests/e2e/fixture-app/app/owner-workspace-radical-simplicity-v2/page.tsx \
+            tests/e2e/fixture-app/app/dashboard/editorial-v3/page.tsx \
             playwright.owner-workspace-radical-simplicity-v2.config.ts \
-            docs/OWNER_WORKSPACE_RADICAL_SIMPLICITY_V2.md \
+            docs/OWNER_WORKSPACE_EDITORIAL_DASHBOARD_V3.md \
             vercel.json \
             .github/workflows/owner-workspace-radical-simplicity-v2.yml
       - name: Lint focused source
         run: |
           npx eslint \
-            'src/app/(dashboard)/dashboard/[projectId]/page.tsx' \
-            src/components/dashboard/dashboard-icons.tsx \
-            src/components/dashboard/dashboard-project-launcher.tsx \
+            src/app/layout.tsx \
             src/components/dashboard/dashboard-shell.tsx \
             src/components/dashboard/project-navigation.tsx \
-            src/components/projects/owner-workspace-visuals.tsx \
             src/components/projects/project-overview-bootstrap.tsx \
-            src/components/projects/invitation-task-workspace.tsx \
             tests/unit/owner-workspace-radical-simplicity-v2.test.ts \
             tests/e2e/owner-workspace-radical-simplicity-v2.spec.ts \
             tests/e2e/fixture-app/app/owner-workspace-radical-simplicity-v2/page.tsx \
+            tests/e2e/fixture-app/app/dashboard/editorial-v3/page.tsx \
             playwright.owner-workspace-radical-simplicity-v2.config.ts
       - run: npm run typecheck
-      - name: Run radical simplicity and Invitation Studio A-G compatibility contracts
+      - name: Run editorial dashboard and Invitation Studio compatibility contracts
         run: |
           npx vitest run \
             tests/unit/owner-workspace-radical-simplicity-v2.test.ts \
@@ -119,7 +114,7 @@ jobs:
       - run: npm run build
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
-      - name: Run desktop tablet and mobile radical simplicity regression
+      - name: Run desktop tablet and mobile editorial dashboard regression
         run: npx playwright test --config=playwright.owner-workspace-radical-simplicity-v2.config.ts
       - name: Run accepted Slice D media compatibility smoke
         run: npx playwright test --config=playwright.invitation-studio-slice-d.config.ts
@@ -129,7 +124,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: owner-workspace-radical-simplicity-v2-report
+          name: owner-workspace-editorial-dashboard-v3-report
           path: |
             playwright-report
             test-results
