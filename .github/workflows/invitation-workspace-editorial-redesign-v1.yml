@@ -11,9 +11,10 @@ on:
       - 'src/components/projects/invitation-studio-preview-rail.tsx'
       - 'src/components/projects/invitation-studio-preview-rail.module.css'
       - 'tests/unit/invitation-workspace-editorial-redesign-v1.test.ts'
-      - 'tests/e2e/invitation-workspace-editorial-redesign-v1.spec.ts'
-      - 'tests/e2e/fixture-app/app/invitation-workspace-editorial-redesign-v1/**'
-      - 'playwright.invitation-workspace-editorial-redesign-v1.config.ts'
+      - 'tests/unit/owner-workspace-radical-simplicity-v2.test.ts'
+      - 'tests/e2e/owner-workspace-radical-simplicity-v2.spec.ts'
+      - 'tests/e2e/fixture-app/app/owner-workspace-radical-simplicity-v2/**'
+      - 'tests/e2e/fixture-app/app/owner-workspace-usability-reset/**'
       - 'vercel.json'
       - '.github/workflows/invitation-workspace-editorial-redesign-v1.yml'
   push:
@@ -30,7 +31,7 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -38,37 +39,31 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Check focused formatting
-        run: |
-          npx prettier --check \
-            'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
-            src/components/projects/invitation-task-workspace.tsx \
-            src/components/projects/invitation-task-workspace.module.css \
-            src/components/projects/invitation-task-workspace.types.ts \
-            src/components/projects/invitation-studio-preview-rail.tsx \
-            src/components/projects/invitation-studio-preview-rail.module.css \
-            vercel.json \
-            .github/workflows/invitation-workspace-editorial-redesign-v1.yml
-      - name: Lint focused source
-        run: |
-          npx eslint \
-            'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
-            src/components/projects/invitation-task-workspace.tsx \
-            src/components/projects/invitation-task-workspace.types.ts \
-            src/components/projects/invitation-studio-preview-rail.tsx
-      - run: npm run typecheck
-      - name: Run Invitation Studio compatibility contracts
-        run: |
-          npx vitest run \
-            tests/unit/invitation-studio-structural-foundation-slice-a.test.tsx \
-            tests/unit/invitation-studio-unified-state-slice-b.test.ts \
-            tests/unit/invitation-studio-design-mode-slice-c.test.ts \
-            tests/unit/invitation-studio-media-mode-slice-d.test.ts \
-            tests/unit/invitation-studio-preview-mode-slice-e.test.ts \
-            tests/unit/invitation-studio-publish-mode-slice-f.test.ts \
-            tests/unit/invitation-studio-responsive-slice-g.test.tsx \
-            src/modules/publications/__tests__/published-invitation.schema.test.ts \
-            src/modules/publications/__tests__/publication.service.test.ts \
-            src/modules/payments/__tests__/payment-publish-policy.test.ts \
-            tests/server/dashboard-invitation-editor-route.test.tsx
-      - run: npm run build
+      - name: Full formatting check
+        run: npm run format:check
+      - name: Full lint
+        run: npm run lint
+      - name: TypeScript typecheck
+        run: npm run typecheck
+      - name: Full unit and server suite
+        run: npm test
+      - name: Production build
+        run: npm run build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run editorial owner and invitation workspace regression
+        run: npx playwright test --config=playwright.owner-workspace-radical-simplicity-v2.config.ts
+      - name: Run accepted Slice D media compatibility smoke
+        run: npx playwright test --config=playwright.invitation-studio-slice-d.config.ts
+      - name: Run accepted Slice G responsive compatibility smoke
+        run: npx playwright test --config=playwright.invitation-studio-slice-g.config.ts
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: invitation-workspace-editorial-redesign-v1-report
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+          retention-days: 7
