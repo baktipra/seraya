@@ -1,4 +1,6 @@
 import '../../../../src/app/globals.css';
+import '../../../../src/app/workspace-anatomy.css';
+import '../../../../src/app/workspace-responsive.css';
 import '../../../../src/app/accessibility-release.css';
 import '../../../../src/app/personal-response-release.css';
 import '../../../../src/app/invitation-maturation-release.css';
