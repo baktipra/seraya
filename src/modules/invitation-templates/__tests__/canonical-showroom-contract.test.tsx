@@ -105,8 +105,10 @@ describe('P0-B4 canonical invitation showroom contract', () => {
     expect(thumbnailSource).toContain('data-canonical-thumbnail-source="static-canonical-capture"');
     expect(thumbnailSource).toMatch(/const STATIC_THUMBNAIL_VERSION = '[^']+';/);
     expect(thumbnailSource).toContain('getCanonicalInvitationThumbnailAssetHref');
-    expect(templatesPageSource).toContain('Koleksi Tema Seraya');
-    expect(templatesPageSource).toContain('Showroom publik memakai renderer produksi yang sama');
-    expect(templatesPageSource).toContain('Gunakan tema');
+    expect(templatesPageSource).toContain('Showroom Seraya');
+    expect(templatesPageSource).toContain('Satu isi undangan. Tiga cara menyambut tamu.');
+    expect(templatesPageSource).toContain('Buka demo umum');
+    expect(templatesPageSource).toContain('Simulasi personal');
+    expect(templatesPageSource).toContain('Buat draf pribadi');
   });
 });
