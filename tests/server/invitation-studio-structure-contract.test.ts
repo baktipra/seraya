@@ -8,15 +8,25 @@ async function read(relativePath: string) {
 }
 
 describe('invitation studio structural reconstruction', () => {
-  it('keeps the studio shell structural and free from inline recovery CSS', async () => {
+  it('keeps the studio shell structural while V1 owns its three-zone workspace geometry', async () => {
     const shell = await read('src/components/projects/invitation-studio-shell.tsx');
     const shellCss = await read('src/components/projects/invitation-studio-shell.module.css');
+    const workspaceCss = await read('src/components/projects/invitation-task-workspace.module.css');
 
     expect(shell).toContain('data-invitation-studio');
     expect(shell).not.toContain('<style>');
-    expect(shellCss).toContain('[data-invitation-editor-desktop-navigation] + form');
-    expect(shellCss).toContain('aside[data-local-preview-desktop]');
+    expect(shellCss).not.toContain('[data-invitation-editor-desktop-navigation] + form');
+    expect(shellCss).not.toContain('aside[data-local-preview-desktop]');
+    expect(workspaceCss).toContain('container-type: inline-size');
+    expect(workspaceCss).toContain(
+      'grid-template-columns: minmax(10.75rem, 12.25rem) minmax(0, 1fr) minmax(17.5rem, 20rem);',
+    );
+    expect(workspaceCss).toContain('.sectionRail');
+    expect(workspaceCss).toContain('.previewRail');
+    expect(workspaceCss).toContain('@container (max-width: 72rem)');
+    expect(workspaceCss).toContain('@container (max-width: 52rem)');
     expect(shellCss).not.toContain(':has(');
+    expect(workspaceCss).not.toContain(':has(');
     expect(shellCss).not.toContain('display: contents');
   });
 

@@ -77,7 +77,7 @@ describe('Slice A invitation editor workspace foundation', () => {
     });
   });
 
-  it('renders an accessible desktop rail and mobile selector while unmounting inactive panels', () => {
+  it('renders the eight content chapters while style remains a dedicated V1 mode', () => {
     const statuses = getInvitationEditorSectionStatuses(draft);
     const navigation = renderToStaticMarkup(
       <InvitationWorkspaceNavigation
@@ -93,9 +93,11 @@ describe('Slice A invitation editor workspace foundation', () => {
     );
 
     expect(navigation).toContain('aria-label="Bagian undangan"');
-    expect(navigation).toContain('Bagian 2 dari 9');
+    expect(navigation).toContain('Bagian 1 dari 8');
+    expect(navigation).toContain('7 dari 8 siap');
     expect(navigation).toContain('aria-current="step"');
     expect(navigation).toContain('Status draf saat ini');
+    expect(navigation).not.toContain('Gaya undangan');
     expect(inactivePanel).toBe('');
     expect(inactivePanel).not.toContain('name="closing.signature"');
   });

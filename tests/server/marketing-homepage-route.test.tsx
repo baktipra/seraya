@@ -15,41 +15,42 @@ const requiredSteps = [
 ] as const;
 
 describe('Release A public flagship landing page', () => {
-  it('renders a public static homepage with canonical metadata', () => {
+  it('renders a public static homepage with the current canonical metadata', () => {
     expect(dynamic).toBe('force-static');
     expect(revalidate).toBe(3600);
     expect(metadata).toMatchObject({
       description:
-        'Susun undangan, bagikan tautan personal, dan kelola perjalanan tamu pernikahan Indonesia dalam satu pengalaman yang indah dan mudah digunakan.',
+        'Buat undangan pernikahan digital dengan tautan personal, RSVP keluarga, dan pengelolaan tamu dalam satu workspace yang tenang.',
       title: {
         absolute: 'Seraya — Pengalaman tamu pernikahan yang personal',
       },
     });
   });
 
-  it('renders the flagship hero, collection navigation, and conversion actions', () => {
+  it('renders the current editorial hero, collection navigation, and conversion actions', () => {
     const html = renderToStaticMarkup(<Home />);
 
-    expect(html).toContain('Undangan personal untuk pernikahan Indonesia');
-    expect(html).toContain('Satu undangan yang indah.');
-    expect(html).toContain('Personal untuk setiap tamu.');
+    expect(html).toContain('data-homepage-editorial-hero="true"');
+    expect(html).toContain('Undangan pernikahan yang terasa personal');
+    expect(html).toContain('Keindahan stationery klasik dengan kemudahan digital.');
+    expect(html).toContain('Jelajahi koleksi');
     expect(html).toContain('href="/login"');
     expect(html).toContain('href="/dashboard/new"');
     expect(html).toContain('href="/templates"');
     expect(html).toContain('Mulai buat undangan');
-    expect(html).toContain('Lihat koleksi desain');
+    expect(html).toContain('Lihat koleksi');
   });
 
-  it('presents the three distinct supported collections', () => {
+  it('presents the three distinct supported collections through the current catalog framing', () => {
     const html = renderToStaticMarkup(<Home />);
 
     for (const collection of ['Roselle', 'Aruna', 'Laras']) {
       expect(html).toContain(collection);
     }
-    expect(html).toContain('Romantic warmth');
-    expect(html).toContain('Modern editorial');
-    expect(html).toContain('Formal evening');
-    expect(html).toContain('Bukan sekadar ganti warna.');
+    expect(html).toContain('Tema pilihan Seraya');
+    expect(html).toContain('Pilih yang paling terasa kalian.');
+    expect(html).toContain('3 tema siap dipakai · koleksi terus bertambah');
+    expect(html).toContain('Lihat semua tema');
   });
 
   it('renders the four owner-journey steps in order', () => {
@@ -64,9 +65,10 @@ describe('Release A public flagship landing page', () => {
   it('keeps the privacy and final CTA language factual', () => {
     const html = renderToStaticMarkup(<Home />);
 
+    expect(html).toContain('Kontrol tetap di tangan kalian');
     expect(html).toContain('Draf pribadi');
-    expect(html).toContain('Tautan personal');
-    expect(html).toContain('Satu workspace');
+    expect(html).toContain('Undangan publik');
+    expect(html).toContain('Undangan personal');
     expect(html).toContain('Personal tanpa membuat data tamu menjadi konsumsi publik.');
     expect(html).toContain('Buat pengalaman yang akan diingat tamu kalian.');
   });

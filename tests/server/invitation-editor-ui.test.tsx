@@ -4,6 +4,15 @@ import path from 'node:path';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 
+import { InvitationTemplatePicker } from '@/components/projects/invitation-editor-fields';
+import {
+  getInvitationEditorSaveStatus,
+  InvitationEditor,
+  InvitationEditorActivePanel,
+  invitationEditorDirtyNavigationMessage,
+  shouldConfirmInvitationEditorNavigation,
+} from '@/components/projects/invitation-editor';
+import { InvitationStudioProvider } from '@/components/projects/invitation-studio-provider';
 import { createDefaultInvitationDraftContent } from '@/modules/invitations/invitation-draft.defaults';
 
 const { refreshMock, toastMock } = vi.hoisted(() => ({
@@ -24,13 +33,9 @@ vi.mock('@/design-system', async () => {
   };
 });
 
-import {
-  getInvitationEditorSaveStatus,
-  InvitationEditor,
-  InvitationEditorActivePanel,
-  invitationEditorDirtyNavigationMessage,
-  shouldConfirmInvitationEditorNavigation,
-} from '@/components/projects/invitation-editor';
+vi.mock('@/modules/invitations/invitation-editor.actions', () => ({
+  saveInvitationEditorAction: vi.fn(async (previousState) => previousState),
+}));
 
 const project = {
   account_id: '11111111-1111-1111-1111-111111111111',
@@ -55,8 +60,7 @@ const draft = {
   updated_at: '2026-06-20T00:00:00.000Z',
 };
 
-const editableFieldNames = [
-  'templateKey',
+const editableContentFieldNames = [
   'hero.eyebrow',
   'hero.title',
   'hero.subtitle',
@@ -88,8 +92,7 @@ const editableFieldNames = [
   'closing.signature',
 ] as const;
 
-const panelKeys = [
-  'style',
+const contentPanelKeys = [
   'opening',
   'couple',
   'story',
@@ -100,7 +103,7 @@ const panelKeys = [
   'closing',
 ] as const;
 
-function renderPanel(activeSection: (typeof panelKeys)[number], content = draft.content) {
+function renderPanel(activeSection: (typeof contentPanelKeys)[number], content = draft.content) {
   return renderToStaticMarkup(
     <InvitationEditorActivePanel
       activeSection={activeSection}
@@ -111,9 +114,32 @@ function renderPanel(activeSection: (typeof panelKeys)[number], content = draft.
   );
 }
 
+function renderEditor() {
+  return renderToStaticMarkup(
+    <InvitationStudioProvider
+      initialDraft={draft}
+      projectId={project.id}
+      refreshOnSuccess={false}
+    >
+      <InvitationEditor draft={draft} projectId={project.id} />
+    </InvitationStudioProvider>,
+  );
+}
+
+function renderDesignPicker() {
+  return renderToStaticMarkup(
+    <InvitationTemplatePicker
+      onPaletteSelect={() => undefined}
+      onSelect={() => undefined}
+      selectedPaletteKey={draft.content.paletteKey}
+      selectedTemplateKey={draft.content.templateKey}
+    />,
+  );
+}
+
 describe('SRY-030 invitation editor multi-event owner UI', () => {
-  it('renders the guided chapter navigation while mounting only the active chapter', () => {
-    const html = renderToStaticMarkup(<InvitationEditor draft={draft} projectId={project.id} />);
+  it('renders the guided content chapter navigation while mounting only the active chapter', () => {
+    const html = renderEditor();
     const chapterPairs = [
       ['opening', 'Pembuka'],
       ['couple', 'Mempelai'],
@@ -133,51 +159,41 @@ describe('SRY-030 invitation editor multi-event owner UI', () => {
     );
     expect(html).toContain('Belum dipublikasikan');
     expect(html).toContain('Undangan belum dipublikasikan.');
-    expect(html).toContain(
-      '1</span><span class="text-seraya-text-primary text-sm font-semibold">Lengkapi detail</span>',
-    );
+    expect(html).toContain('Lengkapi detail');
     expect(html).toContain('Simpan perubahan');
-    expect(html).toContain('Pilih desain undangan');
-    expect(html).toContain('Pilih tampilan yang paling sesuai untuk hari spesial kalian.');
-    expect(html).toContain('Roselle');
-    expect(html).toContain('Aruna');
-    expect(html).toContain('Laras');
-    expect(html).toContain('Buka preview tersimpan');
     expect(html).toContain('Preview tersimpan');
-    expect(html).toContain('Preview lokal');
-    expect(html).toContain('data-local-preview-trigger="true"');
-    expect(html).toContain('data-local-preview-desktop="true"');
-    expect(html).toContain('data-local-preview-deferred="true"');
-    expect(html).toContain('Preview lokal akan segera siap');
+    expect(html).toContain('Preview exact tersedia di mode Desain');
     expect(html).toContain('name="editorPayload"');
+    expect(html).toContain('Bagian 1 dari 8');
     expect(html.match(/data-invitation-editor-panel=/g)).toHaveLength(1);
+    expect(html).not.toContain('Pilih desain undangan');
     expect(html).not.toContain('data-surface="preview"');
     expect(html).not.toContain('draft object');
     expect(html).not.toContain('schema field');
     expect(html).not.toContain('JSON payload');
   });
 
-  it('preserves every locked editable form name across lazy-mounted chapters', () => {
-    const initialHtml = renderToStaticMarkup(
-      <InvitationEditor draft={draft} projectId={project.id} />,
-    );
-    const allPanelsHtml = panelKeys.map((section) => renderPanel(section)).join('');
+  it('preserves every locked editable field across lazy content chapters and dedicated design controls', () => {
+    const initialHtml = renderEditor();
+    const allPanelsHtml = contentPanelKeys.map((section) => renderPanel(section)).join('');
+    const designHtml = renderDesignPicker();
 
-    for (const name of editableFieldNames) {
+    for (const name of editableContentFieldNames) {
       expect(allPanelsHtml).toContain(`name="${name}"`);
     }
 
-    expect(initialHtml).toContain(`type="hidden" name="projectId" value="${project.id}"`);
+    expect(initialHtml).toContain(`name="projectId" type="hidden" value="${project.id}"`);
     expect(initialHtml).toContain('name="editorPayload"');
     expect(initialHtml).not.toContain('name="hero.title"');
     expect(allPanelsHtml).toContain(
       'Tampilkan bagian ini pada undangan setelah diterbitkan. Isi tetap tersimpan meskipun bagian ini belum ditampilkan.',
     );
-    expect(allPanelsHtml).toContain('name="templateKey"');
-    expect(allPanelsHtml).toContain('value="roselle"');
-    expect(allPanelsHtml).toContain('value="aruna"');
-    expect(allPanelsHtml).toContain('value="laras"');
-    expect(allPanelsHtml).toContain('>Terpilih</span>');
+    expect(designHtml).toContain('name="templateKey"');
+    expect(designHtml).toContain('name="paletteKey"');
+    expect(designHtml).toContain('value="roselle"');
+    expect(designHtml).toContain('value="aruna"');
+    expect(designHtml).toContain('value="laras"');
+    expect(designHtml).toContain('>Terpilih</span>');
     expect(allPanelsHtml).toContain('name="story.body"');
     expect(allPanelsHtml).toContain('Rangkaian Acara');
     expect(allPanelsHtml).toContain(
@@ -246,23 +262,26 @@ describe('SRY-030 invitation editor multi-event owner UI', () => {
     expect(html).toContain('value="TEST-ACCOUNT-0001"');
   });
 
-  it('defers the local preview while keeping the authoritative saved preview distinct', async () => {
-    const html = renderToStaticMarkup(<InvitationEditor draft={draft} projectId={project.id} />);
-    const previewSource = await readFile(
-      path.resolve(process.cwd(), 'src/components/projects/invitation-editor-live-preview.tsx'),
+  it('keeps the saved preview handoff distinct from the buffered V1 editorial preview', async () => {
+    const html = renderEditor();
+    const previewRailSource = await readFile(
+      path.resolve(process.cwd(), 'src/components/projects/invitation-studio-preview-rail.tsx'),
       'utf8',
     );
 
     expect(html).toContain('data-testid="invitation-editor-save-status"');
     expect(html).toContain('Belum ada perubahan');
     expect(html).not.toContain('>Tersimpan</p>');
-    expect(html).toContain('Preview tersimpan tetap mengikuti draft dari server.');
-    expect(html).toContain('Preview lokal akan segera siap');
+    expect(html).toContain('Preview exact tersedia di mode Desain');
     expect(html).not.toContain('data-surface="preview"');
-    expect(previewSource).toContain('Mengikuti perubahan lokal. Belum dipublikasikan dari sini.');
-    expect(previewSource).toContain('surface="preview"');
-    expect(previewSource).toContain('memo(function InvitationEditorLivePreview');
     expect(html).toContain(`href="/dashboard/${project.id}/preview"`);
+    expect(previewRailSource).toContain('useDeferredValue(localContent)');
+    expect(previewRailSource).toContain("import('@/modules/invitation-templates')");
+    expect(previewRailSource).toContain('ssr: false');
+    expect(previewRailSource).toContain('requestIdleCallback');
+    expect(previewRailSource).toContain('surface="generic"');
+    expect(previewRailSource).not.toContain('fetch(');
+    expect(previewRailSource).not.toContain('personalSlots');
   });
 
   it('uses local save status only after explicit state transitions and never treats unsaved edits as saved', () => {
@@ -342,49 +361,55 @@ describe('SRY-030 invitation editor multi-event owner UI', () => {
     expect(invitationEditorDirtyNavigationMessage).toContain('belum disimpan');
   });
 
-  it('keeps the server action, accessible field-error boundary, and editor-local mobile action treatment', async () => {
-    const [source, fieldSource, previewSource] = await Promise.all([
-      readFile(
-        path.resolve(process.cwd(), 'src/components/projects/invitation-editor.tsx'),
-        'utf8',
-      ),
-      readFile(
-        path.resolve(process.cwd(), 'src/components/projects/invitation-editor-fields.tsx'),
-        'utf8',
-      ),
-      readFile(
-        path.resolve(process.cwd(), 'src/components/projects/invitation-editor-live-preview.tsx'),
-        'utf8',
-      ),
-    ]);
+  it('keeps save authority in the provider and runtime preview authority in the V1 rail', async () => {
+    const [source, providerSource, taskWorkspaceSource, fieldSource, previewRailSource] =
+      await Promise.all([
+        readFile(
+          path.resolve(process.cwd(), 'src/components/projects/invitation-editor.tsx'),
+          'utf8',
+        ),
+        readFile(
+          path.resolve(process.cwd(), 'src/components/projects/invitation-studio-provider.tsx'),
+          'utf8',
+        ),
+        readFile(
+          path.resolve(process.cwd(), 'src/components/projects/invitation-task-workspace.tsx'),
+          'utf8',
+        ),
+        readFile(
+          path.resolve(process.cwd(), 'src/components/projects/invitation-editor-fields.tsx'),
+          'utf8',
+        ),
+        readFile(
+          path.resolve(process.cwd(), 'src/components/projects/invitation-studio-preview-rail.tsx'),
+          'utf8',
+        ),
+      ]);
 
-    expect(source).toContain(
+    expect(providerSource).toContain(
       "import { saveInvitationEditorAction } from '@/modules/invitations/invitation-editor.actions';",
     );
+    expect(providerSource).toContain('invitationEditorLocalContentReducer');
     expect(source).toMatch(/<form\s+action=\{formAction\}/);
-    expect(source).toContain('invitationEditorLocalContentReducer');
+    expect(taskWorkspaceSource).toContain('StudioSaveFormBridge');
+    expect(taskWorkspaceSource).toContain('name="editorPayload"');
     expect(fieldSource).toContain("value={value ?? ''}");
     expect(fieldSource).toContain('onValueChange(event.currentTarget.value)');
     expect(source).toContain('role="alert"');
     expect(fieldSource).toContain('aria-describedby');
     expect(fieldSource).toContain('role="alert"');
-    expect(source).toContain('sticky bottom-0');
-    expect(source).toContain('safe-area-inset-bottom');
-    expect(source).toContain('data-local-preview-trigger');
-    expect(source).toContain('DeferredInvitationEditorLivePreview');
-    expect(source).toContain('dynamic(');
-    expect(source).toContain('ssr: false');
-    expect(source).toContain('name="editorPayload"');
-    expect(source).toContain('requestIdleCallback');
-    expect(source).toContain('invitation_editor_interactive_ready');
-    expect(previewSource).toContain('surface="preview"');
-    expect(previewSource).toContain('memo(function InvitationEditorLivePreview');
-    expect(previewSource).not.toContain('fetch(');
-    expect(previewSource).not.toContain('/g/');
-    expect(previewSource).not.toContain('personalSlots');
-    expect(source).not.toContain('localStorage');
-    expect(source).not.toContain('sessionStorage');
-    expect(source).not.toContain('revalidateTag');
-    expect(source).not.toContain('published_invitation_snapshots');
+    expect(taskWorkspaceSource).toContain('data-invitation-task-save-action');
+    expect(previewRailSource).toContain("import('@/modules/invitation-templates')");
+    expect(previewRailSource).toContain('useDeferredValue(localContent)');
+    expect(previewRailSource).toContain('requestIdleCallback');
+    expect(previewRailSource).toContain('invitation_editor_interactive_ready');
+    expect(previewRailSource).toContain('data-invitation-editor-runtime-ready');
+    expect(previewRailSource).not.toContain('fetch(');
+    expect(previewRailSource).not.toContain('/g/');
+    expect(previewRailSource).not.toContain('personalSlots');
+    expect(providerSource).not.toContain('localStorage');
+    expect(providerSource).not.toContain('sessionStorage');
+    expect(taskWorkspaceSource).not.toContain('revalidateTag');
+    expect(taskWorkspaceSource).not.toContain('published_invitation_snapshots');
   });
 });
