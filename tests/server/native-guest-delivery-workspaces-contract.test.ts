@@ -8,8 +8,18 @@ async function read(relativePath: string) {
 }
 
 describe('native Tamu and Bagikan operational workspace migration', () => {
-  it('preserves Tamu actions while using native operational composition', async () => {
-    const source = await read('src/components/projects/native-guest-manager.tsx');
+  it('preserves Tamu action authority across the split controller, state, workspace, and data graph', async () => {
+    const [wrapper, controller, actionState, workspace, data, desktopData, mobileData] =
+      await Promise.all([
+        read('src/components/projects/native-guest-manager.tsx'),
+        read('src/components/projects/native-guest-manager-controller.tsx'),
+        read('src/components/projects/native-guest-manager-action-state.tsx'),
+        read('src/components/projects/native-guest-manager-workspace.tsx'),
+        read('src/components/projects/native-guest-manager-data.tsx'),
+        read('src/components/projects/native-guest-manager-desktop-data.tsx'),
+        read('src/components/projects/native-guest-manager-mobile-data.tsx'),
+      ]);
+    const graph = [wrapper, controller, actionState, workspace, data, desktopData, mobileData].join('\n');
 
     for (const contract of [
       'createGuestAction',
@@ -18,37 +28,50 @@ describe('native Tamu and Bagikan operational workspace migration', () => {
       'importGuestsCsvAction',
       'importGuestsXlsxAction',
       'createOrReplacePersonalGuestLinkAction',
+      'reaccessPersonalGuestLinkAction',
       'revokePersonalGuestLinkAction',
       'prepareBatchAction',
-      '<OperationalDesktopData>',
-      '<OperationalMobileDataList>',
+      '<OperationalDesktopData',
+      '<OperationalMobileDataList',
       '<OperationalSelectionBar',
     ]) {
-      expect(source).toContain(contract);
+      expect(graph).toContain(contract);
     }
+
+    expect(wrapper).toContain('useNativeGuestManagerController');
+    expect(wrapper).toContain('<NativeGuestManagerWorkspace');
   });
 
-  it('preserves Bagikan readiness and truthful manual handoff authority', async () => {
-    const source = await read('src/components/projects/native-guest-delivery-center.tsx');
+  it('preserves Bagikan readiness, distribution truth, and manual handoff authority across its split graph', async () => {
+    const [wrapper, actions, workspace, data, shared] = await Promise.all([
+      read('src/components/projects/native-guest-delivery-center.tsx'),
+      read('src/components/projects/native-guest-delivery-center-actions.tsx'),
+      read('src/components/projects/native-guest-delivery-center-workspace.tsx'),
+      read('src/components/projects/native-guest-delivery-center-data.tsx'),
+      read('src/components/projects/native-guest-delivery-center-shared.tsx'),
+    ]);
+    const graph = [wrapper, actions, workspace, data, shared].join('\n');
 
     for (const contract of [
       'deriveDeliveryReadiness',
-      'matchesDeliveryReadinessFilter',
+      'matchesDeliveryDistributionFilter',
       'buildWhatsAppGuestInviteShareUrl',
       'DeliveryWhatsAppCopyControl',
       'DeliveryBatchPreparationDialog',
       'PersonalLinkReaccessControl',
-      '<OperationalDesktopData>',
-      '<OperationalMobileDataList>',
+      '<OperationalDesktopData',
+      '<OperationalMobileDataList',
       '<OperationalSelectionBar',
     ]) {
-      expect(source).toContain(contract);
+      expect(graph).toContain(contract);
     }
 
-    expect(source).toContain('Pembagian WhatsApp');
-    expect(source).toContain('tetap dilakukan manual per tamu.');
-    expect(source).not.toContain('sudah terkirim');
-    expect(source).not.toContain('sudah diterima');
+    expect(graph).toContain('Pengiriman tetap dilakukan oleh Anda melalui WhatsApp.');
+    expect(graph).toContain('Lanjutkan pengiriman manual di WhatsApp.');
+    expect(graph).toContain('belum ditandai sebagai terkirim');
+    expect(graph).not.toContain('Pesan sudah terkirim');
+    expect(graph).not.toContain('WhatsApp sudah terkirim');
+    expect(graph).not.toContain('sudah diterima dan dibaca');
   });
 
   it('keeps deleted compatibility CSS absent and routes on native components', async () => {

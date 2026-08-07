@@ -35,13 +35,24 @@ describe('canonical operational workspace primitives', () => {
     expect(source).not.toContain('nth-child');
   });
 
-  it('keeps all four operational workspaces on native primitives', async () => {
-    const sources = await Promise.all([
-      read('src/components/projects/guest-response-workspace.tsx'),
-      read('src/components/projects/canonical-guest-follow-up-center.tsx'),
-      read('src/components/projects/native-guest-manager.tsx'),
-      read('src/components/projects/native-guest-delivery-center.tsx'),
-    ]);
+  it('keeps all four operational workspaces on native primitives across their composition graphs', async () => {
+    const [responses, followUp, guestWrapper, guestWorkspace, guestData, deliveryWrapper, deliveryWorkspace, deliveryData] =
+      await Promise.all([
+        read('src/components/projects/guest-response-workspace.tsx'),
+        read('src/components/projects/canonical-guest-follow-up-center.tsx'),
+        read('src/components/projects/native-guest-manager.tsx'),
+        read('src/components/projects/native-guest-manager-workspace.tsx'),
+        read('src/components/projects/native-guest-manager-data.tsx'),
+        read('src/components/projects/native-guest-delivery-center.tsx'),
+        read('src/components/projects/native-guest-delivery-center-workspace.tsx'),
+        read('src/components/projects/native-guest-delivery-center-data.tsx'),
+      ]);
+    const sources = [
+      responses,
+      followUp,
+      `${guestWrapper}\n${guestWorkspace}\n${guestData}`,
+      `${deliveryWrapper}\n${deliveryWorkspace}\n${deliveryData}`,
+    ];
 
     for (const source of sources) {
       expect(source).toContain('<OperationalWorkspace');
@@ -50,6 +61,9 @@ describe('canonical operational workspace primitives', () => {
       expect(source).toContain('<OperationalSection');
       expect(source).toContain('<OperationalDataSurface');
     }
+
+    expect(guestWrapper).toContain('<NativeGuestManagerWorkspace');
+    expect(deliveryWrapper).toContain('<DeliveryDistributionWorkspace');
   });
 
   it('routes Tamu and Bagikan directly to their native implementations', async () => {

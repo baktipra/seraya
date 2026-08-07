@@ -54,6 +54,12 @@ const snapshot = {
   template_id: 'roselle' as const,
 };
 
+const legacyPaletteByTemplate = {
+  aruna: 'stone',
+  laras: 'midnight',
+  roselle: 'rose',
+} as const;
+
 describe('SRY-008 public invitation route', () => {
   it('declares the public snapshot route as static ISR output', () => {
     expect(dynamic).toBe('force-static');
@@ -91,7 +97,11 @@ describe('SRY-008 public invitation route', () => {
   });
 
   it('renders the template stored in the immutable published snapshot only', async () => {
-    const publishedDraft = { ...snapshot.snapshot.draft, templateKey: 'laras' as const };
+    const publishedDraft = {
+      ...snapshot.snapshot.draft,
+      paletteKey: 'midnight',
+      templateKey: 'laras' as const,
+    };
     getPublicInvitationMock.mockResolvedValue({
       ...snapshot,
       snapshot: { ...snapshot.snapshot, draft: publishedDraft },
@@ -111,7 +121,11 @@ describe('SRY-008 public invitation route', () => {
       delete (legacyDraft as Partial<typeof legacyDraft>).digitalGift;
       const normalizedLegacySnapshot = normalizePublishedInvitationSnapshot({
         ...snapshot.snapshot,
-        draft: { ...legacyDraft, templateKey },
+        draft: {
+          ...legacyDraft,
+          paletteKey: legacyPaletteByTemplate[templateKey],
+          templateKey,
+        },
       });
       getPublicInvitationMock.mockResolvedValue({
         ...snapshot,

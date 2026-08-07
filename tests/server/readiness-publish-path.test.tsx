@@ -106,18 +106,18 @@ describe('SRY-041 project compass publish handoff', () => {
     toastMock.mockReset();
   });
 
-  it('hands draft publication review to Undangan with one calm primary CTA', () => {
+  it('hands a ready draft to the canonical Undangan publish task without publishing from Ringkasan', () => {
     const html = renderToStaticMarkup(
       <ProjectOverviewBootstrap projectId={projectId} readiness={createReadiness()} />,
     );
 
-    expect(html).toContain('Lengkapi undangan');
-    expect(html).toContain(`href="/dashboard/${projectId}/invitation"`);
+    expect(html).toContain('Terbitkan undangan');
+    expect(html).toContain(`href="/dashboard/${projectId}/invitation?task=publish"`);
     expect(html).not.toContain(`href="/dashboard/${projectId}/billing"`);
     expect(publishActionMock).not.toHaveBeenCalled();
   });
 
-  it('hands deterministic saved changes to Undangan while Ringkasan stays focused on one primary CTA', () => {
+  it('hands unpublished changes to the canonical publish task while keeping Ringkasan read-only', () => {
     const readiness = createReadiness({
       invitation: {
         hasPublishedSnapshot: true,
@@ -132,9 +132,8 @@ describe('SRY-041 project compass publish handoff', () => {
       <ProjectOverviewBootstrap projectId={projectId} readiness={readiness} />,
     );
 
-    expect(html).toContain('Tinjau dan terbitkan ulang');
-    expect(html).not.toContain('Tinjau di Undangan');
-    expect(html).toContain(`href="/dashboard/${projectId}/invitation"`);
+    expect(html).toContain('Sinkronkan versi tamu');
+    expect(html).toContain(`href="/dashboard/${projectId}/invitation?task=publish"`);
     expect(html).not.toContain(`href="/dashboard/${projectId}/billing"`);
     expect(publishActionMock).not.toHaveBeenCalled();
   });
