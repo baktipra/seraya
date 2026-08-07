@@ -1,0 +1,66 @@
+name: Temporary final format Invitation Workspace Editorial V1
+
+on:
+  push:
+    branches:
+      - feature/invitation-workspace-editorial-redesign-v1
+    paths:
+      - '.github/workflows/_tmp-format-invitation-workspace-editorial-v1-final.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/invitation-workspace-editorial-redesign-v1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Format V1 scope
+        run: |
+          npx prettier --write \
+            'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
+            src/components/projects/invitation-task-workspace.tsx \
+            src/components/projects/invitation-task-workspace.module.css \
+            src/components/projects/invitation-task-workspace.types.ts \
+            src/components/projects/invitation-studio-preview-rail.tsx \
+            src/components/projects/invitation-studio-preview-rail.module.css \
+            tests/unit/invitation-workspace-editorial-redesign-v1.test.ts \
+            tests/unit/owner-workspace-radical-simplicity-v2.test.ts \
+            tests/e2e/owner-workspace-radical-simplicity-v2.spec.ts \
+            tests/e2e/fixture-app/app/owner-workspace-usability-reset/fixture-client.tsx \
+            tests/e2e/fixture-app/app/owner-workspace-usability-reset/page.tsx \
+            tests/e2e/fixture-app/app/owner-workspace-radical-simplicity-v2/page.tsx \
+            vercel.json \
+            .github/workflows/invitation-workspace-editorial-redesign-v1.yml
+      - name: Commit formatting
+        run: |
+          if git diff --quiet; then
+            echo 'Already formatted.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add \
+            'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
+            src/components/projects/invitation-task-workspace.tsx \
+            src/components/projects/invitation-task-workspace.module.css \
+            src/components/projects/invitation-task-workspace.types.ts \
+            src/components/projects/invitation-studio-preview-rail.tsx \
+            src/components/projects/invitation-studio-preview-rail.module.css \
+            tests/unit/invitation-workspace-editorial-redesign-v1.test.ts \
+            tests/unit/owner-workspace-radical-simplicity-v2.test.ts \
+            tests/e2e/owner-workspace-radical-simplicity-v2.spec.ts \
+            tests/e2e/fixture-app/app/owner-workspace-usability-reset/fixture-client.tsx \
+            tests/e2e/fixture-app/app/owner-workspace-usability-reset/page.tsx \
+            tests/e2e/fixture-app/app/owner-workspace-radical-simplicity-v2/page.tsx \
+            vercel.json \
+            .github/workflows/invitation-workspace-editorial-redesign-v1.yml
+          git commit -m 'Format final invitation workspace V1 scope'
+          git push origin HEAD:feature/invitation-workspace-editorial-redesign-v1
