@@ -1,0 +1,155 @@
+.projectShell {
+  --font-owner-display: var(--font-fraunces), 'Fraunces', Georgia, serif;
+  --seraya-bg-canvas: #faf6ee;
+  --seraya-bg-surface: #ffffff;
+  --seraya-bg-surface-subtle: #f1ead9;
+  --seraya-bg-surface-raised: #ffffff;
+  --seraya-bg-soft: #f1ead9;
+  --seraya-bg-brand-soft: #e4ebe3;
+  --seraya-bg-brand-softer: #eef2eb;
+  --seraya-text-primary: #201d18;
+  --seraya-text-secondary: #5b5548;
+  --seraya-text-muted: #7d7668;
+  --seraya-text-inverse: #f7f2e4;
+  --seraya-action-primary: #1f3d2b;
+  --seraya-action-primary-hover: #2e5540;
+  --seraya-action-primary-pressed: #183122;
+  --seraya-action-secondary: #b8935f;
+  --seraya-border-subtle: #e4dbc5;
+  --seraya-border-default: #ddd2b8;
+  --seraya-border-strong: #c9b995;
+  --seraya-focus-ring: #96723f;
+  --seraya-status-success: #2e6b57;
+  --seraya-status-success-soft: #e4ebe3;
+  --seraya-status-warning: #bd8a2e;
+  --seraya-status-warning-soft: #f7ecd3;
+  --seraya-status-error: #9b4b4f;
+  --seraya-status-error-soft: #f7e7e4;
+  --seraya-radius-sm: 0.5rem;
+  --seraya-radius-md: 0.75rem;
+  --seraya-radius-lg: 1rem;
+  --seraya-radius-xl: 1.25rem;
+  min-height: 100vh;
+  width: 100%;
+  background: var(--seraya-bg-canvas);
+  color: var(--seraya-text-primary);
+  font-family: var(--font-ui);
+}
+
+.projectHeader {
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  display: grid;
+  grid-template-columns: var(--seraya-project-rail-width) minmax(0, 1fr);
+  min-height: var(--seraya-topbar-height);
+  box-shadow: 0 1px 0 var(--seraya-border-subtle);
+}
+
+.brandPanel {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 0 1.5rem;
+  background: #1f3d2b;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: #f7f2e4;
+  font-family: var(--font-owner-display, var(--font-editorial));
+  font-size: 1.35rem;
+  font-weight: 550;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+}
+
+.brandMark,
+.mobileBrandMark {
+  width: 1.85rem;
+  height: 1.85rem;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: radial-gradient(circle at 32% 28%, #e8ce99, #b8935f 60%, #96723f 100%);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.24);
+}
+
+.projectHeaderMain {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1.75rem;
+  border-bottom: 1px solid var(--seraya-border-subtle);
+  background: rgb(250 246 238 / 0.94);
+  backdrop-filter: blur(10px);
+}
+
+.breadcrumb {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--seraya-text-muted);
+  font-size: 0.8125rem;
+}
+
+.breadcrumb strong {
+  overflow: hidden;
+  color: var(--seraya-text-primary);
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.breadcrumb > span:nth-child(2) {
+  opacity: 0.45;
+}
+
+.mobileBrand {
+  display: none;
+}
+
+.projectMain {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+}
+
+@media (max-width: 1023px) {
+  .projectHeader {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .brandPanel {
+    display: none;
+  }
+
+  .projectHeaderMain {
+    min-height: var(--seraya-topbar-height);
+    padding-inline: 1rem;
+  }
+
+  .mobileBrand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    color: var(--seraya-text-primary);
+    font-family: var(--font-owner-display, var(--font-editorial));
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .mobileBrandMark {
+    width: 1.55rem;
+    height: 1.55rem;
+  }
+
+  .breadcrumb {
+    display: none;
+  }
+}
