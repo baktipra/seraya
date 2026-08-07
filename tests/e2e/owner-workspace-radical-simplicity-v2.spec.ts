@@ -18,7 +18,9 @@ test.describe('SERAYA Owner Workspace Editorial Dashboard V3', () => {
 
     const shell = page.locator('[data-owner-workspace-navigation="editorial-five-area"]');
     await expect(shell).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Selamat datang kembali, Nadia & Farhan' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Selamat datang kembali, Nadia & Farhan' }),
+    ).toBeVisible();
 
     for (const label of ['Status undangan', 'Tamu aktif', 'Respons masuk', 'Siap dibagikan']) {
       await expect(page.getByText(label, { exact: true })).toBeVisible();

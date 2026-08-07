@@ -73,14 +73,22 @@ export function DashboardShell({
       >
         <header className={styles.projectHeader} data-dashboard-topbar>
           <div className={styles.brandPanel}>
-            <Link aria-label={`${siteConfig.name}, kembali ke semua undangan`} className={styles.brand} href="/dashboard">
+            <Link
+              aria-label={`${siteConfig.name}, kembali ke semua undangan`}
+              className={styles.brand}
+              href="/dashboard"
+            >
               <span aria-hidden="true" className={styles.brandMark} />
               <span>{siteConfig.name}</span>
             </Link>
           </div>
 
           <div className={styles.projectHeaderMain}>
-            <Link aria-label={`${siteConfig.name}, kembali ke semua undangan`} className={styles.mobileBrand} href="/dashboard">
+            <Link
+              aria-label={`${siteConfig.name}, kembali ke semua undangan`}
+              className={styles.mobileBrand}
+              href="/dashboard"
+            >
               <span aria-hidden="true" className={styles.mobileBrandMark} />
               <span>{siteConfig.name}</span>
             </Link>

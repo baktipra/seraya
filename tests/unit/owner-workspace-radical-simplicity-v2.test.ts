@@ -15,8 +15,8 @@ describe('SERAYA Owner Workspace Editorial Dashboard V3', () => {
     const labels = [...source.matchAll(/label: '([^']+)'/g)].map((match) => match[1]);
 
     expect(labels).toEqual(['Ringkasan', 'Undangan', 'Tamu', 'Bagikan', 'Respons Tamu']);
-    expect(source).toContain("href: `${base}/delivery` as Route");
-    expect(source).toContain("aliases: [`${base}/guestbook`, `${base}/follow-up`]");
+    expect(source).toContain('href: `${base}/delivery` as Route');
+    expect(source).toContain('aliases: [`${base}/guestbook`, `${base}/follow-up`]');
     expect(source).toContain('data-project-sidebar');
     expect(source).toContain('Buka navigasi proyek');
   });
@@ -94,7 +94,9 @@ describe('SERAYA Owner Workspace Editorial Dashboard V3', () => {
     const overviewStyles = read('src/components/projects/project-overview-bootstrap.module.css');
     const vercel = read('vercel.json');
 
-    expect(anatomy).toContain('grid-template-columns: var(--seraya-project-rail-width) minmax(0, 1fr);');
+    expect(anatomy).toContain(
+      'grid-template-columns: var(--seraya-project-rail-width) minmax(0, 1fr);',
+    );
     expect(anatomy).toContain('gap: 0;');
     expect(navigationStyles).toContain('@media (max-width: 1023px)');
     expect(navigationStyles).toContain('.mobileDrawer');
