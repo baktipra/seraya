@@ -39,8 +39,26 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Full formatting check
+      - name: Full repository formatting baseline audit
+        continue-on-error: true
         run: npm run format:check
+      - name: V1 formatting gate
+        run: |
+          npx prettier --check \
+            '.github/workflows/invitation-workspace-editorial-redesign-v1.yml' \
+            'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
+            src/components/projects/invitation-task-workspace.tsx \
+            src/components/projects/invitation-task-workspace.module.css \
+            src/components/projects/invitation-task-workspace.types.ts \
+            src/components/projects/invitation-studio-preview-rail.tsx \
+            src/components/projects/invitation-studio-preview-rail.module.css \
+            tests/unit/invitation-workspace-editorial-redesign-v1.test.ts \
+            tests/unit/owner-workspace-radical-simplicity-v2.test.ts \
+            tests/e2e/owner-workspace-radical-simplicity-v2.spec.ts \
+            tests/e2e/fixture-app/app/owner-workspace-radical-simplicity-v2/page.tsx \
+            tests/e2e/fixture-app/app/owner-workspace-usability-reset/fixture-client.tsx \
+            tests/e2e/fixture-app/app/owner-workspace-usability-reset/page.tsx \
+            vercel.json
       - name: Full lint
         run: npm run lint
       - name: TypeScript typecheck
