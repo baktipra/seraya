@@ -1,5 +1,6 @@
 'use client';
 
+import { InvitationStudioPreviewRail } from '../../../../../src/components/projects/invitation-studio-preview-rail';
 import {
   InvitationStudioProvider,
   type InvitationStudioSaveAction,
@@ -61,7 +62,13 @@ export function OwnerWorkspaceUsabilityResetFixture({
           initialSection={initialSection}
           initialTask={initialTask}
           music={<FixtureTask label="Musik" />}
-          preview={<FixtureTask label="Preview Draf dan Versi Tamu" />}
+          preview={
+            <InvitationStudioPreviewRail
+              project={{ event_date_primary: '2027-08-17', id: 'usability-reset-project' }}
+              publicationState={readiness.invitation.state}
+              publishedSnapshot={null}
+            />
+          }
           projectId="usability-reset-project"
           publish={<FixtureTask label="Terbitkan" />}
           readiness={readiness}
