@@ -102,7 +102,9 @@ test.describe('SERAYA Owner Workspace Editorial Dashboard V3 + Invitation Worksp
     await expectNoDocumentOverflow(page);
   });
 
-  test('section switching preserves local editor state and uses one save authority', async ({ page }) => {
+  test('section switching preserves local editor state and uses one save authority', async ({
+    page,
+  }) => {
     await page.goto(invitationPath);
 
     const workspace = page.locator('[data-invitation-workspace-editorial="v1"]');
