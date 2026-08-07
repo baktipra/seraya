@@ -1,5 +1,8 @@
 import { DashboardShell } from '../../../../../src/components/dashboard/dashboard-shell';
-import { parseInvitationWorkspaceTask } from '../../../../../src/components/projects/invitation-task-workspace.types';
+import {
+  parseInvitationWorkspaceEditorialSection,
+  parseInvitationWorkspaceTask,
+} from '../../../../../src/components/projects/invitation-task-workspace.types';
 import { createDefaultInvitationDraftContent } from '../../../../../src/modules/invitations/invitation-draft.defaults';
 import type { InvitationDraft } from '../../../../../src/modules/invitations/invitation-draft.types';
 import type { InvitationReadinessV1 } from '../../../../../src/modules/readiness';
@@ -8,6 +11,7 @@ import { OwnerWorkspaceUsabilityResetFixture } from './fixture-client';
 
 type FixtureSearchParams = {
   mode?: string | string[];
+  section?: string | string[];
   task?: string | string[];
 };
 
@@ -63,6 +67,11 @@ export default async function OwnerWorkspaceUsabilityResetFixturePage({
       hasActiveProject
     >
       <OwnerWorkspaceUsabilityResetFixture
+        initialSection={parseInvitationWorkspaceEditorialSection(
+          query.section,
+          query.task,
+          query.mode,
+        )}
         initialTask={parseInvitationWorkspaceTask(query.task, query.mode)}
         readiness={readiness}
         savedDraft={savedDraft}
