@@ -240,13 +240,15 @@
 
   .mobileOverlay {
     position: fixed;
-    inset: 0;
+    inset: var(--seraya-topbar-height) 0 0;
     z-index: 140;
     display: block;
+    isolation: isolate;
   }
 
   .mobileBackdrop {
     position: absolute;
+    z-index: 0;
     inset: 0;
     width: 100%;
     border: 0;
@@ -255,6 +257,7 @@
 
   .mobileDrawer {
     position: absolute;
+    z-index: 1;
     inset-block: 0;
     left: 0;
     display: flex;
@@ -290,6 +293,6 @@
   }
 
   .mobileDrawer .sidebarInner {
-    min-height: calc(100svh - 4.5rem);
+    min-height: calc(100svh - var(--seraya-topbar-height) - 4.5rem);
   }
 }
