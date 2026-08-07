@@ -56,7 +56,7 @@ describe('SERAYA Owner Workspace Editorial Dashboard V3', () => {
     expect(source).not.toContain('ResponseFlowVisual');
   });
 
-  it('preserves one shared draft and one invitation save authority', () => {
+  it('preserves one shared draft and one invitation save authority inside the editorial studio', () => {
     const source = read('src/components/projects/invitation-task-workspace.tsx');
 
     expect(source.match(/function SaveAuthority\(/g)).toHaveLength(1);
@@ -64,10 +64,11 @@ describe('SERAYA Owner Workspace Editorial Dashboard V3', () => {
     expect(source).toContain('useInvitationStudioState');
     expect(source).toContain('form={studioState.formId}');
     expect(source).toContain('InvitationEditorActivePanel');
-    expect(source.match(/number: '\d{2}'/g)).toHaveLength(11);
+    expect(source).toContain('data-invitation-workspace-editorial="v1"');
+    expect(source).not.toContain('data-workspace-task');
   });
 
-  it('preserves distinct visual glyphs for every invitation task', () => {
+  it('preserves distinct visual glyphs for the legacy invitation task compatibility layer', () => {
     const source = read('src/components/projects/owner-workspace-visuals.tsx');
     const tasks = [
       'couple',
@@ -103,5 +104,6 @@ describe('SERAYA Owner Workspace Editorial Dashboard V3', () => {
     expect(overviewStyles).toContain('@media (max-width: 900px)');
     expect(overviewStyles).toContain('@media (max-width: 560px)');
     expect(vercel).toContain('"feature/owner-workspace-editorial-dashboard-v3": false');
+    expect(vercel).toContain('"feature/invitation-workspace-editorial-redesign-v1": false');
   });
 });
