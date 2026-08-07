@@ -1,0 +1,55 @@
+name: Temporary format Invitation Workspace Editorial V1
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feature/invitation-workspace-editorial-redesign-v1
+    paths:
+      - '.github/workflows/_tmp-format-invitation-workspace-editorial-v1.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/invitation-workspace-editorial-redesign-v1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Format focused files
+        run: |
+          npx prettier --write \
+            'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
+            src/components/projects/invitation-task-workspace.tsx \
+            src/components/projects/invitation-task-workspace.module.css \
+            src/components/projects/invitation-task-workspace.types.ts \
+            src/components/projects/invitation-studio-preview-rail.tsx \
+            src/components/projects/invitation-studio-preview-rail.module.css \
+            vercel.json \
+            .github/workflows/invitation-workspace-editorial-redesign-v1.yml
+      - name: Commit formatting
+        run: |
+          if git diff --quiet; then
+            echo 'Already formatted.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add \
+            'src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx' \
+            src/components/projects/invitation-task-workspace.tsx \
+            src/components/projects/invitation-task-workspace.module.css \
+            src/components/projects/invitation-task-workspace.types.ts \
+            src/components/projects/invitation-studio-preview-rail.tsx \
+            src/components/projects/invitation-studio-preview-rail.module.css \
+            vercel.json \
+            .github/workflows/invitation-workspace-editorial-redesign-v1.yml
+          git commit -m 'Format invitation workspace editorial redesign'
+          git push origin HEAD:feature/invitation-workspace-editorial-redesign-v1
