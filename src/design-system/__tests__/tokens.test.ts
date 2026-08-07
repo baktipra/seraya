@@ -10,10 +10,10 @@ import {
 } from '@/design-system';
 
 describe('Seraya design system contracts', () => {
-  it('keeps the required brand palette available', () => {
-    expect(serayaPalette.rosewood).toBe('#8E4B52');
-    expect(serayaPalette.ivory).toBe('#FCF8F3');
-    expect(serayaPalette.ink).toBe('#2B2523');
+  it('keeps the current quiet-editorial brand palette available', () => {
+    expect(serayaPalette.rosewood).toBe('#7B414C');
+    expect(serayaPalette.ivory).toBe('#F7F6F3');
+    expect(serayaPalette.ink).toBe('#211F1D');
   });
 
   it('exposes semantic roles rather than only raw colors', () => {

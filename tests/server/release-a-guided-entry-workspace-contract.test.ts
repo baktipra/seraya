@@ -36,7 +36,7 @@ describe('Release A guided entry and workspace contract', () => {
     expect(serviceSource).toContain('templateKey: input.templateKey');
   });
 
-  it('keeps the owner workspace on the canonical five destinations', () => {
+  it('keeps the owner workspace on the canonical five destinations and current legacy aliases', () => {
     const navigationSource = readSource('src/components/dashboard/project-navigation.tsx');
     const shellSource = readSource('src/components/dashboard/dashboard-shell.tsx');
 
@@ -45,7 +45,8 @@ describe('Release A guided entry and workspace contract', () => {
     }
 
     expect(navigationSource).not.toContain("label: 'Tindak Lanjut'");
-    expect(navigationSource).toContain('aliases: [`${base}/follow-up`, `${base}/share`]');
+    expect(navigationSource).toContain('aliases: [`${base}/share`]');
+    expect(navigationSource).toContain('aliases: [`${base}/guestbook`, `${base}/follow-up`]');
     expect(shellSource).not.toContain("[aria-label^='Project ']");
     expect(shellSource).not.toContain('<style>');
   });

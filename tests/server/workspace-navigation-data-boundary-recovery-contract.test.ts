@@ -10,6 +10,7 @@ const loading = read('src/app/(dashboard)/dashboard/[projectId]/loading.tsx');
 const invitation = read('src/app/(dashboard)/dashboard/[projectId]/invitation/page.tsx');
 const delivery = read('src/app/(dashboard)/dashboard/[projectId]/delivery/page.tsx');
 const navigation = read('src/components/dashboard/project-navigation.tsx');
+const navigationCss = read('src/components/dashboard/project-navigation.module.css');
 const invitationEditor = read('src/components/projects/invitation-editor.tsx');
 const invitationFields = read('src/components/projects/invitation-editor-fields.tsx');
 const invitationWorkspace = read('src/components/projects/invitation-editor-workspace.tsx');
@@ -42,16 +43,16 @@ describe('P0-A2/A3 navigation and data-boundary recovery contract', () => {
     expect(loading).toContain('Navigasi proyek tetap tersedia.');
   });
 
-  it('keeps mobile navigation above content with reserved clearance', () => {
-    expect(navigation).toContain('data-project-mobile-navigation');
-    expect(responsiveCss).toContain('[data-project-workspace-shell] {\n  isolation: isolate;');
-    expect(responsiveCss).toContain(
-      '[data-project-workspace-main] {\n  position: relative;\n  z-index: 0;',
-    );
-    expect(responsiveCss).toContain(
-      '[data-project-mobile-navigation] {\n  position: fixed;\n  z-index: 100;\n  pointer-events: auto;',
-    );
-    expect(responsiveCss).toContain('padding-bottom: calc(var(--seraya-mobile-safe-bottom)');
+  it('keeps the V3 mobile project context sticky and the drawer above content', () => {
+    expect(navigation).toContain('data-project-mobile-context');
+    expect(navigation).toContain('className={styles.mobileOverlay}');
+    expect(navigation).toContain('className={styles.mobileDrawer}');
+    expect(navigationCss).toContain('.mobileContext {');
+    expect(navigationCss).toContain('top: var(--seraya-topbar-height);');
+    expect(navigationCss).toContain('z-index: 50;');
+    expect(navigationCss).toContain('.mobileOverlay {');
+    expect(navigationCss).toContain('z-index: 140;');
+    expect(responsiveCss).toContain('[data-project-workspace-main]');
   });
 
   it('contains the invitation editor within the mobile inline size', () => {
@@ -73,9 +74,9 @@ describe('P0-A2/A3 navigation and data-boundary recovery contract', () => {
     expect(invitation).not.toContain('getWeddingReadinessForVerifiedProject');
   });
 
-  it('uses a bounded publication gate before loading Bagikan data', () => {
-    const publicationGate = delivery.indexOf('getCurrentPublishedInvitationForVerifiedProject');
-    const deliveryRead = delivery.indexOf('getGuestDeliveryCenterForVerifiedProject(project)');
+  it('uses a bounded public-share publication gate before loading Bagikan distribution data', () => {
+    const publicationGate = delivery.indexOf('getPublicSocialShareForVerifiedProject(project)');
+    const deliveryRead = delivery.indexOf('getGuestDistributionCenterForVerifiedProject(project)');
 
     expect(publicationGate).toBeGreaterThan(-1);
     expect(deliveryRead).toBeGreaterThan(publicationGate);

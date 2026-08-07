@@ -30,15 +30,21 @@ describe('responsive operational workspace contract', () => {
     expect(source).toContain('data-mobile-span={mobileSpan}');
   });
 
-  it('uses canonical breakpoints and reserves bottom-navigation clearance for every workspace', async () => {
-    const source = await read('src/app/workspace-responsive.css');
+  it('uses canonical operational breakpoints plus the V3 mobile context and drawer', async () => {
+    const [source, navigation, navigationCss] = await Promise.all([
+      read('src/app/workspace-responsive.css'),
+      read('src/components/dashboard/project-navigation.tsx'),
+      read('src/components/dashboard/project-navigation.module.css'),
+    ]);
 
     expect(source).toContain('@media (max-width: 767px)');
     expect(source).toContain('@media (max-width: 1023px)');
-    expect(source).toContain('--seraya-mobile-safe-bottom');
     expect(source).toContain('[data-project-workspace-main]');
-    expect(source).toContain('[data-project-mobile-navigation]');
-    expect(source).toContain('padding-bottom: calc(var(--seraya-mobile-safe-bottom)');
+    expect(navigation).toContain('data-project-mobile-context');
+    expect(navigationCss).toContain('@media (max-width: 1023px)');
+    expect(navigationCss).toContain('.mobileContext {');
+    expect(navigationCss).toContain('.mobileOverlay {');
+    expect(navigationCss).toContain('z-index: 140;');
     expect(source).not.toContain(':has(');
     expect(source).not.toContain(':nth-child');
     expect(source).not.toContain('aria-labelledby');
@@ -64,13 +70,22 @@ describe('responsive operational workspace contract', () => {
     expect(source).toContain('<OperationalToolbarField');
   });
 
-  it('renders Tamu and Bagikan with explicit desktop data and mobile cards', async () => {
-    const [guests, delivery] = await Promise.all([
-      read('src/components/projects/native-guest-manager.tsx'),
-      read('src/components/projects/native-guest-delivery-center.tsx'),
-    ]);
+  it('renders Tamu and Bagikan with explicit desktop data and mobile cards across their split graphs', async () => {
+    const [guestWrapper, guestWorkspace, guestData, deliveryWrapper, deliveryWorkspace, deliveryData] =
+      await Promise.all([
+        read('src/components/projects/native-guest-manager.tsx'),
+        read('src/components/projects/native-guest-manager-workspace.tsx'),
+        read('src/components/projects/native-guest-manager-data.tsx'),
+        read('src/components/projects/native-guest-delivery-center.tsx'),
+        read('src/components/projects/native-guest-delivery-center-workspace.tsx'),
+        read('src/components/projects/native-guest-delivery-center-data.tsx'),
+      ]);
+    const sources = [
+      `${guestWrapper}\n${guestWorkspace}\n${guestData}`,
+      `${deliveryWrapper}\n${deliveryWorkspace}\n${deliveryData}`,
+    ];
 
-    for (const source of [guests, delivery]) {
+    for (const source of sources) {
       expect(source).toContain('<OperationalDesktopData>');
       expect(source).toContain('<OperationalMobileDataList>');
       expect(source).toContain('<OperationalMobileDataCard');

@@ -27,7 +27,9 @@ const routes = routeFiles.map((path) => {
 
 const readinessQueryCount = (readinessRepository.match(/\.from\(/g) ?? []).length;
 const canonicalDestinationCount = (
-  navigation.match(/performanceWorkspace: '(?:compass|studio|guests|delivery|responses)',/g) ?? []
+  navigation.match(
+    /performanceWorkspace: '(?:project-summary|studio|guests|delivery|responses)',/g,
+  ) ?? []
 ).length;
 
 const baseline = {

@@ -48,7 +48,7 @@ describe('canonical workspace geometry and anatomy', () => {
     expect(source).toContain('data-workspace-kind');
   });
 
-  it('keeps one token-owned project rail and one content-slot gap', async () => {
+  it('keeps one token-owned V3 project rail and one content-slot gap', async () => {
     const layout = await read('src/app/(dashboard)/dashboard/[projectId]/layout.tsx');
     const tokens = await read('src/app/design-tokens.css');
     const anatomy = await read('src/app/workspace-anatomy.css');
@@ -58,8 +58,8 @@ describe('canonical workspace geometry and anatomy', () => {
     expect(layout).not.toContain('grid-cols-[15rem');
     expect(layout).not.toContain('lg:gap-8');
 
-    expect(tokens).toContain('--seraya-project-rail-width: 15rem');
-    expect(tokens).toContain('--seraya-project-rail-gap: 2rem');
+    expect(tokens).toContain('--seraya-project-rail-width: 15.5rem');
+    expect(tokens).toContain('--seraya-project-rail-gap: 2.5rem');
     expect(anatomy).toContain('grid-template-columns: var(--seraya-project-rail-width)');
     expect(anatomy).toContain('gap: var(--seraya-project-rail-gap)');
   });
@@ -70,7 +70,7 @@ describe('canonical workspace geometry and anatomy', () => {
     );
 
     expect(sources[0]).toContain('<WorkspacePage kind="studio" width="studio">');
-    expect(sources[1]).toContain('<WorkspacePage kind="compass" width="standard">');
+    expect(sources[1]).toContain('<WorkspacePage kind="compass" width="operations">');
     expect(sources[2]).toContain('<WorkspacePage kind="guests" width="operations">');
     expect(sources[3]).toContain('<WorkspacePage kind="delivery" width="operations">');
     expect(sources[4]).toContain('<WorkspacePage kind="responses" width="operations">');

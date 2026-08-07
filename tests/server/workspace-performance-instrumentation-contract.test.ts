@@ -26,7 +26,9 @@ describe('P0 workspace performance instrumentation contract', () => {
   it('continues measuring canonical navigation through rendered workspace readiness', () => {
     expect(navigation).toContain('beginWorkspaceTransition');
     expect(
-      navigation.match(/performanceWorkspace: '(?:compass|studio|guests|delivery|responses)',/g),
+      navigation.match(
+        /performanceWorkspace: '(?:project-summary|studio|guests|delivery|responses)',/g,
+      ),
     ).toHaveLength(5);
     expect(workspacePage).toContain('WorkspacePerformanceProbe');
     expect(clientMetrics).toContain("event: 'workspace_transition_started'");
