@@ -40,8 +40,9 @@ test.describe('SERAYA Owner Workspace Editorial Dashboard V3', () => {
     } else {
       await expect(page.locator('[data-project-mobile-context]')).toBeVisible();
       await page.getByRole('button', { name: 'Buka navigasi proyek' }).click();
-      await expect(page.getByRole('complementary', { name: 'Navigasi proyek' })).toBeVisible();
-      await page.getByRole('button', { name: 'Tutup navigasi proyek' }).first().click();
+      const drawer = page.getByRole('complementary', { name: 'Navigasi proyek' });
+      await expect(drawer).toBeVisible();
+      await drawer.getByRole('button', { name: 'Tutup navigasi proyek' }).click();
     }
 
     await expectNoDocumentOverflow(page);
