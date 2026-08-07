@@ -48,7 +48,7 @@ describe('Slice C local invitation editor state', () => {
     });
   });
 
-  it('switches templates nondestructively in local state', () => {
+  it('switches templates nondestructively while resolving a valid palette for the new theme', () => {
     const savedContent = createDefaultInvitationDraftContent(project);
     const localContent = invitationEditorLocalContentReducer(savedContent, {
       templateKey: 'laras',
@@ -56,7 +56,12 @@ describe('Slice C local invitation editor state', () => {
     });
 
     expect(localContent.templateKey).toBe('laras');
-    expect({ ...localContent, templateKey: savedContent.templateKey }).toEqual(savedContent);
+    expect(localContent.paletteKey).toBe('midnight');
+    expect({
+      ...localContent,
+      paletteKey: savedContent.paletteKey,
+      templateKey: savedContent.templateKey,
+    }).toEqual(savedContent);
   });
 
   it('can render only the owner-authorized media supplied by the server load', () => {

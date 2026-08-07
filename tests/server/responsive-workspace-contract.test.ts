@@ -96,8 +96,8 @@ describe('responsive operational workspace contract', () => {
     ];
 
     for (const source of sources) {
-      expect(source).toContain('<OperationalDesktopData>');
-      expect(source).toContain('<OperationalMobileDataList>');
+      expect(source).toContain('<OperationalDesktopData');
+      expect(source).toContain('<OperationalMobileDataList');
       expect(source).toContain('<OperationalMobileDataCard');
       expect(source).toContain('<OperationalMobileField');
       expect(source).toContain('<OperationalToolbarField');

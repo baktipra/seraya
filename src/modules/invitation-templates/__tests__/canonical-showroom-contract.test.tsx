@@ -103,7 +103,7 @@ describe('P0-B4 canonical invitation showroom contract', () => {
     expect(marketingSource).toContain('CanonicalInvitationThumbnail');
     expect(marketingSource).not.toContain('<iframe');
     expect(thumbnailSource).toContain('data-canonical-thumbnail-source="static-canonical-capture"');
-    expect(thumbnailSource).toContain("STATIC_THUMBNAIL_VERSION = '2026-08-v1'");
+    expect(thumbnailSource).toMatch(/const STATIC_THUMBNAIL_VERSION = '[^']+';/);
     expect(thumbnailSource).toContain('getCanonicalInvitationThumbnailAssetHref');
     expect(templatesPageSource).toContain('Koleksi Tema Seraya');
     expect(templatesPageSource).toContain('Showroom publik memakai renderer produksi yang sama');

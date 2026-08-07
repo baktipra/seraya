@@ -50,7 +50,7 @@ describe('SRY-016 invitation editor form boundary', () => {
 
     const injected = createValidInvitationEditorPayloadFormData();
     const payload = JSON.parse(String(injected.get('editorPayload'))) as Record<string, unknown>;
-    payload.gallery = { imageIds: ['attacker-controlled'] };
+    payload.gallery = { enabled: false, imageIds: ['attacker-controlled'] };
     injected.set('editorPayload', JSON.stringify(payload));
 
     const parsed = parseInvitationEditorFormData(injected);

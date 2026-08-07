@@ -46,7 +46,8 @@ describe('SRY-016 invitation editor server action', () => {
     expect(saveDraftMock).toHaveBeenCalledTimes(1);
     const submitted = saveDraftMock.mock.calls[0]?.[0];
     expect(submitted.projectId).toBe(projectId);
-    expect(submitted.content.gallery).toBeUndefined();
+    expect(submitted.content.gallery).toEqual({ enabled: false });
+    expect(submitted.content.gallery.imageIds).toBeUndefined();
     expect(submitted.content.meta).toBeUndefined();
     expect(submitted.content.templateKey).toBe('roselle');
     expect(revalidatePathMock).toHaveBeenCalledWith(`/dashboard/${projectId}`);
@@ -55,7 +56,7 @@ describe('SRY-016 invitation editor server action', () => {
     expect(revalidatePathMock).toHaveBeenCalledTimes(3);
   });
 
-  it('accepts the active-chapter runtime payload without trusting gallery or metadata fields', async () => {
+  it('accepts the active-chapter runtime payload without trusting gallery membership or metadata fields', async () => {
     saveDraftMock.mockResolvedValue(undefined);
 
     await expect(
@@ -66,7 +67,8 @@ describe('SRY-016 invitation editor server action', () => {
     ).resolves.toEqual({ message: 'Perubahan undangan sudah disimpan.', status: 'success' });
 
     const submitted = saveDraftMock.mock.calls[0]?.[0];
-    expect(submitted.content.gallery).toBeUndefined();
+    expect(submitted.content.gallery).toEqual({ enabled: false });
+    expect(submitted.content.gallery.imageIds).toBeUndefined();
     expect(submitted.content.meta).toBeUndefined();
     expect(submitted.content.eventSchedule.events).toHaveLength(1);
   });
