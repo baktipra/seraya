@@ -8,6 +8,7 @@ import {
 } from '../core/theme-renderer.types';
 
 import compositionStyles from './roselle-flagship-composition.module.css';
+import craftStyles from './roselle-flagship-craft.module.css';
 import typographyStyles from './roselle-flagship-typography.module.css';
 import experienceStyles from './roselle-guest-experience.module.css';
 import parityRepairStyles from './roselle-parity-repair.module.css';
@@ -48,8 +49,9 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
   return (
     <article
       aria-labelledby="roselle-invitation-title"
-      className={`${styles.invitation} ${experienceStyles.experience} ${parityRepairStyles.parityRepair} ${compositionStyles.flagship} ${typographyStyles.typography}`}
+      className={`${styles.invitation} ${experienceStyles.experience} ${parityRepairStyles.parityRepair} ${compositionStyles.flagship} ${typographyStyles.typography} ${craftStyles.craft}`}
       data-roselle-composition="flagship-v1"
+      data-roselle-craft="flagship-v1"
       data-roselle-experience="letter-v1"
       data-roselle-typography="flagship-v1"
       data-palette={renderContext.palette?.key}

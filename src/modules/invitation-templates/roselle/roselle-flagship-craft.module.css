@@ -1,0 +1,310 @@
+.craft[data-roselle-craft='flagship-v1'][data-template='roselle'] {
+  --roselle-control-height: 3.1rem;
+  --roselle-control-border: rgb(130 91 99 / 0.34);
+  --roselle-control-focus: rgb(172 111 121 / 0.5);
+  --roselle-control-shadow: 0 0.75rem 1.8rem rgb(64 43 53 / 0.08);
+}
+
+/* R5 — interaction craft stays familiar and operational inside the romantic composition. */
+.craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+  > :global([data-roselle-opening-action]) {
+  min-height: 3.25rem;
+  padding-inline: 1.55rem;
+  font-weight: 750;
+  letter-spacing: 0.015em;
+  text-decoration: none;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+  > :global([data-roselle-opening-action])
+  i {
+  width: 1.6rem;
+  transition: transform 160ms ease;
+}
+
+/* Map actions remain obviously actionable and disclose that they open externally. */
+.craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+  :global([data-schedule-event='roselle'])
+  > a[target='_blank'],
+.craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+  :global([data-roselle-location-note])
+  > a[target='_blank'] {
+  display: inline-flex;
+  min-height: var(--roselle-control-height);
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.72rem 1.05rem;
+  border-color: var(--roselle-control-border);
+  background: rgb(255 253 250 / 0.72);
+  box-shadow: 0 0.5rem 1.25rem rgb(64 43 53 / 0.045);
+  color: var(--roselle-letter-plum);
+  font-weight: 750;
+  text-decoration: none;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    color 150ms ease,
+    transform 150ms ease;
+}
+
+.craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+  :global([data-schedule-event='roselle'])
+  > a[target='_blank']::after,
+.craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+  :global([data-roselle-location-note])
+  > a[target='_blank']::after {
+  content: '↗';
+  font-size: 0.9em;
+  line-height: 1;
+}
+
+/* Gift copy is a quiet utility action, not a second visual card. */
+.craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+  :global([data-roselle-keepsake])
+  button {
+  min-height: var(--roselle-control-height);
+  padding: 0.72rem 1.05rem;
+  border-color: var(--roselle-control-border);
+  border-radius: 999px;
+  background: rgb(255 253 250 / 0.7);
+  box-shadow: none;
+  color: var(--roselle-letter-plum);
+  font-size: 0.9rem;
+  font-weight: 750;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    color 150ms ease,
+    transform 150ms ease;
+}
+
+.craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+  :global([data-roselle-keepsake])
+  [role='status'] {
+  margin-top: 0.45rem;
+  color: var(--roselle-letter-muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+/* RSVP choices read as explicit choices with a strong selected truth. */
+.craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+  :global([data-personal-rsvp-choice]) {
+  min-height: 3.25rem;
+  padding: 0.75rem 1rem;
+  border-color: var(--roselle-control-border);
+  border-radius: 0.7rem;
+  background: rgb(255 253 250 / 0.8);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.4);
+  font-weight: 750;
+  line-height: 1.35;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    color 150ms ease,
+    transform 150ms ease;
+}
+
+.craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+  :global([data-personal-rsvp-choice][data-selected='true']) {
+  border-color: var(--roselle-letter-plum);
+  background: var(--roselle-letter-plum);
+  box-shadow: 0 0.65rem 1.4rem rgb(64 43 53 / 0.14);
+  color: var(--roselle-letter-paper);
+}
+
+/* Form controls stay unmistakably forms while feeling native to Roselle. */
+.craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+  :global([data-template-response-journey='roselle'])
+  :is(select, textarea) {
+  border-color: var(--roselle-control-border);
+  border-radius: 0.7rem;
+  background: rgb(255 253 250 / 0.94);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.65);
+  color: var(--roselle-letter-plum);
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    background-color 150ms ease;
+}
+
+.craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+  :global([data-template-response-journey='roselle'])
+  select {
+  min-height: var(--roselle-control-height);
+  padding-inline: 0.9rem;
+}
+
+.craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+  :global([data-template-response-journey='roselle'])
+  textarea {
+  min-height: 8.5rem;
+  padding: 0.9rem 0.95rem;
+}
+
+.craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+  :global([data-personal-response-submit]) {
+  min-height: 3.25rem;
+  padding: 0.8rem 1.4rem;
+  border-color: var(--roselle-letter-plum);
+  border-radius: 999px;
+  background: var(--roselle-letter-plum);
+  box-shadow: 0 0.75rem 1.8rem rgb(64 43 53 / 0.14);
+  color: var(--roselle-letter-paper);
+  font-weight: 800;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    color 150ms ease,
+    transform 150ms ease;
+}
+
+.craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+  :global([data-personal-response-submit]):disabled,
+.craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+  :global([data-template-response-journey='roselle'])
+  :is(select, textarea):disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+/* Feedback is readable but does not become a dashboard alert card. */
+.craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+  :is(
+    :global([data-personal-response-notice]),
+    :global([data-personal-response-success]),
+    :global([data-personal-response-error])
+  ) {
+  border-radius: 0.35rem;
+  box-shadow: inset 0 0 0 1px rgb(130 91 99 / 0.08);
+}
+
+.craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+  > :global([data-roselle-return-to-opening]) {
+  min-height: 3.25rem;
+  text-decoration: none;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+/* One shared focus language for every guest-facing action. */
+.craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+  :is(
+    :global([data-personal-rsvp-choice]),
+    :global([data-personal-response-submit]),
+    :global([data-schedule-event='roselle']) > a[target='_blank'],
+    :global([data-roselle-location-note]) > a[target='_blank'],
+    :global([data-roselle-keepsake]) button,
+    select,
+    textarea
+  ):focus-visible,
+.craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+  > :global([data-roselle-opening-action]):focus-visible,
+.craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+  > :global([data-roselle-return-to-opening]):focus-visible {
+  outline: 3px solid var(--roselle-control-focus);
+  outline-offset: 3px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+    > :global([data-roselle-opening-action]):hover {
+    transform: translateY(-2px);
+  }
+
+  .craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+    > :global([data-roselle-opening-action]):hover
+    i {
+    transform: translateX(0.18rem);
+  }
+
+  .craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+    :global([data-schedule-event='roselle'])
+    > a[target='_blank']:hover,
+  .craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+    :global([data-roselle-location-note])
+    > a[target='_blank']:hover,
+  .craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+    :global([data-roselle-keepsake])
+    button:hover {
+    border-color: var(--roselle-letter-rose);
+    background: var(--roselle-letter-plum);
+    box-shadow: var(--roselle-control-shadow);
+    color: var(--roselle-letter-paper);
+    transform: translateY(-1px);
+  }
+
+  .craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+    :global([data-personal-rsvp-choice]):not([data-selected='true']):hover {
+    border-color: var(--roselle-letter-rose);
+    background: var(--roselle-letter-paper);
+    transform: translateY(-1px);
+  }
+
+  .craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+    :global([data-personal-response-submit]):not(:disabled):hover {
+    border-color: var(--roselle-letter-rose);
+    background: color-mix(in srgb, var(--roselle-letter-plum) 88%, var(--roselle-letter-rose));
+    box-shadow: 0 0.9rem 2rem rgb(64 43 53 / 0.18);
+    transform: translateY(-1px);
+  }
+}
+
+.craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+  :is(
+    :global([data-personal-rsvp-choice]),
+    :global([data-personal-response-submit]),
+    :global([data-schedule-event='roselle']) > a[target='_blank'],
+    :global([data-roselle-location-note]) > a[target='_blank'],
+    :global([data-roselle-keepsake]) button
+  ):active,
+.craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+  > :global([data-roselle-opening-action]):active {
+  transform: translateY(0);
+}
+
+@media (max-width: 36rem) {
+  .craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+    :global([data-personal-rsvp-choices]) {
+    grid-template-columns: 1fr;
+  }
+
+  .craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+    :global([data-personal-response-submit]),
+  .craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+    :global([data-roselle-keepsake])
+    button {
+    width: 100%;
+  }
+
+  .craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+    :global([data-roselle-location-note])
+    > a[target='_blank'] {
+    width: 100%;
+  }
+}
+
+@media (pointer: coarse) {
+  .craft[data-roselle-craft='flagship-v1'][data-template='roselle'] {
+    --roselle-control-height: 3.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .craft[data-roselle-craft='flagship-v1'][data-template='roselle']
+    :is(a, button, select, textarea) {
+    transition: none;
+  }
+}
