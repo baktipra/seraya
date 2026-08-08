@@ -1,0 +1,410 @@
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle'] {
+  --roselle-type-body: 1rem;
+  --roselle-type-label: 0.75rem;
+  --roselle-type-body-line: 1.65;
+}
+
+/* R4 — keep Roselle's hierarchy expressive without compressing multi-line display text. */
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-roselle-letter-title]) {
+  max-width: 12ch;
+  font-size: clamp(3.25rem, 13.5vw, 6.4rem);
+  line-height: 0.96;
+  letter-spacing: -0.04em;
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: none;
+  text-wrap: balance;
+}
+
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-roselle-letter-subtitle]) {
+  max-width: 60ch;
+  font-size: var(--roselle-type-body);
+  line-height: var(--roselle-type-body-line);
+  text-wrap: pretty;
+}
+
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-roselle-letter-eyebrow]),
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-roselle-scroll-cue]) {
+  font-size: var(--roselle-type-label);
+  line-height: 1.45;
+}
+
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-roselle-letter-date]) {
+  font-variant-numeric: tabular-nums;
+}
+
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  > :global([data-invitation-identity-opening='roselle'])
+  blockquote {
+  max-width: 60ch;
+  font-size: var(--roselle-type-body);
+  line-height: var(--roselle-type-body-line);
+  text-wrap: pretty;
+}
+
+/* Shared micro-label floor: keep operational labels at a readable minimum. */
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-roselle-chapter='couple'])
+  > p:first-child,
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-roselle-story-letter])
+  > p:first-child,
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-roselle-chapter='events'])
+  > p:first-child,
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-roselle-chapter='location'])
+  > p:first-child,
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-roselle-chapter='gallery'])
+  > p:first-child,
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-roselle-chapter='gift'])
+  > p:first-child,
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-template-response-introduction='roselle'])
+  > p:first-child,
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-roselle-letter-closing])
+  > p:first-of-type,
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-personal-greeting-eyebrow]),
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-personal-response-eyebrow]),
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-roselle-response-step]),
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-schedule-event='roselle'])
+  > p:first-of-type,
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-roselle-keepsake])
+  > p:first-of-type {
+  font-size: var(--roselle-type-label);
+  line-height: 1.45;
+}
+
+/* Signature hierarchy — A/B/C/D levels remain distinct at real wrapping lengths. */
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-roselle-chapter='couple'])
+  h2 {
+  max-width: 16ch;
+  font-size: clamp(2.9rem, 8.4vw, 4.8rem);
+  line-height: 1.01;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-roselle-person])
+  h3 {
+  max-width: 11ch;
+  margin-inline: auto;
+  font-size: clamp(2.3rem, 6.5vw, 3.5rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: none;
+  text-wrap: balance;
+}
+
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-roselle-person])
+  > p:first-of-type {
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-roselle-person])
+  > p:last-of-type {
+  max-width: 32ch;
+  font-size: var(--roselle-type-body);
+  line-height: var(--roselle-type-body-line);
+  text-wrap: pretty;
+}
+
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-roselle-chapter='story'])
+  h2 {
+  max-width: 17ch;
+  font-size: clamp(2.35rem, 6.2vw, 3.65rem);
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-roselle-story-letter])
+  > p:last-child {
+  max-width: 65ch;
+  font-size: var(--roselle-type-body);
+  line-height: var(--roselle-type-body-line);
+  text-wrap: pretty;
+}
+
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-roselle-chapter='events'])
+  h2,
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-roselle-chapter='location'])
+  h2 {
+  max-width: 19ch;
+  font-size: clamp(2.2rem, 5.7vw, 3.25rem);
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-schedule-event='roselle']) {
+  font-size: var(--roselle-type-body);
+  line-height: 1.6;
+}
+
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-schedule-event='roselle'])
+  h3 {
+  max-width: 20ch;
+  font-size: clamp(1.9rem, 5vw, 2.55rem);
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  overflow-wrap: break-word;
+  text-wrap: balance;
+}
+
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-schedule-event='roselle'])
+  p {
+  line-height: 1.6;
+}
+
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-schedule-event='roselle'])
+  > p:nth-of-type(2) {
+  font-variant-numeric: tabular-nums;
+}
+
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-roselle-chapter='gallery'])
+  h2 {
+  max-width: 12ch;
+  font-size: clamp(2.9rem, 8vw, 4.55rem);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-roselle-chapter='gift'])
+  h2 {
+  max-width: 20ch;
+  font-size: clamp(2.1rem, 5.2vw, 3rem);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-roselle-chapter='gift'])
+  > p:last-of-type {
+  max-width: 62ch;
+  font-size: var(--roselle-type-body);
+  line-height: var(--roselle-type-body-line);
+  text-wrap: pretty;
+}
+
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-roselle-keepsake])
+  > p:nth-of-type(2) {
+  font-size: 1.6rem;
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-roselle-keepsake])
+  > p:last-of-type {
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: break-word;
+}
+
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-template-response-introduction='roselle'])
+  h2 {
+  max-width: 15ch;
+  font-size: clamp(2.45rem, 6.5vw, 3.75rem);
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-template-response-introduction='roselle'])
+  > p:last-child {
+  max-width: 60ch;
+  font-size: var(--roselle-type-body);
+  line-height: var(--roselle-type-body-line);
+  text-wrap: pretty;
+}
+
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-personal-greeting-title]),
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-personal-response-title]) {
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: none;
+  text-wrap: balance;
+}
+
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-personal-greeting-lead]),
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-personal-response-copy]),
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-personal-rsvp-attendance-copy]),
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-personal-guestbook-help]) {
+  max-width: 65ch;
+  font-size: var(--roselle-type-body);
+  line-height: var(--roselle-type-body-line);
+  text-wrap: pretty;
+}
+
+/* Keep form typography stable on mobile Safari and avoid input-triggered viewport zoom. */
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-template-response-journey='roselle'])
+  :is(select, textarea) {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-personal-response-notice]),
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-personal-response-success]),
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-personal-response-error]) {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-roselle-letter-closing])
+  h2 {
+  max-width: 17ch;
+  font-size: clamp(2.9rem, 8vw, 4.55rem);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-roselle-letter-closing])
+  > p:not(:first-of-type):not(:last-child) {
+  max-width: 62ch;
+  font-size: var(--roselle-type-body);
+  line-height: var(--roselle-type-body-line);
+  text-wrap: pretty;
+}
+
+.typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+  :global([data-roselle-generic-note]) {
+  font-size: 0.9rem;
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+
+/* Mobile is the canonical reading surface: preserve hierarchy while reducing forced wrapping. */
+@media (max-width: 36rem) {
+  .typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+    :global([data-roselle-letter-title]) {
+    max-width: 10.5ch;
+    font-size: clamp(3.2rem, 15vw, 4.6rem);
+    line-height: 0.98;
+  }
+
+  .typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+    :global([data-personal-greeting-title]) {
+    max-width: 14ch;
+    font-size: clamp(2.4rem, 10.5vw, 3.15rem);
+    line-height: 1.04;
+  }
+
+  .typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+    :global([data-roselle-chapter='couple'])
+    h2 {
+    font-size: clamp(2.7rem, 11.5vw, 3.35rem);
+    line-height: 1.03;
+  }
+
+  .typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+    :global([data-roselle-person])
+    h3 {
+    font-size: clamp(2.25rem, 9.8vw, 2.85rem);
+    line-height: 1.04;
+  }
+
+  .typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+    :global([data-roselle-chapter='story'])
+    h2 {
+    font-size: clamp(2.25rem, 9.5vw, 2.8rem);
+    line-height: 1.08;
+  }
+
+  .typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+    :global([data-roselle-chapter='events'])
+    h2,
+  .typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+    :global([data-roselle-chapter='location'])
+    h2 {
+    font-size: clamp(2.1rem, 8.8vw, 2.55rem);
+    line-height: 1.08;
+  }
+
+  .typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+    :global([data-schedule-event='roselle'])
+    h3 {
+    font-size: clamp(1.85rem, 8vw, 2.25rem);
+    line-height: 1.1;
+  }
+
+  .typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+    :global([data-roselle-chapter='gallery'])
+    h2 {
+    font-size: clamp(2.65rem, 11.3vw, 3.3rem);
+    line-height: 1.04;
+  }
+
+  .typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+    :global([data-roselle-chapter='gift'])
+    h2 {
+    font-size: clamp(2.05rem, 8.5vw, 2.45rem);
+    line-height: 1.1;
+  }
+
+  .typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+    :global([data-template-response-introduction='roselle'])
+    h2 {
+    font-size: clamp(2.35rem, 9.8vw, 2.9rem);
+    line-height: 1.06;
+  }
+
+  .typography[data-roselle-typography='flagship-v1'][data-template='roselle']
+    :global([data-roselle-letter-closing])
+    h2 {
+    font-size: clamp(2.65rem, 11.2vw, 3.25rem);
+    line-height: 1.04;
+  }
+}
