@@ -106,6 +106,35 @@
   white-space: nowrap;
 }
 
+[data-invitation-task-workspace]
+  aside[aria-label='Pratinjau undangan langsung']
+  [data-invitation-studio-preview-mode='canonical'][data-preview-viewport='mobile']
+  [data-preview-device='mobile'] {
+  width: min(100%, 230px);
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 9 / 18.5;
+  border: 6px solid #171512;
+  border-radius: 28px;
+  background: #171512;
+  padding: 0;
+  box-shadow: 0 24px 60px -20px rgb(32 29 24 / 0.45);
+}
+
+[data-invitation-task-workspace]
+  aside[aria-label='Pratinjau undangan langsung']
+  [data-preview-device='mobile']
+  > span[aria-hidden='true'] {
+  display: none;
+}
+
+[data-invitation-task-workspace]
+  aside[aria-label='Pratinjau undangan langsung']
+  [data-preview-device='mobile']
+  [aria-label^='Preview ponsel'] {
+  border-radius: 22px;
+}
+
 @media (min-width: 1024px) {
   [data-project-workspace-shell] {
     display: grid;
