@@ -1,0 +1,198 @@
+.motion[data-roselle-motion='flagship-v1'][data-template='roselle'] {
+  --roselle-motion-control-duration: 170ms;
+  --roselle-motion-feedback-duration: 180ms;
+  --roselle-motion-opening-duration: 720ms;
+  --roselle-motion-opening-action-duration: 480ms;
+  --roselle-motion-ease-control: cubic-bezier(0.2, 0.7, 0.3, 1);
+  --roselle-motion-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* R7 replaces the legacy all-at-once chapter animation without changing the base stylesheet. */
+.motion[data-roselle-motion='flagship-v1'][data-template='roselle']
+  :global([data-roselle-chapter]) {
+  animation: none;
+}
+
+/* The opening is the only time-based ceremonial reveal. */
+.motion[data-roselle-motion='flagship-v1'][data-template='roselle']
+  :global([data-roselle-letter]) {
+  animation: roselle-opening-settle var(--roselle-motion-opening-duration)
+    var(--roselle-motion-ease-out) both;
+}
+
+.motion[data-roselle-motion='flagship-v1'][data-template='roselle']
+  > :global([data-roselle-opening-action]) {
+  animation: roselle-opening-action-settle var(--roselle-motion-opening-action-duration)
+    var(--roselle-motion-ease-out) 160ms both;
+}
+
+/* Existing interaction craft keeps its properties; R7 only normalizes tempo and easing. */
+.motion[data-roselle-motion='flagship-v1'][data-template='roselle']
+  :is(a, button, select, textarea) {
+  transition-duration: var(--roselle-motion-control-duration);
+  transition-timing-function: var(--roselle-motion-ease-control);
+}
+
+.motion[data-roselle-motion='flagship-v1'][data-template='roselle']
+  :global([data-invitation-gallery])
+  img {
+  transition-duration: 420ms;
+  transition-timing-function: var(--roselle-motion-ease-out);
+}
+
+/* Response feedback may appear after an action, so it gets a short non-disruptive settle. */
+.motion[data-roselle-motion='flagship-v1'][data-template='roselle']
+  :is(
+    :global([data-personal-response-notice]),
+    :global([data-personal-response-success]),
+    :global([data-personal-response-error])
+  ) {
+  animation: roselle-feedback-settle var(--roselle-motion-feedback-duration)
+    var(--roselle-motion-ease-out) both;
+}
+
+/* Press feedback is tactile but deliberately smaller than hover lift. */
+.motion[data-roselle-motion='flagship-v1'][data-template='roselle']
+  :is(
+    :global([data-personal-rsvp-choice]),
+    :global([data-personal-response-submit]),
+    :global([data-schedule-event='roselle']) > a[target='_blank'],
+    :global([data-roselle-location-note]) > a[target='_blank'],
+    :global([data-roselle-keepsake]) button
+  ):not(:disabled):active,
+.motion[data-roselle-motion='flagship-v1'][data-template='roselle']
+  > :global([data-roselle-opening-action]):active {
+  transform: scale(0.985);
+}
+
+/*
+ * Scroll-driven reveal is progressive enhancement only. Unsupported browsers keep the
+ * static authored composition instead of receiving a JavaScript observer/client island.
+ */
+@supports (animation-timeline: view()) {
+  .motion[data-roselle-motion='flagship-v1'][data-template='roselle']
+    :is(
+      :global([data-roselle-chapter='greeting']),
+      :global([data-roselle-chapter='couple']),
+      :global([data-roselle-chapter='story']),
+      :global([data-roselle-chapter='events']),
+      :global([data-roselle-chapter='location']),
+      :global([data-roselle-chapter='gift']),
+      :global([data-roselle-chapter='closing'])
+    ) {
+    animation-name: roselle-chapter-view-reveal;
+    animation-duration: 1s;
+    animation-fill-mode: both;
+    animation-timing-function: linear;
+    animation-timeline: view(block);
+    animation-range: entry 0% entry 72%;
+  }
+
+  .motion[data-roselle-motion='flagship-v1'][data-template='roselle']
+    :global([data-roselle-memory-album])
+    figure {
+    animation-name: roselle-memory-view-reveal;
+    animation-duration: 1s;
+    animation-fill-mode: both;
+    animation-timing-function: linear;
+    animation-timeline: view(block);
+    animation-range: entry 0% entry 82%;
+  }
+
+  .motion[data-roselle-motion='flagship-v1'][data-template='roselle']
+    :global([data-template-response-slot]) {
+    animation-name: roselle-response-view-reveal;
+    animation-duration: 1s;
+    animation-fill-mode: both;
+    animation-timing-function: linear;
+    animation-timeline: view(block);
+    animation-range: entry 0% entry 76%;
+  }
+}
+
+@keyframes roselle-opening-settle {
+  from {
+    opacity: 0;
+    transform: translateY(0.65rem) scale(0.994);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes roselle-opening-action-settle {
+  from {
+    opacity: 0;
+    transform: translateY(0.45rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes roselle-feedback-settle {
+  from {
+    opacity: 0;
+    transform: translateY(0.2rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes roselle-chapter-view-reveal {
+  from {
+    opacity: 0.72;
+    transform: translateY(0.65rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes roselle-memory-view-reveal {
+  from {
+    opacity: 0.72;
+    transform: translateY(0.55rem) scale(0.996);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes roselle-response-view-reveal {
+  from {
+    opacity: 0.76;
+    transform: translateY(0.4rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion[data-roselle-motion='flagship-v1'][data-template='roselle']
+    :is(*, *::before, *::after) {
+    animation: none !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  .motion[data-roselle-motion='flagship-v1'][data-template='roselle']
+    :is(a, button):active {
+    transform: none;
+  }
+}
