@@ -1,0 +1,479 @@
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1'] {
+  --roselle-rhythm-signature: clamp(4.75rem, 12vw, 8rem);
+  --roselle-rhythm-narrative: clamp(3.8rem, 9vw, 6rem);
+  --roselle-rhythm-utility: clamp(3.15rem, 7.5vw, 4.75rem);
+}
+
+/* R3 — Opening Ceremony: hero, couple identity, entry action and addressed letter read as one sequence. */
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  > :global([data-invitation-identity-opening='roselle']) {
+  position: relative;
+  z-index: 5;
+  width: min(calc(100% - 3rem), 40rem);
+  max-width: 40rem;
+  margin: -2.35rem auto 0;
+  padding: clamp(2.8rem, 7vw, 4.4rem) clamp(1.4rem, 5vw, 3.25rem) 2.45rem;
+  border: 1px solid var(--roselle-letter-line);
+  border-top: 0;
+  border-radius: 0 0 0.7rem 0.7rem;
+  background:
+    linear-gradient(rgb(255 253 250 / 0.96), rgb(255 247 239 / 0.9)),
+    var(--roselle-letter-paper);
+  box-shadow: 0 1.5rem 3.5rem rgb(64 43 53 / 0.075);
+  color: var(--roselle-letter-plum);
+}
+
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  > :global([data-invitation-identity-opening='roselle'])
+  blockquote {
+  max-width: 31rem;
+  margin-inline: auto;
+  color: var(--roselle-letter-muted);
+}
+
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  > :global([data-roselle-opening-action]) {
+  margin: -1.55rem auto clamp(2.8rem, 7vw, 4.25rem);
+  border-color: rgb(172 111 121 / 0.5);
+  background: var(--roselle-letter-plum);
+  box-shadow: 0 1.1rem 2.8rem rgb(64 43 53 / 0.16);
+  color: var(--roselle-letter-paper);
+}
+
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  > :global([data-roselle-opening-action])
+  i {
+  background: linear-gradient(90deg, rgb(255 253 250 / 0.9), transparent);
+}
+
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  > :global([data-roselle-opening-action]):hover {
+  border-color: var(--roselle-letter-plum);
+  background: color-mix(in srgb, var(--roselle-letter-plum) 88%, black);
+  box-shadow: 0 1.2rem 3rem rgb(64 43 53 / 0.2);
+}
+
+/* Addressed Letter — a first sheet, not a card after the cover. */
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  :global([data-roselle-addressed-letter]) {
+  padding-top: var(--roselle-rhythm-narrative);
+  padding-bottom: var(--roselle-rhythm-signature);
+  border-top: 1px solid var(--roselle-letter-line);
+  background:
+    radial-gradient(circle at 86% 14%, rgb(172 111 121 / 0.085), transparent 13rem),
+    linear-gradient(180deg, var(--roselle-letter-cream), var(--roselle-letter-paper) 72%);
+}
+
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  :global([data-roselle-addressed-letter])
+  :global([data-personal-guest-greeting]) {
+  max-width: 38rem;
+  padding: clamp(1.5rem, 4vw, 2.5rem) 0 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  :global([data-roselle-addressed-letter])
+  :global([data-personal-greeting-title]) {
+  max-width: 13ch;
+  font-size: clamp(2.8rem, 8vw, 4.45rem);
+  line-height: 0.9;
+}
+
+/* Couple Reveal — first emotional peak. */
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  :global([data-roselle-chapter='couple']) {
+  padding-top: var(--roselle-rhythm-signature);
+  padding-bottom: var(--roselle-rhythm-signature);
+  background:
+    radial-gradient(circle at 50% 42%, rgb(172 111 121 / 0.06), transparent 19rem),
+    var(--roselle-letter-paper);
+}
+
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  :global([data-roselle-chapter='couple'])
+  h2 {
+  max-width: 15ch;
+  font-size: clamp(3rem, 9vw, 5rem);
+  line-height: 0.88;
+}
+
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  :global([data-roselle-couple-composition]) {
+  margin-top: clamp(3.25rem, 8vw, 5.25rem);
+}
+
+/* Story Interlude — intentionally quieter after the couple reveal. */
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  :global([data-roselle-chapter='story']) {
+  padding-top: var(--roselle-rhythm-narrative);
+  padding-bottom: var(--roselle-rhythm-narrative);
+}
+
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  :global([data-roselle-chapter='story'])
+  h2 {
+  max-width: 16ch;
+  font-size: clamp(2.4rem, 6.8vw, 3.85rem);
+  line-height: 0.94;
+}
+
+/* Celebration Journey — clarity first. */
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  :global([data-roselle-celebration-thread]) {
+  border-block-color: rgb(130 91 99 / 0.2);
+  background:
+    linear-gradient(rgb(255 247 239 / 0.92), rgb(255 253 250 / 0.96)),
+    var(--roselle-letter-cream);
+}
+
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  :global([data-roselle-chapter='events']) {
+  padding-top: var(--roselle-rhythm-utility);
+  padding-bottom: clamp(2.5rem, 6vw, 3.75rem);
+}
+
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  :global([data-roselle-chapter='location']) {
+  padding-bottom: var(--roselle-rhythm-utility);
+}
+
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  :global([data-roselle-chapter='events'])
+  h2,
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  :global([data-roselle-chapter='location'])
+  h2 {
+  max-width: 18ch;
+  font-size: clamp(2.25rem, 6.2vw, 3.45rem);
+  line-height: 0.94;
+}
+
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  :global([data-roselle-event-thread]) {
+  margin-top: clamp(2.4rem, 6vw, 3.6rem);
+}
+
+/* Memory Album — second visual peak. */
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  :global([data-roselle-chapter='gallery']) {
+  padding-top: var(--roselle-rhythm-signature);
+  padding-bottom: var(--roselle-rhythm-signature);
+}
+
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  :global([data-roselle-chapter='gallery'])
+  h2 {
+  max-width: 11ch;
+  font-size: clamp(3rem, 8.5vw, 4.8rem);
+  line-height: 0.9;
+}
+
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  :global([data-roselle-memory-album]) {
+  margin-top: clamp(3rem, 8vw, 5rem);
+}
+
+/* Gift Enclosure — optional, useful and deliberately quieter. */
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  :global([data-roselle-chapter='gift']) {
+  padding-top: var(--roselle-rhythm-utility);
+  padding-bottom: var(--roselle-rhythm-utility);
+  background:
+    linear-gradient(145deg, rgb(247 235 231 / 0.76), rgb(255 247 239 / 0.56)),
+    var(--roselle-letter-blush);
+}
+
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  :global([data-roselle-chapter='gift'])
+  h2 {
+  max-width: 19ch;
+  font-size: clamp(2.15rem, 5.8vw, 3.2rem);
+  line-height: 0.96;
+}
+
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  :global([data-roselle-keepsake-list]) {
+  max-width: 38rem;
+  margin-top: 2rem;
+}
+
+/* Guest Conversation — narrative intro with operationally clear controls. */
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  :global([data-template-response-journey='roselle']) {
+  padding-top: var(--roselle-rhythm-narrative);
+  padding-bottom: var(--roselle-rhythm-narrative);
+  background:
+    radial-gradient(circle at 84% 12%, rgb(172 111 121 / 0.08), transparent 14rem),
+    linear-gradient(180deg, var(--roselle-letter-blush), var(--roselle-letter-cream));
+}
+
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  :global([data-template-response-introduction='roselle']) {
+  max-width: 36rem;
+  margin-right: auto;
+  margin-bottom: clamp(2.5rem, 6vw, 3.75rem);
+  margin-left: auto;
+  text-align: left;
+}
+
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  :global([data-template-response-introduction='roselle'])
+  h2 {
+  max-width: 14ch;
+  margin-right: 0;
+  margin-left: 0;
+  font-size: clamp(2.5rem, 7vw, 4rem);
+  line-height: 0.93;
+}
+
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  :global([data-template-response-introduction='roselle'])
+  p {
+  margin-right: 0;
+  margin-left: 0;
+}
+
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  :global([data-template-response-slot]) {
+  max-width: 38rem;
+}
+
+/* Farewell Letter — identity and closing become one emotional landing. */
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  :global([data-invitation-identity-footer='roselle']) {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: clamp(2.8rem, 7vw, 4.25rem) clamp(1.35rem, 7vw, 5rem) 1.25rem;
+  border-top: 1px solid var(--roselle-letter-line);
+  background: linear-gradient(180deg, var(--roselle-letter-cream), var(--roselle-letter-paper));
+  color: var(--roselle-letter-muted);
+}
+
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  :global([data-invitation-identity-footer='roselle'])
+  a {
+  text-underline-offset: 0.3em;
+}
+
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  :global([data-roselle-letter-closing]) {
+  min-height: min(64svh, 42rem);
+  padding-top: clamp(3.5rem, 8vw, 5.5rem);
+  padding-bottom: var(--roselle-rhythm-signature);
+  background:
+    radial-gradient(circle at 50% 22%, rgb(172 111 121 / 0.105), transparent 18rem),
+    linear-gradient(180deg, var(--roselle-letter-paper), var(--roselle-letter-cream));
+}
+
+.flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+  :global([data-roselle-letter-closing])
+  h2 {
+  max-width: 16ch;
+  font-size: clamp(3rem, 8.5vw, 4.85rem);
+  line-height: 0.9;
+}
+
+/* Mobile is Roselle's canonical artistic surface, not a collapsed desktop grid. */
+@media (max-width: 36rem) {
+  .flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+    > :global([data-invitation-identity-opening='roselle']) {
+    width: calc(100% - 2rem);
+    margin-top: -1.2rem;
+    padding: 2.55rem 1.25rem 2.25rem;
+  }
+
+  .flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+    > :global([data-roselle-opening-action]) {
+    margin-top: -1.5rem;
+    margin-bottom: 2.6rem;
+  }
+
+  .flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+    :global([data-roselle-addressed-letter]) {
+    padding-top: 3.6rem;
+    padding-bottom: 5rem;
+  }
+
+  .flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+    :global([data-roselle-addressed-letter])
+    :global([data-personal-guest-greeting]) {
+    padding: 1.25rem 0 0;
+  }
+
+  .flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+    :global([data-roselle-chapter='couple']) {
+    padding-top: 5.4rem;
+    padding-bottom: 5.4rem;
+  }
+
+  .flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+    :global([data-roselle-chapter='story']) {
+    padding-top: 4.15rem;
+    padding-bottom: 4.15rem;
+  }
+
+  .flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+    :global([data-roselle-chapter='events']) {
+    padding-top: 3.75rem;
+    padding-bottom: 2.75rem;
+  }
+
+  .flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+    :global([data-roselle-chapter='location']) {
+    padding-bottom: 3.9rem;
+  }
+
+  .flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+    :global([data-roselle-chapter='gallery']) {
+    padding-top: 5.2rem;
+    padding-bottom: 5.4rem;
+  }
+
+  .flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+    :global([data-roselle-memory-album][data-gallery-layout]) {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0.72rem;
+  }
+
+  .flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+    :global([data-roselle-memory-album][data-gallery-layout])
+    figure,
+  .flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+    :global([data-roselle-memory-album][data-gallery-layout])
+    figure:first-child,
+  .flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+    :global([data-roselle-memory-album][data-gallery-layout])
+    figure:not(:first-child) {
+    grid-row: auto;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+  }
+
+  .flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+    :global([data-roselle-memory-album][data-gallery-layout='single'])
+    figure {
+    grid-column: 1 / -1;
+    aspect-ratio: 4 / 5;
+    border-radius: 7rem 7rem 0.35rem 0.35rem;
+  }
+
+  .flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+    :global([data-roselle-memory-album][data-gallery-layout='diptych'])
+    figure:first-child {
+    grid-column: 1 / 6;
+    aspect-ratio: 4 / 5;
+    border-radius: 7rem 7rem 0.35rem 0.35rem;
+  }
+
+  .flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+    :global([data-roselle-memory-album][data-gallery-layout='diptych'])
+    figure:last-child {
+    grid-column: 2 / 7;
+    aspect-ratio: 4 / 3;
+    margin-top: 0.65rem;
+    border-radius: 0.35rem;
+  }
+
+  .flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+    :global([data-roselle-memory-album][data-gallery-layout='triptych'])
+    figure:first-child {
+    grid-column: 1 / 6;
+    aspect-ratio: 4 / 5;
+    border-radius: 7rem 7rem 0.35rem 0.35rem;
+  }
+
+  .flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+    :global([data-roselle-memory-album][data-gallery-layout='triptych'])
+    figure:nth-child(2) {
+    grid-column: 3 / 7;
+    aspect-ratio: 4 / 3;
+    margin-top: 0.55rem;
+    border-radius: 0.35rem;
+  }
+
+  .flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+    :global([data-roselle-memory-album][data-gallery-layout='triptych'])
+    figure:nth-child(3) {
+    grid-column: 1 / 5;
+    aspect-ratio: 4 / 3;
+    border-radius: 0.35rem;
+  }
+
+  .flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+    :global([data-roselle-memory-album][data-gallery-layout='mosaic'])
+    figure {
+    grid-column: span 3;
+    aspect-ratio: 4 / 3;
+    border-radius: 0.35rem;
+  }
+
+  .flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+    :global([data-roselle-memory-album][data-gallery-layout='mosaic'])
+    figure:first-child {
+    grid-column: 1 / 6;
+    aspect-ratio: 4 / 5;
+    border-radius: 7rem 7rem 0.35rem 0.35rem;
+  }
+
+  .flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+    :global([data-roselle-memory-album][data-gallery-layout='mosaic'])
+    figure:nth-child(2) {
+    grid-column: 3 / 7;
+    aspect-ratio: 4 / 3;
+    margin-top: 0.75rem;
+  }
+
+  .flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+    :global([data-roselle-memory-album][data-gallery-layout='mosaic'])
+    figure:nth-child(3) {
+    grid-column: 1 / 5;
+    aspect-ratio: 4 / 3;
+  }
+
+  .flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+    :global([data-roselle-memory-album][data-gallery-layout='mosaic'])
+    figure:nth-child(4) {
+    grid-column: 2 / 7;
+    aspect-ratio: 3 / 4;
+  }
+
+  .flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+    :global([data-roselle-memory-album])
+    :global([data-invitation-media-frame]),
+  .flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+    :global([data-roselle-memory-album])
+    :global([data-invitation-media-image]) {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+    :global([data-roselle-chapter='gift']) {
+    padding-top: 3.75rem;
+    padding-bottom: 3.9rem;
+  }
+
+  .flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+    :global([data-template-response-journey='roselle']) {
+    padding-top: 4.25rem;
+    padding-bottom: 4.75rem;
+  }
+
+  .flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+    :global([data-invitation-identity-footer='roselle']) {
+    padding-top: 3.15rem;
+  }
+
+  .flagship[data-roselle-composition='flagship-v1'][data-template='roselle'][data-roselle-experience='letter-v1']
+    :global([data-roselle-letter-closing]) {
+    min-height: min(70svh, 40rem);
+    padding-top: 3.25rem;
+    padding-bottom: 5.5rem;
+  }
+}
