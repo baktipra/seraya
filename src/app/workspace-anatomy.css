@@ -93,6 +93,19 @@
   scroll-margin-top: calc(var(--seraya-topbar-height) + 5rem);
 }
 
+[data-invitation-task-workspace] nav[aria-label='Bagian editor undangan'] + div > header {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 @media (min-width: 1024px) {
   [data-project-workspace-shell] {
     display: grid;
