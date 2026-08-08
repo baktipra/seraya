@@ -155,7 +155,7 @@ export function RoselleEvents({ events }: Pick<InvitationViewModel, 'events'>) {
           {events.items.map((event, index) => (
             <RoselleScheduleEvent
               event={event}
-              key={`${event.title ?? 'acara'}-${index}`}
+              key={event.id ?? `${event.title ?? 'acara'}-${index}`}
               sequence={index + 1}
               showDate={event.dateLabel !== events.primaryDateLabel}
             />
