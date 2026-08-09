@@ -25,6 +25,7 @@ on:
       - 'src/modules/readiness/wedding-readiness.types.ts'
       - 'src/modules/readiness/__tests__/project-compass.test.ts'
       - 'src/modules/readiness/__tests__/wedding-readiness.service.test.ts'
+      - 'tests/unit/owner-post-publish-operations-maturity-v1.test.ts'
       - 'tests/unit/owner-workspace-radical-simplicity-v2.test.ts'
       - 'tests/e2e/owner-workspace-radical-simplicity-v2.spec.ts'
       - 'tests/e2e/fixture-app/app/owner-workspace-radical-simplicity-v2/**'
@@ -59,6 +60,7 @@ on:
       - 'src/modules/readiness/wedding-readiness.types.ts'
       - 'src/modules/readiness/__tests__/project-compass.test.ts'
       - 'src/modules/readiness/__tests__/wedding-readiness.service.test.ts'
+      - 'tests/unit/owner-post-publish-operations-maturity-v1.test.ts'
       - 'tests/unit/owner-workspace-radical-simplicity-v2.test.ts'
       - 'tests/e2e/owner-workspace-radical-simplicity-v2.spec.ts'
       - 'tests/e2e/fixture-app/app/owner-workspace-radical-simplicity-v2/**'
@@ -107,6 +109,7 @@ jobs:
             src/modules/readiness/wedding-readiness.types.ts \
             src/modules/readiness/__tests__/project-compass.test.ts \
             src/modules/readiness/__tests__/wedding-readiness.service.test.ts \
+            tests/unit/owner-post-publish-operations-maturity-v1.test.ts \
             tests/unit/owner-workspace-radical-simplicity-v2.test.ts \
             tests/e2e/owner-workspace-radical-simplicity-v2.spec.ts \
             tests/e2e/fixture-app/app/owner-workspace-radical-simplicity-v2/page.tsx \
@@ -133,6 +136,7 @@ jobs:
             src/modules/readiness/wedding-readiness.types.ts \
             src/modules/readiness/__tests__/project-compass.test.ts \
             src/modules/readiness/__tests__/wedding-readiness.service.test.ts \
+            tests/unit/owner-post-publish-operations-maturity-v1.test.ts \
             tests/unit/owner-workspace-radical-simplicity-v2.test.ts \
             tests/e2e/owner-workspace-radical-simplicity-v2.spec.ts \
             tests/e2e/fixture-app/app/owner-workspace-radical-simplicity-v2/page.tsx \
@@ -142,6 +146,7 @@ jobs:
       - name: Run owner, post-publish, and Invitation Studio compatibility contracts
         run: |
           npx vitest run \
+            tests/unit/owner-post-publish-operations-maturity-v1.test.ts \
             tests/unit/owner-workspace-radical-simplicity-v2.test.ts \
             tests/unit/owner-workspace-usability-reset-v1.test.ts \
             src/modules/readiness/__tests__/project-compass.test.ts \
