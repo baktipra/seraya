@@ -99,20 +99,22 @@ export function deriveProjectCompassNextStep(
     );
   }
 
-  if (readiness.followUp.noFollowUpRecordedCount > 0) {
+  const noFollowUpRecordedCount = readiness.followUp?.noFollowUpRecordedCount ?? 0;
+  if (noFollowUpRecordedCount > 0) {
     return target(
       'open_delivery_center',
       'Bagikan ke tamu yang sudah siap',
-      `${readiness.followUp.noFollowUpRecordedCount} tamu siap masuk ke handoff manual dari Bagikan.`,
+      `${noFollowUpRecordedCount} tamu siap masuk ke handoff manual dari Bagikan.`,
       '/delivery',
     );
   }
 
-  if (readiness.followUp.awaitingRsvpCount > 0) {
+  const awaitingRsvpCount = readiness.followUp?.awaitingRsvpCount ?? 0;
+  if (awaitingRsvpCount > 0) {
     return target(
       'follow_up_pending_rsvp',
       'Tindak lanjuti RSVP yang masih pending',
-      `${readiness.followUp.awaitingRsvpCount} tamu sudah masuk tahap handoff tetapi masih menunggu RSVP.`,
+      `${awaitingRsvpCount} tamu sudah masuk tahap handoff tetapi masih menunggu RSVP.`,
       '/delivery?view=follow-up&filter=awaiting_rsvp',
     );
   }
