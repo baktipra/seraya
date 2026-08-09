@@ -2,6 +2,7 @@ import type { Route } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
+import { CanonicalGuestFollowUpCenter } from '@/components/projects/canonical-guest-follow-up-center';
 import { NativeGuestDeliveryCenter } from '@/components/projects/native-guest-delivery-center';
 import { PublicSocialShareKit } from '@/components/projects/public-social-share-kit';
 import {
@@ -23,21 +24,38 @@ import {
 import { deriveDeliveryDistribution } from '@/modules/delivery/delivery-distribution';
 import { getGuestDistributionCenterForVerifiedProject } from '@/modules/delivery/delivery-handoff.service';
 import { deriveDeliveryReadiness } from '@/modules/delivery/delivery-readiness';
+import { prepareGuestFollowUpHandoffAction } from '@/modules/follow-up/follow-up.actions';
+import { getGuestFollowUpCenterForVerifiedProject } from '@/modules/follow-up/follow-up.service';
+import {
+  guestFollowUpSegments,
+  type GuestFollowUpSegmentFilter,
+} from '@/modules/follow-up/follow-up.types';
 import { ProjectAccessDeniedError } from '@/modules/projects/project.policy';
 import { getPublicSocialShareForVerifiedProject } from '@/modules/public-social-share/public-social-share.service';
 
 type DeliveryCenterPageProps = {
   params: Promise<{ projectId: string }>;
-  searchParams?: Promise<{ view?: string | string[] }>;
+  searchParams?: Promise<{
+    filter?: string | string[];
+    view?: string | string[];
+  }>;
 };
 
-type DeliveryView = 'personal' | 'public';
+type DeliveryView = 'personal' | 'follow-up' | 'public';
 
 type DeliveryScreen =
   | { kind: 'blocked' }
   | {
-      kind: 'delivery';
+      kind: 'personal';
       deliveryCenter: Awaited<ReturnType<typeof getGuestDistributionCenterForVerifiedProject>>;
+    }
+  | {
+      kind: 'follow-up';
+      followUpCenter: Awaited<ReturnType<typeof getGuestFollowUpCenterForVerifiedProject>>;
+    }
+  | {
+      kind: 'public';
+      projectId: string;
       publicShare: NonNullable<Awaited<ReturnType<typeof getPublicSocialShareForVerifiedProject>>>;
     };
 
@@ -47,17 +65,26 @@ export const fetchCache = 'force-no-store';
 
 function getDeliveryView(value: string | string[] | undefined): DeliveryView {
   const resolved = Array.isArray(value) ? value[0] : value;
+  if (resolved === 'follow-up') return 'follow-up';
   return resolved === 'public' ? 'public' : 'personal';
+}
+
+function getFollowUpFilter(value: string | string[] | undefined): GuestFollowUpSegmentFilter {
+  const resolved = Array.isArray(value) ? value[0] : value;
+  return guestFollowUpSegments.includes(resolved as (typeof guestFollowUpSegments)[number])
+    ? (resolved as GuestFollowUpSegmentFilter)
+    : 'all';
 }
 
 function DeliveryViewNavigation({ projectId, view }: { projectId: string; view: DeliveryView }) {
   const base = `/dashboard/${projectId}/delivery` as Route;
+  const followUpHref = `${base}?view=follow-up` as Route;
   const publicHref = `${base}?view=public` as Route;
 
   return (
     <nav
       aria-label="Tampilan Bagikan"
-      className="border-seraya-border-subtle bg-seraya-surface mb-5 inline-flex min-w-0 rounded-[var(--seraya-radius-md)] border p-1"
+      className="border-seraya-border-subtle bg-seraya-surface mb-5 flex min-w-0 flex-wrap rounded-[var(--seraya-radius-md)] border p-1"
       data-delivery-view-navigation
     >
       <Link
@@ -70,6 +97,17 @@ function DeliveryViewNavigation({ projectId, view }: { projectId: string; view: 
         href={base}
       >
         Undangan Pribadi
+      </Link>
+      <Link
+        aria-current={view === 'follow-up' ? 'page' : undefined}
+        className={`focus-visible:outline-seraya-focus-ring inline-flex min-h-11 items-center justify-center rounded-[calc(var(--seraya-radius-md)-0.2rem)] px-4 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-2 ${
+          view === 'follow-up'
+            ? 'bg-seraya-action-primary text-seraya-text-inverse'
+            : 'text-seraya-text-secondary hover:bg-seraya-surface-subtle hover:text-seraya-text-primary'
+        }`}
+        href={followUpHref}
+      >
+        Tindak Lanjut
       </Link>
       <Link
         aria-current={view === 'public' ? 'page' : undefined}
@@ -113,7 +151,10 @@ function DeliveryBlockedState({ projectId }: { projectId: string }) {
   );
 }
 
-async function getDeliveryScreenOrNotFound(projectId: string): Promise<DeliveryScreen> {
+async function getDeliveryScreenOrNotFound(
+  projectId: string,
+  view: DeliveryView,
+): Promise<DeliveryScreen> {
   return measureWorkspaceServerLoad(
     { operation: 'delivery-center-screen', workspace: 'delivery' },
     async () => {
@@ -121,10 +162,21 @@ async function getDeliveryScreenOrNotFound(projectId: string): Promise<DeliveryS
         const project = await getOwnedProjectContextForRequest(projectId);
         const publicShare = await getPublicSocialShareForVerifiedProject(project);
         if (!publicShare) return { kind: 'blocked' };
+
+        if (view === 'public') {
+          return { kind: 'public', projectId: project.id, publicShare };
+        }
+
+        if (view === 'follow-up') {
+          return {
+            followUpCenter: await getGuestFollowUpCenterForVerifiedProject(project),
+            kind: 'follow-up',
+          };
+        }
+
         return {
           deliveryCenter: await getGuestDistributionCenterForVerifiedProject(project),
-          kind: 'delivery',
-          publicShare,
+          kind: 'personal',
         };
       } catch (error) {
         if (error instanceof ProjectAccessDeniedError) notFound();
@@ -139,10 +191,11 @@ export default async function DeliveryCenterPage({
   searchParams,
 }: DeliveryCenterPageProps) {
   const { projectId } = await params;
-  const { view: rawView } = await (searchParams ??
-    Promise.resolve<{ view?: string | string[] }>({}));
-  const view = getDeliveryView(rawView);
-  const screen = await getDeliveryScreenOrNotFound(projectId);
+  const query = await (searchParams ??
+    Promise.resolve<{ filter?: string | string[]; view?: string | string[] }>({}));
+  const view = getDeliveryView(query.view);
+  const followUpFilter = getFollowUpFilter(query.filter);
+  const screen = await getDeliveryScreenOrNotFound(projectId, view);
 
   if (screen.kind === 'blocked') {
     return (
@@ -152,28 +205,52 @@ export default async function DeliveryCenterPage({
     );
   }
 
-  const { deliveryCenter, publicShare } = screen;
+  const canonicalProjectId =
+    screen.kind === 'personal'
+      ? screen.deliveryCenter.project.id
+      : screen.kind === 'follow-up'
+        ? screen.followUpCenter.project.id
+        : screen.projectId;
 
   return (
     <WorkspacePage kind="delivery" width="operations">
-      <DeliveryViewNavigation projectId={deliveryCenter.project.id} view={view} />
+      <DeliveryViewNavigation projectId={canonicalProjectId} view={view} />
 
-      {view === 'public' ? (
-        <PublicSocialShareKit model={publicShare} projectId={deliveryCenter.project.id} />
+      {screen.kind === 'public' ? (
+        <PublicSocialShareKit model={screen.publicShare} projectId={screen.projectId} />
+      ) : screen.kind === 'follow-up' ? (
+        <CanonicalGuestFollowUpCenter
+          initialFilter={followUpFilter}
+          isPublished={screen.followUpCenter.isPublished}
+          projectId={screen.followUpCenter.project.id}
+          rows={screen.followUpCenter.rows.map((row) => ({
+            ...row,
+            ...(row.eligibility.canPrepareEventReminder || row.eligibility.canPrepareRsvpReminder
+              ? {
+                  handoffAction: prepareGuestFollowUpHandoffAction.bind(null, {
+                    guestId: row.guestId,
+                    projectId: screen.followUpCenter.project.id,
+                  }),
+                }
+              : {}),
+          }))}
+          summary={screen.followUpCenter.summary}
+          timezone={screen.followUpCenter.project.default_timezone}
+        />
       ) : (
         <NativeGuestDeliveryCenter
           copyWhatsAppNumbersAction={copySelectedDeliveryWhatsAppNumbersAction.bind(null, {
-            projectId: deliveryCenter.project.id,
+            projectId: screen.deliveryCenter.project.id,
           })}
-          handoffSummary={deliveryCenter.handoffSummary}
-          projectId={deliveryCenter.project.id}
+          handoffSummary={screen.deliveryCenter.handoffSummary}
+          projectId={screen.deliveryCenter.project.id}
           prepareBatchAction={prepareMissingPersonalGuestLinksForDeliveryAction.bind(null, {
-            projectId: deliveryCenter.project.id,
+            projectId: screen.deliveryCenter.project.id,
           })}
-          rows={deliveryCenter.rows.map(({ guestId, ...row }, rowKey) => {
+          rows={screen.deliveryCenter.rows.map(({ guestId, ...row }, rowKey) => {
             const readiness = deriveDeliveryReadiness(row);
             const truth = deriveDeliveryDistribution(row);
-            const bound = { guestId, projectId: deliveryCenter.project.id };
+            const bound = { guestId, projectId: screen.deliveryCenter.project.id };
 
             return {
               ...row,
@@ -195,7 +272,7 @@ export default async function DeliveryCenterPage({
               rowKey,
             };
           })}
-          summary={deliveryCenter.summary}
+          summary={screen.deliveryCenter.summary}
         />
       )}
     </WorkspacePage>
