@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState, type ComponentType, type SVGProps } from 'react';
 
+import { focusFirstDescendant, trapFocusWithin } from '@/lib/focus-management';
 import { beginWorkspaceTransition } from '@/lib/performance/workspace-performance.client';
 
 import {
@@ -245,6 +246,8 @@ export function ProjectNavigation({
   const pathname = usePathname();
   const items = getProjectNavigationItems(projectId);
   const previousPathnameRef = useRef(pathname);
+  const mobileDrawerRef = useRef<HTMLElement | null>(null);
+  const mobileMenuButtonRef = useRef<HTMLButtonElement | null>(null);
   const [pendingHref, setPendingHref] = useState<string | null>(null);
   const [routeAnnouncement, setRouteAnnouncement] = useState('');
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -269,11 +272,40 @@ export function ProjectNavigation({
   useEffect(() => {
     if (!mobileOpen) return undefined;
 
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const focusFrame = window.requestAnimationFrame(() => {
+      const drawer = mobileDrawerRef.current;
+      if (drawer) focusFirstDescendant(drawer, drawer);
+    });
+
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setMobileOpen(false);
+      const drawer = mobileDrawerRef.current;
+      if (!drawer) return;
+
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        event.stopPropagation();
+        setMobileOpen(false);
+        return;
+      }
+
+      trapFocusWithin(event, drawer);
     };
+
     document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
+
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', onKeyDown);
+
+      const trigger = mobileMenuButtonRef.current;
+      window.requestAnimationFrame(() => {
+        if (trigger?.isConnected) trigger.focus({ preventScroll: true });
+      });
+    };
   }, [mobileOpen]);
 
   const startTransition = (item: ProjectNavigationItem) => {
@@ -285,6 +317,8 @@ export function ProjectNavigation({
     <>
       <div className={styles.mobileContext} data-project-mobile-context>
         <button
+          ref={mobileMenuButtonRef}
+          aria-controls="project-mobile-navigation"
           aria-expanded={mobileOpen}
           aria-label="Buka navigasi proyek"
           className={styles.menuButton}
@@ -322,12 +356,21 @@ export function ProjectNavigation({
       {mobileOpen ? (
         <div className={styles.mobileOverlay}>
           <button
-            aria-label="Tutup navigasi proyek"
+            aria-hidden="true"
             className={styles.mobileBackdrop}
             onClick={() => setMobileOpen(false)}
+            tabIndex={-1}
             type="button"
           />
-          <aside aria-label="Navigasi proyek" className={styles.mobileDrawer}>
+          <aside
+            ref={mobileDrawerRef}
+            aria-label="Navigasi proyek"
+            aria-modal="true"
+            className={styles.mobileDrawer}
+            id="project-mobile-navigation"
+            role="dialog"
+            tabIndex={-1}
+          >
             <div className={styles.mobileDrawerHead}>
               <span className={styles.mobileDrawerBrand}>Seraya</span>
               <button
