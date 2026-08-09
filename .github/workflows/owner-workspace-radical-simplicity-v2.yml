@@ -1,4 +1,4 @@
-name: Owner Workspace Editorial Dashboard V3 validation
+name: Owner Dashboard Cognitive Compression V1 validation
 
 on:
   workflow_dispatch:
@@ -6,6 +6,7 @@ on:
     paths:
       - 'src/app/layout.tsx'
       - 'src/app/workspace-anatomy.css'
+      - 'src/app/(dashboard)/dashboard/[projectId]/delivery/page.tsx'
       - 'src/components/dashboard/dashboard-shell.tsx'
       - 'src/components/dashboard/dashboard-shell.module.css'
       - 'src/components/dashboard/project-navigation.tsx'
@@ -19,15 +20,16 @@ on:
       - 'tests/e2e/fixture-app/app/owner-workspace-radical-simplicity-v2/**'
       - 'tests/e2e/fixture-app/app/dashboard/editorial-v3/**'
       - 'playwright.owner-workspace-radical-simplicity-v2.config.ts'
-      - 'docs/OWNER_WORKSPACE_EDITORIAL_DASHBOARD_V3.md'
+      - 'docs/OWNER_DASHBOARD_COGNITIVE_COMPRESSION_V1.md'
       - 'vercel.json'
       - '.github/workflows/owner-workspace-radical-simplicity-v2.yml'
   push:
     branches:
-      - feature/owner-workspace-editorial-dashboard-v3
+      - feature/owner-dashboard-cognitive-compression-v1
     paths:
       - 'src/app/layout.tsx'
       - 'src/app/workspace-anatomy.css'
+      - 'src/app/(dashboard)/dashboard/[projectId]/delivery/page.tsx'
       - 'src/components/dashboard/dashboard-shell.tsx'
       - 'src/components/dashboard/dashboard-shell.module.css'
       - 'src/components/dashboard/project-navigation.tsx'
@@ -41,12 +43,12 @@ on:
       - 'tests/e2e/fixture-app/app/owner-workspace-radical-simplicity-v2/**'
       - 'tests/e2e/fixture-app/app/dashboard/editorial-v3/**'
       - 'playwright.owner-workspace-radical-simplicity-v2.config.ts'
-      - 'docs/OWNER_WORKSPACE_EDITORIAL_DASHBOARD_V3.md'
+      - 'docs/OWNER_DASHBOARD_COGNITIVE_COMPRESSION_V1.md'
       - 'vercel.json'
       - '.github/workflows/owner-workspace-radical-simplicity-v2.yml'
 
 concurrency:
-  group: owner-workspace-editorial-dashboard-${{ github.event.pull_request.number || github.ref }}
+  group: owner-dashboard-cognitive-compression-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -68,6 +70,7 @@ jobs:
           npx prettier --check \
             src/app/layout.tsx \
             src/app/workspace-anatomy.css \
+            'src/app/(dashboard)/dashboard/[projectId]/delivery/page.tsx' \
             src/components/dashboard/dashboard-shell.tsx \
             src/components/dashboard/dashboard-shell.module.css \
             src/components/dashboard/project-navigation.tsx \
@@ -79,13 +82,14 @@ jobs:
             tests/e2e/fixture-app/app/owner-workspace-radical-simplicity-v2/page.tsx \
             tests/e2e/fixture-app/app/dashboard/editorial-v3/page.tsx \
             playwright.owner-workspace-radical-simplicity-v2.config.ts \
-            docs/OWNER_WORKSPACE_EDITORIAL_DASHBOARD_V3.md \
+            docs/OWNER_DASHBOARD_COGNITIVE_COMPRESSION_V1.md \
             vercel.json \
             .github/workflows/owner-workspace-radical-simplicity-v2.yml
       - name: Lint focused source
         run: |
           npx eslint \
             src/app/layout.tsx \
+            'src/app/(dashboard)/dashboard/[projectId]/delivery/page.tsx' \
             src/components/dashboard/dashboard-shell.tsx \
             src/components/dashboard/project-navigation.tsx \
             src/components/projects/project-overview-bootstrap.tsx \
@@ -95,7 +99,7 @@ jobs:
             tests/e2e/fixture-app/app/dashboard/editorial-v3/page.tsx \
             playwright.owner-workspace-radical-simplicity-v2.config.ts
       - run: npm run typecheck
-      - name: Run editorial dashboard and Invitation Studio compatibility contracts
+      - name: Run cognitive compression and Invitation Studio compatibility contracts
         run: |
           npx vitest run \
             tests/unit/owner-workspace-radical-simplicity-v2.test.ts \
@@ -114,7 +118,7 @@ jobs:
       - run: npm run build
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
-      - name: Run desktop tablet and mobile editorial dashboard regression
+      - name: Run desktop tablet and mobile cognitive compression regression
         run: npx playwright test --config=playwright.owner-workspace-radical-simplicity-v2.config.ts
       - name: Run accepted Slice D media compatibility smoke
         run: npx playwright test --config=playwright.invitation-studio-slice-d.config.ts
@@ -124,7 +128,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: owner-workspace-editorial-dashboard-v3-report
+          name: owner-dashboard-cognitive-compression-v1-report
           path: |
             playwright-report
             test-results
