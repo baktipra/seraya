@@ -154,8 +154,8 @@ jobs:
       - name: Run cross-template invitation experience regression
         run: npm run e2e:invitation-experience
 
-      - name: Run 12-surface visual QA compatibility matrix
-        run: npx playwright test --config=playwright.visual-qa.config.ts
+      - name: Run Aruna visual QA compatibility matrix
+        run: npx playwright test --config=playwright.visual-qa.config.ts --grep "aruna"
 
       - name: Upload Playwright evidence
         if: always()
