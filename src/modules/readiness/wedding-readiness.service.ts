@@ -16,11 +16,12 @@ import type { PublishedInvitationSnapshot } from '@/modules/publications/publica
 import { getProjectCoupleLabel } from '@/modules/projects/project.mapper';
 import type { OwnedProject } from '@/modules/projects/project.repository';
 
-import { deriveProjectCompassNextStep } from './project-compass';
 import { getWeddingReadinessAggregateCountsForVerifiedProject } from './wedding-readiness.repository';
 import type {
   InvitationReadinessState,
   InvitationReadinessV1,
+  WeddingReadinessAggregateCounts,
+  WeddingReadinessPrimaryActionKey,
   WeddingReadinessV1,
 } from './wedding-readiness.types';
 
@@ -112,6 +113,45 @@ function getInvitationState(input: {
   return input.hasVerifiedActivation ? 'ready_to_publish' : 'draft_ready_unactivated';
 }
 
+function getPrimaryAction(input: {
+  invitationState: InvitationReadinessState;
+  projectId: string;
+  totals: WeddingReadinessAggregateCounts;
+}): WeddingReadinessV1['primaryAction'] {
+  const action = (key: WeddingReadinessPrimaryActionKey, path?: string) =>
+    path ? { href: `/dashboard/${input.projectId}${path}`, key } : { key };
+
+  if (input.invitationState === 'draft_incomplete') {
+    return action('complete_invitation', '/invitation');
+  }
+
+  if (input.invitationState === 'draft_ready_unactivated') {
+    return action('preview_invitation', '/preview');
+  }
+
+  if (input.invitationState === 'ready_to_publish') {
+    return action('publish_invitation');
+  }
+
+  if (input.invitationState === 'published_with_unpublished_changes') {
+    return action('review_changes');
+  }
+
+  if (input.totals.activeGuestCount === 0) {
+    return action('add_guests', '/guests');
+  }
+
+  if (input.totals.activePersonalLinkGuestCount < input.totals.activeGuestCount) {
+    return action('prepare_personal_invitations', '/delivery');
+  }
+
+  if (input.totals.nonPendingRsvpCount === 0 && input.totals.activeGuestbookCount === 0) {
+    return action('open_delivery_center', '/delivery');
+  }
+
+  return action('view_guest_responses', '/rsvp');
+}
+
 type InvitationReadinessOptions = {
   draft?: InvitationDraft | null;
 };
@@ -159,8 +199,9 @@ export async function getInvitationReadinessForVerifiedProject(
 
 /**
  * Full project-compass readiness composes invitation truth, operational
- * aggregates, and the existing follow-up segmentation authority. The DTO stays
- * aggregate-only and never exposes raw follow-up events or guest capabilities.
+ * aggregates, and the existing follow-up segmentation authority. The legacy
+ * `primaryAction` contract remains unchanged for compatibility; Ringkasan uses
+ * `deriveProjectCompassNextStep` as its dedicated priority authority.
  */
 export async function getWeddingReadinessForVerifiedProject(
   project: OwnedProject,
@@ -177,7 +218,7 @@ export async function getWeddingReadinessForVerifiedProject(
     totals.activePersonalLinkGuestCount,
   );
 
-  const readiness: WeddingReadinessV1 = {
+  return {
     ...invitationReadiness,
     guests: {
       activeGuestCount: totals.activeGuestCount,
@@ -201,7 +242,11 @@ export async function getWeddingReadinessForVerifiedProject(
       noFollowUpRecordedCount: followUpSummary?.noFollowUpRecordedCount ?? 0,
       rsvpRespondedCount: followUpSummary?.rsvpRespondedCount ?? 0,
     },
-    primaryAction: { key: 'view_guest_responses' },
+    primaryAction: getPrimaryAction({
+      invitationState: invitationReadiness.invitation.state,
+      projectId: project.id,
+      totals,
+    }),
     responses: {
       activeGuestbookCount: totals.activeGuestbookCount,
       attendingCount: totals.attendingCount,
@@ -209,15 +254,6 @@ export async function getWeddingReadinessForVerifiedProject(
       declinedCount: totals.declinedCount,
       hasActivePersonalLinks: activePersonalLinkGuestCount > 0,
       nonPendingRsvpCount: totals.nonPendingRsvpCount,
-    },
-  };
-  const nextStep = deriveProjectCompassNextStep(readiness, project.id);
-
-  return {
-    ...readiness,
-    primaryAction: {
-      href: String(nextStep.href),
-      key: nextStep.key,
     },
   };
 }
