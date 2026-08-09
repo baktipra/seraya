@@ -35,38 +35,129 @@ const base: WeddingReadinessV1 = {
   },
 };
 
+const matureBase: WeddingReadinessV1 = {
+  ...base,
+  followUp: {
+    awaitingRsvpCount: 0,
+    noFollowUpRecordedCount: 0,
+    rsvpRespondedCount: 0,
+  },
+};
+
 describe('SRY-041 project compass next-step engine', () => {
-  it('returns exactly one CTA and preserves the agreed priority order', () => {
+  it('preserves pre-publish and republish priority', () => {
     expect(
       deriveProjectCompassNextStep(
-        { ...base, invitation: { ...base.invitation, hasPublishedSnapshot: false } },
+        {
+          ...base,
+          invitation: {
+            ...base.invitation,
+            hasPublishedSnapshot: false,
+            state: 'draft_incomplete',
+          },
+        },
         projectId,
       ).key,
     ).toBe('complete_invitation');
     expect(
       deriveProjectCompassNextStep(
-        { ...base, invitation: { ...base.invitation, hasUnpublishedChanges: true } },
+        {
+          ...base,
+          invitation: {
+            ...base.invitation,
+            hasPublishedSnapshot: false,
+            state: 'draft_ready_unactivated',
+          },
+        },
+        projectId,
+      ).key,
+    ).toBe('activate_for_publish');
+    expect(
+      deriveProjectCompassNextStep(
+        {
+          ...base,
+          invitation: {
+            ...base.invitation,
+            hasPublishedSnapshot: false,
+            state: 'ready_to_publish',
+          },
+        },
+        projectId,
+      ).key,
+    ).toBe('publish_invitation');
+    expect(
+      deriveProjectCompassNextStep(
+        {
+          ...base,
+          invitation: {
+            ...base.invitation,
+            hasUnpublishedChanges: true,
+            state: 'published_with_unpublished_changes',
+          },
+        },
         projectId,
       ).key,
     ).toBe('review_changes');
-    expect(
-      deriveProjectCompassNextStep(
-        { ...base, guests: { ...base.guests, activeGuestCount: 0 } },
-        projectId,
-      ).key,
-    ).toBe('add_guests');
-    expect(
-      deriveProjectCompassNextStep(
-        { ...base, guests: { ...base.guests, noPersonalInvitationCount: 1 } },
-        projectId,
-      ).key,
-    ).toBe('prepare_personal_invitations');
+  });
+
+  it('preserves the legacy ready-to-distribute fallback when follow-up projection is absent', () => {
     expect(
       deriveProjectCompassNextStep(
         { ...base, guests: { ...base.guests, readyToDistributeCount: 1 } },
         projectId,
       ).key,
     ).toBe('open_delivery_center');
-    expect(deriveProjectCompassNextStep(base, projectId).key).toBe('view_guest_responses');
+  });
+
+  it('uses the mature post-publish operational priority ladder', () => {
+    expect(
+      deriveProjectCompassNextStep(
+        { ...matureBase, guests: { ...matureBase.guests, activeGuestCount: 0 } },
+        projectId,
+      ).key,
+    ).toBe('add_guests');
+
+    expect(
+      deriveProjectCompassNextStep(
+        { ...matureBase, guests: { ...matureBase.guests, needsLinkUpdateCount: 1 } },
+        projectId,
+      ).key,
+    ).toBe('repair_guest_links');
+
+    expect(
+      deriveProjectCompassNextStep(
+        { ...matureBase, guests: { ...matureBase.guests, needsWhatsAppCount: 1 } },
+        projectId,
+      ).key,
+    ).toBe('complete_guest_whatsapp');
+
+    expect(
+      deriveProjectCompassNextStep(
+        { ...matureBase, guests: { ...matureBase.guests, noPersonalInvitationCount: 1 } },
+        projectId,
+      ).key,
+    ).toBe('prepare_personal_invitations');
+
+    expect(
+      deriveProjectCompassNextStep(
+        {
+          ...matureBase,
+          followUp: { ...matureBase.followUp!, noFollowUpRecordedCount: 2 },
+        },
+        projectId,
+      ).key,
+    ).toBe('open_delivery_center');
+
+    const followUp = deriveProjectCompassNextStep(
+      {
+        ...matureBase,
+        followUp: { ...matureBase.followUp!, awaitingRsvpCount: 3 },
+      },
+      projectId,
+    );
+    expect(followUp.key).toBe('follow_up_pending_rsvp');
+    expect(String(followUp.href)).toContain('delivery?view=follow-up&filter=awaiting_rsvp');
+
+    expect(deriveProjectCompassNextStep(matureBase, projectId).key).toBe('view_guest_responses');
   });
 });
