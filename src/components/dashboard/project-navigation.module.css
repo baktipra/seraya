@@ -198,8 +198,8 @@
   .mobileSettings,
   .closeButton {
     display: grid;
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 2.75rem;
+    height: 2.75rem;
     flex: 0 0 auto;
     place-items: center;
     border: 1px solid var(--seraya-border-subtle);
@@ -267,6 +267,7 @@
     background: #1f3d2b;
     color: #efe9d8;
     box-shadow: 1.5rem 0 4rem rgb(20 18 15 / 0.28);
+    outline: none;
   }
 
   .mobileDrawerHead {
@@ -294,5 +295,6 @@
 
   .mobileDrawer .sidebarInner {
     min-height: calc(100svh - var(--seraya-topbar-height) - 4.5rem);
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
   }
 }
