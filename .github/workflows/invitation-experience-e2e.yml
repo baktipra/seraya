@@ -8,6 +8,7 @@ on:
       - 'package-lock.json'
       - 'playwright.config.ts'
       - 'playwright.invitation-experience.config.ts'
+      - 'playwright.visual-qa.config.ts'
       - 'src/app/[slug]/**'
       - 'src/app/api/invitations/[slug]/audio/**'
       - 'src/app/aruna-flagship-maturation-release.css'
@@ -23,6 +24,7 @@ on:
       - 'tests/e2e/aruna-flagship-guest-experience.spec.ts'
       - 'tests/e2e/invitation-experience.spec.ts'
       - 'tests/e2e/release-a-invitation-showroom.spec.ts'
+      - 'tests/e2e/visual-qa-hardening.spec.ts'
       - 'tests/e2e/fixture-app/**'
   push:
     branches:
@@ -33,6 +35,7 @@ on:
       - 'package-lock.json'
       - 'playwright.config.ts'
       - 'playwright.invitation-experience.config.ts'
+      - 'playwright.visual-qa.config.ts'
       - 'src/app/[slug]/**'
       - 'src/app/api/invitations/[slug]/audio/**'
       - 'src/app/aruna-flagship-maturation-release.css'
@@ -48,6 +51,7 @@ on:
       - 'tests/e2e/aruna-flagship-guest-experience.spec.ts'
       - 'tests/e2e/invitation-experience.spec.ts'
       - 'tests/e2e/release-a-invitation-showroom.spec.ts'
+      - 'tests/e2e/visual-qa-hardening.spec.ts'
       - 'tests/e2e/fixture-app/**'
 
 permissions:
@@ -78,6 +82,7 @@ jobs:
             package.json \
             playwright.config.ts \
             playwright.invitation-experience.config.ts \
+            playwright.visual-qa.config.ts \
             src/app/api/invitations/[slug]/audio/playback/route.ts \
             src/app/aruna-flagship-maturation-release.css \
             src/app/invitation-maturation-release.css \
@@ -101,6 +106,7 @@ jobs:
             tests/e2e/aruna-flagship-guest-experience.spec.ts \
             tests/e2e/invitation-experience.spec.ts \
             tests/e2e/release-a-invitation-showroom.spec.ts \
+            tests/e2e/visual-qa-hardening.spec.ts \
             tests/e2e/fixture-app/app/layout.tsx \
             tests/e2e/fixture-app/lib/fixture-invitation.ts
 
@@ -109,6 +115,7 @@ jobs:
           npx eslint \
             playwright.config.ts \
             playwright.invitation-experience.config.ts \
+            playwright.visual-qa.config.ts \
             src/app/api/invitations/[slug]/audio/playback/route.ts \
             src/app/layout.tsx \
             src/app/release-a-invitation-preview/page.tsx \
@@ -127,6 +134,7 @@ jobs:
             tests/e2e/aruna-flagship-guest-experience.spec.ts \
             tests/e2e/invitation-experience.spec.ts \
             tests/e2e/release-a-invitation-showroom.spec.ts \
+            tests/e2e/visual-qa-hardening.spec.ts \
             tests/e2e/fixture-app/app/layout.tsx \
             tests/e2e/fixture-app/lib/fixture-invitation.ts
 
@@ -145,6 +153,9 @@ jobs:
 
       - name: Run cross-template invitation experience regression
         run: npm run e2e:invitation-experience
+
+      - name: Run 12-surface visual QA compatibility matrix
+        run: npx playwright test --config=playwright.visual-qa.config.ts
 
       - name: Upload Playwright evidence
         if: always()
