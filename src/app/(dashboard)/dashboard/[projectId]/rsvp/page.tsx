@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { GuestResponseWorkspace } from '@/components/projects/guest-response-workspace';
@@ -60,6 +61,28 @@ export default async function RsvpAnalyticsPage({ params, searchParams }: RsvpAn
 
   return (
     <WorkspacePage kind="responses" width="operations">
+      {screen.rsvp.analytics.pendingGuestCount > 0 ? (
+        <aside
+          className="border-seraya-border-default bg-seraya-brand-soft mb-5 flex flex-col gap-2 rounded-[var(--seraya-radius-md)] border px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+          data-response-to-follow-up-handoff
+        >
+          <div>
+            <p className="text-seraya-text-primary text-sm font-semibold">
+              Ada tamu yang belum merespons.
+            </p>
+            <p className="text-seraya-text-secondary mt-1 text-xs leading-5">
+              Untuk tamu yang sudah masuk tahap handoff, siapkan pengingat manual dari Bagikan.
+            </p>
+          </div>
+          <Link
+            className="text-seraya-action-primary focus-visible:outline-seraya-focus-ring inline-flex min-h-10 shrink-0 items-center text-sm font-semibold underline-offset-4 hover:underline focus-visible:outline-3 focus-visible:outline-offset-3"
+            href={`/dashboard/${screen.rsvp.project.id}/delivery?view=follow-up&filter=awaiting_rsvp`}
+          >
+            Buka Tindak Lanjut →
+          </Link>
+        </aside>
+      ) : null}
+
       <GuestResponseWorkspace
         analytics={screen.rsvp.analytics}
         entries={screen.guestbook.entries}
