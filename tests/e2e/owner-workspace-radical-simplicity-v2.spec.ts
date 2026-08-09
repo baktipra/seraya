@@ -19,51 +19,15 @@ test.describe('SERAYA Owner Dashboard Cognitive Compression V1', () => {
     await page.goto(projectPath);
 
     const shell = page.locator('[data-owner-workspace-navigation="editorial-five-area"]');
-    await expect(shell).toBeVisible();
-    await expect(
-      page.getByRole('heading', { name: 'Selamat datang kembali, Nadia & Farhan' }),
-    ).toBeVisible();
-
+    const title = page.getByRole('heading', { name: 'Selamat datang kembali, Nadia & Farhan' });
     const priorityAction = page.locator('[data-owner-priority-action]');
+
+    await expect(shell).toBeVisible();
+    await expect(title).toBeVisible();
+    await expect(title).toBeInViewport();
     await expect(priorityAction).toHaveCount(1);
     await expect(priorityAction).toBeVisible();
-
-    const viewport = page.viewportSize();
-    if (viewport && viewport.width >= 1024) {
-      const geometry = await page.evaluate(() => {
-        const read = (selector: string) => {
-          const element = document.querySelector<HTMLElement>(selector);
-          if (!element) return null;
-          const rect = element.getBoundingClientRect();
-          const style = getComputedStyle(element);
-          return {
-            bottom: rect.bottom,
-            display: style.display,
-            height: rect.height,
-            left: rect.left,
-            opacity: style.opacity,
-            overflow: style.overflow,
-            position: style.position,
-            right: rect.right,
-            top: rect.top,
-            visibility: style.visibility,
-            width: rect.width,
-          };
-        };
-
-        return {
-          main: read('[data-project-workspace-main]'),
-          priority: read('[data-owner-priority-action]'),
-          shell: read('[data-project-workspace-shell]'),
-          sidebar: read('[data-project-sidebar]'),
-          title: read('#owner-workspace-start-title'),
-          workspace: read('[data-owner-dashboard-cognitive-compression="v1"]'),
-        };
-      });
-      console.log('CCV1_DESKTOP_GEOMETRY', JSON.stringify(geometry));
-      await expect(page.locator('[data-project-sidebar]')).toBeVisible();
-    }
-
+    await expect(priorityAction).toBeInViewport();
     await expect(page.getByRole('heading', { name: 'Lengkapi isi undangan' })).toBeVisible();
     await expect(page.getByText('Perjalanan proyek', { exact: true })).toHaveCount(0);
     await expect(page.getByText('Langkah berikutnya', { exact: true })).toHaveCount(0);
@@ -77,7 +41,10 @@ test.describe('SERAYA Owner Dashboard Cognitive Compression V1', () => {
       expect(sidebarLabels.some((text) => text.includes(label))).toBe(true);
     }
 
-    if (!viewport || viewport.width < 1024) {
+    const viewport = page.viewportSize();
+    if (viewport && viewport.width >= 1024) {
+      await expect(page.locator('[data-project-sidebar]')).toBeVisible();
+    } else {
       const trigger = page.getByRole('button', { name: 'Buka navigasi proyek' });
       await expect(page.locator('[data-project-mobile-context]')).toBeVisible();
       await trigger.click();
