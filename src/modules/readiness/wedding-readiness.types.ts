@@ -51,7 +51,8 @@ export type WeddingReadinessV1 = {
     needsLinkUpdateCount?: number;
     needsWhatsAppCount?: number;
   };
-  followUp: {
+  /** Added by the post-publish maturity service; optional for legacy fixtures/callers. */
+  followUp?: {
     /** Guests already inside the handoff/follow-up lifecycle whose RSVP is still pending. */
     awaitingRsvpCount: number;
     /** Guests whose delivery data is ready but who have no follow-up event yet. */
