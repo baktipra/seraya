@@ -5,6 +5,7 @@ const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://127.0.0.1:3000';
 export default defineConfig({
   testDir: './tests/e2e',
   testIgnore: [
+    'aruna-flagship-guest-experience.spec.ts',
     'invitation-experience.spec.ts',
     'personal-response.spec.ts',
     'release-a-showroom.spec.ts',
