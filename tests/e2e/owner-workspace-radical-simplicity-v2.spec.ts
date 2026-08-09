@@ -24,8 +24,10 @@ test.describe('SERAYA Owner Dashboard Cognitive Compression V1', () => {
       page.getByRole('heading', { name: 'Selamat datang kembali, Nadia & Farhan' }),
     ).toBeVisible();
 
-    await expect(page.getByText('Prioritas sekarang', { exact: true })).toBeVisible();
-    await expect(page.locator('[data-owner-priority-action]')).toHaveCount(1);
+    const priorityAction = page.locator('[data-owner-priority-action]');
+    await expect(priorityAction).toHaveCount(1);
+    await expect(priorityAction).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Lengkapi isi undangan' })).toBeVisible();
     await expect(page.getByText('Perjalanan proyek', { exact: true })).toHaveCount(0);
     await expect(page.getByText('Langkah berikutnya', { exact: true })).toHaveCount(0);
 
@@ -75,44 +77,41 @@ test.describe('SERAYA Owner Dashboard Cognitive Compression V1', () => {
     await expectNoDocumentOverflow(page);
   });
 
-  test('invitation launcher still prioritizes one next task and one save authority', async ({
+  test('invitation persistent editor keeps one save authority and focused section rail', async ({
     page,
   }) => {
     await page.goto(invitationPath);
 
     const workspace = page.locator('[data-invitation-task-workspace]');
+    const rail = page.getByRole('navigation', { name: 'Bagian editor undangan' });
+
     await expect(workspace).toBeVisible();
-    await expect(page.getByText('Lanjutkan di sini', { exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Undangan', level: 1 })).toBeVisible();
     await expect(workspace.locator('[data-invitation-task-save-action]')).toHaveCount(1);
-    await expect(workspace.locator('[data-workspace-task]')).toHaveCount(11);
-    await expect(workspace.locator('[data-workspace-task] svg')).toHaveCount(11);
-
-    const recommendedButton = workspace.locator('[data-recommended-task]');
-    const recommendedTask = await recommendedButton.getAttribute('data-recommended-task');
-    expect(recommendedTask).toBeTruthy();
-
-    await recommendedButton.click();
-    await expect(workspace).toHaveAttribute(
-      'data-invitation-task-workspace-active',
-      recommendedTask!,
-    );
-    await expect(workspace.getByRole('button', { name: /Semua bagian/ })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Lihat hasil' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Terbitkan' })).toBeVisible();
+    await expect(rail.getByRole('button')).toHaveCount(9);
+    await expect(workspace).toHaveAttribute('data-invitation-task-workspace-active', 'design');
+    await expect(page.getByRole('heading', { name: 'Tema', level: 2 })).toBeVisible();
     await expectNoDocumentOverflow(page);
   });
 
-  test('task launcher remains scannable after returning from a single task', async ({ page }) => {
+  test('persistent editor rail switches focused sections without recreating the workspace', async ({
+    page,
+  }) => {
     await page.goto(invitationPath);
 
     const workspace = page.locator('[data-invitation-task-workspace]');
-    await workspace.locator('[data-workspace-task="schedule"]').click();
-    await expect(workspace).toHaveAttribute('data-invitation-task-workspace-active', 'schedule');
+    const rail = page.getByRole('navigation', { name: 'Bagian editor undangan' });
 
-    await workspace.getByRole('button', { name: /Semua bagian/ }).click();
-    await expect(workspace).toHaveAttribute('data-invitation-task-workspace-active', 'launcher');
-    await expect(workspace.locator('[data-workspace-task]')).toHaveCount(11);
-    await expect(page.getByRole('heading', { name: 'Isi undangan' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Tampilan & media' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Selesaikan' })).toBeVisible();
+    await rail.getByRole('button', { name: 'Acara & lokasi' }).click();
+    await expect(workspace).toHaveAttribute('data-invitation-task-workspace-active', 'schedule');
+    await expect(page.getByRole('heading', { name: 'Acara & lokasi', level: 2 })).toBeVisible();
+
+    await rail.getByRole('button', { name: 'Tema' }).click();
+    await expect(workspace).toHaveAttribute('data-invitation-task-workspace-active', 'design');
+    await expect(page.getByRole('heading', { name: 'Tema', level: 2 })).toBeVisible();
+    await expect(workspace.locator('[data-invitation-task-save-action]')).toHaveCount(1);
     await expectNoDocumentOverflow(page);
   });
 });
