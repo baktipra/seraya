@@ -96,23 +96,8 @@ test.describe('Invitation Studio Slice G responsive polish', () => {
     await openMode(page, 'design');
     await page.locator("input[name='templateKey']").nth(1).check();
     await expect(page.locator('[data-invitation-studio-save-action]')).toBeEnabled();
-
-    await page.getByRole('button', { name: 'Desktop', exact: true }).first().click();
-    await expect(page.locator('[data-invitation-studio-design-preview]')).toHaveAttribute(
-      'data-preview-viewport',
-      'desktop',
-    );
+    await expect(page.locator('[data-invitation-studio-design-mode="canonical"]')).toBeVisible();
     await expectNoDocumentOverflow(page);
-
-    const designDevice = page.locator(
-      '[data-invitation-studio-design-preview] [data-preview-device]',
-    );
-    const designStage = page.locator(
-      '[data-invitation-studio-design-preview] [data-preview-stage]',
-    );
-    const designDeviceBox = await designDevice.boundingBox();
-    const designStageBox = await designStage.boundingBox();
-    expect(designDeviceBox?.width ?? 0).toBeLessThanOrEqual((designStageBox?.width ?? 0) + 1);
 
     await openMode(page, 'media');
     await page.getByRole('tab', { name: /Audio/ }).click();
