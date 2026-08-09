@@ -80,7 +80,7 @@ describe('SERAYA Owner Dashboard Cognitive Compression V1', () => {
     expect(source).toContain("title: 'Galeri & musik'");
   });
 
-  it('uses the shared focus-management authority for the mobile project drawer', () => {
+  it('uses shared focus management and a grid-safe live region for project navigation', () => {
     const navigation = read('src/components/dashboard/project-navigation.tsx');
     const navigationStyles = read('src/components/dashboard/project-navigation.module.css');
 
@@ -90,12 +90,15 @@ describe('SERAYA Owner Dashboard Cognitive Compression V1', () => {
     expect(navigation).toContain('aria-modal="true"');
     expect(navigation).toContain('role="dialog"');
     expect(navigation).toContain('aria-controls="project-mobile-navigation"');
+    expect(navigation).toContain('className={styles.routeAnnouncement}');
+    expect(navigationStyles).toContain('.routeAnnouncement');
+    expect(navigationStyles).toContain('position: absolute;');
     expect(navigationStyles).toContain('width: 2.75rem;');
     expect(navigationStyles).toContain('height: 2.75rem;');
     expect(navigationStyles).toContain('env(safe-area-inset-bottom)');
   });
 
-  it('keeps project geometry responsive and blocks preview deployment for this feature branch', () => {
+  it('pins desktop workspace geometry and blocks preview deployment for this feature branch', () => {
     const anatomy = read('src/app/workspace-anatomy.css');
     const overviewStyles = read('src/components/projects/project-overview-bootstrap.module.css');
     const vercel = read('vercel.json');
@@ -103,7 +106,10 @@ describe('SERAYA Owner Dashboard Cognitive Compression V1', () => {
     expect(anatomy).toContain(
       'grid-template-columns: var(--seraya-project-rail-width) minmax(0, 1fr);',
     );
-    expect(anatomy).toContain('gap: 0;');
+    expect(anatomy).toContain('[data-project-sidebar] {');
+    expect(anatomy).toContain('grid-column: 1;');
+    expect(anatomy).toContain('[data-project-workspace-main] {');
+    expect(anatomy).toContain('grid-column: 2;');
     expect(overviewStyles).toContain('@media (max-width: 900px)');
     expect(overviewStyles).toContain('@media (max-width: 560px)');
     expect(vercel).toContain('"feature/owner-dashboard-cognitive-compression-v1": false');
