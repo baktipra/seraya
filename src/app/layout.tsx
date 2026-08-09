@@ -16,6 +16,7 @@ import './invitation-media-release.css';
 import './roselle-flagship-maturation-release.css';
 import './invitation-layout-recovery.css';
 import './invitation-template-quality-bar.css';
+import './aruna-flagship-maturation-release.css';
 
 const geist = Geist({
   display: 'swap',
