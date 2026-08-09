@@ -49,13 +49,7 @@ function getDeliveryView(value: string | string[] | undefined): DeliveryView {
   return resolved === 'public' ? 'public' : 'personal';
 }
 
-function DeliveryViewNavigation({
-  projectId,
-  view,
-}: {
-  projectId: string;
-  view: DeliveryView;
-}) {
+function DeliveryViewNavigation({ projectId, view }: { projectId: string; view: DeliveryView }) {
   const base = `/dashboard/${projectId}/delivery`;
 
   return (
@@ -186,7 +180,10 @@ export default async function DeliveryCenterPage({
                 : {}),
               ...(readiness.isReadyToDistribute
                 ? {
-                    reaccessAction: reaccessOrPrepareCanonicalInitialHandoffAction.bind(null, bound),
+                    reaccessAction: reaccessOrPrepareCanonicalInitialHandoffAction.bind(
+                      null,
+                      bound,
+                    ),
                   }
                 : {}),
               ...(truth.canRecordContact
