@@ -59,12 +59,12 @@ test.describe('Aruna flagship guest experience maturation', () => {
     await expect(responseJourney).toBeVisible();
     await expect(responseColumns).toHaveCount(2);
 
-    const firstMarker = await responseColumns.nth(0).evaluate((element) =>
-      getComputedStyle(element, '::before').content.replaceAll('"', ''),
-    );
-    const secondMarker = await responseColumns.nth(1).evaluate((element) =>
-      getComputedStyle(element, '::before').content.replaceAll('"', ''),
-    );
+    const firstMarker = await responseColumns
+      .nth(0)
+      .evaluate((element) => getComputedStyle(element, '::before').content.replaceAll('"', ''));
+    const secondMarker = await responseColumns
+      .nth(1)
+      .evaluate((element) => getComputedStyle(element, '::before').content.replaceAll('"', ''));
 
     expect(firstMarker).toContain('01 / RESPONS');
     expect(secondMarker).toContain('02 / RESPONS');

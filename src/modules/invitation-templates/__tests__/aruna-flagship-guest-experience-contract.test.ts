@@ -52,8 +52,8 @@ describe('SERAYA Aruna Flagship Guest Experience Maturation V1', () => {
 
   it('keeps RSVP and Guestbook behavior shared while composing them as one editorial reply desk', () => {
     expect(arunaTemplate).toContain('data-template-response-journey="aruna"');
-    expect(arunaTemplate).toContain("data-aruna-response-column=\"rsvp\"");
-    expect(arunaTemplate).toContain("data-aruna-response-column=\"guestbook\"");
+    expect(arunaTemplate).toContain('data-aruna-response-column="rsvp"');
+    expect(arunaTemplate).toContain('data-aruna-response-column="guestbook"');
     expect(arunaTemplate).toContain('data-template-response-slot="rsvp"');
     expect(arunaTemplate).toContain('data-template-response-slot="guestbook"');
     expect(maturationStyles).toContain('counter-reset: aruna-response-step;');
