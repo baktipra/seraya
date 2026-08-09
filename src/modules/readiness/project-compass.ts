@@ -99,6 +99,15 @@ export function deriveProjectCompassNextStep(
     );
   }
 
+  if (!readiness.followUp && (readiness.guests.readyToDistributeCount ?? 0) > 0) {
+    return target(
+      'open_delivery_center',
+      'Mulai bagikan',
+      'Undangan Pribadi yang siap dapat dibagikan secara manual.',
+      '/delivery',
+    );
+  }
+
   const noFollowUpRecordedCount = readiness.followUp?.noFollowUpRecordedCount ?? 0;
   if (noFollowUpRecordedCount > 0) {
     return target(
