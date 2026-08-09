@@ -32,6 +32,7 @@ import type {
 } from '@/modules/follow-up/follow-up.types';
 
 type Props = {
+  initialFilter?: GuestFollowUpSegmentFilter;
   isPublished: boolean;
   projectId: string;
   rows: FollowUpGuestRowClient[];
@@ -81,6 +82,9 @@ function RowAction({
   ) {
     return <Link href={`/dashboard/${projectId}/delivery`}>Buka Bagikan</Link>;
   }
+  if (row.followUpSegment === 'rsvp_responded') {
+    return <Link href={`/dashboard/${projectId}/rsvp`}>Lihat respons</Link>;
+  }
 
   const action = reminder(row);
   if (!action || !row.handoffAction) {
@@ -100,13 +104,14 @@ function RowAction({
 }
 
 export function CanonicalGuestFollowUpCenter({
+  initialFilter = 'all',
   isPublished,
   projectId,
   rows,
   summary,
   timezone,
 }: Props) {
-  const [filter, setFilter] = useState<GuestFollowUpSegmentFilter>('all');
+  const [filter, setFilter] = useState<GuestFollowUpSegmentFilter>(initialFilter);
   const [query, setQuery] = useState('');
   const [result, setResult] = useState<GuestFollowUpHandoffResult | null>(null);
   const visibleRows = useMemo(
@@ -119,11 +124,11 @@ export function CanonicalGuestFollowUpCenter({
       <OperationalHeader
         description={
           <>
-            Siapkan pengingat manual setelah undangan awal dibagikan dari Bagikan. Seraya tidak
-            menganggap pesan sudah terkirim.
+            Siapkan pengingat manual sebagai tahap lanjutan dari Bagikan. Seraya tidak menganggap
+            pesan sudah terkirim, diterima, dibuka, atau dibaca.
           </>
         }
-        eyebrow="Tindak lanjut"
+        eyebrow="Bagikan · Tindak lanjut"
         title="Tindak lanjut tamu"
         titleId="follow-up-title"
       />
