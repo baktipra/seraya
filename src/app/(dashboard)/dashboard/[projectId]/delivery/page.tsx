@@ -27,7 +27,10 @@ import { getPublicSocialShareForVerifiedProject } from '@/modules/public-social-
 
 type DeliveryCenterPageProps = {
   params: Promise<{ projectId: string }>;
+  searchParams?: Promise<{ view?: string | string[] }>;
 };
+
+type DeliveryView = 'personal' | 'public';
 
 type DeliveryScreen =
   | { kind: 'blocked' }
@@ -40,6 +43,46 @@ type DeliveryScreen =
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 export const fetchCache = 'force-no-store';
+
+function getDeliveryView(value: string | string[] | undefined): DeliveryView {
+  const resolved = Array.isArray(value) ? value[0] : value;
+  return resolved === 'public' ? 'public' : 'personal';
+}
+
+function DeliveryViewNavigation({ projectId, view }: { projectId: string; view: DeliveryView }) {
+  const base = `/dashboard/${projectId}/delivery`;
+
+  return (
+    <nav
+      aria-label="Tampilan Bagikan"
+      className="border-seraya-border-subtle bg-seraya-surface mb-5 inline-flex min-w-0 rounded-[var(--seraya-radius-md)] border p-1"
+      data-delivery-view-navigation
+    >
+      <Link
+        aria-current={view === 'personal' ? 'page' : undefined}
+        className={`focus-visible:outline-seraya-focus-ring inline-flex min-h-11 items-center justify-center rounded-[calc(var(--seraya-radius-md)-0.2rem)] px-4 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-2 ${
+          view === 'personal'
+            ? 'bg-seraya-action-primary text-seraya-text-inverse'
+            : 'text-seraya-text-secondary hover:bg-seraya-surface-subtle hover:text-seraya-text-primary'
+        }`}
+        href={base}
+      >
+        Undangan Pribadi
+      </Link>
+      <Link
+        aria-current={view === 'public' ? 'page' : undefined}
+        className={`focus-visible:outline-seraya-focus-ring inline-flex min-h-11 items-center justify-center rounded-[calc(var(--seraya-radius-md)-0.2rem)] px-4 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-2 ${
+          view === 'public'
+            ? 'bg-seraya-action-primary text-seraya-text-inverse'
+            : 'text-seraya-text-secondary hover:bg-seraya-surface-subtle hover:text-seraya-text-primary'
+        }`}
+        href={`${base}?view=public`}
+      >
+        Story & QR Publik
+      </Link>
+    </nav>
+  );
+}
 
 function DeliveryBlockedState({ projectId }: { projectId: string }) {
   return (
@@ -89,8 +132,14 @@ async function getDeliveryScreenOrNotFound(projectId: string): Promise<DeliveryS
   );
 }
 
-export default async function DeliveryCenterPage({ params }: DeliveryCenterPageProps) {
+export default async function DeliveryCenterPage({
+  params,
+  searchParams,
+}: DeliveryCenterPageProps) {
   const { projectId } = await params;
+  const { view: rawView } = await (searchParams ??
+    Promise.resolve<{ view?: string | string[] }>({}));
+  const view = getDeliveryView(rawView);
   const screen = await getDeliveryScreenOrNotFound(projectId);
 
   if (screen.kind === 'blocked') {
@@ -105,40 +154,45 @@ export default async function DeliveryCenterPage({ params }: DeliveryCenterPageP
 
   return (
     <WorkspacePage kind="delivery" width="operations">
-      <PublicSocialShareKit model={publicShare} projectId={deliveryCenter.project.id} />
-      <NativeGuestDeliveryCenter
-        copyWhatsAppNumbersAction={copySelectedDeliveryWhatsAppNumbersAction.bind(null, {
-          projectId: deliveryCenter.project.id,
-        })}
-        handoffSummary={deliveryCenter.handoffSummary}
-        projectId={deliveryCenter.project.id}
-        prepareBatchAction={prepareMissingPersonalGuestLinksForDeliveryAction.bind(null, {
-          projectId: deliveryCenter.project.id,
-        })}
-        rows={deliveryCenter.rows.map(({ guestId, ...row }, rowKey) => {
-          const readiness = deriveDeliveryReadiness(row);
-          const truth = deriveDeliveryDistribution(row);
-          const bound = { guestId, projectId: deliveryCenter.project.id };
+      <DeliveryViewNavigation projectId={deliveryCenter.project.id} view={view} />
 
-          return {
-            ...row,
-            ...(readiness.canPrepareNewLink
-              ? { prepareAction: preparePersonalGuestLinkForDeliveryAction.bind(null, bound) }
-              : {}),
-            ...(readiness.isReadyToDistribute
-              ? {
-                  reaccessAction: reaccessOrPrepareCanonicalInitialHandoffAction.bind(null, bound),
-                }
-              : {}),
-            ...(truth.canRecordContact
-              ? { contactAction: recordCanonicalInitialContactAction.bind(null, bound) }
-              : {}),
-            guestId,
-            rowKey,
-          };
-        })}
-        summary={deliveryCenter.summary}
-      />
+      {view === 'public' ? (
+        <PublicSocialShareKit model={publicShare} projectId={deliveryCenter.project.id} />
+      ) : (
+        <NativeGuestDeliveryCenter
+          copyWhatsAppNumbersAction={copySelectedDeliveryWhatsAppNumbersAction.bind(null, {
+            projectId: deliveryCenter.project.id,
+          })}
+          handoffSummary={deliveryCenter.handoffSummary}
+          projectId={deliveryCenter.project.id}
+          prepareBatchAction={prepareMissingPersonalGuestLinksForDeliveryAction.bind(null, {
+            projectId: deliveryCenter.project.id,
+          })}
+          rows={deliveryCenter.rows.map(({ guestId, ...row }, rowKey) => {
+            const readiness = deriveDeliveryReadiness(row);
+            const truth = deriveDeliveryDistribution(row);
+            const bound = { guestId, projectId: deliveryCenter.project.id };
+
+            return {
+              ...row,
+              ...(readiness.canPrepareNewLink
+                ? { prepareAction: preparePersonalGuestLinkForDeliveryAction.bind(null, bound) }
+                : {}),
+              ...(readiness.isReadyToDistribute
+                ? {
+                    reaccessAction: reaccessOrPrepareCanonicalInitialHandoffAction.bind(null, bound),
+                  }
+                : {}),
+              ...(truth.canRecordContact
+                ? { contactAction: recordCanonicalInitialContactAction.bind(null, bound) }
+                : {}),
+              guestId,
+              rowKey,
+            };
+          })}
+          summary={deliveryCenter.summary}
+        />
+      )}
     </WorkspacePage>
   );
 }
