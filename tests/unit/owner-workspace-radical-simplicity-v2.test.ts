@@ -57,12 +57,16 @@ describe('SERAYA Owner Dashboard Cognitive Compression V1', () => {
   it('keeps Bagikan as one canonical destination with personal delivery as the default view', () => {
     const source = read('src/app/(dashboard)/dashboard/[projectId]/delivery/page.tsx');
 
-    expect(source).toContain("type DeliveryView = 'personal' | 'public';");
+    expect(source).toContain("type DeliveryView = 'personal' | 'follow-up' | 'public';");
+    expect(source).toContain("if (resolved === 'follow-up') return 'follow-up';");
     expect(source).toContain("return resolved === 'public' ? 'public' : 'personal';");
     expect(source).toContain('data-delivery-view-navigation');
     expect(source).toContain('Undangan Pribadi');
+    expect(source).toContain('Tindak Lanjut');
     expect(source).toContain('Story & QR Publik');
+    expect(source).toContain("view === 'follow-up'");
     expect(source).toContain("view === 'public'");
+    expect(source).toContain('<CanonicalGuestFollowUpCenter');
     expect(source).toContain('<PublicSocialShareKit');
     expect(source).toContain('<NativeGuestDeliveryCenter');
   });
@@ -113,5 +117,6 @@ describe('SERAYA Owner Dashboard Cognitive Compression V1', () => {
     expect(overviewStyles).toContain('@media (max-width: 900px)');
     expect(overviewStyles).toContain('@media (max-width: 560px)');
     expect(vercel).toContain('"feature/owner-dashboard-cognitive-compression-v1": false');
+    expect(vercel).toContain('"feature/owner-post-publish-operations-maturity-v1": false');
   });
 });
