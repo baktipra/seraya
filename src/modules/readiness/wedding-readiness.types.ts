@@ -14,8 +14,11 @@ export type WeddingReadinessPrimaryActionKey =
   | 'publish_invitation'
   | 'review_changes'
   | 'add_guests'
+  | 'repair_guest_links'
+  | 'complete_guest_whatsapp'
   | 'prepare_personal_invitations'
   | 'open_delivery_center'
+  | 'follow_up_pending_rsvp'
   | 'view_guest_responses';
 
 /**
@@ -47,6 +50,14 @@ export type WeddingReadinessV1 = {
     noPersonalInvitationCount?: number;
     needsLinkUpdateCount?: number;
     needsWhatsAppCount?: number;
+  };
+  followUp: {
+    /** Guests already inside the handoff/follow-up lifecycle whose RSVP is still pending. */
+    awaitingRsvpCount: number;
+    /** Guests whose delivery data is ready but who have no follow-up event yet. */
+    noFollowUpRecordedCount: number;
+    /** Guests whose RSVP has moved out of pending. */
+    rsvpRespondedCount: number;
   };
   primaryAction: {
     /** A route is present only when the primary action is a navigation. */
