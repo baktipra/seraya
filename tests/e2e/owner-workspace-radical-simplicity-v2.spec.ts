@@ -12,8 +12,8 @@ async function expectNoDocumentOverflow(page: Page) {
   expect(overflow.scrollWidth).toBeLessThanOrEqual(overflow.clientWidth + 1);
 }
 
-test.describe('SERAYA Owner Workspace Editorial Dashboard V3', () => {
-  test('project root shows the five-area shell and readiness dashboard', async ({ page }) => {
+test.describe('SERAYA Owner Dashboard Cognitive Compression V1', () => {
+  test('project root exposes one priority action and a compact readiness pulse', async ({ page }) => {
     await page.goto(projectPath);
 
     const shell = page.locator('[data-owner-workspace-navigation="editorial-five-area"]');
@@ -22,12 +22,14 @@ test.describe('SERAYA Owner Workspace Editorial Dashboard V3', () => {
       page.getByRole('heading', { name: 'Selamat datang kembali, Nadia & Farhan' }),
     ).toBeVisible();
 
+    await expect(page.getByText('Prioritas sekarang', { exact: true })).toBeVisible();
+    await expect(page.locator('[data-owner-priority-action]')).toHaveCount(1);
+    await expect(page.getByText('Perjalanan proyek', { exact: true })).toHaveCount(0);
+    await expect(page.getByText('Langkah berikutnya', { exact: true })).toHaveCount(0);
+
     for (const label of ['Status undangan', 'Tamu aktif', 'Respons masuk', 'Siap dibagikan']) {
       await expect(page.getByText(label, { exact: true })).toBeVisible();
     }
-
-    await expect(page.getByRole('heading', { name: 'Perjalanan proyek' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Langkah berikutnya' })).toBeVisible();
 
     const sidebarLabels = await page.locator('[data-project-sidebar] a').allTextContents();
     for (const label of ['Ringkasan', 'Undangan', 'Tamu', 'Bagikan', 'Respons Tamu']) {
@@ -38,11 +40,17 @@ test.describe('SERAYA Owner Workspace Editorial Dashboard V3', () => {
     if (viewport && viewport.width >= 1024) {
       await expect(page.locator('[data-project-sidebar]')).toBeVisible();
     } else {
+      const trigger = page.getByRole('button', { name: 'Buka navigasi proyek' });
       await expect(page.locator('[data-project-mobile-context]')).toBeVisible();
-      await page.getByRole('button', { name: 'Buka navigasi proyek' }).click();
-      const drawer = page.getByRole('complementary', { name: 'Navigasi proyek' });
+      await trigger.click();
+
+      const drawer = page.getByRole('dialog', { name: 'Navigasi proyek' });
       await expect(drawer).toBeVisible();
-      await drawer.getByRole('button', { name: 'Tutup navigasi proyek' }).click();
+      await expect(drawer.getByRole('button', { name: 'Tutup navigasi proyek' })).toBeFocused();
+
+      await page.keyboard.press('Escape');
+      await expect(drawer).toHaveCount(0);
+      await expect(trigger).toBeFocused();
     }
 
     await expectNoDocumentOverflow(page);
