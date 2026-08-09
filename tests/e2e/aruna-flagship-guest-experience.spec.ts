@@ -32,7 +32,7 @@ test.describe('Aruna flagship guest experience maturation', () => {
     await expect(invitation.locator('[data-aruna-editors-note]')).toHaveCount(0);
     await expect(invitation.locator('[data-aruna-reader-response]')).toHaveCount(0);
     await expect(invitation.locator('[data-aruna-agenda-entry]')).toHaveCount(2);
-    await expect(invitation.locator('[data-aruna-photo-frame]')).toHaveCount(4);
+    await expect(invitation.locator('[data-aruna-photo-frame]')).toHaveCount(6);
     await expect(returnAction).toHaveAttribute('href', '#aruna-invitation-title');
 
     await expectNoHorizontalOverflow(page);
@@ -58,6 +58,8 @@ test.describe('Aruna flagship guest experience maturation', () => {
     await expect(greeting).toContainText('Tamu Browser');
     await expect(responseJourney).toBeVisible();
     await expect(responseColumns).toHaveCount(2);
+    await expect(responseColumns.nth(0)).toHaveAttribute('data-aruna-response-column', 'rsvp');
+    await expect(responseColumns.nth(1)).toHaveAttribute('data-aruna-response-column', 'guestbook');
 
     const firstMarker = await responseColumns
       .nth(0)
@@ -66,8 +68,8 @@ test.describe('Aruna flagship guest experience maturation', () => {
       .nth(1)
       .evaluate((element) => getComputedStyle(element, '::before').content.replaceAll('"', ''));
 
-    expect(firstMarker).toContain('01 / RESPONS');
-    expect(secondMarker).toContain('02 / RESPONS');
+    expect(firstMarker).toContain('RESPONS');
+    expect(secondMarker).toContain('RESPONS');
 
     await returnAction.focus();
     await expect(returnAction).toBeFocused();
