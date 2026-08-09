@@ -99,7 +99,6 @@ jobs:
             src/components/dashboard/project-navigation.tsx \
             src/components/dashboard/project-navigation.module.css \
             src/components/projects/canonical-guest-follow-up-center.tsx \
-            src/components/projects/native-guest-manager-workspace.tsx \
             src/components/projects/project-overview-bootstrap.tsx \
             src/components/projects/project-overview-bootstrap.module.css \
             src/modules/readiness/index.ts \
