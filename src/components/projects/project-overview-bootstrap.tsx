@@ -28,10 +28,7 @@ function getInvitationStatus(readiness: WeddingReadinessV1) {
   }
 }
 
-function getPriorityAction(
-  projectId: string,
-  readiness: WeddingReadinessV1,
-): PriorityAction {
+function getPriorityAction(projectId: string, readiness: WeddingReadinessV1): PriorityAction {
   const base = `/dashboard/${projectId}`;
 
   switch (readiness.invitation.state) {
@@ -97,10 +94,7 @@ function getPriorityAction(
   }
 }
 
-export function ProjectOverviewBootstrap({
-  projectId,
-  readiness,
-}: ProjectOverviewBootstrapProps) {
+export function ProjectOverviewBootstrap({ projectId, readiness }: ProjectOverviewBootstrapProps) {
   const status = getInvitationStatus(readiness);
   const priority = getPriorityAction(projectId, readiness);
   const responseCount = readiness.responses.nonPendingRsvpCount;
@@ -129,11 +123,7 @@ export function ProjectOverviewBootstrap({
           <h2 id="owner-priority-title">{priority.title}</h2>
           <p>{priority.description}</p>
         </div>
-        <Link
-          className={styles.priorityAction}
-          data-owner-priority-action
-          href={priority.href}
-        >
+        <Link className={styles.priorityAction} data-owner-priority-action href={priority.href}>
           Kerjakan sekarang <span aria-hidden="true">→</span>
         </Link>
       </section>
