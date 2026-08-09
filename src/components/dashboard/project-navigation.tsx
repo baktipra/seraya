@@ -273,6 +273,7 @@ export function ProjectNavigation({
     if (!mobileOpen) return undefined;
 
     const previousOverflow = document.body.style.overflow;
+    const trigger = mobileMenuButtonRef.current;
     document.body.style.overflow = 'hidden';
 
     const focusFrame = window.requestAnimationFrame(() => {
@@ -301,7 +302,6 @@ export function ProjectNavigation({
       document.body.style.overflow = previousOverflow;
       document.removeEventListener('keydown', onKeyDown);
 
-      const trigger = mobileMenuButtonRef.current;
       window.requestAnimationFrame(() => {
         if (trigger?.isConnected) trigger.focus({ preventScroll: true });
       });
