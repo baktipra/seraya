@@ -1,3 +1,4 @@
+import type { Route } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -50,7 +51,8 @@ function getDeliveryView(value: string | string[] | undefined): DeliveryView {
 }
 
 function DeliveryViewNavigation({ projectId, view }: { projectId: string; view: DeliveryView }) {
-  const base = `/dashboard/${projectId}/delivery`;
+  const base = `/dashboard/${projectId}/delivery` as Route;
+  const publicHref = `${base}?view=public` as Route;
 
   return (
     <nav
@@ -76,7 +78,7 @@ function DeliveryViewNavigation({ projectId, view }: { projectId: string; view: 
             ? 'bg-seraya-action-primary text-seraya-text-inverse'
             : 'text-seraya-text-secondary hover:bg-seraya-surface-subtle hover:text-seraya-text-primary'
         }`}
-        href={`${base}?view=public`}
+        href={publicHref}
       >
         Story & QR Publik
       </Link>
