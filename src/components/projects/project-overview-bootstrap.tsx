@@ -28,13 +28,17 @@ function getInvitationStatus(readiness: WeddingReadinessV1) {
   }
 }
 
-function getPriorityAction(projectId: string, readiness: WeddingReadinessV1): PriorityAction {
+function getPriorityAction(
+  projectId: string,
+  readiness: WeddingReadinessV1,
+): PriorityAction {
   const base = `/dashboard/${projectId}`;
 
   switch (readiness.invitation.state) {
     case 'draft_incomplete':
       return {
-        description: 'Selesaikan bagian yang masih belum lengkap sebelum memikirkan publikasi atau pembagian.',
+        description:
+          'Selesaikan bagian yang masih belum lengkap sebelum memikirkan publikasi atau pembagian.',
         href: `${base}/invitation` as Route,
         title: 'Lengkapi isi undangan',
       };
@@ -52,14 +56,16 @@ function getPriorityAction(projectId: string, readiness: WeddingReadinessV1): Pr
       };
     case 'published_with_unpublished_changes':
       return {
-        description: 'Tamu masih melihat versi terbit sebelumnya sampai perubahan terbaru diterbitkan ulang.',
+        description:
+          'Tamu masih melihat versi terbit sebelumnya sampai perubahan terbaru diterbitkan ulang.',
         href: `${base}/invitation?task=publish` as Route,
         title: 'Terbitkan ulang perubahan',
       };
     case 'published': {
       if (readiness.guests.activeGuestCount === 0) {
         return {
-          description: 'Undangan sudah aktif. Langkah berikutnya adalah menyiapkan siapa yang akan menerimanya.',
+          description:
+            'Undangan sudah aktif. Langkah berikutnya adalah menyiapkan siapa yang akan menerimanya.',
           href: `${base}/guests` as Route,
           title: 'Tambahkan daftar tamu',
         };
@@ -91,7 +97,10 @@ function getPriorityAction(projectId: string, readiness: WeddingReadinessV1): Pr
   }
 }
 
-export function ProjectOverviewBootstrap({ projectId, readiness }: ProjectOverviewBootstrapProps) {
+export function ProjectOverviewBootstrap({
+  projectId,
+  readiness,
+}: ProjectOverviewBootstrapProps) {
   const status = getInvitationStatus(readiness);
   const priority = getPriorityAction(projectId, readiness);
   const responseCount = readiness.responses.nonPendingRsvpCount;
@@ -120,7 +129,11 @@ export function ProjectOverviewBootstrap({ projectId, readiness }: ProjectOvervi
           <h2 id="owner-priority-title">{priority.title}</h2>
           <p>{priority.description}</p>
         </div>
-        <Link className={styles.priorityAction} data-owner-priority-action href={priority.href}>
+        <Link
+          className={styles.priorityAction}
+          data-owner-priority-action
+          href={priority.href}
+        >
           Kerjakan sekarang <span aria-hidden="true">→</span>
         </Link>
       </section>
