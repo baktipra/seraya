@@ -41,19 +41,21 @@ describe('Seraya Owner Workspace Usability Reset V1', () => {
     ).toBe('schedule');
   });
 
-  it('keeps one save authority and exposes eleven concrete owner tasks', () => {
+  it('keeps one save authority and exposes the accepted persistent editor tasks', () => {
     const source = readFileSync(
       'src/components/projects/invitation-task-workspace.tsx',
       'utf8',
     );
+    const railDefinitions = source.match(/const railTaskDefinitions:[\s\S]*?] as const;/)?.[0];
 
     expect(source.match(/data-invitation-task-save-action/g)).toHaveLength(1);
-    expect(source.match(/number: '\d{2}'/g)).toHaveLength(11);
-    expect(source).toContain("title: 'Mempelai'");
+    expect(railDefinitions).toBeTruthy();
+    expect(railDefinitions?.match(/\n    key: '/g)).toHaveLength(9);
+    expect(source).toContain("title: 'Tema'");
+    expect(source).toContain("title: 'Pasangan'");
     expect(source).toContain("title: 'Galeri & musik'");
-    expect(source).toContain("title: 'Tema & warna'");
-    expect(source).toContain("title: 'Preview'");
-    expect(source).toContain("title: 'Terbitkan'");
+    expect(source).toContain("activateTask('preview')");
+    expect(source).toContain("activateTask('publish')");
     expect(source).toContain('data-invitation-single-task-form');
   });
 
