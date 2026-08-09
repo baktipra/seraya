@@ -13,6 +13,9 @@ export type {
   WeddingReadinessV1,
 } from './wedding-readiness.types';
 
+export { deriveProjectCompassNextStep } from './project-compass';
+export type { ProjectCompassNextStep } from './project-compass';
+
 export {
   getInvitationConfidenceChecklist,
   getInvitationConfidenceStatus,
