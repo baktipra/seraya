@@ -13,7 +13,9 @@ async function expectNoDocumentOverflow(page: Page) {
 }
 
 test.describe('SERAYA Owner Dashboard Cognitive Compression V1', () => {
-  test('project root exposes one priority action and a compact readiness pulse', async ({ page }) => {
+  test('project root exposes one priority action and a compact readiness pulse', async ({
+    page,
+  }) => {
     await page.goto(projectPath);
 
     const shell = page.locator('[data-owner-workspace-navigation="editorial-five-area"]');
@@ -46,9 +48,7 @@ test.describe('SERAYA Owner Dashboard Cognitive Compression V1', () => {
 
       const drawer = page.getByRole('dialog', { name: 'Navigasi proyek' });
       await expect(drawer).toBeVisible();
-      await expect(
-        drawer.getByRole('button', { name: 'Tutup navigasi proyek' }),
-      ).toBeFocused();
+      await expect(drawer.getByRole('button', { name: 'Tutup navigasi proyek' })).toBeFocused();
 
       await page.keyboard.press('Escape');
       await expect(drawer).toHaveCount(0);
