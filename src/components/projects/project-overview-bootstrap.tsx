@@ -7,17 +7,8 @@ import styles from './project-overview-bootstrap.module.css';
 
 type ProjectOverviewBootstrapProps = { projectId: string; readiness: WeddingReadinessV1 };
 
-type JourneyState = 'current' | 'done' | 'pending';
-
-type JourneyStep = {
+type PriorityAction = {
   description: string;
-  label: string;
-  state: JourneyState;
-};
-
-type NextStep = {
-  description: string;
-  done: boolean;
   href: Route;
   title: string;
 };
@@ -37,103 +28,72 @@ function getInvitationStatus(readiness: WeddingReadinessV1) {
   }
 }
 
-function getJourney(readiness: WeddingReadinessV1): JourneyStep[] {
-  const contentReady = readiness.invitation.state !== 'draft_incomplete';
-  const published = readiness.invitation.hasPublishedSnapshot;
-  const hasGuests = readiness.guests.activeGuestCount > 0;
-  const hasResponses = readiness.responses.nonPendingRsvpCount > 0;
-
-  return [
-    {
-      description: 'Identitas proyek sudah dibuat dan siap dikelola.',
-      label: 'Buat proyek',
-      state: 'done',
-    },
-    {
-      description: `${readiness.identity.templateKey} menjadi tampilan aktif saat ini.`,
-      label: 'Pilih tema',
-      state: 'done',
-    },
-    {
-      description: contentReady
-        ? 'Isi utama undangan sudah melewati kesiapan dasar.'
-        : 'Lengkapi bagian yang masih perlu perhatian di editor.',
-      label: 'Lengkapi konten',
-      state: contentReady ? 'done' : 'current',
-    },
-    {
-      description: published
-        ? readiness.invitation.hasUnpublishedChanges
-          ? 'Versi tamu aktif, tetapi ada perubahan baru yang belum diterbitkan.'
-          : 'Versi tamu aktif dan sinkron dengan draf terakhir.'
-        : 'Terbitkan setelah isi dan aktivasi siap.',
-      label: 'Terbitkan',
-      state: published ? 'done' : contentReady ? 'current' : 'pending',
-    },
-    {
-      description: hasResponses
-        ? `${readiness.responses.nonPendingRsvpCount} respons sudah masuk.`
-        : hasGuests
-          ? 'Tamu sudah tersedia; lanjutkan pembagian dan pantau respons.'
-          : 'Tambahkan tamu setelah undangan siap dibagikan.',
-      label: 'Bagikan & pantau',
-      state: published ? 'current' : 'pending',
-    },
-  ];
-}
-
-function getNextSteps(projectId: string, readiness: WeddingReadinessV1): NextStep[] {
+function getPriorityAction(projectId: string, readiness: WeddingReadinessV1): PriorityAction {
   const base = `/dashboard/${projectId}`;
-  const contentReady = readiness.invitation.state !== 'draft_incomplete';
-  const published = readiness.invitation.hasPublishedSnapshot;
-  const publishedSynced = published && !readiness.invitation.hasUnpublishedChanges;
-  const hasGuests = readiness.guests.activeGuestCount > 0;
-  const hasResponses = readiness.responses.nonPendingRsvpCount > 0;
 
-  return [
-    {
-      description: contentReady
-        ? 'Isi utama sudah melewati kesiapan dasar.'
-        : 'Buka editor dan selesaikan bagian yang masih belum lengkap.',
-      done: contentReady,
-      href: `${base}/invitation` as Route,
-      title: 'Lengkapi isi undangan',
-    },
-    {
-      description: publishedSynced
-        ? 'Draf dan versi yang dilihat tamu sudah sama.'
-        : published
-          ? 'Ada perubahan baru yang masih tersimpan sebagai draf privat.'
-          : 'Versi tamu belum aktif sampai proses terbit selesai.',
-      done: publishedSynced,
-      href: `${base}/invitation?task=publish` as Route,
-      title: published ? 'Sinkronkan versi tamu' : 'Terbitkan undangan',
-    },
-    {
-      description: hasGuests
-        ? `${readiness.guests.activeGuestCount} tamu aktif sudah tercatat.`
-        : 'Tambahkan nama dan kapasitas tamu sebelum menyiapkan tautan personal.',
-      done: hasGuests,
-      href: `${base}/guests` as Route,
-      title: 'Siapkan daftar tamu',
-    },
-    {
-      description: hasResponses
-        ? `${readiness.responses.nonPendingRsvpCount} respons sudah dapat dipantau.`
-        : published
-          ? 'Setelah tautan dibagikan, pantau RSVP dan ucapan dari satu tempat.'
-          : 'Respons akan mulai relevan setelah undangan diterbitkan dan dibagikan.',
-      done: hasResponses,
-      href: `${base}/rsvp` as Route,
-      title: 'Pantau respons tamu',
-    },
-  ];
+  switch (readiness.invitation.state) {
+    case 'draft_incomplete':
+      return {
+        description: 'Selesaikan bagian yang masih belum lengkap sebelum memikirkan publikasi atau pembagian.',
+        href: `${base}/invitation` as Route,
+        title: 'Lengkapi isi undangan',
+      };
+    case 'draft_ready_unactivated':
+      return {
+        description: 'Isi utama sudah siap. Selesaikan aktivasi agar versi tamu dapat diterbitkan.',
+        href: `${base}/invitation?task=publish` as Route,
+        title: 'Aktifkan dan terbitkan undangan',
+      };
+    case 'ready_to_publish':
+      return {
+        description: 'Draf sudah melewati kesiapan dasar dan siap menjadi versi yang dilihat tamu.',
+        href: `${base}/invitation?task=publish` as Route,
+        title: 'Terbitkan undangan',
+      };
+    case 'published_with_unpublished_changes':
+      return {
+        description: 'Tamu masih melihat versi terbit sebelumnya sampai perubahan terbaru diterbitkan ulang.',
+        href: `${base}/invitation?task=publish` as Route,
+        title: 'Terbitkan ulang perubahan',
+      };
+    case 'published': {
+      if (readiness.guests.activeGuestCount === 0) {
+        return {
+          description: 'Undangan sudah aktif. Langkah berikutnya adalah menyiapkan siapa yang akan menerimanya.',
+          href: `${base}/guests` as Route,
+          title: 'Tambahkan daftar tamu',
+        };
+      }
+
+      if (readiness.responses.nonPendingRsvpCount > 0) {
+        return {
+          description: `${readiness.responses.nonPendingRsvpCount} respons sudah masuk dan siap dipantau dari satu tempat.`,
+          href: `${base}/rsvp` as Route,
+          title: 'Pantau respons tamu',
+        };
+      }
+
+      const readyToDistributeCount = readiness.guests.readyToDistributeCount ?? 0;
+      if (readyToDistributeCount > 0) {
+        return {
+          description: `${readyToDistributeCount} tamu sudah memiliki kesiapan dasar untuk dibagikan secara manual.`,
+          href: `${base}/delivery` as Route,
+          title: 'Bagikan ke tamu yang sudah siap',
+        };
+      }
+
+      return {
+        description: `${readiness.guests.activeGuestCount} tamu aktif belum siap dibagikan. Periksa data dan Undangan Pribadi mereka.`,
+        href: `${base}/guests` as Route,
+        title: 'Periksa kesiapan tamu',
+      };
+    }
+  }
 }
 
 export function ProjectOverviewBootstrap({ projectId, readiness }: ProjectOverviewBootstrapProps) {
   const status = getInvitationStatus(readiness);
-  const journey = getJourney(readiness);
-  const nextSteps = getNextSteps(projectId, readiness);
+  const priority = getPriorityAction(projectId, readiness);
   const responseCount = readiness.responses.nonPendingRsvpCount;
   const readyToDistributeCount = readiness.guests.readyToDistributeCount ?? 0;
 
@@ -141,6 +101,7 @@ export function ProjectOverviewBootstrap({ projectId, readiness }: ProjectOvervi
     <section
       aria-labelledby="owner-workspace-start-title"
       className={styles.workspace}
+      data-owner-dashboard-cognitive-compression="v1"
       data-owner-workspace-editorial-dashboard="v3"
     >
       <header className={styles.pageHead}>
@@ -149,10 +110,20 @@ export function ProjectOverviewBootstrap({ projectId, readiness }: ProjectOvervi
           Selamat datang kembali, {readiness.identity.coupleLabel}
         </h1>
         <p className={styles.description}>
-          Begini kondisi undangan kalian saat ini. Ringkasan ini hanya menunjukkan hal yang paling
-          berguna untuk menentukan langkah berikutnya.
+          Fokus pada satu langkah berikutnya. Status lain tetap tersedia sebagai ringkasan singkat.
         </p>
       </header>
+
+      <section aria-labelledby="owner-priority-title" className={styles.priorityPanel}>
+        <div className={styles.priorityCopy}>
+          <p className={styles.priorityEyebrow}>Prioritas sekarang</p>
+          <h2 id="owner-priority-title">{priority.title}</h2>
+          <p>{priority.description}</p>
+        </div>
+        <Link className={styles.priorityAction} data-owner-priority-action href={priority.href}>
+          Kerjakan sekarang <span aria-hidden="true">→</span>
+        </Link>
+      </section>
 
       <div className={styles.statGrid} aria-label="Ringkasan kondisi proyek">
         <article className={styles.statCard}>
@@ -180,49 +151,6 @@ export function ProjectOverviewBootstrap({ projectId, readiness }: ProjectOvervi
           </strong>
         </article>
       </div>
-
-      <section className={styles.panel} aria-labelledby="project-journey-title">
-        <div className={styles.panelHead}>
-          <div>
-            <h2 id="project-journey-title">Perjalanan proyek</h2>
-            <p>Tahapan dari menyiapkan undangan sampai mengelola respons tamu.</p>
-          </div>
-        </div>
-        <div className={styles.journey}>
-          {journey.map((step, index) => (
-            <div className={styles.journeyStep} data-state={step.state} key={step.label}>
-              <span className={styles.journeyDot}>{step.state === 'done' ? '✓' : index + 1}</span>
-              <strong>{step.label}</strong>
-              <p>{step.description}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className={styles.panel} aria-labelledby="next-steps-title">
-        <div className={styles.panelHead}>
-          <div>
-            <h2 id="next-steps-title">Langkah berikutnya</h2>
-            <p>Empat area ini merangkum pekerjaan yang paling relevan sekarang.</p>
-          </div>
-        </div>
-        <div className={styles.todoList}>
-          {nextSteps.map((step) => (
-            <Link className={styles.todoRow} href={step.href} key={step.title}>
-              <span className={styles.todoCheck} data-done={step.done || undefined}>
-                {step.done ? '✓' : ''}
-              </span>
-              <span className={styles.todoCopy}>
-                <strong>{step.title}</strong>
-                <span>{step.description}</span>
-              </span>
-              <span aria-hidden="true" className={styles.todoArrow}>
-                →
-              </span>
-            </Link>
-          ))}
-        </div>
-      </section>
     </section>
   );
 }
