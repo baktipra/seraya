@@ -47,8 +47,8 @@ describe('SERAYA Owner Dashboard Cognitive Compression V1', () => {
     expect(source).toContain('Tamu aktif');
     expect(source).toContain('Respons masuk');
     expect(source).toContain('Siap dibagikan');
-    expect(source).not.toContain('Perjalanan proyek');
-    expect(source).not.toContain('Langkah berikutnya');
+    expect(source).not.toContain('project-journey-title');
+    expect(source).not.toContain('next-steps-title');
     expect(source).not.toContain('Buat proyek');
     expect(source).not.toContain('Pilih tema');
     expect(source).not.toContain('Bagikan & pantau');
