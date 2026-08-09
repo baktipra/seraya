@@ -27,6 +27,43 @@ test.describe('SERAYA Owner Dashboard Cognitive Compression V1', () => {
     const priorityAction = page.locator('[data-owner-priority-action]');
     await expect(priorityAction).toHaveCount(1);
     await expect(priorityAction).toBeVisible();
+
+    const viewport = page.viewportSize();
+    if (viewport && viewport.width >= 1024) {
+      const geometry = await page.evaluate(() => {
+        const read = (selector: string) => {
+          const element = document.querySelector<HTMLElement>(selector);
+          if (!element) return null;
+          const rect = element.getBoundingClientRect();
+          const style = getComputedStyle(element);
+          return {
+            bottom: rect.bottom,
+            display: style.display,
+            height: rect.height,
+            left: rect.left,
+            opacity: style.opacity,
+            overflow: style.overflow,
+            position: style.position,
+            right: rect.right,
+            top: rect.top,
+            visibility: style.visibility,
+            width: rect.width,
+          };
+        };
+
+        return {
+          main: read('[data-project-workspace-main]'),
+          priority: read('[data-owner-priority-action]'),
+          shell: read('[data-project-workspace-shell]'),
+          sidebar: read('[data-project-sidebar]'),
+          title: read('#owner-workspace-start-title'),
+          workspace: read('[data-owner-dashboard-cognitive-compression="v1"]'),
+        };
+      });
+      console.log('CCV1_DESKTOP_GEOMETRY', JSON.stringify(geometry));
+      await expect(page.locator('[data-project-sidebar]')).toBeVisible();
+    }
+
     await expect(page.getByRole('heading', { name: 'Lengkapi isi undangan' })).toBeVisible();
     await expect(page.getByText('Perjalanan proyek', { exact: true })).toHaveCount(0);
     await expect(page.getByText('Langkah berikutnya', { exact: true })).toHaveCount(0);
@@ -40,10 +77,7 @@ test.describe('SERAYA Owner Dashboard Cognitive Compression V1', () => {
       expect(sidebarLabels.some((text) => text.includes(label))).toBe(true);
     }
 
-    const viewport = page.viewportSize();
-    if (viewport && viewport.width >= 1024) {
-      await expect(page.locator('[data-project-sidebar]')).toBeVisible();
-    } else {
+    if (!viewport || viewport.width < 1024) {
       const trigger = page.getByRole('button', { name: 'Buka navigasi proyek' });
       await expect(page.locator('[data-project-mobile-context]')).toBeVisible();
       await trigger.click();
@@ -92,7 +126,9 @@ test.describe('SERAYA Owner Dashboard Cognitive Compression V1', () => {
     await expect(page.getByRole('button', { name: 'Terbitkan' })).toBeVisible();
     await expect(rail.getByRole('button')).toHaveCount(9);
     await expect(workspace).toHaveAttribute('data-invitation-task-workspace-active', 'design');
-    await expect(page.getByRole('heading', { name: 'Tema', level: 2 })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Tema & warna', level: 2, exact: true }),
+    ).toBeVisible();
     await expectNoDocumentOverflow(page);
   });
 
@@ -110,7 +146,9 @@ test.describe('SERAYA Owner Dashboard Cognitive Compression V1', () => {
 
     await rail.getByRole('button', { name: 'Tema' }).click();
     await expect(workspace).toHaveAttribute('data-invitation-task-workspace-active', 'design');
-    await expect(page.getByRole('heading', { name: 'Tema', level: 2 })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Tema & warna', level: 2, exact: true }),
+    ).toBeVisible();
     await expect(workspace.locator('[data-invitation-task-save-action]')).toHaveCount(1);
     await expectNoDocumentOverflow(page);
   });
