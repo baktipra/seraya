@@ -1,0 +1,543 @@
+/*
+ * SERAYA — Aruna Flagship Guest Experience Maturation V1
+ *
+ * Presentation-only overlay for the canonical Aruna journal renderer.
+ * The typed invitation view model, generic/personal boundary, RSVP/Guestbook
+ * semantics, publication snapshot, media authority, and guest-link authority
+ * remain unchanged.
+ */
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] {
+  --aruna-flagship-gutter: clamp(1.25rem, 6vw, 5.75rem);
+  --aruna-flagship-section-gap: clamp(4.75rem, 10vw, 8rem);
+  --aruna-flagship-reading: 42rem;
+
+  width: min(100%, 68rem);
+  max-width: 68rem;
+  border-radius: 0;
+  box-shadow: 0 2.75rem 8rem rgb(49 39 33 / 0.16);
+}
+
+/* Cover — preserve the journal identity but give it a stronger first-page hierarchy. */
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-journal-cover] {
+  min-height: min(92svh, 61rem);
+  padding-inline: var(--aruna-flagship-gutter);
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-cover-story] {
+  grid-column: 1 / span 8;
+  align-self: end;
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-cover-story] h1 {
+  max-width: 8.6ch;
+  font-size: clamp(4.7rem, 12.5vw, 9.6rem);
+  line-height: 0.76;
+  letter-spacing: -0.072em;
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-cover-date] {
+  grid-column: 9 / -1;
+  align-self: end;
+  padding-top: 1.35rem;
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-cover-date] span:last-child {
+  max-width: 12ch;
+  font-size: clamp(1.35rem, 2.8vw, 1.9rem);
+  line-height: 1;
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] > [data-aruna-opening-action] {
+  width: min(calc(100% - 2.5rem), 24rem);
+  min-height: 3.25rem;
+  margin-top: -1.625rem;
+  padding-inline: 1.35rem 1.1rem;
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] > [data-aruna-opening-action]:hover {
+  box-shadow: 0 1.15rem 2.8rem rgb(38 34 31 / 0.2);
+}
+
+/* Addressed greeting — read as the editor's opening note, not a detached app card. */
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-editors-note] {
+  display: grid;
+  grid-template-columns: minmax(8rem, 0.45fr) minmax(0, 1.55fr);
+  gap: clamp(2rem, 6vw, 5rem);
+  padding: var(--aruna-flagship-section-gap) var(--aruna-flagship-gutter);
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-editors-note]::before {
+  grid-column: 1;
+  align-self: start;
+  margin: 0;
+  padding-top: 0.7rem;
+  border-top: 3px solid var(--aruna-journal-rust);
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-editors-note]::after {
+  top: var(--aruna-flagship-section-gap);
+  right: var(--aruna-flagship-gutter);
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1']
+  [data-aruna-editors-note]
+  [data-personal-guest-greeting] {
+  grid-column: 2;
+  width: 100%;
+  max-width: var(--aruna-flagship-reading);
+  padding-top: 1.85rem;
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1']
+  [data-aruna-editors-note]
+  [data-personal-greeting-title] {
+  max-width: 11ch;
+  font-size: clamp(2.7rem, 6vw, 4.75rem);
+  line-height: 0.9;
+}
+
+/* Reading pages — stronger editorial columns and calmer vertical rhythm. */
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-journal-pages] {
+  padding-inline: var(--aruna-flagship-gutter);
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1']
+  [data-aruna-journal-pages]
+  > section,
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-agenda] > section {
+  padding-block: var(--aruna-flagship-section-gap);
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-couple-feature] {
+  grid-template-columns: minmax(10rem, 0.58fr) minmax(0, 1.42fr);
+  gap: clamp(2.75rem, 7vw, 6rem);
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1']
+  [data-aruna-couple-feature]
+  > div:first-child {
+  top: 2rem;
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-profile] {
+  padding-block: clamp(2.6rem, 5.5vw, 4rem);
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-profile] h3 {
+  max-width: 10.5ch;
+  font-size: clamp(3rem, 6.5vw, 5.25rem);
+  line-height: 0.84;
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-feature-story] {
+  grid-template-columns: minmax(9rem, 0.48fr) minmax(0, 1.52fr);
+  gap: clamp(2.75rem, 7vw, 6rem);
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-feature-story] h2 {
+  max-width: 13ch;
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-feature-story] p:last-child {
+  max-width: var(--aruna-flagship-reading);
+  font-size: clamp(1rem, 1.8vw, 1.12rem);
+  line-height: 1.9;
+}
+
+/* Agenda — read as a designed event rundown rather than equal dashboard cards. */
+[data-template='aruna'][data-aruna-experience='journal-v1']
+  [data-aruna-agenda-page]
+  > div:has(> [data-aruna-agenda-entry]) {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 0 clamp(1.25rem, 3vw, 2.25rem);
+  border-top: 1px solid var(--aruna-journal-ink);
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-agenda-entry] {
+  grid-column: span 6;
+  min-width: 0;
+  padding: clamp(2rem, 4vw, 3.25rem) 0;
+  border-bottom: 1px solid var(--aruna-journal-line);
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1']
+  [data-aruna-agenda-entry]:nth-child(4n + 1) {
+  grid-column: 1 / span 7;
+  padding-right: clamp(1rem, 3vw, 2.5rem);
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1']
+  [data-aruna-agenda-entry]:nth-child(4n + 2) {
+  grid-column: 8 / -1;
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1']
+  [data-aruna-agenda-entry]:nth-child(4n + 3) {
+  grid-column: 1 / span 5;
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1']
+  [data-aruna-agenda-entry]:nth-child(4n + 4) {
+  grid-column: 6 / -1;
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-agenda-entry] h3 {
+  max-width: 14ch;
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  line-height: 0.98;
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-venue-brief] {
+  display: grid;
+  grid-template-columns: minmax(8rem, 0.45fr) minmax(0, 1.55fr);
+  gap: clamp(2rem, 6vw, 5rem);
+  align-items: start;
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-venue-brief] h2,
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-venue-brief] p,
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-venue-brief] a {
+  grid-column: 2;
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-venue-brief] > p:first-child {
+  grid-column: 1;
+  grid-row: 1 / span 4;
+  width: fit-content;
+  margin: 0;
+  padding-top: 0.7rem;
+  border-top: 3px solid var(--aruna-journal-rust);
+}
+
+/* Photo essay — asymmetry gives Aruna a magazine rhythm without changing media semantics. */
+[data-template='aruna'][data-aruna-experience='journal-v1']
+  [data-aruna-photo-essay]
+  > div:has(> [data-aruna-photo-frame]) {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: clamp(0.8rem, 2vw, 1.4rem);
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-photo-frame] {
+  grid-column: span 6;
+  min-width: 0;
+  margin: 0;
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-photo-frame]:nth-child(6n + 1) {
+  grid-column: 1 / span 8;
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-photo-frame]:nth-child(6n + 2) {
+  grid-column: 9 / -1;
+  align-self: end;
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-photo-frame]:nth-child(6n + 3) {
+  grid-column: 1 / span 4;
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-photo-frame]:nth-child(6n + 4) {
+  grid-column: 5 / -1;
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-photo-frame]:nth-child(6n + 5) {
+  grid-column: 1 / span 7;
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-photo-frame]:nth-child(6n + 6) {
+  grid-column: 8 / -1;
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-photo-frame] figcaption {
+  display: inline-flex;
+  min-width: 2rem;
+  min-height: 2rem;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.6rem;
+  border-top: 1px solid currentColor;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+/* Digital gift — keep it editorial and ledger-like, not a second dashboard. */
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-gift-desk] {
+  display: grid;
+  grid-template-columns: minmax(9rem, 0.55fr) minmax(0, 1.45fr);
+  gap: clamp(2.5rem, 7vw, 5.5rem);
+  align-items: start;
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-gift-desk] > div:last-child {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  border-top: 1px solid var(--aruna-journal-ink);
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-gift-desk] > div:last-child > article {
+  padding: clamp(1.6rem, 3vw, 2.25rem) 0;
+  border: 0;
+  border-bottom: 1px solid var(--aruna-journal-line);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Personal response — an editorial reply desk with truthful shared RSVP/Guestbook behavior. */
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-reader-response] {
+  counter-reset: aruna-response-step;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: clamp(1.5rem, 4vw, 3rem);
+  padding-block: var(--aruna-flagship-section-gap);
+  border-top: 1px solid var(--aruna-journal-ink);
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1']
+  [data-aruna-reader-response]
+  > [data-template-response-introduction='aruna'] {
+  grid-column: 1 / span 4;
+  align-self: start;
+  position: sticky;
+  top: 2rem;
+  padding-top: 0.75rem;
+  border-top: 3px solid var(--aruna-journal-rust);
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1']
+  [data-aruna-reader-response]
+  > [data-aruna-response-column] {
+  counter-increment: aruna-response-step;
+  grid-column: 5 / -1;
+  min-width: 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--aruna-journal-ink);
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1']
+  [data-aruna-reader-response]
+  > [data-aruna-response-column]::before {
+  display: block;
+  margin-bottom: 1.2rem;
+  color: var(--aruna-journal-muted);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  content: '0' counter(aruna-response-step) ' / RESPONS';
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1']
+  [data-aruna-reader-response]:has([data-aruna-response-column='rsvp']):has(
+    [data-aruna-response-column='guestbook']
+  )
+  > [data-aruna-response-column='rsvp'] {
+  grid-column: 5 / span 4;
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1']
+  [data-aruna-reader-response]:has([data-aruna-response-column='rsvp']):has(
+    [data-aruna-response-column='guestbook']
+  )
+  > [data-aruna-response-column='guestbook'] {
+  grid-column: 9 / -1;
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-generic-response-note='aruna'] {
+  max-width: var(--aruna-flagship-reading);
+  margin: 0 auto;
+  padding: 2rem 0;
+  border-top: 1px solid var(--aruna-journal-line);
+  border-bottom: 1px solid var(--aruna-journal-line);
+  background: transparent;
+  text-align: left;
+}
+
+/* Colophon and return — a clear end-state to the reading journey. */
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-colophon] {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(8rem, 0.65fr);
+  gap: clamp(2rem, 6vw, 5rem);
+  align-items: end;
+  min-height: 24rem;
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-colophon] h2 {
+  grid-column: 1;
+  max-width: 11ch;
+  font-size: clamp(2.6rem, 6vw, 4.8rem);
+  line-height: 0.9;
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-colophon] p {
+  grid-column: 1;
+  max-width: 34rem;
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] > [data-aruna-return-action] {
+  display: flex;
+  width: 100%;
+  min-height: 3.25rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem var(--aruna-flagship-gutter);
+  border-top: 1px solid var(--aruna-journal-line);
+  background: var(--aruna-journal-ink);
+  color: var(--aruna-journal-paper);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1'] > [data-aruna-return-action]:hover {
+  background: var(--aruna-journal-rust);
+}
+
+[data-template='aruna'][data-aruna-experience='journal-v1']
+  :is(a, button, input, select, textarea):focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 4px;
+}
+
+@media (max-width: 48rem) {
+  [data-template='aruna'][data-aruna-experience='journal-v1'] {
+    width: 100%;
+    max-width: 100%;
+    border-inline: 0;
+    box-shadow: none;
+  }
+
+  [data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-journal-cover] {
+    min-height: 86svh;
+    grid-template-columns: 1fr;
+    align-content: end;
+    padding-top: 4.5rem;
+  }
+
+  [data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-cover-story],
+  [data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-cover-date] {
+    grid-column: 1;
+  }
+
+  [data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-cover-story] h1 {
+    max-width: 9.5ch;
+    font-size: clamp(3.85rem, 19vw, 6.2rem);
+    line-height: 0.8;
+  }
+
+  [data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-cover-date] {
+    margin-top: 2rem;
+  }
+
+  [data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-editors-note],
+  [data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-couple-feature],
+  [data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-feature-story],
+  [data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-venue-brief],
+  [data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-gift-desk],
+  [data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-colophon],
+  [data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-reader-response] {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+  }
+
+  [data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-editors-note]::before,
+  [data-template='aruna'][data-aruna-experience='journal-v1']
+    [data-aruna-editors-note]
+    [data-personal-guest-greeting],
+  [data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-venue-brief] > *,
+  [data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-colophon] > *,
+  [data-template='aruna'][data-aruna-experience='journal-v1']
+    [data-aruna-reader-response]
+    > [data-template-response-introduction='aruna'],
+  [data-template='aruna'][data-aruna-experience='journal-v1']
+    [data-aruna-reader-response]
+    > [data-aruna-response-column] {
+    grid-column: 1;
+  }
+
+  [data-template='aruna'][data-aruna-experience='journal-v1']
+    [data-aruna-couple-feature]
+    > div:first-child,
+  [data-template='aruna'][data-aruna-experience='journal-v1']
+    [data-aruna-reader-response]
+    > [data-template-response-introduction='aruna'] {
+    position: static;
+  }
+
+  [data-template='aruna'][data-aruna-experience='journal-v1']
+    [data-aruna-agenda-page]
+    > div:has(> [data-aruna-agenda-entry]),
+  [data-template='aruna'][data-aruna-experience='journal-v1']
+    [data-aruna-photo-essay]
+    > div:has(> [data-aruna-photo-frame]) {
+    grid-template-columns: 1fr;
+  }
+
+  [data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-agenda-entry],
+  [data-template='aruna'][data-aruna-experience='journal-v1']
+    [data-aruna-agenda-entry]:nth-child(n),
+  [data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-photo-frame],
+  [data-template='aruna'][data-aruna-experience='journal-v1']
+    [data-aruna-photo-frame]:nth-child(n) {
+    grid-column: 1;
+  }
+
+  [data-template='aruna'][data-aruna-experience='journal-v1']
+    [data-aruna-reader-response]:has([data-aruna-response-column='rsvp']):has(
+      [data-aruna-response-column='guestbook']
+    )
+    > [data-aruna-response-column] {
+    grid-column: 1;
+  }
+
+  [data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-colophon] {
+    min-height: 20rem;
+  }
+}
+
+@media (max-width: 31rem) {
+  [data-template='aruna'][data-aruna-experience='journal-v1'] {
+    --aruna-flagship-gutter: 1.15rem;
+    --aruna-flagship-section-gap: 4.5rem;
+  }
+
+  [data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-journal-cover]::after {
+    width: 4.75rem;
+  }
+
+  [data-template='aruna'][data-aruna-experience='journal-v1'] > [data-aruna-opening-action] {
+    width: calc(100% - 1.5rem);
+  }
+
+  [data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-profile] h3,
+  [data-template='aruna'][data-aruna-experience='journal-v1'] [data-aruna-colophon] h2 {
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-template='aruna'][data-aruna-experience='journal-v1'],
+  [data-template='aruna'][data-aruna-experience='journal-v1'] *,
+  [data-template='aruna'][data-aruna-experience='journal-v1'] *::before,
+  [data-template='aruna'][data-aruna-experience='journal-v1'] *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  [data-template='aruna'][data-aruna-experience='journal-v1'] > [data-aruna-opening-action]:hover,
+  [data-template='aruna'][data-aruna-experience='journal-v1'] > [data-aruna-return-action]:hover {
+    transform: none;
+  }
+}
