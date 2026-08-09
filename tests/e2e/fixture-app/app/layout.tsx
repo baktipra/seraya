@@ -8,6 +8,7 @@ import '../../../../src/app/invitation-opening-maturation-release.css';
 import '../../../../src/app/invitation-media-release.css';
 import '../../../../src/app/invitation-layout-recovery.css';
 import '../../../../src/app/invitation-template-quality-bar.css';
+import '../../../../src/app/aruna-flagship-maturation-release.css';
 
 export default function FixtureRootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
