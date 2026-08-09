@@ -1,8 +1,8 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 const guestToken = 'browser-fixture';
 
-async function expectNoHorizontalOverflow(page: Parameters<typeof test>[0]['page']) {
+async function expectNoHorizontalOverflow(page: Page) {
   const overflow = await page.evaluate(() => ({
     clientWidth: document.documentElement.clientWidth,
     scrollWidth: document.documentElement.scrollWidth,
