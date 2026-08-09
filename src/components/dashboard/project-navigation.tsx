@@ -396,7 +396,12 @@ export function ProjectNavigation({
         </div>
       ) : null}
 
-      <p aria-atomic="true" aria-live="polite" className="sr-only" role="status">
+      <p
+        aria-atomic="true"
+        aria-live="polite"
+        className={styles.routeAnnouncement}
+        role="status"
+      >
         {routeAnnouncement}
       </p>
     </>
