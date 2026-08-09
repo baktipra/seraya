@@ -49,7 +49,13 @@ function getDeliveryView(value: string | string[] | undefined): DeliveryView {
   return resolved === 'public' ? 'public' : 'personal';
 }
 
-function DeliveryViewNavigation({ projectId, view }: { projectId: string; view: DeliveryView }) {
+function DeliveryViewNavigation({
+  projectId,
+  view,
+}: {
+  projectId: string;
+  view: DeliveryView;
+}) {
   const base = `/dashboard/${projectId}/delivery`;
 
   return (
