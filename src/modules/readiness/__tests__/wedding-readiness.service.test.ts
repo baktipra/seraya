@@ -8,12 +8,14 @@ import { createDefaultInvitationDraftContent } from '@/modules/invitations/invit
 const {
   getAggregateMock,
   getDraftMock,
+  getFollowUpCenterMock,
   getPublishedMock,
   hasVerifiedActivationMock,
   ownedProjectContextMock,
 } = vi.hoisted(() => ({
   getAggregateMock: vi.fn(),
   getDraftMock: vi.fn(),
+  getFollowUpCenterMock: vi.fn(),
   getPublishedMock: vi.fn(),
   hasVerifiedActivationMock: vi.fn(),
   ownedProjectContextMock: vi.fn(),
@@ -21,6 +23,9 @@ const {
 
 vi.mock('@/modules/auth/dashboard-request-context', () => ({
   getOwnedProjectContextForRequest: ownedProjectContextMock,
+}));
+vi.mock('@/modules/follow-up/follow-up.service', () => ({
+  getGuestFollowUpCenterForVerifiedProject: getFollowUpCenterMock,
 }));
 vi.mock('@/modules/invitations/invitation-draft.repository', () => ({
   getActiveInvitationDraftForVerifiedProject: getDraftMock,
@@ -69,6 +74,18 @@ const defaultCounts = {
   needsWhatsAppCount: 0,
 };
 
+const defaultFollowUpSummary = {
+  activeGuestCount: 0,
+  awaitingRsvpCount: 0,
+  needsDataRepairCount: 0,
+  needsLinkUpdateCount: 0,
+  needsPreparationCount: 0,
+  needsWhatsAppCount: 0,
+  noFollowUpRecordedCount: 0,
+  noPersonalInvitationCount: 0,
+  rsvpRespondedCount: 0,
+};
+
 function createDraft() {
   return {
     content: createDefaultInvitationDraftContent(project),
@@ -108,6 +125,7 @@ describe('SRY-031 wedding readiness composition', () => {
   beforeEach(() => {
     getAggregateMock.mockReset().mockResolvedValue(defaultCounts);
     getDraftMock.mockReset().mockResolvedValue(createDraft());
+    getFollowUpCenterMock.mockReset().mockResolvedValue({ summary: defaultFollowUpSummary });
     getPublishedMock.mockReset().mockResolvedValue(null);
     hasVerifiedActivationMock.mockReset().mockResolvedValue(false);
     ownedProjectContextMock.mockReset().mockResolvedValue(project);
@@ -127,6 +145,7 @@ describe('SRY-031 wedding readiness composition', () => {
       },
     });
     expect(getAggregateMock).not.toHaveBeenCalled();
+    expect(getFollowUpCenterMock).not.toHaveBeenCalled();
   });
 
   it('reuses a caller-provided active draft instead of querying it again', async () => {
@@ -155,6 +174,12 @@ describe('SRY-031 wedding readiness composition', () => {
       href: `/dashboard/${project.id}/preview`,
       key: 'preview_invitation',
     });
+    expect(readiness.followUp).toEqual({
+      awaitingRsvpCount: 0,
+      noFollowUpRecordedCount: 0,
+      rsvpRespondedCount: 0,
+    });
+    expect(getFollowUpCenterMock).not.toHaveBeenCalled();
   });
 
   it('uses verified activation state rather than browser return state before enabling manual publish', async () => {
@@ -180,6 +205,30 @@ describe('SRY-031 wedding readiness composition', () => {
     expect(readiness.invitation.publishedSlug).toBe(project.slug);
     expect(readiness.primaryAction.key).toBe('prepare_personal_invitations');
     expect(readiness.guests.guestsWithoutActivePersonalLinkCount).toBe(2);
+    expect(getFollowUpCenterMock).toHaveBeenCalledWith(project);
+  });
+
+  it('projects only follow-up aggregate truth after publication', async () => {
+    const draft = createDraft();
+    getDraftMock.mockResolvedValue(draft);
+    getPublishedMock.mockResolvedValue(createPublication(draft));
+    getFollowUpCenterMock.mockResolvedValue({
+      summary: {
+        ...defaultFollowUpSummary,
+        activeGuestCount: 4,
+        awaitingRsvpCount: 2,
+        noFollowUpRecordedCount: 1,
+        rsvpRespondedCount: 1,
+      },
+    });
+
+    const readiness = await getWeddingReadinessForVerifiedProject(project);
+
+    expect(readiness.followUp).toEqual({
+      awaitingRsvpCount: 2,
+      noFollowUpRecordedCount: 1,
+      rsvpRespondedCount: 1,
+    });
   });
 
   it('uses only normalized saved content for the unpublished-change comparison', async () => {
