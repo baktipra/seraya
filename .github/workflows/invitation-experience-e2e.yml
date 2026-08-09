@@ -6,9 +6,11 @@ on:
       - '.github/workflows/invitation-experience-e2e.yml'
       - 'package.json'
       - 'package-lock.json'
+      - 'playwright.config.ts'
       - 'playwright.invitation-experience.config.ts'
       - 'src/app/[slug]/**'
       - 'src/app/api/invitations/[slug]/audio/**'
+      - 'src/app/aruna-flagship-maturation-release.css'
       - 'src/app/invitation-maturation-release.css'
       - 'src/app/invitation-opening-maturation-release.css'
       - 'src/app/invitation-media-release.css'
@@ -18,6 +20,7 @@ on:
       - 'src/modules/invitation-templates/**'
       - 'src/modules/media/invitation-audio-playback.*'
       - 'src/modules/media/invitation-audio.repository.ts'
+      - 'tests/e2e/aruna-flagship-guest-experience.spec.ts'
       - 'tests/e2e/invitation-experience.spec.ts'
       - 'tests/e2e/release-a-invitation-showroom.spec.ts'
       - 'tests/e2e/fixture-app/**'
@@ -28,9 +31,11 @@ on:
       - '.github/workflows/invitation-experience-e2e.yml'
       - 'package.json'
       - 'package-lock.json'
+      - 'playwright.config.ts'
       - 'playwright.invitation-experience.config.ts'
       - 'src/app/[slug]/**'
       - 'src/app/api/invitations/[slug]/audio/**'
+      - 'src/app/aruna-flagship-maturation-release.css'
       - 'src/app/invitation-maturation-release.css'
       - 'src/app/invitation-opening-maturation-release.css'
       - 'src/app/invitation-media-release.css'
@@ -40,6 +45,7 @@ on:
       - 'src/modules/invitation-templates/**'
       - 'src/modules/media/invitation-audio-playback.*'
       - 'src/modules/media/invitation-audio.repository.ts'
+      - 'tests/e2e/aruna-flagship-guest-experience.spec.ts'
       - 'tests/e2e/invitation-experience.spec.ts'
       - 'tests/e2e/release-a-invitation-showroom.spec.ts'
       - 'tests/e2e/fixture-app/**'
@@ -70,8 +76,10 @@ jobs:
           npx prettier --check \
             .github/workflows/invitation-experience-e2e.yml \
             package.json \
+            playwright.config.ts \
             playwright.invitation-experience.config.ts \
             src/app/api/invitations/[slug]/audio/playback/route.ts \
+            src/app/aruna-flagship-maturation-release.css \
             src/app/invitation-maturation-release.css \
             src/app/invitation-opening-maturation-release.css \
             src/app/invitation-media-release.css \
@@ -87,8 +95,10 @@ jobs:
             src/modules/invitation-templates/aruna/aruna-template.tsx \
             src/modules/invitation-templates/laras/laras-monogram.ts \
             src/modules/invitation-templates/laras/laras-template.tsx \
+            src/modules/invitation-templates/__tests__/aruna-flagship-guest-experience-contract.test.ts \
             src/modules/invitation-templates/__tests__/invitation-opening-identity-contract.test.ts \
             src/modules/invitation-templates/__tests__/invitation-media-delivery-contract.test.ts \
+            tests/e2e/aruna-flagship-guest-experience.spec.ts \
             tests/e2e/invitation-experience.spec.ts \
             tests/e2e/release-a-invitation-showroom.spec.ts \
             tests/e2e/fixture-app/app/layout.tsx \
@@ -97,6 +107,7 @@ jobs:
       - name: Lint invitation experience files
         run: |
           npx eslint \
+            playwright.config.ts \
             playwright.invitation-experience.config.ts \
             src/app/api/invitations/[slug]/audio/playback/route.ts \
             src/app/layout.tsx \
@@ -110,8 +121,10 @@ jobs:
             src/modules/invitation-templates/aruna/aruna-template.tsx \
             src/modules/invitation-templates/laras/laras-monogram.ts \
             src/modules/invitation-templates/laras/laras-template.tsx \
+            src/modules/invitation-templates/__tests__/aruna-flagship-guest-experience-contract.test.ts \
             src/modules/invitation-templates/__tests__/invitation-opening-identity-contract.test.ts \
             src/modules/invitation-templates/__tests__/invitation-media-delivery-contract.test.ts \
+            tests/e2e/aruna-flagship-guest-experience.spec.ts \
             tests/e2e/invitation-experience.spec.ts \
             tests/e2e/release-a-invitation-showroom.spec.ts \
             tests/e2e/fixture-app/app/layout.tsx \
@@ -120,6 +133,7 @@ jobs:
       - name: Run invitation experience source contracts
         run: |
           npm test -- \
+            src/modules/invitation-templates/__tests__/aruna-flagship-guest-experience-contract.test.ts \
             src/modules/invitation-templates/__tests__/invitation-opening-identity-contract.test.ts \
             src/modules/invitation-templates/__tests__/invitation-media-delivery-contract.test.ts
 
