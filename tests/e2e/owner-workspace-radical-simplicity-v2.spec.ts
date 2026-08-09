@@ -46,7 +46,9 @@ test.describe('SERAYA Owner Dashboard Cognitive Compression V1', () => {
 
       const drawer = page.getByRole('dialog', { name: 'Navigasi proyek' });
       await expect(drawer).toBeVisible();
-      await expect(drawer.getByRole('button', { name: 'Tutup navigasi proyek' })).toBeFocused();
+      await expect(
+        drawer.getByRole('button', { name: 'Tutup navigasi proyek' }),
+      ).toBeFocused();
 
       await page.keyboard.press('Escape');
       await expect(drawer).toHaveCount(0);
