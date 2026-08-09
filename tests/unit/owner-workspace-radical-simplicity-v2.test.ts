@@ -9,8 +9,8 @@ function read(path: string) {
   return readFileSync(join(root, path), 'utf8');
 }
 
-describe('SERAYA Owner Workspace Editorial Dashboard V3', () => {
-  it('uses the supplied five-area project information architecture', () => {
+describe('SERAYA Owner Dashboard Cognitive Compression V1', () => {
+  it('preserves the canonical five-area project information architecture', () => {
     const source = read('src/components/dashboard/project-navigation.tsx');
     const labels = [...source.matchAll(/label: '([^']+)'/g)].map((match) => match[1]);
 
@@ -37,26 +37,37 @@ describe('SERAYA Owner Workspace Editorial Dashboard V3', () => {
     expect(rootLayout).toContain("variable: '--font-fraunces'");
   });
 
-  it('turns Ringkasan into a readiness-backed project status dashboard', () => {
+  it('compresses Ringkasan to exactly one priority-derived action plus a compact pulse', () => {
     const source = read('src/components/projects/project-overview-bootstrap.tsx');
 
-    expect(source).toContain('Selamat datang kembali');
+    expect(source).toContain('data-owner-dashboard-cognitive-compression="v1"');
+    expect(source).toContain('Prioritas sekarang');
+    expect(source.match(/data-owner-priority-action/g)).toHaveLength(1);
     expect(source).toContain('Status undangan');
     expect(source).toContain('Tamu aktif');
     expect(source).toContain('Respons masuk');
     expect(source).toContain('Siap dibagikan');
-    expect(source).toContain('Perjalanan proyek');
-    expect(source).toContain('Langkah berikutnya');
-    expect(source).toContain('Buat proyek');
-    expect(source).toContain('Pilih tema');
-    expect(source).toContain('Lengkapi konten');
-    expect(source).toContain('Bagikan & pantau');
-    expect(source).not.toContain('CanonicalInvitationThumbnail');
-    expect(source).not.toContain('GuestRosterVisual');
-    expect(source).not.toContain('ResponseFlowVisual');
+    expect(source).not.toContain('Perjalanan proyek');
+    expect(source).not.toContain('Langkah berikutnya');
+    expect(source).not.toContain('Buat proyek');
+    expect(source).not.toContain('Pilih tema');
+    expect(source).not.toContain('Bagikan & pantau');
   });
 
-  it('preserves one shared draft and one invitation save authority', () => {
+  it('keeps Bagikan as one canonical destination with personal delivery as the default view', () => {
+    const source = read('src/app/(dashboard)/dashboard/[projectId]/delivery/page.tsx');
+
+    expect(source).toContain("type DeliveryView = 'personal' | 'public';");
+    expect(source).toContain("return resolved === 'public' ? 'public' : 'personal';");
+    expect(source).toContain('data-delivery-view-navigation');
+    expect(source).toContain('Undangan Pribadi');
+    expect(source).toContain('Story & QR Publik');
+    expect(source).toContain("view === 'public'");
+    expect(source).toContain('<PublicSocialShareKit');
+    expect(source).toContain('<NativeGuestDeliveryCenter');
+  });
+
+  it('preserves one shared invitation draft and one save authority', () => {
     const source = read('src/components/projects/invitation-task-workspace.tsx');
 
     expect(source.match(/function SaveAuthority\(/g)).toHaveLength(1);
@@ -64,33 +75,28 @@ describe('SERAYA Owner Workspace Editorial Dashboard V3', () => {
     expect(source).toContain('useInvitationStudioState');
     expect(source).toContain('form={studioState.formId}');
     expect(source).toContain('InvitationEditorActivePanel');
-    expect(source.match(/number: '\d{2}'/g)).toHaveLength(11);
+    expect(source).toContain('data-invitation-editor-dashboard="v1"');
+    expect(source).toContain("title: 'Tema'");
+    expect(source).toContain("title: 'Galeri & musik'");
   });
 
-  it('preserves distinct visual glyphs for every invitation task', () => {
-    const source = read('src/components/projects/owner-workspace-visuals.tsx');
-    const tasks = [
-      'couple',
-      'opening',
-      'schedule',
-      'story',
-      'media',
-      'gift',
-      'rsvp',
-      'closing',
-      'design',
-      'preview',
-      'publish',
-    ];
-
-    for (const task of tasks) {
-      expect(source).toContain(`case '${task}':`);
-    }
-  });
-
-  it('keeps project geometry flush, responsive, and isolated from production deployment', () => {
-    const anatomy = read('src/app/workspace-anatomy.css');
+  it('uses the shared focus-management authority for the mobile project drawer', () => {
+    const navigation = read('src/components/dashboard/project-navigation.tsx');
     const navigationStyles = read('src/components/dashboard/project-navigation.module.css');
+
+    expect(navigation).toContain("from '@/lib/focus-management'");
+    expect(navigation).toContain('focusFirstDescendant(drawer, drawer)');
+    expect(navigation).toContain('trapFocusWithin(event, drawer)');
+    expect(navigation).toContain('aria-modal="true"');
+    expect(navigation).toContain('role="dialog"');
+    expect(navigation).toContain('aria-controls="project-mobile-navigation"');
+    expect(navigationStyles).toContain('width: 2.75rem;');
+    expect(navigationStyles).toContain('height: 2.75rem;');
+    expect(navigationStyles).toContain('env(safe-area-inset-bottom)');
+  });
+
+  it('keeps project geometry responsive and blocks preview deployment for this feature branch', () => {
+    const anatomy = read('src/app/workspace-anatomy.css');
     const overviewStyles = read('src/components/projects/project-overview-bootstrap.module.css');
     const vercel = read('vercel.json');
 
@@ -98,10 +104,8 @@ describe('SERAYA Owner Workspace Editorial Dashboard V3', () => {
       'grid-template-columns: var(--seraya-project-rail-width) minmax(0, 1fr);',
     );
     expect(anatomy).toContain('gap: 0;');
-    expect(navigationStyles).toContain('@media (max-width: 1023px)');
-    expect(navigationStyles).toContain('.mobileDrawer');
     expect(overviewStyles).toContain('@media (max-width: 900px)');
     expect(overviewStyles).toContain('@media (max-width: 560px)');
-    expect(vercel).toContain('"feature/owner-workspace-editorial-dashboard-v3": false');
+    expect(vercel).toContain('"feature/owner-dashboard-cognitive-compression-v1": false');
   });
 });
