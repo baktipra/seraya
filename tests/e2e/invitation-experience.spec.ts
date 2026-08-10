@@ -15,6 +15,30 @@ function getPersonalPath(templateKey: TemplateKey) {
   return `${getGenericPath(templateKey)}/g/${guestToken}`;
 }
 
+function getOpening(invitation: Locator, templateKey: TemplateKey) {
+  return templateKey === 'roselle'
+    ? invitation.locator('[data-roselle-opening-gate] > header')
+    : invitation.locator(':scope > header');
+}
+
+function getOpeningAction(invitation: Locator, templateKey: TemplateKey) {
+  return templateKey === 'roselle'
+    ? invitation.locator('[data-roselle-opening-gate] [data-invitation-opening-action]')
+    : invitation.locator(':scope > [data-invitation-opening-action]');
+}
+
+function getPersonalGreeting(invitation: Locator, templateKey: TemplateKey) {
+  return templateKey === 'roselle'
+    ? invitation.locator('[data-roselle-opening-gate] [data-template-personal-greeting]')
+    : invitation.locator(':scope > [data-template-personal-greeting]');
+}
+
+function getReturnAction(invitation: Locator, templateKey: TemplateKey) {
+  return templateKey === 'roselle'
+    ? invitation.locator('[data-roselle-farewell] [data-invitation-return-action]')
+    : invitation.locator(':scope > [data-invitation-return-action]');
+}
+
 async function startLayoutShiftObservation(page: Page) {
   await page.addInitScript((scoreKey) => {
     Reflect.set(window, scoreKey, 0);
@@ -87,9 +111,9 @@ async function expectMinimumControlHeight(control: Locator, minimum = 44) {
 }
 
 async function expectFlagshipOpening(page: Page, invitation: Locator, templateKey: TemplateKey) {
-  const opening = invitation.locator(':scope > header');
+  const opening = getOpening(invitation, templateKey);
   const title = opening.getByRole('heading', { name: 'Raka & Nadia' });
-  const openingAction = invitation.locator(':scope > [data-invitation-opening-action]');
+  const openingAction = getOpeningAction(invitation, templateKey);
 
   await expect(opening).toBeVisible();
   await expect(title).toBeVisible();
@@ -177,7 +201,7 @@ for (const templateKey of templateKeys) {
       await page.goto(getGenericPath(templateKey));
 
       const invitation = page.locator(`article[data-template="${templateKey}"]`);
-      const openingAction = invitation.locator(':scope > [data-invitation-opening-action]');
+      const openingAction = getOpeningAction(invitation, templateKey);
       const coupleSection = invitation.getByRole('heading', {
         name:
           templateKey === 'roselle'
@@ -189,7 +213,7 @@ for (const templateKey of templateKeys) {
       const scheduleJourney = invitation.locator('[data-invitation-schedule-journey]');
       const genericNote = invitation.locator('[data-generic-response-note]');
       const closingSection = invitation.locator('section').last();
-      const returnAction = invitation.locator(':scope > [data-invitation-return-action]');
+      const returnAction = getReturnAction(invitation, templateKey);
 
       await expect(invitation).toBeVisible();
       await expectFlagshipOpening(page, invitation, templateKey);
@@ -231,19 +255,30 @@ for (const templateKey of templateKeys) {
       await page.goto(getPersonalPath(templateKey));
 
       const invitation = page.locator(`article[data-template="${templateKey}"]`);
-      const openingAction = invitation.locator(':scope > [data-invitation-opening-action]');
-      const greeting = invitation.locator(':scope > [data-template-personal-greeting]');
+      const openingAction = getOpeningAction(invitation, templateKey);
+      const greeting = getPersonalGreeting(invitation, templateKey);
       const responseJourney = invitation.locator('[data-template-response-journey]');
       const scheduleJourney = invitation.locator('[data-invitation-schedule-journey]');
+      const coupleSection = invitation.getByRole('heading', {
+        name:
+          templateKey === 'roselle'
+            ? 'Dua cerita, satu perjalanan'
+            : templateKey === 'aruna'
+              ? 'Dengan sukacita kami mengundang Anda'
+              : 'Merayakan awal yang baru',
+      });
       const digitalGiftHeading = invitation.getByRole('heading', {
         name: 'Tanda kasih untuk perjalanan baru',
       });
       const digitalGiftSection = digitalGiftHeading.locator('xpath=ancestor::section[1]');
       const closingSection = invitation.locator('section').last();
-      const returnAction = invitation.locator(':scope > [data-invitation-return-action]');
+      const returnAction = getReturnAction(invitation, templateKey);
 
       await expectFlagshipOpening(page, invitation, templateKey);
-      await expect(openingAction).toHaveAttribute('href', /personal-greeting/);
+      await expect(openingAction).toHaveAttribute(
+        'href',
+        templateKey === 'roselle' ? '#roselle-couple-title' : /personal-greeting/,
+      );
       await expect(greeting).toBeVisible();
       await expect(greeting).toContainText('Tamu Browser');
       await expect(responseJourney).toBeVisible();
@@ -253,7 +288,12 @@ for (const templateKey of templateKeys) {
       await expect(invitation.locator('[data-personal-guestbook]')).toBeVisible();
       await expectStableGalleryMedia(invitation, templateKey, page);
 
-      await expectAppearsBefore(openingAction, greeting);
+      if (templateKey === 'roselle') {
+        await expectAppearsBefore(greeting, openingAction);
+      } else {
+        await expectAppearsBefore(openingAction, greeting);
+      }
+      await expectAppearsBefore(openingAction, coupleSection);
       await expectAppearsBefore(greeting, scheduleJourney);
       await expectAppearsBefore(greeting, responseJourney);
       await expectAppearsBefore(digitalGiftSection, responseJourney);

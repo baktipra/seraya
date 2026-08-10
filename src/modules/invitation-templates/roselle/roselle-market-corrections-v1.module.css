@@ -1,0 +1,148 @@
+/* SERAYA — J1.2A Roselle Market-Quality Visual Corrections V1
+ * Focused corrections on top of the locked J1.2 polish layer.
+ * Presentation only: no route, authority, persistence, or invitation schema changes.
+ */
+
+/* Keep arbitrary owner photography readable without flattening the photograph. */
+.marketCorrections[data-template='roselle'][data-roselle-market-corrections='v1']
+  :global([data-roselle-chapter='opening'][data-has-opening-portrait='true'])::before {
+  background:
+    radial-gradient(circle at 50% 42%, rgb(26 16 21 / 0.22), transparent 46%),
+    linear-gradient(
+      180deg,
+      rgb(32 20 26 / 0.52) 0%,
+      rgb(32 20 26 / 0.16) 40%,
+      rgb(32 20 26 / 0.78) 100%
+    ),
+    linear-gradient(
+      90deg,
+      rgb(54 35 44 / 0.22),
+      transparent 48%,
+      rgb(54 35 44 / 0.14)
+    );
+}
+
+.marketCorrections[data-template='roselle'][data-roselle-market-corrections='v1']
+  :global([data-roselle-opening-action]):focus-visible {
+  outline: 3px solid rgb(255 250 245 / 0.72);
+  outline-offset: 4px;
+}
+
+/* Calendar, map, livestream, and return actions keep a real 44px touch floor. */
+.marketCorrections[data-template='roselle'][data-roselle-market-corrections='v1']
+  :global([data-template-event-utility-item])
+  :is(button, a) {
+  min-height: 2.75rem;
+}
+
+.marketCorrections[data-template='roselle'][data-roselle-market-corrections='v1']
+  :global([data-roselle-return-to-opening]) {
+  min-height: 2.75rem;
+}
+
+/* Galleries longer than six items continue the editorial rhythm instead of collapsing to 1/12 tracks. */
+.marketCorrections[data-template='roselle'][data-roselle-market-corrections='v1']
+  :global([data-roselle-memory-album][data-gallery-layout='mosaic'])
+  figure:nth-child(n + 7) {
+  grid-column: span 6;
+  aspect-ratio: 4 / 5;
+}
+
+.marketCorrections[data-template='roselle'][data-roselle-market-corrections='v1']
+  :global([data-roselle-memory-album][data-gallery-layout='mosaic'])
+  figure:nth-child(3n + 9) {
+  grid-column: span 12;
+  aspect-ratio: 16 / 10;
+}
+
+.marketCorrections[data-template='roselle'][data-roselle-market-corrections='v1']
+  :global([data-roselle-memory-album])
+  figure {
+  overflow: hidden;
+}
+
+.marketCorrections[data-template='roselle'][data-roselle-market-corrections='v1']
+  :global([data-roselle-memory-album])
+  :global([data-invitation-media-image]) {
+  object-position: center;
+}
+
+@media (max-width: 26.875rem) {
+  /* Preserve the desktop media-first story rhythm on the primary guest viewport. */
+  .marketCorrections[data-template='roselle'][data-roselle-market-corrections='v1']
+    :global([data-roselle-story-media]) {
+    order: 1;
+  }
+
+  .marketCorrections[data-template='roselle'][data-roselle-market-corrections='v1']
+    :global([data-roselle-story-letter]) {
+    order: 2;
+  }
+
+  .marketCorrections[data-template='roselle'][data-roselle-market-corrections='v1']
+    :global([data-roselle-memory-album][data-gallery-layout='mosaic'])
+    figure:nth-child(n + 7) {
+    grid-column: span 6;
+    aspect-ratio: 4 / 5;
+  }
+
+  .marketCorrections[data-template='roselle'][data-roselle-market-corrections='v1']
+    :global([data-roselle-memory-album][data-gallery-layout='mosaic'])
+    figure:nth-child(3n + 9) {
+    grid-column: span 12;
+    aspect-ratio: 16 / 10;
+  }
+
+  .marketCorrections[data-template='roselle'][data-roselle-market-corrections='v1']
+    :global([data-roselle-return-to-opening]) {
+    margin-top: -3rem;
+  }
+}
+
+/* Short phones should still reach the addressed sheet and opening action without a dead extra viewport. */
+@media (max-width: 26.875rem) and (max-height: 46.25rem) {
+  .marketCorrections[data-template='roselle'][data-roselle-market-corrections='v1']
+    :global([data-roselle-chapter='opening']) {
+    min-height: 62svh;
+    padding: 3.75rem 1.25rem 5.25rem;
+  }
+
+  .marketCorrections[data-template='roselle'][data-roselle-market-corrections='v1']
+    :global([data-invitation-identity-opening='roselle']) {
+    margin-top: -3.9rem;
+    padding-top: 1.65rem;
+  }
+
+  .marketCorrections[data-template='roselle'][data-roselle-market-corrections='v1']
+    :global([data-invitation-identity-opening='roselle'])
+    blockquote {
+    font-size: 1.08rem;
+  }
+
+  .marketCorrections[data-template='roselle'][data-roselle-market-corrections='v1']
+    :global([data-roselle-addressed-letter])
+    :global([data-personal-greeting-title]) {
+    font-size: clamp(1.95rem, 9vw, 2.45rem);
+  }
+
+  .marketCorrections[data-template='roselle'][data-roselle-market-corrections='v1']
+    :global([data-roselle-opening-action]) {
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 22.5rem) {
+  .marketCorrections[data-template='roselle'][data-roselle-market-corrections='v1']
+    :global([data-roselle-memory-album][data-gallery-layout='mosaic'])
+    figure:nth-child(n + 7) {
+    grid-column: span 12;
+    aspect-ratio: 4 / 5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marketCorrections[data-template='roselle'][data-roselle-market-corrections='v1']
+    :global([data-roselle-opening-action]) {
+    transition: none;
+  }
+}
