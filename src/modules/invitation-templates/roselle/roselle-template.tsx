@@ -6,6 +6,7 @@ import {
   getPersonalInvitationPresentationSlots,
   type InvitationTemplateProps,
 } from '../core/theme-renderer.types';
+import { TemplateEventJourneyUtility } from '../template-event-journey-utility';
 
 import compositionStyles from './roselle-flagship-composition.module.css';
 import craftStyles from './roselle-flagship-craft.module.css';
@@ -91,6 +92,13 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
             role="group"
           >
             <RoselleEvents events={invitation.events} />
+            {invitation.events ? (
+              <TemplateEventJourneyUtility
+                events={invitation.events.items}
+                templateKey="roselle"
+                timeZone={invitation.timezone}
+              />
+            ) : null}
             <RoselleLocation location={invitation.location} />
           </div>
         ) : null}

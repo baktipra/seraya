@@ -8,6 +8,7 @@ import {
   getPersonalInvitationPresentationSlots,
   type InvitationTemplateProps,
 } from '../core/theme-renderer.types';
+import { TemplateEventJourneyUtility } from '../template-event-journey-utility';
 
 import styles from './aruna.module.css';
 import experienceStyles from './aruna-guest-experience.module.css';
@@ -201,6 +202,11 @@ export function ArunaTemplate({ invitation, renderContext }: InvitationTemplateP
                     ))}
                   </div>
                 ) : null}
+                <TemplateEventJourneyUtility
+                  events={invitation.events.items}
+                  templateKey="aruna"
+                  timeZone={invitation.timezone}
+                />
               </section>
             ) : null}
 

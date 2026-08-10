@@ -8,6 +8,7 @@ import {
   getPersonalInvitationPresentationSlots,
   type InvitationTemplateProps,
 } from '../core/theme-renderer.types';
+import { TemplateEventJourneyUtility } from '../template-event-journey-utility';
 
 import experienceStyles from './laras-guest-experience.module.css';
 import { createLarasMonogram } from './laras-monogram';
@@ -211,6 +212,11 @@ export function LarasTemplate({ invitation, renderContext }: InvitationTemplateP
                     ))}
                   </div>
                 ) : null}
+                <TemplateEventJourneyUtility
+                  events={invitation.events.items}
+                  templateKey="laras"
+                  timeZone={invitation.timezone}
+                />
               </section>
             ) : null}
 
