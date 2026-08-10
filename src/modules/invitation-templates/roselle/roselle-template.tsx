@@ -11,6 +11,7 @@ import { TemplateEventJourneyUtility } from '../template-event-journey-utility';
 import compositionStyles from './roselle-flagship-composition.module.css';
 import craftStyles from './roselle-flagship-craft.module.css';
 import marketFloorStyles from './roselle-market-floor-v1.module.css';
+import marketPolishStyles from './roselle-market-polish-v1.module.css';
 import motionStyles from './roselle-flagship-motion.module.css';
 import typographyStyles from './roselle-flagship-typography.module.css';
 import experienceStyles from './roselle-guest-experience.module.css';
@@ -45,15 +46,18 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
   const rsvpStepNumber = personalSlots?.rsvp ? 1 : null;
   const guestbookStepNumber = personalSlots?.guestbook ? (personalSlots.rsvp ? 2 : 1) : null;
   const hasScheduleJourney = Boolean(invitation.events || invitation.location);
+  const openingImage = invitation.gallery?.images[0] ?? null;
+  const storyImage = invitation.gallery?.images[1] ?? null;
 
   return (
     <article
       aria-labelledby="roselle-invitation-title"
-      className={`${styles.invitation} ${experienceStyles.experience} ${parityRepairStyles.parityRepair} ${compositionStyles.flagship} ${typographyStyles.typography} ${craftStyles.craft} ${motionStyles.motion} ${marketFloorStyles.marketFloor}`}
+      className={`${styles.invitation} ${experienceStyles.experience} ${parityRepairStyles.parityRepair} ${compositionStyles.flagship} ${typographyStyles.typography} ${craftStyles.craft} ${motionStyles.motion} ${marketFloorStyles.marketFloor} ${marketPolishStyles.marketPolish}`}
       data-roselle-composition="flagship-v1"
       data-roselle-craft="flagship-v1"
       data-roselle-experience="letter-v1"
       data-roselle-market-floor="v1"
+      data-roselle-market-polish="v1"
       data-roselle-motion="flagship-v1"
       data-roselle-typography="flagship-v1"
       data-palette={renderContext.palette?.key}
@@ -62,7 +66,7 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
       data-template="roselle"
     >
       <div className={marketFloorStyles.openingGate} data-roselle-opening-gate="market-floor-v1">
-        <RoselleHero hero={invitation.hero} />
+        <RoselleHero hero={invitation.hero} openingImage={openingImage} />
         <InvitationOpeningIdentity invitation={invitation} template="roselle" />
         {personalSlots?.greeting ? (
           <div
@@ -88,7 +92,7 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
       </div>
       <div className={styles.content}>
         <RoselleCouple couple={invitation.couple} />
-        <RoselleStory story={invitation.story} />
+        <RoselleStory story={invitation.story} storyImage={storyImage} />
         {hasScheduleJourney ? (
           <div
             aria-label="Jadwal dan lokasi perayaan"

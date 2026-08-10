@@ -9,6 +9,8 @@ const DEFAULT_GALLERY_SIZES =
 export type InvitationGalleryImageProps = {
   alt: string;
   className?: string;
+  fetchPriority?: 'auto' | 'high' | 'low';
+  loading?: 'eager' | 'lazy';
   sizes?: string;
   src: string;
 };
@@ -17,11 +19,13 @@ type InvitationMediaState = 'loading' | 'ready' | 'failed';
 
 /**
  * One render-safe gallery image contract shared by every invitation collection.
- * The surrounding template still owns crop, rhythm, and composition.
+ * The surrounding template still owns crop, rhythm, composition, and loading priority.
  */
 export function InvitationGalleryImage({
   alt,
   className,
+  fetchPriority = 'low',
+  loading = 'lazy',
   sizes = DEFAULT_GALLERY_SIZES,
   src,
 }: InvitationGalleryImageProps) {
@@ -35,9 +39,9 @@ export function InvitationGalleryImage({
         data-invitation-media-image
         decoding="async"
         draggable={false}
-        fetchPriority="low"
+        fetchPriority={fetchPriority}
         height={1125}
-        loading="lazy"
+        loading={loading}
         onError={() => setMediaState('failed')}
         onLoad={() => setMediaState('ready')}
         sizes={sizes}

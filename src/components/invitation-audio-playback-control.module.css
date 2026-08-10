@@ -66,14 +66,18 @@
 }
 
 .roselle .button {
-  border-color: rgb(122 65 73 / 0.24);
-  background: rgb(255 250 246 / 0.94);
-  color: #713d48;
+  border-color: rgb(255 248 242 / 0.18);
+  background: rgb(53 37 46 / 0.9);
+  box-shadow: 0 14px 38px rgb(35 22 29 / 0.28);
+  color: #fff8f2;
+  letter-spacing: 0.015em;
+  backdrop-filter: blur(18px) saturate(1.08);
 }
 
 .roselle .icon {
-  background: #f5e2e1;
-  color: #713d48;
+  border: 1px solid rgb(255 248 242 / 0.16);
+  background: rgb(255 248 242 / 0.1);
+  color: #fff8f2;
 }
 
 .aruna .button {
@@ -117,6 +121,10 @@
     min-height: 2.65rem;
     padding-right: 0.78rem;
     font-size: 0.72rem;
+  }
+
+  .roselle .button {
+    box-shadow: 0 10px 30px rgb(35 22 29 / 0.24);
   }
 }
 

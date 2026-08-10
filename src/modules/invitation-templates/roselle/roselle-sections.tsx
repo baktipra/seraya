@@ -5,11 +5,36 @@ import type { InvitationViewModel } from '../invitation-view-model';
 import { RoselleDivider, RosellePetalDecoration } from './roselle-decoration';
 import styles from './roselle.module.css';
 
-type RoselleHeroProps = Pick<InvitationViewModel, 'hero'>;
+type RoselleNarrativeImage = NonNullable<InvitationViewModel['gallery']>['images'][number];
+type RoselleHeroProps = Pick<InvitationViewModel, 'hero'> & {
+  openingImage?: RoselleNarrativeImage | null;
+};
+type RoselleStoryProps = Pick<InvitationViewModel, 'story'> & {
+  storyImage?: RoselleNarrativeImage | null;
+};
 
-export function RoselleHero({ hero }: RoselleHeroProps) {
+export function RoselleHero({ hero, openingImage = null }: RoselleHeroProps) {
   return (
-    <header className={styles.hero} data-roselle-chapter="opening">
+    <header
+      className={styles.hero}
+      data-has-opening-portrait={openingImage ? 'true' : 'false'}
+      data-roselle-chapter="opening"
+    >
+      {openingImage ? (
+        <div
+          aria-hidden="true"
+          data-roselle-opening-media-source="gallery-first"
+          data-roselle-opening-portrait
+        >
+          <InvitationGalleryImage
+            alt=""
+            fetchPriority="high"
+            loading="eager"
+            sizes="(max-width: 54rem) 100vw, 54rem"
+            src={openingImage.src}
+          />
+        </div>
+      ) : null}
       <RosellePetalDecoration className={styles.heroPetalOne} />
       <RosellePetalDecoration className={styles.heroPetalTwo} />
       <div className={styles.heroLetter} data-roselle-letter>
@@ -71,7 +96,7 @@ export function RoselleCouple({ couple }: Pick<InvitationViewModel, 'couple'>) {
   );
 }
 
-export function RoselleStory({ story }: Pick<InvitationViewModel, 'story'>) {
+export function RoselleStory({ story, storyImage = null }: RoselleStoryProps) {
   if (!story) {
     return null;
   }
@@ -80,9 +105,19 @@ export function RoselleStory({ story }: Pick<InvitationViewModel, 'story'>) {
     <section
       aria-labelledby="roselle-story-title"
       className={styles.storySection}
+      data-has-story-media={storyImage ? 'true' : 'false'}
       data-roselle-chapter="story"
     >
       <RosellePetalDecoration className={styles.storyPetal} />
+      {storyImage ? (
+        <figure aria-hidden="true" data-roselle-story-media>
+          <InvitationGalleryImage
+            alt=""
+            sizes="(max-width: 36rem) calc(100vw - 3rem), 24rem"
+            src={storyImage.src}
+          />
+        </figure>
+      ) : null}
       <div className={styles.storyInner} data-roselle-story-letter>
         <p className={styles.sectionEyebrow}>Cerita kami</p>
         <h2 className={styles.storyTitle} id="roselle-story-title">

@@ -1,0 +1,85 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+import { describe, expect, it } from 'vitest';
+
+const roselleTemplate = readFileSync(
+  join(process.cwd(), 'src/modules/invitation-templates/roselle/roselle-template.tsx'),
+  'utf8',
+);
+const roselleSections = readFileSync(
+  join(process.cwd(), 'src/modules/invitation-templates/roselle/roselle-sections.tsx'),
+  'utf8',
+);
+const polishStyles = readFileSync(
+  join(process.cwd(), 'src/modules/invitation-templates/roselle/roselle-market-polish-v1.module.css'),
+  'utf8',
+);
+const galleryImage = readFileSync(
+  join(process.cwd(), 'src/modules/invitation-templates/invitation-gallery-image.tsx'),
+  'utf8',
+);
+const audioStyles = readFileSync(
+  join(process.cwd(), 'src/components/invitation-audio-playback-control.module.css'),
+  'utf8',
+);
+
+describe('J1.2 Roselle market-quality visual polish contract', () => {
+  it('adds one authoritative polish layer without replacing the locked J1.1 gate', () => {
+    expect(roselleTemplate).toContain("import marketPolishStyles from './roselle-market-polish-v1.module.css'");
+    expect(roselleTemplate).toContain('${marketPolishStyles.marketPolish}');
+    expect(roselleTemplate).toContain('data-roselle-market-floor="v1"');
+    expect(roselleTemplate).toContain('data-roselle-market-polish="v1"');
+    expect(roselleTemplate).toContain('data-roselle-opening-gate="market-floor-v1"');
+  });
+
+  it('promotes existing gallery media into optional opening and story art direction', () => {
+    expect(roselleTemplate).toContain('const openingImage = invitation.gallery?.images[0] ?? null');
+    expect(roselleTemplate).toContain('const storyImage = invitation.gallery?.images[1] ?? null');
+    expect(roselleTemplate).toContain('openingImage={openingImage}');
+    expect(roselleTemplate).toContain('storyImage={storyImage}');
+    expect(roselleSections).toContain('data-roselle-opening-media-source="gallery-first"');
+    expect(roselleSections).toContain('data-roselle-opening-portrait');
+    expect(roselleSections).toContain('data-roselle-story-media');
+    expect(roselleSections).toContain('fetchPriority="high"');
+    expect(roselleSections).toContain('loading="eager"');
+  });
+
+  it('keeps shared gallery loading lazy by default while allowing Roselle LCP priority', () => {
+    expect(galleryImage).toContain("fetchPriority?: 'auto' | 'high' | 'low'");
+    expect(galleryImage).toContain("loading?: 'eager' | 'lazy'");
+    expect(galleryImage).toContain("fetchPriority = 'low'");
+    expect(galleryImage).toContain("loading = 'lazy'");
+    expect(galleryImage).toContain('fetchPriority={fetchPriority}');
+    expect(galleryImage).toContain('loading={loading}');
+  });
+
+  it('removes duplicate event chrome only when the native utility is present', () => {
+    expect(polishStyles).toContain(':has(:global([data-template-event-action-list]))');
+    expect(polishStyles).toContain("[data-schedule-event='roselle']");
+    expect(polishStyles).toContain("a[target='_blank']");
+    expect(polishStyles).toContain('display: none');
+  });
+
+  it('creates photo-led peaks and quieter guest-response chrome', () => {
+    expect(polishStyles).toContain("[data-roselle-chapter='gallery']");
+    expect(polishStyles).toContain('linear-gradient(160deg, #3d2933, #2f2229 72%)');
+    expect(polishStyles).toContain('[data-roselle-response-step]');
+    expect(polishStyles).toContain("[data-roselle-farewell='market-floor-v1']");
+    expect(audioStyles).toContain('background: rgb(53 37 46 / 0.9)');
+  });
+
+  it('locks the polish to the 430, 390, and 360 mobile quality gates', () => {
+    expect(polishStyles).toContain('@media (max-width: 26.875rem)');
+    expect(polishStyles).toContain('@media (max-width: 24.375rem)');
+    expect(polishStyles).toContain('@media (max-width: 22.5rem)');
+    expect(polishStyles).toContain('@media (prefers-reduced-motion: reduce)');
+  });
+
+  it('stays schema-free and does not invent unsupported wedding media fields', () => {
+    expect(roselleTemplate).not.toContain('weddingFilm');
+    expect(roselleTemplate).not.toContain('couplePortrait');
+    expect(roselleSections).not.toContain('weddingFilm');
+    expect(polishStyles).not.toMatch(/url\(['"]?https?:\/\//);
+  });
+});
