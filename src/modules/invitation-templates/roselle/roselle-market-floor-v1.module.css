@@ -1,0 +1,370 @@
+/* SERAYA — J1.1 Roselle Market-Floor Flagship Experience Pass
+ * Presentation-only maturation on top of the locked Roselle flagship system.
+ * No guest authority, persistence, route, or invitation schema changes.
+ */
+
+.marketFloor[data-template='roselle'][data-roselle-market-floor='v1'] {
+  --roselle-market-inline: clamp(1rem, 4vw, 2rem);
+  --roselle-market-readable: 38rem;
+  overflow-x: clip;
+}
+
+.openingGate {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  min-height: 100svh;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  border-bottom: 1px solid var(--roselle-line);
+  background: var(--roselle-ivory);
+}
+
+.openingGate::after {
+  position: absolute;
+  z-index: -1;
+  right: clamp(-6rem, -8vw, -2rem);
+  bottom: clamp(-7rem, -9vw, -3rem);
+  width: clamp(14rem, 34vw, 27rem);
+  aspect-ratio: 1;
+  border: 1px solid rgb(151 99 109 / 0.12);
+  border-radius: 999px;
+  content: '';
+  pointer-events: none;
+}
+
+.openingGate > :global([data-roselle-chapter='opening']) {
+  width: 100%;
+  min-height: clamp(31rem, 66svh, 47rem);
+  margin: 0;
+}
+
+.openingGate > :global([data-invitation-identity-opening='roselle']) {
+  position: relative;
+  z-index: 4;
+  width: min(calc(100% - 3rem), 40rem);
+  max-width: 40rem;
+  margin: clamp(-4.75rem, -8vw, -3rem) auto 0;
+  padding: clamp(2rem, 4vw, 3rem) clamp(1.3rem, 4vw, 2.5rem) 1.5rem;
+  border: 1px solid rgb(151 99 109 / 0.22);
+  border-bottom: 0;
+  border-radius: 1.5rem 1.5rem 0 0;
+  background: rgb(255 253 250 / 0.94);
+  box-shadow: 0 -1rem 3rem rgb(64 43 53 / 0.08);
+  backdrop-filter: blur(14px);
+}
+
+.openingGate > :global([data-roselle-addressed-letter]) {
+  position: relative;
+  z-index: 5;
+  width: min(calc(100% - 3rem), 40rem);
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 0.9rem clamp(1.3rem, 4vw, 2.5rem) 1.65rem;
+  border-inline: 1px solid rgb(151 99 109 / 0.22);
+  border-top: 0;
+  background: rgb(255 253 250 / 0.94);
+  color: var(--roselle-plum);
+  backdrop-filter: blur(14px);
+}
+
+.openingGate > :global([data-roselle-addressed-letter]) :global([data-personal-guest-greeting]) {
+  max-width: var(--roselle-market-readable);
+  margin: 0 auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.openingGate > :global([data-roselle-addressed-letter]) :global([data-personal-greeting-title]) {
+  max-width: 16ch;
+  font-size: clamp(2rem, 6vw, 3.3rem);
+  line-height: 0.96;
+}
+
+.openingGate > :global([data-roselle-opening-action]) {
+  position: relative;
+  z-index: 6;
+  width: min(calc(100% - 3rem), 40rem);
+  min-height: 3.35rem;
+  margin: 0 auto clamp(1.5rem, 4vw, 2.5rem);
+  border-color: var(--roselle-plum);
+  border-radius: 0 0 1.5rem 1.5rem;
+  background: var(--roselle-plum);
+  box-shadow: 0 1rem 2.8rem rgb(64 43 53 / 0.17);
+  color: var(--roselle-paper);
+}
+
+.openingGate > :global([data-roselle-opening-action]):hover,
+.openingGate > :global([data-roselle-opening-action]):focus-visible {
+  background: color-mix(in srgb, var(--roselle-plum) 88%, black);
+  box-shadow: 0 1.2rem 3rem rgb(64 43 53 / 0.22);
+}
+
+.marketFloor :global([data-roselle-chapter='couple']) {
+  isolation: isolate;
+}
+
+.marketFloor :global([data-roselle-couple-composition]) {
+  position: relative;
+  max-width: 54rem;
+}
+
+.marketFloor :global([data-roselle-person]) {
+  position: relative;
+  padding-block: clamp(1.75rem, 4vw, 2.75rem);
+}
+
+.marketFloor :global([data-roselle-person])::before {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: min(100%, 17rem);
+  border-top: 1px solid rgb(151 99 109 / 0.28);
+  content: '';
+  transform: translateX(-50%);
+}
+
+.marketFloor :global([data-roselle-person]) h3 {
+  font-size: clamp(2.7rem, 8vw, 4.8rem);
+  line-height: 0.88;
+}
+
+.marketFloor :global([data-roselle-ampersand]) {
+  position: relative;
+  z-index: 2;
+  filter: drop-shadow(0 0.75rem 1.5rem rgb(64 43 53 / 0.08));
+}
+
+/* Countdown becomes the threshold into the event chapter; actions remain after the event copy. */
+.marketFloor :global([data-roselle-celebration-thread]) {
+  display: flex;
+  flex-direction: column;
+}
+
+.marketFloor :global([data-template-event-utility='roselle']) {
+  display: contents;
+}
+
+.marketFloor :global([data-template-event-countdown]) {
+  order: 1;
+  width: min(calc(100% - 2 * var(--roselle-market-inline)), 46rem);
+  margin: clamp(2.75rem, 7vw, 4.75rem) auto clamp(1.2rem, 3vw, 2rem);
+  padding: clamp(2rem, 5vw, 3.25rem) clamp(1rem, 4vw, 2.5rem);
+  border-block: 1px solid rgb(151 99 109 / 0.24);
+  background:
+    radial-gradient(circle at 50% 0%, rgb(189 125 131 / 0.12), transparent 18rem),
+    transparent;
+}
+
+.marketFloor :global([data-template-event-countdown]) > div span:first-child {
+  color: var(--roselle-plum);
+  font-size: clamp(2.25rem, 8vw, 4.15rem);
+  line-height: 0.88;
+}
+
+.marketFloor :global([data-roselle-chapter='events']) {
+  order: 2;
+}
+
+.marketFloor :global([data-template-event-action-list]) {
+  order: 3;
+  width: min(calc(100% - 2 * var(--roselle-market-inline)), 46rem);
+  margin: 0 auto;
+  padding-bottom: 0.5rem;
+}
+
+.marketFloor :global([data-template-event-utility='roselle']) > div:last-child {
+  order: 3;
+  width: min(calc(100% - 2 * var(--roselle-market-inline)), 46rem);
+  margin: 0 auto;
+  padding: 1.25rem 0 2.25rem;
+}
+
+.marketFloor :global([data-template-event-utility-item]) {
+  padding-block: clamp(1.35rem, 3vw, 1.9rem);
+  border-color: rgb(151 99 109 / 0.2);
+}
+
+.marketFloor :global([data-template-event-utility-item]) > div:first-child > p {
+  max-width: 18ch;
+  color: var(--roselle-plum);
+  font-size: clamp(1.25rem, 4vw, 1.7rem);
+}
+
+.marketFloor :global([data-template-event-utility-item]) button,
+.marketFloor :global([data-template-event-utility-item]) a,
+.marketFloor :global([data-template-event-utility='roselle']) > div:last-child button {
+  min-height: 2.75rem;
+}
+
+.marketFloor :global([data-roselle-chapter='location']) {
+  order: 4;
+}
+
+.marketFloor :global([data-roselle-chapter='gallery']) {
+  overflow: hidden;
+}
+
+.marketFloor :global([data-roselle-memory-album]) figure {
+  transform-origin: center;
+}
+
+.marketFloor :global([data-roselle-memory-album][data-gallery-layout='mosaic']) figure:first-child {
+  box-shadow: 0 2rem 4.8rem rgb(64 43 53 / 0.15);
+}
+
+.marketFloor :global([data-roselle-memory-album][data-gallery-layout='mosaic']) figure:nth-child(2n) {
+  translate: 0 clamp(0.2rem, 1vw, 0.8rem);
+}
+
+.marketFloor :global([data-template-response-journey='roselle']) {
+  position: relative;
+  isolation: isolate;
+}
+
+.marketFloor :global([data-template-response-slot]) {
+  border-top: 1px solid rgb(151 99 109 / 0.18);
+  padding-top: clamp(1.4rem, 3vw, 2rem);
+}
+
+.farewell {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 14%, rgb(189 125 131 / 0.1), transparent 21rem),
+    linear-gradient(180deg, var(--roselle-paper), var(--roselle-ivory));
+}
+
+.farewell > :global([data-invitation-identity-footer='roselle']),
+.farewell > :global([data-roselle-letter-closing]) {
+  background: transparent !important;
+}
+
+.farewell > :global([data-roselle-return-to-opening]) {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.6rem;
+  margin: -3.8rem auto 2.25rem;
+  padding: 0.65rem 1rem;
+  border: 1px solid rgb(151 99 109 / 0.28);
+  border-radius: 999px;
+  background: rgb(255 253 250 / 0.72);
+  color: var(--roselle-plum-soft);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  backdrop-filter: blur(10px);
+}
+
+@media (max-width: 26.875rem) {
+  .openingGate {
+    min-height: 100svh;
+    justify-content: flex-start;
+  }
+
+  .openingGate > :global([data-roselle-chapter='opening']) {
+    min-height: 58svh;
+  }
+
+  .openingGate > :global([data-invitation-identity-opening='roselle']),
+  .openingGate > :global([data-roselle-addressed-letter]),
+  .openingGate > :global([data-roselle-opening-action]) {
+    width: calc(100% - 1.5rem);
+  }
+
+  .openingGate > :global([data-invitation-identity-opening='roselle']) {
+    margin-top: -2.75rem;
+    padding: 1.65rem 1.05rem 1rem;
+    border-radius: 1.15rem 1.15rem 0 0;
+  }
+
+  .openingGate > :global([data-roselle-addressed-letter]) {
+    padding: 0.6rem 1.05rem 1.25rem;
+  }
+
+  .openingGate > :global([data-roselle-opening-action]) {
+    min-height: 3.15rem;
+    margin-bottom: 1rem;
+    border-radius: 0 0 1.15rem 1.15rem;
+  }
+
+  .marketFloor :global([data-template-event-countdown]) {
+    width: calc(100% - 1.5rem);
+    margin-top: 2.5rem;
+    padding: 1.8rem 0.75rem;
+  }
+
+  .marketFloor :global([data-template-event-action-list]),
+  .marketFloor :global([data-template-event-utility='roselle']) > div:last-child {
+    width: calc(100% - 1.5rem);
+  }
+
+  .marketFloor :global([data-template-event-utility-item]) > div:first-child > div {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+  }
+
+  .marketFloor :global([data-template-event-utility-item]) button,
+  .marketFloor :global([data-template-event-utility-item]) a {
+    width: 100%;
+    justify-content: center;
+    padding-inline: 0.7rem;
+    text-align: center;
+  }
+
+  .marketFloor :global([data-roselle-person]) h3 {
+    font-size: clamp(2.55rem, 13vw, 3.65rem);
+  }
+}
+
+@media (max-width: 24.375rem) {
+  .openingGate > :global([data-roselle-chapter='opening']) {
+    min-height: 55svh;
+  }
+
+  .openingGate > :global([data-invitation-identity-opening='roselle']) {
+    margin-top: -2.15rem;
+  }
+
+  .marketFloor :global([data-template-event-countdown]) > div {
+    gap: 0.35rem;
+  }
+
+  .marketFloor :global([data-template-event-countdown]) > div span:first-child {
+    font-size: 2.1rem;
+  }
+}
+
+@media (max-width: 22.5rem) {
+  .openingGate > :global([data-invitation-identity-opening='roselle']),
+  .openingGate > :global([data-roselle-addressed-letter]),
+  .openingGate > :global([data-roselle-opening-action]) {
+    width: calc(100% - 1rem);
+  }
+
+  .marketFloor :global([data-template-event-utility-item]) > div:first-child > div {
+    grid-template-columns: 1fr;
+  }
+
+  .marketFloor :global([data-template-event-countdown]) {
+    width: calc(100% - 1rem);
+    padding-inline: 0.45rem;
+  }
+
+  .marketFloor :global([data-template-event-countdown]) > div span:first-child {
+    font-size: 1.9rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marketFloor :global([data-roselle-memory-album]) figure {
+    translate: none;
+  }
+}

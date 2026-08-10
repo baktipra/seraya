@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { InvitationTemplateKey } from '@/modules/invitation-templates/invitation-template.keys';
 import type { InvitationRenderSurfaceV1 } from '@/modules/invitation-templates/core/theme-renderer.types';
@@ -50,7 +50,7 @@ function getPlaybackCopy(state: PlaybackState) {
     default:
       return {
         ariaLabel: 'Putar musik undangan',
-        liveMessage: 'Musik undangan tersedia dan tidak diputar otomatis.',
+        liveMessage: 'Musik undangan tersedia dan siap diputar ketika undangan dibuka.',
         visibleLabel: 'Putar musik',
       };
   }
@@ -63,8 +63,13 @@ export function InvitationAudioPlaybackControl({
 }: InvitationAudioPlaybackControlProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [state, setState] = useState<PlaybackState>('idle');
+  const stateRef = useRef<PlaybackState>('idle');
   const copy = getPlaybackCopy(state);
   const isLoaded = state === 'playing' || state === 'muted';
+
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -77,6 +82,58 @@ export function InvitationAudioPlaybackControl({
     };
   }, []);
 
+  const startPlayback = useCallback(async () => {
+    const audio = audioRef.current;
+    if (!audio || stateRef.current === 'loading') {
+      return;
+    }
+
+    audio.pause();
+    audio.muted = false;
+    audio.src = createPlaybackRequestUrl(capability.requestUrl);
+    audio.load();
+    stateRef.current = 'loading';
+    setState('loading');
+
+    try {
+      await audio.play();
+      stateRef.current = 'playing';
+      setState('playing');
+    } catch {
+      audio.removeAttribute('src');
+      audio.load();
+      stateRef.current = 'error';
+      setState('error');
+    }
+  }, [capability.requestUrl]);
+
+  useEffect(() => {
+    if (templateKey !== 'roselle') {
+      return;
+    }
+
+    function handleRoselleOpening(event: MouseEvent) {
+      const target = event.target;
+      if (!(target instanceof Element) || !target.closest('[data-roselle-opening-action]')) {
+        return;
+      }
+
+      if (stateRef.current === 'idle' || stateRef.current === 'error') {
+        void startPlayback();
+        return;
+      }
+
+      if (stateRef.current === 'muted' && audioRef.current) {
+        audioRef.current.muted = false;
+        stateRef.current = 'playing';
+        setState('playing');
+      }
+    }
+
+    document.addEventListener('click', handleRoselleOpening);
+    return () => document.removeEventListener('click', handleRoselleOpening);
+  }, [startPlayback, templateKey]);
+
   async function handlePlaybackClick() {
     const audio = audioRef.current;
     if (!audio || state === 'loading') {
@@ -85,30 +142,19 @@ export function InvitationAudioPlaybackControl({
 
     if (state === 'playing') {
       audio.muted = true;
+      stateRef.current = 'muted';
       setState('muted');
       return;
     }
 
     if (state === 'muted') {
       audio.muted = false;
+      stateRef.current = 'playing';
       setState('playing');
       return;
     }
 
-    audio.pause();
-    audio.muted = false;
-    audio.src = createPlaybackRequestUrl(capability.requestUrl);
-    audio.load();
-    setState('loading');
-
-    try {
-      await audio.play();
-      setState('playing');
-    } catch {
-      audio.removeAttribute('src');
-      audio.load();
-      setState('error');
-    }
+    await startPlayback();
   }
 
   return (
@@ -121,6 +167,7 @@ export function InvitationAudioPlaybackControl({
       ]
         .filter(Boolean)
         .join(' ')}
+      data-audio-opening-sync={templateKey === 'roselle' ? 'roselle-market-floor-v1' : undefined}
       data-audio-playback-state={state}
       data-invitation-audio-playback="v4j-slice-c"
       data-playback-surface={surface}
@@ -128,8 +175,15 @@ export function InvitationAudioPlaybackControl({
       <audio
         ref={audioRef}
         loop
-        onError={() => setState('error')}
-        onPlaying={() => setState((current) => (current === 'muted' ? 'muted' : 'playing'))}
+        onError={() => {
+          stateRef.current = 'error';
+          setState('error');
+        }}
+        onPlaying={() => {
+          const nextState = stateRef.current === 'muted' ? 'muted' : 'playing';
+          stateRef.current = nextState;
+          setState(nextState);
+        }}
         playsInline
         preload="none"
       />

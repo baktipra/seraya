@@ -10,6 +10,7 @@ import { TemplateEventJourneyUtility } from '../template-event-journey-utility';
 
 import compositionStyles from './roselle-flagship-composition.module.css';
 import craftStyles from './roselle-flagship-craft.module.css';
+import marketFloorStyles from './roselle-market-floor-v1.module.css';
 import motionStyles from './roselle-flagship-motion.module.css';
 import typographyStyles from './roselle-flagship-typography.module.css';
 import experienceStyles from './roselle-guest-experience.module.css';
@@ -43,18 +44,16 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
     Number(Boolean(personalSlots?.rsvp)) + Number(Boolean(personalSlots?.guestbook));
   const rsvpStepNumber = personalSlots?.rsvp ? 1 : null;
   const guestbookStepNumber = personalSlots?.guestbook ? (personalSlots.rsvp ? 2 : 1) : null;
-  const openingTargetId = personalSlots?.greeting
-    ? 'roselle-personal-greeting'
-    : 'roselle-couple-title';
   const hasScheduleJourney = Boolean(invitation.events || invitation.location);
 
   return (
     <article
       aria-labelledby="roselle-invitation-title"
-      className={`${styles.invitation} ${experienceStyles.experience} ${parityRepairStyles.parityRepair} ${compositionStyles.flagship} ${typographyStyles.typography} ${craftStyles.craft} ${motionStyles.motion}`}
+      className={`${styles.invitation} ${experienceStyles.experience} ${parityRepairStyles.parityRepair} ${compositionStyles.flagship} ${typographyStyles.typography} ${craftStyles.craft} ${motionStyles.motion} ${marketFloorStyles.marketFloor}`}
       data-roselle-composition="flagship-v1"
       data-roselle-craft="flagship-v1"
       data-roselle-experience="letter-v1"
+      data-roselle-market-floor="v1"
       data-roselle-motion="flagship-v1"
       data-roselle-typography="flagship-v1"
       data-palette={renderContext.palette?.key}
@@ -62,25 +61,31 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
       style={renderContext.palette?.variables}
       data-template="roselle"
     >
-      <RoselleHero hero={invitation.hero} />
-      <InvitationOpeningIdentity invitation={invitation} template="roselle" />
-      <a data-invitation-opening-action data-roselle-opening-action href={`#${openingTargetId}`}>
-        <span>Buka undangan</span>
-        <i aria-hidden="true" />
-      </a>
-      {personalSlots?.greeting ? (
-        <div
-          aria-label="Sapaan untuk tamu"
-          className={styles.personalGreeting}
-          data-roselle-addressed-letter
-          data-roselle-chapter="greeting"
-          data-template-personal-greeting="roselle"
-          id="roselle-personal-greeting"
-          role="region"
+      <div className={marketFloorStyles.openingGate} data-roselle-opening-gate="market-floor-v1">
+        <RoselleHero hero={invitation.hero} />
+        <InvitationOpeningIdentity invitation={invitation} template="roselle" />
+        {personalSlots?.greeting ? (
+          <div
+            aria-label="Sapaan untuk tamu"
+            className={styles.personalGreeting}
+            data-roselle-addressed-letter
+            data-roselle-chapter="greeting"
+            data-template-personal-greeting="roselle"
+            id="roselle-personal-greeting"
+            role="region"
+          >
+            {personalSlots.greeting}
+          </div>
+        ) : null}
+        <a
+          data-invitation-opening-action
+          data-roselle-opening-action
+          href="#roselle-couple-title"
         >
-          {personalSlots.greeting}
-        </div>
-      ) : null}
+          <span>Buka undangan</span>
+          <i aria-hidden="true" />
+        </a>
+      </div>
       <div className={styles.content}>
         <RoselleCouple couple={invitation.couple} />
         <RoselleStory story={invitation.story} />
@@ -148,17 +153,19 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
             {genericResponseCopy}
           </p>
         ) : null}
-        <InvitationIdentityFooter invitation={invitation} template="roselle" />
-        <RoselleClosing closing={invitation.closing} />
+        <div className={marketFloorStyles.farewell} data-roselle-farewell="market-floor-v1">
+          <InvitationIdentityFooter invitation={invitation} template="roselle" />
+          <RoselleClosing closing={invitation.closing} />
+          <a
+            data-invitation-return-action
+            data-roselle-return-to-opening
+            href="#roselle-invitation-title"
+          >
+            <span aria-hidden="true">↑</span>
+            Kembali ke awal
+          </a>
+        </div>
       </div>
-      <a
-        data-invitation-return-action
-        data-roselle-return-to-opening
-        href="#roselle-invitation-title"
-      >
-        <span aria-hidden="true">↑</span>
-        Kembali ke awal
-      </a>
     </article>
   );
 }
