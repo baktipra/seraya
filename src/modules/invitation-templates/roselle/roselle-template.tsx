@@ -13,6 +13,7 @@ import craftStyles from './roselle-flagship-craft.module.css';
 import marketFloorStyles from './roselle-market-floor-v1.module.css';
 import marketPolishStyles from './roselle-market-polish-v1.module.css';
 import marketCorrectionStyles from './roselle-market-corrections-v1.module.css';
+import immersiveStyles from './roselle-immersive-experience-v1.module.css';
 import motionStyles from './roselle-flagship-motion.module.css';
 import premiumMediaStyles from './roselle-premium-media-v1.module.css';
 import typographyStyles from './roselle-flagship-typography.module.css';
@@ -58,11 +59,12 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
   return (
     <article
       aria-labelledby="roselle-invitation-title"
-      className={`${styles.invitation} ${experienceStyles.experience} ${parityRepairStyles.parityRepair} ${compositionStyles.flagship} ${typographyStyles.typography} ${craftStyles.craft} ${motionStyles.motion} ${marketFloorStyles.marketFloor} ${marketPolishStyles.marketPolish} ${marketCorrectionStyles.marketCorrections} ${premiumMediaStyles.premiumMedia}`}
+      className={`${styles.invitation} ${experienceStyles.experience} ${parityRepairStyles.parityRepair} ${compositionStyles.flagship} ${typographyStyles.typography} ${craftStyles.craft} ${motionStyles.motion} ${marketFloorStyles.marketFloor} ${marketPolishStyles.marketPolish} ${marketCorrectionStyles.marketCorrections} ${premiumMediaStyles.premiumMedia} ${immersiveStyles.immersive}`}
       data-palette={renderContext.palette?.key}
       data-roselle-composition="flagship-v1"
       data-roselle-craft="flagship-v1"
       data-roselle-experience="letter-v1"
+      data-roselle-immersive="v1"
       data-roselle-market-corrections="v1"
       data-roselle-market-floor="v1"
       data-roselle-market-polish="v1"

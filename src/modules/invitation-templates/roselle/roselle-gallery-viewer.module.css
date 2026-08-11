@@ -1,0 +1,247 @@
+.openButton {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  display: grid;
+  place-items: end start;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: zoom-in;
+}
+
+.openButton:focus-visible {
+  outline: 3px solid rgb(255 250 245 / 82%);
+  outline-offset: -5px;
+}
+
+.openHint {
+  margin: 0 0 0.75rem 0.75rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid rgb(255 255 255 / 28%);
+  border-radius: 999px;
+  background: rgb(35 22 29 / 62%);
+  color: #fffaf5;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  opacity: 0;
+  transform: translateY(0.25rem);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.openButton:hover .openHint,
+.openButton:focus-visible .openHint {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.backdrop {
+  position: fixed;
+  z-index: 9999;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: max(0rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right))
+    max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+  background: rgb(20 13 17 / 96%);
+  backdrop-filter: blur(18px);
+  animation: roselle-lightbox-backdrop-in 180ms ease-out both;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+
+.dialog {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  gap: 0.9rem;
+  width: min(100%, 76rem);
+  height: min(100%, 58rem);
+  min-height: 0;
+  color: #fffaf5;
+  animation: roselle-lightbox-dialog-in 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.topBar {
+  display: flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.counter {
+  margin: 0;
+  color: rgb(255 250 245 / 72%);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.closeButton,
+.navigationButton {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  border: 1px solid rgb(255 250 245 / 24%);
+  border-radius: 999px;
+  background: rgb(255 250 245 / 8%);
+  color: inherit;
+  cursor: pointer;
+}
+
+.closeButton {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.closeButton:hover,
+.navigationButton:hover {
+  border-color: rgb(255 250 245 / 48%);
+  background: rgb(255 250 245 / 14%);
+}
+
+.closeButton:focus-visible,
+.navigationButton:focus-visible {
+  outline: 3px solid rgb(255 250 245 / 72%);
+  outline-offset: 3px;
+}
+
+.imageStage {
+  display: grid;
+  min-height: 0;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgb(255 250 245 / 12%);
+  border-radius: clamp(0.8rem, 2vw, 1.35rem);
+  background: #120c0f;
+}
+
+.imageStage > [data-invitation-media-frame] {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  place-items: center;
+  background: transparent;
+}
+
+.imageStage [data-invitation-media-image] {
+  width: 100%;
+  height: 100%;
+  max-height: min(74vh, 48rem);
+  object-fit: contain;
+}
+
+.imageStage :is([data-invitation-media-shimmer], [data-invitation-media-fallback]) {
+  display: none;
+}
+
+.caption {
+  max-width: 54rem;
+  margin: 0 auto;
+  color: rgb(255 250 245 / 68%);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  text-align: center;
+  text-wrap: pretty;
+}
+
+.navigation {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.navigationButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.65rem 1rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+@keyframes roselle-lightbox-backdrop-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes roselle-lightbox-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.4rem) scale(0.992);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 430px) {
+  .backdrop {
+    padding: max(0.65rem, env(safe-area-inset-top)) max(0.65rem, env(safe-area-inset-right))
+      max(0.65rem, env(safe-area-inset-bottom)) max(0.65rem, env(safe-area-inset-left));
+  }
+
+  .dialog {
+    gap: 0.65rem;
+    width: 100%;
+    height: 100%;
+  }
+
+  .imageStage {
+    border-radius: 0.85rem;
+  }
+
+  .imageStage [data-invitation-media-image] {
+    max-height: 70svh;
+  }
+
+  .openHint {
+    display: none;
+  }
+}
+
+@media (max-width: 390px) {
+  .navigationButton {
+    flex: 1 1 0;
+    padding-inline: 0.75rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .navigationButton {
+    font-size: 0.7rem;
+  }
+
+  .caption {
+    font-size: 0.74rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop,
+  .dialog {
+    animation: none;
+  }
+
+  .openHint {
+    transition: none;
+  }
+}

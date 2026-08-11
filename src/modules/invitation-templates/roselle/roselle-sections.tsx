@@ -3,6 +3,7 @@ import { InvitationGalleryImage } from '../invitation-gallery-image';
 import type { InvitationViewModel } from '../invitation-view-model';
 
 import { RoselleDivider, RosellePetalDecoration } from './roselle-decoration';
+import { RoselleGalleryViewer } from './roselle-gallery-viewer';
 import styles from './roselle.module.css';
 
 type RoselleNarrativeImage = NonNullable<InvitationViewModel['gallery']>['images'][number];
@@ -27,7 +28,7 @@ export function RoselleHero({
       className={styles.hero}
       data-has-opening-portrait={openingImage ? 'true' : 'false'}
       data-roselle-chapter="opening"
-    >
+  >
       {openingImage ? (
         <div
           aria-hidden="true"
@@ -220,7 +221,7 @@ export function RoselleEvents({ events }: Pick<InvitationViewModel, 'events'>) {
       </h2>
       {events.primaryDateLabel ? (
         <p className={styles.eventPrimaryDate}>{events.primaryDateLabel}</p>
-      ) : null}
+       ) : null}
       {events.items.length > 0 ? (
         <div
           className={styles.eventGrid}
@@ -328,24 +329,7 @@ export function RoselleGallery({ gallery }: Pick<InvitationViewModel, 'gallery'>
       <h2 className={styles.sectionTitle} id="roselle-gallery-title">
         Fragmen yang kami simpan
       </h2>
-      <div
-        className={styles.galleryGrid}
-        data-gallery-layout={galleryLayout}
-        data-roselle-memory-album
-      >
-        {gallery.images.map((image, index) => (
-          <figure className={styles.galleryFigure} data-gallery-index={index} key={image.id}>
-            <InvitationGalleryImage
-              alt={image.alt}
-              className={styles.galleryImage}
-              src={image.src}
-            />
-            <figcaption aria-hidden="true" data-roselle-memory-caption>
-              {String(index + 1).padStart(2, '0')}
-            </figcaption>
-          </figure>
-        ))}
-      </div>
+      <RoselleGalleryViewer images={gallery.images} layout={galleryLayout} />
     </section>
   );
 }

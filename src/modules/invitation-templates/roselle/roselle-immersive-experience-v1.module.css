@@ -1,0 +1,285 @@
+.immersive[data-template='roselle'][data-roselle-immersive='v1'] {
+  --roselle-venue-line: rgb(118 79 91 / 18%);
+  --roselle-venue-surface: rgb(255 250 245 / 88%);
+  --roselle-venue-ink: #35252e;
+  --roselle-venue-muted: #6f5560;
+}
+
+/* The existing Roselle utility keeps all calendar/map/livestream behavior.
+ * J1.4 changes only how that canonical behavior is composed for guests. */
+.immersive[data-template='roselle'][data-roselle-immersive='v1']
+  :global([data-template-event-utility='roselle']) {
+  width: min(calc(100% - 3rem), 50rem);
+  max-width: 50rem;
+  padding-inline: 0;
+}
+
+.immersive[data-template='roselle'][data-roselle-immersive='v1']
+  :global([data-template-event-action-list]) {
+  display: grid;
+  gap: clamp(1rem, 3vw, 1.45rem);
+}
+
+.immersive[data-template='roselle'][data-roselle-immersive='v1']
+  :global([data-template-event-utility-item]) {
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid var(--roselle-venue-line);
+  border-radius: clamp(1rem, 2.4vw, 1.5rem);
+  background:
+    radial-gradient(circle at 88% 8%, rgb(188 124 131 / 10%), transparent 17rem),
+    var(--roselle-venue-surface);
+  box-shadow: 0 1.4rem 3.6rem rgb(56 35 44 / 9%);
+}
+
+.immersive[data-template='roselle'][data-roselle-immersive='v1']
+  :global([data-template-event-utility-item])
+  > div:first-child {
+  display: grid !important;
+  grid-template-areas:
+    'title preview'
+    'actions preview';
+  grid-template-columns: minmax(0, 0.82fr) minmax(14rem, 1.18fr);
+  align-items: end !important;
+  gap: 1.2rem 1.75rem !important;
+  padding: clamp(1.4rem, 4vw, 2rem);
+}
+
+.immersive[data-template='roselle'][data-roselle-immersive='v1']
+  :global([data-template-event-utility-item])
+  > div:first-child
+  > p {
+  grid-area: title;
+  align-self: end;
+  max-width: 15ch !important;
+  margin: 0;
+  color: var(--roselle-venue-ink) !important;
+  font-family: var(--roselle-display);
+  font-size: clamp(1.7rem, 4.6vw, 2.55rem) !important;
+  font-weight: 500;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+
+.immersive[data-template='roselle'][data-roselle-immersive='v1']
+  :global([data-template-event-utility-item])
+  > div:first-child
+  > div {
+  grid-area: actions;
+  align-self: start;
+  gap: 0.45rem;
+}
+
+/* Production currently has no Embed API key. This is intentionally a truthful
+ * map-oriented preview, not a fake interactive map; the existing Buka rute
+ * action beside it remains the navigation handoff. */
+.immersive[data-template='roselle'][data-roselle-immersive='v1']
+  :global([data-template-event-utility-item])
+  > div:first-child::after {
+  grid-area: preview;
+  display: grid;
+  min-height: 14rem;
+  place-content: center;
+  padding: 1.25rem;
+  border: 1px solid var(--roselle-venue-line);
+  border-radius: 1rem;
+  background:
+    linear-gradient(32deg, transparent 48%, rgb(118 79 91 / 9%) 49%, rgb(118 79 91 / 9%) 51%, transparent 52%),
+    linear-gradient(148deg, transparent 46%, rgb(188 124 131 / 10%) 47%, rgb(188 124 131 / 10%) 50%, transparent 51%),
+    radial-gradient(circle at 46% 48%, rgb(188 124 131 / 30%) 0 0.42rem, transparent 0.48rem),
+    linear-gradient(145deg, #f1e3dc, #fffaf5);
+  color: var(--roselle-venue-muted);
+  content: 'Peta lokasi · buka rute untuk navigasi';
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  line-height: 1.5;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+/* The shared utility mounts its real Google Maps iframe as a direct child
+ * wrapper when the key exists and the guest chooses Lihat peta. */
+.immersive[data-template='roselle'][data-roselle-immersive='v1']
+  :global([data-template-event-utility-item]:has(> div > iframe))
+  > div:first-child::after {
+  display: none;
+}
+
+.immersive[data-template='roselle'][data-roselle-immersive='v1']
+  :global([data-template-event-utility-item])
+  :is(button, a) {
+  min-height: 2.75rem;
+}
+
+.immersive[data-template='roselle'][data-roselle-immersive='v1']
+  :global([data-template-event-utility-item])
+  > div:first-child
+  > div
+  button:first-child {
+  border-color: var(--roselle-venue-ink) !important;
+  background: var(--roselle-venue-ink) !important;
+  color: #fffaf5 !important;
+}
+
+.immersive[data-template='roselle'][data-roselle-immersive='v1']
+  :global([data-template-event-utility-item])
+  > div[class*='border-l-2'] {
+  margin: 0 clamp(1.4rem, 4vw, 2rem) clamp(1.4rem, 4vw, 2rem);
+  padding-left: 1rem;
+  border-color: rgb(188 124 131 / 45%);
+}
+
+.immersive[data-template='roselle'][data-roselle-immersive='v1']
+  :global([data-template-event-utility-item])
+  > div:has(> iframe) {
+  min-height: 22rem;
+  margin: 0 clamp(1.4rem, 4vw, 2rem) clamp(1.4rem, 4vw, 2rem);
+  border-color: var(--roselle-venue-line) !important;
+  border-radius: 1rem;
+  box-shadow: 0 1.25rem 3rem rgb(56 35 44 / 10%);
+}
+
+.immersive[data-template='roselle'][data-roselle-immersive='v1']
+  :global([data-template-event-utility-item])
+  > div:has(> iframe)
+  > iframe {
+  min-height: 22rem;
+}
+
+.immersive[data-template='roselle'][data-roselle-immersive='v1']
+  :global([data-template-event-livestream]) {
+  margin: 0 clamp(1.4rem, 4vw, 2rem);
+  padding: 1.4rem 0 1.7rem;
+  border-color: var(--roselle-venue-line);
+}
+
+.immersive[data-template='roselle'][data-roselle-immersive='v1']
+  :global([data-roselle-gallery-open]) {
+  transition:
+    background-color 180ms ease,
+    transform 180ms ease;
+}
+
+.immersive[data-template='roselle'][data-roselle-immersive='v1']
+  :global([data-roselle-memory-album])
+  figure:focus-within {
+  outline: 2px solid rgb(255 250 245 / 72%);
+  outline-offset: 4px;
+}
+
+@supports (animation-timeline: view()) {
+  .immersive[data-template='roselle'][data-roselle-immersive='v1']
+    :global([data-template-event-utility-item]) {
+    animation-name: roselle-venue-arrival;
+    animation-duration: 1s;
+    animation-fill-mode: both;
+    animation-timeline: view();
+    animation-range: entry entry 76%;
+  }
+}
+
+@keyframes roselle-venue-arrival {
+  from {
+    opacity: 0.72;
+    transform: translateY(0.55rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 430px) {
+  .immersive[data-template='roselle'][data-roselle-immersive='v1']
+    :global([data-template-event-utility='roselle']) {
+    width: calc(100% - 2rem);
+  }
+
+  .immersive[data-template='roselle'][data-roselle-immersive='v1']
+    :global([data-template-event-utility-item])
+    > div:first-child {
+    grid-template-areas:
+      'title'
+      'preview'
+      'actions';
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem !important;
+    padding: 1.25rem;
+  }
+
+  .immersive[data-template='roselle'][data-roselle-immersive='v1']
+    :global([data-template-event-utility-item])
+    > div:first-child::after {
+    min-height: 17rem;
+  }
+
+  .immersive[data-template='roselle'][data-roselle-immersive='v1']
+    :global([data-template-event-utility-item])
+    > div:has(> iframe) {
+    min-height: 18rem;
+    margin: 0 1.25rem 1.25rem;
+  }
+
+  .immersive[data-template='roselle'][data-roselle-immersive='v1']
+    :global([data-template-event-utility-item])
+    > div:has(> iframe)
+    > iframe {
+    min-height: 18rem;
+  }
+
+  .immersive[data-template='roselle'][data-roselle-immersive='v1']
+    :global([data-template-event-utility-item])
+    > div[class*='border-l-2'],
+  .immersive[data-template='roselle'][data-roselle-immersive='v1']
+    :global([data-template-event-livestream]) {
+    margin-right: 1.25rem;
+    margin-left: 1.25rem;
+  }
+}
+
+@media (max-width: 390px) {
+  .immersive[data-template='roselle'][data-roselle-immersive='v1']
+    :global([data-template-event-utility-item])
+    > div:first-child
+    > div {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+  }
+
+  .immersive[data-template='roselle'][data-roselle-immersive='v1']
+    :global([data-template-event-utility-item])
+    > div:first-child
+    > div
+    :is(button, a) {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+}
+
+@media (max-width: 360px) {
+  .immersive[data-template='roselle'][data-roselle-immersive='v1']
+    :global([data-template-event-utility='roselle']) {
+    width: calc(100% - 1.5rem);
+  }
+
+  .immersive[data-template='roselle'][data-roselle-immersive='v1']
+    :global([data-template-event-utility-item])
+    > div:first-child::after {
+    min-height: 15.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .immersive[data-template='roselle'][data-roselle-immersive='v1']
+    :global([data-template-event-utility-item]),
+  .immersive[data-template='roselle'][data-roselle-immersive='v1']
+    :global([data-roselle-gallery-open]) {
+    animation: none;
+    transform: none;
+    transition: none;
+  }
+}
