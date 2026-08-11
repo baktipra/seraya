@@ -3,6 +3,7 @@
   display: grid;
   gap: clamp(1.35rem, 3vw, 2rem);
   align-items: center;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .premiumMedia[data-roselle-premium-media='v1'][data-template='roselle']
@@ -110,21 +111,18 @@
   text-decoration: none;
 }
 
+/* J1.3A hotfix: the outer Roselle couple composition already owns the desktop
+ * side-by-side relationship (person | ampersand | person). Keep each person
+ * internally vertical so portrait media cannot steal the text column width. */
 @media (min-width: 54rem) {
   .premiumMedia[data-roselle-premium-media='v1'][data-template='roselle']
     :global([data-roselle-person][data-has-portrait='true']) {
-    grid-template-columns: minmax(12rem, 20rem) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .premiumMedia[data-roselle-premium-media='v1'][data-template='roselle']
-    :global([data-roselle-person]:nth-of-type(2)[data-has-portrait='true']) {
-    grid-template-columns: minmax(0, 1fr) minmax(12rem, 20rem);
-  }
-
-  .premiumMedia[data-roselle-premium-media='v1'][data-template='roselle']
-    :global([data-roselle-person]:nth-of-type(2)[data-has-portrait='true'])
     :global([data-roselle-person-media]) {
-    order: 2;
+    width: min(100%, 18rem);
   }
 }
 
