@@ -4,9 +4,11 @@ import type { OwnedProject } from '@/modules/projects/project.repository';
 import { createAdminSupabaseClient } from '@/server/supabase/admin';
 import { createServerSupabaseClient } from '@/server/supabase/server';
 
+import { INVITATION_IMAGE_MEDIA_KIND, type InvitationImageRole } from './invitation-image.types';
 import {
   GALLERY_IMAGE_MEDIA_KIND,
   INVITATION_MEDIA_BUCKET,
+  SUPPORTED_GALLERY_IMAGE_MIME_TYPES,
   type GalleryImageMimeType,
   type MediaAsset,
 } from './media.types';
@@ -34,7 +36,8 @@ function mapMediaAsset(record: unknown): MediaAsset {
   if (
     !asset ||
     asset.storage_bucket !== INVITATION_MEDIA_BUCKET ||
-    asset.media_kind !== GALLERY_IMAGE_MEDIA_KIND
+    ![GALLERY_IMAGE_MEDIA_KIND, INVITATION_IMAGE_MEDIA_KIND].includes(asset.media_kind) ||
+    !(SUPPORTED_GALLERY_IMAGE_MIME_TYPES as readonly string[]).includes(asset.mime_type)
   ) {
     throw new MediaRepositoryError();
   }
@@ -42,8 +45,9 @@ function mapMediaAsset(record: unknown): MediaAsset {
   return asset;
 }
 
-export async function reserveProcessingGalleryMediaAsset(input: {
+async function reserveProcessingImageMediaAsset(input: {
   assetId: string;
+  mediaKind: MediaAsset['media_kind'];
   mimeType: GalleryImageMimeType;
   project: OwnedProject;
   sizeBytes: number;
@@ -54,7 +58,7 @@ export async function reserveProcessingGalleryMediaAsset(input: {
     .from('media_assets')
     .insert({
       id: input.assetId,
-      media_kind: GALLERY_IMAGE_MEDIA_KIND,
+      media_kind: input.mediaKind,
       mime_type: input.mimeType,
       project_id: input.project.id,
       size_bytes: input.sizeBytes,
@@ -70,6 +74,32 @@ export async function reserveProcessingGalleryMediaAsset(input: {
   }
 
   return mapMediaAsset(data);
+}
+
+export async function reserveProcessingGalleryMediaAsset(input: {
+  assetId: string;
+  mimeType: GalleryImageMimeType;
+  project: OwnedProject;
+  sizeBytes: number;
+  storagePath: string;
+}): Promise<MediaAsset> {
+  return reserveProcessingImageMediaAsset({
+    ...input,
+    mediaKind: GALLERY_IMAGE_MEDIA_KIND,
+  });
+}
+
+export async function reserveProcessingInvitationImageMediaAsset(input: {
+  assetId: string;
+  mimeType: GalleryImageMimeType;
+  project: OwnedProject;
+  sizeBytes: number;
+  storagePath: string;
+}): Promise<MediaAsset> {
+  return reserveProcessingImageMediaAsset({
+    ...input,
+    mediaKind: INVITATION_IMAGE_MEDIA_KIND,
+  });
 }
 
 export async function getMediaAssetForVerifiedProjectWithAdmin(
@@ -126,6 +156,44 @@ export async function finalizeGalleryMediaAssetWithAdmin(input: {
   }
 }
 
+export async function finalizeInvitationImageMediaAssetWithAdmin(input: {
+  assetId: string;
+  mimeType: GalleryImageMimeType;
+  projectId: string;
+  role: InvitationImageRole;
+  sizeBytes: number;
+}): Promise<void> {
+  const supabase = createAdminSupabaseClient();
+  const { error } = await supabase.rpc('finalize_invitation_image_media_asset', {
+    target_asset_id: input.assetId,
+    target_project_id: input.projectId,
+    target_role: input.role,
+    validated_mime_type: input.mimeType,
+    validated_size_bytes: input.sizeBytes,
+  });
+
+  if (error) {
+    throw new MediaRepositoryError();
+  }
+}
+
+export async function removeInvitationImageMediaAssetWithAdmin(input: {
+  assetId: string;
+  projectId: string;
+  role: InvitationImageRole;
+}): Promise<void> {
+  const supabase = createAdminSupabaseClient();
+  const { error } = await supabase.rpc('remove_invitation_image_media_asset', {
+    target_asset_id: input.assetId,
+    target_project_id: input.projectId,
+    target_role: input.role,
+  });
+
+  if (error) {
+    throw new MediaRepositoryError();
+  }
+}
+
 /** Owner-visible query under regular session RLS. */
 export async function getReadyMediaAssetsForVerifiedProject(
   project: OwnedProject,
@@ -169,47 +237,53 @@ export async function getOwnedReadyMediaAssetById(assetId: string): Promise<Medi
   return data ? mapMediaAsset(data) : null;
 }
 
+function isReferencedByCurrentSnapshot(input: {
+  assetId: string;
+  mediaKind: MediaAsset['media_kind'];
+  snapshot: unknown;
+}) {
+  const payload = input.snapshot as
+    | {
+        draft?: {
+          gallery?: { imageIds?: unknown };
+          premiumMedia?: {
+            coverImageId?: unknown;
+            personOne?: { imageId?: unknown };
+            personTwo?: { imageId?: unknown };
+            storyImageId?: unknown;
+          };
+        };
+      }
+    | null;
+  const draft = payload?.draft;
+
+  if (!draft) {
+    return false;
+  }
+
+  if (input.mediaKind === GALLERY_IMAGE_MEDIA_KIND) {
+    return Array.isArray(draft.gallery?.imageIds) && draft.gallery.imageIds.includes(input.assetId);
+  }
+
+  if (input.mediaKind !== INVITATION_IMAGE_MEDIA_KIND) {
+    return false;
+  }
+
+  return [
+    draft.premiumMedia?.coverImageId,
+    draft.premiumMedia?.personOne?.imageId,
+    draft.premiumMedia?.personTwo?.imageId,
+    draft.premiumMedia?.storyImageId,
+  ].includes(input.assetId);
+}
+
 /** Public proxy lookup uses server-only privilege but verifies every public condition. */
 export async function getCurrentPublicMediaAssetById(assetId: string): Promise<MediaAsset | null> {
   const supabase = createAdminSupabaseClient();
-  const { data: snapshots, error: snapshotError } = await supabase
-    .from('published_invitation_snapshots')
-    .select('project_id, snapshot')
-    .eq('is_current', true)
-    .contains('snapshot', { draft: { gallery: { imageIds: [assetId] } } })
-    .limit(1);
-
-  if (snapshotError) {
-    throw new MediaRepositoryError();
-  }
-
-  const snapshot = snapshots?.[0] as { project_id?: string } | undefined;
-
-  if (!snapshot?.project_id) {
-    return null;
-  }
-
-  const { data: project, error: projectError } = await supabase
-    .from('wedding_projects')
-    .select('id')
-    .eq('id', snapshot.project_id)
-    .eq('status', 'published')
-    .is('deleted_at', null)
-    .maybeSingle();
-
-  if (projectError) {
-    throw new MediaRepositoryError();
-  }
-
-  if (!project) {
-    return null;
-  }
-
-  const { data: asset, error: assetError } = await supabase
+  const { data: assetRecord, error: assetError } = await supabase
     .from('media_assets')
     .select(mediaAssetSelect)
     .eq('id', assetId)
-    .eq('project_id', snapshot.project_id)
     .eq('status', 'ready')
     .is('deleted_at', null)
     .maybeSingle();
@@ -218,7 +292,43 @@ export async function getCurrentPublicMediaAssetById(assetId: string): Promise<M
     throw new MediaRepositoryError();
   }
 
-  return asset ? mapMediaAsset(asset) : null;
+  if (!assetRecord) {
+    return null;
+  }
+
+  const asset = mapMediaAsset(assetRecord);
+  const [{ data: snapshot, error: snapshotError }, { data: project, error: projectError }] =
+    await Promise.all([
+      supabase
+        .from('published_invitation_snapshots')
+        .select('snapshot')
+        .eq('project_id', asset.project_id)
+        .eq('is_current', true)
+        .maybeSingle(),
+      supabase
+        .from('wedding_projects')
+        .select('id')
+        .eq('id', asset.project_id)
+        .eq('status', 'published')
+        .is('deleted_at', null)
+        .maybeSingle(),
+    ]);
+
+  if (snapshotError || projectError) {
+    throw new MediaRepositoryError();
+  }
+
+  if (!snapshot || !project) {
+    return null;
+  }
+
+  return isReferencedByCurrentSnapshot({
+    assetId,
+    mediaKind: asset.media_kind,
+    snapshot: snapshot.snapshot,
+  })
+    ? asset
+    : null;
 }
 
 export async function downloadMediaAssetBytes(asset: MediaAsset): Promise<Blob> {

@@ -416,6 +416,75 @@ const coupleIdentitySchema = z
   })
   .strict();
 
+const createDefaultPremiumPerson = () => ({
+  imageId: null,
+  socialLinks: {
+    instagram: null,
+    tiktok: null,
+    website: null,
+  },
+});
+
+const premiumPersonSchema = z
+  .object({
+    imageId: z.string().trim().uuid('ID foto mempelai tidak valid.').nullable(),
+    socialLinks: z
+      .object({
+        instagram: nullableInstagramUrl,
+        tiktok: nullableTikTokUrl,
+        website: nullableHttpsUrl('Website mempelai'),
+      })
+      .strict(),
+  })
+  .strict();
+
+const createDefaultPremiumMedia = () => ({
+  coverImageId: null,
+  personOne: createDefaultPremiumPerson(),
+  personTwo: createDefaultPremiumPerson(),
+  storyImageId: null,
+  weddingFilm: {
+    caption: null,
+    enabled: false,
+    heading: null,
+    url: null,
+  },
+});
+
+const premiumMediaSchema = z
+  .object({
+    coverImageId: z.string().trim().uuid('ID foto cover tidak valid.').nullable(),
+    personOne: premiumPersonSchema,
+    personTwo: premiumPersonSchema,
+    storyImageId: z.string().trim().uuid('ID foto cerita tidak valid.').nullable(),
+    weddingFilm: z
+      .object({
+        caption: nullableText(600, 'Keterangan Wedding Film'),
+        enabled: z.boolean(),
+        heading: nullableText(160, 'Judul Wedding Film'),
+        url: nullableHttpsUrl('Link Wedding Film'),
+      })
+      .strict(),
+  })
+  .strict()
+  .superRefine((premiumMedia, context) => {
+    if (premiumMedia.weddingFilm.enabled && !premiumMedia.weddingFilm.url) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Tambahkan link YouTube ketika Wedding Film diaktifkan.',
+        path: ['weddingFilm', 'url'],
+      });
+    }
+
+    if (premiumMedia.weddingFilm.url && !getYoutubeVideoId(premiumMedia.weddingFilm.url)) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Gunakan link video, live, Shorts, atau embed YouTube yang valid.',
+        path: ['weddingFilm', 'url'],
+      });
+    }
+  });
+
 const invitationDraftContentBaseSchema = z
   .object({
     audio: invitationAudioSchema.default(createDefaultInvitationAudio),
@@ -426,9 +495,6 @@ const invitationDraftContentBaseSchema = z
         signature: nullableText(160, 'Tanda tangan'),
       })
       .strict(),
-    // Legacy drafts and snapshots predate Amplop Digital. Missing values
-    // intentionally resolve to the safe disabled state without mutating the
-    // stored JSON document until the owner explicitly saves a draft again.
     digitalGift: digitalGiftSchema.default(disabledDigitalGift),
     couple: z
       .object({
@@ -473,6 +539,7 @@ const invitationDraftContentBaseSchema = z
       })
       .strict(),
     opening: invitationOpeningSchema.default(createDefaultInvitationOpening),
+    premiumMedia: premiumMediaSchema.default(createDefaultPremiumMedia),
     rsvp: z
       .object({
         enabled: z.boolean(),
@@ -487,8 +554,6 @@ const invitationDraftContentBaseSchema = z
         heading: nullableText(120, 'Judul cerita'),
       })
       .strict(),
-    // Legacy documents predate theme and palette selection. Missing values
-    // resolve at the compatibility boundary while malformed present values fail.
     paletteKey: invitationPaletteKeySchema,
     templateKey: invitationTemplateKeySchema,
   })
@@ -603,11 +668,7 @@ export const invitationDraftDocumentSchema = z
   })
   .strict();
 
-/**
- * Existing `events` and `location` JSON stay as compatibility mirrors only.
- * Save flows call this from server-owned schedule input so a browser cannot
- * persist conflicting first-event and legacy values.
- */
+/** Existing `events` and `location` JSON stay as compatibility mirrors only. */
 export function derivePrimaryEventCompatibility(eventSchedule: EventScheduleV1) {
   const primary = eventSchedule.events[0];
 

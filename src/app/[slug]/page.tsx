@@ -6,7 +6,10 @@ import {
   InvitationTemplateRenderer,
 } from '@/modules/invitation-templates';
 import { createInvitationAudioPlaybackCapability } from '@/modules/media/invitation-audio-playback.types';
-import { getPublicGalleryImagesForCurrentSnapshot } from '@/modules/media/public-media.service';
+import {
+  getPublicGalleryImagesForCurrentSnapshot,
+  getPublicPremiumMediaImagesForCurrentSnapshot,
+} from '@/modules/media/public-media.service';
 import { getPublicInvitationBySlug } from '@/modules/publications/public-invitation.service';
 
 export const revalidate = 3600;
@@ -57,12 +60,14 @@ export default async function PublicInvitationPage({ params }: PublicInvitationP
     notFound();
   }
 
-  const galleryImages = await getPublicGalleryImagesForCurrentSnapshot(
-    snapshot.draft.gallery.imageIds,
-  );
+  const [galleryImages, premiumMediaImages] = await Promise.all([
+    getPublicGalleryImagesForCurrentSnapshot(snapshot.draft.gallery.imageIds),
+    getPublicPremiumMediaImagesForCurrentSnapshot(snapshot.draft.premiumMedia),
+  ]);
   const invitation = createInvitationViewModel({
     draft: { content: snapshot.draft },
     galleryImages,
+    premiumMediaImages,
     project: {
       event_date_primary: snapshot.project.eventDatePrimary,
     },

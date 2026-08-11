@@ -50,12 +50,15 @@ describe('J1.2 Roselle market-quality visual polish contract', () => {
     expect(roselleTemplate).toContain('data-roselle-opening-gate="market-floor-v1"');
   });
 
-  it('promotes existing gallery media into optional opening and story art direction', () => {
-    expect(roselleTemplate).toContain('const openingImage = invitation.gallery?.images[0] ?? null');
-    expect(roselleTemplate).toContain('const storyImage = invitation.gallery?.images[1] ?? null');
+  it('preserves gallery media as the fallback opening and story art direction', () => {
+    expect(roselleTemplate).toContain('featuredCover ?? invitation.gallery?.images[0] ?? null');
+    expect(roselleTemplate).toContain(
+      'invitation.premiumMedia?.storyImage ?? invitation.gallery?.images[1] ?? null',
+    );
+    expect(roselleTemplate).toContain("openingImage ? 'gallery-first' : null");
     expect(roselleTemplate).toContain('openingImage={openingImage}');
     expect(roselleTemplate).toContain('storyImage={storyImage}');
-    expect(roselleSections).toContain('data-roselle-opening-media-source="gallery-first"');
+    expect(roselleSections).toContain("openingMediaSource ?? 'gallery-first'");
     expect(roselleSections).toContain('data-roselle-opening-portrait');
     expect(roselleSections).toContain('data-roselle-story-media');
     expect(roselleSections).toContain('fetchPriority="high"');
@@ -112,10 +115,9 @@ describe('J1.2 Roselle market-quality visual polish contract', () => {
     expect(polishStyles).toContain('@media (prefers-reduced-motion: reduce)');
   });
 
-  it('stays schema-free and does not invent unsupported wedding media fields', () => {
-    expect(roselleTemplate).not.toContain('weddingFilm');
-    expect(roselleTemplate).not.toContain('couplePortrait');
-    expect(roselleSections).not.toContain('weddingFilm');
+  it('allows J1.3 canonical media without weakening the J1.2 CSS safety boundary', () => {
+    expect(roselleTemplate).toContain("invitation.premiumMedia?.coverImage");
+    expect(roselleSections).toContain('data-roselle-wedding-film');
     expect(polishStyles).not.toMatch(/url\(['"]?https?:\/\//);
     expect(correctionStyles).not.toMatch(/url\(['"]?https?:\/\//);
   });

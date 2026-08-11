@@ -14,6 +14,7 @@ import marketFloorStyles from './roselle-market-floor-v1.module.css';
 import marketPolishStyles from './roselle-market-polish-v1.module.css';
 import marketCorrectionStyles from './roselle-market-corrections-v1.module.css';
 import motionStyles from './roselle-flagship-motion.module.css';
+import premiumMediaStyles from './roselle-premium-media-v1.module.css';
 import typographyStyles from './roselle-flagship-typography.module.css';
 import experienceStyles from './roselle-guest-experience.module.css';
 import parityRepairStyles from './roselle-parity-repair.module.css';
@@ -26,18 +27,14 @@ import {
   RoselleHero,
   RoselleLocation,
   RoselleStory,
+  RoselleWeddingFilm,
 } from './roselle-sections';
 import styles from './roselle.module.css';
 
 /** Roselle presentation renderer. It accepts only an already mapped typed view model. */
-export function RoselleTemplate({
-  invitation,
-  renderContext,
-}: InvitationTemplateProps) {
+export function RoselleTemplate({ invitation, renderContext }: InvitationTemplateProps) {
   const personalSlots = getPersonalInvitationPresentationSlots(renderContext);
-  const hasPersonalResponse = Boolean(
-    personalSlots?.rsvp || personalSlots?.guestbook,
-  );
+  const hasPersonalResponse = Boolean(personalSlots?.rsvp || personalSlots?.guestbook);
   const showGenericResponseNote = renderContext.surface !== 'personal';
   const genericResponseCopy = invitation.rsvp
     ? 'Konfirmasi kehadiran dan ucapan dapat dikirim melalui undangan pribadi dari pasangan.'
@@ -48,22 +45,20 @@ export function RoselleTemplate({
       : 'Konfirmasikan kehadiran Anda untuk membantu pasangan mempersiapkan hari bahagia.'
     : 'Titipkan doa dan ucapan terbaik Anda untuk pasangan.';
   const responseStepCount =
-    Number(Boolean(personalSlots?.rsvp)) +
-    Number(Boolean(personalSlots?.guestbook));
+    Number(Boolean(personalSlots?.rsvp)) + Number(Boolean(personalSlots?.guestbook));
   const rsvpStepNumber = personalSlots?.rsvp ? 1 : null;
-  const guestbookStepNumber = personalSlots?.guestbook
-    ? personalSlots.rsvp
-      ? 2
-      : 1
-    : null;
+  const guestbookStepNumber = personalSlots?.guestbook ? (personalSlots.rsvp ? 2 : 1) : null;
   const hasScheduleJourney = Boolean(invitation.events || invitation.location);
-  const openingImage = invitation.gallery?.images[0] ?? null;
-  const storyImage = invitation.gallery?.images[1] ?? null;
+  const featuredCover = invitation.premiumMedia?.coverImage ?? null;
+  const openingImage = featuredCover ?? invitation.gallery?.images[0] ?? null;
+  const openingMediaSource = featuredCover ? 'featured-cover' : openingImage ? 'gallery-first' : null;
+  const storyImage = invitation.premiumMedia?.storyImage ?? invitation.gallery?.images[1] ?? null;
+  const weddingFilm = invitation.premiumMedia?.weddingFilm ?? null;
 
   return (
     <article
       aria-labelledby="roselle-invitation-title"
-      className={`${styles.invitation} ${experienceStyles.experience} ${parityRepairStyles.parityRepair} ${compositionStyles.flagship} ${typographyStyles.typography} ${craftStyles.craft} ${motionStyles.motion} ${marketFloorStyles.marketFloor} ${marketPolishStyles.marketPolish} ${marketCorrectionStyles.marketCorrections}`}
+      className={`${styles.invitation} ${experienceStyles.experience} ${parityRepairStyles.parityRepair} ${compositionStyles.flagship} ${typographyStyles.typography} ${craftStyles.craft} ${motionStyles.motion} ${marketFloorStyles.marketFloor} ${marketPolishStyles.marketPolish} ${marketCorrectionStyles.marketCorrections} ${premiumMediaStyles.premiumMedia}`}
       data-palette={renderContext.palette?.key}
       data-roselle-composition="flagship-v1"
       data-roselle-craft="flagship-v1"
@@ -72,16 +67,18 @@ export function RoselleTemplate({
       data-roselle-market-floor="v1"
       data-roselle-market-polish="v1"
       data-roselle-motion="flagship-v1"
+      data-roselle-premium-media="v1"
       data-roselle-typography="flagship-v1"
       data-surface={renderContext.surface}
       data-template="roselle"
       style={renderContext.palette?.variables}
     >
-      <div
-        className={marketFloorStyles.openingGate}
-        data-roselle-opening-gate="market-floor-v1"
-      >
-        <RoselleHero hero={invitation.hero} openingImage={openingImage} />
+      <div className={marketFloorStyles.openingGate} data-roselle-opening-gate="market-floor-v1">
+        <RoselleHero
+          hero={invitation.hero}
+          openingImage={openingImage}
+          openingMediaSource={openingMediaSource}
+        />
         <InvitationOpeningIdentity invitation={invitation} template="roselle" />
         {personalSlots?.greeting ? (
           <div
@@ -96,11 +93,7 @@ export function RoselleTemplate({
             {personalSlots.greeting}
           </div>
         ) : null}
-        <a
-          data-invitation-opening-action
-          data-roselle-opening-action
-          href="#roselle-couple-title"
-        >
+        <a data-invitation-opening-action data-roselle-opening-action href="#roselle-couple-title">
           <span>Buka undangan</span>
           <i aria-hidden="true" />
         </a>
@@ -126,6 +119,7 @@ export function RoselleTemplate({
             <RoselleLocation location={invitation.location} />
           </div>
         ) : null}
+        <RoselleWeddingFilm weddingFilm={weddingFilm} />
         <RoselleGallery gallery={invitation.gallery} />
         <RoselleDigitalGift digitalGift={invitation.digitalGift} />
         {hasPersonalResponse ? (
@@ -143,10 +137,7 @@ export function RoselleTemplate({
               <p className={styles.responseLead}>{personalResponseLead}</p>
             </div>
             {personalSlots?.rsvp ? (
-              <div
-                className={styles.personalResponseSection}
-                data-template-response-slot="rsvp"
-              >
+              <div className={styles.personalResponseSection} data-template-response-slot="rsvp">
                 <p aria-hidden="true" data-roselle-response-step>
                   Langkah {rsvpStepNumber} dari {responseStepCount}
                 </p>
@@ -154,10 +145,7 @@ export function RoselleTemplate({
               </div>
             ) : null}
             {personalSlots?.guestbook ? (
-              <div
-                className={styles.personalResponseSection}
-                data-template-response-slot="guestbook"
-              >
+              <div className={styles.personalResponseSection} data-template-response-slot="guestbook">
                 <p aria-hidden="true" data-roselle-response-step>
                   Langkah {guestbookStepNumber} dari {responseStepCount}
                 </p>
@@ -175,10 +163,7 @@ export function RoselleTemplate({
             {genericResponseCopy}
           </p>
         ) : null}
-        <div
-          className={marketFloorStyles.farewell}
-          data-roselle-farewell="market-floor-v1"
-        >
+        <div className={marketFloorStyles.farewell} data-roselle-farewell="market-floor-v1">
           <InvitationIdentityFooter invitation={invitation} template="roselle" />
           <RoselleClosing closing={invitation.closing} />
           <a

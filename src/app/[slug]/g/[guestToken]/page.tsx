@@ -8,10 +8,13 @@ import {
   createInvitationViewModel,
   InvitationTemplateRenderer,
 } from '@/modules/invitation-templates';
-import { createInvitationAudioPlaybackCapability } from '@/modules/media/invitation-audio-playback.types';
-import { getPublicGalleryImagesForCurrentSnapshot } from '@/modules/media/public-media.service';
 import { getPersonalGuestInvitationByToken } from '@/modules/guest-links';
 import { getPersonalGuestbookEntryByToken } from '@/modules/guestbook';
+import { createInvitationAudioPlaybackCapability } from '@/modules/media/invitation-audio-playback.types';
+import {
+  getPublicGalleryImagesForCurrentSnapshot,
+  getPublicPremiumMediaImagesForCurrentSnapshot,
+} from '@/modules/media/public-media.service';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -60,10 +63,6 @@ export default async function PersonalGuestInvitationPage({
     notFound();
   }
 
-  const personalGuestbookEntry = await getPersonalGuestbookEntryByToken({
-    slug,
-    token: guestToken,
-  });
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const guestbookFeedback =
     resolvedSearchParams?.guestbook === 'success'
@@ -72,13 +71,15 @@ export default async function PersonalGuestInvitationPage({
         ? 'error'
         : undefined;
   const rsvpFeedback = resolvedSearchParams?.rsvp === 'success' ? 'success' : undefined;
-
-  const galleryImages = await getPublicGalleryImagesForCurrentSnapshot(
-    snapshot.draft.gallery.imageIds,
-  );
+  const [personalGuestbookEntry, galleryImages, premiumMediaImages] = await Promise.all([
+    getPersonalGuestbookEntryByToken({ slug, token: guestToken }),
+    getPublicGalleryImagesForCurrentSnapshot(snapshot.draft.gallery.imageIds),
+    getPublicPremiumMediaImagesForCurrentSnapshot(snapshot.draft.premiumMedia),
+  ]);
   const invitation = createInvitationViewModel({
     draft: { content: snapshot.draft },
     galleryImages,
+    premiumMediaImages,
     project: {
       event_date_primary: snapshot.project.eventDatePrimary,
     },

@@ -103,10 +103,10 @@ const railTaskDefinitions: readonly RailTaskDefinition[] = [
     title: 'Penutup',
   },
   {
-    description: 'Kelola foto galeri dan musik yang mengiringi undangan.',
+    description: 'Atur cover, potret mempelai, Wedding Film, galeri, dan musik.',
     group: 'media',
     key: 'media',
-    title: 'Galeri & musik',
+    title: 'Foto & media',
   },
 ] as const;
 
@@ -320,8 +320,16 @@ export function InvitationTaskWorkspace({
       ),
     [draft, studioState.actionState.fieldErrors, studioState.content],
   );
-  const hasMedia =
-    studioState.content.gallery.imageIds.length > 0 || Boolean(studioState.content.audio.assetId);
+  const premiumMedia = studioState.content.premiumMedia;
+  const hasMedia = Boolean(
+    studioState.content.gallery.imageIds.length > 0 ||
+      studioState.content.audio.assetId ||
+      premiumMedia.coverImageId ||
+      premiumMedia.personOne.imageId ||
+      premiumMedia.personTwo.imageId ||
+      premiumMedia.storyImageId ||
+      premiumMedia.weddingFilm.enabled,
+  );
   const activeCopy = getTaskCopy(activeTask);
   const railGroups = ['display', 'content', 'media'] as const;
   const showUnpublishedBanner =

@@ -1,0 +1,150 @@
+.premiumMedia[data-roselle-premium-media='v1'][data-template='roselle']
+  :global([data-roselle-person][data-has-portrait='true']) {
+  display: grid;
+  gap: clamp(1.35rem, 3vw, 2rem);
+  align-items: center;
+}
+
+.premiumMedia[data-roselle-premium-media='v1'][data-template='roselle']
+  :global([data-roselle-person-media]) {
+  width: min(100%, 20rem);
+  margin-inline: auto;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  border-radius: 50% 50% 1.35rem 1.35rem;
+  box-shadow: 0 1.4rem 3.4rem rgb(80 42 56 / 14%);
+}
+
+.premiumMedia[data-roselle-premium-media='v1'][data-template='roselle']
+  :global([data-roselle-person-media]) img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.premiumMedia[data-roselle-premium-media='v1'][data-template='roselle']
+  :global([data-roselle-person-socials]) {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: inherit;
+  gap: 0.45rem;
+  margin-top: 1rem;
+}
+
+.premiumMedia[data-roselle-premium-media='v1'][data-template='roselle']
+  :global([data-roselle-person-socials]) a {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+  border-radius: 999px;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+}
+
+.premiumMedia[data-roselle-premium-media='v1'][data-template='roselle']
+  :global([data-roselle-wedding-film]) {
+  position: relative;
+  display: grid;
+  gap: clamp(1.5rem, 4vw, 2.75rem);
+  padding: clamp(4.5rem, 9vw, 7rem) clamp(1.25rem, 6vw, 5rem);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 12% 10%, rgb(255 255 255 / 9%), transparent 30rem),
+    linear-gradient(145deg, #3f2730, #24171d);
+  color: #f9f1ed;
+}
+
+.premiumMedia[data-roselle-premium-media='v1'][data-template='roselle']
+  :global([data-roselle-film-copy]) {
+  width: min(100%, 42rem);
+  margin-inline: auto;
+  text-align: center;
+}
+
+.premiumMedia[data-roselle-premium-media='v1'][data-template='roselle']
+  :global([data-roselle-film-copy]) p:last-child {
+  max-width: 38rem;
+  margin: 1rem auto 0;
+  color: rgb(249 241 237 / 72%);
+  line-height: 1.75;
+}
+
+.premiumMedia[data-roselle-premium-media='v1'][data-template='roselle']
+  :global([data-roselle-film-frame]) {
+  width: min(100%, 58rem);
+  margin-inline: auto;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: clamp(1rem, 2.5vw, 1.75rem);
+  background: #120c0f;
+  box-shadow: 0 2rem 5rem rgb(0 0 0 / 28%);
+}
+
+.premiumMedia[data-roselle-premium-media='v1'][data-template='roselle']
+  :global([data-roselle-film-frame]) iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.premiumMedia[data-roselle-premium-media='v1'][data-template='roselle']
+  :global([data-roselle-wedding-film]) > a {
+  display: inline-flex;
+  min-height: 2.75rem;
+  width: max-content;
+  align-items: center;
+  justify-content: center;
+  margin-inline: auto;
+  border: 1px solid rgb(255 255 255 / 28%);
+  border-radius: 999px;
+  padding: 0.65rem 1rem;
+  color: inherit;
+  font-size: 0.78rem;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+@media (min-width: 54rem) {
+  .premiumMedia[data-roselle-premium-media='v1'][data-template='roselle']
+    :global([data-roselle-person][data-has-portrait='true']) {
+    grid-template-columns: minmax(12rem, 20rem) minmax(0, 1fr);
+  }
+
+  .premiumMedia[data-roselle-premium-media='v1'][data-template='roselle']
+    :global([data-roselle-person]:nth-of-type(2)[data-has-portrait='true']) {
+    grid-template-columns: minmax(0, 1fr) minmax(12rem, 20rem);
+  }
+
+  .premiumMedia[data-roselle-premium-media='v1'][data-template='roselle']
+    :global([data-roselle-person]:nth-of-type(2)[data-has-portrait='true'])
+    :global([data-roselle-person-media]) {
+    order: 2;
+  }
+}
+
+@media (max-width: 430px) {
+  .premiumMedia[data-roselle-premium-media='v1'][data-template='roselle']
+    :global([data-roselle-person-media]) {
+    width: min(78vw, 18rem);
+  }
+
+  .premiumMedia[data-roselle-premium-media='v1'][data-template='roselle']
+    :global([data-roselle-wedding-film]) {
+    padding-inline: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .premiumMedia[data-roselle-premium-media='v1'][data-template='roselle']
+    :global([data-roselle-film-frame]),
+  .premiumMedia[data-roselle-premium-media='v1'][data-template='roselle']
+    :global([data-roselle-person-media]) {
+    scroll-behavior: auto;
+  }
+}

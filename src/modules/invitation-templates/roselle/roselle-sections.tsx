@@ -8,12 +8,20 @@ import styles from './roselle.module.css';
 type RoselleNarrativeImage = NonNullable<InvitationViewModel['gallery']>['images'][number];
 type RoselleHeroProps = Pick<InvitationViewModel, 'hero'> & {
   openingImage?: RoselleNarrativeImage | null;
+  openingMediaSource?: 'featured-cover' | 'gallery-first' | null;
 };
 type RoselleStoryProps = Pick<InvitationViewModel, 'story'> & {
   storyImage?: RoselleNarrativeImage | null;
 };
+type RoselleWeddingFilmProps = {
+  weddingFilm: NonNullable<InvitationViewModel['premiumMedia']>['weddingFilm'];
+};
 
-export function RoselleHero({ hero, openingImage = null }: RoselleHeroProps) {
+export function RoselleHero({
+  hero,
+  openingImage = null,
+  openingMediaSource = null,
+}: RoselleHeroProps) {
   return (
     <header
       className={styles.hero}
@@ -23,7 +31,7 @@ export function RoselleHero({ hero, openingImage = null }: RoselleHeroProps) {
       {openingImage ? (
         <div
           aria-hidden="true"
-          data-roselle-opening-media-source="gallery-first"
+          data-roselle-opening-media-source={openingMediaSource ?? 'gallery-first'}
           data-roselle-opening-portrait
         >
           <InvitationGalleryImage
@@ -65,11 +73,43 @@ export function RoselleHero({ hero, openingImage = null }: RoselleHeroProps) {
 }
 
 function RosellePerson({ person }: { person: InvitationViewModel['couple']['personOne'] }) {
+  const socialLinks = person.socialLinks ?? [];
+
   return (
-    <article className={styles.person} data-roselle-person>
-      <h3 className={styles.personName}>{person.displayName}</h3>
-      {person.fullName ? <p className={styles.personFullName}>{person.fullName}</p> : null}
-      {person.parentLine ? <p className={styles.personParentLine}>{person.parentLine}</p> : null}
+    <article
+      className={styles.person}
+      data-has-portrait={person.portrait ? 'true' : 'false'}
+      data-roselle-person
+    >
+      {person.portrait ? (
+        <figure data-roselle-person-media>
+          <InvitationGalleryImage
+            alt={`Potret ${person.displayName}`}
+            sizes="(max-width: 40rem) min(78vw, 22rem), 20rem"
+            src={person.portrait.src}
+          />
+        </figure>
+      ) : null}
+      <div data-roselle-person-copy>
+        <h3 className={styles.personName}>{person.displayName}</h3>
+        {person.fullName ? <p className={styles.personFullName}>{person.fullName}</p> : null}
+        {person.parentLine ? <p className={styles.personParentLine}>{person.parentLine}</p> : null}
+        {socialLinks.length > 0 ? (
+          <nav aria-label={`Tautan ${person.displayName}`} data-roselle-person-socials>
+            {socialLinks.map((link) => (
+              <a
+                data-social-provider={link.provider}
+                href={link.href}
+                key={link.provider}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                {link.label}
+              </a>
+            ))}
+          </nav>
+        ) : null}
+      </div>
     </article>
   );
 }
@@ -231,6 +271,40 @@ export function RoselleLocation({ location }: Pick<InvitationViewModel, 'locatio
           </a>
         ) : null}
       </div>
+    </section>
+  );
+}
+
+export function RoselleWeddingFilm({ weddingFilm }: RoselleWeddingFilmProps) {
+  if (!weddingFilm) {
+    return null;
+  }
+
+  return (
+    <section
+      aria-labelledby="roselle-wedding-film-title"
+      data-roselle-chapter="film"
+      data-roselle-wedding-film
+    >
+      <div data-roselle-film-copy>
+        <p className={styles.sectionEyebrow}>Wedding Film</p>
+        <h2 className={styles.sectionTitle} id="roselle-wedding-film-title">
+          {weddingFilm.heading}
+        </h2>
+        {weddingFilm.caption ? <p>{weddingFilm.caption}</p> : null}
+      </div>
+      <div data-roselle-film-frame>
+        <iframe
+          allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+          loading="lazy"
+          src={weddingFilm.embedHref}
+          title={weddingFilm.heading}
+        />
+      </div>
+      <a href={weddingFilm.watchHref} rel="noopener noreferrer" target="_blank">
+        Buka di YouTube
+      </a>
     </section>
   );
 }

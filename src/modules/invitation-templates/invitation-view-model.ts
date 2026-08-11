@@ -3,15 +3,24 @@ import type {
   EventScheduleItemV1,
   InvitationDraftContent,
 } from '@/modules/invitations/invitation-draft.schema';
-
+import type { InvitationPremiumMediaImages } from '@/modules/media/invitation-image.types';
 import type { InvitationGalleryImage } from '@/modules/media/media.types';
 
 import { formatInvitationDate, formatInvitationTime } from './invitation-date-formatters';
+import { getYoutubeEmbedHref, getYoutubeWatchHref } from './guest-event-utility-core';
+
+export type InvitationSocialLinkViewModel = {
+  href: string;
+  label: 'Instagram' | 'TikTok' | 'Website';
+  provider: 'instagram' | 'tiktok' | 'website';
+};
 
 export type InvitationPersonViewModel = {
   displayName: string;
   fullName: string | null;
   parentLine: string | null;
+  portrait?: InvitationGalleryImage | null;
+  socialLinks?: InvitationSocialLinkViewModel[];
 };
 
 export type InvitationScheduleItemViewModel = {
@@ -72,12 +81,19 @@ export type InvitationIdentityViewModel = {
     text: string;
   } | null;
   shortName: string | null;
-  socialLinks: Array<{
-    href: string;
-    label: 'Instagram' | 'TikTok' | 'Website';
-    provider: 'instagram' | 'tiktok' | 'website';
-  }>;
+  socialLinks: InvitationSocialLinkViewModel[];
   weddingHashtag: string | null;
+};
+
+export type InvitationPremiumMediaViewModel = {
+  coverImage: InvitationGalleryImage | null;
+  storyImage: InvitationGalleryImage | null;
+  weddingFilm: {
+    caption: string | null;
+    embedHref: string;
+    heading: string;
+    watchHref: string;
+  } | null;
 };
 
 export type InvitationViewModel = {
@@ -102,11 +118,9 @@ export type InvitationViewModel = {
     subtitle: string | null;
     title: string;
   };
-  // Modern multi-event schedules render venue details inside each event item.
-  // This remains only for a legacy normalized document, preserving its old
-  // separate location presentation until that owner explicitly saves again.
   location: InvitationLocationViewModel | null;
   opening?: InvitationOpeningViewModel | null;
+  premiumMedia?: InvitationPremiumMediaViewModel;
   rsvp: {
     heading: string;
     lead: string;
@@ -125,6 +139,7 @@ export type InvitationRendererProjectMetadata = {
 type InvitationViewModelInput = {
   draft: Pick<{ content: InvitationDraftContent }, 'content'>;
   galleryImages?: InvitationGalleryImage[];
+  premiumMediaImages?: InvitationPremiumMediaImages;
   project: InvitationRendererProjectMetadata;
 };
 
@@ -151,6 +166,29 @@ function getSafeHttpsHref(value: string | null | undefined) {
   }
 }
 
+function createSocialLinks(input: {
+  instagram: string | null;
+  tiktok: string | null;
+  website: string | null;
+}): InvitationSocialLinkViewModel[] {
+  const socialLinks: InvitationSocialLinkViewModel[] = [];
+  const instagram = getSafeHttpsHref(input.instagram);
+  const tiktok = getSafeHttpsHref(input.tiktok);
+  const website = getSafeHttpsHref(input.website);
+
+  if (instagram) {
+    socialLinks.push({ href: instagram, label: 'Instagram', provider: 'instagram' });
+  }
+  if (tiktok) {
+    socialLinks.push({ href: tiktok, label: 'TikTok', provider: 'tiktok' });
+  }
+  if (website) {
+    socialLinks.push({ href: website, label: 'Website', provider: 'website' });
+  }
+
+  return socialLinks;
+}
+
 function getInitial(value: string) {
   return value.trim().charAt(0).toLocaleUpperCase('id-ID');
 }
@@ -173,26 +211,12 @@ function createIdentityViewModel(
         text: content.coupleIdentity.monogram.text ?? fallbackText,
       }
     : null;
-  const socialLinks: InvitationIdentityViewModel['socialLinks'] = [];
-  const instagram = getSafeHttpsHref(content.coupleIdentity.socialLinks.instagram);
-  const tiktok = getSafeHttpsHref(content.coupleIdentity.socialLinks.tiktok);
-  const website = getSafeHttpsHref(content.coupleIdentity.socialLinks.website);
-
-  if (instagram) {
-    socialLinks.push({ href: instagram, label: 'Instagram', provider: 'instagram' });
-  }
-  if (tiktok) {
-    socialLinks.push({ href: tiktok, label: 'TikTok', provider: 'tiktok' });
-  }
-  if (website) {
-    socialLinks.push({ href: website, label: 'Website', provider: 'website' });
-  }
-
+  const socialLinks = createSocialLinks(content.coupleIdentity.socialLinks);
   const hasIdentity = Boolean(
     monogram ||
-    content.coupleIdentity.shortName ||
-    content.coupleIdentity.weddingHashtag ||
-    socialLinks.length > 0,
+      content.coupleIdentity.shortName ||
+      content.coupleIdentity.weddingHashtag ||
+      socialLinks.length > 0,
   );
 
   return hasIdentity
@@ -289,6 +313,7 @@ function createLegacyLocationViewModel(content: InvitationDraftContent) {
 export function createInvitationViewModel({
   draft,
   galleryImages = [],
+  premiumMediaImages = { cover: null, personOne: null, personTwo: null, story: null },
   project,
 }: InvitationViewModelInput) {
   const { content } = draft;
@@ -297,28 +322,17 @@ export function createInvitationViewModel({
   const modernPrimaryDate = content.eventSchedule.events[0]?.date ?? null;
   const primaryDate = isLegacySchedule ? legacyPrimaryDate : modernPrimaryDate;
   const primaryDateLabel = formatInvitationDate(primaryDate);
-  const legacyCeremony = createLegacyEventPartViewModel(content.events.ceremony, 'legacy-ceremony');
-  const legacyReception = createLegacyEventPartViewModel(
-    content.events.reception,
-    'legacy-reception',
-  );
-  const legacyItems = [legacyCeremony, legacyReception].filter(
-    (event): event is InvitationScheduleItemViewModel => event !== null,
-  );
+  const legacyItems = [
+    createLegacyEventPartViewModel(content.events.ceremony, 'legacy-ceremony'),
+    createLegacyEventPartViewModel(content.events.reception, 'legacy-reception'),
+  ].filter((event): event is InvitationScheduleItemViewModel => event !== null);
   const modernItems = content.eventSchedule.events.map(createScheduleItemViewModel);
   const hasLegacyEventContent = Boolean(primaryDateLabel || legacyItems.length > 0);
   const events = isLegacySchedule
     ? content.events.enabled && hasLegacyEventContent
-      ? {
-          items: legacyItems,
-          primaryDateLabel,
-        }
+      ? { items: legacyItems, primaryDateLabel }
       : null
-    : {
-        items: modernItems,
-        primaryDateLabel,
-      };
-
+    : { items: modernItems, primaryDateLabel };
   const identity = createIdentityViewModel(content);
   const opening =
     content.opening.message || content.opening.quote
@@ -328,6 +342,12 @@ export function createInvitationViewModel({
           treatment: content.opening.treatment,
         }
       : null;
+  const weddingFilmEmbedHref = content.premiumMedia.weddingFilm.enabled
+    ? getYoutubeEmbedHref(content.premiumMedia.weddingFilm.url)
+    : null;
+  const weddingFilmWatchHref = content.premiumMedia.weddingFilm.enabled
+    ? getYoutubeWatchHref(content.premiumMedia.weddingFilm.url)
+    : null;
 
   return {
     closing:
@@ -342,11 +362,15 @@ export function createInvitationViewModel({
         displayName: content.couple.personOne.displayName,
         fullName: content.couple.personOne.fullName,
         parentLine: content.couple.personOne.parentLine,
+        portrait: premiumMediaImages.personOne,
+        socialLinks: createSocialLinks(content.premiumMedia.personOne.socialLinks),
       },
       personTwo: {
         displayName: content.couple.personTwo.displayName,
         fullName: content.couple.personTwo.fullName,
         parentLine: content.couple.personTwo.parentLine,
+        portrait: premiumMediaImages.personTwo,
+        socialLinks: createSocialLinks(content.premiumMedia.personTwo.socialLinks),
       },
     },
     digitalGift:
@@ -380,6 +404,19 @@ export function createInvitationViewModel({
     },
     location: isLegacySchedule ? createLegacyLocationViewModel(content) : null,
     opening,
+    premiumMedia: {
+      coverImage: premiumMediaImages.cover,
+      storyImage: premiumMediaImages.story,
+      weddingFilm:
+        weddingFilmEmbedHref && weddingFilmWatchHref
+          ? {
+              caption: content.premiumMedia.weddingFilm.caption,
+              embedHref: weddingFilmEmbedHref,
+              heading: content.premiumMedia.weddingFilm.heading ?? 'Wedding Film',
+              watchHref: weddingFilmWatchHref,
+            }
+          : null,
+    },
     rsvp: content.rsvp.enabled
       ? {
           heading: content.rsvp.heading ?? 'Konfirmasi Kehadiran',

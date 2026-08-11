@@ -4,6 +4,7 @@ import {
   createInvitationViewModel,
   type InvitationRendererProjectMetadata,
 } from '@/modules/invitation-templates/invitation-view-model';
+import type { InvitationPremiumMediaImages } from '@/modules/media/invitation-image.types';
 import type { InvitationGalleryImage } from '@/modules/media/media.types';
 
 import type { InvitationDraftContent } from './invitation-draft.schema';
@@ -294,6 +295,21 @@ export function createInvitationEditorSubmissionPayload(content: InvitationDraft
   };
 }
 
+function createOwnerPreviewPremiumMediaImages(
+  content: InvitationDraftContent,
+): InvitationPremiumMediaImages {
+  function image(id: string | null, alt: string) {
+    return id ? { alt, id, src: `/dashboard/media/${id}` } : null;
+  }
+
+  return {
+    cover: image(content.premiumMedia.coverImageId, 'Foto cover pasangan'),
+    personOne: image(content.premiumMedia.personOne.imageId, 'Potret mempelai pertama'),
+    personTwo: image(content.premiumMedia.personTwo.imageId, 'Potret mempelai kedua'),
+    story: image(content.premiumMedia.storyImageId, 'Foto cerita pasangan'),
+  };
+}
+
 export function createInvitationEditorPreviewViewModel(input: {
   content: InvitationDraftContent;
   galleryImages: InvitationGalleryImage[];
@@ -302,6 +318,7 @@ export function createInvitationEditorPreviewViewModel(input: {
   return createInvitationViewModel({
     draft: { content: input.content },
     galleryImages: input.galleryImages,
+    premiumMediaImages: createOwnerPreviewPremiumMediaImages(input.content),
     project: input.project,
   });
 }

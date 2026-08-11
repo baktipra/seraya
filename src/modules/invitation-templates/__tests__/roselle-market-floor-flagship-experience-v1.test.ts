@@ -71,9 +71,9 @@ describe('J1.1 Roselle market-floor flagship experience contract', () => {
     expect(roselleMarketFloorStyles).toContain('min-height: 100svh');
   });
 
-  it('stays presentation-only and does not fake unsupported wedding media', () => {
-    expect(roselleTemplate).not.toContain('weddingFilm');
-    expect(roselleTemplate).not.toContain('couplePortrait');
+  it('keeps J1.1 presentation safety while allowing later canonical wedding-media capabilities', () => {
+    expect(roselleTemplate).toContain("invitation.premiumMedia?.coverImage");
+    expect(roselleTemplate).toContain("invitation.gallery?.images[0]");
     expect(roselleMarketFloorStyles).not.toMatch(/url\(['"]?https?:\/\//);
     expect(roselleMarketFloorStyles).toContain('@media (prefers-reduced-motion: reduce)');
   });

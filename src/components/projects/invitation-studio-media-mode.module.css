@@ -84,7 +84,7 @@
 .tabList {
   display: grid;
   min-width: 0;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 0.55rem;
   margin-bottom: 1rem;
   padding: 0.35rem;
@@ -159,6 +159,12 @@
   color: var(--seraya-text-primary);
 }
 
+@media (min-width: 540px) {
+  .tabList {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 @media (min-width: 720px) {
   .header {
     flex-direction: row;
@@ -167,10 +173,12 @@
   }
 
   .summary {
+    min-width: min(100%, 27rem);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     margin-left: auto;
   }
 
   .tabList {
-    width: min(100%, 34rem);
+    width: min(100%, 48rem);
   }
 }

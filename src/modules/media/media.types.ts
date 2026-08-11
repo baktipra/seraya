@@ -1,3 +1,5 @@
+import { INVITATION_IMAGE_MEDIA_KIND } from './invitation-image.types';
+
 export const INVITATION_MEDIA_BUCKET = 'invitation-media' as const;
 export const GALLERY_IMAGE_MEDIA_KIND = 'gallery_image' as const;
 export const MAX_GALLERY_IMAGES = 12 as const;
@@ -10,13 +12,16 @@ export const SUPPORTED_GALLERY_IMAGE_MIME_TYPES = [
 ] as const;
 
 export type GalleryImageMimeType = (typeof SUPPORTED_GALLERY_IMAGE_MIME_TYPES)[number];
+export type InvitationImageMediaKind =
+  | typeof GALLERY_IMAGE_MEDIA_KIND
+  | typeof INVITATION_IMAGE_MEDIA_KIND;
 export type MediaAssetStatus = 'uploaded' | 'processing' | 'ready' | 'failed' | 'deleted';
 
 export type MediaAsset = {
   created_at: string;
   deleted_at: string | null;
   id: string;
-  media_kind: typeof GALLERY_IMAGE_MEDIA_KIND;
+  media_kind: InvitationImageMediaKind;
   mime_type: GalleryImageMimeType;
   project_id: string;
   size_bytes: number;
