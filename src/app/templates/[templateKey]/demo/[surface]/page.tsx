@@ -13,6 +13,7 @@ import {
   createCanonicalShowroomInvitation,
   createCanonicalShowroomPersonalSlots,
 } from '@/modules/invitation-templates/showroom/canonical-showroom-invitation';
+import { activateRosellePremiumShowroom } from '@/modules/invitation-templates/showroom/roselle-premium-showroom';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,7 +29,6 @@ const SHOWROOM_FINAL_ASSETS = [
 ] as const;
 
 const SHOWROOM_FINAL_ASSET_CSS = `
-#showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-template='roselle'] [data-roselle-chapter='opening']{background-image:linear-gradient(180deg,rgb(255 250 244/.7),rgb(255 250 244/.9)),url("${SHOWROOM_FINAL_ASSETS[0]}");background-position:center 38%;background-repeat:no-repeat;background-size:cover}
 #showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-template='aruna'] [data-invitation-chapter='opening']{background-image:linear-gradient(90deg,rgb(255 246 234/.97) 0%,rgb(255 246 234/.9) 44%,rgb(255 253 248/.48) 100%),url("${SHOWROOM_FINAL_ASSETS[0]}");background-position:center 38%;background-repeat:no-repeat;background-size:cover}
 #showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-template='laras'] [data-invitation-chapter='opening']{background-image:linear-gradient(180deg,rgb(27 23 31/.42),rgb(27 23 31/.84)),url("${SHOWROOM_FINAL_ASSETS[0]}");background-position:center 38%;background-repeat:no-repeat;background-size:cover}
 #showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-invitation-gallery] figure{background-color:#d7c8b7;background-position:center;background-repeat:no-repeat;background-size:cover}
@@ -41,10 +41,19 @@ const SHOWROOM_FINAL_ASSET_CSS = `
 #showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-invitation-gallery] figure img{opacity:0}
 #showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-template='aruna'] [data-invitation-gallery] figure:nth-child(3){grid-column:span 6;aspect-ratio:4/5}
 #showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-template='aruna'] [data-invitation-gallery] figure:nth-child(6){grid-column:2/span 10;aspect-ratio:16/9}
+#showroom-invitation[data-roselle-premium-showroom='j1.3a'] [data-template='roselle'] [data-roselle-opening-portrait] img{object-position:center 38%}
+#showroom-invitation[data-roselle-premium-showroom='j1.3a'] [data-template='roselle'] [data-roselle-person]:first-of-type [data-roselle-person-media] img{transform:scale(1.42);transform-origin:31% 47%}
+#showroom-invitation[data-roselle-premium-showroom='j1.3a'] [data-template='roselle'] [data-roselle-person]:nth-of-type(2) [data-roselle-person-media] img{transform:scale(1.42);transform-origin:69% 47%}
+#showroom-invitation[data-roselle-premium-showroom='j1.3a'] [data-template='roselle'] [data-roselle-story-media] img{object-position:center 44%}
+#showroom-invitation[data-roselle-premium-showroom='j1.3a'] [data-template='roselle'] [data-roselle-wedding-film]{isolation:isolate}
+#showroom-invitation[data-roselle-premium-showroom='j1.3a'] [data-template='roselle'] [data-roselle-film-frame]{max-width:54rem}
 #showroom-invitation[data-showroom-embed='thumbnail']{pointer-events:none;user-select:none}
 #showroom-invitation[data-showroom-embed='thumbnail']::-webkit-scrollbar{display:none}
 html:has(#showroom-invitation[data-showroom-embed='thumbnail']),body:has(#showroom-invitation[data-showroom-embed='thumbnail']){overflow:hidden;background:transparent;scrollbar-width:none}
-@media(max-width:36rem){#showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-template] [data-invitation-chapter='opening'],#showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-template='roselle'] [data-roselle-chapter='opening']{background-position:center 32%}#showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-template='aruna'] [data-invitation-gallery] figure:nth-child(3),#showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-template='aruna'] [data-invitation-gallery] figure:nth-child(6){grid-column:span 12;aspect-ratio:4/5}}
+@media(max-width:36rem){#showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-template='aruna'] [data-invitation-chapter='opening'],#showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-template='laras'] [data-invitation-chapter='opening']{background-position:center 32%}#showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-template='aruna'] [data-invitation-gallery] figure:nth-child(3),#showroom-invitation[data-final-showroom-assets='kirana-arga-v1'] [data-template='aruna'] [data-invitation-gallery] figure:nth-child(6){grid-column:span 12;aspect-ratio:4/5}}
+@media(max-width:430px){#showroom-invitation[data-roselle-premium-showroom='j1.3a'] [data-template='roselle'] [data-roselle-person-media]{width:min(76vw,17rem)}#showroom-invitation[data-roselle-premium-showroom='j1.3a'] [data-template='roselle'] [data-roselle-film-frame]{border-radius:1rem}}
+@media(max-width:390px){#showroom-invitation[data-roselle-premium-showroom='j1.3a'] [data-template='roselle'] [data-roselle-person]:first-of-type [data-roselle-person-media] img{transform-origin:30% 46%}#showroom-invitation[data-roselle-premium-showroom='j1.3a'] [data-template='roselle'] [data-roselle-person]:nth-of-type(2) [data-roselle-person-media] img{transform-origin:70% 46%}}
+@media(max-width:360px){#showroom-invitation[data-roselle-premium-showroom='j1.3a'] [data-template='roselle'] [data-roselle-person-media]{width:min(78vw,16rem)}#showroom-invitation[data-roselle-premium-showroom='j1.3a'] [data-template='roselle'] [data-roselle-person-socials]{justify-content:center}}
 `;
 
 type ShowroomSurface = (typeof SHOWROOM_SURFACES)[number];
@@ -112,7 +121,10 @@ export default async function CanonicalShowroomDemoPage({
   const requestedPalette = getQueryValue(query?.palette);
   const embedMode = getQueryValue(query?.embed) === 'thumbnail';
   const paletteKey = resolveInvitationThemePaletteKey(templateKey, requestedPalette);
-  const invitation = createCanonicalShowroomInvitation(templateKey);
+  const invitation = activateRosellePremiumShowroom(
+    createCanonicalShowroomInvitation(templateKey),
+    templateKey,
+  );
   const personalSlots = surface === 'personal' ? createCanonicalShowroomPersonalSlots() : undefined;
   const templateLabel = getTemplateLabel(templateKey);
 
@@ -176,6 +188,7 @@ export default async function CanonicalShowroomDemoPage({
             : 'bg-seraya-ivory min-h-screen px-0 py-0 sm:px-6 sm:py-8'
         }
         data-final-showroom-assets="kirana-arga-v1"
+        data-roselle-premium-showroom={templateKey === 'roselle' ? 'j1.3a' : undefined}
         data-showroom-embed={embedMode ? 'thumbnail' : undefined}
         id="showroom-invitation"
       >
