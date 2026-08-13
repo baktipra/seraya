@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 
+import { GuestbookModerationControl } from '@/components/projects/guestbook-moderation-control';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/design-system';
 import type { OwnerGuestbookEntry } from '@/modules/guestbook/guestbook.types';
 
@@ -31,25 +32,36 @@ function GuestbookEntryCard({ entry, timezone }: { entry: OwnerGuestbookEntry; t
     <li>
       <Card className="overflow-hidden">
         <CardContent className="p-5 sm:p-6">
-          <div className="min-w-0">
-            <p className="text-seraya-text-primary text-base font-semibold">
-              {entry.guestDisplayName}
-            </p>
-            <div className="text-seraya-text-muted mt-1 flex flex-wrap gap-x-2 text-sm leading-6">
-              {entry.groupLabel ? <span>{entry.groupLabel}</span> : null}
-              <span>Dikirim {formatGuestbookTimestamp(entry.createdAt, timezone)}</span>
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-seraya-text-primary text-base font-semibold">
+                {entry.guestDisplayName}
+              </p>
+              <div className="text-seraya-text-muted mt-1 flex flex-wrap gap-x-2 text-sm leading-6">
+                {entry.groupLabel ? <span>{entry.groupLabel}</span> : null}
+                <span>Dikirim {formatGuestbookTimestamp(entry.createdAt, timezone)}</span>
+              </div>
             </div>
+            <GuestbookModerationControl
+              entryId={entry.id}
+              hiddenFromGuestFeed={entry.hiddenFromGuestFeed}
+              shareWithGuests={entry.shareWithGuests}
+            />
           </div>
           <p className="text-seraya-text-secondary mt-5 text-sm leading-7 break-words whitespace-pre-wrap">
             {entry.message}
           </p>
+          {entry.shareWithGuests ? (
+            <p className="text-seraya-text-muted mt-4 text-xs leading-5">
+              Moderasi hanya mengubah visibilitas di feed tamu. Ucapan tetap tersimpan di Respons Tamu.
+            </p>
+          ) : null}
         </CardContent>
       </Card>
     </li>
   );
 }
 
-/** Read-only owner inbox rendered inside Respons Tamu. Ucapan moderation is intentionally absent. */
 export function GuestbookInboxPanel({ entries, timezone }: GuestbookInboxPanelProps) {
   return (
     <section aria-labelledby="guestbook-inbox-title">
@@ -60,7 +72,9 @@ export function GuestbookInboxPanel({ entries, timezone }: GuestbookInboxPanelPr
         >
           Ucapan dari tamu
         </CardTitle>
-        <CardDescription>Ucapan terbaru ditampilkan paling atas.</CardDescription>
+        <CardDescription>
+          Ucapan terbaru ditampilkan paling atas. Hanya ucapan dengan izin tamu yang dapat muncul di feed undangan pribadi.
+        </CardDescription>
       </CardHeader>
       <CardContent className="px-0 pt-5 sm:px-0 sm:pt-6">
         {entries.length === 0 ? (
@@ -82,7 +96,6 @@ export function GuestbookInboxPanel({ entries, timezone }: GuestbookInboxPanelPr
   );
 }
 
-/** Legacy component kept only for direct internal reuse; the route itself redirects into Respons Tamu. */
 export function GuestbookDashboard({ entries, projectId, timezone }: GuestbookDashboardProps) {
   return (
     <section

@@ -1,20 +1,26 @@
 import 'server-only';
 
 import { requireCurrentUser } from '@/modules/auth/current-user';
+import { isValidPersonalGuestToken } from '@/modules/guest-links/guest-link-token';
 import { isSafePublicInvitationSlug } from '@/modules/publications/public-invitation.repository';
 import { getOwnedProjectById, type OwnedProject } from '@/modules/projects/project.repository';
-
-import { isValidPersonalGuestToken } from '@/modules/guest-links/guest-link-token';
 
 import {
   GuestbookRepositoryError,
   listGuestbookEntriesForVerifiedProject,
+  listPersonalGuestbookSharedWishesRecords,
   mapPersonalGuestbookEntryRecord,
+  mapPersonalGuestbookSharedWishRecord,
   resolvePersonalGuestbookEntryRecord,
+  setGuestbookEntryFeedHiddenForVerifiedProject,
   softRemoveGuestbookEntryForVerifiedProject,
   submitPersonalGuestbookEntryRecord,
 } from './guestbook.repository';
-import type { OwnedGuestbookInbox, PersonalGuestbookEntry } from './guestbook.types';
+import type {
+  OwnedGuestbookInbox,
+  PersonalGuestbookEntry,
+  PersonalGuestbookSharedWish,
+} from './guestbook.types';
 
 export class GuestbookUnavailableError extends Error {
   constructor() {
@@ -23,75 +29,71 @@ export class GuestbookUnavailableError extends Error {
   }
 }
 
-export async function getGuestbookInboxForVerifiedProject(
-  project: OwnedProject,
-): Promise<OwnedGuestbookInbox> {
+export async function getGuestbookInboxForVerifiedProject(project: OwnedProject): Promise<OwnedGuestbookInbox> {
   const entries = await listGuestbookEntriesForVerifiedProject(project);
-
-  return {
-    entries,
-    project: {
-      defaultTimezone: project.default_timezone,
-      id: project.id,
-    },
-  };
+  return { entries, project: { defaultTimezone: project.default_timezone, id: project.id } };
 }
 
-/** Standalone owner-only wrapper for non-RSC callers. */
-export async function getGuestbookInboxForCurrentUser(
-  projectId: string,
-): Promise<OwnedGuestbookInbox> {
+export async function getGuestbookInboxForCurrentUser(projectId: string): Promise<OwnedGuestbookInbox> {
   const user = await requireCurrentUser();
   const project = await getOwnedProjectById(projectId, user.id);
   return getGuestbookInboxForVerifiedProject(project);
 }
 
-export async function softRemoveGuestbookEntryForCurrentUser(input: {
-  entryId: string;
-  projectId: string;
-}): Promise<void> {
+export async function softRemoveGuestbookEntryForCurrentUser(input: { entryId: string; projectId: string }): Promise<void> {
   const user = await requireCurrentUser();
   const project = await getOwnedProjectById(input.projectId, user.id);
   await softRemoveGuestbookEntryForVerifiedProject({ entryId: input.entryId, project });
 }
 
-/** Personal capability query. Null is intentionally generic for all invalid/unavailable states. */
-export async function getPersonalGuestbookEntryByToken(input: {
-  slug: string;
-  token: string;
-}): Promise<PersonalGuestbookEntry | null> {
-  if (!isSafePublicInvitationSlug(input.slug) || !isValidPersonalGuestToken(input.token)) {
-    return null;
-  }
+export async function setGuestbookEntryFeedHiddenForCurrentUser(input: {
+  entryId: string;
+  hidden: boolean;
+  projectId: string;
+}): Promise<void> {
+  const user = await requireCurrentUser();
+  const project = await getOwnedProjectById(input.projectId, user.id);
+  await setGuestbookEntryFeedHiddenForVerifiedProject({ entryId: input.entryId, hidden: input.hidden, project });
+}
 
+export async function getPersonalGuestbookEntryByToken(input: { slug: string; token: string }): Promise<PersonalGuestbookEntry | null> {
+  if (!isSafePublicInvitationSlug(input.slug) || !isValidPersonalGuestToken(input.token)) return null;
   try {
     return mapPersonalGuestbookEntryRecord(await resolvePersonalGuestbookEntryRecord(input));
   } catch (error) {
-    if (error instanceof GuestbookRepositoryError) {
-      return null;
-    }
-
+    if (error instanceof GuestbookRepositoryError) return null;
     throw error;
   }
 }
 
-/** Personal capability mutation. The database resolves the active guest itself. */
+export async function getPersonalGuestbookSharedWishesByToken(input: {
+  slug: string;
+  token: string;
+}): Promise<PersonalGuestbookSharedWish[]> {
+  if (!isSafePublicInvitationSlug(input.slug) || !isValidPersonalGuestToken(input.token)) return [];
+  try {
+    const records = await listPersonalGuestbookSharedWishesRecords(input);
+    return records.flatMap((record) => {
+      const wish = mapPersonalGuestbookSharedWishRecord(record);
+      return wish ? [wish] : [];
+    });
+  } catch (error) {
+    if (error instanceof GuestbookRepositoryError) return [];
+    throw error;
+  }
+}
+
 export async function submitPersonalGuestbookEntry(input: {
   message: string;
+  shareWithGuests: boolean;
   slug: string;
   token: string;
 }): Promise<'created' | 'updated' | null> {
-  if (!isSafePublicInvitationSlug(input.slug) || !isValidPersonalGuestToken(input.token)) {
-    return null;
-  }
-
+  if (!isSafePublicInvitationSlug(input.slug) || !isValidPersonalGuestToken(input.token)) return null;
   try {
     return await submitPersonalGuestbookEntryRecord(input);
   } catch (error) {
-    if (error instanceof GuestbookRepositoryError) {
-      return null;
-    }
-
+    if (error instanceof GuestbookRepositoryError) return null;
     throw error;
   }
 }

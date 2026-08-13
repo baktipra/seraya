@@ -26,15 +26,10 @@ function redirectToPersonalInvitation(input: {
     `/${encodeURIComponent(input.slug)}/g/${encodeURIComponent(input.guestToken)}?guestbook=${input.outcome}`,
   );
   const response = NextResponse.redirect(destination, 303);
-
-  for (const [name, value] of Object.entries(privateResponseHeaders)) {
-    response.headers.set(name, value);
-  }
-
+  for (const [name, value] of Object.entries(privateResponseHeaders)) response.headers.set(name, value);
   return response;
 }
 
-/** Token-authorized guestbook endpoint. It accepts only message body plus current route capability. */
 export async function POST(request: Request, context: PersonalGuestbookRouteContext) {
   const { guestToken, slug } = await context.params;
   let formData: FormData;
@@ -46,18 +41,15 @@ export async function POST(request: Request, context: PersonalGuestbookRouteCont
   }
 
   const parsed = parsePersonalGuestbookFormData(formData);
-
-  if (!parsed.success) {
-    return redirectToPersonalInvitation({ guestToken, outcome: 'error', slug });
-  }
+  if (!parsed.success) return redirectToPersonalInvitation({ guestToken, outcome: 'error', slug });
 
   try {
     const result = await submitPersonalGuestbookEntry({
       message: parsed.data.message,
+      shareWithGuests: parsed.data.shareWithGuests,
       slug,
       token: guestToken,
     });
-
     return redirectToPersonalInvitation({
       guestToken,
       outcome: result ? 'success' : 'error',

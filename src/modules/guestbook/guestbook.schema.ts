@@ -15,6 +15,7 @@ const guestbookMessageSchema = z
 export const personalGuestbookSubmissionSchema = z
   .object({
     message: guestbookMessageSchema,
+    shareWithGuests: z.boolean(),
   })
   .strict();
 
@@ -23,6 +24,7 @@ export type PersonalGuestbookSubmission = z.infer<typeof personalGuestbookSubmis
 export function parsePersonalGuestbookFormData(formData: FormData) {
   return personalGuestbookSubmissionSchema.safeParse({
     message: formData.get('message'),
+    shareWithGuests: formData.get('shareWithGuests') === 'on',
   });
 }
 
@@ -36,6 +38,22 @@ const removeGuestbookEntrySchema = z
 export function parseRemoveGuestbookEntryFormData(formData: FormData) {
   return removeGuestbookEntrySchema.safeParse({
     entryId: formData.get('entryId'),
+    projectId: formData.get('projectId'),
+  });
+}
+
+const moderateGuestbookEntrySchema = z
+  .object({
+    entryId: z.string().uuid(),
+    hidden: z.enum(['true', 'false']).transform((value) => value === 'true'),
+    projectId: z.string().uuid(),
+  })
+  .strict();
+
+export function parseModerateGuestbookEntryFormData(formData: FormData) {
+  return moderateGuestbookEntrySchema.safeParse({
+    entryId: formData.get('entryId'),
+    hidden: formData.get('hidden'),
     projectId: formData.get('projectId'),
   });
 }

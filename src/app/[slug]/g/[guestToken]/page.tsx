@@ -9,7 +9,10 @@ import {
   InvitationTemplateRenderer,
 } from '@/modules/invitation-templates';
 import { getPersonalGuestInvitationByToken } from '@/modules/guest-links';
-import { getPersonalGuestbookEntryByToken } from '@/modules/guestbook';
+import {
+  getPersonalGuestbookEntryByToken,
+  getPersonalGuestbookSharedWishesByToken,
+} from '@/modules/guestbook';
 import { createInvitationAudioPlaybackCapability } from '@/modules/media/invitation-audio-playback.types';
 import {
   getPublicGalleryImagesForCurrentSnapshot,
@@ -34,34 +37,19 @@ type PersonalGuestInvitationPageProps = {
   }>;
 };
 
-/** Metadata is deliberately token-free and does not perform a capability lookup. */
 export function generateMetadata(): Metadata {
-  return {
-    robots: personalInvitationRobots,
-    title: 'Undangan pribadi',
-  };
+  return { robots: personalInvitationRobots, title: 'Undangan pribadi' };
 }
 
-/**
- * Anonymous, no-store personal invitation route. Snapshot content and guest
- * personalization are composed separately, so published snapshot schema stays
- * fully public-safe and guest-free.
- */
 export default async function PersonalGuestInvitationPage({
   params,
   searchParams,
 }: PersonalGuestInvitationPageProps) {
   const { guestToken, slug } = await params;
-  const personalInvitation = await getPersonalGuestInvitationByToken({
-    slug,
-    token: guestToken,
-  });
-
+  const personalInvitation = await getPersonalGuestInvitationByToken({ slug, token: guestToken });
   const snapshot = personalInvitation?.snapshot ?? null;
 
-  if (!personalInvitation || !snapshot) {
-    notFound();
-  }
+  if (!personalInvitation || !snapshot) notFound();
 
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const guestbookFeedback =
@@ -71,18 +59,19 @@ export default async function PersonalGuestInvitationPage({
         ? 'error'
         : undefined;
   const rsvpFeedback = resolvedSearchParams?.rsvp === 'success' ? 'success' : undefined;
-  const [personalGuestbookEntry, galleryImages, premiumMediaImages] = await Promise.all([
+
+  const [personalGuestbookEntry, sharedWishes, galleryImages, premiumMediaImages] = await Promise.all([
     getPersonalGuestbookEntryByToken({ slug, token: guestToken }),
+    getPersonalGuestbookSharedWishesByToken({ slug, token: guestToken }),
     getPublicGalleryImagesForCurrentSnapshot(snapshot.draft.gallery.imageIds),
     getPublicPremiumMediaImagesForCurrentSnapshot(snapshot.draft.premiumMedia),
   ]);
+
   const invitation = createInvitationViewModel({
     draft: { content: snapshot.draft },
     galleryImages,
     premiumMediaImages,
-    project: {
-      event_date_primary: snapshot.project.eventDatePrimary,
-    },
+    project: { event_date_primary: snapshot.project.eventDatePrimary },
   });
 
   return (
@@ -101,6 +90,7 @@ export default async function PersonalGuestInvitationPage({
               entry={personalGuestbookEntry}
               feedback={guestbookFeedback}
               guestToken={guestToken}
+              sharedWishes={sharedWishes}
               slug={slug}
             />
           ),
