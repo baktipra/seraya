@@ -4,10 +4,8 @@ import { useParams } from 'next/navigation';
 import { useActionState } from 'react';
 
 import { Button } from '@/design-system';
-import {
-  initialGuestbookActionState,
-  moderateGuestbookEntryAction,
-} from '@/modules/guestbook';
+import { initialGuestbookActionState } from '@/modules/guestbook/guestbook.action-state';
+import { moderateGuestbookEntryAction } from '@/modules/guestbook/guestbook.actions';
 
 export function GuestbookModerationControl(input: {
   entryId: string;
