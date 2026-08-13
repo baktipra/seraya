@@ -74,12 +74,14 @@ export default async function PersonalFixturePage({
                 guestbookMessage
                   ? {
                       message: guestbookMessage,
+                      shareWithGuests: false,
                       updatedAt: '2026-07-25T00:00:00.000Z',
                     }
                   : null
               }
               feedback={guestbookFeedback}
               guestToken={guestToken}
+              sharedWishes={[]}
               slug={slug}
             />
           ),
