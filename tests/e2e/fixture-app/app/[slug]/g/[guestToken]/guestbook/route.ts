@@ -20,6 +20,7 @@ export async function POST(request: Request, { params }: FixtureGuestbookRouteCo
 
   const formData = await request.formData();
   const message = String(formData.get('message') ?? '').trim();
+  const shareWithGuests = formData.get('shareWithGuests') === 'on';
   const requestOrigin = request.headers.get('origin') ?? new URL(request.url).origin;
   const redirectUrl = new URL(`/${slug}/g/${guestToken}`, requestOrigin);
   redirectUrl.hash = 'personal-guestbook-title';
@@ -31,11 +32,18 @@ export async function POST(request: Request, { params }: FixtureGuestbookRouteCo
 
   redirectUrl.searchParams.set('guestbook', 'success');
   const response = NextResponse.redirect(redirectUrl, { status: 303 });
-  response.cookies.set(getFixtureCookieNames(slug).guestbookMessage, message, {
+  const cookieNames = getFixtureCookieNames(slug);
+  const cookieOptions = {
     httpOnly: true,
     path: '/',
-    sameSite: 'lax',
-  });
+    sameSite: 'lax' as const,
+  };
+  response.cookies.set(cookieNames.guestbookMessage, message, cookieOptions);
+  response.cookies.set(
+    cookieNames.guestbookShareWithGuests,
+    shareWithGuests ? 'true' : 'false',
+    cookieOptions,
+  );
 
   return response;
 }
