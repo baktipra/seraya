@@ -154,6 +154,8 @@ for (const templateKey of templateKeys) {
       const messageField = page.getByLabel('Ucapan & doa');
       await messageField.fill(forcedGuestbookErrorMessage);
       await messageField.press('Tab');
+      await expect(consentCheckbox).toBeFocused();
+      await consentCheckbox.press('Tab');
 
       const submitButton = page.getByRole('button', { name: 'Kirim ucapan' });
       await expect(submitButton).toBeFocused();
