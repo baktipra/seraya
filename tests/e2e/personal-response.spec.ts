@@ -138,8 +138,17 @@ for (const templateKey of templateKeys) {
       await expect(page.locator('[data-personal-rsvp-attendance]')).toHaveCount(0);
     });
 
-    test('handles guestbook error, retry, success, and reload persistence', async ({ page }) => {
+    test('handles guestbook error, consent sharing, opt-out, and reload persistence', async ({ page }) => {
       await page.goto(getPersonalPath(templateKey));
+
+      const consentCheckbox = page.getByRole('checkbox', {
+        name: /Izinkan ucapan ini tampil kepada tamu lain/i,
+      });
+      const sharedWishes = page.locator('[data-personal-shared-wishes]');
+
+      await expect(consentCheckbox).not.toBeChecked();
+      await expect(sharedWishes).toContainText('Belum ada ucapan yang dibagikan untuk tamu lain.');
+      await expect(page.locator('[data-personal-shared-wishes-list]')).toHaveCount(0);
 
       const messageField = page.getByLabel('Ucapan & doa');
       await messageField.fill(forcedGuestbookErrorMessage);
@@ -151,21 +160,43 @@ for (const templateKey of templateKeys) {
 
       await expect(page).toHaveURL(/guestbook=error/);
       await expect(page.getByRole('alert')).toContainText('Ucapan belum bisa dikirim.');
+      await expect(consentCheckbox).not.toBeChecked();
 
       const persistedMessage = `Semoga perjalanan kalian selalu hangat — ${templateKey}.`;
       await page.getByLabel('Ucapan & doa').fill(persistedMessage);
+      await consentCheckbox.check();
       await page.getByRole('button', { name: 'Kirim ucapan' }).press('Enter');
 
       await expect(page).toHaveURL(/guestbook=success/);
       await expect(page.locator('[data-personal-response-success]')).toContainText(
-        'Ucapan dan doa kalian sudah disimpan.',
+        'Ucapan dan preferensi berbagi sudah disimpan.',
       );
       await expect(page.getByLabel('Ucapan & doa')).toHaveValue(persistedMessage);
+      await expect(consentCheckbox).toBeChecked();
       await expect(page.getByRole('button', { name: 'Perbarui ucapan' })).toBeVisible();
+      await expect(page.locator('[data-personal-shared-wishes-list]')).toContainText('Tamu Browser');
+      await expect(page.locator('[data-personal-shared-wishes-list]')).toContainText(persistedMessage);
 
       await page.reload();
       await expect(page.getByLabel('Ucapan & doa')).toHaveValue(persistedMessage);
-      await expect(page.getByRole('button', { name: 'Perbarui ucapan' })).toBeVisible();
+      await expect(consentCheckbox).toBeChecked();
+      await expect(page.locator('[data-personal-shared-wishes-list]')).toContainText(persistedMessage);
+
+      await consentCheckbox.uncheck();
+      await page.getByRole('button', { name: 'Perbarui ucapan' }).press('Enter');
+
+      await expect(page).toHaveURL(/guestbook=success/);
+      await expect(page.locator('[data-personal-response-success]')).toContainText(
+        'Ucapan dan preferensi berbagi sudah disimpan.',
+      );
+      await expect(page.getByLabel('Ucapan & doa')).toHaveValue(persistedMessage);
+      await expect(consentCheckbox).not.toBeChecked();
+      await expect(page.locator('[data-personal-shared-wishes-list]')).toHaveCount(0);
+      await expect(sharedWishes).toContainText('Belum ada ucapan yang dibagikan untuk tamu lain.');
+
+      await page.reload();
+      await expect(consentCheckbox).not.toBeChecked();
+      await expect(page.locator('[data-personal-shared-wishes-list]')).toHaveCount(0);
     });
   });
 }
