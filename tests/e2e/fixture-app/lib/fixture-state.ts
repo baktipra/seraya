@@ -18,6 +18,7 @@ export function getFixtureCookieNames(slug: string) {
   return {
     attendeeCount: `j1re-${safeSlug}-attendee-count`,
     guestbookMessage: `j1re-${safeSlug}-guestbook-message`,
+    guestbookShareWithGuests: `j1re-${safeSlug}-guestbook-share`,
     rsvpStatus: `j1re-${safeSlug}-rsvp-status`,
   };
 }
