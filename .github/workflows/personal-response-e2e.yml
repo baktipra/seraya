@@ -60,7 +60,7 @@ jobs:
             playwright.personal-response.config.ts \
             tsconfig.j1r-e.json \
             src/modules/invitation-templates/invitation-template-renderer.tsx \
-            tests/e2e)"
+            tests/e2e || true)"
           if [ -n "$files" ]; then
             while IFS= read -r file; do
               echo "::error file=$file::Prettier formatting differs"
