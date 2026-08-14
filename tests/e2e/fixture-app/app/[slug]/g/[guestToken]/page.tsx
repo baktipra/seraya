@@ -52,6 +52,8 @@ export default async function PersonalFixturePage({
       ? persistedAttendeeCount
       : null;
   const guestbookMessage = cookieStore.get(cookieNames.guestbookMessage)?.value ?? null;
+  const guestbookShareWithGuests =
+    cookieStore.get(cookieNames.guestbookShareWithGuests)?.value === 'true';
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const guestbookFeedback =
     resolvedSearchParams?.guestbook === 'success'
@@ -74,14 +76,24 @@ export default async function PersonalFixturePage({
                 guestbookMessage
                   ? {
                       message: guestbookMessage,
-                      shareWithGuests: false,
+                      shareWithGuests: guestbookShareWithGuests,
                       updatedAt: '2026-07-25T00:00:00.000Z',
                     }
                   : null
               }
               feedback={guestbookFeedback}
               guestToken={guestToken}
-              sharedWishes={[]}
+              sharedWishes={
+                guestbookMessage && guestbookShareWithGuests
+                  ? [
+                      {
+                        createdAt: '2026-07-25T00:00:00.000Z',
+                        displayName: 'Tamu Browser',
+                        message: guestbookMessage,
+                      },
+                    ]
+                  : []
+              }
               slug={slug}
             />
           ),
