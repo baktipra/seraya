@@ -42,7 +42,7 @@ export function PersonalGuestbook({
 
       {feedback === 'success' ? (
         <p aria-live="polite" data-personal-response-success role="status">
-          {hasEntry ? 'Ucapan dan preferensi berbagi sudah diperbarui.' : 'Ucapan sudah diterima.'}
+          Ucapan dan preferensi berbagi sudah disimpan.
         </p>
       ) : null}
       {feedback === 'error' ? (
