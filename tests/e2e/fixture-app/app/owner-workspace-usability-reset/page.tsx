@@ -57,11 +57,7 @@ export default async function OwnerWorkspaceUsabilityResetFixturePage({
   };
 
   return (
-    <DashboardShell
-      displayName="Alya Prameswari"
-      email="alya@example.com"
-      hasActiveProject
-    >
+    <DashboardShell displayName="Alya Prameswari" email="alya@example.com" hasActiveProject>
       <OwnerWorkspaceUsabilityResetFixture
         initialTask={parseInvitationWorkspaceTask(query.task, query.mode)}
         readiness={readiness}

@@ -1,6 +1,9 @@
 'use client';
 
-import { InvitationStudioProvider, type InvitationStudioSaveAction } from '../../../../../src/components/projects/invitation-studio-provider';
+import {
+  InvitationStudioProvider,
+  type InvitationStudioSaveAction,
+} from '../../../../../src/components/projects/invitation-studio-provider';
 import { InvitationTaskWorkspace } from '../../../../../src/components/projects/invitation-task-workspace';
 import type { InvitationWorkspaceTask } from '../../../../../src/components/projects/invitation-task-workspace.types';
 import { ToastProvider } from '../../../../../src/design-system';
