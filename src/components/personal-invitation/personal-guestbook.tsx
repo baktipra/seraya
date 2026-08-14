@@ -1,7 +1,4 @@
-import type {
-  PersonalGuestbookEntry,
-  PersonalGuestbookSharedWish,
-} from '@/modules/guestbook';
+import type { PersonalGuestbookEntry, PersonalGuestbookSharedWish } from '@/modules/guestbook';
 
 type PersonalGuestbookProps = {
   entry: PersonalGuestbookEntry | null;
@@ -42,7 +39,7 @@ export function PersonalGuestbook({
 
       {feedback === 'success' ? (
         <p aria-live="polite" data-personal-response-success role="status">
-          {hasEntry ? 'Ucapan dan preferensi berbagi sudah diperbarui.' : 'Ucapan sudah diterima.'}
+          Ucapan dan preferensi berbagi sudah disimpan.
         </p>
       ) : null}
       {feedback === 'error' ? (
@@ -74,7 +71,8 @@ export function PersonalGuestbook({
             type="checkbox"
           />
           <span>
-            Izinkan ucapan ini tampil kepada tamu lain di undangan pribadi. Anda dapat mengubah pilihan ini kapan saja.
+            Izinkan ucapan ini tampil kepada tamu lain di undangan pribadi. Anda dapat mengubah
+            pilihan ini kapan saja.
           </span>
         </label>
         <button data-personal-response-submit type="submit">
@@ -82,7 +80,11 @@ export function PersonalGuestbook({
         </button>
       </form>
 
-      <section aria-labelledby="personal-shared-wishes-title" className="mt-8" data-personal-shared-wishes>
+      <section
+        aria-labelledby="personal-shared-wishes-title"
+        className="mt-8"
+        data-personal-shared-wishes
+      >
         <p data-personal-response-eyebrow>Ucapan dari tamu</p>
         <h3 className="text-xl font-semibold" id="personal-shared-wishes-title">
           Doa baik untuk hari bahagia

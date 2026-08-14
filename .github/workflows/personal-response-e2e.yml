@@ -59,8 +59,16 @@ jobs:
             playwright.config.ts \
             playwright.personal-response.config.ts \
             tsconfig.j1r-e.json \
+            src/components/personal-invitation/personal-guest-rsvp.tsx \
+            src/components/personal-invitation/personal-guestbook.tsx \
             src/modules/invitation-templates/invitation-template-renderer.tsx \
-            tests/e2e
+            tests/e2e/personal-response.spec.ts \
+            tests/e2e/fixture-app/lib/fixture-invitation.ts \
+            tests/e2e/fixture-app/lib/fixture-state.ts \
+            'tests/e2e/fixture-app/app/[slug]/page.tsx' \
+            'tests/e2e/fixture-app/app/[slug]/g/[guestToken]/page.tsx' \
+            'tests/e2e/fixture-app/app/[slug]/g/[guestToken]/rsvp/route.ts' \
+            'tests/e2e/fixture-app/app/[slug]/g/[guestToken]/guestbook/route.ts'
 
       - name: Lint J1R-E files
         run: |
