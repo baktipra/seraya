@@ -53,14 +53,20 @@ jobs:
 
       - name: Check J1R-E formatting
         run: |
-          npx prettier --check \
+          files="$(npx prettier --list-different \
             .github/workflows/personal-response-e2e.yml \
             package.json \
             playwright.config.ts \
             playwright.personal-response.config.ts \
             tsconfig.j1r-e.json \
             src/modules/invitation-templates/invitation-template-renderer.tsx \
-            tests/e2e
+            tests/e2e)"
+          if [ -n "$files" ]; then
+            while IFS= read -r file; do
+              echo "::error file=$file::Prettier formatting differs"
+            done <<< "$files"
+            exit 1
+          fi
 
       - name: Lint J1R-E files
         run: |
