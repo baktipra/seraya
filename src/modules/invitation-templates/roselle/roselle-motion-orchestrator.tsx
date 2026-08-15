@@ -4,7 +4,6 @@ import { useEffect, useRef } from 'react';
 
 const revealSelector = [
   "[data-roselle-chapter]:not([data-roselle-chapter='opening'])",
-  '[data-template-response-slot]',
   '[data-template-event-utility-item]',
 ].join(', ');
 
