@@ -11,12 +11,14 @@ async function readRoselleSource(fileName: string) {
 }
 
 describe('Roselle cinematic motion language', () => {
-  it('mounts the motion orchestrator without replacing the existing flagship contract', async () => {
+  it('mounts the observer plus presentation scene layer without replacing the flagship contract', async () => {
     const template = await readRoselleSource('roselle-template.tsx');
 
     expect(template).toContain('RoselleMotionOrchestrator');
+    expect(template).toContain('roselle-presentation-motion-v3.module.css');
     expect(template).toContain('data-roselle-motion="flagship-v1"');
     expect(template).toContain('data-roselle-motion-language="cinematic-v2"');
+    expect(template).toContain('data-roselle-scene-language="presentation-v3"');
   });
 
   it('uses a lightweight fail-open observer instead of a decorative animation dependency', async () => {
@@ -42,5 +44,24 @@ describe('Roselle cinematic motion language', () => {
     expect(styles).toContain('var(--roselle-motion-distance-x)');
     expect(styles).toContain('@media (prefers-reduced-motion: reduce)');
     expect(styles).not.toContain('animation-timeline: view');
+  });
+
+  it('adds presentation-like scene wipes and image masks without autoplay or scroll hijacking', async () => {
+    const styles = await readRoselleSource('roselle-presentation-motion-v3.module.css');
+
+    expect(styles).toContain('roselle-scene-paper-sweep');
+    expect(styles).toContain("[data-roselle-chapter='greeting']");
+    expect(styles).toContain('[data-roselle-person-media]');
+    expect(styles).toContain('[data-roselle-story-media]');
+    expect(styles).toContain("[data-roselle-chapter='events']");
+    expect(styles).toContain('[data-roselle-location-note]');
+    expect(styles).toContain('[data-roselle-film-frame]');
+    expect(styles).toContain('[data-roselle-memory-album]');
+    expect(styles).toContain("[data-template-response-slot='guestbook']");
+    expect(styles).toContain('clip-path');
+    expect(styles).toContain('@media (prefers-reduced-motion: reduce)');
+    expect(styles).not.toContain('scroll-snap-type');
+    expect(styles).not.toContain('position: fixed');
+    expect(styles).not.toContain('autoplay');
   });
 });

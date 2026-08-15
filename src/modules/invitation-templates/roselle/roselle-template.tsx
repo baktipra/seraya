@@ -16,6 +16,7 @@ import marketCorrectionStyles from './roselle-market-corrections-v1.module.css';
 import immersiveStyles from './roselle-immersive-experience-v1.module.css';
 import motionStyles from './roselle-flagship-motion.module.css';
 import { RoselleMotionOrchestrator } from './roselle-motion-orchestrator';
+import presentationMotionStyles from './roselle-presentation-motion-v3.module.css';
 import premiumMediaStyles from './roselle-premium-media-v1.module.css';
 import typographyStyles from './roselle-flagship-typography.module.css';
 import experienceStyles from './roselle-guest-experience.module.css';
@@ -60,7 +61,7 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
   return (
     <article
       aria-labelledby="roselle-invitation-title"
-      className={`${styles.invitation} ${experienceStyles.experience} ${parityRepairStyles.parityRepair} ${compositionStyles.flagship} ${typographyStyles.typography} ${craftStyles.craft} ${motionStyles.motion} ${marketFloorStyles.marketFloor} ${marketPolishStyles.marketPolish} ${marketCorrectionStyles.marketCorrections} ${premiumMediaStyles.premiumMedia} ${immersiveStyles.immersive}`}
+      className={`${styles.invitation} ${experienceStyles.experience} ${parityRepairStyles.parityRepair} ${compositionStyles.flagship} ${typographyStyles.typography} ${craftStyles.craft} ${motionStyles.motion} ${presentationMotionStyles.presentation} ${marketFloorStyles.marketFloor} ${marketPolishStyles.marketPolish} ${marketCorrectionStyles.marketCorrections} ${premiumMediaStyles.premiumMedia} ${immersiveStyles.immersive}`}
       data-palette={renderContext.palette?.key}
       data-roselle-composition="flagship-v1"
       data-roselle-craft="flagship-v1"
@@ -72,6 +73,7 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
       data-roselle-motion="flagship-v1"
       data-roselle-motion-language="cinematic-v2"
       data-roselle-premium-media="v1"
+      data-roselle-scene-language="presentation-v3"
       data-roselle-typography="flagship-v1"
       data-surface={renderContext.surface}
       data-template="roselle"
