@@ -1,198 +1,657 @@
-.motion[data-roselle-motion='flagship-v1'][data-template='roselle'] {
-  --roselle-motion-control-duration: 170ms;
-  --roselle-motion-feedback-duration: 180ms;
-  --roselle-motion-opening-duration: 720ms;
-  --roselle-motion-opening-action-duration: 480ms;
+.motion[data-roselle-motion='flagship-v1'][data-roselle-motion-language='cinematic-v2'][data-template='roselle'] {
+  --roselle-motion-control-duration: 190ms;
+  --roselle-motion-feedback-duration: 240ms;
+  --roselle-motion-opening-duration: 980ms;
+  --roselle-motion-distance-x: clamp(2.25rem, 7vw, 4.5rem);
+  --roselle-motion-distance-y: clamp(1.8rem, 6vw, 3.6rem);
   --roselle-motion-ease-control: cubic-bezier(0.2, 0.7, 0.3, 1);
-  --roselle-motion-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --roselle-motion-ease-cinematic: cubic-bezier(0.16, 1, 0.3, 1);
+  overflow-x: clip;
 }
 
-/* R7 replaces the legacy all-at-once chapter animation without changing the base stylesheet. */
+/* Remove the legacy one-size-fits-all chapter reveal. Roselle v2 choreographs each scene. */
 .motion[data-roselle-motion='flagship-v1'][data-template='roselle']
   :global([data-roselle-chapter]) {
   animation: none;
 }
 
-/* The opening is the only time-based ceremonial reveal. */
-.motion[data-roselle-motion='flagship-v1'][data-template='roselle']
+/* Opening scene — a clear, presentation-like sequence rather than an almost-static settle. */
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle']
+  :global([data-roselle-opening-portrait]) {
+  animation: roselle-opening-curtain 1.35s var(--roselle-motion-ease-cinematic) both;
+  transform-origin: 50% 38%;
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle']
   :global([data-roselle-letter]) {
-  animation: roselle-opening-settle var(--roselle-motion-opening-duration)
-    var(--roselle-motion-ease-out) both;
+  animation: roselle-opening-card var(--roselle-motion-opening-duration)
+    var(--roselle-motion-ease-cinematic) 120ms both;
 }
 
-.motion[data-roselle-motion='flagship-v1'][data-template='roselle']
-  > :global([data-roselle-opening-action]) {
-  animation: roselle-opening-action-settle var(--roselle-motion-opening-action-duration)
-    var(--roselle-motion-ease-out) 160ms both;
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle']
+  :is(
+    :global([data-roselle-letter-eyebrow]),
+    :global([data-roselle-letter-title]),
+    :global([data-roselle-letter-subtitle]),
+    :global([data-roselle-letter-date])
+  ) {
+  animation: roselle-opening-copy 760ms var(--roselle-motion-ease-cinematic) both;
 }
 
-/* Existing interaction craft keeps its properties; R7 only normalizes tempo and easing. */
-.motion[data-roselle-motion='flagship-v1'][data-template='roselle']
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle']
+  :global([data-roselle-letter-eyebrow]) {
+  animation-delay: 260ms;
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle']
+  :global([data-roselle-letter-title]) {
+  animation-delay: 390ms;
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle']
+  :global([data-roselle-letter-subtitle]) {
+  animation-delay: 540ms;
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle']
+  :global([data-roselle-letter-date]) {
+  animation-delay: 660ms;
+}
+
+/* This selector intentionally matches the real nested openingGate DOM. */
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle']
+  :global([data-roselle-opening-action]) {
+  animation: roselle-opening-action 720ms var(--roselle-motion-ease-cinematic) 820ms both;
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle']
+  :global([data-roselle-scroll-cue]) {
+  animation:
+    roselle-scroll-cue-arrive 720ms var(--roselle-motion-ease-cinematic) 1s both,
+    roselle-scroll-cue-breathe 2.8s ease-in-out 1.8s infinite;
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle']
+  :global([data-roselle-chapter='opening'])
+  > svg[aria-hidden='true'] {
+  animation: roselle-botanical-drift 6.8s ease-in-out 1.2s infinite alternate;
+  transform-origin: center;
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle']
+  :global([data-roselle-chapter='opening'])
+  > svg[aria-hidden='true']:nth-of-type(2) {
+  animation-delay: 1.75s;
+  animation-direction: alternate-reverse;
+}
+
+/* Fail-open scroll choreography. Content is hidden only after the tiny observer is active. */
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-motion-state='idle']) {
+  opacity: 0;
+  transform: translate3d(0, var(--roselle-motion-distance-y), 0) scale(0.975);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-motion-state]) {
+  transition:
+    opacity 680ms var(--roselle-motion-ease-cinematic),
+    transform 920ms var(--roselle-motion-ease-cinematic);
+  will-change: opacity, transform;
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-motion-state='visible']) {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+/* Couple scene — portraits/copy enter from opposing sides like a composed slide. */
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='couple'])
+  :is(:global([data-roselle-person]), :global([data-roselle-ampersand])) {
+  transition:
+    opacity 680ms var(--roselle-motion-ease-cinematic),
+    transform 980ms var(--roselle-motion-ease-cinematic);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='couple'][data-roselle-motion-state='idle'])
+  :global([data-roselle-person]):first-of-type {
+  opacity: 0;
+  transform: translate3d(calc(var(--roselle-motion-distance-x) * -1), 1rem, 0) rotate(-1.8deg);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='couple'][data-roselle-motion-state='idle'])
+  :global([data-roselle-person]):last-of-type {
+  opacity: 0;
+  transform: translate3d(var(--roselle-motion-distance-x), 1rem, 0) rotate(1.8deg);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='couple'][data-roselle-motion-state='idle'])
+  :global([data-roselle-ampersand]) {
+  opacity: 0;
+  transform: scale(0.66) rotate(-12deg);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='couple'][data-roselle-motion-state='visible'])
+  :global([data-roselle-person]):first-of-type {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) rotate(0);
+  transition-delay: 80ms;
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='couple'][data-roselle-motion-state='visible'])
+  :global([data-roselle-ampersand]) {
+  opacity: 1;
+  transform: scale(1) rotate(0);
+  transition-delay: 230ms;
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='couple'][data-roselle-motion-state='visible'])
+  :global([data-roselle-person]):last-of-type {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) rotate(0);
+  transition-delay: 340ms;
+}
+
+/* Story scene — image and letter cross into place from opposite directions. */
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='story'])
+  :is(:global([data-roselle-story-media]), :global([data-roselle-story-letter])) {
+  transition:
+    opacity 700ms var(--roselle-motion-ease-cinematic),
+    transform 980ms var(--roselle-motion-ease-cinematic);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='story'][data-roselle-motion-state='idle'])
+  :global([data-roselle-story-media]) {
+  opacity: 0;
+  transform: translate3d(calc(var(--roselle-motion-distance-x) * -1), 1rem, 0) rotate(-2.4deg)
+    scale(0.94);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='story'][data-roselle-motion-state='idle'])
+  :global([data-roselle-story-letter]) {
+  opacity: 0;
+  transform: translate3d(var(--roselle-motion-distance-x), 0, 0);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='story'][data-roselle-motion-state='visible'])
+  :is(:global([data-roselle-story-media]), :global([data-roselle-story-letter])) {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) rotate(0) scale(1);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='story'][data-roselle-motion-state='visible'])
+  :global([data-roselle-story-letter]) {
+  transition-delay: 180ms;
+}
+
+/* Event scene — each event enters in sequence, alternating direction. */
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-event]) {
+  transition:
+    opacity 650ms var(--roselle-motion-ease-cinematic),
+    transform 900ms var(--roselle-motion-ease-cinematic);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='events'][data-roselle-motion-state='idle'])
+  :global([data-roselle-event]) {
+  opacity: 0;
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='events'][data-roselle-motion-state='idle'])
+  :global([data-roselle-event]):nth-child(odd) {
+  transform: translate3d(calc(var(--roselle-motion-distance-x) * -0.72), 1.3rem, 0);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='events'][data-roselle-motion-state='idle'])
+  :global([data-roselle-event]):nth-child(even) {
+  transform: translate3d(calc(var(--roselle-motion-distance-x) * 0.72), 1.3rem, 0);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='events'][data-roselle-motion-state='visible'])
+  :global([data-roselle-event]) {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='events'][data-roselle-motion-state='visible'])
+  :global([data-roselle-event]):nth-child(2) {
+  transition-delay: 140ms;
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='events'][data-roselle-motion-state='visible'])
+  :global([data-roselle-event]):nth-child(3) {
+  transition-delay: 260ms;
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='events'][data-roselle-motion-state='visible'])
+  :global([data-roselle-event]):nth-child(n + 4) {
+  transition-delay: 360ms;
+}
+
+/* Venue utility owns real behavior; this layer only gives each item a stronger arrival. */
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-template-event-utility-item]) {
+  animation: none !important;
+  transition:
+    opacity 680ms var(--roselle-motion-ease-cinematic),
+    transform 960ms var(--roselle-motion-ease-cinematic);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-template-event-utility-item][data-roselle-motion-state='idle']) {
+  opacity: 0;
+  transform: translate3d(0, 2.6rem, 0) scale(0.94);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-template-event-utility-item][data-roselle-motion-state='visible']) {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-location-note]) {
+  transition:
+    opacity 700ms var(--roselle-motion-ease-cinematic),
+    transform 940ms var(--roselle-motion-ease-cinematic);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='location'][data-roselle-motion-state='idle'])
+  :global([data-roselle-location-note]) {
+  opacity: 0;
+  transform: translate3d(0, 2rem, 0) scale(0.94);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='location'][data-roselle-motion-state='visible'])
+  :global([data-roselle-location-note]) {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+  transition-delay: 120ms;
+}
+
+/* Film — copy slides up while the frame performs a restrained zoom reveal. */
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-wedding-film])
+  :is(:global([data-roselle-film-copy]), :global([data-roselle-film-frame])) {
+  transition:
+    opacity 720ms var(--roselle-motion-ease-cinematic),
+    transform 980ms var(--roselle-motion-ease-cinematic);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-wedding-film][data-roselle-motion-state='idle'])
+  :global([data-roselle-film-copy]) {
+  opacity: 0;
+  transform: translate3d(0, 2.4rem, 0);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-wedding-film][data-roselle-motion-state='idle'])
+  :global([data-roselle-film-frame]) {
+  opacity: 0;
+  transform: scale(0.92);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-wedding-film][data-roselle-motion-state='visible'])
+  :is(:global([data-roselle-film-copy]), :global([data-roselle-film-frame])) {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-wedding-film][data-roselle-motion-state='visible'])
+  :global([data-roselle-film-frame]) {
+  transition-delay: 170ms;
+}
+
+/* Gallery — photographs arrive like a slideshow contact sheet, not a static grid. */
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle']
+  :global([data-invitation-gallery])
+  img {
+  transition:
+    transform 620ms var(--roselle-motion-ease-cinematic),
+    filter 620ms var(--roselle-motion-ease-cinematic);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-memory-album])
+  figure {
+  transition:
+    opacity 700ms var(--roselle-motion-ease-cinematic),
+    transform 1s var(--roselle-motion-ease-cinematic);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='gallery'][data-roselle-motion-state='idle'])
+  :global([data-roselle-memory-album])
+  figure {
+  opacity: 0;
+  transform: translate3d(0, 3rem, 0) rotate(-2deg) scale(0.91);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='gallery'][data-roselle-motion-state='idle'])
+  :global([data-roselle-memory-album])
+  figure:nth-child(even) {
+  transform: translate3d(0, 3.5rem, 0) rotate(2deg) scale(0.91);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='gallery'][data-roselle-motion-state='visible'])
+  :global([data-roselle-memory-album])
+  figure {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) rotate(0) scale(1);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='gallery'][data-roselle-motion-state='visible'])
+  :global([data-roselle-memory-album])
+  figure:nth-child(2) {
+  transition-delay: 130ms;
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='gallery'][data-roselle-motion-state='visible'])
+  :global([data-roselle-memory-album])
+  figure:nth-child(3) {
+  transition-delay: 240ms;
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='gallery'][data-roselle-motion-state='visible'])
+  :global([data-roselle-memory-album])
+  figure:nth-child(4) {
+  transition-delay: 330ms;
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='gallery'][data-roselle-motion-state='visible'])
+  :global([data-roselle-memory-album])
+  figure:nth-child(n + 5) {
+  transition-delay: 410ms;
+}
+
+/* Gift keepsakes cascade upward with enough distance to be visibly intentional. */
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-keepsake]) {
+  transition:
+    opacity 620ms var(--roselle-motion-ease-cinematic),
+    transform 860ms var(--roselle-motion-ease-cinematic);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='gift'][data-roselle-motion-state='idle'])
+  :global([data-roselle-keepsake]) {
+  opacity: 0;
+  transform: translate3d(0, 2.6rem, 0) scale(0.96);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='gift'][data-roselle-motion-state='visible'])
+  :global([data-roselle-keepsake]) {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='gift'][data-roselle-motion-state='visible'])
+  :global([data-roselle-keepsake]):nth-child(2) {
+  transition-delay: 150ms;
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='gift'][data-roselle-motion-state='visible'])
+  :global([data-roselle-keepsake]):nth-child(n + 3) {
+  transition-delay: 260ms;
+}
+
+/* Response closing — intro first, then each functional slot arrives independently. */
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-template-response-introduction='roselle']) {
+  transition:
+    opacity 700ms var(--roselle-motion-ease-cinematic),
+    transform 900ms var(--roselle-motion-ease-cinematic);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='response'][data-roselle-motion-state='idle'])
+  :global([data-template-response-introduction='roselle']) {
+  opacity: 0;
+  transform: translate3d(0, 2.6rem, 0);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='response'][data-roselle-motion-state='visible'])
+  :global([data-template-response-introduction='roselle']) {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-template-response-slot][data-roselle-motion-state='idle']) {
+  opacity: 0;
+  transform: translate3d(var(--roselle-motion-distance-x), 1.5rem, 0) scale(0.975);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-template-response-slot='rsvp'][data-roselle-motion-state='idle']) {
+  transform: translate3d(calc(var(--roselle-motion-distance-x) * -1), 1.5rem, 0) scale(0.975);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-template-response-slot][data-roselle-motion-state='visible']) {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+/* Closing seal and botanical mark create the final ceremonial beat. */
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='closing'])
+  :is(:global([data-roselle-closing-seal]), svg[aria-hidden='true']) {
+  transition:
+    opacity 660ms var(--roselle-motion-ease-cinematic),
+    transform 980ms var(--roselle-motion-ease-cinematic);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='closing'][data-roselle-motion-state='idle'])
+  :global([data-roselle-closing-seal]) {
+  opacity: 0;
+  transform: scale(0.48) rotate(-26deg);
+}
+
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='closing'][data-roselle-motion-state='visible'])
+  :global([data-roselle-closing-seal]) {
+  opacity: 1;
+  transform: scale(1) rotate(0);
+  transition-delay: 180ms;
+}
+
+/* Interaction feedback remains quick so the cinematic motion never makes controls feel slow. */
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle']
   :is(a, button, select, textarea) {
   transition-duration: var(--roselle-motion-control-duration);
   transition-timing-function: var(--roselle-motion-ease-control);
 }
 
-.motion[data-roselle-motion='flagship-v1'][data-template='roselle']
-  :global([data-invitation-gallery])
-  img {
-  transition-duration: 420ms;
-  transition-timing-function: var(--roselle-motion-ease-out);
-}
-
-/* Response feedback may appear after an action, so it gets a short non-disruptive settle. */
-.motion[data-roselle-motion='flagship-v1'][data-template='roselle']
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle']
   :is(
     :global([data-personal-response-notice]),
     :global([data-personal-response-success]),
     :global([data-personal-response-error])
   ) {
   animation: roselle-feedback-settle var(--roselle-motion-feedback-duration)
-    var(--roselle-motion-ease-out) both;
+    var(--roselle-motion-ease-cinematic) both;
 }
 
-/* Press feedback is tactile but deliberately smaller than hover lift. */
-.motion[data-roselle-motion='flagship-v1'][data-template='roselle']
+.motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle']
   :is(
     :global([data-personal-rsvp-choice]),
     :global([data-personal-response-submit]),
     :global([data-schedule-event='roselle']) > a[target='_blank'],
     :global([data-roselle-location-note]) > a[target='_blank'],
-    :global([data-roselle-keepsake]) button
-  ):not(:disabled):active,
-.motion[data-roselle-motion='flagship-v1'][data-template='roselle']
-  > :global([data-roselle-opening-action]):active {
-  transform: scale(0.985);
+    :global([data-roselle-keepsake]) button,
+    :global([data-roselle-opening-action])
+  ):not(:disabled):active {
+  transform: scale(0.975);
 }
 
-/*
- * Scroll-driven reveal is progressive enhancement only. Unsupported browsers keep the
- * static authored composition instead of receiving a JavaScript observer/client island.
- */
-@supports (animation-timeline: view()) {
-  .motion[data-roselle-motion='flagship-v1'][data-template='roselle']
-    :is(
-      :global([data-roselle-chapter='greeting']),
-      :global([data-roselle-chapter='couple']),
-      :global([data-roselle-chapter='story']),
-      :global([data-roselle-chapter='events']),
-      :global([data-roselle-chapter='location']),
-      :global([data-roselle-chapter='gift']),
-      :global([data-roselle-chapter='closing'])
-    ) {
-    animation-name: roselle-chapter-view-reveal;
-    animation-duration: 1s;
-    animation-fill-mode: both;
-    animation-timing-function: linear;
-    animation-timeline: view(block);
-    animation-range: entry 0% entry 72%;
+@keyframes roselle-opening-curtain {
+  from {
+    clip-path: inset(0 0 100% 0 round 1.5rem);
+    opacity: 0;
+    transform: scale(1.075);
   }
 
-  .motion[data-roselle-motion='flagship-v1'][data-template='roselle']
-    :global([data-roselle-memory-album])
-    figure {
-    animation-name: roselle-memory-view-reveal;
-    animation-duration: 1s;
-    animation-fill-mode: both;
-    animation-timing-function: linear;
-    animation-timeline: view(block);
-    animation-range: entry 0% entry 82%;
-  }
-
-  .motion[data-roselle-motion='flagship-v1'][data-template='roselle']
-    :global([data-template-response-slot]) {
-    animation-name: roselle-response-view-reveal;
-    animation-duration: 1s;
-    animation-fill-mode: both;
-    animation-timing-function: linear;
-    animation-timeline: view(block);
-    animation-range: entry 0% entry 76%;
+  to {
+    clip-path: inset(0 0 0 0 round 0);
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
-@keyframes roselle-opening-settle {
+@keyframes roselle-opening-card {
   from {
     opacity: 0;
-    transform: translateY(0.65rem) scale(0.994);
+    transform: translate3d(0, 2.75rem, 0) scale(0.95) rotate(-1.1deg);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translate3d(0, 0, 0) scale(1) rotate(0);
   }
 }
 
-@keyframes roselle-opening-action-settle {
+@keyframes roselle-opening-copy {
   from {
     opacity: 0;
-    transform: translateY(0.45rem);
+    transform: translate3d(0, 1.8rem, 0);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes roselle-opening-action {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 1.5rem, 0) scale(0.94);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes roselle-scroll-cue-arrive {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 1rem, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes roselle-scroll-cue-breathe {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: translate3d(0, 0.42rem, 0);
+  }
+}
+
+@keyframes roselle-botanical-drift {
+  from {
+    transform: translate3d(-0.22rem, 0.16rem, 0) rotate(-1.2deg);
+  }
+
+  to {
+    transform: translate3d(0.34rem, -0.28rem, 0) rotate(1.4deg);
   }
 }
 
 @keyframes roselle-feedback-settle {
   from {
     opacity: 0;
-    transform: translateY(0.2rem);
+    transform: translate3d(0, 0.32rem, 0);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
-@keyframes roselle-chapter-view-reveal {
-  from {
-    opacity: 0.72;
-    transform: translateY(0.65rem);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes roselle-memory-view-reveal {
-  from {
-    opacity: 0.72;
-    transform: translateY(0.55rem) scale(0.996);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes roselle-response-view-reveal {
-  from {
-    opacity: 0.76;
-    transform: translateY(0.4rem);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
+@media (max-width: 32rem) {
+  .motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle'] {
+    --roselle-motion-distance-x: 2.35rem;
+    --roselle-motion-distance-y: 2.25rem;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .motion[data-roselle-motion='flagship-v1'][data-template='roselle']
+  .motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle']
     :is(*, *::before, *::after) {
     animation: none !important;
     scroll-behavior: auto !important;
-    transition-duration: 0.01ms !important;
     transition-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
   }
 
-  .motion[data-roselle-motion='flagship-v1'][data-template='roselle']
-    :is(a, button):active {
-    transform: none;
+  .motion[data-roselle-motion-language='cinematic-v2'][data-template='roselle']
+    :is(
+      :global([data-roselle-motion-state]),
+      :global([data-roselle-person]),
+      :global([data-roselle-ampersand]),
+      :global([data-roselle-story-media]),
+      :global([data-roselle-story-letter]),
+      :global([data-roselle-event]),
+      :global([data-template-event-utility-item]),
+      :global([data-roselle-location-note]),
+      :global([data-roselle-film-copy]),
+      :global([data-roselle-film-frame]),
+      :global([data-roselle-memory-album]) figure,
+      :global([data-roselle-keepsake]),
+      :global([data-template-response-introduction='roselle']),
+      :global([data-template-response-slot]),
+      :global([data-roselle-closing-seal])
+    ) {
+    clip-path: none !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
 }

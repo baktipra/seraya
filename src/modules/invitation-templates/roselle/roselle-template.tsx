@@ -15,6 +15,7 @@ import marketPolishStyles from './roselle-market-polish-v1.module.css';
 import marketCorrectionStyles from './roselle-market-corrections-v1.module.css';
 import immersiveStyles from './roselle-immersive-experience-v1.module.css';
 import motionStyles from './roselle-flagship-motion.module.css';
+import { RoselleMotionOrchestrator } from './roselle-motion-orchestrator';
 import premiumMediaStyles from './roselle-premium-media-v1.module.css';
 import typographyStyles from './roselle-flagship-typography.module.css';
 import experienceStyles from './roselle-guest-experience.module.css';
@@ -69,12 +70,14 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
       data-roselle-market-floor="v1"
       data-roselle-market-polish="v1"
       data-roselle-motion="flagship-v1"
+      data-roselle-motion-language="cinematic-v2"
       data-roselle-premium-media="v1"
       data-roselle-typography="flagship-v1"
       data-surface={renderContext.surface}
       data-template="roselle"
       style={renderContext.palette?.variables}
     >
+      <RoselleMotionOrchestrator />
       <div className={marketFloorStyles.openingGate} data-roselle-opening-gate="market-floor-v1">
         <RoselleHero
           hero={invitation.hero}
