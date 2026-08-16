@@ -11,16 +11,18 @@ async function readRoselleSource(fileName: string) {
 }
 
 describe('Roselle cinematic motion language', () => {
-  it('mounts the observer plus presentation and macro scene layers without replacing the flagship contract', async () => {
+  it('mounts the observer plus presentation, macro, and opening repair layers without replacing the flagship contract', async () => {
     const template = await readRoselleSource('roselle-template.tsx');
 
     expect(template).toContain('RoselleMotionOrchestrator');
     expect(template).toContain('roselle-presentation-motion-v3.module.css');
     expect(template).toContain('roselle-macro-motion-v4.module.css');
+    expect(template).toContain('roselle-opening-ceremony-v4a.module.css');
     expect(template).toContain('data-roselle-motion="flagship-v1"');
     expect(template).toContain('data-roselle-motion-language="cinematic-v2"');
     expect(template).toContain('data-roselle-scene-language="presentation-v3"');
     expect(template).toContain('data-roselle-macro-motion="v4"');
+    expect(template).toContain('data-roselle-opening-ceremony="v4a"');
   });
 
   it('uses a lightweight fail-open observer with a deliberate opening ceremony', async () => {
@@ -35,6 +37,7 @@ describe('Roselle cinematic motion language', () => {
     expect(orchestrator).toContain("root.dataset.roselleOpeningState = 'opened'");
     expect(orchestrator).toContain('event.preventDefault()');
     expect(orchestrator).toContain("html.style.overflow = 'hidden'");
+    expect(orchestrator).toContain("not([data-roselle-chapter='greeting'])");
     expect(orchestrator).toContain('prefers-reduced-motion: reduce');
   });
 
@@ -94,6 +97,20 @@ describe('Roselle cinematic motion language', () => {
     expect(styles).not.toContain('[data-template-response-slot');
     expect(styles).not.toContain('scroll-snap-type');
     expect(styles).not.toContain('autoplay');
+    expect(styles).toContain('@media (prefers-reduced-motion: reduce)');
+  });
+
+  it('pins the addressed greeting and opening action inside the first viewport', async () => {
+    const styles = await readRoselleSource('roselle-opening-ceremony-v4a.module.css');
+
+    expect(styles).toContain("[data-roselle-opening-state='closed']");
+    expect(styles).toContain('[data-roselle-addressed-letter]');
+    expect(styles).toContain('[data-roselle-opening-action]');
+    expect(styles).toContain('position: absolute !important');
+    expect(styles).toContain('env(safe-area-inset-bottom)');
+    expect(styles).toContain('overflow: hidden !important');
+    expect(styles).toContain('max-height: min(25dvh, 13.25rem)');
+    expect(styles).toContain('@media (max-height: 47.5rem)');
     expect(styles).toContain('@media (prefers-reduced-motion: reduce)');
   });
 });

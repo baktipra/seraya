@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 
 const revealSelector = [
-  "[data-roselle-chapter]:not([data-roselle-chapter='opening'])",
+  "[data-roselle-chapter]:not([data-roselle-chapter='opening']):not([data-roselle-chapter='greeting'])",
   '[data-template-event-utility-item]',
 ].join(', ');
 
