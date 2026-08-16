@@ -1,0 +1,525 @@
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'] {
+  --roselle-macro-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --roselle-macro-ease-cover: cubic-bezier(0.77, 0, 0.18, 1);
+  --roselle-macro-scene-duration: 1560ms;
+  overflow-x: clip;
+}
+
+/*
+ * True opening ceremony.
+ * The cover becomes a viewport stage only after the client orchestrator is alive,
+ * so the invitation remains fail-open when JavaScript is unavailable.
+ */
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-opening-state='closed']
+  :global([data-roselle-opening-gate]),
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-opening-state='opening']
+  :global([data-roselle-opening-gate]) {
+  position: fixed;
+  z-index: 120;
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--roselle-ivory);
+  box-shadow: 0 2rem 6rem rgb(64 43 53 / 0.24);
+  scrollbar-width: thin;
+  transform: translate3d(0, 0, 0);
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-opening-state='closed']
+  :global([data-roselle-opening-gate])::before,
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-opening-state='opening']
+  :global([data-roselle-opening-gate])::before {
+  position: fixed;
+  z-index: 30;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgb(50 31 39 / 0.02) 0%,
+    rgb(50 31 39 / 0.16) 54%,
+    rgb(50 31 39 / 0.34) 100%
+  );
+  content: '';
+  opacity: 0;
+  pointer-events: none;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-opening-state='opening']
+  :global([data-roselle-opening-gate]) {
+  animation: roselle-v4-cover-lift var(--roselle-macro-scene-duration) var(--roselle-macro-ease-cover)
+    both;
+  pointer-events: none;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-opening-state='opening']
+  :global([data-roselle-opening-gate])::before {
+  animation: roselle-v4-cover-veil 1180ms ease-out both;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-opening-state='opening']
+  :global([data-roselle-opening-portrait]) {
+  animation: roselle-v4-cover-photo-exit 1.5s var(--roselle-macro-ease-cover) both !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-opening-state='opening']
+  :is(
+    :global([data-roselle-letter]),
+    :global([data-invitation-identity-opening='roselle']),
+    :global([data-roselle-addressed-letter]),
+    :global([data-roselle-opening-action])
+  ) {
+  animation: roselle-v4-cover-copy-exit 1.05s var(--roselle-macro-ease-cover) both !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-opening-state='opening']
+  :global([data-invitation-identity-opening='roselle']) {
+  animation-delay: 60ms !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-opening-state='opening']
+  :global([data-roselle-addressed-letter]) {
+  animation-delay: 110ms !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-opening-state='opening']
+  :global([data-roselle-opening-action]) {
+  animation-delay: 160ms !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-opening-state='opened']
+  :global([data-roselle-opening-gate]) {
+  display: none;
+}
+
+/* Couple: viewport-scale opposing motion. */
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='couple'])
+  :global([data-roselle-person]) {
+  transition:
+    opacity 900ms ease-out,
+    transform 1.65s var(--roselle-macro-ease) !important;
+  will-change: transform, opacity;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='couple'][data-roselle-motion-state='idle'])
+  :global([data-roselle-person]):first-of-type {
+  opacity: 0;
+  transform: translate3d(-18vw, 7vh, 0) rotate(-6deg) scale(0.84) !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='couple'][data-roselle-motion-state='idle'])
+  :global([data-roselle-person]):last-of-type {
+  opacity: 0;
+  transform: translate3d(18vw, 7vh, 0) rotate(6deg) scale(0.84) !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='couple'][data-roselle-motion-state='visible'])
+  :global([data-roselle-person]) {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) rotate(0) scale(1) !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='couple'])
+  :global([data-roselle-ampersand]) {
+  transition:
+    opacity 820ms ease-out,
+    transform 1.5s var(--roselle-macro-ease) !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='couple'][data-roselle-motion-state='idle'])
+  :global([data-roselle-ampersand]) {
+  opacity: 0;
+  transform: translate3d(0, 5vh, 0) rotate(-28deg) scale(0.28) !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='couple'][data-roselle-motion-state='visible'])
+  :global([data-roselle-ampersand]) {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) rotate(0) scale(1) !important;
+  transition-delay: 260ms;
+}
+
+/* Story: photograph and letter cross the viewport like a composed slide. */
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-story-media]),
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-story-letter]) {
+  transition:
+    clip-path 1.55s var(--roselle-macro-ease),
+    filter 960ms ease-out,
+    opacity 900ms ease-out,
+    transform 1.7s var(--roselle-macro-ease) !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='story'][data-roselle-motion-state='idle'])
+  :global([data-roselle-story-media]) {
+  opacity: 0;
+  transform: translate3d(-19vw, 5vh, 0) rotate(-5deg) scale(0.82) !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='story'][data-roselle-motion-state='idle'])
+  :global([data-roselle-story-letter]) {
+  opacity: 0;
+  transform: translate3d(18vw, 6vh, 0) rotate(2deg) scale(0.9) !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='story'][data-roselle-motion-state='visible'])
+  :is(:global([data-roselle-story-media]), :global([data-roselle-story-letter])) {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) rotate(0) scale(1) !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='story'][data-roselle-motion-state='visible'])
+  :global([data-roselle-story-letter]) {
+  transition-delay: 210ms;
+}
+
+/* Events: a ceremonial date beat followed by large alternating card arrivals. */
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='events'])
+  :global([data-roselle-event-thread]) {
+  perspective: 1200px;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='events'])
+  > p:nth-of-type(2) {
+  transition:
+    opacity 820ms ease-out,
+    transform 1.55s var(--roselle-macro-ease);
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='events'][data-roselle-motion-state='idle'])
+  > p:nth-of-type(2) {
+  opacity: 0;
+  transform: translate3d(0, 8vh, 0) scale(0.56);
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='events'][data-roselle-motion-state='visible'])
+  > p:nth-of-type(2) {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-event]) {
+  transition:
+    clip-path 1.2s var(--roselle-macro-ease),
+    opacity 820ms ease-out,
+    transform 1.55s var(--roselle-macro-ease) !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='events'][data-roselle-motion-state='idle'])
+  :global([data-roselle-event]):nth-child(odd) {
+  opacity: 0;
+  transform: translate3d(-17vw, 5vh, -2rem) rotateY(-9deg) rotate(-3deg) scale(0.86) !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='events'][data-roselle-motion-state='idle'])
+  :global([data-roselle-event]):nth-child(even) {
+  opacity: 0;
+  transform: translate3d(17vw, 5vh, -2rem) rotateY(9deg) rotate(3deg) scale(0.86) !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='events'][data-roselle-motion-state='visible'])
+  :global([data-roselle-event]) {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) rotateY(0) rotate(0) scale(1) !important;
+}
+
+/* Venue / film: centered viewport reveals with more time to be perceived. */
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-location-note]) {
+  transition:
+    clip-path 1.6s var(--roselle-macro-ease),
+    filter 1s ease-out,
+    opacity 900ms ease-out,
+    transform 1.65s var(--roselle-macro-ease) !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='location'][data-roselle-motion-state='idle'])
+  :global([data-roselle-location-note]) {
+  opacity: 0;
+  transform: translate3d(0, 10vh, 0) scale(0.72) !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='location'][data-roselle-motion-state='visible'])
+  :global([data-roselle-location-note]) {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1) !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-film-frame]) {
+  transition:
+    clip-path 1.75s var(--roselle-macro-ease),
+    filter 1s ease-out,
+    opacity 900ms ease-out,
+    transform 1.7s var(--roselle-macro-ease) !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='film'][data-roselle-motion-state='idle'])
+  :global([data-roselle-film-frame]) {
+  opacity: 0;
+  transform: translate3d(0, 9vh, 0) scale(0.78) !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='film'][data-roselle-motion-state='visible'])
+  :global([data-roselle-film-frame]) {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1) !important;
+}
+
+/* Gallery: the lead frame behaves like a hero slide before the contact sheet settles. */
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-memory-album])
+  figure {
+  transition:
+    clip-path 1.4s var(--roselle-macro-ease),
+    filter 1s ease-out,
+    opacity 900ms ease-out,
+    transform 1.65s var(--roselle-macro-ease) !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='gallery'][data-roselle-motion-state='idle'])
+  :global([data-roselle-memory-album])
+  figure:first-child {
+  opacity: 0;
+  transform: translate3d(0, 12vh, 0) scale(1.28) rotate(-2deg) !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='gallery'][data-roselle-motion-state='idle'])
+  :global([data-roselle-memory-album])
+  figure:nth-child(n + 2):nth-child(odd) {
+  opacity: 0;
+  transform: translate3d(-15vw, 7vh, 0) scale(0.82) rotate(-5deg) !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='gallery'][data-roselle-motion-state='idle'])
+  :global([data-roselle-memory-album])
+  figure:nth-child(n + 2):nth-child(even) {
+  opacity: 0;
+  transform: translate3d(15vw, 7vh, 0) scale(0.82) rotate(5deg) !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='gallery'][data-roselle-motion-state='visible'])
+  :global([data-roselle-memory-album])
+  figure {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1) rotate(0) !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='gallery'][data-roselle-motion-state='visible'])
+  :global([data-roselle-memory-album])
+  figure:nth-child(2) {
+  transition-delay: 240ms;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='gallery'][data-roselle-motion-state='visible'])
+  :global([data-roselle-memory-album])
+  figure:nth-child(3) {
+  transition-delay: 390ms;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='gallery'][data-roselle-motion-state='visible'])
+  :global([data-roselle-memory-album])
+  figure:nth-child(n + 4) {
+  transition-delay: 520ms;
+}
+
+/* Gift remains tactile; closing gets one final viewport-scale ceremonial arrival. */
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='gift'][data-roselle-motion-state='idle'])
+  :global([data-roselle-keepsake]) {
+  transform: translate3d(0, 9vh, 0) scale(0.78) rotate(-3deg) !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='gift'][data-roselle-motion-state='visible'])
+  :global([data-roselle-keepsake]) {
+  transform: translate3d(0, 0, 0) scale(1) rotate(0) !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='closing']) {
+  transform-origin: 50% 40%;
+  transition:
+    opacity 960ms ease-out,
+    transform 1.85s var(--roselle-macro-ease) !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='closing'][data-roselle-motion-state='idle']) {
+  opacity: 0;
+  transform: translate3d(0, 14vh, 0) scale(0.82) !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='closing'][data-roselle-motion-state='visible']) {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1) !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-closing-seal]) {
+  transition: transform 1.7s var(--roselle-macro-ease) !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='closing'][data-roselle-motion-state='idle'])
+  :global([data-roselle-closing-seal]) {
+  transform: scale(0.16) rotate(-80deg) !important;
+}
+
+.macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+  :global([data-roselle-chapter='closing'][data-roselle-motion-state='visible'])
+  :global([data-roselle-closing-seal]) {
+  transform: scale(1) rotate(0) !important;
+}
+
+@keyframes roselle-v4-cover-lift {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  42% {
+    opacity: 1;
+    transform: translate3d(0, -8vh, 0) scale(0.985);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(0, -112vh, 0) scale(0.94);
+  }
+}
+
+@keyframes roselle-v4-cover-photo-exit {
+  from {
+    filter: saturate(1) brightness(1);
+    transform: scale(1);
+  }
+
+  to {
+    filter: saturate(0.86) brightness(0.72);
+    transform: scale(1.22) translate3d(0, -4vh, 0);
+  }
+}
+
+@keyframes roselle-v4-cover-copy-exit {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate3d(0, -11vh, 0) scale(0.9);
+  }
+}
+
+@keyframes roselle-v4-cover-veil {
+  0% {
+    opacity: 0;
+  }
+
+  55% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 40rem) {
+  .macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-opening-state='closed']
+    :global([data-roselle-opening-gate]),
+  .macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-opening-state='opening']
+    :global([data-roselle-opening-gate]) {
+    scrollbar-width: none;
+  }
+
+  .macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+    :global([data-roselle-chapter='couple'][data-roselle-motion-state='idle'])
+    :global([data-roselle-person]):first-of-type {
+    transform: translate3d(-28vw, 6vh, 0) rotate(-7deg) scale(0.82) !important;
+  }
+
+  .macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+    :global([data-roselle-chapter='couple'][data-roselle-motion-state='idle'])
+    :global([data-roselle-person]):last-of-type {
+    transform: translate3d(28vw, 6vh, 0) rotate(7deg) scale(0.82) !important;
+  }
+
+  .macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+    :global([data-roselle-chapter='story'][data-roselle-motion-state='idle'])
+    :global([data-roselle-story-media]) {
+    transform: translate3d(-30vw, 5vh, 0) rotate(-5deg) scale(0.8) !important;
+  }
+
+  .macro[data-roselle-macro-motion='v4'][data-template='roselle'][data-roselle-motion-ready='true']
+    :global([data-roselle-chapter='story'][data-roselle-motion-state='idle'])
+    :global([data-roselle-story-letter]) {
+    transform: translate3d(30vw, 5vh, 0) rotate(2deg) scale(0.88) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .macro[data-roselle-macro-motion='v4'][data-template='roselle']
+    :is(
+      :global([data-roselle-opening-gate]),
+      :global([data-roselle-opening-portrait]),
+      :global([data-roselle-letter]),
+      :global([data-invitation-identity-opening='roselle']),
+      :global([data-roselle-addressed-letter]),
+      :global([data-roselle-opening-action]),
+      :global([data-roselle-person]),
+      :global([data-roselle-ampersand]),
+      :global([data-roselle-story-media]),
+      :global([data-roselle-story-letter]),
+      :global([data-roselle-event]),
+      :global([data-roselle-location-note]),
+      :global([data-roselle-film-frame]),
+      :global([data-roselle-memory-album]) figure,
+      :global([data-roselle-keepsake]),
+      :global([data-roselle-chapter='closing']),
+      :global([data-roselle-closing-seal])
+    ) {
+    animation: none !important;
+    clip-path: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}

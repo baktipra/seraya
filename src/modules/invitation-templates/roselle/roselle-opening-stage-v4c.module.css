@@ -1,0 +1,690 @@
+.stage {
+  position: relative;
+  isolation: isolate;
+}
+
+.stage[data-roselle-opening-state='closed'],
+.stage[data-roselle-opening-state='opening'] {
+  position: fixed !important;
+  z-index: 120;
+  inset: 0;
+  display: grid !important;
+  width: 100vw;
+  height: 100dvh;
+  min-height: 100dvh !important;
+  place-items: center;
+  margin: 0 !important;
+  padding: clamp(0.85rem, 2.4vw, 2.5rem);
+  overflow: hidden !important;
+  border: 0 !important;
+  background:
+    radial-gradient(circle at 14% 10%, rgb(189 125 131 / 0.13), transparent 28rem),
+    radial-gradient(circle at 88% 88%, rgb(113 131 115 / 0.1), transparent 30rem),
+    #f4efe9;
+}
+
+.canvas {
+  position: relative;
+  isolation: isolate;
+  width: min(70rem, calc(100vw - 4rem));
+  height: min(46rem, calc(100dvh - 4rem));
+  max-height: calc(100dvh - 1.7rem);
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 0.34);
+  border-radius: clamp(1.35rem, 2vw, 2rem);
+  background: var(--roselle-plum);
+  box-shadow:
+    0 2.5rem 7rem rgb(47 30 38 / 0.24),
+    0 0 0 1px rgb(64 43 53 / 0.04);
+}
+
+.canvas::after {
+  position: absolute;
+  z-index: 20;
+  inset: clamp(0.8rem, 1.5vw, 1.2rem);
+  border: 1px solid rgb(255 255 255 / 0.28);
+  border-radius: clamp(0.9rem, 1.4vw, 1.35rem);
+  content: '';
+  pointer-events: none;
+}
+
+/*
+ * Desktop opening composition: one centered invitation canvas. The existing
+ * Roselle hero supplies the photograph and couple identity, while this layer
+ * separates them into a 55/45 editorial split instead of floating cards.
+ */
+.stage[data-roselle-opening-state='closed'] .canvas > :global([data-roselle-chapter='opening']),
+.stage[data-roselle-opening-state='opening'] .canvas > :global([data-roselle-chapter='opening']) {
+  position: absolute !important;
+  z-index: 1;
+  inset: 0 !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: linear-gradient(90deg, transparent 0 55%, var(--roselle-plum) 55% 100%) !important;
+  text-align: center;
+}
+
+.stage[data-roselle-opening-state='closed']
+  .canvas
+  > :global([data-roselle-chapter='opening'])::after,
+.stage[data-roselle-opening-state='opening']
+  .canvas
+  > :global([data-roselle-chapter='opening'])::after {
+  display: none !important;
+}
+
+.stage[data-roselle-opening-state='closed']
+  .canvas
+  :global([data-roselle-opening-portrait]),
+.stage[data-roselle-opening-state='opening']
+  .canvas
+  :global([data-roselle-opening-portrait]) {
+  position: absolute !important;
+  z-index: 0;
+  inset: 0 auto 0 0 !important;
+  width: 55% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  clip-path: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+.stage[data-roselle-opening-state='closed']
+  .canvas
+  :global([data-roselle-opening-portrait])::after,
+.stage[data-roselle-opening-state='opening']
+  .canvas
+  :global([data-roselle-opening-portrait])::after {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  background:
+    linear-gradient(90deg, transparent 70%, rgb(64 43 53 / 0.16) 100%),
+    linear-gradient(180deg, rgb(28 18 23 / 0.02), rgb(28 18 23 / 0.12));
+  content: '';
+  pointer-events: none;
+}
+
+.stage[data-roselle-opening-state='closed']
+  .canvas
+  :global([data-roselle-opening-portrait])
+  img,
+.stage[data-roselle-opening-state='opening']
+  .canvas
+  :global([data-roselle-opening-portrait])
+  img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center 38% !important;
+}
+
+.stage[data-roselle-opening-state='closed']
+  .canvas
+  > :global([data-roselle-chapter='opening'])
+  > svg,
+.stage[data-roselle-opening-state='opening']
+  .canvas
+  > :global([data-roselle-chapter='opening'])
+  > svg {
+  display: none !important;
+}
+
+.stage[data-roselle-opening-state='closed'] .canvas :global([data-roselle-letter]),
+.stage[data-roselle-opening-state='opening'] .canvas :global([data-roselle-letter]) {
+  position: absolute !important;
+  z-index: 8;
+  top: 42%;
+  right: 0;
+  left: auto !important;
+  width: 45% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 clamp(2rem, 3.5vw, 3.4rem) !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--roselle-paper) !important;
+  text-align: center;
+  translate: none !important;
+  transform: translate3d(0, -50%, 0) !important;
+  backdrop-filter: none !important;
+}
+
+.stage[data-roselle-opening-state='closed'] .canvas :global([data-roselle-letter-eyebrow]),
+.stage[data-roselle-opening-state='opening'] .canvas :global([data-roselle-letter-eyebrow]) {
+  color: rgb(255 254 251 / 0.72) !important;
+  font-size: 0.67rem !important;
+  letter-spacing: 0.22em !important;
+}
+
+.stage[data-roselle-opening-state='closed'] .canvas :global([data-roselle-letter-title]),
+.stage[data-roselle-opening-state='opening'] .canvas :global([data-roselle-letter-title]) {
+  max-width: 9ch !important;
+  margin: 1rem auto 0 !important;
+  color: var(--roselle-paper) !important;
+  font-size: clamp(4rem, 5.6vw, 6rem) !important;
+  line-height: 0.82 !important;
+  text-shadow: 0 0.9rem 2.5rem rgb(20 12 16 / 0.15);
+}
+
+.stage[data-roselle-opening-state='closed'] .canvas :global([data-roselle-letter-subtitle]),
+.stage[data-roselle-opening-state='opening'] .canvas :global([data-roselle-letter-subtitle]) {
+  max-width: 26rem !important;
+  margin: 1.35rem auto 0 !important;
+  color: rgb(255 254 251 / 0.72) !important;
+  font-size: clamp(0.78rem, 1.2vw, 0.92rem) !important;
+  line-height: 1.65 !important;
+}
+
+.stage[data-roselle-opening-state='closed'] .canvas :global([data-roselle-letter-date]),
+.stage[data-roselle-opening-state='opening'] .canvas :global([data-roselle-letter-date]) {
+  margin: 1.35rem auto 0 !important;
+  color: rgb(255 254 251 / 0.82) !important;
+  font-size: 0.7rem !important;
+  letter-spacing: 0.16em !important;
+}
+
+.stage[data-roselle-opening-state='closed'] .canvas :global([data-roselle-letter]) > :last-child,
+.stage[data-roselle-opening-state='opening'] .canvas :global([data-roselle-letter]) > :last-child {
+  margin-top: 1.65rem !important;
+  color: rgb(215 169 159 / 0.86) !important;
+}
+
+/* Opening identity is redundant with the hero identity in V4C. */
+.stage[data-roselle-opening-state='closed']
+  .canvas
+  > :global([data-invitation-identity-opening='roselle']),
+.stage[data-roselle-opening-state='opening']
+  .canvas
+  > :global([data-invitation-identity-opening='roselle']) {
+  display: none !important;
+}
+
+/* Personal greeting becomes a compact addressee block, not a second card. */
+.stage[data-roselle-opening-state='closed'] .canvas > :global([data-roselle-addressed-letter]),
+.stage[data-roselle-opening-state='opening'] .canvas > :global([data-roselle-addressed-letter]) {
+  position: absolute !important;
+  z-index: 12;
+  right: 0 !important;
+  bottom: 6.8rem;
+  left: auto !important;
+  display: block !important;
+  width: 45% !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 0 clamp(2rem, 3.5vw, 3.4rem) !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--roselle-paper) !important;
+  text-align: center;
+  translate: none !important;
+  clip-path: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+  backdrop-filter: none !important;
+}
+
+.stage[data-roselle-opening-state='closed']
+  .canvas
+  :global([data-personal-guest-greeting]),
+.stage[data-roselle-opening-state='opening']
+  .canvas
+  :global([data-personal-guest-greeting]) {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.stage[data-roselle-opening-state='closed']
+  .canvas
+  :global([data-personal-greeting-eyebrow]),
+.stage[data-roselle-opening-state='opening']
+  .canvas
+  :global([data-personal-greeting-eyebrow]),
+.stage[data-roselle-opening-state='closed']
+  .canvas
+  :global([data-showroom-demo-slot='greeting'])
+  > p:first-child,
+.stage[data-roselle-opening-state='opening']
+  .canvas
+  :global([data-showroom-demo-slot='greeting'])
+  > p:first-child {
+  margin: 0 !important;
+  color: rgb(255 254 251 / 0.58) !important;
+  font-size: 0.62rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.18em !important;
+  line-height: 1.4 !important;
+  text-transform: uppercase;
+}
+
+.stage[data-roselle-opening-state='closed']
+  .canvas
+  :global([data-personal-greeting-title]),
+.stage[data-roselle-opening-state='opening']
+  .canvas
+  :global([data-personal-greeting-title]),
+.stage[data-roselle-opening-state='closed']
+  .canvas
+  :global([data-showroom-demo-slot='greeting'])
+  > p:nth-child(2),
+.stage[data-roselle-opening-state='opening']
+  .canvas
+  :global([data-showroom-demo-slot='greeting'])
+  > p:nth-child(2) {
+  margin: 0.35rem 0 0 !important;
+  color: var(--roselle-paper) !important;
+  font-family: var(--roselle-display) !important;
+  font-size: clamp(1.55rem, 2.2vw, 2.05rem) !important;
+  font-weight: 450 !important;
+  letter-spacing: -0.025em !important;
+  line-height: 1.05 !important;
+  text-wrap: balance;
+}
+
+.stage[data-roselle-opening-state='closed']
+  .canvas
+  :global([data-personal-greeting-lead]),
+.stage[data-roselle-opening-state='opening']
+  .canvas
+  :global([data-personal-greeting-lead]),
+.stage[data-roselle-opening-state='closed']
+  .canvas
+  :global([data-showroom-demo-slot='greeting'])
+  > p:nth-child(n + 3),
+.stage[data-roselle-opening-state='opening']
+  .canvas
+  :global([data-showroom-demo-slot='greeting'])
+  > p:nth-child(n + 3) {
+  display: none !important;
+}
+
+.openAction {
+  position: relative;
+  z-index: 14;
+}
+
+.stage[data-roselle-opening-state='closed'] .canvas > .openAction,
+.stage[data-roselle-opening-state='opening'] .canvas > .openAction {
+  position: absolute !important;
+  z-index: 14;
+  right: clamp(2rem, 3.5vw, 3.4rem) !important;
+  bottom: 2.1rem;
+  left: auto !important;
+  display: inline-flex !important;
+  width: calc(45% - clamp(4rem, 7vw, 6.8rem)) !important;
+  min-width: 16rem;
+  min-height: 3.65rem !important;
+  align-items: center;
+  justify-content: center;
+  margin: 0 !important;
+  border: 1px solid rgb(255 255 255 / 0.72) !important;
+  border-radius: 999px !important;
+  background: var(--roselle-paper) !important;
+  box-shadow: 0 1rem 2.8rem rgb(19 11 15 / 0.2) !important;
+  color: var(--roselle-plum) !important;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  translate: none !important;
+  clip-path: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+.stage[data-roselle-opening-state='closed'] .canvas > .openAction:focus-visible {
+  outline: 3px solid rgb(255 255 255 / 0.82);
+  outline-offset: 4px;
+}
+
+.stage[data-roselle-opening-state='closed'] :global([data-roselle-scroll-cue]),
+.stage[data-roselle-opening-state='opening'] :global([data-roselle-scroll-cue]) {
+  display: none !important;
+}
+
+/* V4C entrance choreography: visible, but subordinate to the composition. */
+.stage[data-roselle-opening-state='closed'] .canvas {
+  animation: roselle-v4c-canvas-arrive 920ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.stage[data-roselle-opening-state='closed']
+  .canvas
+  :global([data-roselle-opening-portrait])
+  img {
+  animation: roselle-v4c-photo-arrive 1.45s cubic-bezier(0.16, 1, 0.3, 1) both !important;
+}
+
+.stage[data-roselle-opening-state='closed'] .canvas :global([data-roselle-letter]) {
+  animation: roselle-v4c-copy-arrive 880ms cubic-bezier(0.16, 1, 0.3, 1) 180ms both !important;
+}
+
+.stage[data-roselle-opening-state='closed'] .canvas > :global([data-roselle-addressed-letter]) {
+  animation: roselle-v4c-copy-arrive 820ms cubic-bezier(0.16, 1, 0.3, 1) 430ms both !important;
+}
+
+.stage[data-roselle-opening-state='closed'] .canvas > .openAction {
+  animation: roselle-v4c-cta-arrive 760ms cubic-bezier(0.16, 1, 0.3, 1) 600ms both !important;
+}
+
+.stage[data-roselle-opening-state='opening'] {
+  pointer-events: none;
+  animation: roselle-v4c-stage-fade 1560ms cubic-bezier(0.77, 0, 0.18, 1) both;
+}
+
+.stage[data-roselle-opening-state='opening'] .canvas {
+  animation: roselle-v4c-canvas-lift 1560ms cubic-bezier(0.77, 0, 0.18, 1) both;
+}
+
+.stage[data-roselle-opening-state='opening']
+  .canvas
+  :global([data-roselle-opening-portrait])
+  img {
+  animation: roselle-v4c-photo-exit 1.5s cubic-bezier(0.77, 0, 0.18, 1) both !important;
+}
+
+.stage[data-roselle-opening-state='opening']
+  .canvas
+  :is(:global([data-roselle-letter]), :global([data-roselle-addressed-letter]), .openAction) {
+  animation: roselle-v4c-copy-exit 960ms cubic-bezier(0.77, 0, 0.18, 1) both !important;
+}
+
+.stage[data-roselle-opening-state='opened'] {
+  display: none !important;
+}
+
+@keyframes roselle-v4c-canvas-arrive {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 2.5rem, 0) scale(0.965);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes roselle-v4c-photo-arrive {
+  from {
+    filter: saturate(0.84) brightness(0.82);
+    transform: scale(1.12) translate3d(-2%, 0, 0);
+  }
+
+  to {
+    filter: saturate(1) brightness(1);
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+}
+
+@keyframes roselle-v4c-copy-arrive {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 2.2rem, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes roselle-v4c-cta-arrive {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 1.7rem, 0) scale(0.94);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes roselle-v4c-stage-fade {
+  0%,
+  48% {
+    background-color: rgb(244 239 233 / 1);
+  }
+
+  100% {
+    background-color: rgb(244 239 233 / 0);
+  }
+}
+
+@keyframes roselle-v4c-canvas-lift {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  38% {
+    opacity: 1;
+    transform: translate3d(0, -5vh, 0) scale(0.985);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(0, -108vh, 0) scale(0.94);
+  }
+}
+
+@keyframes roselle-v4c-photo-exit {
+  from {
+    filter: saturate(1) brightness(1);
+    transform: scale(1);
+  }
+
+  to {
+    filter: saturate(0.86) brightness(0.7);
+    transform: scale(1.14) translate3d(0, -3vh, 0);
+  }
+}
+
+@keyframes roselle-v4c-copy-exit {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate3d(0, -7vh, 0) scale(0.94);
+  }
+}
+
+/* Short desktop viewports preserve the same split without crowding. */
+@media (max-height: 45rem) and (min-width: 52.01rem) {
+  .stage[data-roselle-opening-state='closed'],
+  .stage[data-roselle-opening-state='opening'] {
+    padding: 0.7rem;
+  }
+
+  .canvas {
+    height: calc(100dvh - 1.4rem);
+  }
+
+  .stage[data-roselle-opening-state='closed'] .canvas :global([data-roselle-letter]),
+  .stage[data-roselle-opening-state='opening'] .canvas :global([data-roselle-letter]) {
+    top: 39%;
+  }
+
+  .stage[data-roselle-opening-state='closed'] .canvas :global([data-roselle-letter-title]),
+  .stage[data-roselle-opening-state='opening'] .canvas :global([data-roselle-letter-title]) {
+    font-size: clamp(3.6rem, 5vw, 4.8rem) !important;
+  }
+
+  .stage[data-roselle-opening-state='closed'] .canvas :global([data-roselle-letter-subtitle]),
+  .stage[data-roselle-opening-state='opening'] .canvas :global([data-roselle-letter-subtitle]) {
+    display: none !important;
+  }
+
+  .stage[data-roselle-opening-state='closed'] .canvas > :global([data-roselle-addressed-letter]),
+  .stage[data-roselle-opening-state='opening'] .canvas > :global([data-roselle-addressed-letter]) {
+    bottom: 5.7rem;
+  }
+
+  .stage[data-roselle-opening-state='closed'] .canvas > .openAction,
+  .stage[data-roselle-opening-state='opening'] .canvas > .openAction {
+    bottom: 1.35rem;
+    min-height: 3.35rem !important;
+  }
+}
+
+/* Mobile is a different composition: full-bleed portrait with a romantic veil. */
+@media (max-width: 52rem) {
+  .stage[data-roselle-opening-state='closed'],
+  .stage[data-roselle-opening-state='opening'] {
+    padding: 0;
+    background: var(--roselle-plum);
+  }
+
+  .canvas {
+    width: 100vw;
+    height: 100dvh;
+    max-height: none;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .canvas::after {
+    inset: 0.8rem;
+    border-color: rgb(255 255 255 / 0.22);
+    border-radius: 1.1rem;
+  }
+
+  .stage[data-roselle-opening-state='closed'] .canvas > :global([data-roselle-chapter='opening']),
+  .stage[data-roselle-opening-state='opening'] .canvas > :global([data-roselle-chapter='opening']) {
+    background: linear-gradient(
+      180deg,
+      rgb(45 28 36 / 0.08) 0%,
+      rgb(45 28 36 / 0.2) 38%,
+      rgb(45 28 36 / 0.66) 68%,
+      rgb(45 28 36 / 0.93) 100%
+    ) !important;
+  }
+
+  .stage[data-roselle-opening-state='closed']
+    .canvas
+    :global([data-roselle-opening-portrait]),
+  .stage[data-roselle-opening-state='opening']
+    .canvas
+    :global([data-roselle-opening-portrait]) {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .stage[data-roselle-opening-state='closed']
+    .canvas
+    :global([data-roselle-opening-portrait])::after,
+  .stage[data-roselle-opening-state='opening']
+    .canvas
+    :global([data-roselle-opening-portrait])::after {
+    background: linear-gradient(
+      180deg,
+      rgb(43 27 34 / 0.04) 0%,
+      rgb(43 27 34 / 0.18) 38%,
+      rgb(43 27 34 / 0.64) 70%,
+      rgb(43 27 34 / 0.94) 100%
+    );
+  }
+
+  .stage[data-roselle-opening-state='closed'] .canvas :global([data-roselle-letter]),
+  .stage[data-roselle-opening-state='opening'] .canvas :global([data-roselle-letter]) {
+    top: 42%;
+    right: auto;
+    left: 0 !important;
+    width: 100% !important;
+    padding: 0 1.5rem !important;
+  }
+
+  .stage[data-roselle-opening-state='closed'] .canvas :global([data-roselle-letter-title]),
+  .stage[data-roselle-opening-state='opening'] .canvas :global([data-roselle-letter-title]) {
+    max-width: 8.5ch !important;
+    font-size: clamp(3.9rem, 17vw, 6.2rem) !important;
+    text-shadow: 0 0.8rem 2.8rem rgb(20 12 16 / 0.34);
+  }
+
+  .stage[data-roselle-opening-state='closed'] .canvas :global([data-roselle-letter-subtitle]),
+  .stage[data-roselle-opening-state='opening'] .canvas :global([data-roselle-letter-subtitle]) {
+    max-width: 22rem !important;
+    color: rgb(255 254 251 / 0.78) !important;
+  }
+
+  .stage[data-roselle-opening-state='closed'] .canvas > :global([data-roselle-addressed-letter]),
+  .stage[data-roselle-opening-state='opening'] .canvas > :global([data-roselle-addressed-letter]) {
+    right: auto !important;
+    bottom: calc(max(1rem, env(safe-area-inset-bottom)) + 5.1rem);
+    left: 0 !important;
+    width: 100% !important;
+    padding: 0 1.4rem !important;
+  }
+
+  .stage[data-roselle-opening-state='closed'] .canvas > .openAction,
+  .stage[data-roselle-opening-state='opening'] .canvas > .openAction {
+    right: max(1rem, env(safe-area-inset-right)) !important;
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    left: max(1rem, env(safe-area-inset-left)) !important;
+    width: auto !important;
+    min-width: 0;
+    min-height: 3.7rem !important;
+  }
+}
+
+@media (max-width: 52rem) and (max-height: 44rem) {
+  .stage[data-roselle-opening-state='closed'] .canvas :global([data-roselle-letter]),
+  .stage[data-roselle-opening-state='opening'] .canvas :global([data-roselle-letter]) {
+    top: 36%;
+  }
+
+  .stage[data-roselle-opening-state='closed'] .canvas :global([data-roselle-letter-subtitle]),
+  .stage[data-roselle-opening-state='opening'] .canvas :global([data-roselle-letter-subtitle]) {
+    display: none !important;
+  }
+
+  .stage[data-roselle-opening-state='closed'] .canvas :global([data-roselle-letter-title]),
+  .stage[data-roselle-opening-state='opening'] .canvas :global([data-roselle-letter-title]) {
+    font-size: clamp(3.4rem, 15vw, 5rem) !important;
+  }
+
+  .stage[data-roselle-opening-state='closed'] .canvas > :global([data-roselle-addressed-letter]),
+  .stage[data-roselle-opening-state='opening'] .canvas > :global([data-roselle-addressed-letter]) {
+    bottom: calc(max(0.75rem, env(safe-area-inset-bottom)) + 4.6rem);
+  }
+
+  .stage[data-roselle-opening-state='closed'] .canvas > .openAction,
+  .stage[data-roselle-opening-state='opening'] .canvas > .openAction {
+    bottom: max(0.75rem, env(safe-area-inset-bottom));
+    min-height: 3.35rem !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage,
+  .stage :global(*),
+  .canvas,
+  .openAction {
+    animation: none !important;
+    transition: none !important;
+  }
+}
