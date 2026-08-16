@@ -17,7 +17,7 @@ import immersiveStyles from './roselle-immersive-experience-v1.module.css';
 import macroMotionStyles from './roselle-macro-motion-v4.module.css';
 import motionStyles from './roselle-flagship-motion.module.css';
 import { RoselleMotionOrchestrator } from './roselle-motion-orchestrator';
-import openingCeremonyRepairStyles from './roselle-opening-ceremony-v4a.module.css';
+import { RoselleOpeningCeremony } from './roselle-opening-ceremony';
 import presentationMotionStyles from './roselle-presentation-motion-v3.module.css';
 import premiumMediaStyles from './roselle-premium-media-v1.module.css';
 import typographyStyles from './roselle-flagship-typography.module.css';
@@ -63,14 +63,14 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
   return (
     <article
       aria-labelledby="roselle-invitation-title"
-      className={`${styles.invitation} ${experienceStyles.experience} ${parityRepairStyles.parityRepair} ${compositionStyles.flagship} ${typographyStyles.typography} ${craftStyles.craft} ${motionStyles.motion} ${presentationMotionStyles.presentation} ${macroMotionStyles.macro} ${openingCeremonyRepairStyles.openingRepair} ${marketFloorStyles.marketFloor} ${marketPolishStyles.marketPolish} ${marketCorrectionStyles.marketCorrections} ${premiumMediaStyles.premiumMedia} ${immersiveStyles.immersive}`}
+      className={`${styles.invitation} ${experienceStyles.experience} ${parityRepairStyles.parityRepair} ${compositionStyles.flagship} ${typographyStyles.typography} ${craftStyles.craft} ${motionStyles.motion} ${presentationMotionStyles.presentation} ${macroMotionStyles.macro} ${marketFloorStyles.marketFloor} ${marketPolishStyles.marketPolish} ${marketCorrectionStyles.marketCorrections} ${premiumMediaStyles.premiumMedia} ${immersiveStyles.immersive}`}
       data-palette={renderContext.palette?.key}
       data-roselle-composition="flagship-v1"
       data-roselle-craft="flagship-v1"
       data-roselle-experience="letter-v1"
       data-roselle-immersive="v1"
       data-roselle-macro-motion="v4"
-      data-roselle-opening-ceremony="v4a"
+      data-roselle-opening-ceremony="v4b"
       data-roselle-market-corrections="v1"
       data-roselle-market-floor="v1"
       data-roselle-market-polish="v1"
@@ -84,7 +84,7 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
       style={renderContext.palette?.variables}
     >
       <RoselleMotionOrchestrator />
-      <div className={marketFloorStyles.openingGate} data-roselle-opening-gate="market-floor-v1">
+      <RoselleOpeningCeremony>
         <RoselleHero
           hero={invitation.hero}
           openingImage={openingImage}
@@ -104,11 +104,7 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
             {personalSlots.greeting}
           </div>
         ) : null}
-        <a data-invitation-opening-action data-roselle-opening-action href="#roselle-couple-title">
-          <span>Buka undangan</span>
-          <i aria-hidden="true" />
-        </a>
-      </div>
+      </RoselleOpeningCeremony>
       <div className={styles.content}>
         <RoselleCouple couple={invitation.couple} />
         <RoselleStory story={invitation.story} storyImage={storyImage} />

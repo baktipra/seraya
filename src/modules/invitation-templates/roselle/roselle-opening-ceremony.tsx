@@ -1,7 +1,7 @@
 'use client';
 
 import type { MouseEvent, ReactNode } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import marketFloorStyles from './roselle-market-floor-v1.module.css';
 import stageStyles from './roselle-opening-stage-v4b.module.css';
@@ -20,12 +20,12 @@ export function RoselleOpeningCeremony({ children }: RoselleOpeningCeremonyProps
   const restoreScrollRef = useRef<(() => void) | null>(null);
   const reducedMotionRef = useRef(false);
 
-  const unlockScroll = () => {
+  const unlockScroll = useCallback(() => {
     restoreScrollRef.current?.();
     restoreScrollRef.current = null;
-  };
+  }, []);
 
-  const finishOpening = () => {
+  const finishOpening = useCallback(() => {
     if (openingTimerRef.current !== null) {
       window.clearTimeout(openingTimerRef.current);
       openingTimerRef.current = null;
@@ -34,7 +34,7 @@ export function RoselleOpeningCeremony({ children }: RoselleOpeningCeremonyProps
     setState('opened');
     unlockScroll();
     window.scrollTo({ left: 0, top: 0, behavior: 'auto' });
-  };
+  }, [unlockScroll]);
 
   useEffect(() => {
     if (window.location.hash) {
@@ -66,7 +66,7 @@ export function RoselleOpeningCeremony({ children }: RoselleOpeningCeremonyProps
       }
       unlockScroll();
     };
-  }, []);
+  }, [unlockScroll]);
 
   const handleOpen = (event: MouseEvent<HTMLAnchorElement>) => {
     if (state === 'fallback' || state === 'opened') {

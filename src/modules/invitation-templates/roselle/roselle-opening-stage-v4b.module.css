@@ -1,0 +1,247 @@
+.stage {
+  position: relative;
+  isolation: isolate;
+}
+
+.stage[data-roselle-opening-state='closed'],
+.stage[data-roselle-opening-state='opening'] {
+  position: fixed !important;
+  z-index: 120;
+  inset: 0;
+  display: block !important;
+  width: 100%;
+  height: 100dvh;
+  min-height: 100dvh !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  background: var(--roselle-ivory);
+  box-shadow: 0 2rem 6rem rgb(64 43 53 / 0.24);
+}
+
+.stage[data-roselle-opening-state='closed']::before,
+.stage[data-roselle-opening-state='opening']::before {
+  position: absolute;
+  z-index: 30;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgb(50 31 39 / 0.02) 0%,
+    rgb(50 31 39 / 0.08) 45%,
+    rgb(50 31 39 / 0.34) 100%
+  );
+  content: '';
+  pointer-events: none;
+}
+
+.stage[data-roselle-opening-state='closed'] > :global([data-roselle-chapter='opening']),
+.stage[data-roselle-opening-state='opening'] > :global([data-roselle-chapter='opening']) {
+  position: absolute !important;
+  z-index: 1;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  margin: 0 !important;
+}
+
+.stage[data-roselle-opening-state='closed']
+  > :global([data-invitation-identity-opening='roselle']),
+.stage[data-roselle-opening-state='opening']
+  > :global([data-invitation-identity-opening='roselle']) {
+  position: absolute !important;
+  z-index: 48;
+  top: max(0.85rem, env(safe-area-inset-top));
+  left: 50%;
+  width: min(calc(100% - 2rem), 31rem) !important;
+  max-width: 31rem !important;
+  margin: 0 !important;
+  padding: 0.65rem 1rem !important;
+  border: 1px solid rgb(255 255 255 / 0.24) !important;
+  border-radius: 999px !important;
+  background: rgb(64 43 53 / 0.24) !important;
+  box-shadow: 0 0.75rem 2.4rem rgb(35 21 28 / 0.12) !important;
+  color: var(--roselle-paper) !important;
+  text-align: center;
+  translate: -50% 0;
+  backdrop-filter: blur(12px);
+}
+
+.stage[data-roselle-opening-state='closed'] > :global([data-roselle-addressed-letter]),
+.stage[data-roselle-opening-state='opening'] > :global([data-roselle-addressed-letter]) {
+  position: absolute !important;
+  z-index: 58;
+  right: auto !important;
+  bottom: calc(max(1rem, env(safe-area-inset-bottom)) + 4.95rem);
+  left: 50% !important;
+  width: min(calc(100% - 2rem), 34rem) !important;
+  max-width: 34rem !important;
+  max-height: min(20dvh, 10.5rem);
+  margin: 0 !important;
+  padding: clamp(0.7rem, 1.5vw, 0.95rem) clamp(0.95rem, 2vw, 1.25rem) !important;
+  overflow: auto;
+  border: 1px solid rgb(151 99 109 / 0.28) !important;
+  border-radius: 1.15rem !important;
+  background: rgb(255 253 250 / 0.93) !important;
+  box-shadow: 0 1rem 2.8rem rgb(45 27 35 / 0.18) !important;
+  color: var(--roselle-plum) !important;
+  translate: -50% 0;
+  backdrop-filter: blur(16px);
+  scrollbar-width: thin;
+}
+
+.stage[data-roselle-opening-state='closed'] > :global([data-roselle-addressed-letter]) {
+  clip-path: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+.openAction {
+  position: relative;
+  z-index: 62;
+}
+
+.stage[data-roselle-opening-state='closed'] > .openAction,
+.stage[data-roselle-opening-state='opening'] > .openAction {
+  position: absolute !important;
+  right: auto !important;
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  left: 50% !important;
+  display: inline-flex !important;
+  width: min(calc(100% - 2rem), 34rem) !important;
+  min-height: 3.75rem !important;
+  align-items: center;
+  justify-content: center;
+  margin: 0 !important;
+  border: 1px solid rgb(64 43 53 / 0.86) !important;
+  border-radius: 999px !important;
+  background: var(--roselle-plum) !important;
+  box-shadow: 0 1rem 3rem rgb(45 27 35 / 0.3) !important;
+  color: var(--roselle-paper) !important;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  opacity: 1 !important;
+  transform: none !important;
+  translate: -50% 0;
+}
+
+.stage[data-roselle-opening-state='closed'] > .openAction:focus-visible {
+  outline: 3px solid rgb(255 253 250 / 0.92);
+  outline-offset: 3px;
+}
+
+.stage[data-roselle-opening-state='closed'] :global([data-roselle-scroll-cue]),
+.stage[data-roselle-opening-state='opening'] :global([data-roselle-scroll-cue]) {
+  display: none !important;
+}
+
+.stage[data-roselle-opening-state='opening'] {
+  animation: roselle-v4b-stage-lift 1560ms cubic-bezier(0.77, 0, 0.18, 1) both;
+  pointer-events: none;
+}
+
+.stage[data-roselle-opening-state='opening'] :global([data-roselle-opening-portrait]) {
+  animation: roselle-v4b-photo-exit 1480ms cubic-bezier(0.77, 0, 0.18, 1) both !important;
+}
+
+.stage[data-roselle-opening-state='opening']
+  :is(
+    :global([data-roselle-letter]),
+    :global([data-invitation-identity-opening='roselle']),
+    :global([data-roselle-addressed-letter]),
+    .openAction
+  ) {
+  animation: roselle-v4b-copy-exit 980ms cubic-bezier(0.77, 0, 0.18, 1) both !important;
+}
+
+.stage[data-roselle-opening-state='opened'] {
+  display: none !important;
+}
+
+@keyframes roselle-v4b-stage-lift {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  42% {
+    opacity: 1;
+    transform: translate3d(0, -8vh, 0) scale(0.985);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(0, -112vh, 0) scale(0.94);
+  }
+}
+
+@keyframes roselle-v4b-photo-exit {
+  from {
+    filter: saturate(1) brightness(1);
+    transform: scale(1);
+  }
+
+  to {
+    filter: saturate(0.86) brightness(0.72);
+    transform: scale(1.18) translate3d(0, -4vh, 0);
+  }
+}
+
+@keyframes roselle-v4b-copy-exit {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate3d(0, -8vh, 0) scale(0.92);
+  }
+}
+
+@media (max-height: 47.5rem) {
+  .stage[data-roselle-opening-state='closed']
+    > :global([data-invitation-identity-opening='roselle']),
+  .stage[data-roselle-opening-state='opening']
+    > :global([data-invitation-identity-opening='roselle']) {
+    display: none !important;
+  }
+
+  .stage[data-roselle-opening-state='closed'] > :global([data-roselle-addressed-letter]),
+  .stage[data-roselle-opening-state='opening'] > :global([data-roselle-addressed-letter]) {
+    bottom: calc(max(0.75rem, env(safe-area-inset-bottom)) + 4.35rem);
+    max-height: min(15dvh, 7.5rem);
+    padding: 0.6rem 0.85rem !important;
+  }
+
+  .stage[data-roselle-opening-state='closed'] > .openAction,
+  .stage[data-roselle-opening-state='opening'] > .openAction {
+    bottom: max(0.75rem, env(safe-area-inset-bottom));
+    min-height: 3.45rem !important;
+  }
+}
+
+@media (max-width: 40rem) {
+  .stage[data-roselle-opening-state='closed'] > :global([data-roselle-addressed-letter]),
+  .stage[data-roselle-opening-state='opening'] > :global([data-roselle-addressed-letter]),
+  .stage[data-roselle-opening-state='closed'] > .openAction,
+  .stage[data-roselle-opening-state='opening'] > .openAction {
+    width: calc(100% - 1.25rem) !important;
+  }
+
+  .stage[data-roselle-opening-state='closed'] > :global([data-roselle-addressed-letter]),
+  .stage[data-roselle-opening-state='opening'] > :global([data-roselle-addressed-letter]) {
+    max-height: min(19dvh, 9rem);
+    border-radius: 1rem !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage,
+  .stage :global(*),
+  .openAction {
+    animation: none !important;
+    transition: none !important;
+  }
+}
