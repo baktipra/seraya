@@ -4,7 +4,7 @@ import type { MouseEvent, ReactNode } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import marketFloorStyles from './roselle-market-floor-v1.module.css';
-import stageStyles from './roselle-opening-stage-v4b.module.css';
+import stageStyles from './roselle-opening-stage-v4c.module.css';
 
 type RoselleOpeningState = 'fallback' | 'closed' | 'opening' | 'opened';
 
@@ -53,11 +53,10 @@ export function RoselleOpeningCeremony({ children }: RoselleOpeningCeremonyProps
     reducedMotionRef.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     /*
-     * The V3 presentation layer applies perspective to the Roselle article.
+     * The presentation scene layer uses perspective on the Roselle article.
      * A perspective ancestor becomes the containing block for fixed descendants,
-     * which previously pinned the opening CTA to the bottom of the entire
-     * invitation instead of the browser viewport. Disable that perspective only
-     * while the opening stage is active, then restore it for later scenes.
+     * so the opening stage temporarily disables it to stay anchored to the real
+     * browser viewport. Perspective is restored as soon as the invitation opens.
      */
     const root = stageRef.current?.closest<HTMLElement>("article[data-template='roselle']");
     if (root) {
@@ -118,21 +117,23 @@ export function RoselleOpeningCeremony({ children }: RoselleOpeningCeremonyProps
     <div
       className={`${marketFloorStyles.openingGate} ${stageStyles.stage}`}
       data-roselle-opening-gate="market-floor-v1"
-      data-roselle-opening-stage="v4b"
+      data-roselle-opening-stage="v4c"
       data-roselle-opening-state={state}
       ref={stageRef}
     >
-      {children}
-      <a
-        className={stageStyles.openAction}
-        data-invitation-opening-action
-        data-roselle-opening-action
-        href="#roselle-couple-title"
-        onClick={handleOpen}
-      >
-        <span>Buka undangan</span>
-        <i aria-hidden="true" />
-      </a>
+      <div className={stageStyles.canvas} data-roselle-opening-canvas="v4c">
+        {children}
+        <a
+          className={stageStyles.openAction}
+          data-invitation-opening-action
+          data-roselle-opening-action
+          href="#roselle-couple-title"
+          onClick={handleOpen}
+        >
+          <span>Buka undangan</span>
+          <i aria-hidden="true" />
+        </a>
+      </div>
     </div>
   );
 }

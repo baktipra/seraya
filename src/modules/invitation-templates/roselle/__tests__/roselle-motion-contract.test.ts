@@ -11,7 +11,7 @@ async function readRoselleSource(fileName: string) {
 }
 
 describe('Roselle cinematic motion language', () => {
-  it('mounts the observer plus presentation, macro, and structural opening layers', async () => {
+  it('mounts the observer plus presentation, macro, and redesigned opening layers', async () => {
     const template = await readRoselleSource('roselle-template.tsx');
 
     expect(template).toContain('RoselleMotionOrchestrator');
@@ -22,7 +22,7 @@ describe('Roselle cinematic motion language', () => {
     expect(template).toContain('data-roselle-motion-language="cinematic-v2"');
     expect(template).toContain('data-roselle-scene-language="presentation-v3"');
     expect(template).toContain('data-roselle-macro-motion="v4"');
-    expect(template).toContain('data-roselle-opening-ceremony="v4b"');
+    expect(template).toContain('data-roselle-opening-ceremony="v4c"');
   });
 
   it('keeps opening state inside the dedicated client ceremony component', async () => {
@@ -33,7 +33,9 @@ describe('Roselle cinematic motion language', () => {
     expect(ceremony).toContain("'fallback' | 'closed' | 'opening' | 'opened'");
     expect(ceremony).toContain('event.preventDefault()');
     expect(ceremony).toContain("html.style.overflow = 'hidden'");
+    expect(ceremony).toContain("root.style.perspective = 'none'");
     expect(ceremony).toContain('data-roselle-opening-state={state}');
+    expect(ceremony).toContain('data-roselle-opening-canvas="v4c"');
     expect(ceremony).toContain('data-roselle-opening-action');
     expect(ceremony).toContain('prefers-reduced-motion: reduce');
     expect(orchestrator).not.toContain('roselleOpeningState');
@@ -96,18 +98,22 @@ describe('Roselle cinematic motion language', () => {
     expect(styles).toContain('@media (prefers-reduced-motion: reduce)');
   });
 
-  it('pins the opening CTA inside the dedicated viewport stage', async () => {
-    const styles = await readRoselleSource('roselle-opening-stage-v4b.module.css');
+  it('uses a centered 55/45 opening canvas with compact addressee and mobile full bleed', async () => {
+    const styles = await readRoselleSource('roselle-opening-stage-v4c.module.css');
 
     expect(styles).toContain("[data-roselle-opening-state='closed']");
     expect(styles).toContain("[data-roselle-opening-state='opening']");
     expect(styles).toContain("[data-roselle-opening-state='opened']");
     expect(styles).toContain('position: fixed !important');
-    expect(styles).toContain('height: 100dvh');
-    expect(styles).toContain('> .openAction');
-    expect(styles).toContain('bottom: max(1rem, env(safe-area-inset-bottom))');
-    expect(styles).toContain('-112vh');
-    expect(styles).toContain('@media (max-height: 47.5rem)');
+    expect(styles).toContain('width: min(70rem, calc(100vw - 4rem))');
+    expect(styles).toContain('width: 55% !important');
+    expect(styles).toContain('width: 45% !important');
+    expect(styles).toContain('[data-personal-greeting-lead]');
+    expect(styles).toContain('display: none !important');
+    expect(styles).toContain('roselle-v4c-canvas-lift');
+    expect(styles).toContain('-108vh');
+    expect(styles).toContain('@media (max-width: 52rem)');
+    expect(styles).toContain('width: 100vw');
     expect(styles).toContain('@media (prefers-reduced-motion: reduce)');
   });
 });

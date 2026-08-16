@@ -70,7 +70,7 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
       data-roselle-experience="letter-v1"
       data-roselle-immersive="v1"
       data-roselle-macro-motion="v4"
-      data-roselle-opening-ceremony="v4b"
+      data-roselle-opening-ceremony="v4c"
       data-roselle-market-corrections="v1"
       data-roselle-market-floor="v1"
       data-roselle-market-polish="v1"
