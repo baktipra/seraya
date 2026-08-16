@@ -16,13 +16,20 @@ const openingTransitionMs = 1560;
 
 export function RoselleOpeningCeremony({ children }: RoselleOpeningCeremonyProps) {
   const [state, setState] = useState<RoselleOpeningState>('fallback');
+  const stageRef = useRef<HTMLDivElement | null>(null);
   const openingTimerRef = useRef<number | null>(null);
   const restoreScrollRef = useRef<(() => void) | null>(null);
+  const restorePerspectiveRef = useRef<(() => void) | null>(null);
   const reducedMotionRef = useRef(false);
 
   const unlockScroll = useCallback(() => {
     restoreScrollRef.current?.();
     restoreScrollRef.current = null;
+  }, []);
+
+  const restorePerspective = useCallback(() => {
+    restorePerspectiveRef.current?.();
+    restorePerspectiveRef.current = null;
   }, []);
 
   const finishOpening = useCallback(() => {
@@ -33,8 +40,9 @@ export function RoselleOpeningCeremony({ children }: RoselleOpeningCeremonyProps
 
     setState('opened');
     unlockScroll();
+    restorePerspective();
     window.scrollTo({ left: 0, top: 0, behavior: 'auto' });
-  }, [unlockScroll]);
+  }, [restorePerspective, unlockScroll]);
 
   useEffect(() => {
     if (window.location.hash) {
@@ -43,6 +51,23 @@ export function RoselleOpeningCeremony({ children }: RoselleOpeningCeremonyProps
     }
 
     reducedMotionRef.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /*
+     * The V3 presentation layer applies perspective to the Roselle article.
+     * A perspective ancestor becomes the containing block for fixed descendants,
+     * which previously pinned the opening CTA to the bottom of the entire
+     * invitation instead of the browser viewport. Disable that perspective only
+     * while the opening stage is active, then restore it for later scenes.
+     */
+    const root = stageRef.current?.closest<HTMLElement>("article[data-template='roselle']");
+    if (root) {
+      const previousPerspective = root.style.perspective;
+      root.style.perspective = 'none';
+      restorePerspectiveRef.current = () => {
+        root.style.perspective = previousPerspective;
+      };
+    }
+
     setState('closed');
 
     if (!reducedMotionRef.current) {
@@ -65,8 +90,9 @@ export function RoselleOpeningCeremony({ children }: RoselleOpeningCeremonyProps
         window.clearTimeout(openingTimerRef.current);
       }
       unlockScroll();
+      restorePerspective();
     };
-  }, [unlockScroll]);
+  }, [restorePerspective, unlockScroll]);
 
   const handleOpen = (event: MouseEvent<HTMLAnchorElement>) => {
     if (state === 'fallback' || state === 'opened') {
@@ -94,6 +120,7 @@ export function RoselleOpeningCeremony({ children }: RoselleOpeningCeremonyProps
       data-roselle-opening-gate="market-floor-v1"
       data-roselle-opening-stage="v4b"
       data-roselle-opening-state={state}
+      ref={stageRef}
     >
       {children}
       <a
