@@ -121,7 +121,11 @@ export function RoselleOpeningCeremony({ children }: RoselleOpeningCeremonyProps
       data-roselle-opening-state={state}
       ref={stageRef}
     >
-      <div className={stageStyles.canvas} data-roselle-opening-canvas="v4c">
+      <div
+        className={stageStyles.canvas}
+        data-roselle-opening-canvas="v4c"
+        style={{ left: '50%', position: 'absolute', top: '50%', translate: '-50% -50%' }}
+      >
         {children}
         <a
           className={stageStyles.openAction}
