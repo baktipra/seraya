@@ -18,6 +18,7 @@ import macroMotionStyles from './roselle-macro-motion-v4.module.css';
 import motionStyles from './roselle-flagship-motion.module.css';
 import { RoselleMotionOrchestrator } from './roselle-motion-orchestrator';
 import { RoselleOpeningCeremony } from './roselle-opening-ceremony';
+import postOpenMotionStyles from './roselle-post-open-motion-v5.module.css';
 import presentationMotionStyles from './roselle-presentation-motion-v3.module.css';
 import premiumMediaStyles from './roselle-premium-media-v1.module.css';
 import typographyStyles from './roselle-flagship-typography.module.css';
@@ -63,7 +64,7 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
   return (
     <article
       aria-labelledby="roselle-invitation-title"
-      className={`${styles.invitation} ${experienceStyles.experience} ${parityRepairStyles.parityRepair} ${compositionStyles.flagship} ${typographyStyles.typography} ${craftStyles.craft} ${motionStyles.motion} ${presentationMotionStyles.presentation} ${macroMotionStyles.macro} ${marketFloorStyles.marketFloor} ${marketPolishStyles.marketPolish} ${marketCorrectionStyles.marketCorrections} ${premiumMediaStyles.premiumMedia} ${immersiveStyles.immersive}`}
+      className={`${styles.invitation} ${experienceStyles.experience} ${parityRepairStyles.parityRepair} ${compositionStyles.flagship} ${typographyStyles.typography} ${craftStyles.craft} ${motionStyles.motion} ${presentationMotionStyles.presentation} ${macroMotionStyles.macro} ${postOpenMotionStyles.postOpen} ${marketFloorStyles.marketFloor} ${marketPolishStyles.marketPolish} ${marketCorrectionStyles.marketCorrections} ${premiumMediaStyles.premiumMedia} ${immersiveStyles.immersive}`}
       data-palette={renderContext.palette?.key}
       data-roselle-composition="flagship-v1"
       data-roselle-craft="flagship-v1"
@@ -71,6 +72,7 @@ export function RoselleTemplate({ invitation, renderContext }: InvitationTemplat
       data-roselle-immersive="v1"
       data-roselle-macro-motion="v4"
       data-roselle-opening-ceremony="v4c"
+      data-roselle-post-open-motion="v5"
       data-roselle-market-corrections="v1"
       data-roselle-market-floor="v1"
       data-roselle-market-polish="v1"
